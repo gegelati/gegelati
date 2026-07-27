@@ -980,34 +980,97 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     if (typeid(graph) == typeid(TPG::TPGGraphKeyed)) {
         uint64_t nbRootsToGrow =
             std::ceil(context->nbTeamsToCreate * params.tpg.ratioLeavesToGrow);
-        nbExpectedRoots -= nbRootsToGrow;
 
         for (uint32_t i = 0; i < nbRootsToGrow; i++) {
             // Select a random existing root
+            uint64_t clonedRootIndex =
+                rng.getUnsignedInt64(0, context->teamsClonable.size() - 1);
 
-            // Clone it (the vertex and all its outgoing edges)
+            // clone it (the vertex and all its outgoing edges)
+            const TPG::TPGTeam& newRoot =
+                (const TPG::TPGTeam&)graph.cloneVertex(
+                    *context->teamsClonable.at(clonedRootIndex));
+
+            // Get subtree of the cloned root
+            std::pair<std::set<const TPG::TPGTeamKeyed*>,
+                      std::set<const TPG::TPGEdgeKeyed*>>
+                subtree =
+                    dynamic_cast<const TPG::TPGGraphKeyed&>(graph).getSubtree(
+                        newRoot);
 
             // Add a new key for this root
-            // - ? Delete a key from the root /!\ this may create teams
-            //   without action..)
-            // - ? Replace a key to "mutate" program behavior in the graph for
-            //   edge with this replaced key, without affecting original root
+            dynamic_cast<TPG::TPGGraphKeyed&>(graph).setNextTeamKey(
+                dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
 
-            // Find all teams in the tree of the cloned root.
-            // (Service to be added to TPGGraphKeyed)
-
-            // Select a random team in the tree of the cloned root.
+            // Select a random team in the tree of the cloned root (including
+            // the root itself).
+            uint64_t grownTeamIndex =
+                rng.getUnsignedInt64(0, subtree.first.size() - 1);
+            const TPG::TPGTeamKeyed* grownTeam =
+                *std::next(subtree.first.begin(), grownTeamIndex);
 
             // Add new outgoing edge(s) to the selected team, with the new key
-            // as lock value. Link the new edge to
-            // - ? An existing/clone_mutated/new program
-            // - ? An existing/cloned team or an action /!\ cycle creation to
-            // avoid? Root should stay roots?
+            // as lock value.
 
-            // Maintain a map of key to edge. If a key disappears, all
-            // associated edges should be removed. ?
-            // Keys may be duplicated when cloning a team. Will be hard to keep
-            // track without some kind of shared ptr.
+            // Select and copy a random program from a preexisting edge.
+            uint64_t programIndex =
+                rng.getUnsignedInt64(0, context->preExistingEdges.size() - 1);
+            auto it = context->preExistingEdges.begin();
+            std::advance(it, programIndex);
+            std::shared_ptr<Program::Program> newProgram =
+                std::make_shared<Program::Program>((*it)->getProgram(), false);
+            if (rng.getDouble(0.0, 1.0) <
+                params.tpg.pProgramMutation) { // Add it to the list of new
+                                               // Program to be mutated.
+                newPrograms.push_back(newProgram);
+            }
+
+            // Select a random target from the graph (team or action) to add an
+            // edge to.
+            const TPG::TPGEdge* newEdge = nullptr;
+            if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationIsAction) {
+                // Select a random action from the graph
+                const TPG::TPGAction* targetAction =
+                    context->preExistingActions.at(rng.getUnsignedInt64(
+                        0, context->preExistingActions.size() - 1));
+                newEdge = &dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNewEdge(
+                    *grownTeam, *targetAction, newProgram);
+            }
+            else {
+                // Select and clone a random team from the graph
+                const TPG::TPGTeam* targetTeam =
+                    context->preExistingTeams.at(rng.getUnsignedInt64(
+                        0, context->preExistingTeams.size() - 1));
+                const TPG::TPGTeam& clonedTargetTeam =
+                    (const TPG::TPGTeam&)graph.cloneVertex(*targetTeam);
+
+                // Remove outgoing edges not linked to actions
+                std::vector<const TPG::TPGEdge*> edgesToRemove;
+                for (const TPG::TPGEdge* edge :
+                     clonedTargetTeam.getOutgoingEdges()) {
+                    if (dynamic_cast<const TPG::TPGAction*>(
+                            edge->getDestination()) == nullptr) {
+                        edgesToRemove.push_back(edge);
+                    }
+                }
+
+                // Remove collected edges, ensuring at least one remains
+                for (size_t i = 0;
+                     i < edgesToRemove.size() &&
+                     clonedTargetTeam.getOutgoingEdges().size() > 1;
+                     i++) {
+                    graph.removeEdge(*edgesToRemove.at(i));
+                }
+
+                newEdge = &dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNewEdge(
+                    *grownTeam, clonedTargetTeam, newProgram);
+            }
+
+            // Set the new key as lock value for the new edge
+            uint64_t newKey =
+                dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot).getKey();
+            dynamic_cast<TPG::TPGGraphKeyed&>(graph).setNewEdgeLock(
+                *dynamic_cast<const TPG::TPGEdgeKeyed*>(newEdge), newKey);
         }
     }
 

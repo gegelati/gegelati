@@ -46,8 +46,17 @@ void TPG::TPGGraphKeyed::setNextTeamKey(const TPG::TPGTeamKeyed& team)
         return true;
     };
 
-    uint64_t nextPrime = lastPrime + 1;
-    if (nextPrime != 2) {
+    uint64_t nextPrime = lastPrime;
+    if (nextPrime == 1) {
+        nextPrime = 2; // Start with the first prime number
+    }
+    else {
+        if (nextPrime == 2) {
+            nextPrime = 3; // Move to the next prime after 2
+        }
+        else {
+            nextPrime += 2; // Start checking from the next odd number
+        }
         while (!isPrime(nextPrime)) {
             nextPrime += 2;
         }
