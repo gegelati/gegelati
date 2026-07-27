@@ -31,16 +31,25 @@ namespace TPG {
         void setLock(uint64_t newLock);
 
         /**
+         * @brief Check if a given key unlocks the execution of the TPGEdge.
+         *
+         * @param[in] key The key to check against the lock of the TPGEdge.
+         * @return true if the key unlocks the execution of the TPGEdge, false
+         * otherwise.
+         */
+        bool isUnlockedByKey(uint64_t key) const;
+
+        /**
          * @brief Default constructor.
          *
-         * Lock is initialized to 1 which make this TPGEdg traversable by any
-         * TPGTeamKeyed with a key greater than 1. The lock should be set to a
-         * multiple of the prime number key of the TPGTeamKeyed to unlock the
-         * execution of this TPGEdgeKeyed.
+         * Lock is initialized to 1 which make this TPGEdg traversable by
+         * any TPGTeamKeyed with a key greater than 1. The lock should be
+         * set to a multiple of the prime number key of the TPGTeamKeyed to
+         * unlock the execution of this TPGEdgeKeyed.
          */
 
         TPGEdgeKeyed(const TPGVertex* src, const TPGVertex* dest,
-                            const std::shared_ptr<Program::Program> prog)
+                     const std::shared_ptr<Program::Program> prog)
             : TPGEdge(src, dest, prog), lock{1}
         {
         }

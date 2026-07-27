@@ -120,6 +120,34 @@ TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedSettersAndGetters)
         << "Lock of TPGEdgeKeyed should be 6 after setLock(6).";
 }
 
+TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedIsUnlockedByKey)
+{
+    TPG::TPGTeam team;
+    TPG::TPGAction action(1);
+    TPG::TPGEdgeKeyed edge(&team, &action, progPointer);
+    // Set lock to 6 (2 * 3)
+    edge.setLock(6);
+    // Test keys that should unlock the edge
+    ASSERT_TRUE(edge.isUnlockedByKey(2))
+        << "Key 2 should unlock the edge with lock 6.";
+    ASSERT_TRUE(edge.isUnlockedByKey(3))
+        << "Key 3 should unlock the edge with lock 6.";
+    ASSERT_TRUE(edge.isUnlockedByKey(6))
+        << "Key 6 should unlock the edge with lock 6.";
+    // Test keys that should not unlock the edge
+    ASSERT_FALSE(edge.isUnlockedByKey(1))
+        << "Key 1 should not unlock the edge with lock 6.";
+    ASSERT_FALSE(edge.isUnlockedByKey(5))
+        << "Key 5 should not unlock the edge with lock 6.";
+
+    // Create an edge with default lock (1) and test that any key unlocks it
+    TPG::TPGEdgeKeyed edgeDefaultLock(&team, &action, progPointer);
+    ASSERT_TRUE(edgeDefaultLock.isUnlockedByKey(2))
+        << "Key 2 should unlock the edge with default lock 1.";
+    ASSERT_TRUE(edgeDefaultLock.isUnlockedByKey(1))
+        << "Key 1 should unlock the edge with default lock 1.";
+}
+
 TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryConstructorsDestructors)
 {
     TPG::TPGKeyedFactory* factory;
