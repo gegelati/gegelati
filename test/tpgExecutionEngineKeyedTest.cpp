@@ -233,7 +233,7 @@ TEST_F(TPGExecutionEngineKeyedTest, TPGGraphKeyedGetSubtree)
         << "Subtree should contain 2 teams (T0 and T2).";
     ASSERT_EQ(subtree.second.size(), 5)
         << "Subtree should contain 5 edges (T0->A0, T0->T2, T2->A2, T2->A1, "
-           "T1->TA0).";
+           "T1->A0).";
 }
 
 TEST_F(TPGExecutionEngineKeyedTest, TPGExecutionEngineKeyed)

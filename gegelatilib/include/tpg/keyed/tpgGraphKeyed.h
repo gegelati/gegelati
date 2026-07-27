@@ -43,6 +43,14 @@ namespace TPG {
         void setNewTeamKey(const TPG::TPGTeamKeyed& team, uint64_t newKey);
 
         /**
+         * \brief Set the key of a TPGTeamKeyed to the next prime number.
+         *
+         * This method uses the lastPrime attribute to generate a new prime
+         * number and set it as the key of the given TPGTeamKeyed.
+         */
+        void setNextTeamKey(const TPG::TPGTeamKeyed& team);
+
+        /**
          * \brief Set a new lock to a TPGEdgeKeyed.
          *
          * \param[in] edge the TPGEdgeKeyed to change lock.
@@ -65,6 +73,9 @@ namespace TPG {
          */
         std::pair<std::set<const TPGTeamKeyed*>, std::set<const TPGEdgeKeyed*>>
         getSubtree(const TPGVertex& root, std::set<uint64_t> keys = {}) const;
+
+      protected:
+        uint64_t lastPrime = 1; ///< Last prime number used for key generation.
     };
 
 } // namespace TPG

@@ -350,3 +350,22 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewEdgeLock)
         << "Setting lock on a non-existent edge should throw an exception.";
 }
 
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNextTeamKey)
+{
+    TPG::TPGGraphKeyed graphKeyed(*e);
+    // Add a team
+    const TPG::TPGTeamKeyed* team =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+    ASSERT_NE(team, nullptr) << "Added team should be TPGTeamKeyed.";
+    ASSERT_EQ(team->getKey(), 1) << "Default key should be 1.";
+    // Test setting the next prime key
+    ASSERT_NO_THROW(graphKeyed.setNextTeamKey(*team))
+        << "Setting next team key should not fail.";
+    ASSERT_EQ(team->getKey(), 2)
+        << "Team key should be 2 after setNextTeamKey(team).";
+    // Test setting the next prime key again
+    ASSERT_NO_THROW(graphKeyed.setNextTeamKey(*team))
+        << "Setting next team key again should not fail.";
+    ASSERT_EQ(team->getKey(), 3)
+        << "Team key should be 3 after setNextTeamKey(team) again.";
+}

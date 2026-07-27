@@ -25,6 +25,42 @@ void TPG::TPGGraphKeyed::setNewTeamKey(const TPGTeamKeyed& team,
     rawPtr->setKey(newKey);
 }
 
+void TPG::TPGGraphKeyed::setNextTeamKey(const TPG::TPGTeamKeyed& team)
+{
+    // Find the team in the graph
+    auto teamIterator = vertices.find(&team);
+    if (teamIterator == vertices.end() || teamIterator->get() != &team) {
+        throw std::runtime_error(
+            "The team to modify does not exist in the TPGGraph.");
+    }
+    // Generate the next prime number
+    auto isPrime = [](uint64_t num) {
+        if (num <= 1)
+            return false;
+        if (num == 2)
+            return true;
+        for (uint64_t i = 3; i * i <= num; i += 2) {
+            if (num % i == 0)
+                return false;
+        }
+        return true;
+    };
+
+    uint64_t nextPrime = lastPrime + 1;
+    if (nextPrime != 2) {
+        while (!isPrime(nextPrime)) {
+            nextPrime += 2;
+        }
+    }
+    lastPrime = nextPrime;
+    // Modify the key
+    TPGTeamKeyed* rawPtr = dynamic_cast<TPGTeamKeyed*>(teamIterator->get());
+    if (rawPtr == nullptr) {
+        throw std::runtime_error("The team to modify is not a TPGTeamKeyed.");
+    }
+    rawPtr->setKey(nextPrime);
+}
+
 void TPG::TPGGraphKeyed::setNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
                                         uint64_t newLock)
 {
