@@ -43,12 +43,12 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineKeyed::evaluateTeam(
         }
 
         uint64_t edgeLock = keyedEdge->getLock();
-        if (collectedKeys.empty() && edgeLock == 1) {
+        if (collectedKeys.empty() && keyedEdge->isUnlockedByKey(1)) {
             return false; // Keep this edge if no keys have been collected
         }
         else {
             for (const auto& key : collectedKeys) {
-                if (edgeLock == 1 || edgeLock % key == 0) {
+                if (keyedEdge->isUnlockedByKey(key)) {
                     return false; // Keep this edge
                 }
             }

@@ -168,12 +168,81 @@ class TPGExecutionEngineKeyedTest : public ::testing::Test
     }
 };
 
+TEST_F(TPGExecutionEngineKeyedTest, TPGGraphKeyedGetSubtree)
+{
+    // Because it requires a TPGGraphKeyed to be built, this test is here
+    // insread of in the TPGGraphKeyedTest file.
+
+    // Get the subtree from T0
+    const TPG::TPGGraphKeyed* tpgKeyed =
+        dynamic_cast<const TPG::TPGGraphKeyed*>(tpg);
+    auto subtree = tpgKeyed->getSubtree(*tpg->getVertices().at(0));
+
+    // Check that the subtree contains the expected teams and edges
+    ASSERT_EQ(subtree.first.size(), 2)
+        << "Subtree should contain 2 teams (T0 and T2).";
+    ASSERT_EQ(subtree.second.size(), 4)
+        << "Subtree should contain 4 edges (T0->A0, T0->T2, T2->A2, T2->A1).";
+    // Check that the subtree contains the expected teams and edges
+    auto verticesToCheck = {
+        dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(0)),
+        dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(2))};
+    for (const auto& vertex : verticesToCheck) {
+        ASSERT_TRUE(subtree.first.find(vertex) != subtree.first.end())
+            << "Subtree should contain team with ID: " << vertex->getVertexID();
+    }
+    auto edgesToCheck = {dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(0)),
+                         dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(2)),
+                         dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(3)),
+                         dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(6))};
+    for (const auto& edge : edgesToCheck) {
+        ASSERT_TRUE(subtree.second.find(edge) != subtree.second.end())
+            << "Subtree should contain edge with ID: " << edge->getEdgeID();
+    }
+
+    // Get subtree from T1
+    subtree = tpgKeyed->getSubtree(*tpg->getVertices().at(1));
+
+    // Check that the subtree contains the expected teams and edges
+    ASSERT_EQ(subtree.first.size(), 2)
+        << "Subtree should contain 2 teams (T1 and T2).";
+    ASSERT_EQ(subtree.second.size(), 4)
+        << "Subtree should contain 4 edges (T1->A1, T1->T2, T2->A0, T2->A1).";
+    // Check that the subtree contains the expected teams and edges
+    auto verticesToCheck2 = {
+        dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(1)),
+        dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(2))};
+    for (const auto& vertex : verticesToCheck2) {
+        ASSERT_TRUE(subtree.first.find(vertex) != subtree.first.end())
+            << "Subtree should contain team with ID: " << vertex->getVertexID();
+    }
+    auto edgesToCheck2 = {dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(1)),
+                          dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(4)),
+                          dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(5)),
+                          dynamic_cast<const TPG::TPGEdgeKeyed*>(edges.at(6))};
+    for (const auto& edge : edgesToCheck2) {
+        ASSERT_TRUE(subtree.second.find(edge) != subtree.second.end())
+            << "Subtree should contain edge with ID: " << edge->getEdgeID();
+    }
+
+    // Check the subtree from T0 again, but give key 3 at the start
+    std::set<uint64_t> keys = {3};
+    subtree = tpgKeyed->getSubtree(*tpg->getVertices().at(0), keys);
+    // Check that the subtree contains the expected teams and edges
+    ASSERT_EQ(subtree.first.size(), 2)
+        << "Subtree should contain 2 teams (T0 and T2).";
+    ASSERT_EQ(subtree.second.size(), 5)
+        << "Subtree should contain 5 edges (T0->A0, T0->T2, T2->A2, T2->A1, "
+           "T1->TA0).";
+}
+
 TEST_F(TPGExecutionEngineKeyedTest, TPGExecutionEngineKeyed)
 {
     TPG::TPGExecutionEngineKeyed* engine;
 
     ASSERT_NO_THROW(engine = new TPG::TPGExecutionEngineKeyed(*e, &a))
-        << "Construction of TPGExecutionEngineKeyed with Archive should not "
+        << "Construction of TPGExecutionEngineKeyed with Archive should "
+           "not "
            "fail.";
 
     ASSERT_NO_THROW(delete engine)
@@ -255,8 +324,8 @@ TEST_F(TPGExecutionEngineKeyedTest,
     ASSERT_TRUE(keys.find(3) != keys.end());
 
     // Evaluate team T2 which has no special key
-    // All tree output TPGEdges should be accessible since T2 has no key and the
-    // locks on edges are 2, 3, and 6
+    // All tree output TPGEdges should be accessible since T2 has no key and
+    // the locks on edges are 2, 3, and 6
     const TPG::TPGTeamKeyed* team2 =
         dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(2));
 
@@ -311,8 +380,8 @@ TEST_F(TPGExecutionEngineKeyedTest,
     ASSERT_NO_THROW(result = &engine.evaluateTeam(*team2))
         << "Evaluating a TPGTeamKeyed should not fail.";
 
-    // Check that the result is as expected (edge from T2 to A1) since lock=2
-    // and key=2, so edge should be accessible.
+    // Check that the result is as expected (edge from T2 to A1) since
+    // lock=2 and key=2, so edge should be accessible.
     ASSERT_EQ(result, edges.at(6))
         << "Edge selected during team evaluation is incorrect.";
 }
@@ -385,8 +454,8 @@ TEST_F(TPGExecutionEngineKeyedTest,
     ASSERT_NO_THROW(engine.evaluateTeam(*team0));
 
     auto keys = engine.getCollectedKeys();
-    ASSERT_EQ(keys.size(), 1)
-        << "Evaluating the same key twice should not duplicate it in the set.";
+    ASSERT_EQ(keys.size(), 1) << "Evaluating the same key twice should not "
+                                 "duplicate it in the set.";
 }
 
 TEST_F(TPGExecutionEngineKeyedTest,
@@ -405,7 +474,8 @@ TEST_F(TPGExecutionEngineKeyedTest,
     // Check that key 5 was collected (nevertheless)
     auto keys = engine.getCollectedKeys();
     ASSERT_TRUE(keys.find(5) != keys.end())
-        << "Key 5 should be in the collected keys after evaluating empty team.";
+        << "Key 5 should be in the collected keys after evaluating empty "
+           "team.";
 
     // Evaluate T2 which has outgoing edges but none of them should be
     // accessible with key 5
@@ -413,6 +483,7 @@ TEST_F(TPGExecutionEngineKeyedTest,
         dynamic_cast<const TPG::TPGTeamKeyed*>(tpg->getVertices().at(2));
 
     ASSERT_THROW(engine.evaluateTeam(*team2), std::runtime_error)
-        << "Evaluating a team with no accessible outgoing edges should throw "
+        << "Evaluating a team with no accessible outgoing edges should "
+           "throw "
            "an exception.";
 }

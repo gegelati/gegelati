@@ -49,6 +49,22 @@ namespace TPG {
          * \param[in] newLock the new lock to set.
          */
         void setNewEdgeLock(const TPG::TPGEdgeKeyed& edge, uint64_t newLock);
+
+        /**
+         * @brief Get a subtree of the TPGGraphKeyed.
+         *
+         * Get the TPGTeamKeyed and TPGEdgeKeyed of the subtree rooted at the
+         * given vertex, with a specific key.
+         *
+         * @param[in] root The root vertex of the subtree.
+         * @param[in] keys Optional vector of keys to consider for unlocking
+         * edges. If not provided, an empty set is used, meaning that only keys
+         * collected during traversal will be considered.
+         * @return a Pair of sets containing the TPGTeamKeyed and TPGEdgeKeyed
+         * of the subtree.
+         */
+        std::pair<std::set<const TPGTeamKeyed*>, std::set<const TPGEdgeKeyed*>>
+        getSubtree(const TPGVertex& root, std::set<uint64_t> keys = {}) const;
     };
 
 } // namespace TPG

@@ -349,3 +349,4 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewEdgeLock)
     ASSERT_THROW(graphKeyed.setNewEdgeLock(fakeEdge, 4), std::runtime_error)
         << "Setting lock on a non-existent edge should throw an exception.";
 }
+

@@ -2,6 +2,9 @@
 #include "tpg/keyed/tpgEdgeKeyed.h"
 #include "tpg/keyed/tpgKeyedFactory.h"
 #include "tpg/keyed/tpgTeamKeyed.h"
+#include <algorithm>
+#include <stack>
+#include <vector>
 
 void TPG::TPGGraphKeyed::setNewTeamKey(const TPGTeamKeyed& team,
                                        uint64_t newKey)
@@ -37,4 +40,65 @@ void TPG::TPGGraphKeyed::setNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
         throw std::runtime_error("The edge to modify is not a TPGEdgeKeyed.");
     }
     rawPtr->setLock(newLock);
+}
+
+std::pair<std::set<const TPG::TPGTeamKeyed*>,
+          std::set<const TPG::TPGEdgeKeyed*>>
+TPG::TPGGraphKeyed::getSubtree(const TPGVertex& root,
+                               std::set<uint64_t> keys) const
+{
+    // Create the ordered sets to store the teams and edges of the subtree
+    std::set<const TPG::TPGTeamKeyed*> subtreeTeams;
+    std::set<const TPG::TPGEdgeKeyed*> subtreeEdges;
+
+    using Keys = std::set<uint64_t>;
+    // Stack for DFS: pair of vertex pointer and keys available on the path to
+    // it
+    std::stack<std::pair<const TPG::TPGVertex*, Keys>> stack;
+    stack.push({&root, Keys{keys}}); // start with the provided keys
+
+    // Perform DFS traversal
+    while (!stack.empty()) {
+        auto currentPair = stack.top();
+        stack.pop();
+
+        const TPG::TPGVertex* current = currentPair.first;
+        Keys keysAvailable = currentPair.second;
+
+        // Check if the current vertex is a TPGTeamKeyed
+        const TPG::TPGTeamKeyed* team =
+            dynamic_cast<const TPG::TPGTeamKeyed*>(current);
+        if (team) {
+            subtreeTeams.insert(team);
+
+            // Copy keys and add the key collected at this team so it's
+            // available only for its subtree (children pushed below will use
+            // this copy).
+            Keys childKeys = keysAvailable;
+            // Assume TPGTeamKeyed exposes getKey()
+            childKeys.insert(team->getKey());
+
+            // Iterate through the outgoing edges of the current vertex
+            for (const TPG::TPGEdge* edge : team->getOutgoingEdges()) {
+                // Check if the edge is a TPGEdgeKeyed and if it is unlocked by
+                // any of the available keys for this subtree
+                if (const TPG::TPGEdgeKeyed* keyedEdge =
+                        dynamic_cast<const TPG::TPGEdgeKeyed*>(edge)) {
+                    bool unlocked = std::any_of(
+                        childKeys.begin(), childKeys.end(), [&](uint64_t k) {
+                            return keyedEdge->isUnlockedByKey(k);
+                        });
+
+                    if (unlocked) {
+                        subtreeEdges.insert(keyedEdge);
+                        stack.push({keyedEdge->getDestination(), childKeys});
+                    }
+                }
+            }
+        }
+        // else it is a TPGAction, we don't add it to the subtreeTeams set and
+        // we don't explore outgoing edges from actions in this function.
+    }
+
+    return {subtreeTeams, subtreeEdges};
 }
