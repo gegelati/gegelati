@@ -16,11 +16,9 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineKeyed::evaluateTeam(
             "TPGExecutionEngineKeyed can only evaluate TPGTeamKeyed.");
     }
 
-    // Add the team's key to collectedKeys
-    uint64_t key = keyedTeam->getKey();
-    if (key != 1) {
-        collectedKeys.insert(key);
-    }
+    // Add the team's keys to collectedKeys
+    std::set<uint64_t> keys = keyedTeam->getKeys();
+    collectedKeys.insert(keys.begin(), keys.end());
 
     // Copy outgoing edge list
     std::list<TPG::TPGEdge*> outgoingEdges;
@@ -30,7 +28,7 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineKeyed::evaluateTeam(
     // Note: No need to exclude previously visited edges as the graph is now
     // assumed to be acyclic.
 
-    // exclude all TPGEdgeKeyed whose lock is not a multiple of the key of the
+    // exclude all TPGEdgeKeyed whose lock is not a multiple of the keys of the
     // collectedKeys set.
     std::list<TPG::TPGEdge*> filteredEdges;
     outgoingEdges.remove_if([this](TPG::TPGEdge* edge) {

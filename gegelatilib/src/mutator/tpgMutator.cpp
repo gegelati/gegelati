@@ -999,8 +999,9 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                         newRoot);
 
             // Add a new key for this root
-            dynamic_cast<TPG::TPGGraphKeyed&>(graph).setNextTeamKey(
-                dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
+            uint64_t newKey =
+                dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNextTeamKey(
+                    dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
 
             // Select a random team in the tree of the cloned root (including
             // the root itself).
@@ -1067,8 +1068,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             }
 
             // Set the new key as lock value for the new edge
-            uint64_t newKey =
-                dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot).getKey();
             dynamic_cast<TPG::TPGGraphKeyed&>(graph).setNewEdgeLock(
                 *dynamic_cast<const TPG::TPGEdgeKeyed*>(newEdge), newKey);
         }

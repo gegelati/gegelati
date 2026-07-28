@@ -94,7 +94,7 @@ class TPGExecutionEngineKeyedTest : public ::testing::Test
         uint64_t keys[] = {2, 3, 1};
         for (int i = 0; i < 3; i++) {
             auto& team = tpg->addNewTeam();
-            dynamic_cast<TPG::TPGGraphKeyed*>(tpg)->setNewTeamKey(
+            dynamic_cast<TPG::TPGGraphKeyed*>(tpg)->addNewTeamKey(
                 dynamic_cast<const TPG::TPGTeamKeyed&>(team), keys[i]);
         }
 
@@ -319,7 +319,8 @@ TEST_F(TPGExecutionEngineKeyedTest,
 
     // Check that both keys were collected
     auto keys = engine.getCollectedKeys();
-    ASSERT_EQ(keys.size(), 2) << "Should have collected 2 different keys.";
+    ASSERT_EQ(keys.size(), 3) << "Should have collected 2 different keys.";
+    ASSERT_TRUE(keys.find(1) != keys.end());
     ASSERT_TRUE(keys.find(2) != keys.end());
     ASSERT_TRUE(keys.find(3) != keys.end());
 
@@ -454,7 +455,7 @@ TEST_F(TPGExecutionEngineKeyedTest,
     ASSERT_NO_THROW(engine.evaluateTeam(*team0));
 
     auto keys = engine.getCollectedKeys();
-    ASSERT_EQ(keys.size(), 1) << "Evaluating the same key twice should not "
+    ASSERT_EQ(keys.size(), 2) << "Evaluating the same key twice should not "
                                  "duplicate it in the set.";
 }
 
@@ -464,7 +465,7 @@ TEST_F(TPGExecutionEngineKeyedTest,
     TPG::TPGExecutionEngineKeyed engine(*e, nullptr);
     // Get a team that has no outgoing edges (create a new one)
     auto& emptyTeam = tpg->addNewTeam();
-    dynamic_cast<TPG::TPGGraphKeyed*>(tpg)->setNewTeamKey(
+    dynamic_cast<TPG::TPGGraphKeyed*>(tpg)->addNewTeamKey(
         dynamic_cast<const TPG::TPGTeamKeyed&>(emptyTeam), 5);
     // Evaluate the empty team to collect its key
     ASSERT_THROW(engine.evaluateTeam(emptyTeam), std::runtime_error)

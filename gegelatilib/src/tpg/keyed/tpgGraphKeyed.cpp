@@ -6,7 +6,7 @@
 #include <stack>
 #include <vector>
 
-void TPG::TPGGraphKeyed::setNewTeamKey(const TPGTeamKeyed& team,
+void TPG::TPGGraphKeyed::addNewTeamKey(const TPGTeamKeyed& team,
                                        uint64_t newKey)
 {
     // Find the team in the graph
@@ -17,15 +17,15 @@ void TPG::TPGGraphKeyed::setNewTeamKey(const TPGTeamKeyed& team,
             "The team to modify does not exist in the TPGGraph.");
     }
 
-    // Modify the key
+    // Add the key
     TPGTeamKeyed* rawPtr = dynamic_cast<TPGTeamKeyed*>(teamIterator->get());
     if (rawPtr == nullptr) {
         throw std::runtime_error("The team to modify is not a TPGTeamKeyed.");
     }
-    rawPtr->setKey(newKey);
+    rawPtr->addKey(newKey);
 }
 
-void TPG::TPGGraphKeyed::setNextTeamKey(const TPG::TPGTeamKeyed& team)
+uint64_t TPG::TPGGraphKeyed::addNextTeamKey(const TPG::TPGTeamKeyed& team)
 {
     // Find the team in the graph
     auto teamIterator = vertices.find(&team);
@@ -67,7 +67,9 @@ void TPG::TPGGraphKeyed::setNextTeamKey(const TPG::TPGTeamKeyed& team)
     if (rawPtr == nullptr) {
         throw std::runtime_error("The team to modify is not a TPGTeamKeyed.");
     }
-    rawPtr->setKey(nextPrime);
+    rawPtr->addKey(nextPrime);
+
+    return nextPrime;
 }
 
 void TPG::TPGGraphKeyed::setNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
@@ -120,8 +122,9 @@ TPG::TPGGraphKeyed::getSubtree(const TPGVertex& root,
             // available only for its subtree (children pushed below will use
             // this copy).
             Keys childKeys = keysAvailable;
-            // Assume TPGTeamKeyed exposes getKey()
-            childKeys.insert(team->getKey());
+            // Copy keys
+            auto teamKeys = team->getKeys();
+            childKeys.insert(teamKeys.begin(), teamKeys.end());
 
             // Iterate through the outgoing edges of the current vertex
             for (const TPG::TPGEdge* edge : team->getOutgoingEdges()) {

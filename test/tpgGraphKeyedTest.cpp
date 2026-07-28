@@ -71,22 +71,31 @@ TEST_F(TPGGraphKeyedTest, TPGTeamKeyedSettersAndGetters)
     TPG::TPGTeamKeyed team;
 
     // Test default key
-    ASSERT_EQ(team.getKey(), 1)
+    ASSERT_EQ(team.getKeys().size(), 1)
         << "Default key of a newly constructed TPGTeamKeyed should be 1.";
 
-    // Test setting a prime key
-    ASSERT_NO_THROW(team.setKey(2))
-        << "Setting key to prime number 2 on a TPGTeamKeyed should not fail.";
+    ASSERT_TRUE(team.getKeys().find(1) != team.getKeys().end())
+        << "Default key of a newly constructed TPGTeamKeyed should be 1.";
 
-    ASSERT_EQ(team.getKey(), 2)
-        << "Key of TPGTeamKeyed should be 2 after setKey(2).";
+    // Test adding a prime key
+    ASSERT_NO_THROW(team.addKey(2))
+        << "Adding key prime number 2 on a TPGTeamKeyed should not fail.";
 
-    // Test setting another prime key
-    ASSERT_NO_THROW(team.setKey(3))
-        << "Setting key to prime number 3 on a TPGTeamKeyed should not fail.";
+    ASSERT_EQ(team.getKeys().size(), 2)
+        << "Size of keyset TPGTeamKeyed should be 2 after addKey(2).";
 
-    ASSERT_EQ(team.getKey(), 3)
-        << "Key of TPGTeamKeyed should be 3 after setKey(3).";
+    ASSERT_TRUE(team.getKeys().find(2) != team.getKeys().end())
+        << "Keyset of TPGTeamKeyed should contain key 2 after addKey(2).";
+
+    // Test adding another prime key
+    ASSERT_NO_THROW(team.addKey(3))
+        << "Adding key to prime number 3 on a TPGTeamKeyed should not fail.";
+
+    ASSERT_EQ(team.getKeys().size(), 3)
+        << "Size of keyset of TPGTeamKeyed should be 3 after addKey(3).";
+
+    ASSERT_TRUE(team.getKeys().find(3) != team.getKeys().end())
+        << "Keyset of TPGTeamKeyed should contain key 3 after addKey(3).";
 }
 
 TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedConstructorsDestructors)
@@ -268,8 +277,8 @@ TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryIntegration)
     ASSERT_EQ(e2->getLock(), 1);
 
     // Verify teams have correct default keys
-    ASSERT_EQ(t1->getKey(), 1);
-    ASSERT_EQ(t2->getKey(), 1);
+    ASSERT_EQ(t1->getKeys().size(), 1);
+    ASSERT_EQ(t2->getKeys().size(), 1);
 
     // Verify graph structure
     ASSERT_EQ(tpg.getNbVertices(), 3)
@@ -302,18 +311,20 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewTeamKey)
         dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
 
     ASSERT_NE(team, nullptr) << "Added team should be TPGTeamKeyed.";
-    ASSERT_EQ(team->getKey(), 1) << "Default key should be 1.";
+    ASSERT_EQ(team->getKeys().size(), 1) << "Default key should be 1.";
 
     // Test setting a new key
-    ASSERT_NO_THROW(graphKeyed.setNewTeamKey(*team, 2))
+    ASSERT_NO_THROW(graphKeyed.addNewTeamKey(*team, 2))
         << "Setting team key to 2 should not fail.";
 
-    ASSERT_EQ(team->getKey(), 2)
-        << "Team key should be 2 after setNewTeamKey(team, 2).";
+    ASSERT_EQ(team->getKeys().size(), 2)
+        << "Team key should be 2 after addNewTeamKey(team, 2).";
+    ASSERT_TRUE(team->getKeys().find(2) != team->getKeys().end())
+        << "Team keyset should contain key 2 after addNewTeamKey(team, 2).";
 
     // Test setting key on a non-existent team (should throw)
     TPG::TPGTeamKeyed fakeTeam;
-    ASSERT_THROW(graphKeyed.setNewTeamKey(fakeTeam, 3), std::runtime_error)
+    ASSERT_THROW(graphKeyed.addNewTeamKey(fakeTeam, 3), std::runtime_error)
         << "Setting key on a non-existent team should throw an exception.";
 }
 
@@ -350,22 +361,28 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewEdgeLock)
         << "Setting lock on a non-existent edge should throw an exception.";
 }
 
-TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNextTeamKey)
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedAddNextTeamKey)
 {
     TPG::TPGGraphKeyed graphKeyed(*e);
     // Add a team
     const TPG::TPGTeamKeyed* team =
         dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
     ASSERT_NE(team, nullptr) << "Added team should be TPGTeamKeyed.";
-    ASSERT_EQ(team->getKey(), 1) << "Default key should be 1.";
+    ASSERT_EQ(team->getKeys().size(), 1) << "Default key should be 1.";
     // Test setting the next prime key
-    ASSERT_NO_THROW(graphKeyed.setNextTeamKey(*team))
-        << "Setting next team key should not fail.";
-    ASSERT_EQ(team->getKey(), 2)
-        << "Team key should be 2 after setNextTeamKey(team).";
+    uint64_t newKey;
+    ASSERT_NO_THROW(newKey = graphKeyed.addNextTeamKey(*team))
+        << "Adding next team key should not fail.";
+    ASSERT_EQ(team->getKeys().size(), 2)
+        << "Team key should be 2 after addNextTeamKey(team).";
+    ASSERT_TRUE(team->getKeys().find(newKey) != team->getKeys().end())
+        << "Team keyset should contain the new prime key after "
+           "addNextTeamKey(team).";
     // Test setting the next prime key again
-    ASSERT_NO_THROW(graphKeyed.setNextTeamKey(*team))
-        << "Setting next team key again should not fail.";
-    ASSERT_EQ(team->getKey(), 3)
-        << "Team key should be 3 after setNextTeamKey(team) again.";
+    ASSERT_NO_THROW(newKey = graphKeyed.addNextTeamKey(*team))
+        << "Adding next team key again should not fail.";
+    ASSERT_EQ(team->getKeys().size(), 3)
+        << "Team key should be 3 after addNextTeamKey(team) again.";
+    ASSERT_EQ(newKey, 3) << "The next prime key should be 3 after adding the "
+                            "next prime key again.";
 }

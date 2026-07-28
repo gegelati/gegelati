@@ -40,15 +40,17 @@ namespace TPG {
          * \param[in] team the TPGTeamKeyed to change key.
          * \param[in] newKey the new key to set.
          */
-        void setNewTeamKey(const TPG::TPGTeamKeyed& team, uint64_t newKey);
+        void addNewTeamKey(const TPG::TPGTeamKeyed& team, uint64_t newKey);
 
         /**
          * \brief Set the key of a TPGTeamKeyed to the next prime number.
          *
          * This method uses the lastPrime attribute to generate a new prime
          * number and set it as the key of the given TPGTeamKeyed.
+         *
+         * @return the new prime number set as the key of the TPGTeamKeyed.
          */
-        void setNextTeamKey(const TPG::TPGTeamKeyed& team);
+        uint64_t addNextTeamKey(const TPG::TPGTeamKeyed& team);
 
         /**
          * \brief Set a new lock to a TPGEdgeKeyed.
