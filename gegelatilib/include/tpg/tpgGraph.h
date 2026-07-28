@@ -231,7 +231,7 @@ namespace TPG {
          *
          * \param[in] vertex a const reference to the TPGVertex to remove.
          */
-        void removeVertex(const TPGVertex& vertex);
+        virtual void removeVertex(const TPGVertex& vertex);
 
         /**
          * \brief Clone a TPGVertex of the graph and all its outgoing TPGEdge.

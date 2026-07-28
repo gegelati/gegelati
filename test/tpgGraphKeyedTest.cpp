@@ -127,6 +127,13 @@ TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedSettersAndGetters)
 
     ASSERT_EQ(edge.getLock(), 6)
         << "Lock of TPGEdgeKeyed should be 6 after setLock(6).";
+
+    // Test adding another lock value (should overwrite the previous one)
+    ASSERT_NO_THROW(edge.addLock(5))
+        << "Adding lock 5 on a TPGEdgeKeyed should not fail.";
+
+    ASSERT_EQ(edge.getLock(), 30)
+        << "Lock of TPGEdgeKeyed should be 30 after addLock(5).";
 }
 
 TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedIsUnlockedByKey)
@@ -302,7 +309,7 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedConstructor)
         << "Destruction of TPGGraphKeyed should not fail.";
 }
 
-TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewTeamKey)
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedAddNewTeamKey)
 {
     TPG::TPGGraphKeyed graphKeyed(*e);
 
@@ -354,6 +361,13 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewEdgeLock)
 
     ASSERT_EQ(edge->getLock(), 3)
         << "Edge lock should be 3 after setNewEdgeLock(edge, 3).";
+
+    // Test adding another lock value (should multiply the previous one)
+    ASSERT_NO_THROW(graphKeyed.addNewEdgeLock(*edge, 5))
+        << "Adding edge lock to 5 should not fail.";
+
+    ASSERT_EQ(edge->getLock(), 15)
+        << "Edge lock should be 15 after addNewEdgeLock(edge, 5).";
 
     // Test setting lock on a non-existent edge (should throw)
     TPG::TPGEdgeKeyed fakeEdge(team, action, progPointer);

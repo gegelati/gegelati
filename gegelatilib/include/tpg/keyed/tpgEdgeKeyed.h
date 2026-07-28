@@ -31,6 +31,16 @@ namespace TPG {
         void setLock(uint64_t newLock);
 
         /**
+         * @brief Add a new lock value to the existing lock of the TPGEdge.
+         *
+         *  Each lock is a product of prime numbers which unlocks the execution
+         * of TPGTeamKeyed. Adding a new lock value
+         *
+         * @param newLock New lock value to add.
+         */
+        void addLock(uint64_t newLock);
+
+        /**
          * @brief Check if a given key unlocks the execution of the TPGEdge.
          *
          * @param[in] key The key to check against the lock of the TPGEdge.

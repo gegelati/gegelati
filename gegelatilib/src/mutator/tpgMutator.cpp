@@ -1068,7 +1068,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             }
 
             // Set the new key as lock value for the new edge
-            dynamic_cast<TPG::TPGGraphKeyed&>(graph).setNewEdgeLock(
+            dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNewEdgeLock(
                 *dynamic_cast<const TPG::TPGEdgeKeyed*>(newEdge), newKey);
         }
     }

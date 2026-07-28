@@ -61,6 +61,14 @@ namespace TPG {
         void setNewEdgeLock(const TPG::TPGEdgeKeyed& edge, uint64_t newLock);
 
         /**
+         * @brief Add a new lock value to the existing lock of a TPGEdgeKeyed.
+         *
+         * @param[in] edge the TPGEdgeKeyed to modify.
+         * @param[in] newLock the new lock value to add.
+         */
+        void addNewEdgeLock(const TPG::TPGEdgeKeyed& edge, uint64_t newLock);
+
+        /**
          * @brief Get a subtree of the TPGGraphKeyed.
          *
          * Get the TPGTeamKeyed and TPGEdgeKeyed of the subtree rooted at the

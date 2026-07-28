@@ -10,6 +10,11 @@ void TPG::TPGEdgeKeyed::setLock(uint64_t newLock)
     this->lock = newLock;
 }
 
+void TPG::TPGEdgeKeyed::addLock(uint64_t newLock)
+{
+    this->lock *= newLock;
+}
+
 bool TPG::TPGEdgeKeyed::isUnlockedByKey(uint64_t key) const
 {
     // Always unlocked if the lock is 1 (default value)

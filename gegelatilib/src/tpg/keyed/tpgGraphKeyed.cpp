@@ -89,6 +89,24 @@ void TPG::TPGGraphKeyed::setNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
     rawPtr->setLock(newLock);
 }
 
+void TPG::TPGGraphKeyed::addNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
+                                        uint64_t newLock)
+{
+    // Find the edge in the graph
+    auto edgeIterator = edges.find(&edge);
+    if (edgeIterator == edges.end() || edgeIterator->get() != &edge) {
+        throw std::runtime_error(
+            "The edge to modify does not exist in the TPGGraph.");
+    }
+    // Modify the lock
+    TPGEdgeKeyed* rawPtr = dynamic_cast<TPGEdgeKeyed*>(edgeIterator->get());
+    if (rawPtr == nullptr) {
+        throw std::runtime_error("The edge to modify is not a TPGEdgeKeyed.");
+    }
+
+    rawPtr->addLock(newLock);
+}
+
 std::pair<std::set<const TPG::TPGTeamKeyed*>,
           std::set<const TPG::TPGEdgeKeyed*>>
 TPG::TPGGraphKeyed::getSubtree(const TPGVertex& root,
