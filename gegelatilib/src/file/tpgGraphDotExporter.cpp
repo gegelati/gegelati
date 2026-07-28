@@ -40,6 +40,7 @@
 
 #include "data/constant.h"
 #include "file/tpgGraphDotExporter.h"
+#include "tpg/keyed/tpgGraphKeyed.h"
 #include "util/timestamp.h"
 
 void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
@@ -53,8 +54,24 @@ void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
         color = "#66ddff";
     }
 
-    fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"]\n", this->offset.c_str(),
-            team.getVertexID(), color.c_str());
+    // string buffer to store the label of the team
+    std::ostringstream label;
+    if (dynamic_cast<const TPG::TPGTeamKeyed*>(&team) != nullptr) {
+        label << " label=\"" << team.getVertexID() << "\\n{";
+        const auto& keys =
+            dynamic_cast<const TPG::TPGTeamKeyed*>(&team)->getKeys();
+        for (auto it = keys.begin(); it != keys.end(); ++it) {
+            if (it != keys.begin()) {
+                label << ", ";
+            }
+            label << *it;
+        }
+        label << "}\"";
+    }
+
+    fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"%s]\n",
+            this->offset.c_str(), team.getVertexID(), color.c_str(),
+            label.str().c_str());
 }
 uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
@@ -103,6 +120,15 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 
     Program::Program& p = edge.getProgram();
     uint64_t progID = p.getProgramID();
+
+    // Get lock if any
+    std::ostringstream labelStream;
+    if (dynamic_cast<const TPG::TPGEdgeKeyed*>(&edge) != nullptr) {
+        labelStream << " [label=\""
+                    << dynamic_cast<const TPG::TPGEdgeKeyed*>(&edge)->getLock()
+                    << "\"]";
+    }
+
     if (this->programIDIsNew(progID)) {
 
         // First time thie Program is encountered
@@ -133,14 +159,16 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
                 uint64_t actionID = printTPGAction(
                     *(const TPG::TPGAction*)edge.getDestination());
                 fprintf(pFile,
-                        "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
-                        this->offset.c_str(), srcID, progID, actionID);
+                        "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "%s\n",
+                        this->offset.c_str(), srcID, progID, actionID,
+                        labelStream.str().c_str());
             }
             else {
                 uint64_t destID = edge.getDestination()->getVertexID();
                 fprintf(pFile,
-                        "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n",
-                        this->offset.c_str(), srcID, progID, destID);
+                        "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "%s\n",
+                        this->offset.c_str(), srcID, progID, destID,
+                        labelStream.str().c_str());
             }
         }
     }
