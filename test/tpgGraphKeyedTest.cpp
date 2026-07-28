@@ -400,3 +400,96 @@ TEST_F(TPGGraphKeyedTest, TPGGraphKeyedAddNextTeamKey)
     ASSERT_EQ(newKey, 3) << "The next prime key should be 3 after adding the "
                             "next prime key again.";
 }
+
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedRemoveVertex)
+{
+    TPG::TPGGraphKeyed graphKeyed(*e);
+
+    // Create the following graph structure:
+    //      T0(2)
+    //      |
+    //      |(1)
+    //      v
+    //      T1(1)
+    //  (2)/  \(1)
+    // A0<-'    '->A&
+
+    // Teams and actions
+    const TPG::TPGTeamKeyed* team0 =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+    const TPG::TPGTeamKeyed* team1 =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+    const TPG::TPGAction* action0 =
+        dynamic_cast<const TPG::TPGAction*>(&graphKeyed.addNewAction(0));
+    const TPG::TPGAction* action1 =
+        dynamic_cast<const TPG::TPGAction*>(&graphKeyed.addNewAction(1));
+
+    // Edges
+    const auto& edge0 =
+        graphKeyed.addNewEdge(*team0, *team1, progPointer); // Edge T0 -> T1
+    const auto& edge1 =
+        graphKeyed.addNewEdge(*team1, *action0, progPointer); // Edge T1 -> A0
+    const auto& edge2 =
+        graphKeyed.addNewEdge(*team1, *action1, progPointer); // Edge T1 -> A1
+
+    // Set keys for teams
+    graphKeyed.addNewTeamKey(*team0, 2); // T0 has keys {1, 2}
+
+    // Set locks for edges
+    graphKeyed.setNewEdgeLock(dynamic_cast<const TPG::TPGEdgeKeyed&>(edge0),
+                              1); // Edge T0 -> T1 lock 1
+    graphKeyed.setNewEdgeLock(dynamic_cast<const TPG::TPGEdgeKeyed&>(edge1),
+                              2); // Edge T1 -> A0 lock 2
+    graphKeyed.setNewEdgeLock(dynamic_cast<const TPG::TPGEdgeKeyed&>(edge2),
+                              1); // Edge T1 -> A1 lock 1
+
+    // Remove team0
+    ASSERT_NO_THROW(graphKeyed.removeVertex(*team0))
+        << "Removing team0 should not fail.";
+
+    // Check that team0 is removed
+    ASSERT_EQ(graphKeyed.getVertices().size(), 3)
+        << "Size of vertices should be 3 after removing team0.";
+    ASSERT_EQ(graphKeyed.getEdges().size(), 1)
+        << "Size of edges should be 1 after removing team0.";
+
+    // Check that team0 is no longer present in the vector of vertices
+    auto vertices = graphKeyed.getVertices();
+    ASSERT_FALSE(
+        std::any_of(vertices.begin(), vertices.end(),
+                    [team0](const TPG::TPGVertex* v) { return v == team0; }))
+        << "team0 should not be present in the vector of vertices after "
+           "removal.";
+
+    // Check that orphaned edge edge 1 (T1 -> A0) is removed
+    const auto& edges = graphKeyed.getEdges();
+    ASSERT_FALSE(std::any_of(edges.begin(), edges.end(),
+                             [&edge1](const std::unique_ptr<TPG::TPGEdge>& e) {
+                                 bool isEdge1 = (e.get() == &edge1);
+                                 return isEdge1;
+                             }))
+        << "edge1 should not be present in the vector of edges after "
+           "removal of team0.";
+}
+
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedRecyledKeys)
+{
+    // Create 3 teams and add keys to them
+    TPG::TPGGraphKeyed graphKeyed(*e);
+    graphKeyed.addNextTeamKey(dynamic_cast<const TPG::TPGTeamKeyed&>(
+        graphKeyed.addNewTeam())); // Team 1 gets key 2
+    graphKeyed.addNextTeamKey(dynamic_cast<const TPG::TPGTeamKeyed&>(
+        graphKeyed.addNewTeam())); // Team 2 gets key 3
+    graphKeyed.addNextTeamKey(dynamic_cast<const TPG::TPGTeamKeyed&>(
+        graphKeyed.addNewTeam())); // Team 3 gets key 5
+
+    // Remove Team 2, which has key 3
+    graphKeyed.removeVertex(*graphKeyed.getVertices()[1]);
+
+    // Add a new team
+    const TPG::TPGTeamKeyed* newTeam =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+    // give it a key (should be 3, recycled)
+    auto key = graphKeyed.addNextTeamKey(*newTeam);
+    ASSERT_EQ(key, 3) << "New team should get the recycled key 3.";
+}

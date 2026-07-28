@@ -6,6 +6,69 @@
 #include <stack>
 #include <vector>
 
+void TPG::TPGGraphKeyed::removeVertex(const TPG::TPGVertex& vertex)
+{
+    // Retrieve de keys of the removed vertex if it is a TPGTeamKeyed
+    const TPGTeamKeyed* team = dynamic_cast<const TPGTeamKeyed*>(&vertex);
+    std::set<uint64_t> removedKeys = team->getKeys();
+
+    // Remove the vertex using the base class method
+    TPGGraph::removeVertex(vertex);
+
+    // Remove orphan keys and edges
+    for (uint64_t key : removedKeys) {
+        if (key == 1) {
+            continue; // Skip the default key
+        }
+
+        bool keyIsUsed = false;
+        for (const auto& v : vertices) {
+            const TPGTeamKeyed* otherTeam =
+                dynamic_cast<const TPGTeamKeyed*>(v.get());
+            if (otherTeam && otherTeam->getKeys().count(key) > 0) {
+                keyIsUsed = true;
+                break;
+            }
+        }
+
+        // If the key is not used by any other team, remove edges with locks
+        // that are multiples of this key.
+        if (!keyIsUsed) {
+            // Put the key in the set of recycled keys
+            recycledKeys.push(key);
+
+            std::set<TPGEdgeKeyed*> edgesToRemove;
+            for (auto it = edges.begin(); it != edges.end(); ++it) {
+                TPGEdgeKeyed* keyedEdge =
+                    dynamic_cast<TPGEdgeKeyed*>(it->get());
+
+                // If the edge's lock is greater than 1 and is unlocked by the
+                // key, update the lock or mark it for removal.
+                if (keyedEdge->getLock() > 1 &&
+                    keyedEdge->isUnlockedByKey(key)) {
+                    uint64_t edgeLock = keyedEdge->getLock();
+                    edgeLock /= key; // Remove the key from the lock
+
+                    if (edgeLock == 1) {
+                        // If the lock becomes 1, its last lock was removed, so
+                        // remove the edge
+                        edgesToRemove.insert(keyedEdge);
+                    }
+                    else {
+                        // Otherwise, update the lock and keep the edge
+                        keyedEdge->setLock(edgeLock);
+                    }
+                }
+            }
+
+            // Remove edges that are no longer valid
+            for (TPGEdgeKeyed* edgeToRemove : edgesToRemove) {
+                this->removeEdge(*edgeToRemove);
+            }
+        }
+    }
+}
+
 void TPG::TPGGraphKeyed::addNewTeamKey(const TPGTeamKeyed& team,
                                        uint64_t newKey)
 {
@@ -33,6 +96,20 @@ uint64_t TPG::TPGGraphKeyed::addNextTeamKey(const TPG::TPGTeamKeyed& team)
         throw std::runtime_error(
             "The team to modify does not exist in the TPGGraph.");
     }
+
+    TPGTeamKeyed* rawPtr = dynamic_cast<TPGTeamKeyed*>(teamIterator->get());
+    if (rawPtr == nullptr) {
+        throw std::runtime_error("The team to modify is not a TPGTeamKeyed.");
+    }
+
+    // If a recycled key is available, use it
+    if (!recycledKeys.empty()) {
+        uint64_t recycledKey = recycledKeys.front();
+        recycledKeys.pop();
+        rawPtr->addKey(recycledKey);
+        return recycledKey;
+    }
+
     // Generate the next prime number
     auto isPrime = [](uint64_t num) {
         if (num <= 1)
@@ -63,10 +140,6 @@ uint64_t TPG::TPGGraphKeyed::addNextTeamKey(const TPG::TPGTeamKeyed& team)
     }
     lastPrime = nextPrime;
     // Modify the key
-    TPGTeamKeyed* rawPtr = dynamic_cast<TPGTeamKeyed*>(teamIterator->get());
-    if (rawPtr == nullptr) {
-        throw std::runtime_error("The team to modify is not a TPGTeamKeyed.");
-    }
     rawPtr->addKey(nextPrime);
 
     return nextPrime;
@@ -86,6 +159,7 @@ void TPG::TPGGraphKeyed::setNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
     if (rawPtr == nullptr) {
         throw std::runtime_error("The edge to modify is not a TPGEdgeKeyed.");
     }
+
     rawPtr->setLock(newLock);
 }
 

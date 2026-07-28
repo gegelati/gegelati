@@ -1,6 +1,8 @@
 #ifndef TPG_GRAPH_KEYED_H
 #define TPG_GRAPH_KEYED_H
 
+#include <queue>
+
 #include "tpg/keyed/tpgEdgeKeyed.h"
 #include "tpg/keyed/tpgKeyedFactory.h"
 #include "tpg/keyed/tpgTeamKeyed.h"
@@ -33,6 +35,21 @@ namespace TPG {
             : TPGGraph(e, std::move(f))
         {
         }
+
+        /**
+         * @brief Remove a vertex from the TPGGraphKeyed. Takes care of orphan
+         * keys and locks.
+         *
+         * When a TPGTeamKeyed is removed, its keys are also removed from the
+         * graph. This method check whether the keys are still used by other
+         * TPGTeamKeyed, if not, this key is removed from the graph.
+         * TPGEdgeKeyed with locks that are multiples of the removed keys are
+         * loose that key, and if they have no other keys to unlock them, they
+         * are removed from the graph as well.
+         *
+         * @param[in] vertex the TPGVertex to remove.
+         */
+        void removeVertex(const TPG::TPGVertex& vertex) override;
 
         /**
          * \brief Set a new key to a TPGTeamKeyed.
@@ -86,6 +103,10 @@ namespace TPG {
 
       protected:
         uint64_t lastPrime = 1; ///< Last prime number used for key generation.
+
+        std::queue<uint64_t>
+            recycledKeys; ///< Set of keys that have been removed
+                          ///< from the graph and can be reused.
     };
 
 } // namespace TPG
