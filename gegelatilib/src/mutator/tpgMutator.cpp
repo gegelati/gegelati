@@ -998,13 +998,23 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                     dynamic_cast<const TPG::TPGGraphKeyed&>(graph).getSubtree(
                         newRoot);
 
-            // Add a new key for this root
-            uint64_t newKey =
-                dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNextTeamKey(
-                    dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
+            // Check if the subtree depth is more than 1, otherwise this is
+            // classical growth and we don't need to add a new key.
+            uint64_t newKey = 1;
+            if (subtree.first.size() > 1) {
+                // Add a new key for this root
+                newKey =
+                    dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNextTeamKey(
+                        dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
+
+                // Remove root from subtree, as it is not a leaf and we don't
+                // want to grow from it.
+                subtree.first.erase(
+                    &dynamic_cast<const TPG::TPGTeamKeyed&>(newRoot));
+            }
 
             // Select a random team in the tree of the cloned root (including
-            // the root itself).
+            // the root itself, as this is classical growth).
             uint64_t grownTeamIndex =
                 rng.getUnsignedInt64(0, subtree.first.size() - 1);
             const TPG::TPGTeamKeyed* grownTeam =
@@ -1039,28 +1049,37 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             }
             else {
                 // Select and clone a random team from the graph
+                // Unless the grown team is a root, in which case cloning is not
+                // needed as no cycle can be created.
                 const TPG::TPGTeam* targetTeam =
                     context->preExistingTeams.at(rng.getUnsignedInt64(
                         0, context->preExistingTeams.size() - 1));
+
                 const TPG::TPGTeam& clonedTargetTeam =
-                    (const TPG::TPGTeam&)graph.cloneVertex(*targetTeam);
+                    (newKey == 1)
+                        ? *targetTeam
+                        : (const TPG::TPGTeam&)graph.cloneVertex(*targetTeam);
 
-                // Remove outgoing edges not linked to actions
-                std::vector<const TPG::TPGEdge*> edgesToRemove;
-                for (const TPG::TPGEdge* edge :
-                     clonedTargetTeam.getOutgoingEdges()) {
-                    if (dynamic_cast<const TPG::TPGAction*>(
-                            edge->getDestination()) == nullptr) {
-                        edgesToRemove.push_back(edge);
+                if (newKey != 1) {
+                    // Do only for cloned teams, as the original team may be
+                    // used by other edges and we don't want to remove them.
+                    // Remove outgoing edges not linked to actions
+                    std::vector<const TPG::TPGEdge*> edgesToRemove;
+                    for (const TPG::TPGEdge* edge :
+                         clonedTargetTeam.getOutgoingEdges()) {
+                        if (dynamic_cast<const TPG::TPGAction*>(
+                                edge->getDestination()) == nullptr) {
+                            edgesToRemove.push_back(edge);
+                        }
                     }
-                }
 
-                // Remove collected edges, ensuring at least one remains
-                for (size_t i = 0;
-                     i < edgesToRemove.size() &&
-                     clonedTargetTeam.getOutgoingEdges().size() > 1;
-                     i++) {
-                    graph.removeEdge(*edgesToRemove.at(i));
+                    // Remove collected edges, ensuring at least one remains
+                    for (size_t i = 0;
+                         i < edgesToRemove.size() &&
+                         clonedTargetTeam.getOutgoingEdges().size() > 1;
+                         i++) {
+                        graph.removeEdge(*edgesToRemove.at(i));
+                    }
                 }
 
                 newEdge = &dynamic_cast<TPG::TPGGraphKeyed&>(graph).addNewEdge(
