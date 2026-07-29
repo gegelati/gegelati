@@ -93,7 +93,7 @@ namespace Algorithm::CGP {
          * Random selection is based on the given RNG::RNG.
          *
          * \param[in,out] agent the Agent to mutate.
-         * \param[in] idxLine index of the line mutated.
+         * \param[in] lineIndex index of the line mutated.
          * \param[in] manager the manager to change the agents.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.

@@ -113,7 +113,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.8, params.algorithm.tpg.pEdgeDeletion);
     ASSERT_EQ(0.8, params.algorithm.tpg.pEdgeAddition);
     ASSERT_EQ(0.8, params.algorithm.tpg.pProgramMutation);
-    ASSERT_TRUE(params.algorithm.tpg.forceProgramBehaviorChangeOnMutation);
+    ASSERT_TRUE(params.algorithm.lgp.forceProgramBehaviorChangeOnMutation);
     ASSERT_EQ(0.3, params.algorithm.tpg.pEdgeDestinationChange);
     ASSERT_EQ(0.6, params.algorithm.tpg.pEdgeDestinationIsAction);
 
@@ -244,8 +244,8 @@ TEST(LearningParametersTest, writeParametersToJson)
 
     ASSERT_EQ(params.algorithm.tpg.archiveSize, params2.algorithm.tpg.archiveSize);
     ASSERT_EQ(params.algorithm.tpg.archivingProbability, params2.algorithm.tpg.archivingProbability);
-    ASSERT_EQ(params.algorithm.tpg.forceProgramBehaviorChangeOnMutation,
-              params2.algorithm.tpg.forceProgramBehaviorChangeOnMutation);
+    ASSERT_EQ(params.algorithm.lgp.forceProgramBehaviorChangeOnMutation,
+              params2.algorithm.lgp.forceProgramBehaviorChangeOnMutation);
     ASSERT_EQ(params.algorithm.tpg.maxInitOutgoingEdges,
               params2.algorithm.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(params.algorithm.tpg.maxOutgoingEdges,

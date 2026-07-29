@@ -642,7 +642,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 3;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation), EvoGraph::TPGInstrumentedFactory());
@@ -735,7 +735,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 1;
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
 
@@ -782,7 +782,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 1;
 
     
@@ -832,7 +832,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.algorithm.maple.pMutateActionProgram = 0.9;
     params.algorithm.atpg.probaContextOverActionProgram = 0.9;
     params.algorithm.tpg.pProgramMutation = 0.6;
@@ -886,7 +886,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.algorithm.maple.pMutateActionProgram = 0.9;
     params.algorithm.atpg.probaContextOverActionProgram = 0.9;
     params.algorithm.tpg.pProgramMutation = 0.6;
@@ -943,7 +943,7 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 1;
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
@@ -994,7 +994,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.algorithm.maple.pMutateActionProgram = 0.9;
     params.algorithm.atpg.probaContextOverActionProgram = 0.9;
     params.algorithm.tpg.pProgramMutation = 0.6;
@@ -1060,7 +1060,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.algorithm.maple.pMutateActionProgram = 0.9;
     params.algorithm.atpg.probaContextOverActionProgram = 0.9;
     params.algorithm.tpg.pProgramMutation = 0.6;
@@ -1124,7 +1124,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
@@ -1180,7 +1180,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
@@ -1858,7 +1858,7 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 3;
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
