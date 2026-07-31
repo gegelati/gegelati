@@ -4,11 +4,11 @@
 
 std::vector<double> Representation::Maple::MapleExecutionEngine::execute()
 {
-    const MapleAgent& mapleAgent = dynamic_cast<const MapleAgent&>((*this->executedAgent).get());
-    if(&mapleAgent == nullptr){
+    const MapleIndividual& mapleIndividual = dynamic_cast<const MapleIndividual&>((*this->executedAgent).get());
+    if(&mapleIndividual == nullptr){
         throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute an agent which is not a Maple agent");
     }
-    const EvoGraph::Team& teamVertex = dynamic_cast<const EvoGraph::Team&>(mapleAgent.getVertex());
+    const EvoGraph::Team& teamVertex = dynamic_cast<const EvoGraph::Team&>(mapleIndividual.getVertex());
     if(&teamVertex == nullptr){
         throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent a team vertex");
     }

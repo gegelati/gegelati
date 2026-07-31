@@ -65,10 +65,10 @@ namespace EvoGraph {
          * \brief Main constructor of a Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
-         * \param[in] agentProgram the weak pointer to the Agent Program associated to the
+         * \param[in] agentProgram the weak pointer to the Individual Program associated to the
          *            Vertex.
          */
-        Action(const uint64_t id, std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : Vertex(agentProgram), actionID{id} {
+        Action(const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) : Vertex(agentProgram), actionID{id} {
             this->updateAssessedActions();
         };
 

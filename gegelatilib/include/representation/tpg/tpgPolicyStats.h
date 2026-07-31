@@ -38,7 +38,7 @@
 #define TPG_POLICY_STATS_H
 
 #include "representation/policyStats.h"
-#include "representation/tpg/tpgAgent.h"
+#include "representation/tpg/tpgIndividual.h"
 
 namespace Representation::TPG {
 
@@ -52,15 +52,15 @@ namespace Representation::TPG {
         TPGPolicyStats(std::string representationName, uint64_t representationID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStats) : PolicyStats(representationName, representationID, subPolicyStats) {}
 
         /**
-         * Analyze the policy starting from the given Agent.
+         * Analyze the policy starting from the given Individual.
          *
-         * This method explores the Graph starting from the given Agent,
+         * This method explores the Graph starting from the given Individual,
          * and analyzes all Team, Action and other agents encountered along the
          * way.
          *
          * The method updates the following stats:
          */
-        virtual void analyzePolicy(const Agent& agent) override;
+        virtual void analyzePolicy(const Individual& agent) override;
 
         /**
          * \brief TPG got no specific info to print, so we just return the name of the program sub-representation.

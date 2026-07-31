@@ -30,9 +30,9 @@ void Representation::ATPG::ATPGRepresentation::addAggregatedActionProgramReprese
 }
 
 
-void Representation::ATPG::ATPGRepresentation::initManager()
+void Representation::ATPG::ATPGRepresentation::initPopulation()
 {
-    this->manager = std::make_unique<ATPG::ATPGManager>(*this->outputs, this->representationID);
+    this->population = std::make_unique<ATPG::ATpgPopulation>(*this->outputs, this->representationID);
 }
 
 void Representation::ATPG::ATPGRepresentation::initMutator()
@@ -40,10 +40,10 @@ void Representation::ATPG::ATPGRepresentation::initMutator()
     this->mutator = std::make_unique<ATPG::ATPGMutator>(*this->selector, this->representationID, *this->archive);
 }
 
-std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>> Representation::ATPG::ATPGRepresentation::getUsedSubAgents() const
+std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>> Representation::ATPG::ATPGRepresentation::getUsedSubAgents() const
 {
-    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = TPGRepresentation::getUsedSubAgents();
-    usedSubAgents[this->actionProgramRepresentationID] = std::set<std::reference_wrapper<const Agent>>();
+    std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> usedSubAgents = TPGRepresentation::getUsedSubAgents();
+    usedSubAgents[this->actionProgramRepresentationID] = std::set<std::reference_wrapper<const Individual>>();
 
     for(const EvoGraph::Vertex& vertex: this->graph->getVertices()){
         if(vertex.hasProgram() && vertex.getProgram().getRepresentationID() == this->actionProgramRepresentationID){
@@ -75,12 +75,12 @@ void Representation::ATPG::ATPGRepresentation::initSubRepresentations(RNG::RNG& 
     }
     actionProgramAlgo.initRepresentation(rng, actionProgramOutput, dataSource, graph);
 
-    // Add program manager and mutator to TPG manager and mutator
-    this->manager->addSubManager(actionProgramAlgo.getManager());
-    this->manager->addSubManager(programAlgo.getManager());
-    ATPG::ATPGManager* atpgManager = dynamic_cast<ATPGManager*>(this->manager.get());
-    atpgManager->setActionProgramRepresentationID(this->actionProgramRepresentationID);
-    atpgManager->setProgramRepresentationID(this->programRepresentationID);
+    // Add program population and mutator to TPG population and mutator
+    this->population->addSubPopulation(actionProgramAlgo.getPopulation());
+    this->population->addSubPopulation(programAlgo.getPopulation());
+    ATPG::ATpgPopulation* atpgPopulation = dynamic_cast<ATpgPopulation*>(this->population.get());
+    atpgPopulation->setActionProgramRepresentationID(this->actionProgramRepresentationID);
+    atpgPopulation->setProgramRepresentationID(this->programRepresentationID);
 
     this->mutator->addSubMutator(actionProgramAlgo.getMutator());
     this->mutator->addSubMutator(programAlgo.getMutator());
@@ -99,7 +99,7 @@ std::shared_ptr<Representation::PolicyStats> Representation::ATPG::ATPGRepresent
 }
 
 
-void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const
+void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const
 {
     fileMain
         << "int bestProgram_"<<this->representationName <<this->representationID <<"(double *results, int nb) {\n"
@@ -120,10 +120,10 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
     // set of all used vertex by the list of agents
     std::set<std::reference_wrapper<const EvoGraph::Vertex>> printedVertices;
     std::vector<std::reference_wrapper<const EvoGraph::Vertex>> verticesToVisit;
-    for(const Agent& agent: agents) {
-        if(auto tpgAgent = dynamic_cast<const TPG::TPGAgent*>(&agent)) {
-            printedVertices.insert(tpgAgent->getVertex());
-            verticesToVisit.push_back(tpgAgent->getVertex());
+    for(const Individual& agent: agents) {
+        if(auto tpgIndividual = dynamic_cast<const TPG::TpgIndividual*>(&agent)) {
+            printedVertices.insert(tpgIndividual->getVertex());
+            verticesToVisit.push_back(tpgIndividual->getVertex());
         } else {
             throw std::runtime_error("TPGRepresentation::printCodeGenAgents: agent should be a tpg agent");
         }
@@ -162,11 +162,11 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
     fileMainH << "typedef void (* "<< programAlgo.getRepresentationName() << programAlgo.getRepresentationID() <<"_Program)(double*);\n";
 
 
-    for(const Agent& agent: agents) {
-        const TPG::TPGAgent& tpgAgent = dynamic_cast<const TPG::TPGAgent&>(agent);
+    for(const Individual& agent: agents) {
+        const TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TPG::TpgIndividual&>(agent);
         fileMain 
             << "void " << this->representationName << this->representationID << "_" << agent.getAgentID() << "(double* outputs) {\n"
-            << "\tswitch_"<< this->representationName << this->representationID <<"(T" << tpgAgent.getVertex().getVertexID()<<", outputs);\n"
+            << "\tswitch_"<< this->representationName << this->representationID <<"(T" << tpgIndividual.getVertex().getVertexID()<<", outputs);\n"
             << "}\n"
             << std::endl;
     }

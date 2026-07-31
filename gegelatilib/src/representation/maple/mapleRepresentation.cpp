@@ -7,9 +7,9 @@ std::unique_ptr<Representation::Representation> Representation::Maple::MapleRepr
         std::make_unique<RepresentationParameters>(*this->params), this->representationName, this->representationColor);
 }
 
-void Representation::Maple::MapleRepresentation::initManager()
+void Representation::Maple::MapleRepresentation::initPopulation()
 {
-    this->manager = std::make_unique<Maple::MapleManager>(*this->outputs, this->representationID);
+    this->population = std::make_unique<Maple::MaplePopulation>(*this->outputs, this->representationID);
 }
 
 void Representation::Maple::MapleRepresentation::initMutator()
@@ -37,29 +37,29 @@ void Representation::Maple::MapleRepresentation::initSubRepresentations(RNG::RNG
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
     programAlgo.initRepresentation(rng, *programOutput, dataSource, graph);
 
-    // Add program manager and mutator to TPG manager and mutator
-    this->manager->addSubManager(programAlgo.getManager());
-    MapleManager* mapleManager = dynamic_cast<MapleManager*>(this->manager.get());
-    mapleManager->setProgramRepresentationID(this->programRepresentationID);
+    // Add program population and mutator to TPG population and mutator
+    this->population->addSubPopulation(programAlgo.getPopulation());
+    MaplePopulation* maplePopulation = dynamic_cast<MaplePopulation*>(this->population.get());
+    maplePopulation->setProgramRepresentationID(this->programRepresentationID);
 
     this->mutator->addSubMutator(programAlgo.getMutator());
     MapleMutator* mapleMutator = dynamic_cast<MapleMutator*>(this->mutator.get());
     mapleMutator->setProgramRepresentationID(this->programRepresentationID);
 }
 
-void Representation::Maple::MapleRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const
+void Representation::Maple::MapleRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const
 {
     const Representation& programAlgo = this->cGetSubRepresentation(this->programRepresentationID);
 
     // set of all used vertex by the list of agents
     std::set<std::reference_wrapper<const EvoGraph::Vertex>> printedVertices;
-    for(const Agent& agent: agents) {
-        if(auto mapleAgent = dynamic_cast<const MapleAgent*>(&agent)) {
+    for(const Individual& agent: agents) {
+        if(auto mapleIndividual = dynamic_cast<const MapleIndividual*>(&agent)) {
 
             fileMain
                 << "void "<< this->representationName << this->representationID << "_" <<agent.getAgentID() << "(double* outputs) {\n";
 
-            const EvoGraph::Vertex& vertex = mapleAgent->getVertex();
+            const EvoGraph::Vertex& vertex = mapleIndividual->getVertex();
             for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
                 subAgents.at(this->programRepresentationID).insert(edge.getProgram());
 

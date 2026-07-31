@@ -3,7 +3,7 @@
 #define LGP_AGENT_H
 
 #include <cstdint>
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "evoGraph/vertex.h"
 #include "representation/lgp/lgpLine.h"
 #include "representation/lgp/environment.h"
@@ -13,9 +13,9 @@
 namespace Representation::LGP {
       
         /**
-         * \brief Abstract class representing a LGPAgent
+         * \brief Abstract class representing a LgpIndividual
          */
-        class LGPAgent : public Agent
+        class LgpIndividual : public Individual
         {
         protected:
 
@@ -51,19 +51,19 @@ namespace Representation::LGP {
             std::vector<size_t> outputIndices;
 
             /// Delete the default constructor.
-            LGPAgent() = delete;
+            LgpIndividual() = delete;
 
         public:
             /**
-             * \brief Main constructor of the LGPAgent.
+             * \brief Main constructor of the LgpIndividual.
              *
              * \param[in] e the reference to the Environment that will be referenced
-             * by the LGPAgent.
+             * by the LgpIndividual.
              * \param[in] outputs outputs of the LGP.
              * \param[in] representationID id of the representation used.
              */
-            LGPAgent(const LGPEnvironment& e, const Output::OutputHandler& outputs, uint64_t representationID)
-                : Agent(representationID), environment{e}, constants{e.getNbConstants()}, outputs{outputs}
+            LgpIndividual(const LGPEnvironment& e, const Output::OutputHandler& outputs, uint64_t representationID)
+                : Individual(representationID), environment{e}, constants{e.getNbConstants()}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
                 size_t nbOutputs = this->getUsedNbOutputs(outputs);
@@ -77,18 +77,18 @@ namespace Representation::LGP {
              */
             size_t getUsedNbOutputs(const Output::OutputHandler& outputs) const;
 
-            // Disable copy semantics: LGPAgent should never be copied.
-            LGPAgent(const LGPAgent&) = delete;
-            LGPAgent& operator=(const LGPAgent&) = delete;
+            // Disable copy semantics: LgpIndividual should never be copied.
+            LgpIndividual(const LgpIndividual&) = delete;
+            LgpIndividual& operator=(const LgpIndividual&) = delete;
 
             
             /**
-             * \brief Destructor for the LGPAgent class.
+             * \brief Destructor for the LgpIndividual class.
              *
-             * This destructor deallocates all memory allocated for LGPAgent lines
+             * This destructor deallocates all memory allocated for LgpIndividual lines
              * (if any).
              */
-            ~LGPAgent();
+            ~LgpIndividual();
 
             /**
              * \brief Get the number of outputs of the LGP.

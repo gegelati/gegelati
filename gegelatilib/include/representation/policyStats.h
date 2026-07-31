@@ -42,7 +42,7 @@
 #include <vector>
 
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "evoGraph/graph.h"
 
 namespace Representation {
@@ -186,15 +186,15 @@ namespace Representation {
         virtual void analyzeAction(const EvoGraph::Action& action);
 
         /**
-         * Analyze the policy starting from the given Agent.
+         * Analyze the policy starting from the given Individual.
          *
-         * This method explores the Graph starting from the given Agent,
+         * This method explores the Graph starting from the given Individual,
          * and analyzes all Team, Action and other agents encountered along the
          * way.
          *
          * The method updates the following stats:
          */
-        virtual void analyzePolicy(const Agent& agent) = 0;
+        virtual void analyzePolicy(const Individual& agent) = 0;
 
         /**
          * Method returning the specific informations of the representation used

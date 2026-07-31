@@ -1,7 +1,7 @@
 
-#include "representation/maple/mapleAgent.h"
+#include "representation/maple/mapleIndividual.h"
 
-bool Representation::Maple::MapleAgent::isValid() const
+bool Representation::Maple::MapleIndividual::isValid() const
 {
     // Maple agent are valid if they represent an team vertex with at least one outgoing edge
     if(!this->hasVertex()){

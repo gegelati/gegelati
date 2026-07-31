@@ -3,30 +3,30 @@
 #include "selector/selector.h"
 
 
-Representation::AgentManager& Selector::Selector::getManager()
+Representation::Population& Selector::Selector::getPopulation()
 {
-    if(!this->hasManager()) {
-        throw std::runtime_error("Selector::getManager: manager is not set");
+    if(!this->hasPopulation()) {
+        throw std::runtime_error("Selector::getPopulation: population is not set");
     }
-    return *this->manager;
+    return *this->population;
 }
 
-const Representation::AgentManager& Selector::Selector::cGetManager() const
+const Representation::Population& Selector::Selector::cGetPopulation() const
 {
-    if(!this->hasManager()) {
-        throw std::runtime_error("Selector::getManager: manager is not set");
+    if(!this->hasPopulation()) {
+        throw std::runtime_error("Selector::getPopulation: population is not set");
     }
-    return *this->manager;
+    return *this->population;
 }
 
-void Selector::Selector::setManager(Representation::AgentManager& manager)
+void Selector::Selector::setPopulation(Representation::Population& population)
 {
-    this->manager = manager;
+    this->population = population;
 }
 
-bool Selector::Selector::hasManager() const
+bool Selector::Selector::hasPopulation() const
 {
-    return this->manager.has_value();
+    return this->population.has_value();
 }
 
 void Selector::Selector::setNbAgents(size_t nbAgents)
@@ -42,7 +42,7 @@ size_t Selector::Selector::getNbAgents()
 void Selector::Selector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>& results,
+                  std::reference_wrapper<const Representation::Individual>>& results,
     RNG::RNG& rng)
 {
     throw std::runtime_error(
@@ -58,23 +58,23 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
 
 void Selector::Selector::keepBestPolicy(EvoGraph::Graph& graph)
 {
-    Representation::AgentManager& manager = this->getManager();
+    Representation::Population& population = this->getPopulation();
     auto bestAgentVertex = this->bestAgent.first;
-    if (bestAgentVertex && manager.containsAgent(*bestAgentVertex)) {
+    if (bestAgentVertex && population.containsAgent(*bestAgentVertex)) {
 
         // Remove all but the best agent from the graph
-        while (manager.getAgents().size() != 1) {
-            auto agents = manager.getAgents();
-            for (const Representation::Agent& agent : agents) {
+        while (population.getAgents().size() != 1) {
+            auto agents = population.getAgents();
+            for (const Representation::Individual& agent : agents) {
                 if (agent != bestAgentVertex.value()) {
-                    manager.deleteAgent(agent, graph);
+                    population.deleteAgent(agent, graph);
                 }
             }
         }
     }
 }
 
-void Selector::Selector::removeFromSavedResults(const Representation::Agent& agent)
+void Selector::Selector::removeFromSavedResults(const Representation::Individual& agent)
 {
     if (&agent != nullptr) {
         this->resultsPerAgent.erase(agent);
@@ -90,7 +90,7 @@ void Selector::Selector::removeFromSavedResults(const Representation::Agent& age
 
 void Selector::Selector::updateEvaluationRecords(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Representation::Agent>>& results)
+                        std::reference_wrapper<const Representation::Individual>>& results)
 {
     // Update bestAgent
     this->updateBestAgent(results);
@@ -101,7 +101,7 @@ void Selector::Selector::updateEvaluationRecords(
 
 void Selector::Selector::updateResultsPerAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Representation::Agent>>& results)
+                        std::reference_wrapper<const Representation::Individual>>& results)
 {
     for (const auto& result : results) {
         auto mapIterator = this->resultsPerAgent.find(result.second);
@@ -127,24 +127,24 @@ void Selector::Selector::updateResultsPerAgent(
 
 void Selector::Selector::updateBestAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Representation::Agent>>& results)
+                        std::reference_wrapper<const Representation::Individual>>& results)
 {
     auto iterator = --results.end();
     const std::shared_ptr<Learn::EvaluationResult> evaluation = iterator->first;
-    const Representation::Agent& candidate = iterator->second;
+    const Representation::Individual& candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
     if (!this->bestAgent.first         // NULL case
         || *this->bestAgent.second < *evaluation // new high-score case
         ||
-        !this->getManager().containsAgent(*this->bestAgent.first) // bestAgent disappearance
+        !this->getPopulation().containsAgent(*this->bestAgent.first) // bestAgent disappearance
     ) {
         // Replace the best agent
         this->bestAgent = {candidate, evaluation};
     }
 }
 
-const std::pair<std::optional<std::reference_wrapper<const Representation::Agent>>,
+const std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                 std::shared_ptr<Learn::EvaluationResult>>&
 Selector::Selector::getBestAgent() const
 {
@@ -158,7 +158,7 @@ void Selector::Selector::forgetPreviousResults()
     this->bestAgent.second = nullptr;
 }
 
-const std::map<std::reference_wrapper<const Representation::Agent>, std::shared_ptr<Learn::EvaluationResult>>&
+const std::map<std::reference_wrapper<const Representation::Individual>, std::shared_ptr<Learn::EvaluationResult>>&
 Selector::Selector::getResultsPerAgent() const
 {
     return this->resultsPerAgent;
@@ -169,9 +169,9 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     std::unique_ptr<SelectionContext> context = std::make_unique<SelectionContext>();
 
     // Insert all agents, but only the reference of weak pointer with lock available
-    // manager->getAgents returns a vector of weak pointer, but the context should only have reference to the agent, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
-    const Representation::AgentManager& manager = this->cGetManager();
-    for (const Representation::Agent& agent : manager.getAgents()) {
+    // population->getAgents returns a vector of weak pointer, but the context should only have reference to the agent, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
+    const Representation::Population& population = this->cGetPopulation();
+    for (const Representation::Individual& agent : population.getAgents()) {
         context->agentsClonable.push_back(agent); 
         context->preExistingAgents.push_back(agent);
     }
@@ -184,7 +184,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
 
 
 std::shared_ptr<Learn::EvaluationResult> Selector::Selector::getResultsOf(
-    const Representation::Agent& agent) const
+    const Representation::Individual& agent) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
@@ -198,7 +198,7 @@ std::shared_ptr<Learn::EvaluationResult> Selector::Selector::getResultsOf(
 }
 
 size_t Selector::Selector::getNbEvaluation(
-    const Representation::Agent& agent) const
+    const Representation::Individual& agent) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy

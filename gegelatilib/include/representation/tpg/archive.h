@@ -44,7 +44,7 @@
 #include <functional>
 
 #include "data/dataHandler.h"
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "mutator/rng.h"
 
 namespace Representation::TPG {
@@ -60,7 +60,7 @@ namespace Representation::TPG {
     typedef struct ArchiveRecording
     {
         /// Pointer to the agent Program. This pointer may point to a freed agent.
-        const Agent* agent;
+        const Individual* agent;
 
         /// Hash of the set of DataHandler for this recording
         const size_t dataHash;
@@ -120,7 +120,7 @@ namespace Representation::TPG {
          *
          * The Map is used to speed the unicity tests.
          */
-        std::map<const Agent*, std::deque<ArchiveRecording>>
+        std::map<const Individual*, std::deque<ArchiveRecording>>
             recordingsPerProgram;
 
         /// Recordings of the Archive
@@ -211,7 +211,7 @@ namespace Representation::TPG {
          *                   insertion.
          */
         virtual void addRecording(
-            const Agent& agent,
+            const Individual& agent,
             const std::vector<std::reference_wrapper<const Data::DataHandler>>&
                 dHandler,
             double result, bool forced = false);

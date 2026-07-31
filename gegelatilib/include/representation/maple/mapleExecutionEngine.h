@@ -3,7 +3,7 @@
 #define MAPLE_EXECUTION_ENGINE_H
 
 #include "representation/tpg/tpgExecutionEngine.h"
-#include "representation/maple/mapleAgent.h"
+#include "representation/maple/mapleIndividual.h"
 
 
 namespace Representation::Maple {
@@ -32,7 +32,7 @@ namespace Representation::Maple {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        MapleExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
+        MapleExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
 
 
         /**

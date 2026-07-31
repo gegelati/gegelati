@@ -90,11 +90,11 @@ const EvoGraph::Edge& Representation::TPG::TPGExecutionEngine::evaluateTeam(cons
 
 std::vector<double> Representation::TPG::TPGExecutionEngine::execute()
 {
-    const Representation::TPG::TPGAgent& tpgAgent = dynamic_cast<const TPGAgent&>((*this->executedAgent).get());
-    if(&tpgAgent == nullptr){
+    const Representation::TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TpgIndividual&>((*this->executedAgent).get());
+    if(&tpgIndividual == nullptr){
         throw std::runtime_error("Representation::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
+    std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgIndividual.getVertex();
 
     // Browse the TPG until a Action is reached.
     while (auto teamVertex = dynamic_cast<const EvoGraph::Team*>(&currentVertex.get())) {

@@ -82,7 +82,7 @@ namespace Selector {
              * \brief Specialization of the initialisation of the metrics.
              */
             void initMetrics(
-                const Representation::Agent& agent,
+                const Representation::Individual& agent,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**
@@ -90,7 +90,7 @@ namespace Selector {
              * of an episode.
              */
             void extractMetricsStep(
-                const Representation::Agent& agent, std::vector<double> actionValues,
+                const Representation::Individual& agent, std::vector<double> actionValues,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**
@@ -98,7 +98,7 @@ namespace Selector {
              * of an episode.
              */
             void extractMetricsEpisode(
-                const Representation::Agent& agent, size_t nbStepsExecuted,
+                const Representation::Individual& agent, size_t nbStepsExecuted,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**

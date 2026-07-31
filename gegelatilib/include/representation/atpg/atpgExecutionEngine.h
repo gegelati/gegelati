@@ -35,7 +35,7 @@ namespace Representation::ATPG {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ATPGExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
+        ATPGExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
 
 
         /**

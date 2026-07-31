@@ -4,7 +4,7 @@
 #define MAPLE_REPRESENTATION_H
 
 #include "representation/tpg/tpgRepresentation.h"
-#include "representation/maple/mapleManager.h"
+#include "representation/maple/maplePopulation.h"
 #include "representation/maple/mapleMutator.h"
 
 namespace Representation::Maple {
@@ -32,11 +32,11 @@ namespace Representation::Maple {
 
             
             /**
-             * \brief Initialize the managerof the representation
+             * \brief Initialize the populationof the representation
              * 
              * \param[in] outputs outputs needed for the representation.
              */
-            virtual void initManager() override;
+            virtual void initPopulation() override;
 
             /**
              * \brief Initialize the mutator of the representation
@@ -68,7 +68,7 @@ namespace Representation::Maple {
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
             
     };
 

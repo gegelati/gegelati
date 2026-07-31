@@ -62,7 +62,7 @@ void Learn::ParallelLearningAgent::init(uint64_t seed, bool doGeneratePopulation
     Learn::LearningAgent::init(seed, doGeneratePopulation);
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
 Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
                                                Learn::LearningMode mode)
 {
@@ -75,7 +75,7 @@ Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t gener
         throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
         results;
 
         
@@ -115,7 +115,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     // Clone learningEnvironment
     LearningEnvironment* privateLearningEnvironment = this->allCloneLearningEnvironments.at(indexEnvironment);
 
-    std::unique_ptr<Representation::ExecutionEngine> execEngine = this->currentExecutedRepresentation->getManager().createExecutionEngine(privateLearningEnvironment->getDataSources());
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = this->currentExecutedRepresentation->getPopulation().createExecutionEngine(privateLearningEnvironment->getDataSources());
 
     // Pop a job and process it
     while (true) {
@@ -152,7 +152,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
     std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>&
         results)
 {
     // Create Map for results
@@ -205,7 +205,7 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Representation::Job>>>& resultsPerJobMap,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>&
         results)
 {
     // Merge the results

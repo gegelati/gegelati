@@ -40,18 +40,18 @@
 #include "data/constantHandler.h"
 #include "instructions/multByConstant.h"
 
-void Representation::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
+void Representation::LGP::LGPEngine::setExecutedAgent(const Individual& newExecutedAgent)
 {
-    const LGPAgent& lgpAgent = dynamic_cast<const LGPAgent&>(newExecutedAgent);
-    if(&lgpAgent == nullptr){
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(newExecutedAgent);
+    if(&lgpIndividual == nullptr){
         throw std::runtime_error("Representation::LGP::LGPEngine::setExecutedAgent trying to set an agent which is not a LGP agent");
     }
 
     // are constants used here ?
     size_t offset = 1;
-    if (lgpAgent.getEnvironment().getNbConstants() > 0) {
+    if (lgpIndividual.getEnvironment().getNbConstants() > 0) {
         // replace programs constants if already existing
-        dataScsConstsAndRegs.at(1) = lgpAgent.cGetConstantHandler();
+        dataScsConstsAndRegs.at(1) = lgpIndividual.cGetConstantHandler();
         // increment offset for the datahandlers verification
         offset++;
     }
@@ -61,7 +61,7 @@ void Representation::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAg
     // -2 because we don't count the registers that are the first datasources
     // and the constants (second datasource)
     if (this->dataScsConstsAndRegs.size() - offset !=
-        lgpAgent.getEnvironment().getDataSources().size()) {
+        lgpIndividual.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
@@ -70,7 +70,7 @@ void Representation::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAg
         // check data source characteristics
         auto& iDataSrc =
             this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
-        auto& envDataSrc = lgpAgent.getEnvironment().getDataSources().at(i).get();
+        auto& envDataSrc = lgpIndividual.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
         // having the same id
@@ -91,7 +91,7 @@ void Representation::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAg
     this->registers.resetData();
 
     // set the lines
-    this->lgpExecutedAgent = lgpAgent;
+    this->lgpExecutedAgent = lgpIndividual;
 
     // Reset the counters
     this->programCounter = 0;

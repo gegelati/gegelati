@@ -43,7 +43,7 @@
 
 #include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 #include "representation/executionEngine.h"
 
 namespace Representation::LGP {
@@ -78,7 +78,7 @@ namespace Representation::LGP {
         uint64_t programCounter;
 
         /// casted executed agent
-        std::optional<std::reference_wrapper<const LGPAgent>> lgpExecutedAgent;
+        std::optional<std::reference_wrapper<const LgpIndividual>> lgpExecutedAgent;
 
       protected:
         /**
@@ -130,7 +130,7 @@ namespace Representation::LGP {
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
-        LGPEngine(const LGPAgent& executedAgent, 
+        LGPEngine(const LgpIndividual& executedAgent, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : ExecutionEngine{executedAgent, executedAgent.getOutputs(), isTraining}, programCounter{0},
               registers{executedAgent.getEnvironment().getNbRegisters()}
@@ -167,7 +167,7 @@ namespace Representation::LGP {
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const LGPAgent& executedAgent,  bool isTraining = false)
+        LGPEngine(const LgpIndividual& executedAgent,  bool isTraining = false)
             : LGPEngine(executedAgent, executedAgent.getEnvironment().getDataSources(), isTraining){};
 
         /**
@@ -182,9 +182,9 @@ namespace Representation::LGP {
          * \brief Method for changing the agent executed by a
          * LGPEngine.
          *
-         * \param[in] newExecutedAgent the LGPAgent executed by the lgpEngine
+         * \param[in] newExecutedAgent the LgpIndividual executed by the lgpEngine
          */
-        virtual void setExecutedAgent(const Agent& newExecutedAgent) override;
+        virtual void setExecutedAgent(const Individual& newExecutedAgent) override;
 
         /**
          * \brief Method for changing the dataSources on which the Program will

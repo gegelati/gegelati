@@ -84,9 +84,9 @@ const EvoGraph::Graph& Representation::Representation::getGraph() const
     return *this->graph;
 }
 
-const Representation::AgentManager& Representation::Representation::getManagerCst() const
+const Representation::Population& Representation::Representation::getPopulationCst() const
 {
-    return *this->manager;
+    return *this->population;
 }
 
 const Selector::Selector& Representation::Representation::getSelectorCst() const
@@ -97,9 +97,9 @@ const Selector::Selector& Representation::Representation::getSelectorCst() const
     return *this->selector;
 }
 
-Representation::AgentManager& Representation::Representation::getManager()
+Representation::Population& Representation::Representation::getPopulation()
 {
-    return *this->manager;
+    return *this->population;
 }
 
 
@@ -162,17 +162,17 @@ const Representation::Representation& Representation::Representation::getAggrega
 
 size_t Representation::Representation::getNbAgents() const
 {
-    return this->manager->getAgents().size();   
+    return this->population->getAgents().size();   
 }
 
-const std::vector<std::reference_wrapper<const Representation::Agent>> Representation::Representation::getAgents() const
+const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::Representation::getAgents() const
 {
-    return this->manager->getAgents();
+    return this->population->getAgents();
 }
 
-bool Representation::Representation::containsAgent(const Agent& agent) const
+bool Representation::Representation::containsAgent(const Individual& agent) const
 {
-    return this->manager->containsAgent(agent);
+    return this->population->containsAgent(agent);
 }
 
 void Representation::Representation::initSelector()
@@ -181,7 +181,7 @@ void Representation::Representation::initSelector()
         this->savedDefaultSelector = std::move(Selector::selectorFactory());
         this->setSelector(*this->savedDefaultSelector);
     }
-    this->getSelector().setManager(*this->manager);
+    this->getSelector().setPopulation(*this->population);
     this->getSelector().setNbAgents(this->params->nbAgents);
 }
 
@@ -194,7 +194,7 @@ void Representation::Representation::initRepresentation(RNG::RNG& rng, const Out
     this->outputs = std::make_unique<Output::OutputHandler>(outputs);
     this->graph = graph;
 
-    this->initManager();
+    this->initPopulation();
 
     this->initSelector();
 
@@ -207,7 +207,7 @@ void Representation::Representation::initRepresentation(RNG::RNG& rng, const Out
         if(!aggregatedRepresentation.isInit()) {
             throw std::runtime_error("Aggregated representation is not initialize yet. It should be.");
         }
-        this->manager->addAggregatedManager(aggregatedRepresentation.getManagerCst());
+        this->population->addAggregatedPopulation(aggregatedRepresentation.getPopulationCst());
     }
 
     // Clear the best agent in the selector
@@ -235,49 +235,49 @@ void Representation::Representation::clearRepresentation()
     for(const auto& subRepresentation: subRepresentations){
         subRepresentation->clearRepresentation();
     }
-    if(this->manager != nullptr) {
-        this->manager->clearAgents(*this->graph);
+    if(this->population != nullptr) {
+        this->population->clearAgents(*this->graph);
     }
     this->mutator = nullptr;
     this->selector = std::nullopt;
     this->savedDefaultSelector = nullptr;
-    this->manager = nullptr;
+    this->population = nullptr;
     this->init = false;
 }
 
 void Representation::Representation::initPopulation(RNG::RNG& rng)
 {
     // Initialize a random population
-    this->mutator->initRandomPopulation(*this->graph, *this->manager,
+    this->mutator->initRandomPopulation(*this->graph, *this->population,
                                         *this->params, rng);
 }
 
 void Representation::Representation::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
-    this->mutator->mutatePopulation(*this->graph, *this->manager, *this->params, rng, maxNbThreads);
+    this->mutator->mutatePopulation(*this->graph, *this->population, *this->params, rng, maxNbThreads);
     this->getSelector().updateAfterPopulate(*graph);
 
     this->clearUnusedSubAgents();
 }
 
-std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>> Representation::Representation::getUsedSubAgents() const {
+std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>> Representation::Representation::getUsedSubAgents() const {
     // By default, return an empty map, meaning that no sub-agent is used by the representation.
     if(this->subRepresentations.size() > 0){
         throw std::runtime_error("Representation::getUsedSubAgents: This method should be override by representations with sub-representations to return the used sub-agents.");
     }
-    return std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>();
+    return std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>();
 }
 
 void Representation::Representation::clearUnusedSubAgents() {
-    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = this->getUsedSubAgents();
+    std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> usedSubAgents = this->getUsedSubAgents();
     
     for(const auto& subRepresentation: subRepresentations){
         subRepresentation->clearUnusedSubAgents();
 
-        auto subRepresentationAgents = subRepresentation->getManager().getAgents();
-        for(const Agent& agent: subRepresentationAgents){
+        auto subRepresentationAgents = subRepresentation->getPopulation().getAgents();
+        for(const Individual& agent: subRepresentationAgents){
             if(usedSubAgents[subRepresentation->getRepresentationID()].find(agent) == usedSubAgents[subRepresentation->getRepresentationID()].end()){
-                subRepresentation->manager->deleteAgent(agent, *this->graph);
+                subRepresentation->population->deleteAgent(agent, *this->graph);
             }
         }
     }
@@ -285,7 +285,7 @@ void Representation::Representation::clearUnusedSubAgents() {
 
 
 
-std::shared_ptr<Representation::Job> Representation::Representation::createJob(const Agent& agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
+std::shared_ptr<Representation::Job> Representation::Representation::createJob(const Individual& agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
 {
     if (!this->containsAgent(agent)) {
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with an invalid agent or an agent not belonging to this representation.");
@@ -299,7 +299,7 @@ void Representation::Representation::updateAfterEvaluation(const std::vector<std
     // By default, do nothing
 }
 
-void Representation::Representation::linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
+void Representation::Representation::linkAgentVertex(const Individual& agent, const EvoGraph::Vertex& vertex)
 {
     throw std::runtime_error("Representation::linkAgentVertex: This method should not be called without being override by the specific representation.");
 }
@@ -314,13 +314,13 @@ void Representation::Representation::exportBestAgentCodeGen(const std::string& f
     }
 }
 
-void Representation::Representation::exportSpecificAgentCodeGen(const Agent& agent, const std::string& filename, const std::string& path)
+void Representation::Representation::exportSpecificAgentCodeGen(const Individual& agent, const std::string& filename, const std::string& path)
 {
     if(this->containsAgent(agent)) {
         std::string isDash = (filename == "") ? "_" : "";
         std::string filenameAlgo = filename + isDash + this->representationName + std::to_string(this->representationID);
 
-        std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> subAgents;
+        std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> subAgents;
         std::vector<std::string> subAlgoNames;
         for(const auto& subAlgo: this->subRepresentations) {
             subAgents.insert({subAlgo->getRepresentationID(), {}});
@@ -339,9 +339,9 @@ void Representation::Representation::exportSpecificAgentCodeGen(const Agent& age
     }
 }
 
-void Representation::Representation::exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Agent>> agents,const std::string& filename, const std::string& path)
+void Representation::Representation::exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Individual>> agents,const std::string& filename, const std::string& path)
 {
-    for(const Agent& agent: agents) {
+    for(const Individual& agent: agents) {
         if(!this->containsAgent(agent)) {
             throw std::runtime_error("Representation::exportSpecificAgentsCodeGen: unknown agent.");
         }
@@ -349,7 +349,7 @@ void Representation::Representation::exportSpecificAgentsCodeGen(std::set<std::r
     std::string isDash = (filename == "") ? "_" : "";
     std::string filenameAlgo = filename + isDash + this->representationName + std::to_string(this->representationID);
 
-    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> subAgents;
+    std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> subAgents;
     std::vector<std::string> subAlgoNames;
     for(const auto& subAlgo: this->subRepresentations) {
         subAgents.insert({subAlgo->getRepresentationID(), {}});
@@ -382,7 +382,7 @@ void Representation::Representation::exportBestAgentDotFile(const char* filePath
     }
 }
 
-void Representation::Representation::exportSpecificAgentDotFile(const Agent& agent, const char* filePath)
+void Representation::Representation::exportSpecificAgentDotFile(const Individual& agent, const char* filePath)
 {
     if(this->containsAgent(agent)) {
         File::GraphDotExporter exporter;

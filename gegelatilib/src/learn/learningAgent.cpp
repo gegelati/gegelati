@@ -150,7 +150,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     }
 
     // Get the current agent and the current representation
-    const Representation::Agent& agent = job.getAgent();
+    const Representation::Individual& agent = job.getAgent();
     const Selector::Selector& selector = this->currentExecutedRepresentation->getSelector();
 
 
@@ -248,11 +248,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     return evaluationResult;
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
 Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
         results;
 
 
@@ -269,7 +269,7 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
 }
 
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
 Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
@@ -280,11 +280,11 @@ Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNum
         throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
         results;
 
     std::unique_ptr<Representation::ExecutionEngine> execEngine =
-        this->currentExecutedRepresentation->getManager().createExecutionEngine();
+        this->currentExecutedRepresentation->getPopulation().createExecutionEngine();
 
     auto jobs = this->makeJobs(mode);
     for(auto job: jobs) {
@@ -305,13 +305,13 @@ Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNum
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
-    const Representation::Agent& agent)
+    const Representation::Individual& agent)
 {
     const Representation::Representation& representation = this->getRepresentationAt(agent.getRepresentationID());
 
     // Create the execution engine of the agent.
     std::unique_ptr<Representation::ExecutionEngine> execEngine =
-        representation.getManagerCst().createExecutionEngine();
+        representation.getPopulationCst().createExecutionEngine();
 
     // Create and evaluate the job
     auto job = representation.createJob(agent, mode, this->rng);
@@ -324,7 +324,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 
 void Learn::LearningAgent::launchRepresentationsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Representation::Agent>>& results,
+                          std::reference_wrapper<const Representation::Individual>>& results,
             RNG::RNG& rng)
 {
 
@@ -341,14 +341,14 @@ void Learn::LearningAgent::launchRepresentationsSelection(
 
     } else {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            std::reference_wrapper<const Representation::Agent>>
+            std::reference_wrapper<const Representation::Individual>>
             resultsCopy(results);
 
         results.clear();
 
         for(const auto& pair: representations){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Representation::Agent>>
+                        std::reference_wrapper<const Representation::Individual>>
                 resultsAlgo;
             
             for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
@@ -395,7 +395,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     // Does a validation or not according to the parameter doValidation
     if (params->doValidation) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::reference_wrapper<const Representation::Agent>>
+                      std::reference_wrapper<const Representation::Individual>>
             validationResults;
 
         if (generationNumber % params->stepValidation == 0 ||

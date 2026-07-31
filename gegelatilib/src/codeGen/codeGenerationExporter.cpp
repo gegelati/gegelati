@@ -131,7 +131,7 @@ void CodeGen::CodeGenerationExporter::initActivationFunction(const Representatio
     fileMain << "\t}\n}\n" << std::endl;
 }
 
-void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Agent& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Individual& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents) 
 {
     
     fileMainH 
@@ -170,12 +170,12 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Agen
         << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
 
     // Print the agent by calling representation.printAgent
-    std::set<std::reference_wrapper<const Representation::Agent>> agents{agent};
+    std::set<std::reference_wrapper<const Representation::Individual>> agents{agent};
     representation.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
 }
 
 
-void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapper<const Representation::Agent>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapper<const Representation::Individual>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents) 
 {
 
     // If do need activation function
@@ -192,7 +192,7 @@ void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapp
         }
     }
 
-    for(const Representation::Agent& agent: agents) {
+    for(const Representation::Individual& agent: agents) {
         fileMainH
             << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
     }

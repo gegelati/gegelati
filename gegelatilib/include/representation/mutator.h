@@ -6,8 +6,8 @@
 #include <string>
 #include <array>
 
-#include "representation/agent.h"
-#include "representation/agentManager.h"
+#include "representation/individual.h"
+#include "representation/population.h"
 #include "mutator/rng.h"
 #include "representation/repParameters.h"
 #include "selector/selector.h"
@@ -57,12 +57,12 @@ namespace Representation {
          * \brief Update the context used by the TPGMutator to populate the Graph.
          * 
          * \param[in] graph the Graph.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void updateSpecificContext(
-            EvoGraph::Graph& graph, AgentManager& manager,
+            EvoGraph::Graph& graph, Population& population,
             const RepresentationParameters& params,
             RNG::RNG& rng);
 
@@ -99,7 +99,7 @@ namespace Representation {
          * This method should be call before initializing the population.
          * 
          * \param[in] params the Parameters for the mutation.
-         * \param[in] outputs the OutputHandler of the manager.
+         * \param[in] outputs the OutputHandler of the population.
          */
         virtual bool isConfigurationValid(const RepresentationParameters& params, const Output::OutputHandler& outputs) const = 0;
 
@@ -108,7 +108,7 @@ namespace Representation {
          * 
          * This methods created only the action vertices that does not already exist in the graph
          * 
-         * The action vertices are based on the outputs attribute of the manager. 
+         * The action vertices are based on the outputs attribute of the population. 
          * If the outputs contain a single discrete output, an action vertex for each takeable output value is created.
          * If the outputs contain multiple discrete or continuous outputs, an action vertex is created for each output.
          * 
@@ -123,43 +123,43 @@ namespace Representation {
          * \brief Initialize a random population.
          *
          * \param[in,out] graph the initialized Graph.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const RepresentationParameters& params, RNG::RNG& rng) = 0;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) = 0;
 
         /**
-         * \brief Initialize a random Agent.
+         * \brief Initialize a random Individual.
          *
          * \param[in,out] graph the Graph.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual const Agent& initRandomAgent(EvoGraph::Graph& graph, AgentManager& manager, const RepresentationParameters& params, RNG::RNG& rng);
+        virtual const Individual& initRandomAgent(EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng);
 
         
         /**
-         * \brief Initialize a random Agent.
+         * \brief Initialize a random Individual.
          *
          * \param[in] agent initialized.
          * \param[in,out] graph the Graph.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void initRandomSpecificAgent(
-            const Agent& agent,
+            const Individual& agent,
             EvoGraph::Graph& graph,
-            AgentManager& manager,
+            Population& population,
             const RepresentationParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate the whole population, by dupplicating and adding new agents from the current representation.
          * 
          * \param[in] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in] maxNbThreads Integer parameter controlling the number of
@@ -170,42 +170,42 @@ namespace Representation {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         virtual void mutatePopulation(
-            EvoGraph::Graph& graph, AgentManager& manager,
+            EvoGraph::Graph& graph, Population& population,
             const RepresentationParameters& params,
             RNG::RNG& rng, uint64_t maxNbThreads = std::thread::hardware_concurrency());
         /**
          * \brief mutate a specific agent of an representation within a population
          * 
-         * \param[in,out] agents the Agent to crossover.
+         * \param[in,out] agents the Individual to crossover.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] newSubAgents vector of new agents of sub representation created while crossing over the agents
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
         ) {};
 
         /**
          * \brief mutate a specific agent of an representation within a population
          * 
-         * \param[in,out] agent the Agent to mutate.
+         * \param[in,out] agent the Individual to mutate.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng) = 0;
+            const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate new sub agents of sub representations created during the evolution process of the current representation
          * 
          * \param[in] agents vector of new agents of sub representation created while mutating the agent
          * \param[in,out] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] population the population to change the agents.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in] maxNbThreads Integer parameter controlling the number of
@@ -215,7 +215,7 @@ namespace Representation {
          *   - `0` and `1`: Do not use parallelism.
          *   - `n > 1`: Set the number of threads explicitly.
          */
-        virtual void mutateSubAgents(std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, AgentManager& manager, const RepresentationParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
+        virtual void mutateSubAgents(std::vector<std::reference_wrapper<const Individual>>& agents, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
     };
 }; // namespace Mutator
 

@@ -31,7 +31,7 @@ namespace Selector {
          * it. The Vertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<std::reference_wrapper<const Representation::Agent>> agentsToDelete;
+        std::set<std::reference_wrapper<const Representation::Individual>> agentsToDelete;
 
       public:
         /**
@@ -69,7 +69,7 @@ namespace Selector {
         virtual void doSelection(
             EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Representation::Agent>>& results,
+                          std::reference_wrapper<const Representation::Individual>>& results,
             RNG::RNG& rng) override;
 
         /**
@@ -77,7 +77,7 @@ namespace Selector {
          *
          * \param[in] vertex Vertex added to the vertices to remove
          */
-        void addToVerticesToDelete(const Representation::Agent& vertex);
+        void addToVerticesToDelete(const Representation::Individual& vertex);
 
         /**
          * \brief Specialization of updateContext for tournament purposes
@@ -101,7 +101,7 @@ namespace Selector {
         /**
          * \brief getter of the verticesToDelete set.
          */
-        virtual const std::set<std::reference_wrapper<const Representation::Agent>>& getAgentsToDelete();
+        virtual const std::set<std::reference_wrapper<const Representation::Individual>>& getAgentsToDelete();
     };
 }; // namespace Selector
 

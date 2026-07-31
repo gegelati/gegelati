@@ -5,6 +5,6 @@ void CounterReset::counterReset()
 {
     EvoGraph::Vertex::resetVertexIDCounter();
     EvoGraph::Edge::resetEdgeIDCounter();
-    Representation::Agent::resetAgentIDCounter();
+    Representation::Individual::resetAgentIDCounter();
     Representation::Representation::resetRepresentationIDCounter();
 }

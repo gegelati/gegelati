@@ -9,11 +9,11 @@
 struct CounterReset;
 namespace Representation {
     /**
-     * \brief Abstract class representing an Agent used by an Representation.
+     * \brief Abstract class representing an Individualidual used by an Representation.
      * 
      * Available representations are TPG, MAPLE, and LGP
      */
-    class Agent
+    class Individual
     {
     protected:
         
@@ -40,15 +40,15 @@ namespace Representation {
     public:
 
         /// Default polymorphic destructor
-        virtual ~Agent() = default;
+        virtual ~Individual() = default;
 
 
         /**
-         * \brief Constructor for the Agent.
+         * \brief Constructor for the Individual.
          * 
-         * \param[in] representationID id of the representation used by the Agent.
+         * \param[in] representationID id of the representation used by the Individual.
          */
-        Agent(uint64_t representationID) : representationID(representationID), agentID(incrementeCounter()) {};
+        Individual(uint64_t representationID) : representationID(representationID), agentID(incrementeCounter()) {};
 
         /**
          * \brief Return the id of the representation.
@@ -66,41 +66,41 @@ namespace Representation {
         virtual bool isValid() const {return true;};
     
         /**
-         * \brief Get the unique identifier of the Agent.
+         * \brief Get the unique identifier of the Individual.
          *
-         * \return the integer ID of the Agent.
+         * \return the integer ID of the Individual.
          */
         virtual uint64_t getAgentID() const;
 
         /**
-         * \brief Set a new unique identifier to the Agent.
+         * \brief Set a new unique identifier to the Individual.
          *
-         * \param[in] newID the new integer ID to set to the Agent.
+         * \param[in] newID the new integer ID to set to the Individual.
          */
         virtual void setAgentID(uint64_t newID);
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
-        Agent(const Agent&) = delete;
-        Agent& operator=(const Agent&) = delete;
+        Individual(const Individual&) = delete;
+        Individual& operator=(const Individual&) = delete;
     };
     
     /**
-     * \brief Comparison function to enable sorting of Agent with
+     * \brief Comparison function to enable sorting of Individual with
      * STL.
      */
-    bool operator<(const Agent& a, const Agent& b);
+    bool operator<(const Individual& a, const Individual& b);
 
     /**
-     * \brief Comparison function to enable sorting of Agent with
+     * \brief Comparison function to enable sorting of Individual with
      * STL.
      */
-    bool operator==(const Agent& a, const Agent& b);
+    bool operator==(const Individual& a, const Individual& b);
 
     /**
-     * \brief Comparison function to enable sorting of Agent with
+     * \brief Comparison function to enable sorting of Individual with
      * STL.
      */
-    bool operator!=(const Agent& a, const Agent& b);
+    bool operator!=(const Individual& a, const Individual& b);
 }; // namespace Representation
 
 #endif

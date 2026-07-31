@@ -45,7 +45,7 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
     const Selector::Selector& selector = this->representation.getSelectorCst();
-    const Representation::Agent& bestAgent = *selector.getBestAgent().first;
+    const Representation::Individual& bestAgent = *selector.getBestAgent().first;
     if (this->lastBestAgentID == -1 || bestAgent.getAgentID() != this->lastBestAgentID) {
         // Update the best root befor loggin it PolicyStats
         this->lastBestAgentID = bestAgent.getAgentID();

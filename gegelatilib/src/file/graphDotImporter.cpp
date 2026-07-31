@@ -6,7 +6,7 @@
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
- * artificial intelligence based on Tangled Agent Graphs (TPGs).
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software. You can use,
@@ -222,11 +222,11 @@ void File::GraphDotImporter::readAgent(std::smatch& matches) {
         uint64_t representationID = std::stoi(matches[3]);
         
         Representation::Representation& representation = this->getRepresentation(representationID);
-        const Representation::Agent& agent = representation.readAgent(matches);
+        const Representation::Individual& agent = representation.readAgent(matches);
 
         this->readAgentID.insert({std::stoi(matches[1]), agent});
 
-        representation.getManager().setNewAgentID(agent, agentID);
+        representation.getPopulation().setNewAgentID(agent, agentID);
     }
 }
 
@@ -334,7 +334,7 @@ void File::GraphDotImporter::importGraph(const char* filePath)
     }
 
     // clear every storing objects
-    representation.getManager().clearAgents(this->graph);
+    representation.getPopulation().clearAgents(this->graph);
     this->readVertexID.clear();
     this->readEdgeID.clear();
     this->readAgentID.clear();

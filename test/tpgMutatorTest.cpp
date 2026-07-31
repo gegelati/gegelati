@@ -75,11 +75,11 @@ class TpgMutatorTest : public ::testing::Test
     Parameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
     std::shared_ptr<Representation::TPG::TPGArchive> archive;
-    std::shared_ptr<Representation::LGP::LGPManager> lgpManager;
+    std::shared_ptr<Representation::LGP::LGPPopulation> lgpPopulation;
     std::shared_ptr<Representation::LGP::LGPMutator> lgpMutator;
-    const Representation::Agent* lgpAgent;
+    const Representation::Individual* lgpIndividual;
 
-    std::shared_ptr<Representation::TPG::TPGManager> tpgManager;
+    std::shared_ptr<Representation::TPG::TpgPopulation> tpgPopulation;
     std::shared_ptr<Representation::TPG::TPGMutator> tpgMutator;
     Output::OutputHandler* actions;
     Output::OutputHandler* lgpOutput;
@@ -126,15 +126,15 @@ class TpgMutatorTest : public ::testing::Test
         graph = std::make_shared<EvoGraph::Graph>();
 
         
-        lgpManager = std::make_shared<Representation::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)0);
-        lgpAgent = &lgpManager->createAgent(*graph);
+        lgpPopulation = std::make_shared<Representation::LGP::LGPPopulation>(*e, *lgpOutput, (uint64_t)0);
+        lgpIndividual = &lgpPopulation->createAgent(*graph);
 
-        tpgManager = std::make_shared<Representation::TPG::TPGManager>(*actions, (uint64_t)1);
-        tpgManager->addSubManager(*lgpManager);
-        tpgManager->setProgramRepresentationID((uint64_t)0);
+        tpgPopulation = std::make_shared<Representation::TPG::TpgPopulation>(*actions, (uint64_t)1);
+        tpgPopulation->addSubPopulation(*lgpPopulation);
+        tpgPopulation->setProgramRepresentationID((uint64_t)0);
 
         selector = std::make_shared<Selector::TruncationSelector>(std::make_unique<Selector::SelectionParameters>(params.selection));
-        selector->setManager(*tpgManager);
+        selector->setPopulation(*tpgPopulation);
         selector->setNbAgents(params.representation.nbAgents);
 
         lgpMutator = std::make_shared<Representation::LGP::LGPMutator>(*selector, (uint64_t)0);
@@ -185,7 +185,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     params.representation.lgp.maxConstValue = 1;
 
     ASSERT_NO_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng))
+        tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng))
         << "TPG Initialization failed.";
     auto vertexSet = graph->getVertices();
     // Check number or vertex, roots, actions, teams, edges
@@ -214,16 +214,16 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
-    std::set<std::reference_wrapper<const Representation::Agent>> programs;
+    std::set<std::reference_wrapper<const Representation::Individual>> programs;
     for (const auto& edge : graph->getEdges()) {
-        const Representation::Agent& program = edge.get().getProgram();
+        const Representation::Individual& program = edge.get().getProgram();
             programs.insert(program);
     }
     ASSERT_EQ(programs.size(), params.representation.nbAgents * 2)
         << "Number of distinct program in the TPG is incorrect.";
     // Check that no team has the same program twice
     for (auto team :graph->getRootVertices()) {
-    std::set<std::reference_wrapper<const Representation::Agent>> teamPrograms;
+    std::set<std::reference_wrapper<const Representation::Individual>> teamPrograms;
         std::for_each(team.get().getOutgoingEdges().begin(),
                       team.get().getOutgoingEdges().end(),
                       [&teamPrograms](const EvoGraph::Edge& edge) {
@@ -236,13 +236,13 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     // Cover bad parameterization error
     params.representation.tpg.maxInitOutgoingEdges = 6;
     ASSERT_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng),
+        tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     params.representation.tpg.maxInitOutgoingEdges = 0;
     actions = new Output::OutputHandler(1);;
     ASSERT_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng),
+        tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 }
@@ -451,12 +451,12 @@ TEST_F(TpgMutatorTest, TPGMutatorRemoveRandomEdge)
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
     const EvoGraph::Team& vertex2 = graph->addNewTeam();
     const EvoGraph::Action& vertex3 = graph->addNewAction(1);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
-    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpAgent);
-    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpIndividual);
+    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex0, vertex3, *lgpIndividual);
 
     for(auto vertex: graph->getVertices()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
 
     RNG::RNG rng;
@@ -490,19 +490,19 @@ TEST_F(TpgMutatorTest, TPGMutatorAddRandomEdge)
     const EvoGraph::Action& vertex4 = graph->addNewAction(2);
 
 
-    graph->addNewEdge(vertex0, vertex1, *lgpAgent);
-    graph->addNewEdge(vertex0, vertex2, *lgpAgent);
-    graph->addNewEdge(vertex0, vertex3, *lgpAgent);
-    graph->addNewEdge(vertex2, vertex4, *lgpAgent);
+    graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
+    graph->addNewEdge(vertex0, vertex2, *lgpIndividual);
+    graph->addNewEdge(vertex0, vertex3, *lgpIndividual);
+    graph->addNewEdge(vertex2, vertex4, *lgpIndividual);
 
     for(auto vertex: graph->getVertices()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
     
 
     RNG::RNG rng;
     rng.setSeed(0);
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgPopulation, params.representation, rng);
     // Run the add
     ASSERT_NO_THROW(
         tpgMutator->addRandomEdge(*graph, vertex2, rng))
@@ -528,18 +528,18 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateEdgeDestination)
 
 
     for(auto vertex: graph->getRootTeams()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
 
     params.representation.tpg.pEdgeDestinationIsAction = 0.5;
 
     RNG::RNG rng;
     rng.setSeed(2);
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgPopulation, params.representation, rng);
 
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
-    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex3, *lgpIndividual);
 
     ASSERT_NO_THROW(tpgMutator->mutateEdgeDestination(
         *graph, edge1, params.representation, rng));
@@ -560,14 +560,14 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     rng.setSeed(0);
 
     // Init a TPG
-    lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params.representation, rng);
+    lgpMutator->initRandomSpecificAgent(*lgpIndividual, *graph, *lgpPopulation, params.representation, rng);
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
 
 
     for(auto vertex: graph->getVertices()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
     
     params.representation.lgp.maxProgramSize = 96;
@@ -576,8 +576,8 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    execEngine->setExecutedAgent(tpgPopulation->getAgents().at(0));
     execEngine->execute();
 
     // Mutate (params selected for code coverage)
@@ -587,12 +587,12 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     params.representation.lgp.pSwap = 1.0;
     params.representation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgPopulation, params.representation, rng);
 
     ASSERT_NO_THROW(tpgMutator->mutateOutgoingEdge(
-        *graph, edge0, *tpgManager, newPrograms, params.representation, rng));
+        *graph, edge0, *tpgPopulation, newPrograms, params.representation, rng));
 }
 
 /*
@@ -744,7 +744,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction)
     EvoGraph::Graph tpg(ce);
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpIndividual);
     const EvoGraph::Edge& edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
@@ -818,7 +818,7 @@ TEST_F(TpgMutatorTest, TPGMutatorOutgoingEdgeMutateAction)
     EvoGraph::Graph tpg(ce);
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpIndividual);
     const EvoGraph::Edge& edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
@@ -863,15 +863,15 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
     const EvoGraph::Action& vertex2 = graph->addNewAction(1);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
-    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpIndividual);
     const EvoGraph::Action& vertex3 = graph->addNewAction(2);
     const EvoGraph::Team& vertex4 = graph->addNewTeam();
-    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex4, vertex3, *lgpAgent);
-    const EvoGraph::Edge& edge3 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
+    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex4, vertex3, *lgpIndividual);
+    const EvoGraph::Edge& edge3 = graph->addNewEdge(vertex0, vertex3, *lgpIndividual);
 
     for(auto vertex: graph->getVertices()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
     
     params.representation.lgp.maxProgramSize = 96;
@@ -889,22 +889,22 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    execEngine->setExecutedAgent(tpgPopulation->getAgents().at(0));
     execEngine->execute();
 
 
-    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgPopulation, params.representation, rng);
 
-    auto& newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), *graph);
+    auto& newAgent = tpgPopulation->copyAgent(tpgPopulation->getAgents().at(0), *graph);
 
     // Test the function in normal conditions
     // (only edge2 can be part of "preExistingEdges" since all other edges are
     // outgoing from vertex0, which would mean they are not pre-existing in
     // the mutation process.)
-    ASSERT_NO_THROW(tpgMutator->mutateAgent(newAgent, *graph, *tpgManager,
+    ASSERT_NO_THROW(tpgMutator->mutateAgent(newAgent, *graph, *tpgPopulation,
                                             newPrograms, params.representation, rng))
         << "Mutate team should not fail in these conditions.";
 
@@ -920,10 +920,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     // Init a TPG
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
-    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpIndividual);
 
     for(auto vertex: graph->getVertices()){
-        tpgManager->createAgent(vertex);
+        tpgPopulation->createAgent(vertex);
     }
     
     // Init its program and fill the archive
@@ -933,8 +933,8 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    execEngine->setExecutedAgent(tpgPopulation->getAgents().at(0));
     execEngine->execute();
 
 
@@ -945,22 +945,22 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.representation.lgp.pSwap = 1.0;
     params.representation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgPopulation, params.representation, rng);
 
-    tpgMutator->mutateOutgoingEdge(*graph, edge0, *tpgManager, newPrograms,
+    tpgMutator->mutateOutgoingEdge(*graph, edge0, *tpgPopulation, newPrograms,
                                             params.representation, rng);
     
     tpgMutator->setArchive(*archive);
     ASSERT_NO_THROW(tpgMutator->mutateProgramAgentAgainstArchive(
-        newPrograms.front(), *graph, *lgpManager, params.representation, rng))
+        newPrograms.front(), *graph, *lgpPopulation, params.representation, rng))
         << "Mutating a Program behavior failed unexpectedly.";
 
     // Check the unicity against the Representation::TPG::TPGArchive
     // Verify new program uniqueness
     
-    execEngine = lgpManager->createExecutionEngine({}, true);
+    execEngine = lgpPopulation->createExecutionEngine({}, true);
     execEngine->setExecutedAgent(newPrograms.front());
     double result = execEngine->execute().at(0);
     std::map<size_t, double> hashesAndResults = {
@@ -994,23 +994,23 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     params.representation.lgp.minConstValue = 0;
     params.representation.lgp.maxConstValue = 10;
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    for (auto& agent :tpgManager->getAgents()) {
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    for (auto& agent :tpgPopulation->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Representation::Agent>> newAgents;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
+        newAgents.emplace_back(lgpPopulation->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
     ASSERT_NO_THROW(tpgMutator->mutateSubAgents(
-        newAgents, *graph, *tpgManager, params.representation, rng, 0))
+        newAgents, *graph, *tpgPopulation, params.representation, rng, 0))
         << "Program behavior mutation failed (sequentially).";
 }
 
@@ -1038,23 +1038,23 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     params.representation.lgp.minConstValue = 0;
     params.representation.lgp.maxConstValue = 10;
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    for (auto& agent :tpgManager->getAgents()) {
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    for (auto& agent :tpgPopulation->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Representation::Agent>> newAgents;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
+        newAgents.emplace_back(lgpPopulation->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
     ASSERT_NO_THROW(tpgMutator->mutateSubAgents(
-        newAgents, *graph, *tpgManager, params.representation, rng, 4))
+        newAgents, *graph, *tpgPopulation, params.representation, rng, 4))
         << "Program behavior mutation failed (Parallelism).";
 }
 
@@ -1083,35 +1083,35 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
 
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    for (auto& agent :tpgManager->getAgents()) {
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    for (auto& agent :tpgPopulation->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
     }
 
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Representation::Agent>> newAgentsSequential;
-    std::vector<std::reference_wrapper<const Representation::Agent>> newAgentsParallel;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newAgentsSequential;
+    std::vector<std::reference_wrapper<const Representation::Individual>> newAgentsParallel;
     for (auto& edge :graph->getEdges()) {
-        newAgentsSequential.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
-        newAgentsParallel.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
+        newAgentsSequential.emplace_back(lgpPopulation->copyAgent(edge.get().getProgram(), *graph));
+        newAgentsParallel.emplace_back(lgpPopulation->copyAgent(edge.get().getProgram(), *graph));
     }
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(
-        newAgentsSequential, *graph, *tpgManager, params.representation, rng, 0);
+        newAgentsSequential, *graph, *tpgPopulation, params.representation, rng, 0);
 
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(
-        newAgentsParallel, *graph, *tpgManager, params.representation, rng, 4);
+        newAgentsParallel, *graph, *tpgPopulation, params.representation, rng, 4);
 
     // Check determinism
     // Using nb lines of programs
     for (auto i = 0; i < newAgentsSequential.size(); i++) {
-        ASSERT_EQ(dynamic_cast<const Representation::LGP::LGPAgent&>(newAgentsSequential.at(i).get()).getNbLines(),
-                  dynamic_cast<const Representation::LGP::LGPAgent&>(newAgentsParallel.at(i).get()).getNbLines())
+        ASSERT_EQ(dynamic_cast<const Representation::LGP::LgpIndividual&>(newAgentsSequential.at(i).get()).getNbLines(),
+                  dynamic_cast<const Representation::LGP::LgpIndividual&>(newAgentsParallel.at(i).get()).getNbLines())
             << "Different number of line in mutatedPrograms.";
     }
 
@@ -1143,28 +1143,28 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     params.representation.lgp.maxConstValue = 10;
 
     selector->setNbAgents(params.representation.nbAgents);
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine({}, true);
-    for (auto& agent :tpgManager->getAgents()) {
+    auto execEngine = tpgPopulation->createExecutionEngine({}, true);
+    for (auto& agent :tpgPopulation->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
     }
 
     // Check the correct execution
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        *graph, *tpgManager, params.representation, rng, 0))
+        *graph, *tpgPopulation, params.representation, rng, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbAgents);
-    ASSERT_EQ(tpgManager->getAgents().size(), params.representation.nbAgents);
+    ASSERT_EQ(tpgPopulation->getAgents().size(), params.representation.nbAgents);
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
-    auto tpgManager2 = std::make_shared<Representation::TPG::TPGManager>(nbActions, 1);
-    tpgManager2->addSubManager(*lgpManager);
+    auto tpgPopulation2 = std::make_shared<Representation::TPG::TpgPopulation>(nbActions, 1);
+    tpgPopulation2->addSubPopulation(*lgpPopulation);
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        *graph2, *tpgManager2, params.representation, rng, 0))
+        *graph2, *tpgPopulation2, params.representation, rng, 0))
         << "Populating an empty TPG failed.";
 }
 

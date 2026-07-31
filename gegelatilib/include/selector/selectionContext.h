@@ -3,7 +3,7 @@
 #ifndef SELECTION_CONTEXT_H
 #define SELECTION_CONTEXT_H
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "evoGraph/graph.h"
 
 namespace Selector {
@@ -19,12 +19,12 @@ namespace Selector {
 
         /// @brief vector sjared pointer of agent that are clonable by the
         /// Mutator to fill the new population.
-        std::vector<std::reference_wrapper<const Representation::Agent>> agentsClonable;
+        std::vector<std::reference_wrapper<const Representation::Individual>> agentsClonable;
 
 
         /// @brief vector of shared pointer of agent that can be new
         /// destination for the new agents created by the Mutator.
-        std::vector<std::reference_wrapper<const Representation::Agent>> preExistingAgents;
+        std::vector<std::reference_wrapper<const Representation::Individual>> preExistingAgents;
 
         /// @brief number of agent to be created by the mutator
         uint64_t nbAgentsToCreate;

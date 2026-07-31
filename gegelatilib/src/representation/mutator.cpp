@@ -17,7 +17,7 @@ Representation::Mutator& Representation::Mutator::getSubMutator(uint64_t represe
 }
 
 void Representation::Mutator::updateSpecificContext(
-    EvoGraph::Graph& graph, AgentManager& manager,
+    EvoGraph::Graph& graph, Population& population,
     const RepresentationParameters& params,
     RNG::RNG& rng)
 {
@@ -25,8 +25,8 @@ void Representation::Mutator::updateSpecificContext(
 
     // Update the context of the subMutators
     for(auto subMutPair: this->subMutators){
-        auto& subManager = manager.getSubManager(subMutPair.first);
-        subMutPair.second.get().updateSpecificContext(graph, subManager, params, rng);
+        auto& subPopulation = population.getSubPopulation(subMutPair.first);
+        subMutPair.second.get().updateSpecificContext(graph, subPopulation, params, rng);
     }
 }
 
@@ -64,35 +64,35 @@ std::vector<std::reference_wrapper<const EvoGraph::Action>> Representation::Muta
     return actions;
 }
 
-const Representation::Agent& Representation::Mutator::initRandomAgent(
+const Representation::Individual& Representation::Mutator::initRandomAgent(
     EvoGraph::Graph& graph,
-    AgentManager& manager,
+    Population& population,
     const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const Representation::Agent& agent = manager.createAgent(graph);
-    this->initRandomSpecificAgent(agent, graph, manager, params, rng);
+    const Representation::Individual& agent = population.createAgent(graph);
+    this->initRandomSpecificAgent(agent, graph, population, params, rng);
     return agent;
 }
 
 void Representation::Mutator::mutatePopulation(
-    EvoGraph::Graph& graph, AgentManager& manager,
+    EvoGraph::Graph& graph, Population& population,
     const RepresentationParameters& params,
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
 
-    this->updateSpecificContext(graph, manager, params, rng);
+    this->updateSpecificContext(graph, population, params, rng);
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (this->currentContext->agentsClonable.size() <= 1) {
         throw std::runtime_error("At least two agents should survive the selection");
     } 
-    std::vector<std::reference_wrapper<const Representation::Agent>> subAgentsClonable1(
+    std::vector<std::reference_wrapper<const Representation::Individual>> subAgentsClonable1(
         this->currentContext->agentsClonable);
 
     // Divide agents clonable into two subVector with half of the agents, randomly
     // selected.
-    std::vector<std::reference_wrapper<const Representation::Agent>> subAgentsClonable2;
+    std::vector<std::reference_wrapper<const Representation::Individual>> subAgentsClonable2;
     for (size_t idx = 0; idx < this->currentContext->agentsClonable.size() / 2; idx++) {
         auto agent = subAgentsClonable1.at(
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
@@ -102,44 +102,44 @@ void Representation::Mutator::mutatePopulation(
     }
 
     // Agents newly created during the evolution that belong to another representation.
-    std::vector<std::reference_wrapper<const Agent>>  newSubAgents;
+    std::vector<std::reference_wrapper<const Individual>>  newSubAgents;
 
     
     // Create the new agents
-    uint64_t nbAgentsToReach = manager.getAgents().size() + this->currentContext->nbAgentsToCreate;
-    while (manager.getAgents().size() < nbAgentsToReach) {
+    uint64_t nbAgentsToReach = population.getAgents().size() + this->currentContext->nbAgentsToCreate;
+    while (population.getAgents().size() < nbAgentsToReach) {
 
         // Clone one random offspring.
         uint64_t clonedRootIndex1 =
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1);
 
-        std::vector<std::reference_wrapper<const Agent>> offsprings;
+        std::vector<std::reference_wrapper<const Individual>> offsprings;
 
-        offsprings.push_back(manager.copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
+        offsprings.push_back(population.copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
 
         // Be sure we have agents in both sub lists, and we still have at least
         // two agents to create
         if (subAgentsClonable2.size() > 0 &&
-            manager.getAgents().size() < nbAgentsToReach - 1) {
+            population.getAgents().size() < nbAgentsToReach - 1) {
 
             uint64_t clonedRootIndex2 =
                 rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
 
             // clone the offset
-            offsprings.push_back(manager.copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
+            offsprings.push_back(population.copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
-            this->crossoverAgents({offsprings.at(0), offsprings.at(1)}, graph, manager, newSubAgents, params, rng);
+            this->crossoverAgents({offsprings.at(0), offsprings.at(1)}, graph, population, newSubAgents, params, rng);
         }
 
         // Do the mutation over the childs
-        for (const Representation::Agent& offspring : offsprings) {
+        for (const Representation::Individual& offspring : offsprings) {
             if (!offspring.isValid()) {
-                manager.deleteAgent(offspring, graph);
+                population.deleteAgent(offspring, graph);
             }
             else {
                 // Apply mutations to the root and increase the number of roots
-                this->mutateAgent(offspring, graph, manager, newSubAgents,
+                this->mutateAgent(offspring, graph, population, newSubAgents,
                                   params, rng);
             }
         }
@@ -147,5 +147,5 @@ void Representation::Mutator::mutatePopulation(
     }
 
     // Mutate the new subAgents.
-    this->mutateSubAgents(newSubAgents, graph, manager, params, rng, maxNbThreads);
+    this->mutateSubAgents(newSubAgents, graph, population, params, rng, maxNbThreads);
 }

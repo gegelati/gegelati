@@ -79,7 +79,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 void Selector::MapElites::MapElitesSelector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>& results,
+                  std::reference_wrapper<const Representation::Individual>>& results,
     RNG::RNG& rng)
 {
 
@@ -100,7 +100,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         std::shared_ptr<const MapElitesDescriptor> descriptor = pair.first;
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
 
-        std::vector<std::reference_wrapper<const Representation::Agent>> verticesToDelete;
+        std::vector<std::reference_wrapper<const Representation::Individual>> verticesToDelete;
 
         size_t numberNewValues = 0;
 
@@ -113,7 +113,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
                 throw std::runtime_error("SelectionMetrics should be castable "
                                          "to MapElitesSelectionMetrics");
             }
-            const Representation::Agent& agent = it->second;
+            const Representation::Individual& agent = it->second;
       
             std::vector<double> descriptorUsed(
                 metrics->getMapDescriptors().at(descriptor));  
@@ -146,7 +146,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
         if (!containAgent) {
             this->removeFromSavedResults(it->second);
-            this->getManager().deleteAgent(it->second, graph);
+            this->getPopulation().deleteAgent(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {
@@ -161,9 +161,9 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     std::unique_ptr<SelectionContext> context = std::move(Selector::Selector::updateContext());
 
     // Get all the vertices in the different archives
-    std::set<std::reference_wrapper<const Representation::Agent>> agentsInAllArchives;
+    std::set<std::reference_wrapper<const Representation::Individual>> agentsInAllArchives;
     for (auto& pair : this->mapEliteArchives) {
-        std::set<std::reference_wrapper<const Representation::Agent>> agentsInArchive =
+        std::set<std::reference_wrapper<const Representation::Individual>> agentsInArchive =
             pair.second->getVerticesInArchive();
         agentsInAllArchives.insert(agentsInArchive.begin(),
                                      agentsInArchive.end());

@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "representation/representation.h"
-#include "representation/lgp/lgpManager.h"
+#include "representation/lgp/lgpPopulation.h"
 #include "representation/lgp/lgpMutator.h"
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 #include "representation/lgp/lgpPolicyStats.h"
 #include "representation/lgp/lgpCodeGenerationEngine.h"
 #include "representation/lgp/environment.h"
@@ -27,8 +27,8 @@ namespace Representation::LGP {
             /// Instruction Set used by the LGPRepresentation
             const Instructions::Set& iSet;
 
-            /// @brief regex use to read an lgpAgent from a .dot file.
-            static const std::string lgpAgentRegex;
+            /// @brief regex use to read an lgpIndividual from a .dot file.
+            static const std::string lgpIndividualRegex;
 
         public:
 
@@ -59,11 +59,11 @@ namespace Representation::LGP {
 
             
             /**
-             * \brief Initialize the managerof the representation
+             * \brief Initialize the populationof the representation
              * 
              * \param[in] outputs outputs needed for the representation.
              */
-            virtual void initManager() override;
+            virtual void initPopulation() override;
 
             /**
              * \brief Initialize the mutator of the representation
@@ -86,25 +86,25 @@ namespace Representation::LGP {
             virtual std::unique_ptr<Representation> copy() const override;
 
             /** 
-             * \brief Inherited method to print a LGPagent.
+             * \brief Inherited method to print a LgpIndividual.
              * 
              * The LGP agent prints the different lines of its program.
              */
-            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            void printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
             
 
             /**
-             * \brief Inherited method to read a LGPAgent.
+             * \brief Inherited method to read a LgpIndividual.
              * 
              * This method will use the current line to get the constant of the agent.
              * Then it will get the next line to read the instruction
              */
-            virtual const Agent& readAgent(std::smatch& matches) override;
+            virtual const Individual& readAgent(std::smatch& matches) override;
 
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
         };
 }; // namespace LGP_Representation
 

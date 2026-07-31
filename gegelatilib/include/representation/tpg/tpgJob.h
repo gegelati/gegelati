@@ -3,8 +3,8 @@
 #define TPG_JOB_H
 
 #include "representation/job.h"
-#include "representation/tpg/tpgAgent.h"
-#include "representation/tpg/tpgManager.h"
+#include "representation/tpg/tpgIndividual.h"
+#include "representation/tpg/tpgPopulation.h"
 
 
 namespace Representation::TPG {
@@ -31,7 +31,7 @@ namespace Representation::TPG {
              * @param[in] idx The index of this job.
              * @param[in] archive The archive associated to this job.
              */
-            TPGJob(const Agent& agent,
+            TPGJob(const Individual& agent,
                 uint64_t idx = 0, std::unique_ptr<TPGArchive> archive = nullptr)
                 : Job(agent, idx), archive(std::move(archive))
             {

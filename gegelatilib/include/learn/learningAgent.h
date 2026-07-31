@@ -252,7 +252,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::reference_wrapper<const Representation::Agent>>
+                              std::reference_wrapper<const Representation::Individual>>
         evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -268,7 +268,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::reference_wrapper<const Representation::Agent>>
+                              std::reference_wrapper<const Representation::Individual>>
         evaluateCurrentRepresentationAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -281,13 +281,13 @@ namespace Learn {
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] agent the evaluated Agent.
-         * \return the averaged EvaluationResult for the given Agent.
+         * \param[in] agent the evaluated Individual.
+         * \return the averaged EvaluationResult for the given Individual.
          * \throws an exception in case the given agent does not exist.
          */
         virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
             uint64_t generationNumber, LearningMode mode,
-            const Representation::Agent& agent);
+            const Representation::Individual& agent);
 
         /**
          * \brief Train the Graph for one generation.
@@ -346,7 +346,7 @@ namespace Learn {
          */
         virtual void launchRepresentationsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Representation::Agent>>& results,
+                          std::reference_wrapper<const Representation::Individual>>& results,
             RNG::RNG& rng);
 
         /**

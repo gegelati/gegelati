@@ -13,22 +13,22 @@ bool Representation::TGP::TGPMutator::isConfigurationValid(const RepresentationP
     return true;
 }
 
-void Representation::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::TGP::TGPMutator::initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     // If first agent, check validity
-    if(manager.getAgents().size() == 1){
-        this->isConfigurationValid(params, manager.getOutputs());
+    if(population.getAgents().size() == 1){
+        this->isConfigurationValid(params, population.getOutputs());
     }
 
-    manager.emptyAgent(agent, graph);
+    population.emptyAgent(agent, graph);
 
-    LGP::LGPManager& lgpManager = dynamic_cast<LGP::LGPManager&>(manager);
-    if(&lgpManager == nullptr){
-        throw std::invalid_argument("TGPMutator::initRandomAgent: the given manager is not a LGPManager.");
+    LGP::LGPPopulation& lgpPopulation = dynamic_cast<LGP::LGPPopulation&>(population);
+    if(&lgpPopulation == nullptr){
+        throw std::invalid_argument("TGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
     }
 
-    const LGP::LGPAgent& lgpAgent = dynamic_cast<const LGP::LGPAgent&>(agent);
-    if(&lgpAgent == nullptr){
+    const LGP::LgpIndividual& lgpIndividual = dynamic_cast<const LGP::LgpIndividual&>(agent);
+    if(&lgpIndividual == nullptr){
         throw std::invalid_argument("TGPMutator::initRandomAgent: the created agent is not a TGPAgent.");
     }
 
@@ -37,17 +37,17 @@ void Representation::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent
     for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.lgp.minConstValue,
                                  params.lgp.maxConstValue)};
-        lgpManager.setConstantAt(agent, i, c_value);
+        lgpPopulation.setConstantAt(agent, i, c_value);
     }
 
     // Insert line, TGP will recursively call this method to create a whole TGP graph.
-    this->insertRandomSubTree(lgpAgent, 0, params.tgp.maxInitDepth, lgpManager, params, rng);
+    this->insertRandomSubTree(lgpIndividual, 0, params.tgp.maxInitDepth, lgpPopulation, params, rng);
 
     // Identify Introns
-    lgpManager.identifyIntrons(agent);
+    lgpPopulation.identifyIntrons(agent);
 }
 
-void Representation::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::TGP::TGPMutator::insertRandomSubTree(const LGP::LgpIndividual& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     std::vector<size_t> lineDestinationIndexToInsert;
     lineDestinationIndexToInsert.push_back(destinationIndexLine);
@@ -57,13 +57,13 @@ void Representation::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& a
         lineDestinationIndexToInsert.erase(lineDestinationIndexToInsert.begin());
         // Always add a line at index 0, because lines are inserted in the opposite order as the distribution
         size_t lineIndex = 0;        
-        const LGP::LGPLine& line = manager.addNewLine(agent, 0);
+        const LGP::LGPLine& line = population.addNewLine(agent, 0);
         
         // If current index is at max depth, don't allows the line to select registers.
         
         bool maxDepthReached = (this->getNodeDepth(destinationIndexLine) == maxDepthTree - 1);
 
-        this->tgpLineMutator.initRandomCorrectLine(manager.getLineForMutation(agent, lineIndex), destinationIndexLine, maxDepthReached, rng);
+        this->tgpLineMutator.initRandomCorrectLine(population.getLineForMutation(agent, lineIndex), destinationIndexLine, maxDepthReached, rng);
 
         for(size_t idx = 0; idx < params.tgp.maxNbEdgePerNode; idx++) {
             // Operand is a register
@@ -75,24 +75,24 @@ void Representation::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& a
 }
 
 void Representation::TGP::TGPMutator::crossoverAgents(
-    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, 
-    AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
+    std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, 
+    Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, 
     const RepresentationParameters& params, RNG::RNG& rng)
 { 
 
     // Casted agent 1 and 2
-    const LGP::LGPAgent& lgpAgent1 = dynamic_cast<const LGP::LGPAgent&>(agents[0].get());
-    const LGP::LGPAgent& lgpAgent2 = dynamic_cast<const LGP::LGPAgent&>(agents[1].get());
-    auto lgpAgents = std::array<std::reference_wrapper<const LGP::LGPAgent>, 2>{lgpAgent1, lgpAgent2};
-    if(&lgpAgent1 == nullptr || &lgpAgent2 == nullptr){
-        throw std::invalid_argument("LGPMutator::crossoverAgents: the given agents are not LGPAgents.");
+    const LGP::LgpIndividual& lgpIndividual1 = dynamic_cast<const LGP::LgpIndividual&>(agents[0].get());
+    const LGP::LgpIndividual& lgpIndividual2 = dynamic_cast<const LGP::LgpIndividual&>(agents[1].get());
+    auto lgpIndividuals = std::array<std::reference_wrapper<const LGP::LgpIndividual>, 2>{lgpIndividual1, lgpIndividual2};
+    if(&lgpIndividual1 == nullptr || &lgpIndividual2 == nullptr){
+        throw std::invalid_argument("LGPMutator::crossoverAgents: the given agents are not LgpIndividuals.");
     }
-    LGP::LGPManager& lgpManager = dynamic_cast<LGP::LGPManager&>(manager);
-    if(&lgpManager == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
+    LGP::LGPPopulation& lgpPopulation = dynamic_cast<LGP::LGPPopulation&>(population);
+    if(&lgpPopulation == nullptr){
+        throw std::invalid_argument("LGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
     }
 
-    if(lgpAgent1.getNbLines() < 2 || lgpAgent2.getNbLines() < 2){
+    if(lgpIndividual1.getNbLines() < 2 || lgpIndividual2.getNbLines() < 2){
         return; // Crossover cannot be done if a program contains less than two lines
     }
     
@@ -104,7 +104,7 @@ void Representation::TGP::TGPMutator::crossoverAgents(
     std::array<std::map<size_t, std::reference_wrapper<const LGP::LGPLine>>, 2> linesToCross;
     std::array<std::set<size_t>, 2> removedIdxLines;
     for(size_t idxAgent = 0; idxAgent < 2; idxAgent++) {
-        const LGP::LGPAgent& curAgent = lgpAgents.at(idxAgent);
+        const LGP::LgpIndividual& curAgent = lgpIndividuals.at(idxAgent);
         std::vector<size_t> possibleNodes;
         size_t nbLines = curAgent.getNbLines();
         for(size_t idx = 0; idx < nbLines; idx++) {
@@ -144,60 +144,60 @@ void Representation::TGP::TGPMutator::crossoverAgents(
 
     for(size_t idxAgent = 0; idxAgent < 2; idxAgent++) {
         // Get agent and lines of the other agent
-        const LGP::LGPAgent& curAgent = lgpAgents.at(idxAgent);
-        const LGP::LGPAgent& otherAgent = lgpAgents.at(1 - idxAgent);
+        const LGP::LgpIndividual& curAgent = lgpIndividuals.at(idxAgent);
+        const LGP::LgpIndividual& otherAgent = lgpIndividuals.at(1 - idxAgent);
         const auto& mapLines = linesToCross.at(1 - idxAgent);
 
         // Add lines in opposite order.
         auto itLines = mapLines.rbegin();
         while(itLines != mapLines.rend()) {
-            lgpManager.addNewLine(curAgent, itLines->second, 0);
+            lgpPopulation.addNewLine(curAgent, itLines->second, 0);
             itLines++;
         }
-        this->changeNodeIndex(curAgent, lgpManager, 0, linesToCross.at(idxAgent).begin()->first);
+        this->changeNodeIndex(curAgent, lgpPopulation, 0, linesToCross.at(idxAgent).begin()->first);
     }
     for(size_t idxAgent = 0; idxAgent < 2; idxAgent++) {
 
         auto itRemovedIdx = removedIdxLines.at(idxAgent).rbegin();
         while(itRemovedIdx != removedIdxLines.at(idxAgent).rend()) {
             // Remove the old lines
-            lgpManager.removeLine(lgpAgents.at(idxAgent), *itRemovedIdx + linesToCross.at(1 - idxAgent).size());
+            lgpPopulation.removeLine(lgpIndividuals.at(idxAgent), *itRemovedIdx + linesToCross.at(1 - idxAgent).size());
             itRemovedIdx++;
         }
 
-        lgpManager.identifyIntrons(lgpAgents.at(idxAgent));
+        lgpPopulation.identifyIntrons(lgpIndividuals.at(idxAgent));
     }
 }
 
-bool Representation::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const RepresentationParameters& params, RNG::RNG& rng)
+bool Representation::TGP::TGPMutator::mutateLgpIndividual(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
     if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
-        alterRandomLine(agent, manager, params, rng);
+        alterRandomLine(agent, population, params, rng);
     }
 
     // mutate the programs constants if they exists
     if (params.lgp.nbProgramConstant > 0 &&
         rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
-        alterRandomConstant(agent, manager, params, rng);
+        alterRandomConstant(agent, population, params, rng);
     }
 
-    if(agent.getUsedNbOutputs(manager.getOutputs()) > 1) {
-        for(size_t idx = 0; idx < agent.getUsedNbOutputs(manager.getOutputs()); idx++) {
+    if(agent.getUsedNbOutputs(population.getOutputs()) > 1) {
+        for(size_t idx = 0; idx < agent.getUsedNbOutputs(population.getOutputs()); idx++) {
     
             size_t nbZeroRegUsed = std::count_if(
                 agent.getOutputIndices().begin(), agent.getOutputIndices().end(), []
                 (size_t outputIdx) {return outputIdx == 0;});
     
             if(nbZeroRegUsed == 0) {
-                throw std::runtime_error("TGPMutator::mutateLGPAgent: zero output index should always be used at least once.");
+                throw std::runtime_error("TGPMutator::mutateLgpIndividual: zero output index should always be used at least once.");
             }
     
             // One of the output must always be zero, so mutation is allowed if zero is used multiple time, or if current idx is not using zero (meaning it is used elsewhere)
             if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
-                alterRandomOutputs(agent, manager, idx, params, rng);
+                alterRandomOutputs(agent, population, idx, params, rng);
             }
         }
 
@@ -205,13 +205,13 @@ bool Representation::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent,
 
     // Identify introns
     if (anyMutation) {
-        manager.identifyIntrons(agent);
+        population.identifyIntrons(agent);
     }
     return anyMutation;
 }
 
 
-bool Representation::TGP::TGPMutator::alterRandomOutputs(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t location,
+bool Representation::TGP::TGPMutator::alterRandomOutputs(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, size_t location,
                                               const RepresentationParameters& params, RNG::RNG& rng)
 {
 
@@ -222,11 +222,11 @@ bool Representation::TGP::TGPMutator::alterRandomOutputs(const LGP::LGPAgent& ag
 
     auto it = availableRegisters.begin();
     std::advance(it, rng.getUnsignedInt64(0, availableRegisters.size() - 1));
-    manager.setOutputIndex(agent, *it, location);
+    population.setOutputIndex(agent, *it, location);
     return true;
 }
 
-std::vector<bool> Representation::TGP::TGPMutator::hasSubTree(const LGP::LGPAgent& agent, size_t idx) {
+std::vector<bool> Representation::TGP::TGPMutator::hasSubTree(const LGP::LgpIndividual& agent, size_t idx) {
     std::vector<bool> result;
 
     const LGP::LGPLine& line = agent.getLine(idx);
@@ -237,7 +237,7 @@ std::vector<bool> Representation::TGP::TGPMutator::hasSubTree(const LGP::LGPAgen
     return result;
 }
 
-size_t Representation::TGP::TGPMutator::getIndexLineFromDest(const LGP::LGPAgent& agent, size_t destIdx) {
+size_t Representation::TGP::TGPMutator::getIndexLineFromDest(const LGP::LgpIndividual& agent, size_t destIdx) {
     size_t idxLine = 0;
     while(agent.getLine(idxLine).getDestinationIndex() != destIdx) {
         idxLine++;
@@ -252,7 +252,7 @@ size_t Representation::TGP::TGPMutator::getNodeDepth(size_t destIndex) {
     return std::floor(std::log2(destIndex + 1));
 }
 
-size_t Representation::TGP::TGPMutator::getRealNodeDepth(const LGP::LGPAgent& agent, size_t destIndex) {
+size_t Representation::TGP::TGPMutator::getRealNodeDepth(const LGP::LgpIndividual& agent, size_t destIndex) {
     // Recursively get the lines to cross
     size_t highestDepth = 0;
     std::vector<size_t> destinationIndexToInclude;
@@ -279,7 +279,7 @@ size_t Representation::TGP::TGPMutator::getRealNodeDepth(const LGP::LGPAgent& ag
     return highestDepth - this->getNodeDepth(destIndex);
 }
 
-void Representation::TGP::TGPMutator::destroySubTree(const LGP::LGPAgent& agent, size_t idxSubTree, LGP::LGPManager& manager) 
+void Representation::TGP::TGPMutator::destroySubTree(const LGP::LgpIndividual& agent, size_t idxSubTree, LGP::LGPPopulation& population) 
 {
     // Recursively iterate to erase the lines in the hierarchy
     std::vector<size_t> destinationIdxToDestroy;
@@ -298,11 +298,11 @@ void Representation::TGP::TGPMutator::destroySubTree(const LGP::LGPAgent& agent,
                 destinationIdxToDestroy.push_back(destroyedLine.getOperand(idx).second);
             }
         }
-        manager.removeLine(agent, idxLine);
+        population.removeLine(agent, idxLine);
     }
 }
 
-bool Representation::TGP::TGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, 
+bool Representation::TGP::TGPMutator::alterRandomLine(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, 
                                               const RepresentationParameters& params, RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
@@ -316,7 +316,7 @@ bool Representation::TGP::TGPMutator::alterRandomLine(const LGP::LGPAgent& agent
 
     // If current index is at max depth, don't allows the line to select registers.
     bool maxDepthReached = (this->getNodeDepth(line.getDestinationIndex()) == params.tgp.maxDepth - 1);
-    this->tgpLineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), maxDepthReached, rng); // specified accessible registers
+    this->tgpLineMutator.alterCorrectLine(population.getLineForMutation(agent, lineIndex), maxDepthReached, rng); // specified accessible registers
 
     if(!maxDepthReached) {
         std::vector<bool> newSubTree = this->hasSubTree(agent, lineIndex);
@@ -324,17 +324,17 @@ bool Representation::TGP::TGPMutator::alterRandomLine(const LGP::LGPAgent& agent
             size_t idxSubTree = params.tgp.maxNbEdgePerNode * line.getDestinationIndex() + 1 + idx;
             if(oldSubTree[idx] && !newSubTree[idx]) {
                 // Destroy old sub tree
-                this->destroySubTree(agent, idxSubTree, manager);
+                this->destroySubTree(agent, idxSubTree, population);
             } else if(!oldSubTree[idx] && newSubTree[idx]) {
                 // Create new sub tree
-                this->insertRandomSubTree(agent, idxSubTree, params.tgp.maxDepth, manager,  params, rng);
+                this->insertRandomSubTree(agent, idxSubTree, params.tgp.maxDepth, population,  params, rng);
             }
         }
     }
     return true;
 } 
 
-void Representation::TGP::TGPMutator::changeNodeIndex(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t lineIndex, size_t destIndex)
+void Representation::TGP::TGPMutator::changeNodeIndex(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, size_t lineIndex, size_t destIndex)
 {
     const LGP::LGPLine& line = agent.getLine(lineIndex);
     if(line.getDestinationIndex() != destIndex) {
@@ -342,13 +342,13 @@ void Representation::TGP::TGPMutator::changeNodeIndex(const LGP::LGPAgent& agent
         std::vector<bool> subTree = this->hasSubTree(agent, lineIndex);
         for(size_t idx = 0; idx < subTree.size(); idx++) {
             if(subTree.at(idx)) {
-                this->changeNodeIndex(agent, manager, this->getIndexLineFromDest(agent, agent.getLine(lineIndex).getOperand(idx).second), subTree.size() * destIndex + 1 + idx);
-                bool success = manager.getLineForMutation(agent, lineIndex).setOperand(idx, 0, subTree.size() * destIndex + 1 + idx);
+                this->changeNodeIndex(agent, population, this->getIndexLineFromDest(agent, agent.getLine(lineIndex).getOperand(idx).second), subTree.size() * destIndex + 1 + idx);
+                bool success = population.getLineForMutation(agent, lineIndex).setOperand(idx, 0, subTree.size() * destIndex + 1 + idx);
                 if(!success) {
                     throw std::runtime_error("TGPMutator::changeNodeIndex: operand of sub tree modification did not success.");
                 }
             }
         }
-        manager.getLineForMutation(agent, lineIndex).setDestinationIndex(destIndex);
+        population.getLineForMutation(agent, lineIndex).setDestinationIndex(destIndex);
     }
 }

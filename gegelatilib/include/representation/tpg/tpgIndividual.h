@@ -3,16 +3,16 @@
 #define TPG_AGENT_H
 
 #include <cstdint>
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
 namespace Representation::TPG {
       
         /**
-         * \brief Abstract class representing a TPGAgent
+         * \brief Abstract class representing a TpgIndividual
          */
-        class TPGAgent : public Agent
+        class TpgIndividual : public Individual
         {
         protected:
             
@@ -24,12 +24,12 @@ namespace Representation::TPG {
         public:
 
             /**
-             * \brief Main constructor of the TPGAgent.
+             * \brief Main constructor of the TpgIndividual.
              *
-             * \param[in] vertex the Vertex that the TPGAgent will represent.
+             * \param[in] vertex the Vertex that the TpgIndividual will represent.
              * \param[in] representationID id of the representation used.
              */
-            TPGAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t representationID) : vertex{vertex}, Agent(representationID) {};
+            TpgIndividual(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t representationID) : vertex{vertex}, Individual(representationID) {};
 
 
             /**
@@ -38,7 +38,7 @@ namespace Representation::TPG {
             virtual bool isValid() const;
 
             /**
-             * \brief return if the tpgAgent has a vertex set or not.
+             * \brief return if the tpgIndividual has a vertex set or not.
              */
             virtual bool hasVertex() const;
 

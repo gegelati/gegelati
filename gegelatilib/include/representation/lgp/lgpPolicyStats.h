@@ -38,7 +38,7 @@
 #define LGP_POLICY_STATS_H
 
 #include "representation/policyStats.h"
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 
 namespace Representation::LGP {
 
@@ -62,7 +62,7 @@ namespace Representation::LGP {
          * When analyzing a policy, this number corresponds to
          * the number of Edge referencing a Program.
          */
-        std::map<std::reference_wrapper<const LGPAgent>, size_t> nbUsePerProgram;
+        std::map<std::reference_wrapper<const LgpIndividual>, size_t> nbUsePerProgram;
 
         /// Number of lines of analyzed Program.
         std::vector<size_t> nbLinesPerProgram;
@@ -108,7 +108,7 @@ namespace Representation::LGP {
         void analyzeLine(const LGP::LGPLine& line);
 
         /**
-         * Analyze the given LGPAgent.
+         * Analyze the given LgpIndividual.
          *
          * The method updates the following stats:
          * - Number of use per Program.
@@ -120,11 +120,11 @@ namespace Representation::LGP {
          * If a Program was already analyzed, it will not be analyzed again and
          * only the number of use per program will be updated.
          *
-         * \param[in] agent the analyzed Agent.
+         * \param[in] agent the analyzed Individual.
          * \throws std::runtime_error if the given Program has incorrect lines
          * accessing for example non existing instructions.
          */
-        virtual void analyzePolicy(const Agent& agent) override;
+        virtual void analyzePolicy(const Individual& agent) override;
 
         /**
          * \brief Return the specific informations of the LGP usage.

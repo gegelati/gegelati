@@ -3,7 +3,7 @@
 #ifndef COUNTER_RESET_H
 #define COUNTER_RESET_H
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "representation/representation.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"

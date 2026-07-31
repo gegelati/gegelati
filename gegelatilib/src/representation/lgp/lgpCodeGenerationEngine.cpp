@@ -105,7 +105,7 @@ void Representation::LGP::LGPCodeGenerationEngine::generateProgram(
 #endif
 
     
-    const std::vector<size_t>& outputIndices = dynamic_cast<const LGPAgent&>(this->executedAgent->get()).getOutputIndices();
+    const std::vector<size_t>& outputIndices = dynamic_cast<const LgpIndividual&>(this->executedAgent->get()).getOutputIndices();
     for(size_t idx = 0; idx < outputIndices.size(); idx ++ ){
         fileMain << "\toutputs["<<idx<<"] = reg["<<outputIndices[idx]<<"];\n";
     }

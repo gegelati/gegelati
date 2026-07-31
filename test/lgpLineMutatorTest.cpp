@@ -6,7 +6,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
 #include "representation/lgp/lgpLineMutator.h"
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 #include "representation/lgp/lgpLine.h"
 #include "representation/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
@@ -24,7 +24,7 @@ class LineMutatorTest : public ::testing::Test
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
     Parameters params;
     Representation::LGP::LGPLineMutator lineMutator;
-    std::shared_ptr<Representation::LGP::LGPAgent> programAgent;
+    std::shared_ptr<Representation::LGP::LgpIndividual> programAgent;
     Output::OutputHandler* lgpOutput;
 
     LineMutatorTest() : e{nullptr} {};
@@ -58,7 +58,7 @@ class LineMutatorTest : public ::testing::Test
         params.representation.lgp.nbProgramConstant = 5;
         e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
         programAgent =
-            std::make_shared<Representation::LGP::LGPAgent>(*e, *lgpOutput, 0);
+            std::make_shared<Representation::LGP::LgpIndividual>(*e, *lgpOutput, 0);
     }
 
     virtual void TearDown()
@@ -251,7 +251,7 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e2 = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
-    std::shared_ptr<Representation::LGP::LGPAgent> programAgent2 = std::make_shared<Representation::LGP::LGPAgent>(*e2, *lgpOutput, 1);
+    std::shared_ptr<Representation::LGP::LgpIndividual> programAgent2 = std::make_shared<Representation::LGP::LgpIndividual>(*e2, *lgpOutput, 1);
 
     Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
 

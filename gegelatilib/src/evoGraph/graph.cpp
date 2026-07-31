@@ -89,13 +89,13 @@ void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t ne
     vertices.insert(std::move(tmp));
 }
 
-const EvoGraph::Team& EvoGraph::Graph::addNewTeam(std::optional<std::reference_wrapper<const Representation::Agent>> programAgent)
+const EvoGraph::Team& EvoGraph::Graph::addNewTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programAgent)
 {
     this->vertices.insert(factory->createTeam(programAgent));
     return dynamic_cast<const Team&>(**this->vertices.rbegin());
 }
 
-const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Agent>> programAgent)
+const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Individual>> programAgent)
 {
     this->vertices.insert(factory->createAction(actionID, programAgent));
     return dynamic_cast<const Action&>(**this->vertices.rbegin());
@@ -253,7 +253,7 @@ const EvoGraph::Vertex& EvoGraph::Graph::cloneVertex(const Vertex& vertex)
             "The vertex to clone does not exist in the Graph.");
     }
 
-    std::optional<std::reference_wrapper<const Representation::Agent>> program = (vertex.hasProgram()) ? std::optional(std::cref(vertex.getProgram())) : std::nullopt;
+    std::optional<std::reference_wrapper<const Representation::Individual>> program = (vertex.hasProgram()) ? std::optional(std::cref(vertex.getProgram())) : std::nullopt;
 
     // Create a new Vertex
     // (at the end of the vertices list)
@@ -304,7 +304,7 @@ void EvoGraph::Graph::setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID)
 
 const EvoGraph::Edge& EvoGraph::Graph::addNewEdge(
     const Vertex& src, const Vertex& dest,
-    const Representation::Agent& prog)
+    const Representation::Individual& prog)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
@@ -370,7 +370,7 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
 }
 
 
-void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, const Representation::Agent& programAgent)
+void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, const Representation::Individual& programAgent)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&vertex);
@@ -448,7 +448,7 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     
 }
 
-bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, const Representation::Agent& programAgent)
+bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, const Representation::Individual& programAgent)
 {
     
     auto iterEdge = this->edges.find(&edge);

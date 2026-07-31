@@ -7,9 +7,9 @@
 
 #include "representation/atpg/atpgPolicyStats.h"
 #include "representation/tpg/tpgRepresentation.h"
-#include "representation/atpg/atpgManager.h"
+#include "representation/atpg/atpgPopulation.h"
 #include "representation/atpg/atpgMutator.h"
-#include "representation/tpg/tpgAgent.h"
+#include "representation/tpg/tpgIndividual.h"
 
 #include "learn/learningEnvironment.h"
 
@@ -58,11 +58,11 @@ namespace Representation::ATPG {
             void addAggregatedActionProgramRepresentation(const Representation& programRepresentation);
 
             /**
-             * \brief Initialize the managerof the representation
+             * \brief Initialize the populationof the representation
              * 
              * \param[in] outputs outputs needed for the representation.
              */
-            virtual void initManager() override;
+            virtual void initPopulation() override;
 
             /**
              * \brief Initialize the mutator of the representation
@@ -85,7 +85,7 @@ namespace Representation::ATPG {
              * 
              * The sub agents are the agents used by the program sub-representation and the action sub-representation.
              */
-            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubAgents() const override;
 
             /**
              * \brief Inherited method to create the policy stats of the representation
@@ -98,7 +98,7 @@ namespace Representation::ATPG {
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
 
             /**
              * Copy and return a uniqure pointer of the representation

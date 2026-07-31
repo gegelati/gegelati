@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <optional>
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "representation/job.h"
 #include "data/dataHandler.h"
 #include "outputInfo.h"
@@ -21,8 +21,8 @@ namespace Representation {
     class ExecutionEngine {
 
     protected:
-        /// Agent executed
-        std::optional<std::reference_wrapper<const Agent>> executedAgent;
+        /// Individual executed
+        std::optional<std::reference_wrapper<const Individual>> executedAgent;
 
         /// Values to outputs 
         const Output::OutputHandler& outputs;
@@ -69,7 +69,7 @@ namespace Representation {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, representationID{executedAgent.getRepresentationID()}, isTraining{isTraining} {}
+        ExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, representationID{executedAgent.getRepresentationID()}, isTraining{isTraining} {}
 
         /**
          * \brief setter for the isTraining attribute. 
@@ -86,14 +86,14 @@ namespace Representation {
         /**
          * \brief Return the current agent executed.
          */
-        virtual const Agent& getExecutedAgent() const;
+        virtual const Individual& getExecutedAgent() const;
 
         /**
          * \brief Set a new agent executed by the execution engine.
          * 
          * \param[in] newExecutedAgent new executed agent. 
          */
-        virtual void setExecutedAgent(const Agent& newExecutedAgent);
+        virtual void setExecutedAgent(const Individual& newExecutedAgent);
 
         /**
          * \brief Setup the execution engine with the given job.

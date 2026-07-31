@@ -46,7 +46,7 @@
 #include <set>
 
 namespace Representation{
-  class Agent;
+  class Individual;
 }
 
 namespace EvoGraph {
@@ -63,18 +63,18 @@ namespace EvoGraph {
 
 
         /**
-         * \brief Get a const weak pointer of the Agent Program of the Element.
+         * \brief Get a const weak pointer of the Individual Program of the Element.
          *
-         * \return a const weak pointer of the Agent Program of the Element.
+         * \return a const weak pointer of the Individual Program of the Element.
          */
-        virtual const Representation::Agent& getProgram() const;
+        virtual const Representation::Individual& getProgram() const;
 
         /**
-         * \brief Set a new Agent Program for the Element.
+         * \brief Set a new Individual Program for the Element.
          *
-         * \param[in] agentProgram the new weak pointer to a Agent Program.
+         * \param[in] agentProgram the new weak pointer to a Individual Program.
          */
-        virtual void setProgram(const Representation::Agent& agentProgram);
+        virtual void setProgram(const Representation::Individual& agentProgram);
 
         /**
          * \brief remove the program of the agent by setting nullopt.
@@ -97,17 +97,17 @@ namespace EvoGraph {
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          * 
-         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
+         * \param[in] agentProgram the shared pointer to the Individual Program associated to the
          *            Element.
          */
-        Element(std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : program{agentProgram}{};
+        Element(std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) : program{agentProgram}{};
 
 
-        /// Shared pointer to the Agent to execute when evaluating the bid
+        /// Shared pointer to the Individual to execute when evaluating the bid
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-       std::optional<std::reference_wrapper<const Representation::Agent>> program;
+       std::optional<std::reference_wrapper<const Representation::Individual>> program;
     };
 }; // namespace EvoGraph
 

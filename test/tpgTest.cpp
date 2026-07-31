@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
@@ -65,7 +65,7 @@ class TPGTest : public ::testing::Test
     Instructions::Set set;
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e = NULL;
     Parameters params;
-    std::shared_ptr<Representation::Agent> sharedProgramAgent;
+    std::shared_ptr<Representation::Individual> sharedProgramAgent;
 
     virtual void SetUp()
     {
@@ -83,7 +83,7 @@ class TPGTest : public ::testing::Test
         params.representation.lgp.nbProgramConstant = 1;
         e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
         sharedProgramAgent =
-            std::make_shared<Representation::LGP::LGPAgent>(*e, Output::OutputHandler(1), (uint64_t)0);
+            std::make_shared<Representation::LGP::LgpIndividual>(*e, Output::OutputHandler(1), (uint64_t)0);
     }
 
     virtual void TearDown()
@@ -186,8 +186,8 @@ TEST_F(TPGTest, EdgeGetSetProgram)
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
-    std::shared_ptr<Representation::Agent> programAgent2 =
-            std::make_shared<Representation::LGP::LGPAgent>(*e, Output::OutputHandler(1), 0);
+    std::shared_ptr<Representation::Individual> programAgent2 =
+            std::make_shared<Representation::LGP::LgpIndividual>(*e, Output::OutputHandler(1), 0);
     
     constEdge->setProgram(*programAgent2);
     ASSERT_EQ(constEdge->getProgram(), *programAgent2)

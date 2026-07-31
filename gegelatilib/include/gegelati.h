@@ -51,15 +51,15 @@
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <representation/agent.h>
+#include <representation/individual.h>
 #include <representation/representation.h>
 #include <representation/job.h>
 #include <representation/mutator.h>
-#include <representation/agentManager.h>
+#include <representation/population.h>
 #include <representation/executionEngine.h>
 
 #include <representation/atpg/atpgRepresentation.h>
-#include <representation/atpg/atpgManager.h>
+#include <representation/atpg/atpgPopulation.h>
 #include <representation/atpg/atpgMutator.h>
 #include <representation/atpg/atpgExecutionEngine.h>
 
@@ -69,18 +69,18 @@
 
 #include <representation/lgp/environment.h>
 #include <representation/lgp/lgpRepresentation.h>
-#include <representation/lgp/lgpAgent.h>
-#include <representation/lgp/lgpManager.h>
+#include <representation/lgp/lgpIndividual.h>
+#include <representation/lgp/lgpPopulation.h>
 #include <representation/lgp/lgpMutator.h>
 #include <representation/lgp/lgpLine.h>
 #include <representation/lgp/lgpLineMutator.h>
 #include <representation/lgp/lgpCodeGenerationEngine.h>
 #include <representation/lgp/lgpExecutionEngine.h>
 
-#include <representation/maple/mapleAgent.h>
+#include <representation/maple/mapleIndividual.h>
 #include <representation/maple/mapleRepresentation.h>
 #include <representation/maple/mapleExecutionEngine.h>
-#include <representation/maple/mapleManager.h>
+#include <representation/maple/maplePopulation.h>
 #include <representation/maple/mapleMutator.h>
 
 #include <representation/tgp/tgpRepresentation.h>
@@ -89,8 +89,8 @@
 
 #include <representation/tpg/archive.h>
 #include <representation/tpg/tpgRepresentation.h>
-#include <representation/tpg/tpgAgent.h>
-#include <representation/tpg/tpgManager.h>
+#include <representation/tpg/tpgIndividual.h>
+#include <representation/tpg/tpgPopulation.h>
 #include <representation/tpg/tpgMutator.h>
 #include <representation/tpg/tpgExecutionEngine.h>
 

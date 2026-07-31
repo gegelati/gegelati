@@ -2,7 +2,7 @@
 #ifndef MAP_ELITES_DEFAULT_DESCRIPTORS_H
 #define MAP_ELITES_DEFAULT_DESCRIPTORS_H
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "evoGraph/graph.h"
 
@@ -41,7 +41,7 @@ namespace Selector {
                  * \brief Specialisation of extractMetricsStep
                  */
                 virtual void extractMetricsStep(
-                    std::vector<double>& metrics, const Representation::Agent& agent,
+                    std::vector<double>& metrics, const Representation::Individual& agent,
                     std::vector<double> actionValues,
                     const Learn::LearningEnvironment& learningEnvironment)
                     const override;
@@ -50,7 +50,7 @@ namespace Selector {
                  * \brief Specialisation of extractMetricsEpisode
                  */
                 virtual void extractMetricsEpisode(
-                    std::vector<double>& metrics, const Representation::Agent& agent,
+                    std::vector<double>& metrics, const Representation::Individual& agent,
                     size_t nbStepsExecuted,
                     const Learn::LearningEnvironment& learningEnvironment)
                     const override;

@@ -18,7 +18,7 @@ std::string Selector::MapElites::DefaultDescriptors::ActionValues::getName() con
 }
 
 void Selector::MapElites::DefaultDescriptors::ActionValues::extractMetricsStep(
-    std::vector<double>& metrics, const Representation::Agent& agent,
+    std::vector<double>& metrics, const Representation::Individual& agent,
     std::vector<double> actionValues,
     const Learn::LearningEnvironment& learningEnvironment) const
 {
@@ -29,7 +29,7 @@ void Selector::MapElites::DefaultDescriptors::ActionValues::extractMetricsStep(
 
 void Selector::MapElites::DefaultDescriptors::ActionValues::
     extractMetricsEpisode(
-        std::vector<double>& metrics, const Representation::Agent& agent,
+        std::vector<double>& metrics, const Representation::Individual& agent,
         size_t nbStepsExecuted,
         const Learn::LearningEnvironment& learningEnvironment) const
 {

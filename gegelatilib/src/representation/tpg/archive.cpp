@@ -70,7 +70,7 @@ void Representation::TPG::TPGArchive::setRandomSeed(size_t newSeed)
 }
 
 void Representation::TPG::TPGArchive::addRecording(
-    const Representation::Agent& agent,
+    const Representation::Individual& agent,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandler,
     double result, bool forced)

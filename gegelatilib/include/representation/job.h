@@ -40,7 +40,7 @@
 #include <vector>
 #include <memory>
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "representation/tpg/archive.h"
 
 
@@ -58,7 +58,7 @@ namespace Representation {
         /**
          * The agent contained in the job.
          */
-        const Agent& agent;
+        const Individual& agent;
         
 
         /**
@@ -86,7 +86,7 @@ namespace Representation {
          * @param[in] agent The agent that will be encapsulated into the job.
          * @param[in] idx The index of this job.
          */
-        Job(const Agent& agent,
+        Job(const Individual& agent,
             uint64_t idx = 0)
             : agent(agent), idx(idx)
         {
@@ -104,7 +104,7 @@ namespace Representation {
          *
          * @return The agent embedded by the job.
          */
-        virtual const Agent& getAgent() const;
+        virtual const Individual& getAgent() const;
 
     };
 } // namespace Learn

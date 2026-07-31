@@ -3,7 +3,7 @@
 #define TPG_EXECUTION_ENGINE_H
 
 #include "representation/executionEngine.h"
-#include "representation/tpg/tpgAgent.h"
+#include "representation/tpg/tpgIndividual.h"
 #include "representation/tpg/tpgJob.h"
 #include "evoGraph/action.h"
 #include "evoGraph/team.h"
@@ -52,7 +52,7 @@ namespace Representation::TPG {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
+        TPGExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
 
         /**
          * Setter for the archive

@@ -43,7 +43,7 @@
 #include "util/timestamp.h"
 #include "data/demangle.h"
 
-void File::GraphDotExporter::printAgent(const Representation::Agent& agentProgram){
+void File::GraphDotExporter::printAgent(const Representation::Individual& agentProgram){
 
     // Find corresponding representation to the agent and print it
     auto it = this->mapRepresentations.find(agentProgram.getRepresentationID());
@@ -255,7 +255,7 @@ void File::GraphDotExporter::printGraphFooter(const Representation::Representati
     // Rank all the agents of main algoritms
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Main agents ids
-    for(const Representation::Agent& agent : representation.getManagerCst().getAgents()){
+    for(const Representation::Individual& agent : representation.getPopulationCst().getAgents()){
         fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
     }
     // Action root
@@ -288,7 +288,7 @@ void File::GraphDotExporter::exportRepresentation(const char* filePath, const Re
     // Print each agent representations
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(const Representation::Agent& agent : representation.getManagerCst().getAgents()){
+    for(const Representation::Individual& agent : representation.getPopulationCst().getAgents()){
         this->printAgent(agent);
     }
 
@@ -303,7 +303,7 @@ void File::GraphDotExporter::exportRepresentation(const char* filePath, const Re
     fclose(pFile);
 }
 
-void File::GraphDotExporter::exportAgent(const char* filePath, const Representation::Agent& agent, const Representation::Representation& representation)
+void File::GraphDotExporter::exportAgent(const char* filePath, const Representation::Individual& agent, const Representation::Representation& representation)
 {
     if ((pFile = fopen(filePath, "w")) == NULL) {
         throw std::runtime_error("Could not open file " +
@@ -320,7 +320,7 @@ void File::GraphDotExporter::exportAgent(const char* filePath, const Representat
     if(representation.containsAgent(agent)){
         this->printRepresentationsSubGraph(representation);
     } else {
-        throw std::runtime_error("File::GraphDotExporter::printSubGraph: Agent should belong to the specified representation");
+        throw std::runtime_error("File::GraphDotExporter::printSubGraph: Individual should belong to the specified representation");
     }
 
     // Print the agent given as parameter, its vertices and edges, and the potential agent programs associated to these vertices and edges.

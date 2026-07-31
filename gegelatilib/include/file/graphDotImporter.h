@@ -7,7 +7,7 @@
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
- * artificial intelligence based on Tangled Agent Graphs (TPGs).
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software. You can use,
@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpIndividual.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
@@ -106,7 +106,7 @@ namespace File {
         std::map<uint64_t, std::reference_wrapper<const EvoGraph::Edge>> readEdgeID;
 
         /// @brief map of printed agent. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent agent.
-        std::map<uint64_t, std::reference_wrapper<const Representation::Agent>> readAgentID;
+        std::map<uint64_t, std::reference_wrapper<const Representation::Individual>> readAgentID;
 
 
         
@@ -199,7 +199,7 @@ namespace File {
         static const std::string actionRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Agent -> Action
+         * \brief contains the regex to identify a Team -> Individual -> Action
          * Link
          *
          * this regex values
@@ -228,7 +228,7 @@ namespace File {
         static const std::string linkTeamAgentActionRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Agent -> Team Link
+         * \brief contains the regex to identify a Team -> Individual -> Team Link
          *
          * this regex values
          * "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*"
@@ -256,13 +256,13 @@ namespace File {
         static const std::string linkTeamAgentTeamRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Agent
+         * \brief contains the regex to identify a Team -> Individual
          * Link
          */
         static const std::string linkTeamAgentRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Agent Link
+         * \brief contains the regex to identify a Team -> Individual Link
          */
         static const std::string linkAgentTeamRegex;
 

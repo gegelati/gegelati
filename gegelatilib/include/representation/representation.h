@@ -8,8 +8,8 @@
 #include <regex>
 
 #include "representation/job.h"
-#include "representation/agent.h"
-#include "representation/agentManager.h"
+#include "representation/individual.h"
+#include "representation/population.h"
 #include "representation/mutator.h"
 #include "representation/policyStats.h"
 #include "representation/repParameters.h"
@@ -31,7 +31,7 @@ namespace Representation {
         std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Graph used by the representation
-        std::unique_ptr<AgentManager> manager;
+        std::unique_ptr<Population> population;
 
         /// Parameters used by the representation
         std::unique_ptr<RepresentationParameters> params;
@@ -121,16 +121,16 @@ namespace Representation {
         static uint64_t getRepresentationIDCounter();
 
         /**
-         * \brief Get the unique identifier of the Agent.
+         * \brief Get the unique identifier of the Individual.
          *
-         * \return the integer ID of the Agent.
+         * \return the integer ID of the Individual.
          */
         virtual uint64_t getRepresentationID() const;
 
         /**
-         * \brief Set a new unique identifier to the Agent.
+         * \brief Set a new unique identifier to the Individual.
          *
-         * \param[in] newID the new integer ID to set to the Agent.
+         * \param[in] newID the new integer ID to set to the Individual.
          */
         virtual void setRepresentationID(uint64_t newID);
 
@@ -150,7 +150,7 @@ namespace Representation {
          * \brief Method that aggregate another representation to this representation.
          * 
          * The representation need to be the same type.
-         * This access allows for the manager to dupplicate an agent from the aggregated representation to its own agents.
+         * This access allows for the population to dupplicate an agent from the aggregated representation to its own agents.
          * 
          * \param[in] aggregatedRepresentation the representation to aggregate.
          */
@@ -178,14 +178,14 @@ namespace Representation {
         /// Constant getter for the graph
         virtual const EvoGraph::Graph& getGraph() const;
 
-        /// Constant getter for the manager
-        virtual const AgentManager& getManagerCst() const;
+        /// Constant getter for the population
+        virtual const Population& getPopulationCst() const;
 
         /// Constant getter for the selector
         virtual const Selector::Selector& getSelectorCst() const;
 
-        /// Getter for the manager
-        virtual AgentManager& getManager();
+        /// Getter for the population
+        virtual Population& getPopulation();
 
         /// Indicate if the representation possess a selector 
         virtual bool hasSelector() const;
@@ -217,19 +217,19 @@ namespace Representation {
         /**
          * \brief Get the current agents used by the representation.
          */
-        virtual const std::vector<std::reference_wrapper<const Agent>> getAgents () const;
+        virtual const std::vector<std::reference_wrapper<const Individual>> getAgents () const;
 
         /**
          * \brief method that indicate if the representation contains a specific agent.
          * 
          * \param[in] agent searched agent.
          */
-        virtual bool containsAgent(const Agent& agent) const;
+        virtual bool containsAgent(const Individual& agent) const;
 
         /**
-         * \brief Initialize the managerof the representation
+         * \brief Initialize the populationof the representation
          */
-        virtual void initManager() = 0;
+        virtual void initPopulation() = 0;
 
         
         /**
@@ -305,7 +305,7 @@ namespace Representation {
         * \brief Get the agents that are currently used by the representation.
         * The returned map associate to each sub-representation id the set of agents used by this sub-representation.
         */
-        virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const;
+        virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubAgents() const;
 
         /**
          * \brief Clear all the unused sub agents
@@ -318,9 +318,9 @@ namespace Representation {
         virtual void clearUnusedAgentParts() = 0;
 
         /**
-         * \brief Takes a given Agent and creates a job containing it.
+         * \brief Takes a given Individual and creates a job containing it.
          *
-         * \param[in] agent the Agent to be evaluated.
+         * \param[in] agent the Individual to be evaluated.
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] rng deterministic random generator
@@ -329,7 +329,7 @@ namespace Representation {
          *
          * \return A job representing the agent.
          */
-        virtual std::shared_ptr<Job> createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+        virtual std::shared_ptr<Job> createJob(const Individual& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
 
         /**
          * \brief Create a PolicyStats object corresponding to the representation.
@@ -360,7 +360,7 @@ namespace Representation {
          * \param[in] printedAgentID the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
          * \param[in] elementsToPrint the list of elements to print, filled during this method.
          */
-        virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
+        virtual void printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
 
         /**
          * \brief Read and create an agent.
@@ -372,7 +372,7 @@ namespace Representation {
          * 
          * \param[in] matches the match of the regex line.
          */
-        virtual const Agent& readAgent(std::smatch& matches) = 0;
+        virtual const Individual& readAgent(std::smatch& matches) = 0;
 
         /**
          * \brief Link an agent to a corresponding vertex
@@ -382,7 +382,7 @@ namespace Representation {
          * \param[in] agent the agent linked to the vertex.
          * \param[in] vertex the vertex linked to the agent.
          */
-        virtual void linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex);
+        virtual void linkAgentVertex(const Individual& agent, const EvoGraph::Vertex& vertex);
 
         /**
          * \brief Export the corresponding C code of the representation.
@@ -393,13 +393,13 @@ namespace Representation {
         /**
          * \brief Export the corresponding C code of the representation.
          */
-        virtual void exportSpecificAgentCodeGen(const Agent& agent, const std::string& filename = "",
+        virtual void exportSpecificAgentCodeGen(const Individual& agent, const std::string& filename = "",
                            const std::string& path = "./");
 
         /**
          * \brief Export the corresponding C code of the representation.
          */
-        virtual void exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Agent>> agents, const std::string& filename = "",
+        virtual void exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Individual>> agents, const std::string& filename = "",
                            const std::string& path = "./");
 
         /**
@@ -415,13 +415,13 @@ namespace Representation {
         /**
          * \brief Export the corresponding dot file of the representation, and its sub representations
          */
-        virtual void exportSpecificAgentDotFile(const Agent& agent, const char* filePath);
+        virtual void exportSpecificAgentDotFile(const Individual& agent, const char* filePath);
 
 
         /**
          * \brief specific exporting of an agent for the code generation
          */
-        virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const = 0;
+        virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const = 0;
 
         /**
          * \brief Import the corresponding file

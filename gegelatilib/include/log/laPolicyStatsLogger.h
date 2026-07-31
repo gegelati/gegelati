@@ -36,7 +36,7 @@
 #ifndef LA_POLICY_STATS_LOGGER_H
 #define LA_POLICY_STATS_LOGGER_H
 
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "log/laLogger.h"
 #include "representation/policyStats.h"
 

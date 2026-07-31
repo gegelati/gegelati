@@ -3,7 +3,7 @@
 #ifndef SELECTOR_H
 #define SELECTOR_H
 
-#include "representation/agentManager.h"
+#include "representation/population.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "learn/learningParameters.h"
@@ -30,7 +30,7 @@ namespace Selector {
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<std::optional<std::reference_wrapper<const Representation::Agent>>,
+        std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                   std::shared_ptr<Learn::EvaluationResult>>
             bestAgent{std::nullopt, nullptr};
 
@@ -47,29 +47,29 @@ namespace Selector {
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
-        std::map<std::reference_wrapper<const Representation::Agent>,
+        std::map<std::reference_wrapper<const Representation::Individual>,
                  std::shared_ptr<Learn::EvaluationResult>>
             resultsPerAgent;
 
 
         /**
-         * \brief manager of the used representation. The manager can delete or create agents in the representation population
+         * \brief population of the used representation. The population can delete or create agents in the representation population
          */
-        std::optional<std::reference_wrapper<Representation::AgentManager>> manager;
+        std::optional<std::reference_wrapper<Representation::Population>> population;
 
         /**
-         * \brief get the manager
+         * \brief get the population
          * 
-         * Throw if manager is not set (in optional type)
+         * Throw if population is not set (in optional type)
          */
-        Representation::AgentManager& getManager();
+        Representation::Population& getPopulation();
 
         /**
-         * \brief get the manager
+         * \brief get the population
          * 
-         * Throw if manager is not set (in optional type)
+         * Throw if population is not set (in optional type)
          */
-        const Representation::AgentManager& cGetManager() const;
+        const Representation::Population& cGetPopulation() const;
 
       public:
 
@@ -96,16 +96,16 @@ namespace Selector {
         size_t getNbAgents();
 
         /**
-         * \brief set the manager of the selector
+         * \brief set the population of the selector
          * 
-         * \param[in] manager set to the selector
+         * \param[in] population set to the selector
          */
-        void setManager(Representation::AgentManager& manager);
+        void setPopulation(Representation::Population& population);
 
         /**
-         * \brief return true if the manager is set
+         * \brief return true if the population is set
          */
-        bool hasManager() const;
+        bool hasPopulation() const;
 
         /**
          * \brief Removes from the Graph the agent Vertex.
@@ -124,7 +124,7 @@ namespace Selector {
         virtual void doSelection(
             EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Representation::Agent>>& results,
+                          std::reference_wrapper<const Representation::Individual>>& results,
             RNG::RNG& rng);
 
         /**
@@ -148,9 +148,9 @@ namespace Selector {
         /**
          * \brief Remove the agent from resultsPerAgent and BestAgent if already saved.
          * 
-         * \param[in] agent Agent removed from the data.
+         * \param[in] agent Individual removed from the data.
          */
-        virtual void removeFromSavedResults(const Representation::Agent& agent);
+        virtual void removeFromSavedResults(const Representation::Individual& agent);
 
         /**
          * \brief Update the bestAgent and resultsPerAgent attributes.
@@ -174,7 +174,7 @@ namespace Selector {
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Representation::Agent>>& results);
+                                std::reference_wrapper<const Representation::Individual>>& results);
 
         /**
          * \brief Update the resultsPerAgent.
@@ -183,7 +183,7 @@ namespace Selector {
          */
         virtual void updateResultsPerAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Representation::Agent>>& results);
+                                std::reference_wrapper<const Representation::Individual>>& results);
 
         /**
          * \brief Update the bestAgent attribute.
@@ -207,7 +207,7 @@ namespace Selector {
          */
         virtual void updateBestAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Representation::Agent>>& results);
+                                std::reference_wrapper<const Representation::Individual>>& results);
 
                                 
         /**
@@ -219,7 +219,7 @@ namespace Selector {
          * otherwise.
          */
         virtual std::shared_ptr<Learn::EvaluationResult> getResultsOf(
-            const Representation::Agent& agent) const;
+            const Representation::Individual& agent) const;
 
         /**
          * \brief Getter for the number of evaluation of a specific agent
@@ -230,7 +230,7 @@ namespace Selector {
          * otherwise.
          */
         virtual size_t getNbEvaluation(
-            const Representation::Agent& agent) const;
+            const Representation::Individual& agent) const;
 
         /**
          * \brief Get the best agent EvoGraph::Vertex encountered since the last init.
@@ -240,7 +240,7 @@ namespace Selector {
          *
          * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<std::optional<std::reference_wrapper<const Representation::Agent>>,
+        virtual const std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
         getBestAgent() const;
 
@@ -257,7 +257,7 @@ namespace Selector {
         /**
          * \brief Return the resultsPerAgent map.
          */
-        virtual const std::map<std::reference_wrapper<const Representation::Agent>,
+        virtual const std::map<std::reference_wrapper<const Representation::Individual>,
                                std::shared_ptr<Learn::EvaluationResult>>&
         getResultsPerAgent() const;
 

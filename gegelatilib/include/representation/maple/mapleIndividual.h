@@ -3,29 +3,29 @@
 #define MAPLE_AGENT_H
 
 #include <cstdint>
-#include "representation/tpg/tpgAgent.h"
+#include "representation/tpg/tpgIndividual.h"
 #include "evoGraph/action.h"
 
 
 namespace Representation::Maple {
       
         /**
-         * \brief Abstract class representing a TPGAgent
+         * \brief Abstract class representing a TpgIndividual
          */
-        class MapleAgent : public TPG::TPGAgent
+        class MapleIndividual : public TPG::TpgIndividual
         {
         protected:
 
         public:
 
             /**
-             * \brief Main constructor of the TPGAgent.
+             * \brief Main constructor of the TpgIndividual.
              *
-             * \param[in] vertex the Vertex that the TPGAgent will represent. This vertex must be an action vertex.
+             * \param[in] vertex the Vertex that the TpgIndividual will represent. This vertex must be an action vertex.
              * \param[in] representationID id of the representation used.
              */
-            MapleAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t representationID) 
-            : TPGAgent(vertex, representationID) {};
+            MapleIndividual(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t representationID) 
+            : TpgIndividual(vertex, representationID) {};
 
             /**
              * \brief Method that return if the agent is valid for execution.

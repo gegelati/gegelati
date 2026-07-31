@@ -1,12 +1,12 @@
 
 #include "representation/executionEngine.h"
 
-const Representation::Agent& Representation::ExecutionEngine::getExecutedAgent() const
+const Representation::Individual& Representation::ExecutionEngine::getExecutedAgent() const
 {
     return *this->executedAgent;
 }
 
-void Representation::ExecutionEngine::setExecutedAgent(const Agent& newExecutedAgent)
+void Representation::ExecutionEngine::setExecutedAgent(const Individual& newExecutedAgent)
 {
     if(newExecutedAgent.getRepresentationID() != this->representationID){
         throw std::runtime_error("Representation::ExecutionEngine::setExecutedAgent trying to set an agent from a different representation");

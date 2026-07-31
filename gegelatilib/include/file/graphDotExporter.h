@@ -93,7 +93,7 @@ namespace File {
          * 
          * \param[in] agentProgram the agent program to be printed
          */
-        void printAgent(const Representation::Agent& agentProgram);
+        void printAgent(const Representation::Individual& agentProgram);
 
         /**
          * \brief Print the dot content for the given Element.
@@ -157,9 +157,9 @@ namespace File {
         /**
          * \brief Prints the dot content for the given Program.
          *
-         * \param[in] lgpAgent the lgpAgent to be printed
+         * \param[in] lgpIndividual the lgpIndividual to be printed
          *
-         * a lgpAgent is stored in the .dot file with the format :
+         * a lgpIndividual is stored in the .dot file with the format :
          * line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
          *
          * a line is stored in the .dot file with the following format
@@ -169,7 +169,7 @@ namespace File {
          * dest_idx = destination index
          * op       = operand
          */
-        //void printLGPAgent(std::shared_ptr<const Representation::LGP::LGPAgent> lgpAgent);
+        //void printLgpIndividual(std::shared_ptr<const Representation::LGP::LgpIndividual> lgpIndividual);
 
         /**
          * \brief Prints header content in the dot file.
@@ -244,7 +244,7 @@ namespace File {
          * \param[in] agent The agent printed
          * \param[in] representation the representation the agent belongs too
          */
-        void exportAgent(const char* filePath, const Representation::Agent& agent, const Representation::Representation& representation);
+        void exportAgent(const char* filePath, const Representation::Individual& agent, const Representation::Representation& representation);
     };
 }; // namespace File
 

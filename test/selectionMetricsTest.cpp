@@ -113,7 +113,7 @@ TEST(SelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
     FakedLearningEnvironment env(3.0, 1.0);
 
     // Call extraction
-    const Representation::Agent* nullAgent = nullptr;
+    const Representation::Individual* nullAgent = nullptr;
     metrics.extractMetricsEpisode(*nullAgent, 0, env);
 
     // score and utility should be incremented
@@ -217,7 +217,7 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
 {
     Selector::ClassificationSelectionMetrics metrics;
     FakedClassificationLearningEnvironment env(2);
-    const Representation::Agent* nullAgent = nullptr;
+    const Representation::Individual* nullAgent = nullptr;
 
     // Prepare classification table: class 0 guessed [2,1], class 1 guessed
     // [0,3]

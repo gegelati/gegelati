@@ -68,29 +68,29 @@ void Representation::LGP::LGPPolicyStats::analyzeLine(const LGPLine& line)
 
 }
 
-void Representation::LGP::LGPPolicyStats::analyzePolicy(const Agent& agent)
+void Representation::LGP::LGPPolicyStats::analyzePolicy(const Individual& agent)
 {
 
-    // Get tpgAgent if agent is one, else throw
-    const LGPAgent& lgpAgent = dynamic_cast<const LGPAgent&>(agent);
-    if (&lgpAgent == nullptr) {
-        throw std::invalid_argument("PolicyStats can only analyze LGPAgent");
+    // Get tpgIndividual if agent is one, else throw
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(agent);
+    if (&lgpIndividual == nullptr) {
+        throw std::invalid_argument("PolicyStats can only analyze LgpIndividual");
     }
 
     // Check if the Program was already analyzed
-    auto programIterator = this->nbUsePerProgram.find(lgpAgent);
+    auto programIterator = this->nbUsePerProgram.find(lgpIndividual);
     if (programIterator != this->nbUsePerProgram.end()) {
         programIterator->second++;
         return;
     }
 
-    this->nbUsePerProgram.emplace(lgpAgent, 1);
-    this->nbLinesPerProgram.push_back(lgpAgent.getNbLines());
+    this->nbUsePerProgram.emplace(lgpIndividual, 1);
+    this->nbLinesPerProgram.push_back(lgpIndividual.getNbLines());
 
     size_t nbIntronLines = 0;
-    for (auto lineIdx = 0; lineIdx < lgpAgent.getNbLines(); lineIdx++) {
-        if (!lgpAgent.isIntron(lineIdx)) {
-            this->analyzeLine(lgpAgent.getLine(lineIdx));
+    for (auto lineIdx = 0; lineIdx < lgpIndividual.getNbLines(); lineIdx++) {
+        if (!lgpIndividual.isIntron(lineIdx)) {
+            this->analyzeLine(lgpIndividual.getLine(lineIdx));
         }
         else {
             nbIntronLines++;

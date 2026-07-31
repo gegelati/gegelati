@@ -256,7 +256,7 @@ TEST_F(LearningAgentTest, EvalAgent)
                // LearningAgent is used.
 
     la.init();
-    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getPopulation().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
     auto job = tpg->createJob(la.getRepresentationAt(tpg->getRepresentationID()).getAgents().at(0),
@@ -304,7 +304,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>
+                  std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
                         la.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -342,7 +342,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Representation::TPG::TPGArchive a(0);
     Representation::Representation& tpgRef = la.getRepresentationAt(tpg->getRepresentationID());
-    tpgRef.getMutator().mutatePopulation(la.getGraph(), tpgRef.getManager(), params.representation, la.getRNG());
+    tpgRef.getMutator().mutatePopulation(la.getGraph(), tpgRef.getPopulation(), params.representation, la.getRNG());
 
     size_t initialNbVertex = la.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -426,7 +426,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << graph.getEdges().size() << ", "
                 << EvoGraph::Vertex::getVertexIDCounter() << ", "
                 << EvoGraph::Edge::getEdgeIDCounter() << ", "
-                << Representation::Agent::getAgentIDCounter() << ", "
+                << Representation::Individual::getAgentIDCounter() << ", "
                 << rngValue
                 << "}"<<std::endl;
         // Nice printed infos
@@ -435,7 +435,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << "Number of edges: " << graph.getEdges().size() << "\n"
                 << "Vertex ID counter: " << EvoGraph::Vertex::getVertexIDCounter() << "\n"
                 << "Edge ID counter: " << EvoGraph::Edge::getEdgeIDCounter() << "\n"
-                << "Agent ID counter: " << Representation::Agent::getAgentIDCounter() << "\n"
+                << "Individual ID counter: " << Representation::Individual::getAgentIDCounter() << "\n"
 
                 << "RNG value: " << rngValue << std::endl;
     }
@@ -453,7 +453,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), expectedValues[4])
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Representation::Agent::getAgentIDCounter(), expectedValues[5])
+    ASSERT_EQ(Representation::Individual::getAgentIDCounter(), expectedValues[5])
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(rngValue, expectedValues[6])
         << "Graph does not have the expected determinst characteristics.";
@@ -1035,7 +1035,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // Do the populate call to keep know the number of initial vertex
     Representation::TPG::TPGArchive a(0);
 
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
+    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getPopulation(), params, la.getRNG());
     size_t initialNbVertex = la.getGraph().getNbVertices();
 
     // Seed selected so that an action becomes a root during next generation
@@ -1093,7 +1093,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
                // LearningAgent is used.
 
     pla.init();
-    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getPopulation().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
     auto job = tpg->createJob(pla.getRepresentationAt(0).getAgents().at(0),
@@ -1118,7 +1118,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>
+                  std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1141,7 +1141,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>
+                  std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1370,7 +1370,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Do the populate call to keep know the number of initial vertex
     Representation::TPG::TPGArchive a(0);
     Representation::Representation& tpg = pla.getRepresentationAt(0);
-    tpg.getMutator().mutatePopulation(pla.getGraph(), tpg.getManager(), params.representation, pla.getRNG());
+    tpg.getMutator().mutatePopulation(pla.getGraph(), tpg.getPopulation(), params.representation, pla.getRNG());
     size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1406,7 +1406,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    tpg->getMutator().mutatePopulation(pla.getGraph(), tpg->getManager(), params.representation, pla.getRNG());
+    tpg->getMutator().mutatePopulation(pla.getGraph(), tpg->getPopulation(), params.representation, pla.getRNG());
     
     size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation

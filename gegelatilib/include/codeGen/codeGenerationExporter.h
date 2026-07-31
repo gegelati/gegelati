@@ -47,7 +47,7 @@
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
-#include "representation/agent.h"
+#include "representation/individual.h"
 #include "representation/representation.h"
 
 namespace CodeGen {
@@ -107,7 +107,7 @@ namespace CodeGen {
         virtual ~CodeGenerationExporter();
 
         /**
-         * \brief function that creates the C files required to execute the Agent
+         * \brief function that creates the C files required to execute the Individual
          * without gegelati.
          *
          * This function iterates trough the Graph and create the required C
@@ -117,11 +117,11 @@ namespace CodeGen {
          * \param[in] representation the representation corresponding to the agent
          * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void exportMainAgent(const Representation::Agent& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents);
+        virtual void exportMainAgent(const Representation::Individual& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents);
 
         
         /**
-         * \brief function that creates the C files required to execute the Agent
+         * \brief function that creates the C files required to execute the Individual
          * without gegelati.
          *
          * This function iterates trough the Graph and create the required C
@@ -131,7 +131,7 @@ namespace CodeGen {
          * \param[in] representation the representation corresponding to the agent
          * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void exportAgents(std::set<std::reference_wrapper<const Representation::Agent>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents);
+        virtual void exportAgents(std::set<std::reference_wrapper<const Representation::Individual>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents);
     };
 } // namespace CodeGen
 

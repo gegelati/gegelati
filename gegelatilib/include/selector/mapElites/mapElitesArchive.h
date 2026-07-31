@@ -42,7 +42,7 @@ namespace Selector {
             /// The archive storing evaluation results and their corresponding
             /// agent
             std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                  std::optional<std::reference_wrapper<const Representation::Agent>>>>
+                                  std::optional<std::reference_wrapper<const Representation::Individual>>>>
                 archive;
 
           public:
@@ -92,7 +92,7 @@ namespace Selector {
              */
             virtual const std::vector<
                 std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          std::optional<std::reference_wrapper<const Representation::Agent>>>>&
+                          std::optional<std::reference_wrapper<const Representation::Individual>>>>&
             getAllArchive() const;
 
             /**
@@ -101,7 +101,7 @@ namespace Selector {
              * \param[in] indices the indices to get the archive content from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    std::optional<std::reference_wrapper<const Representation::Agent>>>&
+                                    std::optional<std::reference_wrapper<const Representation::Individual>>>&
             getArchiveAt(const std::vector<uint64_t>& indices) const;
 
             /**
@@ -111,32 +111,32 @@ namespace Selector {
              * from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    std::optional<std::reference_wrapper<const Representation::Agent>>>&
+                                    std::optional<std::reference_wrapper<const Representation::Individual>>>&
             getArchiveFromDescriptors(
                 const std::vector<double>& descriptors) const;
 
             /**
              * \brief Set the archive content at given indices
              *
-             * \param[in] agent the Agent to set in the archive
+             * \param[in] agent the Individual to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] indices the indices to set the archive content at
              */
             virtual void setArchiveAt(
-                const Representation::Agent& agent,
+                const Representation::Individual& agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<uint64_t>& indices);
 
             /**
              * \brief Set the archive content at given descriptors
              *
-             * \param[in] agent the Agent to set in the archive
+             * \param[in] agent the Individual to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] descriptors the descriptors to set the archive content
              * at
              */
             virtual void setArchiveFromDescriptors(
-                const Representation::Agent& agent,
+                const Representation::Individual& agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors);
 
@@ -168,7 +168,7 @@ namespace Selector {
              *
              * \param[in] agent the agent to check
              */
-            virtual bool containsAgent(const Representation::Agent& agent) const;
+            virtual bool containsAgent(const Representation::Individual& agent) const;
 
             /**
              * \brief Remove a agent from the archive if its number of
@@ -179,12 +179,12 @@ namespace Selector {
              * allowed
              */
             virtual void removeAgentFromArchive(
-                const Representation::Agent& agent, size_t maxNbEvaluation);
+                const Representation::Individual& agent, size_t maxNbEvaluation);
 
             /**
              * \brief Return a set with the current vectors in the archive.
              */
-            virtual std::set<std::reference_wrapper<const Representation::Agent>> getVerticesInArchive()
+            virtual std::set<std::reference_wrapper<const Representation::Individual>> getVerticesInArchive()
                 const;
         };
 

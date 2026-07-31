@@ -12,7 +12,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
 void Selector::ClassificationSelector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>& results,
+                  std::reference_wrapper<const Representation::Individual>>& results,
     RNG::RNG& rng)
 {
     // Check that results are ClassificationSelectionMetrics is used.
@@ -25,10 +25,10 @@ void Selector::ClassificationSelector::doSelection(
                                  "ClassificationSelectionMetrics.");
     }
 
-    Representation::AgentManager& manager = this->getManager();
+    Representation::Population& population = this->getPopulation();
 
     // Compute the number of agent to keep/delete base on each criterion
-    uint64_t totalNbAgent = manager.getAgents().size();
+    uint64_t totalNbAgent = population.getAgents().size();
     uint64_t nbAgentsToDelete = (uint64_t)floor(
         this->params->truncation.ratioDeletedRoots * totalNbAgent);
     uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
@@ -42,18 +42,18 @@ void Selector::ClassificationSelector::doSelection(
         nbAgentsToKeep - this->nbActions * nbAgentsKeptPerClass;
 
     // Build a list of agents to keep
-    std::vector<std::reference_wrapper<const Representation::Agent>> agentsToKeep;
+    std::vector<std::reference_wrapper<const Representation::Individual>> agentsToKeep;
 
     // Insert agents to keep per class
     for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++) {
         // Fill a map with the agents and the score of the specific class as
         // ID.
-        std::multimap<double, std::reference_wrapper<const Representation::Agent>> sortedAgent;
+        std::multimap<double, std::reference_wrapper<const Representation::Individual>> sortedAgent;
         std::for_each(
             results.begin(), results.end(),
             [&sortedAgent, &classIdx](
                 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Representation::Agent>>& res) {
+                                std::reference_wrapper<const Representation::Individual>>& res) {
                 sortedAgent.emplace(((ClassificationSelectionMetrics*)res.first
                                         ->getSelectionMetrics()
                                         .get())
@@ -67,9 +67,9 @@ void Selector::ClassificationSelector::doSelection(
         auto iterator = sortedAgent.rbegin();
         for (auto i = 0; i < nbAgentsKeptPerClass; i++) {
             // If the agent is not already marked to be kept
-            const Representation::Agent& agent = iterator->second;
+            const Representation::Individual& agent = iterator->second;
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&agent](const std::reference_wrapper<const Representation::Agent>& agentToKeep) {
+                [&agent](const std::reference_wrapper<const Representation::Individual>& agentToKeep) {
                     return agent == agentToKeep.get();
                 }) == agentsToKeep.end()) {
                 agentsToKeep.push_back(iterator->second);
@@ -82,9 +82,9 @@ void Selector::ClassificationSelector::doSelection(
     auto iterator2 = results.rbegin();
     while (agentsToKeep.size() < nbAgentsToKeep && iterator2 != results.rend()) {
         // If the agent is not already marked to be kept
-        const Representation::Agent& lockedAgent = iterator2->second;
+        const Representation::Individual& lockedAgent = iterator2->second;
         if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-            [&lockedAgent](const std::reference_wrapper<const Representation::Agent>& agent) {
+            [&lockedAgent](const std::reference_wrapper<const Representation::Individual>& agent) {
                 return agent.get() == lockedAgent;
             }) == agentsToKeep.end()) {
             agentsToKeep.push_back(iterator2->second);
@@ -96,25 +96,25 @@ void Selector::ClassificationSelector::doSelection(
     // Do the removal.
     // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
-    auto allAgents = manager.getAgents();
+    auto allAgents = population.getAgents();
     auto& graphRef = graph;
     std::for_each(
         allAgents.begin(), allAgents.end(),
-        [&agentsToKeep, &graphRef, this, &manager,
-         &results](std::reference_wrapper<const Representation::Agent> curragent) {
+        [&agentsToKeep, &graphRef, this, &population,
+         &results](std::reference_wrapper<const Representation::Individual> curragent) {
 
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&curragent](const std::reference_wrapper<const Representation::Agent>& agent) {
+                [&curragent](const std::reference_wrapper<const Representation::Individual>& agent) {
                     return agent.get() == curragent.get();
                 }) == agentsToKeep.end()) {
-                manager.deleteAgent(curragent, graphRef);
+                population.deleteAgent(curragent, graphRef);
 
                 // Keep only results of non-decimated agents.
                 this->removeFromSavedResults(curragent);
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Representation::Agent>>::iterator iter =
+                              std::reference_wrapper<const Representation::Individual>>::iterator iter =
                     results.begin();
                 while (iter != results.end()) {
                     if (iter->second == curragent) {

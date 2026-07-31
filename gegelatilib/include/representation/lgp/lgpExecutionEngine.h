@@ -99,7 +99,7 @@ namespace Representation::LGP {
          */
         template <class T>
         LGPExecutionEngine(
-            const LGPAgent& executedAgent, 
+            const LgpIndividual& executedAgent, 
             const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : LGPEngine(executedAgent, dataSrc, isTraining){};
 
@@ -113,7 +113,7 @@ namespace Representation::LGP {
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const LGPAgent& executedAgent, bool isTraining = false)
+        LGPExecutionEngine(const LgpIndividual& executedAgent, bool isTraining = false)
             : LGPEngine(executedAgent, isTraining){};
 
         /**
@@ -138,7 +138,7 @@ namespace Representation::LGP {
 
         /**
          * \brief Execute the program completely and returns the content of
-         * register 0 to lgpAgent->nbOutputs
+         * register 0 to lgpIndividual->nbOutputs
          */
         virtual std::vector<double> execute() override;
 

@@ -50,7 +50,7 @@ namespace EvoGraph {
       public:
         /// Main constructor for TeamInstrumented.
         /// see Team constructor for more details.
-        TeamInstrumented(std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : Team(agentProgram)
+        TeamInstrumented(std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) : Team(agentProgram)
         {
         }
     };

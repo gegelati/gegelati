@@ -5,7 +5,7 @@
 void Selector::TruncationSelector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>& results,
+                  std::reference_wrapper<const Representation::Individual>>& results,
     RNG::RNG& rng)
 {
     // Some actions may be encountered but not removed while scanning the
@@ -13,7 +13,7 @@ void Selector::TruncationSelector::doSelection(
     // method.
     // Teams and actions are not removed also if there is 1% of teams or actions
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Representation::Agent>>
+                  std::reference_wrapper<const Representation::Individual>>
         preservedAgents;
 
     // Estimate the number of expected agents to delete
@@ -25,13 +25,13 @@ void Selector::TruncationSelector::doSelection(
     while (i < nbExpectedAgents && results.size() > 0) {
 
         auto it = results.begin();
-        const Representation::Agent& agent = it->second;
+        const Representation::Individual& agent = it->second;
         results.erase(it);
 
         // Removed stored result (if any)
         this->removeFromSavedResults(agent);
 
-        this->getManager().deleteAgent(agent, graph);
+        this->getPopulation().deleteAgent(agent, graph);
 
         // Increment loop counter
         i++;
