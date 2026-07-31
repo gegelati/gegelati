@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-#include "algorithm/lgp/lgpAgent.h"
+#include "representation/lgp/lgpAgent.h"
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
@@ -63,9 +63,9 @@ class TPGTest : public ::testing::Test
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e = NULL;
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e = NULL;
     Parameters params;
-    std::shared_ptr<Algorithm::Agent> sharedProgramAgent;
+    std::shared_ptr<Representation::Agent> sharedProgramAgent;
 
     virtual void SetUp()
     {
@@ -79,11 +79,11 @@ class TPGTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 1;
-        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 1;
+        e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
         sharedProgramAgent =
-            std::make_shared<Algorithm::LGP::LGPAgent>(*e, Output::OutputHandler(1), (uint64_t)0);
+            std::make_shared<Representation::LGP::LGPAgent>(*e, Output::OutputHandler(1), (uint64_t)0);
     }
 
     virtual void TearDown()
@@ -186,8 +186,8 @@ TEST_F(TPGTest, EdgeGetSetProgram)
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
-    std::shared_ptr<Algorithm::Agent> programAgent2 =
-            std::make_shared<Algorithm::LGP::LGPAgent>(*e, Output::OutputHandler(1), 0);
+    std::shared_ptr<Representation::Agent> programAgent2 =
+            std::make_shared<Representation::LGP::LGPAgent>(*e, Output::OutputHandler(1), 0);
     
     constEdge->setProgram(*programAgent2);
     ASSERT_EQ(constEdge->getProgram(), *programAgent2)

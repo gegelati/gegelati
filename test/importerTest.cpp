@@ -96,8 +96,8 @@ class ImporterTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect, 3);
         tpg = new EvoGraph::Graph(*e);
         tpg_copy = new EvoGraph::Graph(*e);
@@ -437,7 +437,7 @@ TEST_F(ImporterTest, importTrainedGraph)
 
 TEST_F(ImporterTest, importTrainedGraphContinuous)
 {
-    params.algorithm.lgp.nbProgramConstant = 10;
+    params.representation.lgp.nbProgramConstant = 10;
     e = new Environment(set, params, vect, 3);
     tpg_copy = new EvoGraph::Graph(*e);
 

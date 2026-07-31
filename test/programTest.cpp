@@ -70,8 +70,8 @@ class ProgramTest : public ::testing::Test
         };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
     }
 
@@ -416,7 +416,7 @@ TEST_F(ProgramTest, identifyContinuousIntronsAndIsIntronWithActionProgram)
                 return a[0] * b[0] + a[1] * b[1];
             }));
 
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
     Environment localE(set, params, vect, 3);
 
     // Create a program with 2 introns

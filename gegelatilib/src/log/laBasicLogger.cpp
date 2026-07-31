@@ -44,7 +44,7 @@
 
 void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>& results)
+                  std::reference_wrapper<const Representation::Agent>>& results)
 {
     auto logStat = [&](auto getter) {
         auto iter = results.begin();
@@ -59,7 +59,7 @@ void Log::LABasicLogger::logResults(
             results.begin(), results.end(), 0.0,
             [getter](double acc,
                      const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                     std::reference_wrapper<const Algorithm::Agent>>& pair) {
+                                     std::reference_wrapper<const Representation::Agent>>& pair) {
                 return acc +
                        (pair.first->getSelectionMetrics().get()->*getter)();
             });
@@ -138,7 +138,7 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 
           
     uint64_t nbAgents = 0;
-    for(auto& algo : this->learningAgent.getAlgorithms()){
+    for(auto& algo : this->learningAgent.getRepresentations()){
         nbAgents += algo.get().getNbAgents();
     }
 
@@ -160,7 +160,7 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 
 void Log::LABasicLogger::logAfterEvaluate(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>& results)
+                  std::reference_wrapper<const Representation::Agent>>& results)
 {
     evalTime = getDurationFrom(*checkpoint);
 
@@ -172,7 +172,7 @@ void Log::LABasicLogger::logAfterEvaluate(
 
 void Log::LABasicLogger::logAfterValidate(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>& results)
+                  std::reference_wrapper<const Representation::Agent>>& results)
 {
     validTime = getDurationFrom(*checkpoint);
 

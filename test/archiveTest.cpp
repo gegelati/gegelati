@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "algorithm/lgp/lgpAgent.h"
+#include "representation/lgp/lgpAgent.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
@@ -48,7 +48,7 @@
 #include "mutator/rng.h"
 #include "parameters.h"
 
-#include "algorithm/tpg/archive.h"
+#include "representation/tpg/archive.h"
 
 class ArchiveTest : public ::testing::Test
 {
@@ -57,8 +57,8 @@ class ArchiveTest : public ::testing::Test
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
-    std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
+    std::shared_ptr<const Representation::LGP::LGPAgent> lgpAgent;
     Parameters params;
 
     virtual void SetUp()
@@ -73,10 +73,10 @@ class ArchiveTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
-        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
-        lgpAgent = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
+        lgpAgent = std::make_shared<const Representation::LGP::LGPAgent>(*e, 1, 0);
     }
 
     virtual void TearDown()
@@ -90,18 +90,18 @@ class ArchiveTest : public ::testing::Test
 
 TEST_F(ArchiveTest, ConstructorDestructor)
 {
-    Algorithm::TPG::TPGArchive* a;
-    ASSERT_NO_THROW(a = new Algorithm::TPG::TPGArchive();)
-        << "Default construction of an Algorithm::TPG::TPGArchive failed";
+    Representation::TPG::TPGArchive* a;
+    ASSERT_NO_THROW(a = new Representation::TPG::TPGArchive();)
+        << "Default construction of an Representation::TPG::TPGArchive failed";
 
-    ASSERT_NO_THROW(delete a;) << "Destruction of an empty Algorithm::TPG::TPGArchive failed.";
+    ASSERT_NO_THROW(delete a;) << "Destruction of an empty Representation::TPG::TPGArchive failed.";
 }
 
 TEST_F(ArchiveTest, CombineHash)
 {
     size_t hash;
 
-    ASSERT_NO_THROW(hash = Algorithm::TPG::TPGArchive::getCombinedHash(vect))
+    ASSERT_NO_THROW(hash = Representation::TPG::TPGArchive::getCombinedHash(vect))
         << "Combination of several DataHandler hash failed.";
 
     // change data in one dataHandler
@@ -110,13 +110,13 @@ TEST_F(ArchiveTest, CombineHash)
     d.setDataAt(typeid(int), 2, 1337);
 
     // Compare hashes.
-    ASSERT_NE(Algorithm::TPG::TPGArchive::getCombinedHash(vect), hash);
+    ASSERT_NE(Representation::TPG::TPGArchive::getCombinedHash(vect), hash);
 }
 
 TEST_F(ArchiveTest, AddRecordingTests)
 {
     // For these test, force archivingProbability to 1
-    Algorithm::TPG::TPGArchive archive(3, 1.0);
+    Representation::TPG::TPGArchive archive(3, 1.0);
 
     // Add a fictive recording
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, 1.3))
@@ -128,7 +128,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Add other recordings with the same DataHandlers
-    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
+    auto lgpAgent2 = std::make_shared<const Representation::LGP::LGPAgent>(*e, 1, 0);
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent2, vect, 0.3))
         << "Adding a recording to the non-empty archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 2)
@@ -158,7 +158,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Evict a recording again, and its DataHandler copy.
-    auto lgpAgent3 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
+    auto lgpAgent3 = std::make_shared<const Representation::LGP::LGPAgent>(*e, 1, 0);
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent3, vect, 1.5))
         << "Adding a recording to the full archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 3)
@@ -171,7 +171,7 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Algorithm::TPG::TPGArchive archive(10, 0.5, 0);
+    Representation::TPG::TPGArchive archive(10, 0.5, 0);
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
@@ -191,7 +191,7 @@ TEST_F(ArchiveTest, At)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Algorithm::TPG::TPGArchive archive(10, 1.0);
+    Representation::TPG::TPGArchive archive(10, 1.0);
 
     // Add a few fictive recording
     for (int i = 0; i < 5; i++) {
@@ -217,7 +217,7 @@ TEST_F(ArchiveTest, SetSeed)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Algorithm::TPG::TPGArchive archive(10, 0.5);
+    Representation::TPG::TPGArchive archive(10, 0.5);
 
     ASSERT_NO_THROW(archive.setRandomSeed(1))
         << "Setting a new seed failed unexpectedly.";
@@ -240,7 +240,7 @@ TEST_F(ArchiveTest, SetSeed)
 
 TEST_F(ArchiveTest, areProgramResultsUnique)
 {
-    Algorithm::TPG::TPGArchive archive(4);
+    Representation::TPG::TPGArchive archive(4);
     size_t hash1 = archive.getCombinedHash(vect);
     Data::PrimitiveTypeArray<int>& d =
         const_cast<Data::PrimitiveTypeArray<int>&>(
@@ -254,7 +254,7 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
     archive.addRecording(*lgpAgent, vect, 1.5);
 
     // Add a few fictive recordings with p2
-    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
+    auto lgpAgent2 = std::make_shared<const Representation::LGP::LGPAgent>(*e, 1, 0);
     archive.addRecording(*lgpAgent2, vect, 2.0);
     d.setDataAt(typeid(int), 2, 42);
     size_t hash3 = archive.getCombinedHash(vect);
@@ -276,7 +276,7 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
 
 TEST_F(ArchiveTest, DataHandlersAccessors)
 {
-    Algorithm::TPG::TPGArchive archive(4);
+    Representation::TPG::TPGArchive archive(4);
 
     // Add a few fictive recordings
     archive.addRecording(*lgpAgent, vect, 1.0);
@@ -300,7 +300,7 @@ TEST_F(ArchiveTest, DataHandlersAccessors)
 
 TEST_F(ArchiveTest, Clear)
 {
-    Algorithm::TPG::TPGArchive archive(4);
+    Representation::TPG::TPGArchive archive(4);
 
     ASSERT_NO_THROW(archive.clear())
         << "Clearing an empty archive should not fail.";

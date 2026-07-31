@@ -3,10 +3,10 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
-#include "algorithm/lgp/lgpMutator.h"
-#include "algorithm/lgp/lgpAgent.h"
-#include "algorithm/lgp/lgpLine.h"
-#include "algorithm/lgp/lgpExecutionEngine.h"
+#include "representation/lgp/lgpMutator.h"
+#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpLine.h"
+#include "representation/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
 #include "parameters.h"
 
@@ -20,15 +20,15 @@ class LgpMutatorTest : public ::testing::Test
     const float value1{4.2f};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
     Parameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
     Output::OutputHandler* lgpOutput;
     Selector::Selector* selector;
-    std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
-    const Algorithm::Agent* agent;
-    const Algorithm::LGP::LGPAgent* lgpAgent;
-    std::shared_ptr<Algorithm::LGP::LGPMutator> lgpMutator;
+    std::shared_ptr<Representation::LGP::LGPManager> lgpManager;
+    const Representation::Agent* agent;
+    const Representation::LGP::LGPAgent* lgpAgent;
+    std::shared_ptr<Representation::LGP::LGPMutator> lgpMutator;
 
     LgpMutatorTest() : e{nullptr} {};
 
@@ -55,15 +55,15 @@ class LgpMutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         // the environment and the LGPs have 5 Constant parameters
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
-        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
         lgpOutput = new Output::OutputHandler(Output::Output());
-        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)1);
+        lgpManager = std::make_shared<Representation::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)1);
 
         agent = &lgpManager->createAgent(*graph);
-        lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(agent);
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector, (uint64_t)1);
+        lgpAgent = dynamic_cast<const Representation::LGP::LGPAgent*>(agent);
+        lgpMutator = std::make_shared<Representation::LGP::LGPMutator>(*selector, (uint64_t)1);
     }
 
     virtual void TearDown()
@@ -109,28 +109,28 @@ TEST_F(LgpMutatorTest, LGPMutatorInsertRandomLine)
     rng.setSeed(0);
 
     // Insert in empty LGP
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 1)
         << "Line insertion in an empty LGP failed.";
 
     // Insert in non empty LGP
     // in first position (with known seed)
     rng.setSeed(0);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 2)
         << "Line insertion in a non-empty LGP failed.";
 
     // Insert in non empty LGP
     // After last position (with known seed)
     rng.setSeed(1);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 3)
         << "Line insertion in a non-empty LGP failed.";
 
     // Insert in non empty LGP
     // In the middle position (with known seed)
     rng.setSeed(5);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 4)
         << "Line insertion in a non-empty LGP failed.";
 }
@@ -140,7 +140,7 @@ TEST_F(LgpMutatorTest, LGPMutatorSwapRandomLines)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    std::vector<const Algorithm::LGP::LGPLine*> lines;
+    std::vector<const Representation::LGP::LGPLine*> lines;
     // Nothing on empty LGP
     ASSERT_FALSE(lgpMutator->swapRandomLines(*lgpAgent, *lgpManager, rng));
 
@@ -183,14 +183,14 @@ TEST_F(LgpMutatorTest, LGPMutatorAlterRandomLine)
     rng.setSeed(0);
 
     // Nothing on empty LGP
-    ASSERT_FALSE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_FALSE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
     // Add 10 lines
     for (auto i = 0; i < 10; i++) {
         lgpManager->addNewLine(*lgpAgent);
     }
     // Alter a randomly selected line (with a known seed)
     // Parameter of Line 4 is altered.
-    ASSERT_TRUE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
+    ASSERT_TRUE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.representation, rng));
 }
 
 TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
@@ -198,20 +198,20 @@ TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    params.algorithm.lgp.initMaxProgramSize = 96;
-    params.algorithm.lgp.initMinProgramSize = 1;
-    params.algorithm.lgp.maxConstValue = 10;
-    params.algorithm.lgp.minConstValue = 0;
+    params.representation.lgp.initMaxProgramSize = 96;
+    params.representation.lgp.initMinProgramSize = 1;
+    params.representation.lgp.maxConstValue = 10;
+    params.representation.lgp.minConstValue = 0;
 
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
-    ASSERT_NO_THROW(lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(&lgpMutator->initRandomAgent(*graph, *lgpManager, params.algorithm, rng)))
+    ASSERT_NO_THROW(lgpAgent = dynamic_cast<const Representation::LGP::LGPAgent*>(&lgpMutator->initRandomAgent(*graph, *lgpManager, params.representation, rng)))
         << "Empty LGP Random init failed";
     ASSERT_EQ(lgpAgent->getNbLines(), 15)
         << "Random number of line is not as expected (with known seed).";
 
 
-    ASSERT_NO_THROW(lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params.algorithm, rng))
+    ASSERT_NO_THROW(lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params.representation, rng))
         << "Non-Empty LGP Random init failed";
     ASSERT_EQ(lgpAgent->getNbLines(), 38)
         << "Random number of line is not as expected (with known seed).";
@@ -240,62 +240,62 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
         [](const double a, const double b, const double c) -> double {
             return (cos(a + b + c));
         })));
-    const Algorithm::LGP::LGPAgent& lgpAgent2 = *dynamic_cast<const Algorithm::LGP::LGPAgent*>(&lgpManager->createAgent(*graph));
+    const Representation::LGP::LGPAgent& lgpAgent2 = *dynamic_cast<const Representation::LGP::LGPAgent*>(&lgpManager->createAgent(*graph));
 
-    Algorithm::LGP::LGPLineMutator lineMutator;
+    Representation::LGP::LGPLineMutator lineMutator;
     Selector::SelectionContext context;
 
     rng.setSeed(14);
     lgpManager->addNewLine(lgpAgent2);
-    Algorithm::LGP::LGPLine& l = lgpManager->getLineForMutation(lgpAgent2, 0);
+    Representation::LGP::LGPLine& l = lgpManager->getLineForMutation(lgpAgent2, 0);
     lineMutator.initRandomCorrectLine(l, rng);
     lgpManager->addNewLine(lgpAgent2);
-    Algorithm::LGP::LGPLine& l2 = lgpManager->getLineForMutation(lgpAgent2, 1);
+    Representation::LGP::LGPLine& l2 = lgpManager->getLineForMutation(lgpAgent2, 1);
     lineMutator.initRandomCorrectLine(l2, rng);
     lgpManager->addNewLine(lgpAgent2);
-    Algorithm::LGP::LGPLine& l3 = lgpManager->getLineForMutation(lgpAgent2, 2);
+    Representation::LGP::LGPLine& l3 = lgpManager->getLineForMutation(lgpAgent2, 2);
     lineMutator.initRandomCorrectLine(l3, rng);
 
-    params.algorithm.lgp.maxProgramSize = 15;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pAdd = 0.0;
-    params.algorithm.lgp.pMutate = 0.0;
-    params.algorithm.lgp.pSwap = 0.0;
-    params.algorithm.lgp.maxConstValue = 1;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.pConstantMutation = 0.2;
+    params.representation.lgp.maxProgramSize = 15;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pAdd = 0.0;
+    params.representation.lgp.pMutate = 0.0;
+    params.representation.lgp.pSwap = 0.0;
+    params.representation.lgp.maxConstValue = 1;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.pConstantMutation = 0.2;
 
     rng.setSeed(0);
-    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.algorithm, rng))
+    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.representation, rng))
         << "Mutation did not occur with known seed.";
     ASSERT_EQ(lgpAgent2.getNbLines(), 2)
         << "Wrong LGP mutation occured. Expected: Line deletion.";
 
-    params.algorithm.lgp.pDelete = 0.0;
-    params.algorithm.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.0;
+    params.representation.lgp.pAdd = 0.5;
     rng.setSeed(1);
-    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.algorithm, rng))
+    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.representation, rng))
         << "Mutation did not occur with known seed.";
     ASSERT_EQ(lgpAgent2.getNbLines(), 3)
         << "Wrong LGP mutation occured. Expected: Line insertion.";
 
-    params.algorithm.lgp.pAdd = 0.0;
-    params.algorithm.lgp.pMutate = 0.01;
+    params.representation.lgp.pAdd = 0.0;
+    params.representation.lgp.pMutate = 0.01;
     rng.setSeed(86);
-    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.algorithm, rng))
+    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.representation, rng))
         << "Mutation did not occur with known seed.";
 
-    params.algorithm.lgp.pMutate = 0.00;
-    params.algorithm.lgp.pSwap = 0.1;
+    params.representation.lgp.pMutate = 0.00;
+    params.representation.lgp.pSwap = 0.1;
     rng.setSeed(1);
-    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.algorithm, rng))
+    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.representation, rng))
         << "Mutation did not occur with known seed.";
 
     // mutate other instructions
-    params.algorithm.lgp.pSwap = 0.0;
-    params.algorithm.lgp.pMutate = 1;
+    params.representation.lgp.pSwap = 0.0;
+    params.representation.lgp.pMutate = 1;
     rng.setSeed(114);
-    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.algorithm, rng))
+    ASSERT_TRUE(lgpMutator->mutateLGPAgent(lgpAgent2, *lgpManager, params.representation, rng))
         << "Mutation did not occur with known seed.";
 
     // Teardown for this test

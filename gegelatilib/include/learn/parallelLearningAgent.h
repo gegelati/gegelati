@@ -84,9 +84,9 @@ namespace Learn {
          * evaluated agents.
          */
         virtual void evaluateAgentsInParallel(
-            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+            std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results);
+                          std::reference_wrapper<const Representation::Agent>>& results);
 
         /**
          * \brief Subfunction of evaluateAllAgentsInParallel which handles the
@@ -102,9 +102,9 @@ namespace Learn {
          * results and itself.
          */
         virtual void evaluateAgentsInParallelExecute(
-            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+            std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Algorithm::Job>>>&
+                                         std::shared_ptr<Representation::Job>>>&
                 resultsPerJobMap);
 
         /**
@@ -120,10 +120,10 @@ namespace Learn {
          */
         virtual void evaluateAgentsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Algorithm::Job>>>&
+                                         std::shared_ptr<Representation::Job>>>&
                 resultsPerJobMap,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results);
+                          std::reference_wrapper<const Representation::Agent>>& results);
 
         /**
          * \brief Function implementing the behavior of slave threads during
@@ -147,10 +147,10 @@ namespace Learn {
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess,
+            std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess,
             std::mutex& agentsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Algorithm::Job>>>&
+                                         std::shared_ptr<Representation::Job>>>&
                 resultsPerAgentMap,
             std::mutex& resultsPerAgentMapMutex,
             size_t indexEnvironment);
@@ -165,16 +165,16 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] algorithms vector of algorithm learned by the learning agent
+         * \param[in] representations vector of representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
+            LearningEnvironment& le, std::vector<std::reference_wrapper<Representation::Representation>> representations,
             std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, algorithms, std::move(parameters), factory)
+            : LearningAgent(le, representations, std::move(parameters), factory)
         {};
 
         /**
@@ -183,32 +183,32 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] algorithm vector of algorithm learned by the learning agent
+         * \param[in] representation vector of representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, Algorithm::Algorithm& algorithm,
+            LearningEnvironment& le, Representation::Representation& representation,
             std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, std::move(parameters), factory) {};
+            : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Representation::Representation>>{representation}, std::move(parameters), factory) {};
 
 
         /**
          * \brief Inherrit from LearningAgent, set the maxNbThreads value.
          * 
          * \param[in] seed the seed given to the TPGMutator.
-         * \param[in] doGeneratePopulation boolean to indicate if population of the algorithms should be generated here.
+         * \param[in] doGeneratePopulation boolean to indicate if population of the representations should be generated here.
          */
         virtual void init(uint64_t seed = 0, bool doGeneratePopulation = true) override;
 
         /**
-         * \brief Evaluate all agent of an algorithm.
+         * \brief Evaluate all agent of an representation.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
-         * This method must always return the same results as the evaluateOneAlgorithmAgents for
+         * This method must always return the same results as the evaluateOneRepresentationAgents for
          * a sequential execution. 
          *
          * \param[in] generationNumber the integer number of the current
@@ -217,8 +217,8 @@ namespace Learn {
          * evaluation.
          * 
          */
-        std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
-        evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode) override;
+        std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+        evaluateCurrentRepresentationAgents(uint64_t generationNumber, LearningMode mode) override;
     };
 } // namespace Learn
 #endif

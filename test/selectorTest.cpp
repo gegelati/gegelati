@@ -84,23 +84,23 @@ class SelectorTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         // Proba as in Kelly's paper
-        params.algorithm.tpg.maxInitOutgoingEdges = 3;
-        params.algorithm.lgp.maxProgramSize = 96;
-        params.algorithm.nbAgents = 15;
-        params.algorithm.tpg.pEdgeDeletion = 0.7;
-        params.algorithm.tpg.pEdgeAddition = 0.7;
-        params.algorithm.tpg.pProgramMutation = 0.2;
-        params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-        params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-        params.algorithm.tpg.maxOutgoingEdges = 4;
-        params.algorithm.lgp.pAdd = 0.5;
-        params.algorithm.lgp.pDelete = 0.5;
-        params.algorithm.lgp.pMutate = 1.0;
-        params.algorithm.lgp.pSwap = 1.0;
-        params.algorithm.lgp.pConstantMutation = 0.5;
-        params.algorithm.lgp.minConstValue = 0;
-        params.algorithm.lgp.maxConstValue = 1;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.tpg.maxInitOutgoingEdges = 3;
+        params.representation.lgp.maxProgramSize = 96;
+        params.representation.nbAgents = 15;
+        params.representation.tpg.pEdgeDeletion = 0.7;
+        params.representation.tpg.pEdgeAddition = 0.7;
+        params.representation.tpg.pProgramMutation = 0.2;
+        params.representation.tpg.pEdgeDestinationChange = 0.1;
+        params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+        params.representation.tpg.maxOutgoingEdges = 4;
+        params.representation.lgp.pAdd = 0.5;
+        params.representation.lgp.pDelete = 0.5;
+        params.representation.lgp.pMutate = 1.0;
+        params.representation.lgp.pSwap = 1.0;
+        params.representation.lgp.pConstantMutation = 0.5;
+        params.representation.lgp.minConstValue = 0;
+        params.representation.lgp.maxConstValue = 1;
+        params.representation.lgp.nbProgramConstant = 5;
 
         e = new Environment(set, params, vect);
         progPointer =
@@ -144,8 +144,8 @@ TEST_F(SelectorTest, doAbstractSelection)
 
 TEST_F(SelectorTest, KeepBestPolicy)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 1;
     params.selection.truncation.ratioDeletedRoots = 0.2;
@@ -254,14 +254,14 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
 
 TEST_F(SelectorTest, forgetPreviousResults)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
-    params.algorithm.tpg.maxInitOutgoingEdges = 2;
+    params.representation.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.algorithm.nbAgents = 10;
-    params.algorithm.lgp.nbRegisters = 4;
+    params.representation.nbAgents = 10;
+    params.representation.lgp.nbRegisters = 4;
 
     Learn::LearningAgent la(le, set, params);
     la.init();
@@ -312,15 +312,15 @@ TEST_F(SelectorTest, forgetPreviousResults)
 
 TEST_F(SelectorTest, DoSelection)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.algorithm.tpg.maxInitOutgoingEdges = 2;
+    params.representation.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.algorithm.nbAgents =
+    params.representation.nbAgents =
         le.getNbActions() - 1; // Param used in decimation
-    params.algorithm.lgp.nbRegisters = 4;
+    params.representation.lgp.nbRegisters = 4;
 
     Learn::LearningAgent la(le, set, params);
     la.init();
@@ -365,10 +365,10 @@ TEST_F(SelectorTest, DoSelection)
 TEST_F(SelectorTest, DoSelectionActionsQuota)
 {
     // We force the ratio to quickly reach quotas
-    params.algorithm.nbAgents = 20;
+    params.representation.nbAgents = 20;
     params.selection.truncation.ratioDeletedRoots = 0.5;
-    params.algorithm.tpg.ratioTeamsOverActions = 0.6;
-    params.algorithm.tpg.useActionProgram =
+    params.representation.tpg.ratioTeamsOverActions = 0.6;
+    params.representation.tpg.useActionProgram =
         true; // To make action vertices removed too.
     Learn::LearningAgent cla(cle, set, params);
     cla.init();
@@ -421,7 +421,7 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
 TEST_F(SelectorTest, DecimateWithTournamentSelection)
 {
     params.selection._selectionMode = "tournament";
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     params.selection.tournament.ratioSavedRoots = 0.3;
     params.selection.tournament.sizeTournament = 4;
     Learn::LearningAgent tournamentLA(le, set, params);
@@ -472,10 +472,10 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
 
 TEST_F(SelectorTest, UpdateContext)
 {
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.nbAgents = 2;
-    params.algorithm.tpg.ratioTeamsOverActions = 0.5;
-    params.algorithm.tpg.teamAccessAllActions = false;
+    params.representation.tpg.useActionProgram = true;
+    params.representation.nbAgents = 2;
+    params.representation.tpg.ratioTeamsOverActions = 0.5;
+    params.representation.tpg.teamAccessAllActions = false;
 
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
 
@@ -555,7 +555,7 @@ TEST_F(SelectorTest, UpdateContext)
 
 TEST_F(SelectorTest, UpdateContextTournament)
 {
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
 
     // Create dummy teams and actions, some marked as to be deleted
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
@@ -599,7 +599,7 @@ TEST_F(SelectorTest, UpdateContextTournament)
 
 TEST_F(SelectorTest, updateAfterPopulate)
 {
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
 
     // Create dummy teams and actions, some marked as to be deleted
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
@@ -653,7 +653,7 @@ TEST_F(SelectorTest, FactorySelector)
     ASSERT_TRUE(std::dynamic_pointer_cast<Selector::MapElitesSelector>(
                     selector) != nullptr);
 
-    params.algorithm.tpg.ratioTeamsOverActions = 0.5;
+    params.representation.tpg.ratioTeamsOverActions = 0.5;
     ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params),
                  std::runtime_error);
 

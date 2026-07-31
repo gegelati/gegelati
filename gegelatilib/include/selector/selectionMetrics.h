@@ -3,7 +3,7 @@
 #ifndef SELECTION_METRICS_H
 #define SELECTION_METRICS_H
 
-#include "algorithm/agent.h"
+#include "representation/agent.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/graph.h"
 
@@ -69,7 +69,7 @@ namespace Selector {
          * agent is evaluated.
          */
         virtual void initMetrics(
-            const Algorithm::Agent& agent,
+            const Representation::Agent& agent,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -85,7 +85,7 @@ namespace Selector {
          * agent is evaluated.
          */
         virtual void extractMetricsStep(
-            const Algorithm::Agent& agent, std::vector<double> actionValues,
+            const Representation::Agent& agent, std::vector<double> actionValues,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -103,7 +103,7 @@ namespace Selector {
          * which the agent is evaluated.
          */
         virtual void extractMetricsEpisode(
-            const Algorithm::Agent& agent, size_t nbStepsExecuted,
+            const Representation::Agent& agent, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment);
 
         /**

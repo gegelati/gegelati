@@ -110,8 +110,8 @@ class ProgramEngineTest : public ::testing::Test
                 return a + b * (double)c;
             }));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
         p = new Program::Program(*e, false);
 
@@ -304,8 +304,8 @@ TEST_F(ProgramEngineTest, setProgram)
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
-    params.algorithm.lgp.nbRegisters = 2;
-    params.algorithm.lgp.nbProgramConstant = 0;
+    params.representation.lgp.nbRegisters = 2;
+    params.representation.lgp.nbProgramConstant = 0;
     Environment otherE(set, params, otherVect);
     Program::Program p3(otherE, false);
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)

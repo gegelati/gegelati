@@ -51,48 +51,48 @@
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <algorithm/agent.h>
-#include <algorithm/algorithm.h>
-#include <algorithm/job.h>
-#include <algorithm/mutator.h>
-#include <algorithm/agentManager.h>
-#include <algorithm/executionEngine.h>
+#include <representation/agent.h>
+#include <representation/representation.h>
+#include <representation/job.h>
+#include <representation/mutator.h>
+#include <representation/agentManager.h>
+#include <representation/executionEngine.h>
 
-#include <algorithm/atpg/atpgAlgorithm.h>
-#include <algorithm/atpg/atpgManager.h>
-#include <algorithm/atpg/atpgMutator.h>
-#include <algorithm/atpg/atpgExecutionEngine.h>
+#include <representation/atpg/atpgRepresentation.h>
+#include <representation/atpg/atpgManager.h>
+#include <representation/atpg/atpgMutator.h>
+#include <representation/atpg/atpgExecutionEngine.h>
 
-#include <algorithm/cgp/cgpAlgorithm.h>
-#include <algorithm/cgp/cgpLineMutator.h>
-#include <algorithm/cgp/cgpMutator.h>
+#include <representation/cgp/cgpRepresentation.h>
+#include <representation/cgp/cgpLineMutator.h>
+#include <representation/cgp/cgpMutator.h>
 
-#include <algorithm/lgp/environment.h>
-#include <algorithm/lgp/lgpAlgorithm.h>
-#include <algorithm/lgp/lgpAgent.h>
-#include <algorithm/lgp/lgpManager.h>
-#include <algorithm/lgp/lgpMutator.h>
-#include <algorithm/lgp/lgpLine.h>
-#include <algorithm/lgp/lgpLineMutator.h>
-#include <algorithm/lgp/lgpCodeGenerationEngine.h>
-#include <algorithm/lgp/lgpExecutionEngine.h>
+#include <representation/lgp/environment.h>
+#include <representation/lgp/lgpRepresentation.h>
+#include <representation/lgp/lgpAgent.h>
+#include <representation/lgp/lgpManager.h>
+#include <representation/lgp/lgpMutator.h>
+#include <representation/lgp/lgpLine.h>
+#include <representation/lgp/lgpLineMutator.h>
+#include <representation/lgp/lgpCodeGenerationEngine.h>
+#include <representation/lgp/lgpExecutionEngine.h>
 
-#include <algorithm/maple/mapleAgent.h>
-#include <algorithm/maple/mapleAlgorithm.h>
-#include <algorithm/maple/mapleExecutionEngine.h>
-#include <algorithm/maple/mapleManager.h>
-#include <algorithm/maple/mapleMutator.h>
+#include <representation/maple/mapleAgent.h>
+#include <representation/maple/mapleRepresentation.h>
+#include <representation/maple/mapleExecutionEngine.h>
+#include <representation/maple/mapleManager.h>
+#include <representation/maple/mapleMutator.h>
 
-#include <algorithm/tgp/tgpAlgorithm.h>
-#include <algorithm/tgp/tgpLineMutator.h>
-#include <algorithm/tgp/tgpMutator.h>
+#include <representation/tgp/tgpRepresentation.h>
+#include <representation/tgp/tgpLineMutator.h>
+#include <representation/tgp/tgpMutator.h>
 
-#include <algorithm/tpg/archive.h>
-#include <algorithm/tpg/tpgAlgorithm.h>
-#include <algorithm/tpg/tpgAgent.h>
-#include <algorithm/tpg/tpgManager.h>
-#include <algorithm/tpg/tpgMutator.h>
-#include <algorithm/tpg/tpgExecutionEngine.h>
+#include <representation/tpg/archive.h>
+#include <representation/tpg/tpgRepresentation.h>
+#include <representation/tpg/tpgAgent.h>
+#include <representation/tpg/tpgManager.h>
+#include <representation/tpg/tpgMutator.h>
+#include <representation/tpg/tpgExecutionEngine.h>
 
 
 #include <data/array2DWrapper.h>

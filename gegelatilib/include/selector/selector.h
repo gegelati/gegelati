@@ -3,7 +3,7 @@
 #ifndef SELECTOR_H
 #define SELECTOR_H
 
-#include "algorithm/agentManager.h"
+#include "representation/agentManager.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "learn/learningParameters.h"
@@ -30,7 +30,7 @@ namespace Selector {
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<std::optional<std::reference_wrapper<const Algorithm::Agent>>,
+        std::pair<std::optional<std::reference_wrapper<const Representation::Agent>>,
                   std::shared_ptr<Learn::EvaluationResult>>
             bestAgent{std::nullopt, nullptr};
 
@@ -47,29 +47,29 @@ namespace Selector {
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
-        std::map<std::reference_wrapper<const Algorithm::Agent>,
+        std::map<std::reference_wrapper<const Representation::Agent>,
                  std::shared_ptr<Learn::EvaluationResult>>
             resultsPerAgent;
 
 
         /**
-         * \brief manager of the used algorithm. The manager can delete or create agents in the algorithm population
+         * \brief manager of the used representation. The manager can delete or create agents in the representation population
          */
-        std::optional<std::reference_wrapper<Algorithm::AgentManager>> manager;
+        std::optional<std::reference_wrapper<Representation::AgentManager>> manager;
 
         /**
          * \brief get the manager
          * 
          * Throw if manager is not set (in optional type)
          */
-        Algorithm::AgentManager& getManager();
+        Representation::AgentManager& getManager();
 
         /**
          * \brief get the manager
          * 
          * Throw if manager is not set (in optional type)
          */
-        const Algorithm::AgentManager& cGetManager() const;
+        const Representation::AgentManager& cGetManager() const;
 
       public:
 
@@ -100,7 +100,7 @@ namespace Selector {
          * 
          * \param[in] manager set to the selector
          */
-        void setManager(Algorithm::AgentManager& manager);
+        void setManager(Representation::AgentManager& manager);
 
         /**
          * \brief return true if the manager is set
@@ -124,14 +124,14 @@ namespace Selector {
         virtual void doSelection(
             EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results,
+                          std::reference_wrapper<const Representation::Agent>>& results,
             RNG::RNG& rng);
 
         /**
          * Creates and return an instance of SelectionMetrics
          *
          * The purpose of this method is to be override by new selection
-         * algorithms to use specific metrics.
+         * representations to use specific metrics.
          */
         virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const;
 
@@ -150,7 +150,7 @@ namespace Selector {
          * 
          * \param[in] agent Agent removed from the data.
          */
-        virtual void removeFromSavedResults(const Algorithm::Agent& agent);
+        virtual void removeFromSavedResults(const Representation::Agent& agent);
 
         /**
          * \brief Update the bestAgent and resultsPerAgent attributes.
@@ -174,7 +174,7 @@ namespace Selector {
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Representation::Agent>>& results);
 
         /**
          * \brief Update the resultsPerAgent.
@@ -183,7 +183,7 @@ namespace Selector {
          */
         virtual void updateResultsPerAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Representation::Agent>>& results);
 
         /**
          * \brief Update the bestAgent attribute.
@@ -207,7 +207,7 @@ namespace Selector {
          */
         virtual void updateBestAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::reference_wrapper<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Representation::Agent>>& results);
 
                                 
         /**
@@ -219,7 +219,7 @@ namespace Selector {
          * otherwise.
          */
         virtual std::shared_ptr<Learn::EvaluationResult> getResultsOf(
-            const Algorithm::Agent& agent) const;
+            const Representation::Agent& agent) const;
 
         /**
          * \brief Getter for the number of evaluation of a specific agent
@@ -230,7 +230,7 @@ namespace Selector {
          * otherwise.
          */
         virtual size_t getNbEvaluation(
-            const Algorithm::Agent& agent) const;
+            const Representation::Agent& agent) const;
 
         /**
          * \brief Get the best agent EvoGraph::Vertex encountered since the last init.
@@ -240,7 +240,7 @@ namespace Selector {
          *
          * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<std::optional<std::reference_wrapper<const Algorithm::Agent>>,
+        virtual const std::pair<std::optional<std::reference_wrapper<const Representation::Agent>>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
         getBestAgent() const;
 
@@ -257,7 +257,7 @@ namespace Selector {
         /**
          * \brief Return the resultsPerAgent map.
          */
-        virtual const std::map<std::reference_wrapper<const Algorithm::Agent>,
+        virtual const std::map<std::reference_wrapper<const Representation::Agent>,
                                std::shared_ptr<Learn::EvaluationResult>>&
         getResultsPerAgent() const;
 

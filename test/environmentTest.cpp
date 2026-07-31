@@ -40,7 +40,7 @@
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "algorithm/lgp/environment.h"
+#include "representation/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
@@ -65,16 +65,16 @@ TEST(EnvironmentTest, Constructor)
     vect.push_back(d2);
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    ASSERT_NO_THROW({ Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect); });
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    ASSERT_NO_THROW({ Representation::LGP::LGPEnvironment e(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect); });
 
-    params.algorithm.lgp.nbProgramConstant = 0;
+    params.representation.lgp.nbProgramConstant = 0;
     ASSERT_THROW(
         // Empty dataHandlers
-        Algorithm::LGP::LGPEnvironment e2(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, {});, std::domain_error)
-        << "Something went unexpectedly right when constructing an Algorithm::LGP::LGPEnvironment "
-           "with an invalid Algorithm::LGP::LGPEnvironment.";
+        Representation::LGP::LGPEnvironment e2(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, {});, std::domain_error)
+        << "Something went unexpectedly right when constructing an Representation::LGP::LGPEnvironment "
+           "with an invalid Representation::LGP::LGPEnvironment.";
 }
 
 TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
@@ -97,10 +97,10 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
     set.add(*(new Instructions::AddPrimitiveType<bool>()));
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    Algorithm::LGP::LGPEnvironment* e3 = NULL;
-    ASSERT_NO_THROW(e3 = new Algorithm::LGP::LGPEnvironment(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect))
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    Representation::LGP::LGPEnvironment* e3 = NULL;
+    ASSERT_NO_THROW(e3 = new Representation::LGP::LGPEnvironment(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect))
         << "Constructing an Environemnt with an invalid Instruction should not "
            "throw an exception.";
     if (e3 != NULL) {
@@ -119,9 +119,9 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
     set2.add(*(new Instructions::AddPrimitiveType<int>()));
     set2.add(*(new Instructions::AddPrimitiveType<double>()));
     set2.add(*(new Instructions::MultByConstant<int>()));
-    Algorithm::LGP::LGPEnvironment* e4 = NULL;
-    params.algorithm.lgp.nbProgramConstant = 0;
-    ASSERT_NO_THROW(e4 = new Algorithm::LGP::LGPEnvironment(set2, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect))
+    Representation::LGP::LGPEnvironment* e4 = NULL;
+    params.representation.lgp.nbProgramConstant = 0;
+    ASSERT_NO_THROW(e4 = new Representation::LGP::LGPEnvironment(set2, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect))
         << "Constructing an Environemnt with an invalid Instruction should not "
            "throw an exception.";
     if (e4 != NULL) {
@@ -142,7 +142,7 @@ TEST(EnvironmentTest, computeLineSize)
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    Algorithm::LGP::LGPEnvironment* e;
+    Representation::LGP::LGPEnvironment* e;
     vect.push_back(
         *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
     vect.push_back(*(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
@@ -152,9 +152,9 @@ TEST(EnvironmentTest, computeLineSize)
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    e = new Algorithm::LGP::LGPEnvironment(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    e = new Representation::LGP::LGPEnvironment(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
     // Expected answer:
     // n = 8
@@ -192,27 +192,27 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     vect.push_back(d2);
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    Representation::LGP::LGPEnvironment e(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
     ASSERT_EQ(e.getNbRegisters(), 8)
-        << "Number of registers of the Algorithm::LGP::LGPEnvironment does not correspond to the "
+        << "Number of registers of the Representation::LGP::LGPEnvironment does not correspond to the "
            "one given during construction.";
     ASSERT_EQ(e.getNbConstants(), 5)
-        << "Number of Constants of the Algorithm::LGP::LGPEnvironment does not correspond to the "
+        << "Number of Constants of the Representation::LGP::LGPEnvironment does not correspond to the "
            "one given during construction.";
     ASSERT_EQ(e.getNbInstructions(), 3)
-        << "Number of instructions of the Algorithm::LGP::LGPEnvironment does not correspond to "
+        << "Number of instructions of the Representation::LGP::LGPEnvironment does not correspond to "
            "the content of the set given during construction.";
     ASSERT_EQ(e.getMaxNbOperands(), 2)
-        << "Maximum number of operands of the Algorithm::LGP::LGPEnvironment does not correspond "
+        << "Maximum number of operands of the Representation::LGP::LGPEnvironment does not correspond "
            "to the instruction set given during construction.";
     ASSERT_EQ(e.getNbDataSources(), 4)
         << "Number of data sources does not correspond to the number of "
            "DataHandler (+1 for registers) given during construction.";
     ASSERT_EQ(e.getLargestAddressSpace(), size2)
-        << "Largest address space of the Algorithm::LGP::LGPEnvironment does not corresponds to "
+        << "Largest address space of the Representation::LGP::LGPEnvironment does not corresponds to "
            "the dataHandlers or registers given during construction.";
 }
 
@@ -236,9 +236,9 @@ TEST(EnvironmentTest, GetFakeRegisters)
     vect.push_back(d2);
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    Representation::LGP::LGPEnvironment e(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
     ASSERT_NO_THROW(auto dataHandler = e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
@@ -271,9 +271,9 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     vect.push_back(d2);
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    Representation::LGP::LGPEnvironment e(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
     const Instructions::Set& setCpy = e.getInstructionSet();
     ASSERT_NE(&setCpy, &set)
@@ -309,9 +309,9 @@ TEST(EnvironmentTest, DataSourceAccessor)
     vect.push_back(d2);
 
     Parameters params;
-    params.algorithm.lgp.nbRegisters = 8;
-    params.algorithm.lgp.nbProgramConstant = 5;
-    Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+    params.representation.lgp.nbRegisters = 8;
+    params.representation.lgp.nbProgramConstant = 5;
+    Representation::LGP::LGPEnvironment e(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
     auto& dataSourcesCpy = e.getDataSources();
     ASSERT_NE(&dataSourcesCpy, &vect)

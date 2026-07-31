@@ -54,7 +54,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            Team.
          */
-        Team(std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) : Vertex(agentProgram){};
+        Team(std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : Vertex(agentProgram){};
 
 
         

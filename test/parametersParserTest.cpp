@@ -79,11 +79,11 @@ TEST(LearningParametersTest, readConfigFile)
 TEST(LearningParametersTest, setParameterFromString)
 {
     Parameters params;
-    ASSERT_EQ(params.algorithm.lgp.nbRegisters, 8);
+    ASSERT_EQ(params.representation.lgp.nbRegisters, 8);
     std::string key = "nbRegisters";
     Json::Value v(5);
     File::ParametersParser::setParameterFromString(params, key, v);
-    ASSERT_EQ(params.algorithm.lgp.nbRegisters, 5);
+    ASSERT_EQ(params.representation.lgp.nbRegisters, 5);
 }
 
 TEST(LearningParametersTest, setAllParamsFrom)
@@ -103,50 +103,50 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(200, params.evaluation.nbGenerations);
     ASSERT_EQ(true, params.evaluation.doValidation);
 
-    ASSERT_EQ("none", params.algorithm.activationFunction);
-    ASSERT_EQ(100, params.algorithm.nbAgents);
+    ASSERT_EQ("none", params.representation.activationFunction);
+    ASSERT_EQ(100, params.representation.nbAgents);
 
-    ASSERT_EQ(50, params.algorithm.tpg.archiveSize);
-    ASSERT_EQ(0.5, params.algorithm.tpg.archivingProbability);
-    ASSERT_EQ(3, params.algorithm.tpg.maxInitOutgoingEdges);
-    ASSERT_EQ(60, params.algorithm.tpg.maxOutgoingEdges);
-    ASSERT_EQ(0.8, params.algorithm.tpg.pEdgeDeletion);
-    ASSERT_EQ(0.8, params.algorithm.tpg.pEdgeAddition);
-    ASSERT_EQ(0.8, params.algorithm.tpg.pProgramMutation);
-    ASSERT_TRUE(params.algorithm.lgp.forceProgramBehaviorChangeOnMutation);
-    ASSERT_EQ(0.3, params.algorithm.tpg.pEdgeDestinationChange);
-    ASSERT_EQ(0.6, params.algorithm.tpg.pEdgeDestinationIsAction);
+    ASSERT_EQ(50, params.representation.tpg.archiveSize);
+    ASSERT_EQ(0.5, params.representation.tpg.archivingProbability);
+    ASSERT_EQ(3, params.representation.tpg.maxInitOutgoingEdges);
+    ASSERT_EQ(60, params.representation.tpg.maxOutgoingEdges);
+    ASSERT_EQ(0.8, params.representation.tpg.pEdgeDeletion);
+    ASSERT_EQ(0.8, params.representation.tpg.pEdgeAddition);
+    ASSERT_EQ(0.8, params.representation.tpg.pProgramMutation);
+    ASSERT_TRUE(params.representation.lgp.forceProgramBehaviorChangeOnMutation);
+    ASSERT_EQ(0.3, params.representation.tpg.pEdgeDestinationChange);
+    ASSERT_EQ(0.6, params.representation.tpg.pEdgeDestinationIsAction);
 
-    ASSERT_EQ(0.5, params.algorithm.atpg.probaContextOverActionProgram);
+    ASSERT_EQ(0.5, params.representation.atpg.probaContextOverActionProgram);
 
-    ASSERT_EQ(0.3, params.algorithm.maple.pChangeActionClass);
-    ASSERT_EQ(0.3, params.algorithm.maple.pActionEdgeDeletion);
-    ASSERT_EQ(0.4, params.algorithm.maple.pActionEdgeAddition);
-    ASSERT_EQ(0.5, params.algorithm.maple.pMutateActionProgram);
-    ASSERT_EQ(0.9, params.algorithm.maple.pSwapActionProgram);
-    ASSERT_EQ(3, params.algorithm.maple.nbActionEdgeInit);
-    ASSERT_EQ(0.2, params.algorithm.maple.pCrossAgents);
-    ASSERT_EQ(0.5, params.algorithm.maple.pCrossPrograms);
+    ASSERT_EQ(0.3, params.representation.maple.pChangeActionClass);
+    ASSERT_EQ(0.3, params.representation.maple.pActionEdgeDeletion);
+    ASSERT_EQ(0.4, params.representation.maple.pActionEdgeAddition);
+    ASSERT_EQ(0.5, params.representation.maple.pMutateActionProgram);
+    ASSERT_EQ(0.9, params.representation.maple.pSwapActionProgram);
+    ASSERT_EQ(3, params.representation.maple.nbActionEdgeInit);
+    ASSERT_EQ(0.2, params.representation.maple.pCrossAgents);
+    ASSERT_EQ(0.5, params.representation.maple.pCrossPrograms);
 
-    ASSERT_EQ(3.0, params.algorithm.lgp.nbRegisters);
-    ASSERT_EQ(5, params.algorithm.lgp.nbProgramConstant);
-    ASSERT_EQ(40, params.algorithm.lgp.maxProgramSize);
-    ASSERT_EQ(0.0, params.algorithm.lgp.pNewProgram);
-    ASSERT_EQ(0.7, params.algorithm.lgp.pDelete);
-    ASSERT_EQ(0.7, params.algorithm.lgp.pAdd);
-    ASSERT_EQ(1.0, params.algorithm.lgp.pMutate);
-    ASSERT_EQ(1.0, params.algorithm.lgp.pSwap);
-    ASSERT_EQ(0.5, params.algorithm.lgp.pConstantMutation);
-    ASSERT_EQ(-10, params.algorithm.lgp.minConstValue);
-    ASSERT_EQ(10, params.algorithm.lgp.maxConstValue);
+    ASSERT_EQ(3.0, params.representation.lgp.nbRegisters);
+    ASSERT_EQ(5, params.representation.lgp.nbProgramConstant);
+    ASSERT_EQ(40, params.representation.lgp.maxProgramSize);
+    ASSERT_EQ(0.0, params.representation.lgp.pNewProgram);
+    ASSERT_EQ(0.7, params.representation.lgp.pDelete);
+    ASSERT_EQ(0.7, params.representation.lgp.pAdd);
+    ASSERT_EQ(1.0, params.representation.lgp.pMutate);
+    ASSERT_EQ(1.0, params.representation.lgp.pSwap);
+    ASSERT_EQ(0.5, params.representation.lgp.pConstantMutation);
+    ASSERT_EQ(-10, params.representation.lgp.minConstValue);
+    ASSERT_EQ(10, params.representation.lgp.maxConstValue);
 
-    ASSERT_EQ(0, params.algorithm.cgp.nbLayers);
-    ASSERT_EQ(0, params.algorithm.cgp.nbNodesPerLayer);
-    ASSERT_EQ(0, params.algorithm.cgp.pMutateNode);
+    ASSERT_EQ(0, params.representation.cgp.nbLayers);
+    ASSERT_EQ(0, params.representation.cgp.nbNodesPerLayer);
+    ASSERT_EQ(0, params.representation.cgp.pMutateNode);
 
-    ASSERT_EQ(0, params.algorithm.tgp.maxDepth);
-    ASSERT_EQ(0, params.algorithm.tgp.maxInitDepth);
-    ASSERT_EQ(0, params.algorithm.tgp.maxNbEdgePerNode);
+    ASSERT_EQ(0, params.representation.tgp.maxDepth);
+    ASSERT_EQ(0, params.representation.tgp.maxInitDepth);
+    ASSERT_EQ(0, params.representation.tgp.maxNbEdgePerNode);
 
     ASSERT_EQ("tournament", params.selection._selectionMode);
     ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
@@ -169,7 +169,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
         << "A default nbThreads value should be set when no one is specified";
     ASSERT_EQ(params2.evaluation.doValidation, false)
         << "Default validation should be false";
-    ASSERT_EQ(params2.algorithm.lgp.nbRegisters, 8) << "Bad parameter should be ignored";
+    ASSERT_EQ(params2.representation.lgp.nbRegisters, 8) << "Bad parameter should be ignored";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson)
@@ -178,7 +178,7 @@ TEST(LearningParametersTest, loadParametersFromJson)
     ASSERT_NO_THROW(File::ParametersParser::loadParametersFromJson(
         TESTS_DAT_PATH "params.json", params));
     // only testing 1 parameter as readConfigFile was already tested
-    ASSERT_EQ(params.algorithm.lgp.nbRegisters, 3.0)
+    ASSERT_EQ(params.representation.lgp.nbRegisters, 3.0)
         << "There should be 3 registers according to the params file";
 }
 
@@ -214,72 +214,72 @@ TEST(LearningParametersTest, writeParametersToJson)
     ASSERT_EQ(params.evaluation.nbThreads, params2.evaluation.nbThreads);
 
     // Mutation lgp parameters
-    ASSERT_EQ(params.algorithm.lgp.nbProgramConstant, params2.algorithm.lgp.nbProgramConstant);
-    ASSERT_EQ(params.algorithm.lgp.nbRegisters, params2.algorithm.lgp.nbRegisters);
-    ASSERT_EQ(params.algorithm.lgp.maxConstValue,
-              params2.algorithm.lgp.maxConstValue);
-    ASSERT_EQ(params.algorithm.lgp.maxProgramSize,
-              params2.algorithm.lgp.maxProgramSize);
-    ASSERT_EQ(params.algorithm.lgp.minConstValue,
-              params2.algorithm.lgp.minConstValue);
-    ASSERT_EQ(params.algorithm.lgp.pAdd, params2.algorithm.lgp.pAdd);
-    ASSERT_EQ(params.algorithm.lgp.pConstantMutation,
-              params2.algorithm.lgp.pConstantMutation);
-    ASSERT_EQ(params.algorithm.lgp.pDelete, params2.algorithm.lgp.pDelete);
-    ASSERT_EQ(params.algorithm.lgp.pMutate, params2.algorithm.lgp.pMutate);
-    ASSERT_EQ(params.algorithm.lgp.pSwap, params2.algorithm.lgp.pSwap);
+    ASSERT_EQ(params.representation.lgp.nbProgramConstant, params2.representation.lgp.nbProgramConstant);
+    ASSERT_EQ(params.representation.lgp.nbRegisters, params2.representation.lgp.nbRegisters);
+    ASSERT_EQ(params.representation.lgp.maxConstValue,
+              params2.representation.lgp.maxConstValue);
+    ASSERT_EQ(params.representation.lgp.maxProgramSize,
+              params2.representation.lgp.maxProgramSize);
+    ASSERT_EQ(params.representation.lgp.minConstValue,
+              params2.representation.lgp.minConstValue);
+    ASSERT_EQ(params.representation.lgp.pAdd, params2.representation.lgp.pAdd);
+    ASSERT_EQ(params.representation.lgp.pConstantMutation,
+              params2.representation.lgp.pConstantMutation);
+    ASSERT_EQ(params.representation.lgp.pDelete, params2.representation.lgp.pDelete);
+    ASSERT_EQ(params.representation.lgp.pMutate, params2.representation.lgp.pMutate);
+    ASSERT_EQ(params.representation.lgp.pSwap, params2.representation.lgp.pSwap);
 
-    ASSERT_EQ(params.algorithm.cgp.nbLayers, params2.algorithm.cgp.nbLayers);
-    ASSERT_EQ(params.algorithm.cgp.nbNodesPerLayer, params2.algorithm.cgp.nbNodesPerLayer);
-    ASSERT_EQ(params.algorithm.cgp.pMutateNode, params2.algorithm.cgp.pMutateNode);
+    ASSERT_EQ(params.representation.cgp.nbLayers, params2.representation.cgp.nbLayers);
+    ASSERT_EQ(params.representation.cgp.nbNodesPerLayer, params2.representation.cgp.nbNodesPerLayer);
+    ASSERT_EQ(params.representation.cgp.pMutateNode, params2.representation.cgp.pMutateNode);
     
-    ASSERT_EQ(params.algorithm.tgp.maxDepth, params2.algorithm.tgp.maxDepth);
-    ASSERT_EQ(params.algorithm.tgp.maxInitDepth, params2.algorithm.tgp.maxInitDepth);
-    ASSERT_EQ(params.algorithm.tgp.maxNbEdgePerNode, params2.algorithm.tgp.maxNbEdgePerNode);
+    ASSERT_EQ(params.representation.tgp.maxDepth, params2.representation.tgp.maxDepth);
+    ASSERT_EQ(params.representation.tgp.maxInitDepth, params2.representation.tgp.maxInitDepth);
+    ASSERT_EQ(params.representation.tgp.maxNbEdgePerNode, params2.representation.tgp.maxNbEdgePerNode);
     
 
     // Mutation parameters tpg
-    ASSERT_EQ(params.algorithm.activationFunction, params2.algorithm.activationFunction);
-    ASSERT_EQ(params.algorithm.nbAgents, params2.algorithm.nbAgents);
+    ASSERT_EQ(params.representation.activationFunction, params2.representation.activationFunction);
+    ASSERT_EQ(params.representation.nbAgents, params2.representation.nbAgents);
 
-    ASSERT_EQ(params.algorithm.tpg.archiveSize, params2.algorithm.tpg.archiveSize);
-    ASSERT_EQ(params.algorithm.tpg.archivingProbability, params2.algorithm.tpg.archivingProbability);
-    ASSERT_EQ(params.algorithm.lgp.forceProgramBehaviorChangeOnMutation,
-              params2.algorithm.lgp.forceProgramBehaviorChangeOnMutation);
-    ASSERT_EQ(params.algorithm.tpg.maxInitOutgoingEdges,
-              params2.algorithm.tpg.maxInitOutgoingEdges);
-    ASSERT_EQ(params.algorithm.tpg.maxOutgoingEdges,
-              params2.algorithm.tpg.maxOutgoingEdges);
-    ASSERT_EQ(params.algorithm.tpg.pEdgeAddition,
-              params2.algorithm.tpg.pEdgeAddition);
-    ASSERT_EQ(params.algorithm.tpg.pEdgeDeletion,
-              params2.algorithm.tpg.pEdgeDeletion);
-    ASSERT_EQ(params.algorithm.tpg.pEdgeDestinationChange,
-              params2.algorithm.tpg.pEdgeDestinationChange);
-    ASSERT_EQ(params.algorithm.tpg.pEdgeDestinationIsAction,
-              params2.algorithm.tpg.pEdgeDestinationIsAction);
-    ASSERT_EQ(params.algorithm.tpg.pProgramMutation,
-              params2.algorithm.tpg.pProgramMutation);
+    ASSERT_EQ(params.representation.tpg.archiveSize, params2.representation.tpg.archiveSize);
+    ASSERT_EQ(params.representation.tpg.archivingProbability, params2.representation.tpg.archivingProbability);
+    ASSERT_EQ(params.representation.lgp.forceProgramBehaviorChangeOnMutation,
+              params2.representation.lgp.forceProgramBehaviorChangeOnMutation);
+    ASSERT_EQ(params.representation.tpg.maxInitOutgoingEdges,
+              params2.representation.tpg.maxInitOutgoingEdges);
+    ASSERT_EQ(params.representation.tpg.maxOutgoingEdges,
+              params2.representation.tpg.maxOutgoingEdges);
+    ASSERT_EQ(params.representation.tpg.pEdgeAddition,
+              params2.representation.tpg.pEdgeAddition);
+    ASSERT_EQ(params.representation.tpg.pEdgeDeletion,
+              params2.representation.tpg.pEdgeDeletion);
+    ASSERT_EQ(params.representation.tpg.pEdgeDestinationChange,
+              params2.representation.tpg.pEdgeDestinationChange);
+    ASSERT_EQ(params.representation.tpg.pEdgeDestinationIsAction,
+              params2.representation.tpg.pEdgeDestinationIsAction);
+    ASSERT_EQ(params.representation.tpg.pProgramMutation,
+              params2.representation.tpg.pProgramMutation);
 
-    ASSERT_EQ(params.algorithm.atpg.probaContextOverActionProgram,
-              params2.algorithm.atpg.probaContextOverActionProgram);
+    ASSERT_EQ(params.representation.atpg.probaContextOverActionProgram,
+              params2.representation.atpg.probaContextOverActionProgram);
               
-    ASSERT_EQ(params.algorithm.maple.pChangeActionClass,
-              params2.algorithm.maple.pChangeActionClass);
-    ASSERT_EQ(params.algorithm.maple.pActionEdgeAddition,
-              params2.algorithm.maple.pActionEdgeAddition);
-    ASSERT_EQ(params.algorithm.maple.pActionEdgeDeletion,
-              params2.algorithm.maple.pActionEdgeDeletion);
-    ASSERT_EQ(params.algorithm.maple.pMutateActionProgram,
-              params2.algorithm.maple.pMutateActionProgram);
-    ASSERT_EQ(params.algorithm.maple.pSwapActionProgram,
-              params2.algorithm.maple.pSwapActionProgram);
-    ASSERT_EQ(params.algorithm.maple.nbActionEdgeInit,
-              params2.algorithm.maple.nbActionEdgeInit);
-    ASSERT_EQ(params.algorithm.maple.pCrossAgents,
-              params2.algorithm.maple.pCrossAgents);
-    ASSERT_EQ(params.algorithm.maple.pCrossPrograms,
-              params2.algorithm.maple.pCrossPrograms);
+    ASSERT_EQ(params.representation.maple.pChangeActionClass,
+              params2.representation.maple.pChangeActionClass);
+    ASSERT_EQ(params.representation.maple.pActionEdgeAddition,
+              params2.representation.maple.pActionEdgeAddition);
+    ASSERT_EQ(params.representation.maple.pActionEdgeDeletion,
+              params2.representation.maple.pActionEdgeDeletion);
+    ASSERT_EQ(params.representation.maple.pMutateActionProgram,
+              params2.representation.maple.pMutateActionProgram);
+    ASSERT_EQ(params.representation.maple.pSwapActionProgram,
+              params2.representation.maple.pSwapActionProgram);
+    ASSERT_EQ(params.representation.maple.nbActionEdgeInit,
+              params2.representation.maple.nbActionEdgeInit);
+    ASSERT_EQ(params.representation.maple.pCrossAgents,
+              params2.representation.maple.pCrossAgents);
+    ASSERT_EQ(params.representation.maple.pCrossPrograms,
+              params2.representation.maple.pCrossPrograms);
 
     // Selection parameters
     ASSERT_EQ(params.selection._selectionMode,

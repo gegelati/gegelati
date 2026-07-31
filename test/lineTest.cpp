@@ -66,8 +66,8 @@ class LineTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 0;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 0;
         e = new Environment(set, params, vect);
     }
 

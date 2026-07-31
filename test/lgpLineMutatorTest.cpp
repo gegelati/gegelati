@@ -5,10 +5,10 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
-#include "algorithm/lgp/lgpLineMutator.h"
-#include "algorithm/lgp/lgpAgent.h"
-#include "algorithm/lgp/lgpLine.h"
-#include "algorithm/lgp/lgpExecutionEngine.h"
+#include "representation/lgp/lgpLineMutator.h"
+#include "representation/lgp/lgpAgent.h"
+#include "representation/lgp/lgpLine.h"
+#include "representation/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
 #include "parameters.h"
 
@@ -21,10 +21,10 @@ class LineMutatorTest : public ::testing::Test
     const float value1{4.2f};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
     Parameters params;
-    Algorithm::LGP::LGPLineMutator lineMutator;
-    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent;
+    Representation::LGP::LGPLineMutator lineMutator;
+    std::shared_ptr<Representation::LGP::LGPAgent> programAgent;
     Output::OutputHandler* lgpOutput;
 
     LineMutatorTest() : e{nullptr} {};
@@ -54,11 +54,11 @@ class LineMutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         // the environment and the programs have 5 Constant parameters
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
-        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
         programAgent =
-            std::make_shared<Algorithm::LGP::LGPAgent>(*e, *lgpOutput, 0);
+            std::make_shared<Representation::LGP::LGPAgent>(*e, *lgpOutput, 0);
     }
 
     virtual void TearDown()
@@ -80,7 +80,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 
     // Add a pseudo-random lines to the program
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
+    Representation::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l0, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
@@ -105,7 +105,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 
     // Add another pseudo-random lines to the program
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l1 = programAgent->getLineForMutation(1);
+    Representation::LGP::LGPLine& l1 = programAgent->getLineForMutation(1);
 
     // Additionally covers correct operand type from data source
     // Instruction if lambda instruction(plus)
@@ -122,9 +122,9 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
     // Add another pseudo-random lines to the program
     // Additionally covers nothing
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l2 = programAgent->getLineForMutation(2);
+    Representation::LGP::LGPLine& l2 = programAgent->getLineForMutation(2);
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l3 = programAgent->getLineForMutation(3);
+    Representation::LGP::LGPLine& l3 = programAgent->getLineForMutation(3);
 
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l2, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -135,7 +135,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 
     // Add another pseudo-random lines to the program
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l4 = programAgent->getLineForMutation(4);
+    Representation::LGP::LGPLine& l4 = programAgent->getLineForMutation(4);
     // Additionally covers additional uneeded operand (register)
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l4, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -147,7 +147,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
            "known seed.";
 
     Output::OutputHandler output = Output::OutputHandler(Output::Output());
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
 
 
     ASSERT_NO_THROW(lgpExecutionEngine.execute())
@@ -159,12 +159,12 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 TEST_F(LineMutatorTest, LineMutatorAlterLine)
 {
     RNG::RNG rng;
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
 
     // Add a 0 lines to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
     programAgent->addNewLine();
-    Algorithm::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
+    Representation::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
 
     // Alter instruction
     // i=, d=0, op0=(0,0), op1=(0,0)
@@ -250,15 +250,15 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
             [](const double* a, const double* b) -> double {
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e2 = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
-    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(*e2, *lgpOutput, 1);
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e2 = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
+    std::shared_ptr<Representation::LGP::LGPAgent> programAgent2 = std::make_shared<Representation::LGP::LGPAgent>(*e2, *lgpOutput, 1);
 
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
 
     // Add a 0 line to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
     programAgent2->addNewLine();
-    Algorithm::LGP::LGPLine& l0 = programAgent2->getLineForMutation(0);
+    Representation::LGP::LGPLine& l0 = programAgent2->getLineForMutation(0);
 
     // Alter instruction
     // i=2, d=0, op0=(0,0), op1=(0,0)

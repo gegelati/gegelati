@@ -74,8 +74,8 @@ class TPGInstrumentedTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 1;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
         progPointer =
             std::shared_ptr<Program::Program>(new Program::Program(*e, false));

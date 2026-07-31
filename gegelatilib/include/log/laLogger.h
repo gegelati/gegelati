@@ -42,7 +42,7 @@
 #include <map>
 #include <ostream>
 
-#include "algorithm/algorithm.h"
+#include "representation/representation.h"
 #include "learn/evaluationResult.h"
 #include "log/logger.h"
 #include "evoGraph/graph.h"
@@ -195,7 +195,7 @@ namespace Log {
 
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results) {
+                          std::reference_wrapper<const Representation::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -215,7 +215,7 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results) {
+                          std::reference_wrapper<const Representation::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 

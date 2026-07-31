@@ -129,55 +129,55 @@ void File::ParametersParser::setParameterFromString(
     }
 
     if (param == "nbAgents") {
-        params.algorithm.nbAgents = (size_t)value.asUInt();
+        params.representation.nbAgents = (size_t)value.asUInt();
         return;
     }
     if (param == "activationFunction") {
-        params.algorithm.activationFunction = value.asString();
+        params.representation.activationFunction = value.asString();
         return;
     }
 
 
     if (param == "archiveSize") {
-        params.algorithm.tpg.archiveSize = (size_t)value.asUInt();
+        params.representation.tpg.archiveSize = (size_t)value.asUInt();
         return;
     }
     if (param == "archivingProbability") {
-        params.algorithm.tpg.archivingProbability = value.asDouble();
+        params.representation.tpg.archivingProbability = value.asDouble();
         return;
     }
     if (param == "maxInitOutgoingEdges") {
-        params.algorithm.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
+        params.representation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
     }
     if (param == "maxOutgoingEdges") {
-        params.algorithm.tpg.maxOutgoingEdges = (size_t)value.asUInt();
+        params.representation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
         return;
     }
     if (param == "pEdgeDeletion") {
-        params.algorithm.tpg.pEdgeDeletion = value.asDouble();
+        params.representation.tpg.pEdgeDeletion = value.asDouble();
         return;
     }
     if (param == "pEdgeAddition") {
-        params.algorithm.tpg.pEdgeAddition = value.asDouble();
+        params.representation.tpg.pEdgeAddition = value.asDouble();
         return;
     }
     if (param == "pProgramMutation") {
-        params.algorithm.tpg.pProgramMutation = value.asDouble();
+        params.representation.tpg.pProgramMutation = value.asDouble();
         return;
     }
     if (param == "pEdgeDestinationChange") {
-        params.algorithm.tpg.pEdgeDestinationChange = value.asDouble();
+        params.representation.tpg.pEdgeDestinationChange = value.asDouble();
         return;
     }
     if (param == "pEdgeDestinationIsAction") {
-        params.algorithm.tpg.pEdgeDestinationIsAction = value.asDouble();
+        params.representation.tpg.pEdgeDestinationIsAction = value.asDouble();
         return;
     }
 
 
     if (param == "probaContextOverActionProgram") {
-        params.algorithm.atpg.probaContextOverActionProgram =
+        params.representation.atpg.probaContextOverActionProgram =
             (double)value.asDouble();
         return;
     }
@@ -185,127 +185,127 @@ void File::ParametersParser::setParameterFromString(
 
     
     if (param == "nbActionEdgeInit") {
-        params.algorithm.maple.nbActionEdgeInit = (size_t)value.asUInt();
+        params.representation.maple.nbActionEdgeInit = (size_t)value.asUInt();
         return;
     }
     if (param == "pChangeActionClass") {
-        params.algorithm.maple.pChangeActionClass = (double)value.asDouble();
+        params.representation.maple.pChangeActionClass = (double)value.asDouble();
         return;
     }
     if (param == "pActionEdgeDeletion") {
-        params.algorithm.maple.pActionEdgeDeletion = value.asDouble();
+        params.representation.maple.pActionEdgeDeletion = value.asDouble();
         return;
     }
     if (param == "pActionEdgeAddition") {
-        params.algorithm.maple.pActionEdgeAddition = value.asDouble();
+        params.representation.maple.pActionEdgeAddition = value.asDouble();
         return;
     }
     if (param == "pMutateActionProgram") {
-        params.algorithm.maple.pMutateActionProgram = value.asDouble();
+        params.representation.maple.pMutateActionProgram = value.asDouble();
         return;
     }
     if (param == "pSwapActionProgram") {
-        params.algorithm.maple.pSwapActionProgram = value.asDouble();
+        params.representation.maple.pSwapActionProgram = value.asDouble();
         return;
     }
     if (param == "pCrossAgents") {
-        params.algorithm.maple.pCrossAgents = (double)value.asDouble();
+        params.representation.maple.pCrossAgents = (double)value.asDouble();
         return;
     }
     if (param == "pCrossPrograms") {
-        params.algorithm.maple.pCrossPrograms = (double)value.asDouble();
+        params.representation.maple.pCrossPrograms = (double)value.asDouble();
         return;
     }
 
 
 
     if (param == "forceProgramBehaviorChangeOnMutation") {
-        params.algorithm.lgp.forceProgramBehaviorChangeOnMutation =
+        params.representation.lgp.forceProgramBehaviorChangeOnMutation =
             value.asBool();
         return;
     }
     if (param == "nbRegisters") {
-        params.algorithm.lgp.nbRegisters = (size_t)value.asUInt();
+        params.representation.lgp.nbRegisters = (size_t)value.asUInt();
         return;
     }
     if (param == "maxProgramSize") {
-        params.algorithm.lgp.maxProgramSize = (size_t)value.asUInt();
+        params.representation.lgp.maxProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "initMinProgramSize") {
-        params.algorithm.lgp.initMinProgramSize = (size_t)value.asUInt();
+        params.representation.lgp.initMinProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "initMaxProgramSize") {
-        params.algorithm.lgp.initMaxProgramSize = (size_t)value.asUInt();
+        params.representation.lgp.initMaxProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "pDelete") {
-        params.algorithm.lgp.pDelete = value.asDouble();
+        params.representation.lgp.pDelete = value.asDouble();
         return;
     }
     if (param == "pAdd") {
-        params.algorithm.lgp.pAdd = value.asDouble();
+        params.representation.lgp.pAdd = value.asDouble();
         return;
     }
     if (param == "pMutate") {
-        params.algorithm.lgp.pMutate = value.asDouble();
+        params.representation.lgp.pMutate = value.asDouble();
         return;
     }
     if (param == "pSwap") {
-        params.algorithm.lgp.pSwap = value.asDouble();
+        params.representation.lgp.pSwap = value.asDouble();
         return;
     }
     if (param == "nbProgramConstant") {
-        params.algorithm.lgp.nbProgramConstant = (size_t)value.asUInt();
+        params.representation.lgp.nbProgramConstant = (size_t)value.asUInt();
         return;
     }
     if (param == "pConstantMutation") {
-        params.algorithm.lgp.pConstantMutation = value.asDouble();
+        params.representation.lgp.pConstantMutation = value.asDouble();
         return;
     }
     if (param == "pNewProgram") {
-        params.algorithm.lgp.pNewProgram = value.asDouble();
+        params.representation.lgp.pNewProgram = value.asDouble();
         return;
     }
     if (param == "minConstValue") {
-        params.algorithm.lgp.minConstValue = value.asDouble();
+        params.representation.lgp.minConstValue = value.asDouble();
         return;
     }
     if (param == "maxConstValue") {
-        params.algorithm.lgp.maxConstValue = value.asDouble();
+        params.representation.lgp.maxConstValue = value.asDouble();
         return;
     }
     if (param == "pMutateOutput") {
-        params.algorithm.lgp.pMutateOutput = value.asDouble();
+        params.representation.lgp.pMutateOutput = value.asDouble();
         return;
     }
 
 
     if (param == "nbLayers") {
-        params.algorithm.cgp.nbLayers = (size_t)value.asUInt();
+        params.representation.cgp.nbLayers = (size_t)value.asUInt();
         return;
     }
     if (param == "nbNodesPerLayer") {
-        params.algorithm.cgp.nbNodesPerLayer = (size_t)value.asUInt();
+        params.representation.cgp.nbNodesPerLayer = (size_t)value.asUInt();
         return;
     }
     if (param == "pMutateNode") {
-        params.algorithm.cgp.pMutateNode = value.asDouble();
+        params.representation.cgp.pMutateNode = value.asDouble();
         return;
     }
 
 
     if (param == "maxDepth") {
-        params.algorithm.tgp.maxDepth = (size_t)value.asUInt();
+        params.representation.tgp.maxDepth = (size_t)value.asUInt();
         return;
     }
     if (param == "maxInitDepth") {
-        params.algorithm.tgp.maxInitDepth = (size_t)value.asUInt();
+        params.representation.tgp.maxInitDepth = (size_t)value.asUInt();
         return;
     }
     if (param == "maxNbEdgePerNode") {
-        params.algorithm.tgp.maxNbEdgePerNode= (size_t)value.asUInt();
+        params.representation.tgp.maxNbEdgePerNode= (size_t)value.asUInt();
         return;
     }
 
@@ -395,189 +395,189 @@ void File::ParametersParser::writeParametersToJson(
 
 
 
-    root["algorithm"]["nbAgents"] = params.algorithm.nbAgents;
-    root["algorithm"]["nbAgents"].setComment(
-        Algorithm::AlgorithmParameters::nbAgentsComment, Json::commentBefore);
+    root["representation"]["nbAgents"] = params.representation.nbAgents;
+    root["representation"]["nbAgents"].setComment(
+        Representation::RepresentationParameters::nbAgentsComment, Json::commentBefore);
 
-    root["algorithm"]["activationFunction"] = params.algorithm.activationFunction;
-    root["algorithm"]["activationFunction"].setComment(
-        Algorithm::AlgorithmParameters::activationFunctionComment,
+    root["representation"]["activationFunction"] = params.representation.activationFunction;
+    root["representation"]["activationFunction"].setComment(
+        Representation::RepresentationParameters::activationFunctionComment,
         Json::commentBefore);
 
-    root["algorithm"]["tpg"]["archiveSize"] = params.algorithm.tpg.archiveSize;
-    root["algorithm"]["tpg"]["archiveSize"].setComment(
-        Algorithm::TPG::TPGParameters::archiveSizeComment, Json::commentBefore);
+    root["representation"]["tpg"]["archiveSize"] = params.representation.tpg.archiveSize;
+    root["representation"]["tpg"]["archiveSize"].setComment(
+        Representation::TPG::TPGParameters::archiveSizeComment, Json::commentBefore);
 
-    root["algorithm"]["tpg"]["archivingProbability"] = params.algorithm.tpg.archivingProbability;
-    root["algorithm"]["tpg"]["archivingProbability"].setComment(
-        Algorithm::TPG::TPGParameters::archivingProbabilityComment,
+    root["representation"]["tpg"]["archivingProbability"] = params.representation.tpg.archivingProbability;
+    root["representation"]["tpg"]["archivingProbability"].setComment(
+        Representation::TPG::TPGParameters::archivingProbabilityComment,
         Json::commentBefore);
 
-    root["algorithm"]["tpg"]["maxInitOutgoingEdges"] =
-        params.algorithm.tpg.maxInitOutgoingEdges;
-    root["algorithm"]["tpg"]["maxInitOutgoingEdges"].setComment(
-        Algorithm::TPG::TPGParameters::maxInitOutgoingEdgesComment,
+    root["representation"]["tpg"]["maxInitOutgoingEdges"] =
+        params.representation.tpg.maxInitOutgoingEdges;
+    root["representation"]["tpg"]["maxInitOutgoingEdges"].setComment(
+        Representation::TPG::TPGParameters::maxInitOutgoingEdgesComment,
         Json::commentBefore);
 
-    root["algorithm"]["tpg"]["maxOutgoingEdges"] =
-        params.algorithm.tpg.maxOutgoingEdges;
-    root["algorithm"]["tpg"]["maxOutgoingEdges"].setComment(
-        Algorithm::TPG::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
+    root["representation"]["tpg"]["maxOutgoingEdges"] =
+        params.representation.tpg.maxOutgoingEdges;
+    root["representation"]["tpg"]["maxOutgoingEdges"].setComment(
+        Representation::TPG::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
 
-    root["algorithm"]["tpg"]["pEdgeAddition"] =
-        params.algorithm.tpg.pEdgeAddition;
-    root["algorithm"]["tpg"]["pEdgeAddition"].setComment(
-        Algorithm::TPG::TPGParameters::pEdgeAdditionComment, Json::commentBefore);
+    root["representation"]["tpg"]["pEdgeAddition"] =
+        params.representation.tpg.pEdgeAddition;
+    root["representation"]["tpg"]["pEdgeAddition"].setComment(
+        Representation::TPG::TPGParameters::pEdgeAdditionComment, Json::commentBefore);
 
-    root["algorithm"]["tpg"]["pEdgeDeletion"] =
-        params.algorithm.tpg.pEdgeDeletion;
-    root["algorithm"]["tpg"]["pEdgeDeletion"].setComment(
-        Algorithm::TPG::TPGParameters::pEdgeDeletionComment, Json::commentBefore);
+    root["representation"]["tpg"]["pEdgeDeletion"] =
+        params.representation.tpg.pEdgeDeletion;
+    root["representation"]["tpg"]["pEdgeDeletion"].setComment(
+        Representation::TPG::TPGParameters::pEdgeDeletionComment, Json::commentBefore);
 
-    root["algorithm"]["tpg"]["pEdgeDestinationChange"] =
-        params.algorithm.tpg.pEdgeDestinationChange;
-    root["algorithm"]["tpg"]["pEdgeDestinationChange"].setComment(
-        Algorithm::TPG::TPGParameters::pEdgeDestinationChangeComment,
+    root["representation"]["tpg"]["pEdgeDestinationChange"] =
+        params.representation.tpg.pEdgeDestinationChange;
+    root["representation"]["tpg"]["pEdgeDestinationChange"].setComment(
+        Representation::TPG::TPGParameters::pEdgeDestinationChangeComment,
         Json::commentBefore);
 
-    root["algorithm"]["tpg"]["pEdgeDestinationIsAction"] =
-        params.algorithm.tpg.pEdgeDestinationIsAction;
-    root["algorithm"]["tpg"]["pEdgeDestinationIsAction"].setComment(
-        Algorithm::TPG::TPGParameters::pEdgeDestinationIsActionComment,
+    root["representation"]["tpg"]["pEdgeDestinationIsAction"] =
+        params.representation.tpg.pEdgeDestinationIsAction;
+    root["representation"]["tpg"]["pEdgeDestinationIsAction"].setComment(
+        Representation::TPG::TPGParameters::pEdgeDestinationIsActionComment,
         Json::commentBefore);
-    root["algorithm"]["tpg"]["pProgramMutation"] =
-        params.algorithm.tpg.pProgramMutation;
-    root["algorithm"]["tpg"]["pProgramMutation"].setComment(
-        Algorithm::TPG::TPGParameters::pProgramMutationComment, Json::commentBefore);
+    root["representation"]["tpg"]["pProgramMutation"] =
+        params.representation.tpg.pProgramMutation;
+    root["representation"]["tpg"]["pProgramMutation"].setComment(
+        Representation::TPG::TPGParameters::pProgramMutationComment, Json::commentBefore);
 
 
 
-    root["algorithm"]["atpg"]["probaContextOverActionProgram"] =
-        params.algorithm.atpg.probaContextOverActionProgram;
-    root["algorithm"]["atpg"]["probaContextOverActionProgram"].setComment(
-        Algorithm::ATPG::ATPGParameters::probaContextOverActionProgramComment,
+    root["representation"]["atpg"]["probaContextOverActionProgram"] =
+        params.representation.atpg.probaContextOverActionProgram;
+    root["representation"]["atpg"]["probaContextOverActionProgram"].setComment(
+        Representation::ATPG::ATPGParameters::probaContextOverActionProgramComment,
         Json::commentBefore);
 
 
 
-    root["algorithm"]["maple"]["nbActionEdgeInit"] =
-        params.algorithm.maple.nbActionEdgeInit;
-    root["algorithm"]["maple"]["nbActionEdgeInit"].setComment(
-        Algorithm::Maple::MapleParameters::nbActionEdgeInitComment, Json::commentBefore);
-    root["algorithm"]["maple"]["pChangeActionClass"] =
-        params.algorithm.maple.pChangeActionClass;
-    root["algorithm"]["maple"]["pChangeActionClass"].setComment(
-        Algorithm::Maple::MapleParameters::pChangeActionClassComment, Json::commentBefore);
-    root["algorithm"]["maple"]["pActionEdgeAddition"] =
-        params.algorithm.maple.pActionEdgeAddition;
-    root["algorithm"]["maple"]["pActionEdgeAddition"].setComment(
-        Algorithm::Maple::MapleParameters::pActionEdgeAdditionComment,
+    root["representation"]["maple"]["nbActionEdgeInit"] =
+        params.representation.maple.nbActionEdgeInit;
+    root["representation"]["maple"]["nbActionEdgeInit"].setComment(
+        Representation::Maple::MapleParameters::nbActionEdgeInitComment, Json::commentBefore);
+    root["representation"]["maple"]["pChangeActionClass"] =
+        params.representation.maple.pChangeActionClass;
+    root["representation"]["maple"]["pChangeActionClass"].setComment(
+        Representation::Maple::MapleParameters::pChangeActionClassComment, Json::commentBefore);
+    root["representation"]["maple"]["pActionEdgeAddition"] =
+        params.representation.maple.pActionEdgeAddition;
+    root["representation"]["maple"]["pActionEdgeAddition"].setComment(
+        Representation::Maple::MapleParameters::pActionEdgeAdditionComment,
         Json::commentBefore);
-    root["algorithm"]["maple"]["pActionEdgeDeletion"] =
-        params.algorithm.maple.pActionEdgeDeletion;
-    root["algorithm"]["maple"]["pActionEdgeDeletion"].setComment(
-        Algorithm::Maple::MapleParameters::pActionEdgeDeletionComment,
+    root["representation"]["maple"]["pActionEdgeDeletion"] =
+        params.representation.maple.pActionEdgeDeletion;
+    root["representation"]["maple"]["pActionEdgeDeletion"].setComment(
+        Representation::Maple::MapleParameters::pActionEdgeDeletionComment,
         Json::commentBefore);
-    root["algorithm"]["maple"]["pMutateActionProgram"] =
-        params.algorithm.maple.pMutateActionProgram;
-    root["algorithm"]["maple"]["pMutateActionProgram"].setComment(
-        Algorithm::Maple::MapleParameters::pMutateActionProgramComment,
+    root["representation"]["maple"]["pMutateActionProgram"] =
+        params.representation.maple.pMutateActionProgram;
+    root["representation"]["maple"]["pMutateActionProgram"].setComment(
+        Representation::Maple::MapleParameters::pMutateActionProgramComment,
         Json::commentBefore);
-    root["algorithm"]["maple"]["pSwapActionProgram"] =
-        params.algorithm.maple.pSwapActionProgram;
-    root["algorithm"]["maple"]["pSwapActionProgram"].setComment(
-        Algorithm::Maple::MapleParameters::pSwapActionProgramComment, Json::commentBefore);
-    root["algorithm"]["maple"]["pCrossAgents"] = params.algorithm.maple.pCrossAgents;
-    root["algorithm"]["maple"]["pCrossAgents"].setComment(
-        Algorithm::Maple::MapleParameters::pCrossAgentsComment, Json::commentBefore);
-    root["algorithm"]["maple"]["pCrossPrograms"] =
-        params.algorithm.maple.pCrossPrograms;
-    root["algorithm"]["maple"]["pCrossPrograms"].setComment(
-        Algorithm::Maple::MapleParameters::pCrossProgramsComment, Json::commentBefore);
+    root["representation"]["maple"]["pSwapActionProgram"] =
+        params.representation.maple.pSwapActionProgram;
+    root["representation"]["maple"]["pSwapActionProgram"].setComment(
+        Representation::Maple::MapleParameters::pSwapActionProgramComment, Json::commentBefore);
+    root["representation"]["maple"]["pCrossAgents"] = params.representation.maple.pCrossAgents;
+    root["representation"]["maple"]["pCrossAgents"].setComment(
+        Representation::Maple::MapleParameters::pCrossAgentsComment, Json::commentBefore);
+    root["representation"]["maple"]["pCrossPrograms"] =
+        params.representation.maple.pCrossPrograms;
+    root["representation"]["maple"]["pCrossPrograms"].setComment(
+        Representation::Maple::MapleParameters::pCrossProgramsComment, Json::commentBefore);
 
 
 
     // Mutation.program parameters
 
-    root["algorithm"]["lgp"]["forceProgramBehaviorChangeOnMutation"] =
-        params.algorithm.lgp.forceProgramBehaviorChangeOnMutation;
-    root["algorithm"]["lgp"]["forceProgramBehaviorChangeOnMutation"].setComment(
-        Algorithm::LGP::LGPParameters::forceProgramBehaviorChangeOnMutationComment,
+    root["representation"]["lgp"]["forceProgramBehaviorChangeOnMutation"] =
+        params.representation.lgp.forceProgramBehaviorChangeOnMutation;
+    root["representation"]["lgp"]["forceProgramBehaviorChangeOnMutation"].setComment(
+        Representation::LGP::LGPParameters::forceProgramBehaviorChangeOnMutationComment,
         Json::commentBefore);
-    root["algorithm"]["lgp"]["nbProgramConstant"] = params.algorithm.lgp.nbProgramConstant;
-    root["algorithm"]["lgp"]["nbProgramConstant"].setComment(
-        Algorithm::LGP::LGPParameters::nbProgramConstantComment,
+    root["representation"]["lgp"]["nbProgramConstant"] = params.representation.lgp.nbProgramConstant;
+    root["representation"]["lgp"]["nbProgramConstant"].setComment(
+        Representation::LGP::LGPParameters::nbProgramConstantComment,
         Json::commentBefore);
-    root["algorithm"]["lgp"]["nbRegisters"] = params.algorithm.lgp.nbRegisters;
-    root["algorithm"]["lgp"]["nbRegisters"].setComment(
-        Algorithm::LGP::LGPParameters::nbRegistersComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["maxConstValue"] =
-        params.algorithm.lgp.maxConstValue;
-    root["algorithm"]["lgp"]["maxConstValue"].setComment(
-        Algorithm::LGP::LGPParameters::maxConstValueComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["maxProgramSize"] =
-        params.algorithm.lgp.maxProgramSize;
-    root["algorithm"]["lgp"]["maxProgramSize"].setComment(
-        Algorithm::LGP::LGPParameters::maxProgramSizeComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["initMinProgramSize"] =
-        params.algorithm.lgp.initMinProgramSize;
-    root["algorithm"]["lgp"]["initMinProgramSize"].setComment(
-        Algorithm::LGP::LGPParameters::initMinProgramSizeComment,
+    root["representation"]["lgp"]["nbRegisters"] = params.representation.lgp.nbRegisters;
+    root["representation"]["lgp"]["nbRegisters"].setComment(
+        Representation::LGP::LGPParameters::nbRegistersComment, Json::commentBefore);
+    root["representation"]["lgp"]["maxConstValue"] =
+        params.representation.lgp.maxConstValue;
+    root["representation"]["lgp"]["maxConstValue"].setComment(
+        Representation::LGP::LGPParameters::maxConstValueComment, Json::commentBefore);
+    root["representation"]["lgp"]["maxProgramSize"] =
+        params.representation.lgp.maxProgramSize;
+    root["representation"]["lgp"]["maxProgramSize"].setComment(
+        Representation::LGP::LGPParameters::maxProgramSizeComment, Json::commentBefore);
+    root["representation"]["lgp"]["initMinProgramSize"] =
+        params.representation.lgp.initMinProgramSize;
+    root["representation"]["lgp"]["initMinProgramSize"].setComment(
+        Representation::LGP::LGPParameters::initMinProgramSizeComment,
         Json::commentBefore);
-    root["algorithm"]["lgp"]["initMaxProgramSize"] =
-        params.algorithm.lgp.initMaxProgramSize;
-    root["algorithm"]["lgp"]["initMaxProgramSize"].setComment(
-        Algorithm::LGP::LGPParameters::initMaxProgramSizeComment,
+    root["representation"]["lgp"]["initMaxProgramSize"] =
+        params.representation.lgp.initMaxProgramSize;
+    root["representation"]["lgp"]["initMaxProgramSize"].setComment(
+        Representation::LGP::LGPParameters::initMaxProgramSizeComment,
         Json::commentBefore);
-    root["algorithm"]["lgp"]["minConstValue"] =
-        params.algorithm.lgp.minConstValue;
-    root["algorithm"]["lgp"]["minConstValue"].setComment(
-        Algorithm::LGP::LGPParameters::minConstValueComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pAdd"] = params.algorithm.lgp.pAdd;
-    root["algorithm"]["lgp"]["pAdd"].setComment(
-        Algorithm::LGP::LGPParameters::pAddComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pConstantMutation"] =
-        params.algorithm.lgp.pConstantMutation;
-    root["algorithm"]["lgp"]["pConstantMutation"].setComment(
-        Algorithm::LGP::LGPParameters::pConstantMutationComment,
+    root["representation"]["lgp"]["minConstValue"] =
+        params.representation.lgp.minConstValue;
+    root["representation"]["lgp"]["minConstValue"].setComment(
+        Representation::LGP::LGPParameters::minConstValueComment, Json::commentBefore);
+    root["representation"]["lgp"]["pAdd"] = params.representation.lgp.pAdd;
+    root["representation"]["lgp"]["pAdd"].setComment(
+        Representation::LGP::LGPParameters::pAddComment, Json::commentBefore);
+    root["representation"]["lgp"]["pConstantMutation"] =
+        params.representation.lgp.pConstantMutation;
+    root["representation"]["lgp"]["pConstantMutation"].setComment(
+        Representation::LGP::LGPParameters::pConstantMutationComment,
         Json::commentBefore);
-    root["algorithm"]["lgp"]["pNewProgram"] = params.algorithm.lgp.pNewProgram;
-    root["algorithm"]["lgp"]["pNewProgram"].setComment(
-        Algorithm::LGP::LGPParameters::pNewProgramComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pDelete"] = params.algorithm.lgp.pDelete;
-    root["algorithm"]["lgp"]["pDelete"].setComment(
-        Algorithm::LGP::LGPParameters::pDeleteComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pMutate"] = params.algorithm.lgp.pMutate;
-    root["algorithm"]["lgp"]["pMutate"].setComment(
-        Algorithm::LGP::LGPParameters::pMutateComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pSwap"] = params.algorithm.lgp.pSwap;
-    root["algorithm"]["lgp"]["pSwap"].setComment(
-        Algorithm::LGP::LGPParameters::pSwapComment, Json::commentBefore);
-    root["algorithm"]["lgp"]["pMutateOutput"] = params.algorithm.lgp.pMutateOutput;
-    root["algorithm"]["lgp"]["pMutateOutput"].setComment(
-        Algorithm::LGP::LGPParameters::pMutateOutputComment, Json::commentBefore);
+    root["representation"]["lgp"]["pNewProgram"] = params.representation.lgp.pNewProgram;
+    root["representation"]["lgp"]["pNewProgram"].setComment(
+        Representation::LGP::LGPParameters::pNewProgramComment, Json::commentBefore);
+    root["representation"]["lgp"]["pDelete"] = params.representation.lgp.pDelete;
+    root["representation"]["lgp"]["pDelete"].setComment(
+        Representation::LGP::LGPParameters::pDeleteComment, Json::commentBefore);
+    root["representation"]["lgp"]["pMutate"] = params.representation.lgp.pMutate;
+    root["representation"]["lgp"]["pMutate"].setComment(
+        Representation::LGP::LGPParameters::pMutateComment, Json::commentBefore);
+    root["representation"]["lgp"]["pSwap"] = params.representation.lgp.pSwap;
+    root["representation"]["lgp"]["pSwap"].setComment(
+        Representation::LGP::LGPParameters::pSwapComment, Json::commentBefore);
+    root["representation"]["lgp"]["pMutateOutput"] = params.representation.lgp.pMutateOutput;
+    root["representation"]["lgp"]["pMutateOutput"].setComment(
+        Representation::LGP::LGPParameters::pMutateOutputComment, Json::commentBefore);
 
 
-    root["algorithm"]["cgp"]["nbLayers"] = params.algorithm.cgp.nbLayers;
-    root["algorithm"]["cgp"]["nbLayers"].setComment(
-        Algorithm::CGP::CGPParameters::nbLayersComment, Json::commentBefore);
-    root["algorithm"]["cgp"]["nbNodesPerLayer"] = params.algorithm.cgp.nbNodesPerLayer;
-    root["algorithm"]["cgp"]["nbNodesPerLayer"].setComment(
-        Algorithm::CGP::CGPParameters::nbNodesPerLayerComment, Json::commentBefore);
-    root["algorithm"]["cgp"]["pMutateNode"] = params.algorithm.cgp.pMutateNode;
-    root["algorithm"]["cgp"]["pMutateNode"].setComment(
-        Algorithm::CGP::CGPParameters::pMutateNodeComment, Json::commentBefore);
+    root["representation"]["cgp"]["nbLayers"] = params.representation.cgp.nbLayers;
+    root["representation"]["cgp"]["nbLayers"].setComment(
+        Representation::CGP::CGPParameters::nbLayersComment, Json::commentBefore);
+    root["representation"]["cgp"]["nbNodesPerLayer"] = params.representation.cgp.nbNodesPerLayer;
+    root["representation"]["cgp"]["nbNodesPerLayer"].setComment(
+        Representation::CGP::CGPParameters::nbNodesPerLayerComment, Json::commentBefore);
+    root["representation"]["cgp"]["pMutateNode"] = params.representation.cgp.pMutateNode;
+    root["representation"]["cgp"]["pMutateNode"].setComment(
+        Representation::CGP::CGPParameters::pMutateNodeComment, Json::commentBefore);
     
 
-    root["algorithm"]["tgp"]["maxDepth"] = params.algorithm.tgp.maxDepth;
-    root["algorithm"]["tgp"]["maxDepth"].setComment(
-        Algorithm::TGP::TGPParameters::maxDepthComment, Json::commentBefore);
-    root["algorithm"]["tgp"]["maxInitDepth"] = params.algorithm.tgp.maxInitDepth;
-    root["algorithm"]["tgp"]["maxInitDepth"].setComment(
-        Algorithm::TGP::TGPParameters::maxInitDepthComment, Json::commentBefore);
-    root["algorithm"]["tgp"]["maxNbEdgePerNode"] = params.algorithm.tgp.maxNbEdgePerNode;
-    root["algorithm"]["tgp"]["maxNbEdgePerNode"].setComment(
-        Algorithm::TGP::TGPParameters::maxNbEdgePerNodeComment, Json::commentBefore);
+    root["representation"]["tgp"]["maxDepth"] = params.representation.tgp.maxDepth;
+    root["representation"]["tgp"]["maxDepth"].setComment(
+        Representation::TGP::TGPParameters::maxDepthComment, Json::commentBefore);
+    root["representation"]["tgp"]["maxInitDepth"] = params.representation.tgp.maxInitDepth;
+    root["representation"]["tgp"]["maxInitDepth"].setComment(
+        Representation::TGP::TGPParameters::maxInitDepthComment, Json::commentBefore);
+    root["representation"]["tgp"]["maxNbEdgePerNode"] = params.representation.tgp.maxNbEdgePerNode;
+    root["representation"]["tgp"]["maxNbEdgePerNode"].setComment(
+        Representation::TGP::TGPParameters::maxNbEdgePerNodeComment, Json::commentBefore);
     
 
 

@@ -51,34 +51,34 @@ void Learn::LearningAgent::setNbGen(size_t gen)
     this->params->nbGenerations = gen;
 }
 
-const Algorithm::Algorithm& Learn::LearningAgent::getBestAlgorithm()
+const Representation::Representation& Learn::LearningAgent::getBestRepresentation()
 {
-    return *this->currentBestAlgorithm;
+    return *this->currentBestRepresentation;
 }
 
-void Learn::LearningAgent::setCurrentAlgorithm(Algorithm::Algorithm* algorithm)
+void Learn::LearningAgent::setCurrentRepresentation(Representation::Representation* representation)
 {
-    if(algorithm == nullptr){
-        throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is a null pointer.");
+    if(representation == nullptr){
+        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is a null pointer.");
     }
-    if(this->algorithms.find(algorithm->getAlgorithmID()) == this->algorithms.end()){
-        throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is not part of the learning agent algorithms.");
+    if(this->representations.find(representation->getRepresentationID()) == this->representations.end()){
+        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is not part of the learning agent representations.");
     }
 
-    this->currentExecutedAlgorithm = algorithm;
+    this->currentExecutedRepresentation = representation;
 }
 
-void Learn::LearningAgent::addAlgorithm(Algorithm::Algorithm& algorithm)
+void Learn::LearningAgent::addRepresentation(Representation::Representation& representation)
 {
-    this->algorithms.insert({algorithm.getAlgorithmID(), algorithm});
+    this->representations.insert({representation.getRepresentationID(), representation});
 }
 
 
-Algorithm::Algorithm& Learn::LearningAgent::getAlgorithm(const Algorithm::Algorithm& algorithm)
+Representation::Representation& Learn::LearningAgent::getRepresentation(const Representation::Representation& representation)
 {
-    auto iterator = this->algorithms.find(algorithm.getAlgorithmID());
-    if(iterator == this->algorithms.end() || (*iterator).second.get().getAlgorithmID() != algorithm.getAlgorithmID()){
-        throw std::invalid_argument("LearningAgent::getAlgorithm: the given algorithm is not managed by this learning agent.");
+    auto iterator = this->representations.find(representation.getRepresentationID());
+    if(iterator == this->representations.end() || (*iterator).second.get().getRepresentationID() != representation.getRepresentationID()){
+        throw std::invalid_argument("LearningAgent::getRepresentation: the given representation is not managed by this learning agent.");
     }
     return iterator->second;
 }
@@ -88,27 +88,27 @@ EvoGraph::Graph& Learn::LearningAgent::getGraph()
     return *this->graph;
 }
 
-std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Learn::LearningAgent::cGetAlgorithms() const
+std::vector<std::reference_wrapper<const Representation::Representation>> Learn::LearningAgent::cGetRepresentations() const
 {
-    std::vector<std::reference_wrapper<const Algorithm::Algorithm>> result;
-    for(const auto& pair : this->algorithms) {
+    std::vector<std::reference_wrapper<const Representation::Representation>> result;
+    for(const auto& pair : this->representations) {
         result.push_back(pair.second);
     }
     return result;
 }
 
-std::vector<std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getAlgorithms()
+std::vector<std::reference_wrapper<Representation::Representation>> Learn::LearningAgent::getRepresentations()
 {
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> result;
-    for(const auto& pair : this->algorithms) {
+    std::vector<std::reference_wrapper<Representation::Representation>> result;
+    for(const auto& pair : this->representations) {
         result.push_back(pair.second);
     }
     return result;
 }
 
-Algorithm::Algorithm& Learn::LearningAgent::getAlgorithmAt(size_t idx)
+Representation::Representation& Learn::LearningAgent::getRepresentationAt(size_t idx)
 {
-    return this->algorithms.at(idx);
+    return this->representations.at(idx);
 }
 
 RNG::RNG& Learn::LearningAgent::getRNG()
@@ -121,12 +121,12 @@ void Learn::LearningAgent::init(uint64_t seed, bool doGeneratePopulation)
     // Initialize Randomness
     this->rng.setSeed(seed);
 
-    if(this->algorithms.empty()){
-        throw std::runtime_error("LearningAgent::init: No algorithm to init.");
+    if(this->representations.empty()){
+        throw std::runtime_error("LearningAgent::init: No representation to init.");
     }
 
-    for(const auto& pair: algorithms){
-        pair.second.get().initAlgorithm(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
+    for(const auto& pair: representations){
+        pair.second.get().initRepresentation(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
         if(doGeneratePopulation) {
             pair.second.get().initPopulation(this->rng);
         }
@@ -142,16 +142,16 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
-    Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job, uint64_t generationNumber,
+    Representation::ExecutionEngine& execEngine, const Representation::Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
-    if(this->currentExecutedAlgorithm == nullptr){
-        throw std::runtime_error("LearningAgent::evaluateJob: currentExecutedAlgorithm is not set.");
+    if(this->currentExecutedRepresentation == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateJob: currentExecutedRepresentation is not set.");
     }
 
-    // Get the current agent and the current algorithm
-    const Algorithm::Agent& agent = job.getAgent();
-    const Selector::Selector& selector = this->currentExecutedAlgorithm->getSelector();
+    // Get the current agent and the current representation
+    const Representation::Agent& agent = job.getAgent();
+    const Selector::Selector& selector = this->currentExecutedRepresentation->getSelector();
 
 
 
@@ -248,20 +248,20 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     return evaluationResult;
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
 Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
         results;
 
 
-    for(const auto& pair: this->algorithms){
-        // set current executed algorithm
-        this->setCurrentAlgorithm(&pair.second.get());
+    for(const auto& pair: this->representations){
+        // set current executed representation
+        this->setCurrentRepresentation(&pair.second.get());
 
-        // Evaluate the algorithm agents and insert the results
-        auto algoResults = this->evaluateCurrentAlgorithmAgents(generationNumber, mode);
+        // Evaluate the representation agents and insert the results
+        auto algoResults = this->evaluateCurrentRepresentationAgents(generationNumber, mode);
         results.insert(algoResults.begin(), algoResults.end());
     }
 
@@ -269,22 +269,22 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
 }
 
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
-Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
-    if(this->currentExecutedAlgorithm == nullptr){
-        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
+    if(this->currentExecutedRepresentation == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: currentExecutedRepresentation is not set.");
     }
-    if(!this->containsAlgorithm(*this->currentExecutedAlgorithm)){
-        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
+    if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
         results;
 
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        this->currentExecutedAlgorithm->getManager().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine =
+        this->currentExecutedRepresentation->getManager().createExecutionEngine();
 
     auto jobs = this->makeJobs(mode);
     for(auto job: jobs) {
@@ -297,24 +297,24 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
     }
 
 
-    // Update the algorithm after evaluation with the jobs processed
-    this->currentExecutedAlgorithm->updateAfterEvaluation(jobs, mode);
+    // Update the representation after evaluation with the jobs processed
+    this->currentExecutedRepresentation->updateAfterEvaluation(jobs, mode);
 
     return results;
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
-    const Algorithm::Agent& agent)
+    const Representation::Agent& agent)
 {
-    const Algorithm::Algorithm& algorithm = this->getAlgorithmAt(agent.getAlgorithmID());
+    const Representation::Representation& representation = this->getRepresentationAt(agent.getRepresentationID());
 
     // Create the execution engine of the agent.
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        algorithm.getManagerCst().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine =
+        representation.getManagerCst().createExecutionEngine();
 
     // Create and evaluate the job
-    auto job = algorithm.createJob(agent, mode, this->rng);
+    auto job = representation.createJob(agent, mode, this->rng);
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *execEngine, *job, generationNumber, mode, this->learningEnvironment);
 
@@ -322,33 +322,33 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     return avgScore;
 }
 
-void Learn::LearningAgent::launchAlgorithmsSelection(
+void Learn::LearningAgent::launchRepresentationsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results,
+                          std::reference_wrapper<const Representation::Agent>>& results,
             RNG::RNG& rng)
 {
 
-    // set current best algorithm
-    this->currentBestAlgorithm = &this->getAlgorithmAt(results.rbegin()->second.get().getAlgorithmID());
+    // set current best representation
+    this->currentBestRepresentation = &this->getRepresentationAt(results.rbegin()->second.get().getRepresentationID());
     
 
-    if(this->algorithms.size() == 1){
-        // Do the selection for this algorithm
-        this->algorithms.begin()->second.get().getSelector().doSelection(*this->graph, results, rng);
+    if(this->representations.size() == 1){
+        // Do the selection for this representation
+        this->representations.begin()->second.get().getSelector().doSelection(*this->graph, results, rng);
 
         // Update the evaluation records
-        this->algorithms.begin()->second.get().getSelector().updateEvaluationRecords(results);
+        this->representations.begin()->second.get().getSelector().updateEvaluationRecords(results);
 
     } else {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            std::reference_wrapper<const Algorithm::Agent>>
+            std::reference_wrapper<const Representation::Agent>>
             resultsCopy(results);
 
         results.clear();
 
-        for(const auto& pair: algorithms){
+        for(const auto& pair: representations){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Algorithm::Agent>>
+                        std::reference_wrapper<const Representation::Agent>>
                 resultsAlgo;
             
             for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
@@ -360,7 +360,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 }
             }
 
-            // Do the selection for this algorithm
+            // Do the selection for this representation
             pair.second.get().getSelector().doSelection(*this->graph, resultsAlgo, rng);
             // Update the evaluation records
             pair.second.get().getSelector().updateEvaluationRecords(resultsAlgo);
@@ -386,7 +386,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     }
 
     // Remove worst performing roots
-    this->launchAlgorithmsSelection(results, rng);
+    this->launchRepresentationsSelection(results, rng);
 
     for (auto logger : loggers) {
         logger.get().logAfterDecimate();
@@ -395,7 +395,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     // Does a validation or not according to the parameter doValidation
     if (params->doValidation) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::reference_wrapper<const Algorithm::Agent>>
+                      std::reference_wrapper<const Representation::Agent>>
             validationResults;
 
         if (generationNumber % params->stepValidation == 0 ||
@@ -410,7 +410,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
     if (doPopulate) {
         // Populate Sequentially
-        for(const auto& pair: algorithms){
+        for(const auto& pair: representations){
             pair.second.get().populate(this->rng, this->maxNbThreads);
         }
     }
@@ -469,23 +469,23 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     return generationNumber;
 }
 
-std::vector<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
+std::vector<std::shared_ptr<Representation::Job>> Learn::LearningAgent::makeJobs(
     Learn::LearningMode mode)
 {
-    if(this->currentExecutedAlgorithm == nullptr){
-        throw std::runtime_error("LearningAgent::makeJobs: Current executed algorithm is nullptr.");
+    if(this->currentExecutedRepresentation == nullptr){
+        throw std::runtime_error("LearningAgent::makeJobs: Current executed representation is nullptr.");
     }
 
-    std::vector<std::shared_ptr<Algorithm::Job>> jobs;
+    std::vector<std::shared_ptr<Representation::Job>> jobs;
     size_t idx = 0;
-    for(auto agent: this->currentExecutedAlgorithm->getAgents()){
-        auto job = this->currentExecutedAlgorithm->createJob(agent, mode, rng, idx);
+    for(auto agent: this->currentExecutedRepresentation->getAgents()){
+        auto job = this->currentExecutedRepresentation->createJob(agent, mode, rng, idx);
         jobs.push_back(job);
         idx++;
     }
     return jobs;
 }
 
-bool Learn::LearningAgent::containsAlgorithm(Algorithm::Algorithm& algorithm){
-    return this->algorithms.find(algorithm.getAlgorithmID()) != this->algorithms.end();
+bool Learn::LearningAgent::containsRepresentation(Representation::Representation& representation){
+    return this->representations.find(representation.getRepresentationID()) != this->representations.end();
 }

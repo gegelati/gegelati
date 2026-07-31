@@ -40,7 +40,7 @@
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "algorithm/lgp/environment.h"
+#include "representation/lgp/environment.h"
 #include "goldenReferenceComparison.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
@@ -93,8 +93,8 @@ class ExecutionStatsTest : public ::testing::Test
 
         // Environment
         Learn::LearningParameters params;
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
 
         // Setup execution engine

@@ -48,7 +48,7 @@
 #endif
 
 #include "codeGen/tpgGenerationEngineFactory.h"
-#include "algorithm/lgp/environment.h"
+#include "representation/lgp/environment.h"
 #include "file/graphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
@@ -114,7 +114,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
             cond, "$0 = ($1) < ($2) ? -1*($1) : ($1);")));
 
         data.push_back(currentState);
-        params.algorithm.lgp.nbRegisters = 8;
+        params.representation.lgp.nbRegisters = 8;
         e = new Environment(set, params, data);
         tpg = new EvoGraph::Graph(*e);
 

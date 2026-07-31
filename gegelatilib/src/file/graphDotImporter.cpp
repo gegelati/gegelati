@@ -36,11 +36,11 @@
  */
 #include "file/graphDotImporter.h"
 
-const std::string File::GraphDotImporter::algorithmRegex(
+const std::string File::GraphDotImporter::representationRegex(
     "ALGO([0-9]+)\\x20\\x5B.*label=\"([^\\.]+)\\.([0-9]+)\".*");
-const std::string File::GraphDotImporter::subAlgorithmLinkRegex(
+const std::string File::GraphDotImporter::subRepresentationLinkRegex(
     "ALGO([0-9]+)\\x20->\\x20ALGO([0-9]+)");
-const std::string File::GraphDotImporter::endAlgorithmSubGraph(R"(^\s*\}\s*$)");
+const std::string File::GraphDotImporter::endRepresentationSubGraph(R"(^\s*\}\s*$)");
 
 
 const std::string File::GraphDotImporter::teamRegex(
@@ -58,11 +58,11 @@ const std::string File::GraphDotImporter::linkTeamAgentRegex(
 const std::string File::GraphDotImporter::linkAgentTeamRegex(
     "P([0-9]+)\\x20->\\x20T([0-9]+)");
 
-Algorithm::Algorithm& File::GraphDotImporter::getAlgorithm(uint64_t algorithmID)
+Representation::Representation& File::GraphDotImporter::getRepresentation(uint64_t representationID)
 {
-    auto it = this->mapAlgorithms.find(algorithmID);
-    if(it == this->mapAlgorithms.end()){
-        throw std::runtime_error("GraphDotImporter::getAlgorithm Algorithm not found"); 
+    auto it = this->mapRepresentations.find(representationID);
+    if(it == this->mapRepresentations.end()){
+        throw std::runtime_error("GraphDotImporter::getRepresentation Representation not found"); 
     }
     return it->second;
 }
@@ -107,37 +107,37 @@ void File::GraphDotImporter::dumpGraphHeader()
     }
 }
 
-void File::GraphDotImporter::readAlgorithm(std::smatch matches)
+void File::GraphDotImporter::readRepresentation(std::smatch matches)
 {
     std::string name = matches[2];
     uint64_t id = std::stoi(matches[3]);
     
-    auto it = this->mapAlgorithms.find(id);
-    if(it == this->mapAlgorithms.end() || it->second.get().getAlgorithmName() != name){
-        throw std::runtime_error("GraphDotImporter::readAlgorithm: Algorithm doesnt correspond"); 
+    auto it = this->mapRepresentations.find(id);
+    if(it == this->mapRepresentations.end() || it->second.get().getRepresentationName() != name){
+        throw std::runtime_error("GraphDotImporter::readRepresentation: Representation doesnt correspond"); 
     }
 }
 
-void File::GraphDotImporter::readSubAlgorithmLink(std::smatch matches)
+void File::GraphDotImporter::readSubRepresentationLink(std::smatch matches)
 {
     uint64_t id_src = std::stoi(matches[1]);
     uint64_t id_dest = std::stoi(matches[2]);
 
-    auto it_src = this->mapAlgorithms.find(id_src);
-    if(it_src == this->mapAlgorithms.end()){
-        throw std::runtime_error("GraphDotImporter::readSubAlgorithmLink: source algorithm not found"); 
+    auto it_src = this->mapRepresentations.find(id_src);
+    if(it_src == this->mapRepresentations.end()){
+        throw std::runtime_error("GraphDotImporter::readSubRepresentationLink: source representation not found"); 
     }
 
-    auto it_dest = this->mapAlgorithms.find(id_dest);
-    if(it_dest == this->mapAlgorithms.end()){
-        throw std::runtime_error("GraphDotImporter::readSubAlgorithmLink: destination algorithm not found"); 
+    auto it_dest = this->mapRepresentations.find(id_dest);
+    if(it_dest == this->mapRepresentations.end()){
+        throw std::runtime_error("GraphDotImporter::readSubRepresentationLink: destination representation not found"); 
     }
 
     // Will throw if nothing is found
-    it_src->second.get().cGetSubAlgorithm(id_dest);
+    it_src->second.get().cGetSubRepresentation(id_dest);
 }
 
-void File::GraphDotImporter::readAlgorithmGraphSubGraph()
+void File::GraphDotImporter::readRepresentationGraphSubGraph()
 {
     char buffer[MAX_READ_SIZE];
     // Skip subGraph header (should be 5 lines)
@@ -145,11 +145,11 @@ void File::GraphDotImporter::readAlgorithmGraphSubGraph()
         pFile.getline(buffer, MAX_READ_SIZE);
     }
 
-    this->setMapAlgorithm();
+    this->setMapRepresentation();
 
-    std::regex testAlgorithmRegex(this->algorithmRegex);
-    std::regex testSubAlgorithmLinkRegex(this->subAlgorithmLinkRegex);
-    std::regex testEndAlgorithmSubGraph(this->endAlgorithmSubGraph);
+    std::regex testRepresentationRegex(this->representationRegex);
+    std::regex testSubRepresentationLinkRegex(this->subRepresentationLinkRegex);
+    std::regex testEndRepresentationSubGraph(this->endRepresentationSubGraph);
 
 
     std::smatch matches;
@@ -163,11 +163,11 @@ void File::GraphDotImporter::readAlgorithmGraphSubGraph()
         }
 
         // check the line shape and parse it
-        if (std::regex_search(this->lastLine, matches, testAlgorithmRegex)) {
-            this->readAlgorithm(matches);
-        } else if (std::regex_search(this->lastLine, matches, testSubAlgorithmLinkRegex)) {
-            this->readSubAlgorithmLink(matches);
-        } else if (std::regex_search(this->lastLine, matches, testEndAlgorithmSubGraph)) {
+        if (std::regex_search(this->lastLine, matches, testRepresentationRegex)) {
+            this->readRepresentation(matches);
+        } else if (std::regex_search(this->lastLine, matches, testSubRepresentationLinkRegex)) {
+            this->readSubRepresentationLink(matches);
+        } else if (std::regex_search(this->lastLine, matches, testEndRepresentationSubGraph)) {
             read = false;
         } else {
         }
@@ -175,20 +175,20 @@ void File::GraphDotImporter::readAlgorithmGraphSubGraph()
 }
 
 
-void File::GraphDotImporter::setMapAlgorithm()
+void File::GraphDotImporter::setMapRepresentation()
 {
-    this->mapAlgorithms.clear();
-    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithmsToAdd;
-    algorithmsToAdd.push_back(algorithm);
-    while(!algorithmsToAdd.empty()){
-        Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
-        algorithmsToAdd.pop_back();
+    this->mapRepresentations.clear();
+    // Add all representations to the set, and recursively all their sub-representations, to be able to print the content of the programs when they are mutated by the representation.
+    std::vector<std::reference_wrapper<Representation::Representation>> representationsToAdd;
+    representationsToAdd.push_back(representation);
+    while(!representationsToAdd.empty()){
+        Representation::Representation& representation = representationsToAdd.back();
+        representationsToAdd.pop_back();
 
-        if(this->mapAlgorithms.find(algorithm.getAlgorithmID()) == this->mapAlgorithms.end()){
-            this->mapAlgorithms.insert({algorithm.getAlgorithmID(), algorithm});
-            for(Algorithm::Algorithm& subAlgorithm : algorithm.getSubAlgorithms()){
-                algorithmsToAdd.push_back(subAlgorithm);
+        if(this->mapRepresentations.find(representation.getRepresentationID()) == this->mapRepresentations.end()){
+            this->mapRepresentations.insert({representation.getRepresentationID(), representation});
+            for(Representation::Representation& subRepresentation : representation.getSubRepresentations()){
+                representationsToAdd.push_back(subRepresentation);
             }
         }
     }
@@ -218,15 +218,15 @@ void File::GraphDotImporter::readAction(std::smatch& matches)
 void File::GraphDotImporter::readAgent(std::smatch& matches) {
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t agentID = std::stoi(matches[1]);
-        std::string algorithmName = matches[2];
-        uint64_t algorithmID = std::stoi(matches[3]);
+        std::string representationName = matches[2];
+        uint64_t representationID = std::stoi(matches[3]);
         
-        Algorithm::Algorithm& algorithm = this->getAlgorithm(algorithmID);
-        const Algorithm::Agent& agent = algorithm.readAgent(matches);
+        Representation::Representation& representation = this->getRepresentation(representationID);
+        const Representation::Agent& agent = representation.readAgent(matches);
 
         this->readAgentID.insert({std::stoi(matches[1]), agent});
 
-        algorithm.getManager().setNewAgentID(agent, agentID);
+        representation.getManager().setNewAgentID(agent, agentID);
     }
 }
 
@@ -320,8 +320,8 @@ void File::GraphDotImporter::readLinkAgentTeam(std::smatch& matches)
             throw std::runtime_error("GraphDotImporter::readLinkAgentTeam team src not found");
         }
 
-        Algorithm::Algorithm& algorithm = this->getAlgorithm(agent_it->second.get().getAlgorithmID());
-        algorithm.linkAgentVertex(agent_it->second, team_it->second);
+        Representation::Representation& representation = this->getRepresentation(agent_it->second.get().getRepresentationID());
+        representation.linkAgentVertex(agent_it->second, team_it->second);
     }
 }
 
@@ -334,7 +334,7 @@ void File::GraphDotImporter::importGraph(const char* filePath)
     }
 
     // clear every storing objects
-    algorithm.getManager().clearAgents(this->graph);
+    representation.getManager().clearAgents(this->graph);
     this->readVertexID.clear();
     this->readEdgeID.clear();
     this->readAgentID.clear();
@@ -372,8 +372,8 @@ void File::GraphDotImporter::importGraph(const char* filePath)
     pFile.seekg(0);
     // Skip header
     this->dumpGraphHeader();
-    // Read algorithm subGraph
-    this->readAlgorithmGraphSubGraph();
+    // Read representation subGraph
+    this->readRepresentationGraphSubGraph();
     bool read = true;
     while (read) {
         read = this->readLineFromFile();

@@ -62,32 +62,32 @@ void Learn::ParallelLearningAgent::init(uint64_t seed, bool doGeneratePopulation
     Learn::LearningAgent::init(seed, doGeneratePopulation);
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
-Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
+Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
                                                Learn::LearningMode mode)
 {
 
 
-    if(this->currentExecutedAlgorithm == nullptr){
-        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
+    if(this->currentExecutedRepresentation == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: currentExecutedRepresentation is not set.");
     }
-    if(!this->containsAlgorithm(*this->currentExecutedAlgorithm)){
-        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
+    if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>
         results;
 
         
     if (false && (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable())) {
-        results = Learn::LearningAgent::evaluateCurrentAlgorithmAgents(generationNumber, mode);
+        results = Learn::LearningAgent::evaluateCurrentRepresentationAgents(generationNumber, mode);
     }
     else {
         // Create jobs to process
-        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode);
+        std::vector<std::shared_ptr<Representation::Job>> jobsToProcess = makeJobs(mode);
 
         // Create a copy of jobsToProcess in a queue structure
-        std::queue<std::shared_ptr<Algorithm::Job>> jobsQueue;
+        std::queue<std::shared_ptr<Representation::Job>> jobsQueue;
         for (const auto& job : jobsToProcess) {
             jobsQueue.push(job);
         }
@@ -95,8 +95,8 @@ Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generation
         // Parallel mode
         evaluateAgentsInParallel(jobsQueue, generationNumber, mode, results);
 
-        // Update the algorithm after evaluation with the jobs processed
-        this->currentExecutedAlgorithm->updateAfterEvaluation(jobsToProcess, mode);
+        // Update the representation after evaluation with the jobs processed
+        this->currentExecutedRepresentation->updateAfterEvaluation(jobsToProcess, mode);
     }
 
     return results;
@@ -104,10 +104,10 @@ Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generation
 
 void Learn::ParallelLearningAgent::slaveEvalJobThread(
     uint64_t generationNumber, Learn::LearningMode mode,
-    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess,
+    std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess,
     std::mutex& agentsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Algorithm::Job>>>& resultsPerAgentMap,
+                                 std::shared_ptr<Representation::Job>>>& resultsPerAgentMap,
     std::mutex& resultsPerAgentMapMutex,
     size_t indexEnvironment)
 {
@@ -115,12 +115,12 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     // Clone learningEnvironment
     LearningEnvironment* privateLearningEnvironment = this->allCloneLearningEnvironments.at(indexEnvironment);
 
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = this->currentExecutedAlgorithm->getManager().createExecutionEngine(privateLearningEnvironment->getDataSources());
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = this->currentExecutedRepresentation->getManager().createExecutionEngine(privateLearningEnvironment->getDataSources());
 
     // Pop a job and process it
     while (true) {
         bool doProcess = false;
-        std::shared_ptr<Algorithm::Job> jobToProcess;
+        std::shared_ptr<Representation::Job> jobToProcess;
 
         { // Mutual exclusion zone: atomic job acquisition + engine creation
             std::lock_guard<std::mutex> lock(agentsToProcessMutex);
@@ -151,13 +151,13 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
 }
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
-    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>&
+    std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>&
         results)
 {
     // Create Map for results
     std::map<uint64_t,
-             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Algorithm::Job>>>
+             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Representation::Job>>>
         resultsPerJobMap;
 
     evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap);
@@ -166,9 +166,9 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
 
 }
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
-    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+    std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap)
+                                 std::shared_ptr<Representation::Job>>>& resultsPerJobMap)
 {
     // Create mutexes
     std::mutex agentsToProcessMutex;
@@ -204,8 +204,8 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>&
+                                 std::shared_ptr<Representation::Job>>>& resultsPerJobMap,
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Agent>>&
         results)
 {
     // Merge the results

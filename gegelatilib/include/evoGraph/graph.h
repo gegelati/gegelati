@@ -131,7 +131,7 @@ namespace EvoGraph {
          *
          * \return a const reference to the newly created Team.
          */
-        const EvoGraph::Team& addNewTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
+        const EvoGraph::Team& addNewTeam(std::optional<std::reference_wrapper<const Representation::Agent>> programAgent = std::nullopt);
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -146,7 +146,7 @@ namespace EvoGraph {
          * 
          * \return a const reference to the newly created Action.
          */
-        const EvoGraph::Action& addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
+        const EvoGraph::Action& addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Agent>> programAgent = std::nullopt);
 
 
         /**
@@ -297,7 +297,7 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         const EvoGraph::Edge& addNewEdge(const Vertex& src, const Vertex& dest,
-                                  const Algorithm::Agent& programAgent);
+                                  const Representation::Agent& programAgent);
 
 
         /**
@@ -327,7 +327,7 @@ namespace EvoGraph {
          * \param[in] vertex a const reference to the modified Vertex.
          * \param[in] programAgent weak pointer to the Agent Program to set to the vertex
          */
-        void setVertexProgram(const Vertex& vertex, const Algorithm::Agent& programAgent);
+        void setVertexProgram(const Vertex& vertex, const Representation::Agent& programAgent);
 
         /**
          * Duplicate a Edge from the Graph.
@@ -376,7 +376,7 @@ namespace EvoGraph {
          * \param[in] programAgent shared pointer to the Agent Program to set to the edge.
          * \return true if the given edge is part of the graph, and
          */
-        bool setEdgeProgram(const Edge& edge, const Algorithm::Agent& programAgent);
+        bool setEdgeProgram(const Edge& edge, const Representation::Agent& programAgent);
 
 
         /**

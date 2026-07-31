@@ -43,12 +43,12 @@
 
 #include "log/laBasicLogger.h"
 
-#include "algorithm/tpg/tpgAlgorithm.h"
-#include "algorithm/lgp/lgpAlgorithm.h"
-#include "algorithm/cgp/cgpAlgorithm.h"
-#include "algorithm/tgp/tgpAlgorithm.h"
-#include "algorithm/maple/mapleAlgorithm.h"
-#include "algorithm/atpg/atpgAlgorithm.h"
+#include "representation/tpg/tpgRepresentation.h"
+#include "representation/lgp/lgpRepresentation.h"
+#include "representation/cgp/cgpRepresentation.h"
+#include "representation/tgp/tgpRepresentation.h"
+#include "representation/maple/mapleRepresentation.h"
+#include "representation/atpg/atpgRepresentation.h"
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"
@@ -81,8 +81,8 @@ class LearningAgentTest : public ::testing::Test
     StickGameWithOpponent le;
     FakeMultiContinuousLearningEnvironment cle;
     Parameters params;
-    Algorithm::LGPAlgorithm* lgp;
-    Algorithm::TPGAlgorithm* tpg;
+    Representation::LGPRepresentation* lgp;
+    Representation::TPGRepresentation* tpg;
     Selector::Selector* selector;
 
     virtual void SetUp()
@@ -92,26 +92,26 @@ class LearningAgentTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         // Proba as in Kelly's paper
-        params.algorithm.tpg.maxInitOutgoingEdges = 3;
-        params.algorithm.lgp.maxProgramSize = 96;
-        params.algorithm.nbAgents = 15;
-        params.algorithm.tpg.pEdgeDeletion = 0.7;
-        params.algorithm.tpg.pEdgeAddition = 0.7;
-        params.algorithm.tpg.pProgramMutation = 0.2;
-        params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-        params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-        params.algorithm.tpg.maxOutgoingEdges = 4;
-        params.algorithm.lgp.pAdd = 0.5;
-        params.algorithm.lgp.pDelete = 0.5;
-        params.algorithm.lgp.pMutate = 1.0;
-        params.algorithm.lgp.pSwap = 1.0;
-        params.algorithm.lgp.pConstantMutation = 0.5;
-        params.algorithm.lgp.minConstValue = 0;
-        params.algorithm.lgp.maxConstValue = 1;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.tpg.maxInitOutgoingEdges = 3;
+        params.representation.lgp.maxProgramSize = 96;
+        params.representation.nbAgents = 15;
+        params.representation.tpg.pEdgeDeletion = 0.7;
+        params.representation.tpg.pEdgeAddition = 0.7;
+        params.representation.tpg.pProgramMutation = 0.2;
+        params.representation.tpg.pEdgeDestinationChange = 0.1;
+        params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+        params.representation.tpg.maxOutgoingEdges = 4;
+        params.representation.lgp.pAdd = 0.5;
+        params.representation.lgp.pDelete = 0.5;
+        params.representation.lgp.pMutate = 1.0;
+        params.representation.lgp.pSwap = 1.0;
+        params.representation.lgp.pConstantMutation = 0.5;
+        params.representation.lgp.minConstValue = 0;
+        params.representation.lgp.maxConstValue = 1;
+        params.representation.lgp.nbProgramConstant = 5;
 
-        lgp = new Algorithm::LGPAlgorithm(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-        tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+        lgp = new Representation::LGPRepresentation(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
+        tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
         selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
         tpg->setSelector(*selector);
@@ -140,8 +140,8 @@ TEST_F(LearningAgentTest, Constructor)
 
 TEST_F(LearningAgentTest, Init)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     ASSERT_NO_THROW(la.init())
@@ -150,8 +150,8 @@ TEST_F(LearningAgentTest, Init)
 
 TEST_F(LearningAgentTest, addLogger)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     Log::LALogger* l = nullptr;
@@ -217,11 +217,11 @@ TEST_F(LearningAgentTest, addLogger)
 {
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
-    auto job = *la.makeJob(la.getAlgorithmAt(0).getAgents().at(0),
+    auto job = *la.makeJob(la.getRepresentationAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
     ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
-    ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(0), job.getAgent())
+    ASSERT_EQ(la.getRepresentationAt(0).getAgents().at(0), job.getAgent())
         << "Encapsulate the root in a job shouldn't change it";
 
     Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
@@ -234,10 +234,10 @@ TEST_F(LearningAgentTest, MakeJobs)
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
-    ASSERT_EQ(la.getAlgorithmAt(0).getAgents().size(), jobs.size())
+    ASSERT_EQ(la.getRepresentationAt(0).getAgents().size(), jobs.size())
         << "There should be as many jobs as roots";
     for (int i = 0; i < la.getGraph().getNbRootVertices(); i++) {
-        ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(i),
+        ASSERT_EQ(la.getRepresentationAt(0).getAgents().at(i),
                   (*jobs.front()).getAgent())
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
@@ -246,22 +246,22 @@ TEST_F(LearningAgentTest, MakeJobs)
 
 TEST_F(LearningAgentTest, EvalAgent)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 1.0;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 1.0;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
-    Algorithm::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
+    Representation::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
     la.init();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(la.getAlgorithmAt(tpg->getAlgorithmID()).getAgents().at(0),
+    auto job = tpg->createJob(la.getRepresentationAt(tpg->getRepresentationID()).getAgents().at(0),
                            Learn::LearningMode::TRAINING, la.getRNG());
-    la.setCurrentAlgorithm(tpg);
+    la.setCurrentRepresentation(tpg);
     ASSERT_NO_THROW(
         result = la.evaluateJob(*execEngine, *job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
@@ -271,22 +271,22 @@ TEST_F(LearningAgentTest, EvalAgent)
 
 TEST_F(LearningAgentTest, EvaluateOneRoot)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 1.0;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 1.0;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
-    Algorithm::TPG::TPGArchive a; // For testing purposes, normally, the archive from the
+    Representation::TPG::TPGArchive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
     la.init();
 
-    la.setCurrentAlgorithm(tpg);
+    la.setCurrentRepresentation(tpg);
     std::shared_ptr<Learn::EvaluationResult> result;
     ASSERT_NO_THROW(
         result = la.evaluateOneAgent(0, Learn::LearningMode::TRAINING,
-                                    la.getAlgorithmAt(tpg->getAlgorithmID()).getAgents().at(0)))
+                                    la.getRepresentationAt(tpg->getRepresentationID()).getAgents().at(0)))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -294,17 +294,17 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
 
 TEST_F(LearningAgentTest, EvalAllRoots)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>
+                  std::reference_wrapper<const Representation::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         la.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -318,8 +318,8 @@ TEST_F(LearningAgentTest, EvalAllRoots)
 
 TEST_F(LearningAgentTest, TrainOnegeneration)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
@@ -328,10 +328,10 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // we will validate in order to cover validation log
     params.evaluation.doValidation = true;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     la.init();
 
@@ -340,9 +340,9 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     Log::LABasicLogger l(la, o);
 
     // Do the populate call to keep know the number of initial vertex
-    Algorithm::TPG::TPGArchive a(0);
-    Algorithm::Algorithm& tpgRef = la.getAlgorithmAt(tpg->getAlgorithmID());
-    tpgRef.getMutator().mutatePopulation(la.getGraph(), tpgRef.getManager(), params.algorithm, la.getRNG());
+    Representation::TPG::TPGArchive a(0);
+    Representation::Representation& tpgRef = la.getRepresentationAt(tpg->getRepresentationID());
+    tpgRef.getMutator().mutatePopulation(la.getGraph(), tpgRef.getManager(), params.representation, la.getRNG());
 
     size_t initialNbVertex = la.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -353,7 +353,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     ASSERT_EQ(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.algorithm.nbAgents))
+                        params.representation.nbAgents))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 
@@ -374,17 +374,17 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
 TEST_F(LearningAgentTest, Train)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 3;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     la.init();
     bool alt = false;
@@ -398,10 +398,10 @@ TEST_F(LearningAgentTest, Train)
     // For coverage
     params.evaluation.doValidation = true;
     params.evaluation.stepValidation = 2;
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
     alt = false;
     la2.init();
     ASSERT_NO_THROW(la2.train(alt, true))
@@ -426,7 +426,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << graph.getEdges().size() << ", "
                 << EvoGraph::Vertex::getVertexIDCounter() << ", "
                 << EvoGraph::Edge::getEdgeIDCounter() << ", "
-                << Algorithm::Agent::getAgentIDCounter() << ", "
+                << Representation::Agent::getAgentIDCounter() << ", "
                 << rngValue
                 << "}"<<std::endl;
         // Nice printed infos
@@ -435,7 +435,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << "Number of edges: " << graph.getEdges().size() << "\n"
                 << "Vertex ID counter: " << EvoGraph::Vertex::getVertexIDCounter() << "\n"
                 << "Edge ID counter: " << EvoGraph::Edge::getEdgeIDCounter() << "\n"
-                << "Agent ID counter: " << Algorithm::Agent::getAgentIDCounter() << "\n"
+                << "Agent ID counter: " << Representation::Agent::getAgentIDCounter() << "\n"
 
                 << "RNG value: " << rngValue << std::endl;
     }
@@ -453,7 +453,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), expectedValues[4])
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), expectedValues[5])
+    ASSERT_EQ(Representation::Agent::getAgentIDCounter(), expectedValues[5])
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(rngValue, expectedValues[6])
         << "Graph does not have the expected determinst characteristics.";
@@ -465,19 +465,19 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
 // ensure the result of the training is identical on all OSes and Compilers.
 TEST_F(LearningAgentTest, TrainPortability)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     tpg->setSelector(*selector);
@@ -490,23 +490,23 @@ TEST_F(LearningAgentTest, TrainPortability)
 // ensure the result of the training is identical on all OSes and Compilers.
 TEST_F(LearningAgentTest, TrainLGPPortability)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
 
 
-    auto lgp1 = new Algorithm::LGPAlgorithm(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto lgp1 = new Representation::LGPRepresentation(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *lgp1, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     trainAndTestDeterminissm(la, {0, 0, 0, 0, 0, 144, 2805795284291322615U}, false);
 }
@@ -515,26 +515,26 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
 // ensure the result of the training is identical on all OSes and Compilers.
 TEST_F(LearningAgentTest, TrainCGPPortability)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
-    params.algorithm.lgp.pMutateOutput = 1;
-    params.algorithm.cgp.nbLayers = 3;
-    params.algorithm.cgp.nbNodesPerLayer = 5;
-    params.algorithm.cgp.pMutateNode = params.algorithm.lgp.pMutate;
+    params.representation.lgp.pMutateOutput = 1;
+    params.representation.cgp.nbLayers = 3;
+    params.representation.cgp.nbNodesPerLayer = 5;
+    params.representation.cgp.pMutateNode = params.representation.lgp.pMutate;
 
     Instructions::Set set2;
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a - b; })));
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a + b; })));
-    auto cgp = new Algorithm::CGPAlgorithm(set2, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto cgp = new Representation::CGPRepresentation(set2, std::make_unique<Representation::RepresentationParameters>(params.representation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     cgp->setSelector(*selector);
     Learn::LearningAgent la(le, *cgp, std::make_unique<Learn::LearningParameters>(params.evaluation));
@@ -545,27 +545,27 @@ TEST_F(LearningAgentTest, TrainCGPPortability)
 // ensure the result of the training is identical on all OSes and Compilers.
 TEST_F(LearningAgentTest, TrainTGPPortability)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
-    params.algorithm.tgp.maxDepth = 4;
-    params.algorithm.tgp.maxInitDepth = 2;
-    params.algorithm.tgp.maxNbEdgePerNode = 2;
+    params.representation.tgp.maxDepth = 4;
+    params.representation.tgp.maxInitDepth = 2;
+    params.representation.tgp.maxNbEdgePerNode = 2;
 
     
     Instructions::Set set2;
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a - b; })));
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a + b; })));
     
-    auto tgp = new Algorithm::TGPAlgorithm(set2, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tgp = new Representation::TGPRepresentation(set2, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tgp, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
 
@@ -577,17 +577,17 @@ TEST_F(LearningAgentTest, TrainTGPPortability)
 TEST_F(LearningAgentTest, TrainInstrumented)
 {
     return;
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 3;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation), EvoGraph::TPGInstrumentedFactory());
@@ -649,23 +649,23 @@ TEST_F(LearningAgentTest, TrainInstrumented)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     trainAndTestDeterminissm(la, {29, 25, 93, 149, 534, 347, 10145656939287947145U}, false);
 }
@@ -673,26 +673,26 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.atpg.probaContextOverActionProgram = 0.1;
-    params.algorithm.nbAgents = 30;
+    params.representation.atpg.probaContextOverActionProgram = 0.1;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
-    tpg = new Algorithm::ATPGAlgorithm(*lgp, *actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    tpg = new Representation::ATPGRepresentation(*lgp, *actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     trainAndTestDeterminissm(la, {56, 24, 115, 235, 559, 431, 11530679664757575767U}, false);
 }
@@ -701,29 +701,29 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
 // it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
-    params.algorithm.maple.pMutateActionProgram = 0.9;
-    params.algorithm.atpg.probaContextOverActionProgram = 0.9;
-    params.algorithm.tpg.pProgramMutation = 0.6;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.maple.pMutateActionProgram = 0.9;
+    params.representation.atpg.probaContextOverActionProgram = 0.9;
+    params.representation.tpg.pProgramMutation = 0.6;
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
-    auto actionMaple = new Algorithm::MapleAlgorithm(*actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    tpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionMaple = new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     trainAndTestDeterminissm(la, {160, 96, 264, 717, 1225, 986, 16096251753827571400U}, false);
 }
@@ -734,27 +734,27 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
 // it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
-    params.algorithm.maple.pMutateActionProgram = 0.9;
-    params.algorithm.atpg.probaContextOverActionProgram = 0.9;
-    params.algorithm.tpg.pProgramMutation = 0.6;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.maple.pMutateActionProgram = 0.9;
+    params.representation.atpg.probaContextOverActionProgram = 0.9;
+    params.representation.tpg.pProgramMutation = 0.6;
     params.evaluation.nbThreads = 1;
 
-    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
-    auto actionMaple = new Algorithm::MapleAlgorithm(*actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    auto atpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    atpg->addAggregatedActionProgramAlgorithm(*actionMaple);
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = { *actionMaple, *atpg}; // ORDER MUST BE AUTOMATIC
+    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionMaple = new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto atpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    atpg->addAggregatedActionProgramRepresentation(*actionMaple);
+    std::vector<std::reference_wrapper<Representation::Representation>> listAlgo = { *actionMaple, *atpg}; // ORDER MUST BE AUTOMATIC
     Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     actionMaple->setSelector(*selector);
@@ -768,25 +768,25 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousMaple)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
-    params.algorithm.maple.pCrossAgents = 0.7;
-    params.algorithm.maple.pCrossPrograms = 0.5;
+    params.representation.nbAgents = 30;
+    params.representation.maple.pCrossAgents = 0.7;
+    params.representation.maple.pCrossPrograms = 0.5;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
 
-    auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto maple = new Representation::MapleRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
 
     trainAndTestDeterminissm(la, {27, 24, 72, 151, 385, 330, 11466624659474942238U}, false);
@@ -797,33 +797,33 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
 // it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
-    params.algorithm.maple.pMutateActionProgram = 0.9;
-    params.algorithm.atpg.probaContextOverActionProgram = 0.9;
-    params.algorithm.tpg.pProgramMutation = 0.6;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.maple.pMutateActionProgram = 0.9;
+    params.representation.atpg.probaContextOverActionProgram = 0.9;
+    params.representation.tpg.pProgramMutation = 0.6;
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple =
-        new Algorithm::MapleAlgorithm(*actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "MAPLEAction");
-    auto matpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "MATPG");
+        new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation), "MAPLEAction");
+    auto matpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "MATPG");
 
-    auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP1");
+    auto standaloneLGP = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
 
-    auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP2");
-    auto standaloneMaple = new Algorithm::MapleAlgorithm(*standaloneLGPforMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "Maple2");
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
+    auto standaloneLGPforMaple = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
+    auto standaloneMaple = new Representation::MapleRepresentation(*standaloneLGPforMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "Maple2");
+    std::vector<std::reference_wrapper<Representation::Representation>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
@@ -842,34 +842,34 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
 // it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
-    params.algorithm.maple.pMutateActionProgram = 0.9;
-    params.algorithm.atpg.probaContextOverActionProgram = 0.9;
-    params.algorithm.tpg.pProgramMutation = 0.6;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.maple.pMutateActionProgram = 0.9;
+    params.representation.atpg.probaContextOverActionProgram = 0.9;
+    params.representation.tpg.pProgramMutation = 0.6;
     params.evaluation.nbThreads = 1;
     params.selection._selectionMode = "tournament";
 
     
-    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple =
-        new Algorithm::MapleAlgorithm(*actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "MAPLEAction");
-    auto matpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "MATPG");
+        new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation), "MAPLEAction");
+    auto matpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "MATPG");
 
-    auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP1");
+    auto standaloneLGP = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
 
-    auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP2");
-    auto standaloneMaple = new Algorithm::MapleAlgorithm(*standaloneLGPforMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "Maple2");
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
+    auto standaloneLGPforMaple = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
+    auto standaloneMaple = new Representation::MapleRepresentation(*standaloneLGPforMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "Maple2");
+    std::vector<std::reference_wrapper<Representation::Representation>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TournamentSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     standaloneLGP->setSelector(*selector);
@@ -886,21 +886,21 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
-    auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto maple = new Representation::MapleRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::MapElitesSelector(std::make_unique<Selector::SelectionParameters>(params.selection), params.evaluation.maxNbEvaluationPerPolicy);
     maple->setSelector(*selector);
@@ -921,21 +921,21 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
-    params.algorithm.lgp.forceProgramBehaviorChangeOnMutation = false;
+    params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
-    auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto maple = new Representation::MapleRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::MapElitesSelector(std::make_unique<Selector::SelectionParameters>(params.selection), params.evaluation.maxNbEvaluationPerPolicy);
     maple->setSelector(*selector);
@@ -957,8 +957,8 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
 /*
 TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 1;
     params.selection.truncation.ratioDeletedRoots = 0.2;
@@ -972,7 +972,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
 
     EvoGraph::Graph& graph = la.getGraph();
     
-    la.getAlgorithmAt(0).getSelector().keepBestPolicy(la.getGraph());
+    la.getRepresentationAt(0).getSelector().keepBestPolicy(la.getGraph());
 
     // Get policy stats
     EvoGraph::PolicyStats psOrigin;
@@ -987,13 +987,13 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
 
     // Record the behavior of the TPG with introns
     le.reset();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->createExecutionEngine();
 
     std::vector<const EvoGraph::Vertex*> pathOrigin =
         tee.executeFromRoot(*(graph.getRootVertices().at(0))).first;
 
     // Clear introns
-    la.getAlgorithmAt(0).clearUnusedAgentParts();
+    la.getRepresentationAt(0).clearUnusedAgentParts();
 
     // Get new policy stats
     EvoGraph::PolicyStats psNoIntrons;
@@ -1021,19 +1021,19 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
 
 TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 1;
-    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    tpg = new Representation::TPGRepresentation(params, *lgp);
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
     // Do the populate call to keep know the number of initial vertex
-    Algorithm::TPG::TPGArchive a(0);
+    Representation::TPG::TPGArchive a(0);
 
     tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
     size_t initialNbVertex = la.getGraph().getNbVertices();
@@ -1047,11 +1047,11 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     ASSERT_LE(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.algorithm.nbAgents))
+                        params.representation.nbAgents))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
     // Train a second generation, because most roots were removed, a root
-    // actions have appeared and the training algorithm will attempt to remove
+    // actions have appeared and the training representation will attempt to remove
     // them.
     ASSERT_NO_THROW(la.trainOneGeneration(0))
         << "Training for one generation failed.";
@@ -1070,8 +1070,8 @@ TEST_F(ParallelLearningAgentTest, Constructor)
 
 TEST_F(ParallelLearningAgentTest, Init)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     ASSERT_NO_THROW(pla.init())
@@ -1082,23 +1082,23 @@ TEST_F(ParallelLearningAgentTest, Init)
 
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 1.0;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 1.0;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 1;
 
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
-    Algorithm::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
+    Representation::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
     pla.init();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
+    std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(pla.getAlgorithmAt(0).getAgents().at(0),
+    auto job = tpg->createJob(pla.getRepresentationAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING, pla.getRNG());
-    pla.setCurrentAlgorithm(tpg);
+    pla.setCurrentRepresentation(tpg);
     ASSERT_NO_THROW(
         result = pla.evaluateJob(*execEngine, *job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
@@ -1108,8 +1108,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 1;
@@ -1118,7 +1118,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>
+                  std::reference_wrapper<const Representation::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1130,18 +1130,18 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 4;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>
+                  std::reference_wrapper<const Representation::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1155,13 +1155,13 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 {
     // Check that parallel execution leads to the exact same results as
     // sequential
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.1;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.1;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
 
-    auto tpgLa = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
@@ -1169,7 +1169,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsSequential = params.evaluation;
     paramsSequential.nbThreads = 1;
-    auto tpgSequential = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgSequential = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1180,7 +1180,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgParallel = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1213,7 +1213,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     // Check archives
     ASSERT_GT(tpgLa->getArchive().getNbRecordings(), 0)
-        << "For the archive determinism tests to be meaningful, Algorithm::TPG::TPGArchive should "
+        << "For the archive determinism tests to be meaningful, Representation::TPG::TPGArchive should "
            "not be empty.";
     ASSERT_EQ(tpgLa->getArchive().getNbRecordings(),
               tpgSequential->getArchive().getNbRecordings())
@@ -1269,12 +1269,12 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 {
     // Check that parallel execution leads to the exact same results as
     // sequential
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.1;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.1;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    auto tpgLa = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset centralized RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
@@ -1283,7 +1283,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     Learn::LearningParameters paramsSequential = params.evaluation;
     paramsSequential.nbThreads = 1;
     
-    auto tpgSequential = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgSequential = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1294,7 +1294,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    auto tpgParallel = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1354,8 +1354,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
 TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
@@ -1364,13 +1364,13 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
 
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    pla.getAlgorithms().front().get().setSelector(*selector);
+    pla.getRepresentations().front().get().setSelector(*selector);
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    Algorithm::TPG::TPGArchive a(0);
-    Algorithm::Algorithm& tpg = pla.getAlgorithmAt(0);
-    tpg.getMutator().mutatePopulation(pla.getGraph(), tpg.getManager(), params.algorithm, pla.getRNG());
+    Representation::TPG::TPGArchive a(0);
+    Representation::Representation& tpg = pla.getRepresentationAt(0);
+    tpg.getMutator().mutatePopulation(pla.getGraph(), tpg.getManager(), params.representation, pla.getRNG());
     size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1380,7 +1380,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.algorithm.nbAgents))
+                        params.representation.nbAgents))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 
@@ -1391,22 +1391,22 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
 
 TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
         0.85; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 4;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    pla.getAlgorithms().front().get().setSelector(*selector);
+    pla.getRepresentations().front().get().setSelector(*selector);
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    tpg->getMutator().mutatePopulation(pla.getGraph(), tpg->getManager(), params.algorithm, pla.getRNG());
+    tpg->getMutator().mutatePopulation(pla.getGraph(), tpg->getManager(), params.representation, pla.getRNG());
     
     size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -1417,15 +1417,15 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.algorithm.nbAgents))
+                        params.representation.nbAgents))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 }
 
 TEST_F(ParallelLearningAgentTest, TrainSequential)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
@@ -1434,10 +1434,10 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
         params.evaluation.nbIterationsPerPolicyEvaluation * 2;
     params.evaluation.nbThreads = 1;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    pla.getAlgorithms().front().get().setSelector(*selector);
+    pla.getRepresentations().front().get().setSelector(*selector);
 
     pla.init();
     bool alt = false;
@@ -1451,8 +1451,8 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
 
 TEST_F(ParallelLearningAgentTest, TrainParallel)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
@@ -1475,21 +1475,21 @@ TEST_F(ParallelLearningAgentTest, TrainParallel)
 
 TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     // Set a large number of generations and roots
     // so that the chances of something going wrong is higher.
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 5;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
+    la.getRepresentations().front().get().setSelector(*selector);
 
     la.init();
 
@@ -1500,7 +1500,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     params.evaluation.nbThreads = 4;
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    pla.getAlgorithms().front().get().setSelector(*selector);
+    pla.getRepresentations().front().get().setSelector(*selector);
 
     pla.init();
 
@@ -1522,31 +1522,31 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
 
 TEST_F(ParallelLearningAgentTest, TrainPortability)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.algorithm.nbAgents = 30;
+    params.representation.nbAgents = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
 
-    tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
+    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
-    la.getAlgorithms().front().get().setSelector(*selector);
-    
+    la.getRepresentations().front().get().setSelector(*selector);
+
     trainAndTestDeterminissm(la, {32, 25, 83, 152, 518, 366, 2465407677219726593U}, false);
 }
 
 /*
 TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
 {
-    params.algorithm.tpg.archiveSize = 50;
-    params.algorithm.tpg.archivingProbability = 0.5;
+    params.representation.tpg.archiveSize = 50;
+    params.representation.tpg.archivingProbability = 0.5;
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 1;
     params.selection.truncation.ratioDeletedRoots = 0.2;
@@ -1586,7 +1586,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     Learn::LearningAgent la(utilityEnv, set, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
 
-    Algorithm::TPG::TPGArchive a;
+    Representation::TPG::TPGArchive a;
     EvoGraph::OldExecutionEngine tee(la.getGraph().getEnvironment(), &a);
     auto job = *la.makeJob(la.getGraph().getRootVertices().at(0),
                            Learn::LearningMode::TRAINING);

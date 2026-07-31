@@ -28,23 +28,23 @@ class MapElitesLoggerTest : public ::testing::Test
     void SetUp() override
     {
         // Proba as in Kelly's paper
-        params.algorithm.tpg.maxInitOutgoingEdges = 3;
-        params.algorithm.lgp.maxProgramSize = 96;
-        params.algorithm.nbAgents = 15;
-        params.algorithm.tpg.pEdgeDeletion = 0.7;
-        params.algorithm.tpg.pEdgeAddition = 0.7;
-        params.algorithm.tpg.pProgramMutation = 0.2;
-        params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-        params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-        params.algorithm.tpg.maxOutgoingEdges = 4;
-        params.algorithm.lgp.pAdd = 0.5;
-        params.algorithm.lgp.pDelete = 0.5;
-        params.algorithm.lgp.pMutate = 1.0;
-        params.algorithm.lgp.pSwap = 1.0;
-        params.algorithm.lgp.nbProgramConstant = 0;
+        params.representation.tpg.maxInitOutgoingEdges = 3;
+        params.representation.lgp.maxProgramSize = 96;
+        params.representation.nbAgents = 15;
+        params.representation.tpg.pEdgeDeletion = 0.7;
+        params.representation.tpg.pEdgeAddition = 0.7;
+        params.representation.tpg.pProgramMutation = 0.2;
+        params.representation.tpg.pEdgeDestinationChange = 0.1;
+        params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+        params.representation.tpg.maxOutgoingEdges = 4;
+        params.representation.lgp.pAdd = 0.5;
+        params.representation.lgp.pDelete = 0.5;
+        params.representation.lgp.pMutate = 1.0;
+        params.representation.lgp.pSwap = 1.0;
+        params.representation.lgp.nbProgramConstant = 0;
 
-        params.algorithm.tpg.archiveSize = 50;
-        params.algorithm.tpg.archivingProbability = 0.5;
+        params.representation.tpg.archiveSize = 50;
+        params.representation.tpg.archivingProbability = 0.5;
         params.evaluation.maxNbActionsPerEval = 11;
         params.evaluation.nbIterationsPerPolicyEvaluation = 3;
         params.selection.truncation.ratioDeletedRoots =

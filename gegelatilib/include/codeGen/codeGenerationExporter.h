@@ -47,8 +47,8 @@
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
-#include "algorithm/agent.h"
-#include "algorithm/algorithm.h"
+#include "representation/agent.h"
+#include "representation/representation.h"
 
 namespace CodeGen {
     /**
@@ -83,7 +83,7 @@ namespace CodeGen {
          * This function print the activation function in the param file of the
          * Environment instance.
          */
-        virtual void initActivationFunction(const Algorithm::Algorithm& algorithm);
+        virtual void initActivationFunction(const Representation::Representation& representation);
 
       public:
         /**
@@ -92,7 +92,7 @@ namespace CodeGen {
          * \param[in] filename : filename of the file holding the main function
          *                of the generated program.
          *
-         * \param[in] subAlgoNames names of the sub algorithms
+         * \param[in] subAlgoNames names of the sub representations
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
          */
@@ -114,10 +114,10 @@ namespace CodeGen {
          * code to represent each element of the Graph.
          * 
          * \param[in] agent the agent generated
-         * \param[in] algorithm the algorithm corresponding to the agent
+         * \param[in] representation the representation corresponding to the agent
          * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void exportMainAgent(const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents);
+        virtual void exportMainAgent(const Representation::Agent& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents);
 
         
         /**
@@ -128,10 +128,10 @@ namespace CodeGen {
          * code to represent each element of the Graph.
          * 
          * \param[in] agents the agents generated
-         * \param[in] algorithm the algorithm corresponding to the agent
+         * \param[in] representation the representation corresponding to the agent
          * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void exportAgents(std::set<std::reference_wrapper<const Algorithm::Agent>> agents, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents);
+        virtual void exportAgents(std::set<std::reference_wrapper<const Representation::Agent>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents);
     };
 } // namespace CodeGen
 

@@ -12,7 +12,7 @@ double Selector::SelectionMetrics::getUtility() const
 }
 
 void Selector::SelectionMetrics::extractMetricsEpisode(
-    const Algorithm::Agent& agent, size_t nbStepsExecuted,
+    const Representation::Agent& agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update score

@@ -42,20 +42,20 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph() const
     return std::make_shared<EvoGraph::Graph>(std::make_unique<GraphFactory>());
 }
 
-std::unique_ptr<EvoGraph::Team> EvoGraph::GraphFactory::createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent) const
+std::unique_ptr<EvoGraph::Team> EvoGraph::GraphFactory::createTeam(std::optional<std::reference_wrapper<const Representation::Agent>> programAgent) const
 {
     return std::make_unique<EvoGraph::Team>(programAgent);
 }
 
 std::unique_ptr<EvoGraph::Action> EvoGraph::GraphFactory::createAction(
-    const uint64_t id, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent) const
+    const uint64_t id, std::optional<std::reference_wrapper<const Representation::Agent>> programAgent) const
 {
     return std::make_unique<EvoGraph::Action>(id, programAgent);
 }
 
 std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createEdge(
     const Vertex& src, const Vertex& dest,
-    std::optional<std::reference_wrapper<const Algorithm::Agent>> actionProgram) const
+    std::optional<std::reference_wrapper<const Representation::Agent>> actionProgram) const
 {
     return std::make_unique<EvoGraph::Edge>(src, dest, actionProgram);
 }

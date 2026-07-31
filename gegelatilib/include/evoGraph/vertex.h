@@ -161,7 +161,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            Vertex.
          */
-        Vertex(std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) : Element{agentProgram}, vertexID(incrementeCounter()){};
+        Vertex(std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : Element{agentProgram}, vertexID(incrementeCounter()){};
 
         /**
          * \brief Set of incoming Edge of the Vertex.

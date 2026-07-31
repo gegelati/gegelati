@@ -95,32 +95,32 @@ CodeGen::CodeGenerationExporter::~CodeGenerationExporter()
 }
 
 
-void CodeGen::CodeGenerationExporter::initActivationFunction(const Algorithm::Algorithm& algorithm)
+void CodeGen::CodeGenerationExporter::initActivationFunction(const Representation::Representation& representation)
 {
     // TODO NEED UPDATE FOR CUSTOM RANGES
-    if(algorithm.getOutputs().sizeContinuous() == 0) {
+    if(representation.getOutputs().sizeContinuous() == 0) {
         throw std::runtime_error("CodeGenerationExporter::initActivationFunction: should not be called if no continuous actions");
     } 
 
-    fileMainH << "void activationFunction_"<< algorithm.getAlgorithmName() << algorithm.getAlgorithmID() <<"(double *outputs);\n";
+    fileMainH << "void activationFunction_"<< representation.getRepresentationName() << representation.getRepresentationID() <<"(double *outputs);\n";
 
-    fileMain << "void activationFunction_"<< algorithm.getAlgorithmName() << algorithm.getAlgorithmID() <<"(double *outputs) {\n"
+    fileMain << "void activationFunction_"<< representation.getRepresentationName() << representation.getRepresentationID() <<"(double *outputs) {\n"
              << "\tfor (size_t i = 0; i < "
-             << algorithm.getOutputs().sizeContinuous()
+             << representation.getOutputs().sizeContinuous()
              << "; i++) {\n"
              << "\t\tif(isnan(outputs[i])) outputs[i] = -INFINITY;\n\n";
 
-    if (algorithm.getParams().activationFunction == "none") {
+    if (representation.getParams().activationFunction == "none") {
         fileMain << "\t\tif (outputs[i] > 1.0) outputs[i] = 1.0;\n"
                  << "\t\telse if (outputs[i] < -1.0) outputs[i] = -1.0;\n";
     }
 
-    else if (algorithm.getParams().activationFunction ==
+    else if (representation.getParams().activationFunction ==
              "sigmoid") {
         fileMain << "\t\toutputs[i] = 1.0 / (1.0 + exp(-outputs[i]));\n";
     }
 
-    else if (algorithm.getParams().activationFunction ==
+    else if (representation.getParams().activationFunction ==
              "tanh") {
         fileMain << "\t\toutputs[i] = tanh(outputs[i]);\n";
     }
@@ -131,7 +131,7 @@ void CodeGen::CodeGenerationExporter::initActivationFunction(const Algorithm::Al
     fileMain << "\t}\n}\n" << std::endl;
 }
 
-void CodeGen::CodeGenerationExporter::exportMainAgent(const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Agent& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents) 
 {
     
     fileMainH 
@@ -140,13 +140,13 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Algorithm::Agent& ag
     fileMain
         << "\n"
         << "void inference(double* actions) {\n"
-        << "\t"<<algorithm.getAlgorithmName() << algorithm.getAlgorithmID() << "_" << agent.getAgentID()<<"(actions);\n";
+        << "\t"<<representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID()<<"(actions);\n";
 
 
     // If do need activation function
-    if(algorithm.getOutputs().sizeContinuous() > 0) {
+    if(representation.getOutputs().sizeContinuous() > 0) {
         bool doActivationFunction = true;
-        for(const Output::Output& output: algorithm.getOutputs().getContinuousOutputs()) {
+        for(const Output::Output& output: representation.getOutputs().getContinuousOutputs()) {
             if(output.getRangeMin() == - std::numeric_limits<double>::infinity() || output.getRangeMax() == std::numeric_limits<double>::infinity()) {
                 doActivationFunction = false;
             }
@@ -154,9 +154,9 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Algorithm::Agent& ag
 
         if(doActivationFunction) {
             fileMain 
-                << "\tactivationFunction_"<< algorithm.getAlgorithmName() << algorithm.getAlgorithmID() <<"(actions);\n"
+                << "\tactivationFunction_"<< representation.getRepresentationName() << representation.getRepresentationID() <<"(actions);\n"
                 << "}\n" << std::endl;
-            this->initActivationFunction(algorithm);
+            this->initActivationFunction(representation);
         } else {
             fileMain 
                 << "}\n" << std::endl;
@@ -167,38 +167,38 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Algorithm::Agent& ag
     }
 
     fileMainH
-        << "void " << algorithm.getAlgorithmName() << algorithm.getAlgorithmID() << "_" << agent.getAgentID() << "(double* outputs);\n";
+        << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
 
-    // Print the agent by calling algorithm.printAgent
-    std::set<std::reference_wrapper<const Algorithm::Agent>> agents{agent};
-    algorithm.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
+    // Print the agent by calling representation.printAgent
+    std::set<std::reference_wrapper<const Representation::Agent>> agents{agent};
+    representation.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
 }
 
 
-void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapper<const Algorithm::Agent>> agents, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapper<const Representation::Agent>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Agent>>>& subAgents) 
 {
 
     // If do need activation function
-    if(algorithm.getOutputs().sizeContinuous() > 0) {
+    if(representation.getOutputs().sizeContinuous() > 0) {
         bool doActivationFunction = true;
-        for(const Output::Output& output: algorithm.getOutputs().getContinuousOutputs()) {
+        for(const Output::Output& output: representation.getOutputs().getContinuousOutputs()) {
             if(output.getRangeMin() == - std::numeric_limits<double>::infinity() || output.getRangeMax() == std::numeric_limits<double>::infinity()) {
                 doActivationFunction = false;
             }
         }
 
         if(doActivationFunction) {
-            this->initActivationFunction(algorithm);
+            this->initActivationFunction(representation);
         }
     }
 
-    for(const Algorithm::Agent& agent: agents) {
+    for(const Representation::Agent& agent: agents) {
         fileMainH
-            << "void " << algorithm.getAlgorithmName() << algorithm.getAlgorithmID() << "_" << agent.getAgentID() << "(double* outputs);\n";
+            << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
     }
     fileMainH << std::endl;
 
-    algorithm.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
+    representation.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
 }
 
 //#endif // CODE_GENERATION

@@ -42,14 +42,14 @@
 #include <set>
 #include <vector>
 
-#include "algorithm/lgp/lgpMutator.h"
-#include "algorithm/lgp/lgpLineMutator.h"
-#include "algorithm/mutator.h"
-#include "algorithm/tpg/tpgMutator.h"
-#include "algorithm/tpg/tpgExecutionEngine.h"
+#include "representation/lgp/lgpMutator.h"
+#include "representation/lgp/lgpLineMutator.h"
+#include "representation/mutator.h"
+#include "representation/tpg/tpgMutator.h"
+#include "representation/tpg/tpgExecutionEngine.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "algorithm/lgp/environment.h"
+#include "representation/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
@@ -71,16 +71,16 @@ class TpgMutatorTest : public ::testing::Test
     const float value1{4.2f};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
+    std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
     Parameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
-    std::shared_ptr<Algorithm::TPG::TPGArchive> archive;
-    std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
-    std::shared_ptr<Algorithm::LGP::LGPMutator> lgpMutator;
-    const Algorithm::Agent* lgpAgent;
+    std::shared_ptr<Representation::TPG::TPGArchive> archive;
+    std::shared_ptr<Representation::LGP::LGPManager> lgpManager;
+    std::shared_ptr<Representation::LGP::LGPMutator> lgpMutator;
+    const Representation::Agent* lgpAgent;
 
-    std::shared_ptr<Algorithm::TPG::TPGManager> tpgManager;
-    std::shared_ptr<Algorithm::TPG::TPGMutator> tpgMutator;
+    std::shared_ptr<Representation::TPG::TPGManager> tpgManager;
+    std::shared_ptr<Representation::TPG::TPGMutator> tpgMutator;
     Output::OutputHandler* actions;
     Output::OutputHandler* lgpOutput;
 
@@ -116,32 +116,32 @@ class TpgMutatorTest : public ::testing::Test
 
 
         // the environment and the LGPs have 5 Constant parameters
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
-        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
 
-        archive = std::make_shared<Algorithm::TPG::TPGArchive>(params.algorithm.tpg.archiveSize,
-                                            params.algorithm.tpg.archivingProbability);
+        archive = std::make_shared<Representation::TPG::TPGArchive>(params.representation.tpg.archiveSize,
+                                            params.representation.tpg.archivingProbability);
 
         graph = std::make_shared<EvoGraph::Graph>();
 
         
-        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)0);
+        lgpManager = std::make_shared<Representation::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)0);
         lgpAgent = &lgpManager->createAgent(*graph);
 
-        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions, (uint64_t)1);
+        tpgManager = std::make_shared<Representation::TPG::TPGManager>(*actions, (uint64_t)1);
         tpgManager->addSubManager(*lgpManager);
-        tpgManager->setProgramAlgorithmID((uint64_t)0);
+        tpgManager->setProgramRepresentationID((uint64_t)0);
 
         selector = std::make_shared<Selector::TruncationSelector>(std::make_unique<Selector::SelectionParameters>(params.selection));
         selector->setManager(*tpgManager);
-        selector->setNbAgents(params.algorithm.nbAgents);
+        selector->setNbAgents(params.representation.nbAgents);
 
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector, (uint64_t)0);
+        lgpMutator = std::make_shared<Representation::LGP::LGPMutator>(*selector, (uint64_t)0);
 
-        tpgMutator = std::make_shared<Algorithm::TPG::TPGMutator>(*selector, (uint64_t)1, *archive);
+        tpgMutator = std::make_shared<Representation::TPG::TPGMutator>(*selector, (uint64_t)1, *archive);
         tpgMutator->addSubMutator(*lgpMutator);
-        tpgMutator->setProgramAlgorithmID((uint64_t)0);
+        tpgMutator->setProgramRepresentationID((uint64_t)0);
 
     }
 
@@ -178,20 +178,20 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     rng.setSeed(0);
 
 
-    params.algorithm.tpg.maxInitOutgoingEdges = 4;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
+    params.representation.tpg.maxInitOutgoingEdges = 4;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
 
     ASSERT_NO_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng))
+        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng))
         << "TPG Initialization failed.";
     auto vertexSet = graph->getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), this->actions->front().getNbValues() + params.algorithm.nbAgents)
+    ASSERT_EQ(vertexSet.size(), this->actions->front().getNbValues() + params.representation.nbAgents)
         << "Number of vertices after initialization is incorrect.";
-    ASSERT_EQ(graph->getRootVertices().size(), params.algorithm.nbAgents)
+    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbAgents)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const EvoGraph::Vertex& vert) {
@@ -205,25 +205,25 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
                                 return dynamic_cast<const EvoGraph::Team*>(
                                            &vert) != nullptr;
                             }),
-              params.algorithm.nbAgents)
+              params.representation.nbAgents)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_GE(graph->getEdges().size(), 2 * params.algorithm.nbAgents)
+    ASSERT_GE(graph->getEdges().size(), 2 * params.representation.nbAgents)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(graph->getEdges().size(),
-              params.algorithm.nbAgents * params.algorithm.tpg.maxInitOutgoingEdges)
+              params.representation.nbAgents * params.representation.tpg.maxInitOutgoingEdges)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
-    std::set<std::reference_wrapper<const Algorithm::Agent>> programs;
+    std::set<std::reference_wrapper<const Representation::Agent>> programs;
     for (const auto& edge : graph->getEdges()) {
-        const Algorithm::Agent& program = edge.get().getProgram();
+        const Representation::Agent& program = edge.get().getProgram();
             programs.insert(program);
     }
-    ASSERT_EQ(programs.size(), params.algorithm.nbAgents * 2)
+    ASSERT_EQ(programs.size(), params.representation.nbAgents * 2)
         << "Number of distinct program in the TPG is incorrect.";
     // Check that no team has the same program twice
     for (auto team :graph->getRootVertices()) {
-    std::set<std::reference_wrapper<const Algorithm::Agent>> teamPrograms;
+    std::set<std::reference_wrapper<const Representation::Agent>> teamPrograms;
         std::for_each(team.get().getOutgoingEdges().begin(),
                       team.get().getOutgoingEdges().end(),
                       [&teamPrograms](const EvoGraph::Edge& edge) {
@@ -234,15 +234,15 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     }
 
     // Cover bad parameterization error
-    params.algorithm.tpg.maxInitOutgoingEdges = 6;
+    params.representation.tpg.maxInitOutgoingEdges = 6;
     ASSERT_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng),
+        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
-    params.algorithm.tpg.maxInitOutgoingEdges = 0;
+    params.representation.tpg.maxInitOutgoingEdges = 0;
     actions = new Output::OutputHandler(1);;
     ASSERT_THROW(
-        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng),
+        tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 }
@@ -259,11 +259,11 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGContinuous)
     mutParams.mutation.tpg.ratioTeamsOverActions = 0.5;
     mutParams.mutation.prog.minConstValue = 0;
     mutParams.mutation.prog.maxConstValue = 1;
-    params.algorithm.lgp.nbRegisters = 8;
+    params.representation.lgp.nbRegisters = 8;
 
     // Error on number of registers
     rng.setSeed(0);
-    params.algorithm.tpg.useActionProgram = false;
+    params.representation.tpg.useActionProgram = false;
     uint64_t nbActions = 8;
     Environment ce0(set, params, vect, nbActions);
     EvoGraph::Graph tpg0(ce0);
@@ -275,7 +275,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGContinuous)
     // No error
     rng.setSeed(0);
     nbActions = 7;
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
     Environment ce1(set, params, vect, nbActions);
     EvoGraph::Graph tpg1(ce1);
     ASSERT_NO_THROW(
@@ -294,7 +294,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGContinuous)
 
     rng.setSeed(0);
     nbActions = 8;
-    params.algorithm.tpg.teamAccessAllActions = true;
+    params.representation.tpg.teamAccessAllActions = true;
     Environment ce3(set, params, vect, nbActions);
     EvoGraph::Graph tpg3(ce3);
     ASSERT_NO_THROW(
@@ -362,7 +362,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGContinuous)
         TpgMutator->initRandomPopulation(tpg4, mutParams, rng, nbActions))
         << "Should not throw with teamAccessAllActions enabled.";
 
-    params.algorithm.lgp.nbRegisters = 8;
+    params.representation.lgp.nbRegisters = 8;
     mutParams.mutation.tpg.useActionProgram = true;
     mutParams.mutation.tpg.teamAccessAllActions = false;
     mutParams.mutation.tpg.ratioTeamsOverActions = 1.0;
@@ -383,14 +383,14 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGMAPLE)
     mutParams.mutation.prog.pConstantMutation = 0.5;
     mutParams.mutation.prog.minConstValue = 0;
     mutParams.mutation.prog.maxConstValue = 1;
-    params.algorithm.lgp.nbRegisters = 8;
+    params.representation.lgp.nbRegisters = 8;
 
     // Error on number of registers
     rng.setSeed(0);
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.tpg.useMultiActionProgram = true;
-    params.algorithm.tpg.nbActionEdgeInit = 10;
-    params.algorithm.tpg.ratioTeamsOverActions = 0.0;
+    params.representation.tpg.useActionProgram = true;
+    params.representation.tpg.useMultiActionProgram = true;
+    params.representation.tpg.nbActionEdgeInit = 10;
+    params.representation.tpg.ratioTeamsOverActions = 0.0;
     uint64_t nbActions = 5;
     Environment ce2(set, params, vect, nbActions);
     EvoGraph::Graph tpg2(ce2);
@@ -402,7 +402,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGMAPLE)
     // Error on number of registers
     rng.setSeed(0);
     nbActions = 8;
-    params.algorithm.tpg.nbActionEdgeInit = 3;
+    params.representation.tpg.nbActionEdgeInit = 3;
     Environment ce3(set, params, vect, nbActions);
     EvoGraph::Graph tpg3(ce3);
     ASSERT_NO_THROW(
@@ -430,7 +430,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGMAPLE)
               0)
         << "Number of team vertex in the graph is incorrect.";
     ASSERT_EQ(tpg3.getEdges().size(),
-              mutParams.mutation.tpg.nbRoots * params.algorithm.tpg.nbActionEdgeInit)
+              mutParams.mutation.tpg.nbRoots * params.representation.tpg.nbActionEdgeInit)
         << "Number of edges in the initialized TPG is incorrect.";
 
     // Check number of Programs.
@@ -441,7 +441,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGMAPLE)
                   });
     // 2 contexts programs and 2 actions program per roots
     ASSERT_EQ(programs.size(),
-              mutParams.mutation.tpg.nbRoots * params.algorithm.tpg.nbActionEdgeInit)
+              mutParams.mutation.tpg.nbRoots * params.representation.tpg.nbActionEdgeInit)
         << "Number of distinct program in the TPG is incorrect.";
 }*/
 
@@ -502,7 +502,7 @@ TEST_F(TpgMutatorTest, TPGMutatorAddRandomEdge)
 
     RNG::RNG rng;
     rng.setSeed(0);
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
     // Run the add
     ASSERT_NO_THROW(
         tpgMutator->addRandomEdge(*graph, vertex2, rng))
@@ -531,18 +531,18 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateEdgeDestination)
         tpgManager->createAgent(vertex);
     }
 
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
 
     RNG::RNG rng;
     rng.setSeed(2);
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
 
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
     const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
 
     ASSERT_NO_THROW(tpgMutator->mutateEdgeDestination(
-        *graph, edge1, params.algorithm, rng));
+        *graph, edge1, params.representation, rng));
     // Check properties of the tpg
     ASSERT_EQ(graph->getEdges().size(), 2)
         << "Number of edge should remain unchanged after destination change.";
@@ -560,7 +560,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     rng.setSeed(0);
 
     // Init a TPG
-    lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params.algorithm, rng);
+    lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params.representation, rng);
     const EvoGraph::Team& vertex0 = graph->addNewTeam();
     const EvoGraph::Action& vertex1 = graph->addNewAction(0);
     const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
@@ -570,10 +570,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
         tpgManager->createAgent(vertex);
     }
     
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
@@ -581,18 +581,18 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     execEngine->execute();
 
     // Mutate (params selected for code coverage)
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.tpg.pEdgeDestinationChange = 1.0;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
 
     ASSERT_NO_THROW(tpgMutator->mutateOutgoingEdge(
-        *graph, edge0, *tpgManager, newPrograms, params.algorithm, rng));
+        *graph, edge0, *tpgManager, newPrograms, params.representation, rng));
 }
 
 /*
@@ -685,12 +685,12 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction_MultiAction)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.tpg.useMultiActionProgram = true;
-    params.algorithm.tpg.pActionEdgeDeletion = 0.7;
-    params.algorithm.tpg.pActionEdgeAddition = 0.7;
-    params.algorithm.tpg.pSwapActionProgram = 0.7;
-    params.algorithm.tpg.pMutateActionProgram = 0.7;
+    params.representation.tpg.useActionProgram = true;
+    params.representation.tpg.useMultiActionProgram = true;
+    params.representation.tpg.pActionEdgeDeletion = 0.7;
+    params.representation.tpg.pActionEdgeAddition = 0.7;
+    params.representation.tpg.pSwapActionProgram = 0.7;
+    params.representation.tpg.pMutateActionProgram = 0.7;
 
     uint64_t nbActions = 5;
     Environment ce(set, params, vect, nbActions);
@@ -733,7 +733,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
     uint64_t nbActions = 8;
     Environment ce(set, params, vect, nbActions);
 
@@ -749,12 +749,12 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction)
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
-    Algorithm::TPG::TPGArchive archive;
+    Representation::TPG::TPGArchive archive;
     EvoGraph::OldExecutionEngine tee(ce, &archive);
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
     Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -778,9 +778,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateActionEdge_MultiAction)
     RNG::RNG rng;
     rng.setSeed(1);
 
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.tpg.useMultiActionProgram = true;
-    params.algorithm.tpg.pChangeActionClass =
+    params.representation.tpg.useActionProgram = true;
+    params.representation.tpg.useMultiActionProgram = true;
+    params.representation.tpg.pChangeActionClass =
         1.0; // Pour forcer le changement d'actionClass
     uint64_t nbActions = 3;
     Environment ce(set, params, vect, nbActions);
@@ -807,7 +807,7 @@ TEST_F(TpgMutatorTest, TPGMutatorOutgoingEdgeMutateAction)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.tpg.useActionProgram = true;
     uint64_t nbActions = 8;
     Environment ce(set, params, vect, nbActions);
 
@@ -823,14 +823,14 @@ TEST_F(TpgMutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
-    Algorithm::TPG::TPGArchive archive;
+    Representation::TPG::TPGArchive archive;
     EvoGraph::OldExecutionEngine tee(ce, &archive);
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
-    params.algorithm.tpg.probaContextOverActionProgram = 0;
-    params.algorithm.tpg.useActionProgram = true;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
+    params.representation.tpg.probaContextOverActionProgram = 0;
+    params.representation.tpg.useActionProgram = true;
     Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -874,19 +874,19 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
         tpgManager->createAgent(vertex);
     }
     
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
@@ -894,9 +894,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     execEngine->execute();
 
 
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
 
     auto& newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), *graph);
 
@@ -905,7 +905,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     // outgoing from vertex0, which would mean they are not pre-existing in
     // the mutation process.)
     ASSERT_NO_THROW(tpgMutator->mutateAgent(newAgent, *graph, *tpgManager,
-                                            newPrograms, params.algorithm, rng))
+                                            newPrograms, params.representation, rng))
         << "Mutate team should not fail in these conditions.";
 
     // No other check really needed since individual mutation functions are
@@ -927,10 +927,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     }
     
     // Init its program and fill the archive
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 1;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 1;
 
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
@@ -939,25 +939,25 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
 
     // Mutate (params selected for code coverage)
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.tpg.pEdgeDestinationChange = 1.0;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newPrograms;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->updateSpecificContext(*graph, *tpgManager, params.representation, rng);
 
     tpgMutator->mutateOutgoingEdge(*graph, edge0, *tpgManager, newPrograms,
-                                            params.algorithm, rng);
+                                            params.representation, rng);
     
     tpgMutator->setArchive(*archive);
     ASSERT_NO_THROW(tpgMutator->mutateProgramAgentAgainstArchive(
-        newPrograms.front(), *graph, *lgpManager, params.algorithm, rng))
+        newPrograms.front(), *graph, *lgpManager, params.representation, rng))
         << "Mutating a Program behavior failed unexpectedly.";
 
-    // Check the unicity against the Algorithm::TPG::TPGArchive
+    // Check the unicity against the Representation::TPG::TPGArchive
     // Verify new program uniqueness
     
     execEngine = lgpManager->createExecutionEngine({}, true);
@@ -977,24 +977,24 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
 
     uint64_t nbActions = 4;
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 7;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 7;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto& agent :tpgManager->getAgents()) {
@@ -1003,14 +1003,14 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgents;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
         newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
     ASSERT_NO_THROW(tpgMutator->mutateSubAgents(
-        newAgents, *graph, *tpgManager, params.algorithm, rng, 0))
+        newAgents, *graph, *tpgManager, params.representation, rng, 0))
         << "Program behavior mutation failed (sequentially).";
 }
 
@@ -1021,24 +1021,24 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
 
     uint64_t nbActions = 4;
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 7;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 7;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto& agent :tpgManager->getAgents()) {
@@ -1047,14 +1047,14 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgents;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
         newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
     ASSERT_NO_THROW(tpgMutator->mutateSubAgents(
-        newAgents, *graph, *tpgManager, params.algorithm, rng, 4))
+        newAgents, *graph, *tpgManager, params.representation, rng, 4))
         << "Program behavior mutation failed (Parallelism).";
 }
 
@@ -1064,26 +1064,26 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
 
     uint64_t nbActions = 4;
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 7;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 7;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
 
 
 
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng);
+    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto& agent :tpgManager->getAgents()) {
@@ -1093,25 +1093,25 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
 
     // Create a list of Programs to mutate
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgentsSequential;
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgentsParallel;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newAgentsSequential;
+    std::vector<std::reference_wrapper<const Representation::Agent>> newAgentsParallel;
     for (auto& edge :graph->getEdges()) {
         newAgentsSequential.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
         newAgentsParallel.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(
-        newAgentsSequential, *graph, *tpgManager, params.algorithm, rng, 0);
+        newAgentsSequential, *graph, *tpgManager, params.representation, rng, 0);
 
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(
-        newAgentsParallel, *graph, *tpgManager, params.algorithm, rng, 4);
+        newAgentsParallel, *graph, *tpgManager, params.representation, rng, 4);
 
     // Check determinism
     // Using nb lines of programs
     for (auto i = 0; i < newAgentsSequential.size(); i++) {
-        ASSERT_EQ(dynamic_cast<const Algorithm::LGP::LGPAgent&>(newAgentsSequential.at(i).get()).getNbLines(),
-                  dynamic_cast<const Algorithm::LGP::LGPAgent&>(newAgentsParallel.at(i).get()).getNbLines())
+        ASSERT_EQ(dynamic_cast<const Representation::LGP::LGPAgent&>(newAgentsSequential.at(i).get()).getNbLines(),
+                  dynamic_cast<const Representation::LGP::LGPAgent&>(newAgentsParallel.at(i).get()).getNbLines())
             << "Different number of line in mutatedPrograms.";
     }
 
@@ -1125,25 +1125,25 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
     uint64_t nbActions = 4;
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 7;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 7;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
 
-    selector->setNbAgents(params.algorithm.nbAgents);
-    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.algorithm, rng);
+    selector->setNbAgents(params.representation.nbAgents);
+    tpgMutator->initRandomPopulation(*graph, *tpgManager, params.representation, rng);
     // Init its program and fill the archive
     auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto& agent :tpgManager->getAgents()) {
@@ -1153,18 +1153,18 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     // Check the correct execution
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        *graph, *tpgManager, params.algorithm, rng, 0))
+        *graph, *tpgManager, params.representation, rng, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(graph->getRootVertices().size(), params.algorithm.nbAgents);
-    ASSERT_EQ(tpgManager->getAgents().size(), params.algorithm.nbAgents);
+    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbAgents);
+    ASSERT_EQ(tpgManager->getAgents().size(), params.representation.nbAgents);
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
-    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, 1);
+    auto tpgManager2 = std::make_shared<Representation::TPG::TPGManager>(nbActions, 1);
     tpgManager2->addSubManager(*lgpManager);
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        *graph2, *tpgManager2, params.algorithm, rng, 0))
+        *graph2, *tpgManager2, params.representation, rng, 0))
         << "Populating an empty TPG failed.";
 }
 
@@ -1179,26 +1179,26 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
 
     std::shared_ptr<EvoGraph::Graph> tpg = std::make_shared<EvoGraph::Graph>(ce);
 
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 10;
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.tpg.useMultiActionProgram = true;
-    params.algorithm.tpg.ratioTeamsOverActions = 0.5;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 10;
+    params.representation.tpg.useActionProgram = true;
+    params.representation.tpg.useMultiActionProgram = true;
+    params.representation.tpg.ratioTeamsOverActions = 0.5;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
-    Algorithm::TPG::TPGArchive archive;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
+    Representation::TPG::TPGArchive archive;
     Selector::Selector selector(*graph, params);
 
     TpgMutator->initRandomPopulation(*tpg, params.mutation, rng, nbActions);
@@ -1213,7 +1213,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
         *tpg, selector, archive, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(tpg->getRootVertices().size(), params.algorithm.nbAgents);
+    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbAgents);
 
     size_t nbActionsRoots = 0;
     size_t nbTeamsRoots = 0;
@@ -1226,10 +1226,10 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
         }
     }
     // Check the ratio of teams over actions
-    ASSERT_EQ(nbTeamsRoots, params.algorithm.nbAgents *
-                                params.algorithm.tpg.ratioTeamsOverActions)
+    ASSERT_EQ(nbTeamsRoots, params.representation.nbAgents *
+                                params.representation.tpg.ratioTeamsOverActions)
         << "The number of team roots is not as expected.";
-    ASSERT_EQ(nbActionsRoots, params.algorithm.nbAgents - nbTeamsRoots)
+    ASSERT_EQ(nbActionsRoots, params.representation.nbAgents - nbTeamsRoots)
         << "The number of action roots is not as expected.";
 }
 
@@ -1246,26 +1246,26 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 
     std::shared_ptr<EvoGraph::Graph> tpg = std::make_shared<EvoGraph::Graph>(ce);
 
-    params.algorithm.tpg.maxInitOutgoingEdges = 3;
-    params.algorithm.lgp.maxProgramSize = 96;
-    params.algorithm.nbAgents = 10;
-    params.algorithm.tpg.useActionProgram = true;
-    params.algorithm.tpg.useMultiActionProgram = true;
-    params.algorithm.tpg.ratioTeamsOverActions = 0.5;
+    params.representation.tpg.maxInitOutgoingEdges = 3;
+    params.representation.lgp.maxProgramSize = 96;
+    params.representation.nbAgents = 10;
+    params.representation.tpg.useActionProgram = true;
+    params.representation.tpg.useMultiActionProgram = true;
+    params.representation.tpg.ratioTeamsOverActions = 0.5;
     // Proba as in Kelly's paper
-    params.algorithm.tpg.pEdgeDeletion = 0.7;
-    params.algorithm.tpg.pEdgeAddition = 0.7;
-    params.algorithm.tpg.pProgramMutation = 0.2;
-    params.algorithm.tpg.pEdgeDestinationChange = 0.1;
-    params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
-    params.algorithm.lgp.pAdd = 0.5;
-    params.algorithm.lgp.pDelete = 0.5;
-    params.algorithm.lgp.pMutate = 1.0;
-    params.algorithm.lgp.pSwap = 1.0;
-    params.algorithm.lgp.pConstantMutation = 0.5;
-    params.algorithm.lgp.minConstValue = 0;
-    params.algorithm.lgp.maxConstValue = 10;
-    Algorithm::TPG::TPGArchive archive;
+    params.representation.tpg.pEdgeDeletion = 0.7;
+    params.representation.tpg.pEdgeAddition = 0.7;
+    params.representation.tpg.pProgramMutation = 0.2;
+    params.representation.tpg.pEdgeDestinationChange = 0.1;
+    params.representation.tpg.pEdgeDestinationIsAction = 0.5;
+    params.representation.lgp.pAdd = 0.5;
+    params.representation.lgp.pDelete = 0.5;
+    params.representation.lgp.pMutate = 1.0;
+    params.representation.lgp.pSwap = 1.0;
+    params.representation.lgp.pConstantMutation = 0.5;
+    params.representation.lgp.minConstValue = 0;
+    params.representation.lgp.maxConstValue = 10;
+    Representation::TPG::TPGArchive archive;
     Selector::TournamentSelector selector(*graph, params);
 
     TpgMutator->initRandomPopulation(*tpg, params.mutation, rng, nbActions);
@@ -1291,7 +1291,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
         *tpg, selector, archive, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(tpg->getRootVertices().size(), params.algorithm.nbAgents);
+    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbAgents);
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
         << "After populateTPG with tournament selection, the set of vertices "
@@ -1306,11 +1306,11 @@ TEST_F(TpgMutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     rng.setSeed(0);
 
     Mutator::MutationParameters params;
-    params.algorithm.lgp.maxProgramSize = 64;
-    params.algorithm.lgp.initMaxProgramSize = 8;
-    params.algorithm.lgp.initMinProgramSize = 4;
-    params.algorithm.lgp.maxConstValue = 10;
-    params.algorithm.lgp.minConstValue = 0;
+    params.representation.lgp.maxProgramSize = 64;
+    params.representation.lgp.initMaxProgramSize = 8;
+    params.representation.lgp.initMinProgramSize = 4;
+    params.representation.lgp.maxConstValue = 10;
+    params.representation.lgp.minConstValue = 0;
 
     // Create 2 action vertices with known ids (0 and 1)
     const EvoGraph::Action* a0 = &(*graph->addNewAction(0));
@@ -1368,11 +1368,11 @@ TEST_F(TpgMutatorTest, TPGMutatorCrossProgram)
     rng.setSeed(1);
 
     Mutator::MutationParameters params;
-    params.algorithm.lgp.maxProgramSize = 10;
-    params.algorithm.lgp.initMaxProgramSize = 10;
-    params.algorithm.lgp.initMinProgramSize = 6;
-    params.algorithm.lgp.maxConstValue = 10;
-    params.algorithm.lgp.minConstValue = 0;
+    params.representation.lgp.maxProgramSize = 10;
+    params.representation.lgp.initMaxProgramSize = 10;
+    params.representation.lgp.initMinProgramSize = 6;
+    params.representation.lgp.maxConstValue = 10;
+    params.representation.lgp.minConstValue = 0;
 
     // Create two parent actions
     const EvoGraph::Action* parent0 = &(*graph->addNewAction(0));
@@ -1430,8 +1430,8 @@ TEST_F(TpgMutatorTest, TPGMutatorCrossProgram)
     // Programs must be non-empty and respect maxProgramSize
     ASSERT_GT(c0prog->getNbLines(), 0u);
     ASSERT_GT(c1prog->getNbLines(), 0u);
-    ASSERT_LE(c0prog->getNbLines(), params.algorithm.lgp.maxProgramSize);
-    ASSERT_LE(c1prog->getNbLines(), params.algorithm.lgp.maxProgramSize);
+    ASSERT_LE(c0prog->getNbLines(), params.representation.lgp.maxProgramSize);
+    ASSERT_LE(c1prog->getNbLines(), params.representation.lgp.maxProgramSize);
 }
 
 TEST_F(TpgMutatorTest, TPGMutatorCrossAction)
@@ -1443,14 +1443,14 @@ TEST_F(TpgMutatorTest, TPGMutatorCrossAction)
 
     Mutator::MutationParameters params;
     // Force cross operations to happen
-    params.algorithm.tpg.pCrossAgents = 0.9; // allow repeated attempts
-    params.algorithm.tpg.pCrossPrograms =
+    params.representation.tpg.pCrossAgents = 0.9; // allow repeated attempts
+    params.representation.tpg.pCrossPrograms =
         0.9; // prefer program-level crossover when possible
-    params.algorithm.lgp.maxProgramSize = 64;
-    params.algorithm.lgp.initMaxProgramSize = 8;
-    params.algorithm.lgp.initMinProgramSize = 4;
-    params.algorithm.lgp.maxConstValue = 10;
-    params.algorithm.lgp.minConstValue = 0;
+    params.representation.lgp.maxProgramSize = 64;
+    params.representation.lgp.initMaxProgramSize = 8;
+    params.representation.lgp.initMinProgramSize = 4;
+    params.representation.lgp.maxConstValue = 10;
+    params.representation.lgp.minConstValue = 0;
 
     // create two parents that assess the same actions (we'll ensure both assess
     // action 0 and 1)

@@ -114,7 +114,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
         *this << "A cycle was detected in the TPG.";
     }
 
-    // If this point of the algorithm is reached, no cycle were detected
+    // If this point of the representation is reached, no cycle were detected
     if (this->logOnSuccess) {
         *this << "No cycle detected in this TPG.";
     }

@@ -123,7 +123,7 @@ namespace Selector {
                            const std::vector<std::vector<double>>& centroids);
 
             /**
-             * \brief Initialize the CVT centroids using Lloyd's algorithm
+             * \brief Initialize the CVT centroids using Lloyd's representation
              *
              * \param[in] rng Random number generator
              */
@@ -141,7 +141,7 @@ namespace Selector {
              * \brief Get the archive content at given descriptors
              */
             const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                            std::optional<std::reference_wrapper<const Algorithm::Agent>>>&
+                            std::optional<std::reference_wrapper<const Representation::Agent>>>&
             getArchiveFromDescriptors(
                 const std::vector<double>& descriptors) const override;
 
@@ -149,7 +149,7 @@ namespace Selector {
              * \brief Set the archive content at given descriptors
              */
             void setArchiveFromDescriptors(
-                const Algorithm::Agent& agent,
+                const Representation::Agent& agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors) override;
 

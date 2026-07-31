@@ -68,7 +68,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            Vertex.
          */
-        Action(const uint64_t id, std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) : Vertex(agentProgram), actionID{id} {
+        Action(const uint64_t id, std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : Vertex(agentProgram), actionID{id} {
             this->updateAssessedActions();
         };
 

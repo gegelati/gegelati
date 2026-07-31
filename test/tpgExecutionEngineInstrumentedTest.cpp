@@ -108,8 +108,8 @@ class ExecutionEngineInstrumentedTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 1;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
         tpg = new EvoGraph::Graph(
             *e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());

@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "algorithm/lgp/lgpAgent.h"
+#include "representation/lgp/lgpAgent.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
@@ -67,13 +67,13 @@ namespace File {
       protected:
 
         /**
-         * Get an algorithm from the algorithm ID
+         * Get an representation from the representation ID
          */
-        Algorithm::Algorithm& getAlgorithm(uint64_t algorithmID);
+        Representation::Representation& getRepresentation(uint64_t representationID);
         /**
-         * \brief set the map algorithms used in the attribute vector
+         * \brief set the map representations used in the attribute vector
          */
-        void setMapAlgorithm();
+        void setMapRepresentation();
 
         /**
          * \brief File in which the dot content is read during import.
@@ -92,11 +92,11 @@ namespace File {
          */
         EvoGraph::Graph& graph;
 
-        /// @brief algorithm containing the agents.
-        Algorithm::Algorithm& algorithm;
+        /// @brief representation containing the agents.
+        Representation::Representation& representation;
 
-        /// @brief vector of algorithms used, including subAlgorithms. This is used to read the content of the programs of sub algorithms.
-        std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> mapAlgorithms;
+        /// @brief vector of representations used, including subRepresentations. This is used to read the content of the programs of sub representations.
+        std::map<uint64_t, std::reference_wrapper<Representation::Representation>> mapRepresentations;
 
         
         /// @brief map of printed vertex. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
@@ -106,31 +106,31 @@ namespace File {
         std::map<uint64_t, std::reference_wrapper<const EvoGraph::Edge>> readEdgeID;
 
         /// @brief map of printed agent. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent agent.
-        std::map<uint64_t, std::reference_wrapper<const Algorithm::Agent>> readAgentID;
+        std::map<uint64_t, std::reference_wrapper<const Representation::Agent>> readAgentID;
 
 
         
         /**
-         * \brief Contains the regex to identify an algorithm declaration
+         * \brief Contains the regex to identify an representation declaration
          * 
          * Should work with ALGO10 [.... label="Name.ID"]
          */
-        static const std::string algorithmRegex;
+        static const std::string representationRegex;
 
         /**
-         * \brief Contains the regex to identify a sub algorithm link declaration
+         * \brief Contains the regex to identify a sub representation link declaration
          * 
          * Should work with ALGO10 -> ALGO12
          */
-        static const std::string subAlgorithmLinkRegex;
+        static const std::string subRepresentationLinkRegex;
 
 
         /**
-         * \brief Contains the regex to identify the end of the sub graph of algorithms
+         * \brief Contains the regex to identify the end of the sub graph of representations
          * 
          * should only work with "}"
          */
-        static const std::string endAlgorithmSubGraph;
+        static const std::string endRepresentationSubGraph;
 
 
 
@@ -287,19 +287,19 @@ namespace File {
         void dumpGraphHeader();
 
         /**
-         * \brief reads an algorithm and control its validity
+         * \brief reads an representation and control its validity
          */
-        void readAlgorithm(std::smatch matches);
+        void readRepresentation(std::smatch matches);
 
         /**
-         * \brief control that sub algorithm link exist
+         * \brief control that sub representation link exist
          */
-        void readSubAlgorithmLink(std::smatch matches);
+        void readSubRepresentationLink(std::smatch matches);
 
         /**
-         * \brief read the algorithm subGraph
+         * \brief read the representation subGraph
          */
-        void readAlgorithmGraphSubGraph();
+        void readRepresentationGraphSubGraph();
 
         /**
          * \brief reads and creates a Team.
@@ -334,7 +334,7 @@ namespace File {
         /**
          * \brief reads a link declaration and add the team to the agent's team. 
          * 
-         * Will throw if the algorithm doesn't handle it.
+         * Will throw if the representation doesn't handle it.
          */
         void readLinkAgentTeam(std::smatch& matches);
 
@@ -361,12 +361,12 @@ namespace File {
          *
          * \param[in] graphRef a Reference to the Graph to build from
          * the .dot file
-         * \param[in] algorithm algorithm containing the agents.
+         * \param[in] representation representation containing the agents.
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
-        GraphDotImporter(EvoGraph::Graph& graphRef, Algorithm::Algorithm& algorithm)
-            : graph{graphRef}, algorithm{algorithm}
+        GraphDotImporter(EvoGraph::Graph& graphRef, Representation::Representation& representation)
+            : graph{graphRef}, representation{representation}
         {};
 
         /**

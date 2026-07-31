@@ -1,7 +1,7 @@
 #include "selector/mapElites/mapElitesArchive.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "algorithm/lgp/environment.h"
+#include "representation/lgp/environment.h"
 #include <gtest/gtest.h>
 
 /*
@@ -45,8 +45,8 @@ class MapElitesArchiveTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 1;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
         graph = std::make_shared<EvoGraph::Graph>();
         dummyVertex = graph->addNewTeam();

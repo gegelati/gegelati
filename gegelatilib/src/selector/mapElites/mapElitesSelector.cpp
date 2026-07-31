@@ -79,7 +79,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 void Selector::MapElites::MapElitesSelector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Representation::Agent>>& results,
     RNG::RNG& rng)
 {
 
@@ -100,7 +100,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         std::shared_ptr<const MapElitesDescriptor> descriptor = pair.first;
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
 
-        std::vector<std::reference_wrapper<const Algorithm::Agent>> verticesToDelete;
+        std::vector<std::reference_wrapper<const Representation::Agent>> verticesToDelete;
 
         size_t numberNewValues = 0;
 
@@ -113,7 +113,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
                 throw std::runtime_error("SelectionMetrics should be castable "
                                          "to MapElitesSelectionMetrics");
             }
-            const Algorithm::Agent& agent = it->second;
+            const Representation::Agent& agent = it->second;
       
             std::vector<double> descriptorUsed(
                 metrics->getMapDescriptors().at(descriptor));  
@@ -161,9 +161,9 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     std::unique_ptr<SelectionContext> context = std::move(Selector::Selector::updateContext());
 
     // Get all the vertices in the different archives
-    std::set<std::reference_wrapper<const Algorithm::Agent>> agentsInAllArchives;
+    std::set<std::reference_wrapper<const Representation::Agent>> agentsInAllArchives;
     for (auto& pair : this->mapEliteArchives) {
-        std::set<std::reference_wrapper<const Algorithm::Agent>> agentsInArchive =
+        std::set<std::reference_wrapper<const Representation::Agent>> agentsInArchive =
             pair.second->getVerticesInArchive();
         agentsInAllArchives.insert(agentsInArchive.begin(),
                                      agentsInArchive.end());

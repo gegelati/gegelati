@@ -67,7 +67,7 @@ namespace EvoGraph {
          *            edge.
          */
         Edge(const Vertex& src, const Vertex& dest,
-                std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt)
+                std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt)
             : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
         /**

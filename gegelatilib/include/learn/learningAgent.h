@@ -42,7 +42,7 @@
 #include <map>
 #include <queue>
 
-#include "algorithm/algorithm.h"
+#include "representation/representation.h"
 
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
@@ -65,8 +65,8 @@ namespace Learn {
         /// LearningEnvironment with which the LearningAgent will interact.
         LearningEnvironment& learningEnvironment;
 
-        /// Map of reference of algorithms learned by the learning agent.
-        std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> algorithms;
+        /// Map of reference of representations learned by the learning agent.
+        std::map<uint64_t, std::reference_wrapper<Representation::Representation>> representations;
 
         /// Parameters for the learning process
         std::unique_ptr<LearningParameters> params;
@@ -89,36 +89,36 @@ namespace Learn {
          */
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
-        /// Currently executed algorithm during evaluation
-        Algorithm::Algorithm* currentExecutedAlgorithm;
+        /// Currently executed representation during evaluation
+        Representation::Representation* currentExecutedRepresentation;
 
-        /// Currently best algorithm during evaluation
-        Algorithm::Algorithm* currentBestAlgorithm;
+        /// Currently best representation during evaluation
+        Representation::Representation* currentBestRepresentation;
 
         /**
-         * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
+         * \brief return the representation managed by the learning agent corresponding to the given representation.
          * 
-         * \param[in] algorithm the algorithm to get.
+         * \param[in] representation the representation to get.
          */
-        Algorithm::Algorithm& getAlgorithm(const Algorithm::Algorithm& algorithm);
+        Representation::Representation& getRepresentation(const Representation::Representation& representation);
 
       public:
         /**
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] algorithms vector of algorithms learned by the learning agent
+         * \param[in] representations vector of representations learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
+        LearningAgent(LearningEnvironment& le, std::vector<std::reference_wrapper<Representation::Representation>> representations,
                       std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le},
               params{std::make_unique<LearningParameters>(*parameters)}, graph(factory.createGraph()) {
-                for(Algorithm::Algorithm& algorithm: algorithms){
-                    this->algorithms.insert({algorithm.getAlgorithmID(), algorithm});
+                for(Representation::Representation& representation: representations){
+                    this->representations.insert({representation.getRepresentationID(), representation});
                 }
               };
 
@@ -126,15 +126,15 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] algorithm algorithm learned by the learning agent
+         * \param[in] representation representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, Algorithm::Algorithm& algorithm,
+        LearningAgent(LearningEnvironment& le, Representation::Representation& representation,
                       std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, std::move(parameters), factory) {};
+            : LearningAgent(le, std::vector<std::reference_wrapper<Representation::Representation>>{representation}, std::move(parameters), factory) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -147,18 +147,18 @@ namespace Learn {
         void setNbGen(size_t gen);
 
         /**
-         * \brief Set the current executed algorithm during evaluation
+         * \brief Set the current executed representation during evaluation
          * 
-         * \param[in] algorithm the algorithm to set as current executed algorithm
+         * \param[in] representation the representation to set as current executed representation
          */
-        void setCurrentAlgorithm(Algorithm::Algorithm* algorithm);
+        void setCurrentRepresentation(Representation::Representation* representation);
 
         /**
-         * \brief Add an algorithm to the learning agent.
+         * \brief Add an representation to the learning agent.
          * 
-         * \param[in] algorithm the algorithm to add.
+         * \param[in] representation the representation to add.
          */
-        void addAlgorithm(Algorithm::Algorithm& algorithm);
+        void addRepresentation(Representation::Representation& representation);
 
 
         /**
@@ -169,21 +169,21 @@ namespace Learn {
         EvoGraph::Graph& getGraph();
 
         /**
-         * \brief Getter for the vector of algorithms
+         * \brief Getter for the vector of representations
          */
-        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> cGetAlgorithms() const;
+        std::vector<std::reference_wrapper<const Representation::Representation>> cGetRepresentations() const;
 
         /**
-         * \brief Getter for the vector of algorithms
+         * \brief Getter for the vector of representations
          */
-        std::vector<std::reference_wrapper<Algorithm::Algorithm>> getAlgorithms();
+        std::vector<std::reference_wrapper<Representation::Representation>> getRepresentations();
 
         /**
-         * \brief return the a pointer of the algorithm at the specified index
+         * \brief return the a pointer of the representation at the specified index
          * 
          * \param[in] id specified index
          */
-        Algorithm::Algorithm& getAlgorithmAt(size_t id);
+        Representation::Representation& getRepresentationAt(size_t id);
 
         /**
          * \brief Getter for the RNG used by the LearningAgent.
@@ -234,16 +234,16 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job,
+            Representation::ExecutionEngine& execEngine, const Representation::Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
 
         /**
-         * \brief Evaluate all agent of the algorithms.
+         * \brief Evaluate all agent of the representations.
          *
          * This method calls the evaluateJob method for every agent
-         * of the algorithms. The method returns a sorted map associating each
+         * of the representations. The method returns a sorted map associating each
          * agent to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
@@ -252,14 +252,14 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::reference_wrapper<const Algorithm::Agent>>
+                              std::reference_wrapper<const Representation::Agent>>
         evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
-         * \brief Evaluate all agents of one algorithm.
+         * \brief Evaluate all agents of one representation.
          *
          * This method calls the evaluateJob method for every agent
-         * of one algorithm. The method returns a sorted map associating each
+         * of one representation. The method returns a sorted map associating each
          * agent to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
@@ -268,8 +268,8 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::reference_wrapper<const Algorithm::Agent>>
-        evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode);
+                              std::reference_wrapper<const Representation::Agent>>
+        evaluateCurrentRepresentationAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
          * \brief Evaluate one agent.
@@ -287,7 +287,7 @@ namespace Learn {
          */
         virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
             uint64_t generationNumber, LearningMode mode,
-            const Algorithm::Agent& agent);
+            const Representation::Agent& agent);
 
         /**
          * \brief Train the Graph for one generation.
@@ -295,7 +295,7 @@ namespace Learn {
          * Training for one generation includes:
          * - Populating the Graph according to given MutationParameters.
          * - Evaluating all agents of the Graph. (call to evaluateAllRoots)
-         * - Removing from the Graph and Algorithms the worst performing agents.
+         * - Removing from the Graph and Representations the worst performing agents.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -334,19 +334,19 @@ namespace Learn {
          *
          * @return A vector containing pointers of the newly created jobs.
          */
-        virtual std::vector<std::shared_ptr<Algorithm::Job>> makeJobs(
+        virtual std::vector<std::shared_ptr<Representation::Job>> makeJobs(
             Learn::LearningMode mode);
 
 
         /**
-         * \brief launch the selection of the different algorithms
+         * \brief launch the selection of the different representations
          * 
          * \param[in] results results of the evaluation
          * \param[in] rng Random Number Generator for this Learning Agent.
          */
-        virtual void launchAlgorithmsSelection(
+        virtual void launchRepresentationsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results,
+                          std::reference_wrapper<const Representation::Agent>>& results,
             RNG::RNG& rng);
 
         /**
@@ -357,22 +357,22 @@ namespace Learn {
          * Clears the Archive.
          *
          * \param[in] seed the seed given to the TPGMutator.
-         * \param[in] doGeneratePopulation boolean to indicate if population of the algorithms should be generated here.
+         * \param[in] doGeneratePopulation boolean to indicate if population of the representations should be generated here.
          */
         virtual void init(uint64_t seed = 0, bool doGeneratePopulation = true);
 
 
         /**
-         * \brief Return the current best algorithm
+         * \brief Return the current best representation
          */
-        const Algorithm::Algorithm& getBestAlgorithm();
+        const Representation::Representation& getBestRepresentation();
 
         /**
-         * \brief Method that indicate if the learning agent contains a specific algorithm.
+         * \brief Method that indicate if the learning agent contains a specific representation.
          * 
-         * \param[in] algorithm the algorithm to search.
+         * \param[in] representation the representation to search.
          */
-        virtual bool containsAlgorithm(Algorithm::Algorithm& algorithm);
+        virtual bool containsRepresentation(Representation::Representation& representation);
     };
 }; // namespace Learn
 

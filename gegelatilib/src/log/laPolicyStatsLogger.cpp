@@ -44,8 +44,8 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
-    const Selector::Selector& selector = this->algorithm.getSelectorCst();
-    const Algorithm::Agent& bestAgent = *selector.getBestAgent().first;
+    const Selector::Selector& selector = this->representation.getSelectorCst();
+    const Representation::Agent& bestAgent = *selector.getBestAgent().first;
     if (this->lastBestAgentID == -1 || bestAgent.getAgentID() != this->lastBestAgentID) {
         // Update the best root befor loggin it PolicyStats
         this->lastBestAgentID = bestAgent.getAgentID();
@@ -55,7 +55,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
                      ->getScore()
               << std::endl
               << std::endl;
-        std::shared_ptr<Algorithm::PolicyStats> ps = algorithm.createPolicyStats();
+        std::shared_ptr<Representation::PolicyStats> ps = representation.createPolicyStats();
         ps->analyzePolicy(bestAgent); 
         *this << *ps << std::endl;
         *this << std::endl

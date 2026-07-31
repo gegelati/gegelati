@@ -45,7 +45,7 @@
 #include <list>
 #include <set>
 
-namespace Algorithm{
+namespace Representation{
   class Agent;
 }
 
@@ -67,14 +67,14 @@ namespace EvoGraph {
          *
          * \return a const weak pointer of the Agent Program of the Element.
          */
-        virtual const Algorithm::Agent& getProgram() const;
+        virtual const Representation::Agent& getProgram() const;
 
         /**
          * \brief Set a new Agent Program for the Element.
          *
          * \param[in] agentProgram the new weak pointer to a Agent Program.
          */
-        virtual void setProgram(const Algorithm::Agent& agentProgram);
+        virtual void setProgram(const Representation::Agent& agentProgram);
 
         /**
          * \brief remove the program of the agent by setting nullopt.
@@ -100,14 +100,14 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            Element.
          */
-        Element(std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) : program{agentProgram}{};
+        Element(std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) : program{agentProgram}{};
 
 
         /// Shared pointer to the Agent to execute when evaluating the bid
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-       std::optional<std::reference_wrapper<const Algorithm::Agent>> program;
+       std::optional<std::reference_wrapper<const Representation::Agent>> program;
     };
 }; // namespace EvoGraph
 

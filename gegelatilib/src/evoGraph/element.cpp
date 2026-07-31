@@ -2,13 +2,13 @@
 #include "evoGraph/element.h"
 
 
-const Algorithm::Agent& EvoGraph::Element::getProgram() const
+const Representation::Agent& EvoGraph::Element::getProgram() const
 {
     return *this->program;
 }
 
 void EvoGraph::Element::setProgram(
-    const Algorithm::Agent& program)
+    const Representation::Agent& program)
 {
     this->program = program;
 }

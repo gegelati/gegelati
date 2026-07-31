@@ -40,7 +40,7 @@ namespace Log {
     /**
      * \brief Detector for connected cycles in TPGs
      *
-     * This utility class implement a depth-first search algorithm for detecting
+     * This utility class implement a depth-first search representation for detecting
      * the presence of directed cyclic paths in TPGs.
      */
     class CycleDetectionLALogger : public LALogger

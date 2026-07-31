@@ -5,7 +5,7 @@
 void Selector::TournamentSelector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::reference_wrapper<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Representation::Agent>>& results,
     RNG::RNG& rng)
 {
     this->agentsToDelete.clear();
@@ -17,7 +17,7 @@ void Selector::TournamentSelector::doSelection(
 
     // Copy the first agents to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>>
+                          std::reference_wrapper<const Representation::Agent>>>
         elements;
     
     for (size_t i = 0; i < nbAgentsInTournament && results.size() > 0; i++) {
@@ -43,7 +43,7 @@ void Selector::TournamentSelector::doSelection(
         auto subrangeEnd = elements.begin() + end;
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::reference_wrapper<const Algorithm::Agent>>
+                      std::reference_wrapper<const Representation::Agent>>
             subMap(subrangeBegin, subrangeEnd);
 
         // Delete everything but the best
@@ -64,7 +64,7 @@ void Selector::TournamentSelector::doSelection(
 }
 
 void Selector::TournamentSelector::addToVerticesToDelete(
-    const Algorithm::Agent& agent)
+    const Representation::Agent& agent)
 {
     this->agentsToDelete.insert(agent);
 }
@@ -79,7 +79,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
         std::remove_if(
             context->preExistingAgents.begin(),
             context->preExistingAgents.end(),
-            [agentsToDeleteRef](const Algorithm::Agent& agent) -> bool {
+            [agentsToDeleteRef](const Representation::Agent& agent) -> bool {
                 return agentsToDeleteRef.find(agent) !=
                        agentsToDeleteRef.end();
             }),
@@ -91,7 +91,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
             std::remove_if(
                 context->agentsClonable.begin(),
                 context->agentsClonable.end(),
-                [agentsToDeleteRef](const Algorithm::Agent& agent) -> bool {
+                [agentsToDeleteRef](const Representation::Agent& agent) -> bool {
                     return agentsToDeleteRef.find(agent) ==
                            agentsToDeleteRef.end();
                 }),
@@ -121,7 +121,7 @@ void Selector::TournamentSelector::updateAfterPopulate(EvoGraph::Graph& graph)
     this->agentsToDelete.clear();
 }
 
-const std::set<std::reference_wrapper<const Algorithm::Agent>>& Selector::TournamentSelector::
+const std::set<std::reference_wrapper<const Representation::Agent>>& Selector::TournamentSelector::
     getAgentsToDelete()
 {
     return this->agentsToDelete;

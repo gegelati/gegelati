@@ -49,7 +49,7 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
-#include "algorithm/algorithm.h"
+#include "representation/representation.h"
 
 namespace File {
     /**
@@ -70,8 +70,8 @@ namespace File {
          */
         std::string offset;
 
-        /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
-        std::map<uint64_t, std::reference_wrapper<const Algorithm::Algorithm>> mapAlgorithms;
+        /// @brief vector of representations used, including subRepresentations. This is used to print the content of the programs when they are mutated by the representation.
+        std::map<uint64_t, std::reference_wrapper<const Representation::Representation>> mapRepresentations;
 
         /// @brief set of printed vertex ID. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
         std::set<uint64_t> printedVertexID;
@@ -83,17 +83,17 @@ namespace File {
         std::set<uint64_t> printedAgentID;
 
         /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
-        std::set<uint64_t> printedAlgorithmsID;
+        std::set<uint64_t> printedRepresentationsID;
 
 
         /**
          * \brief Print the dot content for the given Program.
          * 
-         * This method find the corresponding algorithm to the agent program given and print it.
+         * This method find the corresponding representation to the agent program given and print it.
          * 
          * \param[in] agentProgram the agent program to be printed
          */
-        void printAgent(const Algorithm::Agent& agentProgram);
+        void printAgent(const Representation::Agent& agentProgram);
 
         /**
          * \brief Print the dot content for the given Element.
@@ -169,7 +169,7 @@ namespace File {
          * dest_idx = destination index
          * op       = operand
          */
-        //void printLGPAgent(std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent);
+        //void printLGPAgent(std::shared_ptr<const Representation::LGP::LGPAgent> lgpAgent);
 
         /**
          * \brief Prints header content in the dot file.
@@ -180,14 +180,14 @@ namespace File {
         void printGraphHeader();
 
         /**
-         * \brief print a specific algorithm node, an also print the potential sub and aggregated algorithm.
+         * \brief print a specific representation node, an also print the potential sub and aggregated representation.
          */    
-        void printAlgorithm(const Algorithm::Algorithm& printAlgorithm);
+        void printRepresentation(const Representation::Representation& printRepresentation);
 
         /**
-         * \brief Prints algorithms node, showing what are the relations between the different algorithms.
+         * \brief Prints representations node, showing what are the relations between the different representations.
          */
-        void printAlgorithmsSubGraph(const Algorithm::Algorithm& algorithm);
+        void printRepresentationsSubGraph(const Representation::Representation& representation);
 
         /**
          * \brief Prints footer content in the dot file.
@@ -195,7 +195,7 @@ namespace File {
          * This method prints finalization content that must be printed into the
          * dot file after all vertices and edges.
          */
-        void printGraphFooter(const Algorithm::Algorithm& algorithm);
+        void printGraphFooter(const Representation::Representation& representation);
 
       public:
         /**
@@ -227,13 +227,13 @@ namespace File {
             delete;
 
         /**
-         * \brief Print the content of an algorithm given when constructing the
+         * \brief Print the content of an representation given when constructing the
          * dotExporter into a dot file.
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
-         * \param[in] algorithm the printed algorithm
+         * \param[in] representation the printed representation
          */
-        void exportAlgorithm(const char* filePath, const Algorithm::Algorithm& algorithm);
+        void exportRepresentation(const char* filePath, const Representation::Representation& representation);
 
         /**
          * \brief Print a sub-tree of the Graph given when constructing the
@@ -242,9 +242,9 @@ namespace File {
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
          * \param[in] agent The agent printed
-         * \param[in] algorithm the algorithm the agent belongs too
+         * \param[in] representation the representation the agent belongs too
          */
-        void exportAgent(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm);
+        void exportAgent(const char* filePath, const Representation::Agent& agent, const Representation::Representation& representation);
     };
 }; // namespace File
 

@@ -79,7 +79,7 @@ namespace EvoGraph {
          * \param[in] programAgent weak pointer to the Agent Program associated to the newly
          *                 created Team.
          */
-        virtual std::unique_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt) const;
+        virtual std::unique_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Representation::Agent>> programAgent = std::nullopt) const;
 
         /**
          * \brief Create a Action for a Graph.
@@ -91,7 +91,7 @@ namespace EvoGraph {
          *                 created Action.
          */
         virtual std::unique_ptr<Action> createAction(
-            const uint64_t id, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt) const;
+            const uint64_t id, std::optional<std::reference_wrapper<const Representation::Agent>> programAgent = std::nullopt) const;
 
         /**
          * \brief Create a Edge for a Graph.
@@ -106,7 +106,7 @@ namespace EvoGraph {
          */
         virtual std::unique_ptr<Edge> createEdge(
             const Vertex& src, const Vertex& dest,
-            std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) const;
+            std::optional<std::reference_wrapper<const Representation::Agent>> agentProgram = std::nullopt) const;
 
 
     };

@@ -39,7 +39,7 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-#include "algorithm/algorithmParameters.h"
+#include "representation/repParameters.h"
 #include "selector/selectionParameters.h"
 #include "learn/learningParameters.h"
 
@@ -51,8 +51,8 @@
  */
 typedef struct Parameters
 {
-    /// AlgorithmParameters for controlling paramters of any algorithm.
-    Algorithm::AlgorithmParameters algorithm;
+    /// RepresentationParameters for controlling paramters of any representation.
+    Representation::RepresentationParameters representation;
 
     /// SelectionParameters for controlling selection aspects of the
     /// learning process.

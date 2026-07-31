@@ -36,9 +36,9 @@
 #ifndef LA_POLICY_STATS_LOGGER_H
 #define LA_POLICY_STATS_LOGGER_H
 
-#include "algorithm/agent.h"
+#include "representation/agent.h"
 #include "log/laLogger.h"
-#include "algorithm/policyStats.h"
+#include "representation/policyStats.h"
 
 namespace Log {
     /**
@@ -63,8 +63,8 @@ namespace Log {
         /// Number of the current generation.
         uint64_t generationNumber = 0;
 
-        /// Analyzed algorithm
-        const Algorithm::Algorithm& algorithm;
+        /// Analyzed representation
+        const Representation::Representation& representation;
 
       public:
         /**
@@ -72,12 +72,12 @@ namespace Log {
          *
          * \param[in] la LearningAgent whose information will be logged by the
          * LAPolicyStatsLogger.
-         * \param[in] algorithm algorithm whose best agent is output.
+         * \param[in] representation representation whose best agent is output.
          * \param[in] out ostream where the logger will write its output.
          */
-        LAPolicyStatsLogger(Learn::LearningAgent& la, const Algorithm::Algorithm& algorithm,
+        LAPolicyStatsLogger(Learn::LearningAgent& la, const Representation::Representation& representation,
                             std::ostream& out = std::cout)
-            : LALogger(la, out), algorithm{algorithm} {};
+            : LALogger(la, out), representation{representation} {};
 
         /// Inherited from LALogger
         void logNewGeneration(uint64_t& generationNumber) override;

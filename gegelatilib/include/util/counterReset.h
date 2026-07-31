@@ -3,8 +3,8 @@
 #ifndef COUNTER_RESET_H
 #define COUNTER_RESET_H
 
-#include "algorithm/agent.h"
-#include "algorithm/algorithm.h"
+#include "representation/agent.h"
+#include "representation/representation.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
 

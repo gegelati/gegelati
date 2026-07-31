@@ -111,8 +111,8 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 return a + b * (double)c;
             }));
 
-        params.algorithm.lgp.nbRegisters = 8;
-        params.algorithm.lgp.nbProgramConstant = 5;
+        params.representation.lgp.nbRegisters = 8;
+        params.representation.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
         p = new Program::Program(*e, false);
 

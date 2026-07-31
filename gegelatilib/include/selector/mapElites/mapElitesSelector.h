@@ -15,7 +15,7 @@ namespace Selector {
 
         /**
          * \brief Selection class that will do a selection with a Map Elites
-         * algorithm.
+         * representation.
          *
          * The different archives are stored in the mapEliteArchives attribute,
          * each archive corresponding to a descriptor.
@@ -124,7 +124,7 @@ namespace Selector {
             virtual void doSelection(
                 EvoGraph::Graph& graph,
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Algorithm::Agent>>& results,
+                              std::reference_wrapper<const Representation::Agent>>& results,
                 RNG::RNG& rng) override;
 
             /**
