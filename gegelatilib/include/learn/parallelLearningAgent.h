@@ -43,7 +43,7 @@
 #include <thread>
 
 #include "learn/evaluationResult.h"
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 

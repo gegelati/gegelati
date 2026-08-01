@@ -38,7 +38,7 @@
 #include <iomanip>
 #include <numeric>
 
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "log/mapElitesArchiveLogger.h"
 #include "selector/mapElites/cvtMapElitesArchive.h"
 #include "selector/mapElites/mapElitesArchive.h"

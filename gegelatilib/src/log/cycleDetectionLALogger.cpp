@@ -37,7 +37,7 @@
 #include <set>
 #include <vector>
 
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "log/cycleDetectionLALogger.h"
 
 void Log::CycleDetectionLALogger::logHeader()

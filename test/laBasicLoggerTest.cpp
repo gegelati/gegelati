@@ -41,7 +41,7 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 
 #include "log/laBasicLogger.h"

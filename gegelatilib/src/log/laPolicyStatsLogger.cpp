@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 
 #include "log/laPolicyStatsLogger.h"
 

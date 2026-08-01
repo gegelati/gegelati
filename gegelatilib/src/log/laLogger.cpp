@@ -35,7 +35,7 @@
  */
 
 #include "log/laLogger.h"
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 
 double Log::LALogger::getDurationFrom(
     const std::chrono::time_point<std::chrono::system_clock,

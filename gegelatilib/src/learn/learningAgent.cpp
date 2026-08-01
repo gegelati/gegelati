@@ -44,7 +44,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 
 void Learn::LearningAgent::setNbGen(size_t gen)
 {

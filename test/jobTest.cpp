@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 
 /*

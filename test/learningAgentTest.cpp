@@ -62,7 +62,7 @@
 #include "mutator/rng.h"
 
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "parameters.h"
 #include "learn/parallelLearningAgent.h"

@@ -44,7 +44,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
-#include "learn/LearningAgent.h"
+#include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
