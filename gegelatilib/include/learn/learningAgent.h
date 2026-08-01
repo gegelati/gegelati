@@ -206,6 +206,18 @@ namespace Learn {
 
 
         /**
+         * \brief Get the number of evaluation to perform for a given individual.
+         * 
+         * In Training mode, the number of evaluation to perform depends if the individual has already been evaluated or not. Default is parameter.nbIterationsPerPolicyEvaluation, but if the individual has already been evaluated, a verification is done to ensure that the total number of evaluation does not exceed parameter.maxNbEvaluationPerPolicy.
+         * In Validation mode, the number of evaluation to perform is always parameter.nbIterationsPerPolicyValidation.
+         * 
+         * \param[in] previousEval the previous evaluation result of the individual.
+         * \param[in] mode the LearningMode to use during the policy evaluation.
+         */
+        virtual size_t getNbEvaluationIndiv(
+            std::shared_ptr<Learn::EvaluationResult> previousEval, Learn::LearningMode mode) const;
+
+        /**
          * \brief Evaluates policy starting from the given root.
          *
          * The policy, that is, the Graph execution starting from the given

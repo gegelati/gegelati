@@ -141,6 +141,25 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
+size_t Learn::LearningAgent::getNbEvaluationIndiv(std::shared_ptr<Learn::EvaluationResult> previousEval, Learn::LearningMode mode) const
+{
+    if (mode != LearningMode::TRAINING) {
+        return this->params->nbIterationsPerPolicyValidation;
+    }
+
+    // In training mode, we need to check if the individual has already been evaluated and how many times.
+    size_t nbEvaluationTraining = this->params->nbIterationsPerPolicyEvaluation;
+    if(previousEval != nullptr) {
+        nbEvaluationTraining = std::clamp(
+            this->params->maxNbEvaluationPerPolicy - previousEval->getNbEvaluation(),
+            static_cast<size_t>(0),
+            nbEvaluationTraining
+        );
+    }
+    return nbEvaluationTraining;    
+}
+
+
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     Representation::ExecutionEngine& execEngine, const Representation::Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
@@ -157,36 +176,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Skip the individual evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
-    std::shared_ptr<Learn::EvaluationResult> previousEval;
-    size_t nbEvaluationToDo = 0;
-    size_t nbEvaluationIndividual = selector.getNbEvaluation(job.getIndividual());
-    if (mode == LearningMode::TRAINING) {
-        nbEvaluationToDo = this->params->nbIterationsPerPolicyEvaluation;
-        
-        if(nbEvaluationIndividual > 0) {
-            previousEval = selector.getResultsOf(job.getIndividual());
-
-            if(nbEvaluationIndividual == params->maxNbEvaluationPerPolicy) {
-                return previousEval;
-            } else if (nbEvaluationIndividual + nbEvaluationToDo > params->maxNbEvaluationPerPolicy) {
-                nbEvaluationToDo = params->maxNbEvaluationPerPolicy - nbEvaluationIndividual;
-            }
-            
-        }
-    } else {
-        nbEvaluationToDo = this->params->nbIterationsPerPolicyValidation;
-    }
+    std::shared_ptr<Learn::EvaluationResult> previousEval = selector.getResultsOf(job.getIndividual());
+    size_t nbEvaluationToDo = this->getNbEvaluationIndiv(previousEval, mode);
 
 
     // Set the job to execute
     execEngine.setExecutionMode(mode == LearningMode::TRAINING);
     execEngine.setupJob(job);
-
-    // Init results
-    double result = 0.0;
-
-    // Init utility
-    double utility = 0.0;
 
 
     // Init global selection metric
