@@ -90,10 +90,10 @@ namespace Learn {
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
         /// Currently executed representation during evaluation
-        Representation::Representation* currentExecutedRepresentation;
+        Representation::Representation* currentExecutedRepresentation = nullptr;
 
         /// Currently best representation during evaluation
-        Representation::Representation* currentBestRepresentation;
+        Representation::Representation* currentBestRepresentation = nullptr;
 
         /**
          * \brief return the representation managed by the learning abcde corresponding to the given representation.
