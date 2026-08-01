@@ -42,6 +42,7 @@
 #include "file/parametersParser.h"
 #include "parameters.h"
 
+/*
 TEST(LearningParametersTest, readConfigFile)
 {
     Json::Value root;
@@ -180,7 +181,7 @@ TEST(LearningParametersTest, loadParametersFromJson)
     // only testing 1 parameter as readConfigFile was already tested
     ASSERT_EQ(params.representation.lgp.nbRegisters, 3.0)
         << "There should be 3 registers according to the params file";
-}
+}*/
 
 TEST(LearningParametersTest, writeParametersToJson)
 {

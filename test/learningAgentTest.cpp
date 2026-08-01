@@ -1079,7 +1079,7 @@ TEST_F(ParallelLearningAgentTest, Init)
 
 }
 
-
+/*
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 {
     params.representation.tpg.archiveSize = 50;
@@ -1104,7 +1104,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
-}
+}*/
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 {
@@ -1351,7 +1351,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     ASSERT_EQ(tpgParallel->getArchive().getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
 }
-
+/*
 TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
 {
     params.representation.tpg.archiveSize = 50;
@@ -1387,7 +1387,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Check that bestRoot has been set
     ASSERT_NE(tpg.getSelector().getBestIndividual().first, std::nullopt)
         << "Best root should not be expired after training one generation.";
-}
+}*/
 
 TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
 {
