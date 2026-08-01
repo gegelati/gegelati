@@ -59,9 +59,9 @@ namespace Representation {
         /// JSon comment
         inline static const std::string nbAgentsComment =
             "// Number of agent for the evolution of the population"
-            "// \"nbAgents\" : 100, // Default value";
+            "// \"nbIndividuals\" : 100, // Default value";
         /// Number of agent for the evolution of the population
-        size_t nbAgents = 100;
+        size_t nbIndividuals = 100;
 
         /// JSon comment
         inline static const std::string activationFunctionComment =

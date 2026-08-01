@@ -135,7 +135,7 @@ class TpgMutatorTest : public ::testing::Test
 
         selector = std::make_shared<Selector::TruncationSelector>(std::make_unique<Selector::SelectionParameters>(params.selection));
         selector->setPopulation(*tpgPopulation);
-        selector->setNbAgents(params.representation.nbAgents);
+        selector->setNbAgents(params.representation.nbIndividuals);
 
         lgpMutator = std::make_shared<Representation::LGP::LGPMutator>(*selector, (uint64_t)0);
 
@@ -189,9 +189,9 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         << "TPG Initialization failed.";
     auto vertexSet = graph->getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), this->actions->front().getNbValues() + params.representation.nbAgents)
+    ASSERT_EQ(vertexSet.size(), this->actions->front().getNbValues() + params.representation.nbIndividuals)
         << "Number of vertices after initialization is incorrect.";
-    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbAgents)
+    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbIndividuals)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const EvoGraph::Vertex& vert) {
@@ -205,12 +205,12 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
                                 return dynamic_cast<const EvoGraph::Team*>(
                                            &vert) != nullptr;
                             }),
-              params.representation.nbAgents)
+              params.representation.nbIndividuals)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_GE(graph->getEdges().size(), 2 * params.representation.nbAgents)
+    ASSERT_GE(graph->getEdges().size(), 2 * params.representation.nbIndividuals)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(graph->getEdges().size(),
-              params.representation.nbAgents * params.representation.tpg.maxInitOutgoingEdges)
+              params.representation.nbIndividuals * params.representation.tpg.maxInitOutgoingEdges)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
@@ -219,7 +219,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         const Representation::Individual& program = edge.get().getProgram();
             programs.insert(program);
     }
-    ASSERT_EQ(programs.size(), params.representation.nbAgents * 2)
+    ASSERT_EQ(programs.size(), params.representation.nbIndividuals * 2)
         << "Number of distinct program in the TPG is incorrect.";
     // Check that no team has the same program twice
     for (auto team :graph->getRootVertices()) {
@@ -979,7 +979,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     uint64_t nbActions = 4;
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 7;
+    params.representation.nbIndividuals = 7;
     // Proba as in Kelly's paper
     params.representation.tpg.pEdgeDeletion = 0.7;
     params.representation.tpg.pEdgeAddition = 0.7;
@@ -1023,7 +1023,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     uint64_t nbActions = 4;
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 7;
+    params.representation.nbIndividuals = 7;
     // Proba as in Kelly's paper
     params.representation.tpg.pEdgeDeletion = 0.7;
     params.representation.tpg.pEdgeAddition = 0.7;
@@ -1066,7 +1066,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     uint64_t nbActions = 4;
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 7;
+    params.representation.nbIndividuals = 7;
     // Proba as in Kelly's paper
     params.representation.tpg.pEdgeDeletion = 0.7;
     params.representation.tpg.pEdgeAddition = 0.7;
@@ -1127,7 +1127,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     uint64_t nbActions = 4;
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 7;
+    params.representation.nbIndividuals = 7;
     // Proba as in Kelly's paper
     params.representation.tpg.pEdgeDeletion = 0.7;
     params.representation.tpg.pEdgeAddition = 0.7;
@@ -1142,7 +1142,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     params.representation.lgp.minConstValue = 0;
     params.representation.lgp.maxConstValue = 10;
 
-    selector->setNbAgents(params.representation.nbAgents);
+    selector->setNbAgents(params.representation.nbIndividuals);
     tpgMutator->initRandomPopulation(*graph, *tpgPopulation, params.representation, rng);
     // Init its program and fill the archive
     auto execEngine = tpgPopulation->createExecutionEngine({}, true);
@@ -1156,8 +1156,8 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
         *graph, *tpgPopulation, params.representation, rng, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbAgents);
-    ASSERT_EQ(tpgPopulation->getAgents().size(), params.representation.nbAgents);
+    ASSERT_EQ(graph->getRootVertices().size(), params.representation.nbIndividuals);
+    ASSERT_EQ(tpgPopulation->getAgents().size(), params.representation.nbIndividuals);
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
@@ -1181,7 +1181,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
 
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 10;
+    params.representation.nbIndividuals = 10;
     params.representation.tpg.useActionProgram = true;
     params.representation.tpg.useMultiActionProgram = true;
     params.representation.tpg.ratioTeamsOverActions = 0.5;
@@ -1213,7 +1213,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
         *tpg, selector, archive, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbAgents);
+    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbIndividuals);
 
     size_t nbActionsRoots = 0;
     size_t nbTeamsRoots = 0;
@@ -1226,10 +1226,10 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateActionRoots)
         }
     }
     // Check the ratio of teams over actions
-    ASSERT_EQ(nbTeamsRoots, params.representation.nbAgents *
+    ASSERT_EQ(nbTeamsRoots, params.representation.nbIndividuals *
                                 params.representation.tpg.ratioTeamsOverActions)
         << "The number of team roots is not as expected.";
-    ASSERT_EQ(nbActionsRoots, params.representation.nbAgents - nbTeamsRoots)
+    ASSERT_EQ(nbActionsRoots, params.representation.nbIndividuals - nbTeamsRoots)
         << "The number of action roots is not as expected.";
 }
 
@@ -1248,7 +1248,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 
     params.representation.tpg.maxInitOutgoingEdges = 3;
     params.representation.lgp.maxProgramSize = 96;
-    params.representation.nbAgents = 10;
+    params.representation.nbIndividuals = 10;
     params.representation.tpg.useActionProgram = true;
     params.representation.tpg.useMultiActionProgram = true;
     params.representation.tpg.ratioTeamsOverActions = 0.5;
@@ -1291,7 +1291,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
         *tpg, selector, archive, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
-    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbAgents);
+    ASSERT_EQ(tpg->getRootVertices().size(), params.representation.nbIndividuals);
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
         << "After populateTPG with tournament selection, the set of vertices "

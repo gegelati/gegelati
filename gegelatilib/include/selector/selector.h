@@ -23,7 +23,7 @@ namespace Selector {
       protected:
 
         /// @brief number of agents controlled by the selector
-        size_t nbAgents;
+        size_t nbIndividuals;
 
         /// Parameters for the selection
         std::unique_ptr<SelectionParameters> params;
@@ -89,8 +89,8 @@ namespace Selector {
         }
 
         /// @brief setter for the number of agents
-        /// @param nbAgents number of agents set
-        void setNbAgents(size_t nbAgents);
+        /// @param nbIndividuals number of agents set
+        void setNbAgents(size_t nbIndividuals);
 
         /// @brief Getter for the number of agents. 
         size_t getNbAgents();

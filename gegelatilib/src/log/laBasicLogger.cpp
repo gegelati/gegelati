@@ -137,15 +137,15 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
           << this->learningAgent.getGraph().getNbVertices();
 
           
-    uint64_t nbAgents = 0;
+    uint64_t nbIndividuals = 0;
     for(auto& algo : this->learningAgent.getRepresentations()){
-        nbAgents += algo.get().getNbAgents();
+        nbIndividuals += algo.get().getNbAgents();
     }
 
     uint64_t nbActionsR = this->learningAgent.getGraph().getRootActions().size();
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
-          << nbAgents;
+          << nbIndividuals;
 
     // resets checkpoint to be able to show evaluation time
     chronoFromNow();

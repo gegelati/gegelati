@@ -76,7 +76,7 @@ void Representation::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& gr
     std::vector<std::reference_wrapper<const Individual>> programAgents;
 
 
-    for (size_t idx = 0; idx < params.nbAgents; idx++) {
+    for (size_t idx = 0; idx < params.nbIndividuals; idx++) {
         teams.push_back(dynamic_cast<const TPG::TpgIndividual&>(population.createAgent(graph)).getVertex());
     }
 
@@ -89,7 +89,7 @@ void Representation::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& gr
 
     Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramRepresentationID);
     Population& actionProgramPopulation = population.getSubPopulation(this->actionProgramRepresentationID);
-    for (size_t i = 0; i < 2 * params.nbAgents; i++) {
+    for (size_t i = 0; i < 2 * params.nbIndividuals; i++) {
 
         // Create a program agent
         programAgents.push_back(programMutator.initRandomAgent(graph, programPopulation, params, rng));

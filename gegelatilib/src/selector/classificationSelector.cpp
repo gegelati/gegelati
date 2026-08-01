@@ -35,7 +35,7 @@ void Selector::ClassificationSelector::doSelection(
 
     // Keep ~half+ of the agents based on their general score on
     // all class.
-    // and ~half- of the agents on a per class score (none if nbAgents to keep
+    // and ~half- of the agents on a per class score (none if nbIndividuals to keep
     // < 2*nb class)
     uint64_t nbAgentsKeptPerClass = (nbAgentsToKeep / this->nbActions) / 2;
     uint64_t nbAgentsKeptGeneralScore =

@@ -20,7 +20,7 @@ void Representation::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& grap
     // Empty agent population
     population.clearAgents(graph);
 
-    for (size_t idx = 0; idx < params.nbAgents; idx++) {
+    for (size_t idx = 0; idx < params.nbIndividuals; idx++) {
         this->initRandomAgent(graph, population, params, rng);
     }
 }

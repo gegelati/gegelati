@@ -94,7 +94,7 @@ class LearningAgentTest : public ::testing::Test
         // Proba as in Kelly's paper
         params.representation.tpg.maxInitOutgoingEdges = 3;
         params.representation.lgp.maxProgramSize = 96;
-        params.representation.nbAgents = 15;
+        params.representation.nbIndividuals = 15;
         params.representation.tpg.pEdgeDeletion = 0.7;
         params.representation.tpg.pEdgeAddition = 0.7;
         params.representation.tpg.pProgramMutation = 0.2;
@@ -353,7 +353,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     ASSERT_EQ(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.representation.nbAgents))
+                        params.representation.nbIndividuals))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 
@@ -471,7 +471,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -496,7 +496,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -521,7 +521,7 @@ TEST_F(LearningAgentTest, TrainCGPPortability)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -551,7 +551,7 @@ TEST_F(LearningAgentTest, TrainTGPPortability)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -583,7 +583,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -655,7 +655,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -680,7 +680,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
     params.representation.atpg.probaContextOverActionProgram = 0.1;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -707,7 +707,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -740,7 +740,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -774,7 +774,7 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     params.representation.maple.pCrossAgents = 0.7;
     params.representation.maple.pCrossPrograms = 0.5;
     // A root may be evaluated at most for 3 generations
@@ -803,7 +803,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -848,7 +848,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -892,7 +892,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -927,7 +927,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
@@ -1047,7 +1047,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     ASSERT_LE(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.representation.nbAgents))
+                        params.representation.nbIndividuals))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
     // Train a second generation, because most roots were removed, a root
@@ -1380,7 +1380,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.representation.nbAgents))
+                        params.representation.nbIndividuals))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 
@@ -1417,7 +1417,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
-                        params.representation.nbAgents))
+                        params.representation.nbIndividuals))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
 }
@@ -1483,7 +1483,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     // Set a large number of generations and roots
     // so that the chances of something going wrong is higher.
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 5;
 
@@ -1528,7 +1528,7 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
     params.evaluation.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;

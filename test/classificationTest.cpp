@@ -68,7 +68,7 @@ class ClassificationTest : public ::testing::Test
         // Proba as in Kelly's paper
         params.representation.tpg.maxInitOutgoingEdges = 3;
         params.representation.lgp.maxProgramSize = 96;
-        params.representation.nbAgents = 15;
+        params.representation.nbIndividuals = 15;
         params.representation.tpg.pEdgeDeletion = 0.7;
         params.representation.tpg.pEdgeAddition = 0.7;
         params.representation.tpg.pProgramMutation = 0.2;
@@ -89,7 +89,7 @@ class ClassificationTest : public ::testing::Test
         delete (&set.getInstruction(1));
     }
 };
-/*
+
 TEST_F(ClassificationTest, Constructor)
 {
     Learn::LearningAgent* la;
@@ -173,7 +173,7 @@ TEST_F(ClassificationTest, DoSelection)
     params.nbIterationsPerPolicyEvaluation = 3;
     params.representation.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.representation.nbAgents = 50; // Param used in decimation
+    params.representation.nbIndividuals = 50; // Param used in decimation
     params.nbThreads = 4;
 
     Learn::LearningAgent la(fle, set, params);
@@ -296,7 +296,7 @@ TEST_F(ClassificationTest, DoSelection)
     ASSERT_EQ(
         la.getGraph()->getNbVertices(),
         originalNbVertices -
-            std::ceil(params.representation.nbAgents *
+            std::ceil(params.representation.nbIndividuals *
                       (1.0 - params.selection.truncation.ratioDeletedRoots)));
 
     // Check the presence of savedRoots among remaining roots.
@@ -319,4 +319,3 @@ TEST_F(ClassificationTest, DoSelection)
                           &teamRoot) == remainingRoots.end())
         << "Action roots with poor score were not preserved during decimation.";
 }
-*/

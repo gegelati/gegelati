@@ -128,8 +128,8 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-    if (param == "nbAgents") {
-        params.representation.nbAgents = (size_t)value.asUInt();
+    if (param == "nbIndividuals") {
+        params.representation.nbIndividuals = (size_t)value.asUInt();
         return;
     }
     if (param == "activationFunction") {
@@ -395,8 +395,8 @@ void File::ParametersParser::writeParametersToJson(
 
 
 
-    root["representation"]["nbAgents"] = params.representation.nbAgents;
-    root["representation"]["nbAgents"].setComment(
+    root["representation"]["nbIndividuals"] = params.representation.nbIndividuals;
+    root["representation"]["nbIndividuals"].setComment(
         Representation::RepresentationParameters::nbAgentsComment, Json::commentBefore);
 
     root["representation"]["activationFunction"] = params.representation.activationFunction;

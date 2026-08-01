@@ -182,7 +182,7 @@ void Representation::Representation::initSelector()
         this->setSelector(*this->savedDefaultSelector);
     }
     this->getSelector().setPopulation(*this->population);
-    this->getSelector().setNbAgents(this->params->nbAgents);
+    this->getSelector().setNbAgents(this->params->nbIndividuals);
 }
 
 void Representation::Representation::initSubRepresentations(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {

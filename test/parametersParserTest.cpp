@@ -104,7 +104,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(true, params.evaluation.doValidation);
 
     ASSERT_EQ("none", params.representation.activationFunction);
-    ASSERT_EQ(100, params.representation.nbAgents);
+    ASSERT_EQ(100, params.representation.nbIndividuals);
 
     ASSERT_EQ(50, params.representation.tpg.archiveSize);
     ASSERT_EQ(0.5, params.representation.tpg.archivingProbability);
@@ -240,7 +240,7 @@ TEST(LearningParametersTest, writeParametersToJson)
 
     // Mutation parameters tpg
     ASSERT_EQ(params.representation.activationFunction, params2.representation.activationFunction);
-    ASSERT_EQ(params.representation.nbAgents, params2.representation.nbAgents);
+    ASSERT_EQ(params.representation.nbIndividuals, params2.representation.nbIndividuals);
 
     ASSERT_EQ(params.representation.tpg.archiveSize, params2.representation.tpg.archiveSize);
     ASSERT_EQ(params.representation.tpg.archivingProbability, params2.representation.tpg.archivingProbability);

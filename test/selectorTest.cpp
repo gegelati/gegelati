@@ -86,7 +86,7 @@ class SelectorTest : public ::testing::Test
         // Proba as in Kelly's paper
         params.representation.tpg.maxInitOutgoingEdges = 3;
         params.representation.lgp.maxProgramSize = 96;
-        params.representation.nbAgents = 15;
+        params.representation.nbIndividuals = 15;
         params.representation.tpg.pEdgeDeletion = 0.7;
         params.representation.tpg.pEdgeAddition = 0.7;
         params.representation.tpg.pProgramMutation = 0.2;
@@ -260,7 +260,7 @@ TEST_F(SelectorTest, forgetPreviousResults)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.representation.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.representation.nbAgents = 10;
+    params.representation.nbIndividuals = 10;
     params.representation.lgp.nbRegisters = 4;
 
     Learn::LearningAgent la(le, set, params);
@@ -318,7 +318,7 @@ TEST_F(SelectorTest, DoSelection)
     params.nbIterationsPerPolicyEvaluation = 3;
     params.representation.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.representation.nbAgents =
+    params.representation.nbIndividuals =
         le.getNbActions() - 1; // Param used in decimation
     params.representation.lgp.nbRegisters = 4;
 
@@ -365,7 +365,7 @@ TEST_F(SelectorTest, DoSelection)
 TEST_F(SelectorTest, DoSelectionActionsQuota)
 {
     // We force the ratio to quickly reach quotas
-    params.representation.nbAgents = 20;
+    params.representation.nbIndividuals = 20;
     params.selection.truncation.ratioDeletedRoots = 0.5;
     params.representation.tpg.ratioTeamsOverActions = 0.6;
     params.representation.tpg.useActionProgram =
@@ -421,7 +421,7 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
 TEST_F(SelectorTest, DecimateWithTournamentSelection)
 {
     params.selection._selectionMode = "tournament";
-    params.representation.nbAgents = 30;
+    params.representation.nbIndividuals = 30;
     params.selection.tournament.ratioSavedRoots = 0.3;
     params.selection.tournament.sizeTournament = 4;
     Learn::LearningAgent tournamentLA(le, set, params);
@@ -473,7 +473,7 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
 TEST_F(SelectorTest, UpdateContext)
 {
     params.representation.tpg.useActionProgram = true;
-    params.representation.nbAgents = 2;
+    params.representation.nbIndividuals = 2;
     params.representation.tpg.ratioTeamsOverActions = 0.5;
     params.representation.tpg.teamAccessAllActions = false;
 

@@ -29,14 +29,14 @@ bool Selector::Selector::hasPopulation() const
     return this->population.has_value();
 }
 
-void Selector::Selector::setNbAgents(size_t nbAgents)
+void Selector::Selector::setNbAgents(size_t nbIndividuals)
 {
-    this->nbAgents = nbAgents;
+    this->nbIndividuals = nbIndividuals;
 }
 
 size_t Selector::Selector::getNbAgents()
 {
-    return this->nbAgents;
+    return this->nbIndividuals;
 }
 
 void Selector::Selector::doSelection(
@@ -177,7 +177,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     }
     
     context->nbAgentsToCreate =
-        this->nbAgents - context->preExistingAgents.size();
+        this->nbIndividuals - context->preExistingAgents.size();
 
     return context;
 }

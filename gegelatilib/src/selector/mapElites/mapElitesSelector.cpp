@@ -170,7 +170,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     }
 
     if(agentsInAllArchives.size() != 0){
-        context->nbAgentsToCreate = this->nbAgents + agentsInAllArchives.size();
+        context->nbAgentsToCreate = this->nbIndividuals + agentsInAllArchives.size();
     }
 
     return context;

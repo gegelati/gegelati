@@ -40,7 +40,7 @@
             "pMutateActionProgram" : 0.7,
             "pSwapActionProgram" : 0.5
         },
-        "nbAgents" : 100,
+        "nbIndividuals" : 100,
         "tgp" :
         {
             "nbLayers" : 5,

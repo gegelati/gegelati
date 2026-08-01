@@ -66,7 +66,7 @@ class LABasicLoggerTest : public ::testing::Test
         // Proba as in Kelly's paper
         params.representation.tpg.maxInitOutgoingEdges = 3;
         params.representation.lgp.maxProgramSize = 96;
-        params.representation.nbAgents = 15;
+        params.representation.nbIndividuals = 15;
         params.representation.tpg.pEdgeDeletion = 0.7;
         params.representation.tpg.pEdgeAddition = 0.7;
         params.representation.tpg.pProgramMutation = 0.2;
