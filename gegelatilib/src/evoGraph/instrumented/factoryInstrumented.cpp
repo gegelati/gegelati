@@ -44,15 +44,15 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph()
         std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::unique_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programAgent) const
+std::unique_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual) const
 {
-    return std::make_unique<TeamInstrumented>(programAgent);
+    return std::make_unique<TeamInstrumented>(programIndividual);
 }
 
 std::unique_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
-    const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> programAgent) const
+    const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual) const
 {
-    return std::make_unique<ActionInstrumented>(id, programAgent);
+    return std::make_unique<ActionInstrumented>(id, programIndividual);
 }
 
 std::unique_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(

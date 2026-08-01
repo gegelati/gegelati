@@ -23,26 +23,26 @@ void Representation::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& 
     size_t nbOutputs = (population.getOutputs().sizeDiscrete() == 1) ? population.getOutputs().front().getNbValues() : population.getOutputs().size();
     this->initActionVertices(graph, nbOutputs);
 
-    // Empty agent population
-    population.clearAgents(graph);
+    // Empty individual population
+    population.clearIndividuals(graph);
 
     for (size_t idx = 0; idx < params.nbIndividuals; idx++) {
-        this->initRandomAgent(graph, population, params, rng);
+        this->initRandomIndividual(graph, population, params, rng);
     }
 }
 
-void Representation::Maple::MapleMutator::initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::Maple::MapleMutator::initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    // First agent initialized, check configuration validity and create action vertices
-    if(population.getAgents().size() == 1){
+    // First individual initialized, check configuration validity and create action vertices
+    if(population.getIndividuals().size() == 1){
         this->isConfigurationValid(params, population.getOutputs());
         size_t nbOutputs = (population.getOutputs().sizeDiscrete() == 1) ? population.getOutputs().front().getNbValues() : population.getOutputs().size();
         this->initActionVertices(graph, nbOutputs);
     }
 
-    population.emptyAgent(agent, graph);
+    population.emptyIndividual(individual, graph);
     
-    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleIndividual&>(agent).getVertex();
+    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleIndividual&>(individual).getVertex();
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // Get program mutator and population
@@ -61,7 +61,7 @@ void Representation::Maple::MapleMutator::initRandomSpecificAgent(const Individu
 
     size_t remaining = availableActions.size();
     for (size_t idxAction = 0; idxAction < params.maple.nbActionEdgeInit; idxAction++) {
-        const Individual& programAgent = programMutator.initRandomAgent(graph, programPopulation, params, rng);
+        const Individual& programIndividual = programMutator.initRandomIndividual(graph, programPopulation, params, rng);
 
         // Pick uniformly from remaining values
         size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);
@@ -73,14 +73,14 @@ void Representation::Maple::MapleMutator::initRandomSpecificAgent(const Individu
         --remaining;
 
         // Create the action edge
-        graph.addNewEdge(team, actionVertices.at(actionClass), programAgent);
+        graph.addNewEdge(team, actionVertices.at(actionClass), programIndividual);
     }
 
     graph.orderActionEdges(team);
 }
 
 void Representation::Maple::MapleMutator::crossoverPrograms(
-    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
     // Get program to cross for the teams. It should exist.
     std::vector<std::reference_wrapper<const Individual>> swapPrograms;
@@ -93,12 +93,12 @@ void Representation::Maple::MapleMutator::crossoverPrograms(
                     edge.getProgram().getRepresentationID() ==
                         this->programRepresentationID) {
 
-                    const Individual& originAgent = edge.getProgram();
+                    const Individual& originIndividual = edge.getProgram();
                     // copy program
-                    const Representation::Individual& newAgent = population.getSubPopulation(originAgent.getRepresentationID()).copyAgent(originAgent, graph);
+                    const Representation::Individual& newIndividual = population.getSubPopulation(originIndividual.getRepresentationID()).copyIndividual(originIndividual, graph);
 
-                    // Set the mutated agent to the edge
-                    graph.setEdgeProgram(edge, newAgent);
+                    // Set the mutated individual to the edge
+                    graph.setEdgeProgram(edge, newIndividual);
 
                     swapPrograms.push_back(edge.getProgram());
                     break;
@@ -114,11 +114,11 @@ void Representation::Maple::MapleMutator::crossoverPrograms(
     std::array<std::reference_wrapper<const Individual>, 2> programs{swapPrograms[0], swapPrograms[1]};
     // Do the crossover
     Population& programPopulation = population.getSubPopulation(this->programRepresentationID);
-    this->getSubMutator(swapPrograms.front().get().getRepresentationID()).crossoverAgents(programs, graph, programPopulation, newSubAgents, params, rng);
+    this->getSubMutator(swapPrograms.front().get().getRepresentationID()).crossoverIndividuals(programs, graph, programPopulation, newSubIndividuals, params, rng);
 }
 
 void Representation::Maple::MapleMutator::crossoverEdges(
-    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
     // Get edge to swap for the teams if it exist
     std::array<const EvoGraph::Edge*, 2> swapEdges{nullptr, nullptr};
@@ -151,11 +151,11 @@ void Representation::Maple::MapleMutator::crossoverEdges(
 }
 
 
-void Representation::Maple::MapleMutator::crossoverAgents(
-    std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::Maple::MapleMutator::crossoverIndividuals(
+    std::array<std::reference_wrapper<const Individual>, 2> individuals, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
     // No crossover
-    if (params.maple.pCrossAgents == 0) {
+    if (params.maple.pCrossIndividuals == 0) {
         return;
     }
     // Initialize available actions
@@ -166,10 +166,10 @@ void Representation::Maple::MapleMutator::crossoverAgents(
     uint64_t indexAction;
 
     
-    const EvoGraph::Vertex& vertex0 = dynamic_cast<const MapleIndividual&>(agents.at(0).get()).getVertex();
+    const EvoGraph::Vertex& vertex0 = dynamic_cast<const MapleIndividual&>(individuals.at(0).get()).getVertex();
     const EvoGraph::Team& team0 = dynamic_cast<const EvoGraph::Team&>(vertex0);
 
-    const EvoGraph::Vertex& vertex1 = dynamic_cast<const MapleIndividual&>(agents.at(1).get()).getVertex();
+    const EvoGraph::Vertex& vertex1 = dynamic_cast<const MapleIndividual&>(individuals.at(1).get()).getVertex();
     const EvoGraph::Team& team1 = dynamic_cast<const EvoGraph::Team&>(vertex1);
 
     std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teamsArray = {team0, team1};
@@ -195,10 +195,10 @@ void Representation::Maple::MapleMutator::crossoverAgents(
             team1.getAssessedActions().count(indexAction) > 0 &&
             params.maple.pCrossPrograms > rng.getDouble(0, 1)) {
 
-            this->crossoverPrograms(teamsArray, indexAction, graph, population, newSubAgents, params, rng);
+            this->crossoverPrograms(teamsArray, indexAction, graph, population, newSubIndividuals, params, rng);
         }
         else {
-            this->crossoverEdges(teamsArray, indexAction, graph, population, newSubAgents, params, rng);
+            this->crossoverEdges(teamsArray, indexAction, graph, population, newSubIndividuals, params, rng);
 
         }
 
@@ -207,7 +207,7 @@ void Representation::Maple::MapleMutator::crossoverAgents(
         
         graph.orderActionEdges(team0);
         graph.orderActionEdges(team1);
-        proba *= params.maple.pCrossAgents;
+        proba *= params.maple.pCrossIndividuals;
     }
 
 }
@@ -304,18 +304,18 @@ void Representation::Maple::MapleMutator::mutateEdgeDestination(
 void Representation::Maple::MapleMutator::mutateOutgoingEdge(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     const std::set<size_t>& actionClasses, Population& population,
-    std::vector<std::reference_wrapper<const Individual>>& newSubAgents,
+    std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals,
     const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const Individual& originAgent = edge.getProgram();
+    const Individual& originIndividual = edge.getProgram();
     // copy program
-    const Representation::Individual& newAgent = population.getSubPopulation(originAgent.getRepresentationID()).copyAgent(originAgent, graph);
+    const Representation::Individual& newIndividual = population.getSubPopulation(originIndividual.getRepresentationID()).copyIndividual(originIndividual, graph);
 
-    // Set the mutated agent to the edge
-    graph.setEdgeProgram(edge, newAgent);
+    // Set the mutated individual to the edge
+    graph.setEdgeProgram(edge, newIndividual);
 
-    // Add it to the list of new agent to be mutated.
-    newSubAgents.push_back(newAgent);
+    // Add it to the list of new individual to be mutated.
+    newSubIndividuals.push_back(newIndividual);
 
     size_t nbActions = (population.getOutputs().sizeDiscrete() == 1) ? population.getOutputs().front().getNbValues() : population.getOutputs().size();
     // Change action ID randomly if the action do not contain all actions.
@@ -326,10 +326,10 @@ void Representation::Maple::MapleMutator::mutateOutgoingEdge(
     }
 }
 
-void Representation::Maple::MapleMutator::mutateAgent(
-    const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::Maple::MapleMutator::mutateIndividual(
+    const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleIndividual&>(agent).getVertex();
+    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleIndividual&>(individual).getVertex();
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // 1. Remove randomly selected edges
@@ -398,7 +398,7 @@ void Representation::Maple::MapleMutator::mutateAgent(
             auto iter = team.getOutgoingEdges().begin();
             std::advance(iter, pickIdx);
 
-            this->mutateOutgoingEdge(graph, *iter, team.getAssessedActions(), population, newSubAgents, params, rng);
+            this->mutateOutgoingEdge(graph, *iter, team.getAssessedActions(), population, newSubIndividuals, params, rng);
             graph.updateAssessedActions(team);
 
             proba *= params.maple.pMutateActionProgram;

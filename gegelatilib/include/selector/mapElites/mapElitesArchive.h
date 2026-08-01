@@ -19,7 +19,7 @@ namespace Selector {
          * \brief Class representing a Map Elites archive.
          *
          * The archive is represented as a multi-dimensional grid, where each
-         * cell can store an EvaluationResult and its corresponding agent.
+         * cell can store an EvaluationResult and its corresponding individual.
          */
         class MapElitesArchive
         {
@@ -40,7 +40,7 @@ namespace Selector {
             std::vector<double> archiveLimits;
 
             /// The archive storing evaluation results and their corresponding
-            /// agent
+            /// individual
             std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                   std::optional<std::reference_wrapper<const Representation::Individual>>>>
                 archive;
@@ -118,25 +118,25 @@ namespace Selector {
             /**
              * \brief Set the archive content at given indices
              *
-             * \param[in] agent the Individual to set in the archive
+             * \param[in] individual the Individual to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] indices the indices to set the archive content at
              */
             virtual void setArchiveAt(
-                const Representation::Individual& agent,
+                const Representation::Individual& individual,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<uint64_t>& indices);
 
             /**
              * \brief Set the archive content at given descriptors
              *
-             * \param[in] agent the Individual to set in the archive
+             * \param[in] individual the Individual to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] descriptors the descriptors to set the archive content
              * at
              */
             virtual void setArchiveFromDescriptors(
-                const Representation::Individual& agent,
+                const Representation::Individual& individual,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors);
 
@@ -164,22 +164,22 @@ namespace Selector {
             virtual std::vector<uint64_t> computeIndices(uint64_t index) const;
 
             /**
-             * \brief Check if the archive contains a agent
+             * \brief Check if the archive contains a individual
              *
-             * \param[in] agent the agent to check
+             * \param[in] individual the individual to check
              */
-            virtual bool containsAgent(const Representation::Individual& agent) const;
+            virtual bool containsIndividual(const Representation::Individual& individual) const;
 
             /**
-             * \brief Remove a agent from the archive if its number of
+             * \brief Remove a individual from the archive if its number of
              * evaluation is below maxNbEvaluation
              *
-             * \param[in] agent the agent to remove
+             * \param[in] individual the individual to remove
              * \param[in] maxNbEvaluation the maximum number of evaluation
              * allowed
              */
-            virtual void removeAgentFromArchive(
-                const Representation::Individual& agent, size_t maxNbEvaluation);
+            virtual void removeIndividualFromArchive(
+                const Representation::Individual& individual, size_t maxNbEvaluation);
 
             /**
              * \brief Return a set with the current vectors in the archive.

@@ -211,12 +211,12 @@ namespace Learn {
          * \brief Get the data sources for this LearningEnvironment.
          *
          * This method returns a vector of reference to the DataHandler that
-         * will be given to the learningAgent, and to its Program to learn how
+         * will be given to the LearningAgent, and to its Program to learn how
          * to interact with the LearningEnvironment. Throughout the existence
          * of the LearningEnvironment, data contained in the data will be
          * modified, but never the number, nature or size of the dataHandlers.
          * Since this methods return references to the DataHandler, the
-         * learningAgent will assume that the referenced dataHandler are
+         * LearningAgent will assume that the referenced dataHandler are
          * automatically updated each time the doAction, or reset methods
          * are called on the LearningEnvironment.
          *
@@ -254,7 +254,7 @@ namespace Learn {
          * method will have no effects on the dataSources of the
          * LearningEnvironment, or on its score. For example, this terminal
          * state may be reached for a Game Over state within a game, or in case
-         * the objective of the learning agent has been successfuly reached.
+         * the objective of the learning abcde has been successfuly reached.
          *
          * \return a boolean indicating termination.
          */

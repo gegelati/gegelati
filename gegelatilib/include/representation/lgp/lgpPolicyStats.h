@@ -120,11 +120,11 @@ namespace Representation::LGP {
          * If a Program was already analyzed, it will not be analyzed again and
          * only the number of use per program will be updated.
          *
-         * \param[in] agent the analyzed Individual.
+         * \param[in] individual the analyzed Individual.
          * \throws std::runtime_error if the given Program has incorrect lines
          * accessing for example non existing instructions.
          */
-        virtual void analyzePolicy(const Individual& agent) override;
+        virtual void analyzePolicy(const Individual& individual) override;
 
         /**
          * \brief Return the specific informations of the LGP usage.

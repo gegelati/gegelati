@@ -40,11 +40,11 @@
 #include "data/constantHandler.h"
 #include "instructions/multByConstant.h"
 
-void Representation::LGP::LGPEngine::setExecutedAgent(const Individual& newExecutedAgent)
+void Representation::LGP::LGPEngine::setExecutedIndividual(const Individual& newExecutedIndividual)
 {
-    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(newExecutedAgent);
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(newExecutedIndividual);
     if(&lgpIndividual == nullptr){
-        throw std::runtime_error("Representation::LGP::LGPEngine::setExecutedAgent trying to set an agent which is not a LGP agent");
+        throw std::runtime_error("Representation::LGP::LGPEngine::setExecutedIndividual trying to set an individual which is not a LGP individual");
     }
 
     // are constants used here ?
@@ -85,13 +85,13 @@ void Representation::LGP::LGPEngine::setExecutedAgent(const Individual& newExecu
             // space size for each data type.
         }
     }
-    // set the agent
-    this->executedAgent = newExecutedAgent;
+    // set the individual
+    this->executedIndividual = newExecutedIndividual;
     // Reset Registers (in case it is not done when they are constructed)
     this->registers.resetData();
 
     // set the lines
-    this->lgpExecutedAgent = lgpIndividual;
+    this->lgpExecutedIndividual = lgpIndividual;
 
     // Reset the counters
     this->programCounter = 0;
@@ -108,14 +108,14 @@ const bool Representation::LGP::LGPEngine::next()
     // increment the program counter.
     do {
         this->programCounter++;
-    } while (this->programCounter < this->lgpExecutedAgent->get().getNbLines() &&
-             this->lgpExecutedAgent->get().isIntron(this->programCounter));
-    return this->programCounter < this->lgpExecutedAgent->get().getNbLines();
+    } while (this->programCounter < this->lgpExecutedIndividual->get().getNbLines() &&
+             this->lgpExecutedIndividual->get().isIntron(this->programCounter));
+    return this->programCounter < this->lgpExecutedIndividual->get().getNbLines();
 }
 
 const Representation::LGP::LGPLine& Representation::LGP::LGPEngine::getCurrentLine() const
 {
-    return this->lgpExecutedAgent->get().getLine(this->programCounter);
+    return this->lgpExecutedIndividual->get().getLine(this->programCounter);
 }
 
 const Instructions::Instruction& Representation::LGP::LGPEngine::getCurrentInstruction()
@@ -125,7 +125,7 @@ const Instructions::Instruction& Representation::LGP::LGPEngine::getCurrentInstr
         this->getCurrentLine(); // throw std::out_of_range if the program
     // counter is too large.
     uint64_t instructionIndex = currentLine.getInstructionIndex();
-    return this->lgpExecutedAgent->get().getEnvironment().getInstructionSet().getInstruction(
+    return this->lgpExecutedIndividual->get().getEnvironment().getInstructionSet().getInstruction(
         instructionIndex); // throw std::out_of_range if the index of the line
     // is too large.
 }
@@ -174,10 +174,10 @@ uint64_t Representation::LGP::LGPEngine::getOperandLocation(uint64_t idxOp) cons
 void Representation::LGP::LGPEngine::iterateThroughtProgram(const bool ignoreException)
 {
     this->programCounter = 0;
-    bool hasNext = this->lgpExecutedAgent->get().getNbLines() > 0;
+    bool hasNext = this->lgpExecutedIndividual->get().getNbLines() > 0;
 
     // Skip first lines if they are introns.
-    if (hasNext && this->lgpExecutedAgent->get().isIntron(0)) {
+    if (hasNext && this->lgpExecutedIndividual->get().isIntron(0)) {
         hasNext = this->next();
     }
 
@@ -219,17 +219,17 @@ void Representation::LGP::LGPEngine::setDataSources(
     this->dataSources = dataSrc;
     // we need this offset to push the constant at the first
     size_t offset =
-        this->lgpExecutedAgent->get().getEnvironment().getNbConstants() > 0
+        this->lgpExecutedIndividual->get().getEnvironment().getNbConstants() > 0
             ? 2
             : 1;
     if (offset == 2) {
         this->dataScsConstsAndRegs.at(1) =
-            this->lgpExecutedAgent->get().cGetConstantHandler();
+            this->lgpExecutedIndividual->get().cGetConstantHandler();
     }
     for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
         this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
     }
 
     // Set program to check compatibility with new data source
-    this->setExecutedAgent(*this->executedAgent);
+    this->setExecutedIndividual(*this->executedIndividual);
 }

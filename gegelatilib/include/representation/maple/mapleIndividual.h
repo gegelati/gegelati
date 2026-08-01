@@ -1,6 +1,6 @@
 
-#ifndef MAPLE_AGENT_H
-#define MAPLE_AGENT_H
+#ifndef MAPLE_INDIVIDUAL_H
+#define MAPLE_INDIVIDUAL_H
 
 #include <cstdint>
 #include "representation/tpg/tpgIndividual.h"
@@ -28,11 +28,11 @@ namespace Representation::Maple {
             : TpgIndividual(vertex, representationID) {};
 
             /**
-             * \brief Method that return if the agent is valid for execution.
+             * \brief Method that return if the individual is valid for execution.
              */
             virtual bool isValid() const override;
         };
   
 }; // namespace Representation::MAPLE
 
-#endif // TPG_AGENT
+#endif // TPG_INDIVIDUAL

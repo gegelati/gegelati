@@ -44,7 +44,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
@@ -288,7 +288,7 @@ TEST_F(SelectorTest, forgetPreviousResults)
     la.isRootEvalSkipped(*selector->getBestRoot().first, previousEval);
 
     ASSERT_NE(nullptr, previousEval)
-        << "Learning agent should remember the last score of the root.";
+        << "Learning Agent should remember the last score of the root.";
 
     // Forgets the eval record
     ASSERT_NO_THROW(selector->forgetPreviousResults())
@@ -298,13 +298,13 @@ TEST_F(SelectorTest, forgetPreviousResults)
     la.isRootEvalSkipped(*selector->getBestRoot().first, previousEval);
 
     ASSERT_EQ(nullptr, previousEval)
-        << "Learning agent should have forgotten the last score of the root";
+        << "Learning Agent should have forgotten the last score of the root";
 
     ASSERT_EQ(nullptr, selector->getBestRoot().first)
-        << "Learning agent should have forgotten the best root";
+        << "Learning Agent should have forgotten the best root";
 
     ASSERT_EQ(nullptr, selector->getBestRoot().second)
-        << "Learning agent should have forgotten the last score of the root";
+        << "Learning Agent should have forgotten the last score of the root";
 
     ASSERT_NO_THROW(la.trainOneGeneration(0))
         << "trainOneGeneration doesn't work after a forgetPreviousResults";

@@ -35,7 +35,7 @@
  */
 
 #include "log/laLogger.h"
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 
 double Log::LALogger::getDurationFrom(
     const std::chrono::time_point<std::chrono::system_clock,
@@ -51,12 +51,12 @@ Log::LALogger::getTime() const
 }
 
 Log::LALogger::LALogger(Learn::LearningAgent& la, std::ostream& out)
-    : Log::Logger(out), learningAgent(la),
+    : Log::Logger(out), LearningAgent(la),
       start(std::make_shared<std::chrono::time_point<std::chrono::system_clock,
                                                      std::chrono::nanoseconds>>(
           getTime()))
 {
-    this->learningAgent.addLogger(*this);
+    this->LearningAgent.addLogger(*this);
     chronoFromNow();
 };
 

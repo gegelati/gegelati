@@ -2,23 +2,23 @@
 #include "representation/maple/maplePopulation.h"
 
 
-Representation::Maple::MapleIndividual& Representation::Maple::MaplePopulation::getMapleIndividualFromCst(const Individual& agent)
+Representation::Maple::MapleIndividual& Representation::Maple::MaplePopulation::getMapleIndividualFromCst(const Individual& individual)
 {
-    return dynamic_cast<MapleIndividual&>(**this->getAgentFromCst(agent));
+    return dynamic_cast<MapleIndividual&>(**this->getIndividualFromCst(individual));
 }
 
-const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::Maple::MaplePopulation::getAgents() const
+const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::Maple::MaplePopulation::getIndividuals() const
 {
-    // No filtering on root agents for Maple, as all agents are action agents
-    return Representation::Population::getAgents();
+    // No filtering on root individuals for Maple, as all individuals are action individuals
+    return Representation::Population::getIndividuals();
 }
 
 
 
-const Representation::Individual& Representation::Maple::MaplePopulation::createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
+const Representation::Individual& Representation::Maple::MaplePopulation::createIndividual(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
 {
-    this->agents.insert(std::make_unique<MapleIndividual>(vertex, this->getRepresentationID()));
-    return **this->agents.rbegin();
+    this->individuals.insert(std::make_unique<MapleIndividual>(vertex, this->getRepresentationID()));
+    return **this->individuals.rbegin();
 }
 
 std::unique_ptr<Representation::ExecutionEngine> Representation::Maple::MaplePopulation::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const

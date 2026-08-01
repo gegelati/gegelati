@@ -1,24 +1,24 @@
 
 #include "representation/executionEngine.h"
 
-const Representation::Individual& Representation::ExecutionEngine::getExecutedAgent() const
+const Representation::Individual& Representation::ExecutionEngine::getExecutedIndividual() const
 {
-    return *this->executedAgent;
+    return *this->executedIndividual;
 }
 
-void Representation::ExecutionEngine::setExecutedAgent(const Individual& newExecutedAgent)
+void Representation::ExecutionEngine::setExecutedIndividual(const Individual& newExecutedIndividual)
 {
-    if(newExecutedAgent.getRepresentationID() != this->representationID){
-        throw std::runtime_error("Representation::ExecutionEngine::setExecutedAgent trying to set an agent from a different representation");
+    if(newExecutedIndividual.getRepresentationID() != this->representationID){
+        throw std::runtime_error("Representation::ExecutionEngine::setExecutedIndividual trying to set an individual from a different representation");
     }
 
-    this->executedAgent = newExecutedAgent;
+    this->executedIndividual = newExecutedIndividual;
 }
 
 
 void Representation::ExecutionEngine::setupJob(const Representation::Job& job)
 {
-    this->setExecutedAgent(job.getAgent());
+    this->setExecutedIndividual(job.getIndividual());
     
 }
 

@@ -44,7 +44,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 
 void Learn::LearningAgent::setNbGen(size_t gen)
 {
@@ -62,7 +62,7 @@ void Learn::LearningAgent::setCurrentRepresentation(Representation::Representati
         throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is a null pointer.");
     }
     if(this->representations.find(representation->getRepresentationID()) == this->representations.end()){
-        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is not part of the learning agent representations.");
+        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is not part of the learning abcde representations.");
     }
 
     this->currentExecutedRepresentation = representation;
@@ -78,7 +78,7 @@ Representation::Representation& Learn::LearningAgent::getRepresentation(const Re
 {
     auto iterator = this->representations.find(representation.getRepresentationID());
     if(iterator == this->representations.end() || (*iterator).second.get().getRepresentationID() != representation.getRepresentationID()){
-        throw std::invalid_argument("LearningAgent::getRepresentation: the given representation is not managed by this learning agent.");
+        throw std::invalid_argument("LearningAgent::getRepresentation: the given representation is not managed by this learning abcde.");
     }
     return iterator->second;
 }
@@ -149,27 +149,27 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         throw std::runtime_error("LearningAgent::evaluateJob: currentExecutedRepresentation is not set.");
     }
 
-    // Get the current agent and the current representation
-    const Representation::Individual& agent = job.getAgent();
+    // Get the current individual and the current representation
+    const Representation::Individual& individual = job.getIndividual();
     const Selector::Selector& selector = this->currentExecutedRepresentation->getSelector();
 
 
 
-    // Skip the agent evaluation process if enough evaluations were already
+    // Skip the individual evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     size_t nbEvaluationToDo = 0;
-    size_t nbEvaluationAgent = selector.getNbEvaluation(job.getAgent());
+    size_t nbEvaluationIndividual = selector.getNbEvaluation(job.getIndividual());
     if (mode == LearningMode::TRAINING) {
         nbEvaluationToDo = this->params->nbIterationsPerPolicyEvaluation;
         
-        if(nbEvaluationAgent > 0) {
-            previousEval = selector.getResultsOf(job.getAgent());
+        if(nbEvaluationIndividual > 0) {
+            previousEval = selector.getResultsOf(job.getIndividual());
 
-            if(nbEvaluationAgent == params->maxNbEvaluationPerPolicy) {
+            if(nbEvaluationIndividual == params->maxNbEvaluationPerPolicy) {
                 return previousEval;
-            } else if (nbEvaluationAgent + nbEvaluationToDo > params->maxNbEvaluationPerPolicy) {
-                nbEvaluationToDo = params->maxNbEvaluationPerPolicy - nbEvaluationAgent;
+            } else if (nbEvaluationIndividual + nbEvaluationToDo > params->maxNbEvaluationPerPolicy) {
+                nbEvaluationToDo = params->maxNbEvaluationPerPolicy - nbEvaluationIndividual;
             }
             
         }
@@ -192,7 +192,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
         selector.createSelectionMetrics();
-    globalSelectionMetrics->initMetrics(agent, le);
+    globalSelectionMetrics->initMetrics(individual, le);
 
 
     // Evaluate nbIteration times
@@ -210,7 +210,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
             selector.createSelectionMetrics();
-        selectionMetrics->initMetrics(agent, le);
+        selectionMetrics->initMetrics(individual, le);
 
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
@@ -227,11 +227,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             nbActions++;
 
             // Extract the metrics.
-            selectionMetrics->extractMetricsStep(agent, actionsID, le);
+            selectionMetrics->extractMetricsStep(individual, actionsID, le);
         }
 
         // Extract the metrics.
-        selectionMetrics->extractMetricsEpisode(agent, nbActions, le);
+        selectionMetrics->extractMetricsEpisode(individual, nbActions, le);
 
         // Add the extracted metrics to the total.
         globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber, 1);
@@ -249,7 +249,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 }
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
-Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
+Learn::LearningAgent::evaluateAllIndividuals(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
@@ -260,8 +260,8 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
         // set current executed representation
         this->setCurrentRepresentation(&pair.second.get());
 
-        // Evaluate the representation agents and insert the results
-        auto algoResults = this->evaluateCurrentRepresentationAgents(generationNumber, mode);
+        // Evaluate the representation individuals and insert the results
+        auto algoResults = this->evaluateCurrentRepresentationIndividuals(generationNumber, mode);
         results.insert(algoResults.begin(), algoResults.end());
     }
 
@@ -270,14 +270,14 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
 
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
-Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
+Learn::LearningAgent::evaluateCurrentRepresentationIndividuals(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
     if(this->currentExecutedRepresentation == nullptr){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: currentExecutedRepresentation is not set.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: currentExecutedRepresentation is not set.");
     }
     if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning abcde does not contain the given representation.");
     }
 
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
@@ -293,7 +293,7 @@ Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNum
         }
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
-        results.emplace(result, (*job).getAgent());
+        results.emplace(result, (*job).getIndividual());
     }
 
 
@@ -303,18 +303,18 @@ Learn::LearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNum
     return results;
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneIndividual(
     uint64_t generationNumber, Learn::LearningMode mode,
-    const Representation::Individual& agent)
+    const Representation::Individual& individual)
 {
-    const Representation::Representation& representation = this->getRepresentationAt(agent.getRepresentationID());
+    const Representation::Representation& representation = this->getRepresentationAt(individual.getRepresentationID());
 
-    // Create the execution engine of the agent.
+    // Create the execution engine of the individual.
     std::unique_ptr<Representation::ExecutionEngine> execEngine =
         representation.getPopulationCst().createExecutionEngine();
 
     // Create and evaluate the job
-    auto job = representation.createJob(agent, mode, this->rng);
+    auto job = representation.createJob(individual, mode, this->rng);
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *execEngine, *job, generationNumber, mode, this->learningEnvironment);
 
@@ -352,7 +352,7 @@ void Learn::LearningAgent::launchRepresentationsSelection(
                 resultsAlgo;
             
             for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
-                if(pair.second.get().containsAgent(it->second)){
+                if(pair.second.get().containsIndividual(it->second)){
                     resultsAlgo.insert(*it);
                     it = resultsCopy.erase(it);
                 } else {
@@ -380,7 +380,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
     // Evaluate
     auto results =
-        this->evaluateAllAgents(generationNumber, LearningMode::TRAINING);
+        this->evaluateAllIndividuals(generationNumber, LearningMode::TRAINING);
     for (auto logger : loggers) {
         logger.get().logAfterEvaluate(results);
     }
@@ -400,7 +400,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
         if (generationNumber % params->stepValidation == 0 ||
             generationNumber == params->nbGenerations - 1) {
-            validationResults = evaluateAllAgents(
+            validationResults = evaluateAllIndividuals(
                 generationNumber, Learn::LearningMode::VALIDATION);
         }
         for (auto logger : loggers) {
@@ -478,8 +478,8 @@ std::vector<std::shared_ptr<Representation::Job>> Learn::LearningAgent::makeJobs
 
     std::vector<std::shared_ptr<Representation::Job>> jobs;
     size_t idx = 0;
-    for(auto agent: this->currentExecutedRepresentation->getAgents()){
-        auto job = this->currentExecutedRepresentation->createJob(agent, mode, rng, idx);
+    for(auto individual: this->currentExecutedRepresentation->getIndividuals()){
+        auto job = this->currentExecutedRepresentation->createJob(individual, mode, rng, idx);
         jobs.push_back(job);
         idx++;
     }

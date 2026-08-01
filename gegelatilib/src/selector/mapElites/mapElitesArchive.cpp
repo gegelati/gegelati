@@ -74,7 +74,7 @@ Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
-    const Representation::Individual& agent, std::shared_ptr<Learn::EvaluationResult> eval,
+    const Representation::Individual& individual, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<double>& descriptors)
 {
     std::vector<uint64_t> indices;
@@ -82,8 +82,8 @@ void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
         indices.push_back(getIndexArchive(descriptors[i]));
     }
 
-    std::reference_wrapper<const Representation::Individual> agentRef = agent;
-    archive[computeLinearIndex(indices)] = std::make_pair(eval, agentRef);
+    std::reference_wrapper<const Representation::Individual> individualRef = individual;
+    archive[computeLinearIndex(indices)] = std::make_pair(eval, individualRef);
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -95,32 +95,32 @@ Selector::MapElites::MapElitesArchive::getArchiveAt(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveAt(
-    const Representation::Individual& agent, std::shared_ptr<Learn::EvaluationResult> eval,
+    const Representation::Individual& individual, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<uint64_t>& indices)
 {
-    std::reference_wrapper<const Representation::Individual> agentRef = agent;
-    archive[computeLinearIndex(indices)] = std::make_pair(eval, agentRef);
+    std::reference_wrapper<const Representation::Individual> individualRef = individual;
+    archive[computeLinearIndex(indices)] = std::make_pair(eval, individualRef);
 }
 
-bool Selector::MapElites::MapElitesArchive::containsAgent(
-    const Representation::Individual& agent) const
+bool Selector::MapElites::MapElitesArchive::containsIndividual(
+    const Representation::Individual& individual) const
 {
 
     for (const auto& pair : archive) {
-        if (pair.second == agent) {
+        if (pair.second == individual) {
             return true;
         }
     }
     return false;
 }
 
-void Selector::MapElites::MapElitesArchive::removeAgentFromArchive(
-    const Representation::Individual& agent, size_t maxNbEvaluation)
+void Selector::MapElites::MapElitesArchive::removeIndividualFromArchive(
+    const Representation::Individual& individual, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == agent) {
+        if (it->second == individual) {
             if (it->first->getNbEvaluation() < maxNbEvaluation) {
-                // Remove the agent from the archive if it has been evaluated
+                // Remove the individual from the archive if it has been evaluated
                 // enough
                 it->first = nullptr;
                 it->second = std::nullopt; // Clear the vertex pointer

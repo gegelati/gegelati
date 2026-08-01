@@ -1,102 +1,102 @@
 
 #include "representation/tpg/tpgPopulation.h"
 
-Representation::TPG::TpgIndividual& Representation::TPG::TpgPopulation::getTpgIndividualFromCst(const Individual& agent)
+Representation::TPG::TpgIndividual& Representation::TPG::TpgPopulation::getTpgIndividualFromCst(const Individual& individual)
 {
-    return dynamic_cast<TpgIndividual&>(**this->getAgentFromCst(agent));
+    return dynamic_cast<TpgIndividual&>(**this->getIndividualFromCst(individual));
 }
 
-const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::TPG::TpgPopulation::getAgents() const
+const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::TPG::TpgPopulation::getIndividuals() const
 {
-    std::vector<std::reference_wrapper<const Representation::Individual>> constAgents;
+    std::vector<std::reference_wrapper<const Representation::Individual>> constIndividuals;
 
     // Transform each root from shared_ptr<Individual> to shared_ptr<const Individual>
-    for(auto it = this->agents.begin(); it != this->agents.end(); ){
+    for(auto it = this->individuals.begin(); it != this->individuals.end(); ){
         const TpgIndividual* tpgIndividual = dynamic_cast<const TpgIndividual*>((*it).get());
         if(tpgIndividual == nullptr){
-            throw std::runtime_error("TpgPopulation::getAgents: an agent managed by the TpgPopulation is not a TpgIndividual.");
+            throw std::runtime_error("TpgPopulation::getIndividuals: an individual managed by the TpgPopulation is not a TpgIndividual.");
         } else if (tpgIndividual->isRoot()){
-            constAgents.push_back(**it);
+            constIndividuals.push_back(**it);
         }
         it++;
     }
 
-    return constAgents;
+    return constIndividuals;
 }
 
 
-const Representation::Individual& Representation::TPG::TpgPopulation::createAgent(EvoGraph::Graph& graph)
+const Representation::Individual& Representation::TPG::TpgPopulation::createIndividual(EvoGraph::Graph& graph)
 {
-    return this->createAgent(graph.addNewTeam());
+    return this->createIndividual(graph.addNewTeam());
 }
 
-const Representation::Individual& Representation::TPG::TpgPopulation::createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
+const Representation::Individual& Representation::TPG::TpgPopulation::createIndividual(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
 {
-    this->agents.insert(std::make_unique<TpgIndividual>(vertex, this->getRepresentationID()));
-    return **this->agents.rbegin();
+    this->individuals.insert(std::make_unique<TpgIndividual>(vertex, this->getRepresentationID()));
+    return **this->individuals.rbegin();
 }
 
-const Representation::Individual& Representation::TPG::TpgPopulation::createEmptyAgent()
+const Representation::Individual& Representation::TPG::TpgPopulation::createEmptyIndividual()
 {
     std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex = std::nullopt;
-    return this->createAgent(vertex);
+    return this->createIndividual(vertex);
 }
 
-const Representation::Individual& Representation::TPG::TpgPopulation::copyAgent(const Individual& agent, EvoGraph::Graph& graph)
+const Representation::Individual& Representation::TPG::TpgPopulation::copyIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    const TpgIndividual& castedAgent = dynamic_cast<const TpgIndividual&>(agent);
-    if(&castedAgent == nullptr){
-        throw std::runtime_error("Representation::TPG::TpgPopulation::copyAgent: trying to copy an agent that is not a TpgIndividual.");
+    const TpgIndividual& castedIndividual = dynamic_cast<const TpgIndividual&>(individual);
+    if(&castedIndividual == nullptr){
+        throw std::runtime_error("Representation::TPG::TpgPopulation::copyIndividual: trying to copy an individual that is not a TpgIndividual.");
     }
 
-    // Set to castedAgent to avoid unset references
-    std::reference_wrapper<const EvoGraph::Vertex> newVertex = castedAgent.getVertex();
+    // Set to castedIndividual to avoid unset references
+    std::reference_wrapper<const EvoGraph::Vertex> newVertex = castedIndividual.getVertex();
 
-    if(agent.getRepresentationID() != this->getRepresentationID()){
-        // Since the agent dupplicated is not from the same representation, we also need to dupplicate the sub agents on the edge of the vertex.
+    if(individual.getRepresentationID() != this->getRepresentationID()){
+        // Since the individual dupplicated is not from the same representation, we also need to dupplicate the sub individuals on the edge of the vertex.
         newVertex = graph.addNewTeam();
-        for(const EvoGraph::Edge& edge: castedAgent.getVertex().getOutgoingEdges()){
-            const Representation::Individual& newSubAgent = this->getSubPopulation(this->programRepresentationID).copyAgent(edge.getProgram(), graph);
-            graph.addNewEdge(newVertex, edge.getDestination(), newSubAgent);
+        for(const EvoGraph::Edge& edge: castedIndividual.getVertex().getOutgoingEdges()){
+            const Representation::Individual& newSubIndividual = this->getSubPopulation(this->programRepresentationID).copyIndividual(edge.getProgram(), graph);
+            graph.addNewEdge(newVertex, edge.getDestination(), newSubIndividual);
         }
         
     } else {
-        newVertex = graph.cloneVertex(castedAgent.getVertex());
+        newVertex = graph.cloneVertex(castedIndividual.getVertex());
     }
 
-    return this->createAgent(newVertex);
+    return this->createIndividual(newVertex);
 }
 
-void Representation::TPG::TpgPopulation::deleteAgent(const Individual& agent, EvoGraph::Graph& graph)
+void Representation::TPG::TpgPopulation::deleteIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    this->emptyAgent(agent, graph);
-    // Do not remove action agents from the graph
-    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getTpgIndividualFromCst(agent).getVertex())){
+    this->emptyIndividual(individual, graph);
+    // Do not remove action individuals from the graph
+    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getTpgIndividualFromCst(individual).getVertex())){
         graph.removeVertex(*vertex);
     }
 
-    auto iterator = this->agents.find(&agent);
-    this->agents.erase(iterator);   
+    auto iterator = this->individuals.find(&individual);
+    this->individuals.erase(iterator);   
 }
-void Representation::TPG::TpgPopulation::emptyAgent(const Individual& agent, EvoGraph::Graph& graph)
+void Representation::TPG::TpgPopulation::emptyIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    // Do not remove action agents from the graph
-    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getTpgIndividualFromCst(agent).getVertex())){
+    // Do not remove action individuals from the graph
+    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getTpgIndividualFromCst(individual).getVertex())){
         while(vertex->getOutgoingEdges().size() > 0){
             graph.removeEdge(vertex->getOutgoingEdges().front());
         }
     }
 }
 
-void Representation::TPG::TpgPopulation::setVertex(const Individual& agent, const EvoGraph::Vertex& vertex)
+void Representation::TPG::TpgPopulation::setVertex(const Individual& individual, const EvoGraph::Vertex& vertex)
 {
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
     if(&team == nullptr){
-        throw std::runtime_error("TpgPopulation::setVertex: trying to set an agent on a vertex from the graph that is not a team.");
+        throw std::runtime_error("TpgPopulation::setVertex: trying to set an individual on a vertex from the graph that is not a team.");
     }
 
     // Set the element
-    this->getTpgIndividualFromCst(agent).setVertex(vertex);
+    this->getTpgIndividualFromCst(individual).setVertex(vertex);
 }
 
 

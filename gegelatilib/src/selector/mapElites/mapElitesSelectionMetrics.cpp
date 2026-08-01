@@ -10,7 +10,7 @@ Selector::MapElites::MapElitesSelectionMetrics::getMapDescriptors() const
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(
-    const Representation::Individual& agent,
+    const Representation::Individual& individual,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     for (auto& pair : mapDescriptors) {
@@ -19,24 +19,24 @@ void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(
-    const Representation::Individual& agent, std::vector<double> actionValues,
+    const Representation::Individual& individual, std::vector<double> actionValues,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     for (auto& pair : mapDescriptors) {
-        pair.first->extractMetricsStep(pair.second, agent, actionValues,
+        pair.first->extractMetricsStep(pair.second, individual, actionValues,
                                        learningEnvironment);
     }
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsEpisode(
-    const Representation::Individual& agent, size_t nbStepsExecuted,
+    const Representation::Individual& individual, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
-    SelectionMetrics::extractMetricsEpisode(agent, nbStepsExecuted,
+    SelectionMetrics::extractMetricsEpisode(individual, nbStepsExecuted,
                                             learningEnvironment);
 
     for (auto& pair : mapDescriptors) {
-        pair.first->extractMetricsEpisode(pair.second, agent, nbStepsExecuted,
+        pair.first->extractMetricsEpisode(pair.second, individual, nbStepsExecuted,
                                           learningEnvironment);
     }
 }

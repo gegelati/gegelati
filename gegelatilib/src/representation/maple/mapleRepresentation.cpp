@@ -47,38 +47,38 @@ void Representation::Maple::MapleRepresentation::initSubRepresentations(RNG::RNG
     mapleMutator->setProgramRepresentationID(this->programRepresentationID);
 }
 
-void Representation::Maple::MapleRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const
+void Representation::Maple::MapleRepresentation::printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const
 {
     const Representation& programAlgo = this->cGetSubRepresentation(this->programRepresentationID);
 
-    // set of all used vertex by the list of agents
+    // set of all used vertex by the list of individuals
     std::set<std::reference_wrapper<const EvoGraph::Vertex>> printedVertices;
-    for(const Individual& agent: agents) {
-        if(auto mapleIndividual = dynamic_cast<const MapleIndividual*>(&agent)) {
+    for(const Individual& individual: individuals) {
+        if(auto mapleIndividual = dynamic_cast<const MapleIndividual*>(&individual)) {
 
             fileMain
-                << "void "<< this->representationName << this->representationID << "_" <<agent.getAgentID() << "(double* outputs) {\n";
+                << "void "<< this->representationName << this->representationID << "_" <<individual.getIndividualID() << "(double* outputs) {\n";
 
             const EvoGraph::Vertex& vertex = mapleIndividual->getVertex();
             for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
-                subAgents.at(this->programRepresentationID).insert(edge.getProgram());
+                subIndividuals.at(this->programRepresentationID).insert(edge.getProgram());
 
                 size_t actionId = 0;
                 if(auto action = dynamic_cast< const EvoGraph::Action*>(&edge.getDestination())) {
                     actionId = action->getActionID();
                 } else {
-                    throw std::runtime_error("MapleRepresentation::printCodeGenAgents: destination vertices should be action vertices with maple");
+                    throw std::runtime_error("MapleRepresentation::printCodeGenIndividuals: destination vertices should be action vertices with maple");
                 }
 
 
                 fileMain
-                    << "\t"<< programAlgo.getRepresentationName() << programAlgo.getRepresentationID() << "_" << edge.getProgram().getAgentID() << "(outputs + " <<actionId << ");\n";
+                    << "\t"<< programAlgo.getRepresentationName() << programAlgo.getRepresentationID() << "_" << edge.getProgram().getIndividualID() << "(outputs + " <<actionId << ");\n";
             }
 
             fileMain
                 << "}\n";
         } else {
-            throw std::runtime_error("MapleRepresentation::printCodeGenAgents: agent should be a maple agent");
+            throw std::runtime_error("MapleRepresentation::printCodeGenIndividuals: individual should be a maple individual");
         }
     }
 }

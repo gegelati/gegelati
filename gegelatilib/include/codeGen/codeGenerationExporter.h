@@ -71,7 +71,7 @@ namespace CodeGen {
     {
       protected:
 
-        /// File holding the functions in charge of iterating through the agent.
+        /// File holding the functions in charge of iterating through the individual.
         std::ofstream fileMain;
         /// File holding the header functions.
         std::ofstream fileMainH;
@@ -113,11 +113,11 @@ namespace CodeGen {
          * This function iterates trough the Graph and create the required C
          * code to represent each element of the Graph.
          * 
-         * \param[in] agent the agent generated
-         * \param[in] representation the representation corresponding to the agent
-         * \param[in] subAgents map of the sub agents plot during the exporting of the agent
+         * \param[in] individual the individual generated
+         * \param[in] representation the representation corresponding to the individual
+         * \param[in] subIndividuals map of the sub individuals plot during the exporting of the individual
          */
-        virtual void exportMainAgent(const Representation::Individual& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents);
+        virtual void exportMainIndividual(const Representation::Individual& individual, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subIndividuals);
 
         
         /**
@@ -127,11 +127,11 @@ namespace CodeGen {
          * This function iterates trough the Graph and create the required C
          * code to represent each element of the Graph.
          * 
-         * \param[in] agents the agents generated
-         * \param[in] representation the representation corresponding to the agent
-         * \param[in] subAgents map of the sub agents plot during the exporting of the agent
+         * \param[in] individuals the individuals generated
+         * \param[in] representation the representation corresponding to the individual
+         * \param[in] subIndividuals map of the sub individuals plot during the exporting of the individual
          */
-        virtual void exportAgents(std::set<std::reference_wrapper<const Representation::Individual>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents);
+        virtual void exportIndividuals(std::set<std::reference_wrapper<const Representation::Individual>> individuals, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subIndividuals);
     };
 } // namespace CodeGen
 

@@ -47,7 +47,7 @@ namespace Representation::LGP {
          * \brief Initialize LGP Population.
          *
          * \param[in,out] graph the initialized Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -56,55 +56,55 @@ namespace Representation::LGP {
         /**
          * \brief Initialize a random Individual.
          *
-         * \param[in] agent The agent initialized
+         * \param[in] individual The individual initialized
          * \param[in,out] graph the Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
         
 
 
         /**
-         * \brief mutate a specific agent of an representation within a population
+         * \brief mutate a specific individual of an representation within a population
          * 
-         * \param[in,out] agents the Individual to crossover.
+         * \param[in,out] individuals the Individual to crossover.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while crossing over the agents
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while crossing over the individuals
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+        virtual void crossoverIndividuals(
+            std::array<std::reference_wrapper<const Individual>, 2> individuals, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng
         ) override;
 
         /**
-         * \brief mutate a specific agent of an representation within a population
+         * \brief mutate a specific individual of an representation within a population
          * 
-         * \param[in,out] agent the Individual to mutate.
+         * \param[in,out] individual the Individual to mutate.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while mutating the individual
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateAgent(
-            const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+        virtual void mutateIndividual(
+            const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng
         ) override;
 
 
         /**
          * \brief mutate a specific LgpIndividual of an representation within a population
          * 
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual bool mutateLgpIndividual(
-            const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng
+            const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng
         );
 
         /**
@@ -114,13 +114,13 @@ namespace Representation::LGP {
          * function randomly selects a line of the Program and deletes it.
          * Random selection is based on the given RNG::RNG.
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a line could be added, false otherwise.
          *
          */
-        virtual bool deleteRandomLine(const LgpIndividual& agent, LGPPopulation& population, RNG::RNG& rng);
+        virtual bool deleteRandomLine(const LgpIndividual& individual, LGPPopulation& population, RNG::RNG& rng);
 
         /**
          * \brief Insert a new Line at a randomly selected position within the
@@ -131,13 +131,13 @@ namespace Representation::LGP {
          * initRandomCorrectLine).
          * Random selection is based on the given RNG::RNG.
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        virtual void insertRandomLine(const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng);
+        virtual void insertRandomLine(const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Swap two randomly selected instructions within the given
@@ -147,13 +147,13 @@ namespace Representation::LGP {
          * them. If the given Program has less than two lines, nothing happens.
          * Random selection is based on the given RNG::RNG.
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        virtual bool swapRandomLines(const LgpIndividual& agent, LGPPopulation& population, RNG::RNG& rng);
+        virtual bool swapRandomLines(const LgpIndividual& individual, LGPPopulation& population, RNG::RNG& rng);
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -163,14 +163,14 @@ namespace Representation::LGP {
          * Mutator::LineMutator:AlterCorrectLine function on it.
          * Random selection is based on the given RNG::RNG.
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        virtual bool alterRandomLine(const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng);
+        virtual bool alterRandomLine(const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Alter a program's constant.
@@ -179,29 +179,29 @@ namespace Representation::LGP {
          * in a pseudo-random way and modifies it
          * Random selection is based on the given RNG::RNG.
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the mutation parameters
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a constant was successfully altered, false if the
          *         Program has less than one line.
          */
-        virtual bool alterRandomConstant(const LgpIndividual& agent, LGPPopulation& population,
+        virtual bool alterRandomConstant(const LgpIndividual& individual, LGPPopulation& population,
                                  const RepresentationParameters& params,
                                  RNG::RNG& rng);
 
         /**
          * \brief change a random output
          *
-         * \param[in,out] agent the Individual to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in,out] individual the Individual to mutate.
+         * \param[in] population the population to change the individuals.
          * \param[in] location location is the index of the output changed
          * \param[in] params the mutation parameters
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        virtual bool alterRandomOutputs(const LgpIndividual& agent, LGPPopulation& population, size_t location, const RepresentationParameters& params, RNG::RNG& rng);
+        virtual bool alterRandomOutputs(const LgpIndividual& individual, LGPPopulation& population, size_t location, const RepresentationParameters& params, RNG::RNG& rng);
     };
 
 

@@ -28,11 +28,11 @@ namespace Selector {
         /**
          * \brief override of doSelection method
          *
-         * Removed the worst agents from the population with a truncation
+         * Removed the worst individuals from the population with a truncation
          * process where the worst proportion set in the parameters is deleted.
          *
          * \param[in] graph the Graph on which selection is performed.
-         * \param[in,out] results a multimap containing agent
+         * \param[in,out] results a multimap containing individual
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */

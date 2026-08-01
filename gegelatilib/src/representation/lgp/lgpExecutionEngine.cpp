@@ -61,7 +61,7 @@ std::vector<double> Representation::LGP::LGPExecutionEngine::execute()
 
     iterateThroughtProgram(this->ignoreException);
 
-    const std::vector<size_t>& outputIndices = dynamic_cast<const LgpIndividual&>(this->executedAgent->get()).getOutputIndices();
+    const std::vector<size_t>& outputIndices = dynamic_cast<const LgpIndividual&>(this->executedIndividual->get()).getOutputIndices();
     std::vector<double> result;
     for(size_t idx = 0; idx < outputIndices.size(); idx++){
         // cast to primitiveType<double> to enable cast to double.

@@ -9,7 +9,7 @@
 
 namespace Selector {
     /**
-     * \brief Class to extract metrics from either the agent or the environment.
+     * \brief Class to extract metrics from either the individual or the environment.
      *
      * This metrics can be used to specify the selection of the selector.
      * This class does not implement any metrics, it need to be override by the
@@ -39,7 +39,7 @@ namespace Selector {
         /**
          * \brief Constructor with score and utility initialization.
          *
-         * \param[in] scorePerClass the vector of score obtained by the agent
+         * \param[in] scorePerClass the vector of score obtained by the individual
          * per class.
          * \param[in] nbEvalPerClass the vector of number of
          * evaluation per class.
@@ -58,12 +58,12 @@ namespace Selector {
         };
 
         /**
-         * Return the score per class of the agent.
+         * Return the score per class of the individual.
          */
         virtual const std::vector<double>& getScorePerClass() const;
 
         /**
-         * Return the number of evaluation per class of the agent.
+         * Return the number of evaluation per class of the individual.
          */
         virtual const std::vector<size_t>& getNbEvalPerClassPerClass() const;
 
@@ -71,7 +71,7 @@ namespace Selector {
          * \brief Specialization of the initialisation of the metrics.
          */
         void initMetrics(
-            const Representation::Individual& agent,
+            const Representation::Individual& individual,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
         /**
@@ -79,7 +79,7 @@ namespace Selector {
          * an episode.
          */
         void extractMetricsEpisode(
-            const Representation::Individual& agent, size_t nbStepsExecuted,
+            const Representation::Individual& individual, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
         /**

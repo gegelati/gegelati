@@ -14,7 +14,7 @@ namespace Selector {
     namespace MapElites {
 
         /**
-         * \brief Class to extract metrics from either the agent or the
+         * \brief Class to extract metrics from either the individual or the
          * environment.
          *
          * This metrics can be used to specify the selection of the selector.
@@ -53,7 +53,7 @@ namespace Selector {
              * \brief Constructor of MapEliteselectionMetrics with a vector of
              * scores.
              *
-             * \param[in] score the score obtained by the agent.
+             * \param[in] score the score obtained by the individual.
              * \param[in] mapDescriptors the map of descriptors associated to
              * their descriptor values.
              */
@@ -67,7 +67,7 @@ namespace Selector {
              * \brief Constructor of MapEliteselectionMetrics with a vector of
              * scores.
              *
-             * \param[in] score the score obtained by the agent.
+             * \param[in] score the score obtained by the individual.
              */
             MapElitesSelectionMetrics(double score) : SelectionMetrics(score){};
 
@@ -82,7 +82,7 @@ namespace Selector {
              * \brief Specialization of the initialisation of the metrics.
              */
             void initMetrics(
-                const Representation::Individual& agent,
+                const Representation::Individual& individual,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**
@@ -90,7 +90,7 @@ namespace Selector {
              * of an episode.
              */
             void extractMetricsStep(
-                const Representation::Individual& agent, std::vector<double> actionValues,
+                const Representation::Individual& individual, std::vector<double> actionValues,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**
@@ -98,7 +98,7 @@ namespace Selector {
              * of an episode.
              */
             void extractMetricsEpisode(
-                const Representation::Individual& agent, size_t nbStepsExecuted,
+                const Representation::Individual& individual, size_t nbStepsExecuted,
                 const Learn::LearningEnvironment& learningEnvironment) override;
 
             /**

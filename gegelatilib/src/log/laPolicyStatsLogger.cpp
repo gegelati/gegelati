@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 
 #include "log/laPolicyStatsLogger.h"
 
@@ -45,18 +45,18 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
     const Selector::Selector& selector = this->representation.getSelectorCst();
-    const Representation::Individual& bestAgent = *selector.getBestAgent().first;
-    if (this->lastBestAgentID == -1 || bestAgent.getAgentID() != this->lastBestAgentID) {
+    const Representation::Individual& bestIndividual = *selector.getBestIndividual().first;
+    if (this->lastBestIndividualID == -1 || bestIndividual.getIndividualID() != this->lastBestIndividualID) {
         // Update the best root befor loggin it PolicyStats
-        this->lastBestAgentID = bestAgent.getAgentID();
+        this->lastBestIndividualID = bestIndividual.getIndividualID();
         *this << "Generation " << this->generationNumber << " - Score "
-              << selector.getBestAgent()
+              << selector.getBestIndividual()
                      .second->getSelectionMetrics()
                      ->getScore()
               << std::endl
               << std::endl;
         std::shared_ptr<Representation::PolicyStats> ps = representation.createPolicyStats();
-        ps->analyzePolicy(bestAgent); 
+        ps->analyzePolicy(bestIndividual); 
         *this << *ps << std::endl;
         *this << std::endl
               << std::endl

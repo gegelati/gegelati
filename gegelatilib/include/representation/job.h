@@ -46,19 +46,19 @@
 
 namespace Representation {
     /**
-     * \brief This class embeds agents for the simulations.
+     * \brief This class embeds individuals for the simulations.
      *
-     * The goal of the Job is to contain one agent, so that each job
-     * will match with one simulation/evaluation. A basic learning agent will
-     * embed one agent per job to do as many simulations as there are agents.
+     * The goal of the Job is to contain one individual, so that each job
+     * will match with one simulation/evaluation. A basic learning abcde will
+     * embed one individual per job to do as many simulations as there are individuals.
      */
     class Job
     {
       protected:
         /**
-         * The agent contained in the job.
+         * The individual contained in the job.
          */
-        const Individual& agent;
+        const Individual& individual;
         
 
         /**
@@ -83,12 +83,12 @@ namespace Representation {
          * \brief Constructor enabling storing elements in the job so that the
          * Learning Agents will be able to use them later.
          *
-         * @param[in] agent The agent that will be encapsulated into the job.
+         * @param[in] individual The individual that will be encapsulated into the job.
          * @param[in] idx The index of this job.
          */
-        Job(const Individual& agent,
+        Job(const Individual& individual,
             uint64_t idx = 0)
-            : agent(agent), idx(idx)
+            : individual(individual), idx(idx)
         {
         }
 
@@ -100,11 +100,11 @@ namespace Representation {
         uint64_t getIdx() const;
 
         /**
-         * \brief Getter of the agent.
+         * \brief Getter of the individual.
          *
-         * @return The agent embedded by the job.
+         * @return The individual embedded by the job.
          */
-        virtual const Individual& getAgent() const;
+        virtual const Individual& getIndividual() const;
 
     };
 } // namespace Learn

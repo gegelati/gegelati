@@ -11,13 +11,13 @@ void Representation::ATPG::ATPGExecutionEngine::setActionProgramExecutionEngine(
 
 std::vector<double> Representation::ATPG::ATPGExecutionEngine::execute()
 {
-    const Representation::TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TPG::TpgIndividual&>((*this->executedAgent).get());
+    const Representation::TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TPG::TpgIndividual&>((*this->executedIndividual).get());
     if(&tpgIndividual == nullptr){
-        throw std::runtime_error("Representation::ATPG::ATPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
+        throw std::runtime_error("Representation::ATPG::ATPGExecutionEngine::execute trying to execute an individual which is not a TPG individual");
     }
     std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgIndividual.getVertex();
 
-    // Browse the TPG until vertex with an agent of the actionProgram Representation name is reached
+    // Browse the TPG until vertex with an individual of the actionProgram Representation name is reached
     while (!currentVertex.get().hasProgram() || currentVertex.get().getProgram().getRepresentationID() != this->actionProgramExecutionEngine->getRepresentationID()) {
 
         const EvoGraph::Team& teamVertex = dynamic_cast<const EvoGraph::Team&>(currentVertex.get());
@@ -33,7 +33,7 @@ std::vector<double> Representation::ATPG::ATPGExecutionEngine::execute()
     }
 
     // Set the progExecutionEngine to the program
-    this->actionProgramExecutionEngine->setExecutedAgent(currentVertex.get().getProgram());
+    this->actionProgramExecutionEngine->setExecutedIndividual(currentVertex.get().getProgram());
     this->actionValues = this->actionProgramExecutionEngine->execute();
 
     if(this->outputs.sizeContinuous() == 0){

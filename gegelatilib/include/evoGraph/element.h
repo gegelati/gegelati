@@ -53,7 +53,7 @@ namespace EvoGraph {
     /**
      * \brief Abstract class representing the elements of a Graph, either vertices or edges
      * 
-     * An element can contain an agent.
+     * An element can contain an individual.
      */
     class Element
     {
@@ -72,17 +72,17 @@ namespace EvoGraph {
         /**
          * \brief Set a new Individual Program for the Element.
          *
-         * \param[in] agentProgram the new weak pointer to a Individual Program.
+         * \param[in] individualProgram the new weak pointer to a Individual Program.
          */
-        virtual void setProgram(const Representation::Individual& agentProgram);
+        virtual void setProgram(const Representation::Individual& individualProgram);
 
         /**
-         * \brief remove the program of the agent by setting nullopt.
+         * \brief remove the program of the individual by setting nullopt.
          */
         virtual void removeProgram();
 
         /**
-         * \brief return true if the element has a program agent
+         * \brief return true if the element has a program individual
          */
         virtual bool hasProgram() const;
 
@@ -97,10 +97,10 @@ namespace EvoGraph {
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          * 
-         * \param[in] agentProgram the shared pointer to the Individual Program associated to the
+         * \param[in] individualProgram the shared pointer to the Individual Program associated to the
          *            Element.
          */
-        Element(std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) : program{agentProgram}{};
+        Element(std::optional<std::reference_wrapper<const Representation::Individual>> individualProgram = std::nullopt) : program{individualProgram}{};
 
 
         /// Shared pointer to the Individual to execute when evaluating the bid

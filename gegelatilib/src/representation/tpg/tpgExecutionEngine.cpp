@@ -27,13 +27,13 @@ void Representation::TPG::TPGExecutionEngine::setupJob(const Representation::Job
     if(this->isTraining){
         this->setArchive(tpgJob->getArchive());
     }
-    this->setExecutedAgent(job.getAgent());
+    this->setExecutedIndividual(job.getIndividual());
 }
 
 double Representation::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
     // Set the progExecutionEngine to the program
-    this->getProgramExecutionEngine().setExecutedAgent(edge.getProgram());
+    this->getProgramExecutionEngine().setExecutedIndividual(edge.getProgram());
 
     // Execute the program.
     this->lastValues = this->getProgramExecutionEngine().execute();
@@ -90,9 +90,9 @@ const EvoGraph::Edge& Representation::TPG::TPGExecutionEngine::evaluateTeam(cons
 
 std::vector<double> Representation::TPG::TPGExecutionEngine::execute()
 {
-    const Representation::TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TpgIndividual&>((*this->executedAgent).get());
+    const Representation::TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TpgIndividual&>((*this->executedIndividual).get());
     if(&tpgIndividual == nullptr){
-        throw std::runtime_error("Representation::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
+        throw std::runtime_error("Representation::TPG::TPGExecutionEngine::execute trying to execute an individual which is not a TPG individual");
     }
     std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgIndividual.getVertex();
 

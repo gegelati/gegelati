@@ -17,17 +17,17 @@ namespace Selector {
     struct SelectionContext
     {   
 
-        /// @brief vector sjared pointer of agent that are clonable by the
+        /// @brief vector sjared pointer of individual that are clonable by the
         /// Mutator to fill the new population.
-        std::vector<std::reference_wrapper<const Representation::Individual>> agentsClonable;
+        std::vector<std::reference_wrapper<const Representation::Individual>> individualsClonable;
 
 
-        /// @brief vector of shared pointer of agent that can be new
-        /// destination for the new agents created by the Mutator.
-        std::vector<std::reference_wrapper<const Representation::Individual>> preExistingAgents;
+        /// @brief vector of shared pointer of individual that can be new
+        /// destination for the new individuals created by the Mutator.
+        std::vector<std::reference_wrapper<const Representation::Individual>> preExistingIndividuals;
 
-        /// @brief number of agent to be created by the mutator
-        uint64_t nbAgentsToCreate;
+        /// @brief number of individual to be created by the mutator
+        uint64_t nbIndividualsToCreate;
     };
 }; // namespace Selector
 

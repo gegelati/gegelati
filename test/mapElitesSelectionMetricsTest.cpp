@@ -14,7 +14,7 @@ class MapElitesSelectionMetricsTest : public ::testing::Test
     FakeMultiContinuousLearningEnvironment env;
     std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
         descriptor;
-    const EvoGraph::Vertex* dummyAgent;
+    const EvoGraph::Vertex* dummyIndividual;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -37,7 +37,7 @@ class MapElitesSelectionMetricsTest : public ::testing::Test
         params.representation.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
         graph = std::make_shared<EvoGraph::Graph>(*e);
-        dummyAgent = &graph->addNewTeam();
+        dummyIndividual = &graph->addNewTeam();
 
         descriptor = std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
@@ -63,7 +63,7 @@ TEST_F(MapElitesSelectionMetricsTest, InitMetrics_ResizesDescriptorVectors)
 {
     Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
 
-    m.initMetrics(dummyAgent, env);
+    m.initMetrics(dummyIndividual, env);
 
     const auto& map = m.getMapDescriptors();
     ASSERT_EQ(map.size(), 1u);
@@ -77,10 +77,10 @@ TEST_F(MapElitesSelectionMetricsTest, InitMetrics_ResizesDescriptorVectors)
 TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsStep_FillsDescriptorValues)
 {
     Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
-    m.initMetrics(dummyAgent, env);
+    m.initMetrics(dummyIndividual, env);
 
     std::vector<double> actions = {1.0, -2.0, 3.0};
-    m.extractMetricsStep(dummyAgent, actions, env);
+    m.extractMetricsStep(dummyIndividual, actions, env);
 
     const auto& vec = m.getMapDescriptors().at(descriptor);
 
@@ -96,10 +96,10 @@ TEST_F(MapElitesSelectionMetricsTest,
        ExtractMetricsEpisode_ForwardsToDescriptor)
 {
     Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
-    m.initMetrics(dummyAgent, env);
+    m.initMetrics(dummyIndividual, env);
 
     double beforeScore = m.getScore();
-    m.extractMetricsEpisode(dummyAgent, 10, env);
+    m.extractMetricsEpisode(dummyIndividual, 10, env);
     double afterScore = m.getScore();
 
     // Score may be modified by base class, but must still exist
@@ -135,8 +135,8 @@ TEST_F(MapElitesSelectionMetricsTest, WeightedSum_ThrowsOnMismatchedVectorSize)
     Selector::MapElites::MapElitesSelectionMetrics A({descriptor});
     Selector::MapElites::MapElitesSelectionMetrics B({descriptor});
 
-    A.initMetrics(dummyAgent, env);
-    B.initMetrics(dummyAgent, env);
+    A.initMetrics(dummyIndividual, env);
+    B.initMetrics(dummyIndividual, env);
 
     auto& vecB =
         const_cast<std::vector<double>&>(B.getMapDescriptors().at(descriptor));

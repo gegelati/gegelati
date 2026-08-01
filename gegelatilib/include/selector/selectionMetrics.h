@@ -10,7 +10,7 @@
 
 namespace Selector {
     /**
-     * \brief Class to extract metrics from either the agent or the environment.
+     * \brief Class to extract metrics from either the individual or the environment.
      *
      * This metrics can be used to specify the selection of the selector.
      * This class does not implement any metrics, it need to be override by the
@@ -20,7 +20,7 @@ namespace Selector {
     {
       protected:
         /**
-         * Score obtained by the agent at the end of an episode
+         * Score obtained by the individual at the end of an episode
          */
         double score = 0;
 
@@ -43,67 +43,67 @@ namespace Selector {
         /**
          * \brief Constructor with score and utility initialization.
          *
-         * \param[in] score the score obtained by the agent.
-         * \param[in] utility the utility obtained by the agent.
+         * \param[in] score the score obtained by the individual.
+         * \param[in] utility the utility obtained by the individual.
          */
         SelectionMetrics(double score, double utility = 0)
             : score{score}, utility{utility} {};
 
         /**
-         * Return the score of the agent.
+         * Return the score of the individual.
          */
         virtual double getScore() const;
 
         /**
-         * Return the utility of the agent.
+         * Return the utility of the individual.
          */
         virtual double getUtility() const;
 
         /**
-         * \brief Init the metrics for the agent in the learning environment.
+         * \brief Init the metrics for the individual in the learning environment.
          *
          * This method is called at the beginning of the evaluateJob method.
          *
-         * \param[in] agent the agent representing the agent.
+         * \param[in] individual the individual representing the individual.
          * \param[in] learningEnvironment the learning environment in which the
-         * agent is evaluated.
+         * individual is evaluated.
          */
         virtual void initMetrics(
-            const Representation::Individual& agent,
+            const Representation::Individual& individual,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
         /**
-         * \brief Extract metrics from the agent in the learning environment.
+         * \brief Extract metrics from the individual in the learning environment.
          *
          * This method is called at every step of the environment evaluation.
          *
-         * \param[in] agent the agent representing the agent.
-         * \param[in] actionValues the action values taken by the agent.
+         * \param[in] individual the individual representing the individual.
+         * \param[in] actionValues the action values taken by the individual.
          * \param[in] learningEnvironment the learning environment in which the
-         * agent is evaluated.
+         * individual is evaluated.
          */
         virtual void extractMetricsStep(
-            const Representation::Individual& agent, std::vector<double> actionValues,
+            const Representation::Individual& individual, std::vector<double> actionValues,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
         /**
-         * \brief Extract metrics from the agent in the learning environment.
+         * \brief Extract metrics from the individual in the learning environment.
          *
          * This method is called at the end of every episode of the environment
          * evaluation.
          *
-         * \param[in] agent the agent representing the agent.
+         * \param[in] individual the individual representing the individual.
          * \param[in] nbStepsExecuted number of steps executed at the end of the
          * episode.
          * \param[in] learningEnvironment the learning environment in
-         * which the agent is evaluated.
+         * which the individual is evaluated.
          */
         virtual void extractMetricsEpisode(
-            const Representation::Individual& agent, size_t nbStepsExecuted,
+            const Representation::Individual& individual, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment);
 
         /**

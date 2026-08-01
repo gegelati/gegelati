@@ -40,10 +40,10 @@
 #include <numeric>
 
 
-void Representation::TPG::TPGPolicyStats::analyzePolicy(const Individual& agent)
+void Representation::TPG::TPGPolicyStats::analyzePolicy(const Individual& individual)
 {
-    // Get tpgIndividual if agent is one, else throw
-    const TpgIndividual& tpgIndividual = dynamic_cast<const TpgIndividual&>(agent);
+    // Get tpgIndividual if individual is one, else throw
+    const TpgIndividual& tpgIndividual = dynamic_cast<const TpgIndividual&>(individual);
     if (&tpgIndividual == nullptr) {
         throw std::invalid_argument("PolicyStats can only analyze TpgIndividual");
     }

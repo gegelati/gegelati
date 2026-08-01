@@ -31,10 +31,10 @@ void Representation::LGP::LGPRepresentation::initRepresentation(RNG::RNG& rng, c
     Representation::Representation::initRepresentation(rng, outputs, dataSource, graph);
 }
 
-void Representation::LGP::LGPRepresentation::clearUnusedAgentParts() 
+void Representation::LGP::LGPRepresentation::clearUnusedIndividualParts() 
 {
     LGPPopulation& lgpPopulation = dynamic_cast<LGPPopulation&>(*this->population);
-    lgpPopulation.clearAgentsIntrons();
+    lgpPopulation.clearIndividualsIntrons();
 }
 
 
@@ -45,12 +45,12 @@ std::shared_ptr<Representation::PolicyStats> Representation::LGP::LGPRepresentat
     return std::make_shared<LGPPolicyStats>(this->representationName, this->representationID, *this->env);
 }
 
-void Representation::LGP::LGPRepresentation::printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+void Representation::LGP::LGPRepresentation::printIndividual(const Individual& individual, FILE* pFile, std::string offset, std::set<uint64_t>& printedIndividualID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
 {
-    if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
-        printedAgentID.insert(agent.getAgentID());
+    if(printedIndividualID.find(individual.getIndividualID()) == printedIndividualID.end() && this->containsIndividual(individual)){
+        printedIndividualID.insert(individual.getIndividualID());
 
-        const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(agent);
+        const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(individual);
 
         std::string constantInfo;
         std::string instructionInfo;
@@ -85,7 +85,7 @@ void Representation::LGP::LGPRepresentation::printAgent(const Individual& agent,
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s.%" PRIu64 "\" constant=\"%s\" instruction=\"%s\"]\n",
-                offset.c_str(), lgpIndividual.getAgentID(), this->representationColor.c_str(), this->representationName.c_str(), this->representationID, constantInfo.c_str(), instructionInfo.c_str());
+                offset.c_str(), lgpIndividual.getIndividualID(), this->representationColor.c_str(), this->representationName.c_str(), this->representationID, constantInfo.c_str(), instructionInfo.c_str());
     }
 }
 
@@ -95,16 +95,16 @@ void Representation::LGP::LGPRepresentation::printAgent(const Individual& agent,
 const std::string Representation::LGP::LGPRepresentation::lgpIndividualRegex(
     "P([0-9]+)\\x20\\x5B.*label=\"(.*)\".*constant=\"(.*)\".*instruction=\"(.*)\"\\x5D");
 
-const Representation::Individual& Representation::LGP::LGPRepresentation::readAgent(std::smatch& matches)
+const Representation::Individual& Representation::LGP::LGPRepresentation::readIndividual(std::smatch& matches)
 {   
     std::regex testLgpIndividualRegex(this->lgpIndividualRegex);
     std::smatch newMatches;
     std::string line = matches[0];
     if(!std::regex_search(line, newMatches, testLgpIndividualRegex)){
-        throw std::runtime_error("LGPRepresentation::readAgent: regex search should succeed.");
+        throw std::runtime_error("LGPRepresentation::readIndividual: regex search should succeed.");
     }
 
-    const Individual& agent = this->population->createAgent(*graph);
+    const Individual& individual = this->population->createIndividual(*graph);
     LGPPopulation& lgpPopulation = dynamic_cast<LGPPopulation&>(*this->population);
 
     std::string constantStr = newMatches[3];
@@ -128,21 +128,21 @@ const Representation::Individual& Representation::LGP::LGPRepresentation::readAg
     }
     // Set the constant.
     for (int i = 0; i < v_constant.size(); i++) {
-        lgpPopulation.setConstantAt(agent, i, v_constant[i]);
+        lgpPopulation.setConstantAt(individual, i, v_constant[i]);
     }
 
-    lgpPopulation.readLines(newMatches[4], agent);
-    return agent;
+    lgpPopulation.readLines(newMatches[4], individual);
+    return individual;
 }
 
-void Representation::LGP::LGPRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const
+void Representation::LGP::LGPRepresentation::printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const
 {
     LGPCodeGenerationEngine engine(fileMain, fileMainH, *this->env, *this->outputs, this->representationID, this->representationName);
 
     engine.initGlobalVar();
 
-    for(const Individual& agent: agents) {
-        engine.setExecutedAgent(agent);
+    for(const Individual& individual: individuals) {
+        engine.setExecutedIndividual(individual);
         engine.generateProgram();
     }
 }

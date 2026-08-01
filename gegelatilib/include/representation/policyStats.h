@@ -51,7 +51,7 @@ namespace Representation {
      * Utility class for extracting statistics from a policy within a Graph.
      *
      * The entry point for using this class is the analyzePolicy() method which
-     * updates all attribute for a "tree" starting from a given agent.
+     * updates all attribute for a "tree" starting from a given individual.
      *
      * To analyze different policies with a single PolicyStats instance, the
      * clear() method should be called between calls to analyzePolicy().
@@ -189,12 +189,12 @@ namespace Representation {
          * Analyze the policy starting from the given Individual.
          *
          * This method explores the Graph starting from the given Individual,
-         * and analyzes all Team, Action and other agents encountered along the
+         * and analyzes all Team, Action and other individuals encountered along the
          * way.
          *
          * The method updates the following stats:
          */
-        virtual void analyzePolicy(const Individual& agent) = 0;
+        virtual void analyzePolicy(const Individual& individual) = 0;
 
         /**
          * Method returning the specific informations of the representation used

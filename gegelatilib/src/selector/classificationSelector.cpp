@@ -20,41 +20,41 @@ void Selector::ClassificationSelector::doSelection(
     const Learn::EvaluationResult* result = results.begin()->first.get();
     if (typeid(ClassificationSelectionMetrics) !=
         typeid(*result->getSelectionMetrics().get())) {
-        throw std::runtime_error("Can not decimate worst agents for "
+        throw std::runtime_error("Can not decimate worst individuals for "
                                  "results whose metrics type is not "
                                  "ClassificationSelectionMetrics.");
     }
 
     Representation::Population& population = this->getPopulation();
 
-    // Compute the number of agent to keep/delete base on each criterion
-    uint64_t totalNbAgent = population.getAgents().size();
-    uint64_t nbAgentsToDelete = (uint64_t)floor(
-        this->params->truncation.ratioDeletedRoots * totalNbAgent);
-    uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
+    // Compute the number of individual to keep/delete base on each criterion
+    uint64_t totalNbIndividual = population.getIndividuals().size();
+    uint64_t nbIndividualsToDelete = (uint64_t)floor(
+        this->params->truncation.ratioDeletedRoots * totalNbIndividual);
+    uint64_t nbIndividualsToKeep = (totalNbIndividual - nbIndividualsToDelete);
 
-    // Keep ~half+ of the agents based on their general score on
+    // Keep ~half+ of the individuals based on their general score on
     // all class.
-    // and ~half- of the agents on a per class score (none if nbIndividuals to keep
+    // and ~half- of the individuals on a per class score (none if nbIndividuals to keep
     // < 2*nb class)
-    uint64_t nbAgentsKeptPerClass = (nbAgentsToKeep / this->nbActions) / 2;
-    uint64_t nbAgentsKeptGeneralScore =
-        nbAgentsToKeep - this->nbActions * nbAgentsKeptPerClass;
+    uint64_t nbIndividualsKeptPerClass = (nbIndividualsToKeep / this->nbActions) / 2;
+    uint64_t nbIndividualsKeptGeneralScore =
+        nbIndividualsToKeep - this->nbActions * nbIndividualsKeptPerClass;
 
-    // Build a list of agents to keep
-    std::vector<std::reference_wrapper<const Representation::Individual>> agentsToKeep;
+    // Build a list of individuals to keep
+    std::vector<std::reference_wrapper<const Representation::Individual>> individualsToKeep;
 
-    // Insert agents to keep per class
+    // Insert individuals to keep per class
     for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++) {
-        // Fill a map with the agents and the score of the specific class as
+        // Fill a map with the individuals and the score of the specific class as
         // ID.
-        std::multimap<double, std::reference_wrapper<const Representation::Individual>> sortedAgent;
+        std::multimap<double, std::reference_wrapper<const Representation::Individual>> sortedIndividual;
         std::for_each(
             results.begin(), results.end(),
-            [&sortedAgent, &classIdx](
+            [&sortedIndividual, &classIdx](
                 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Representation::Individual>>& res) {
-                sortedAgent.emplace(((ClassificationSelectionMetrics*)res.first
+                sortedIndividual.emplace(((ClassificationSelectionMetrics*)res.first
                                         ->getSelectionMetrics()
                                         .get())
                                        ->getScorePerClass()
@@ -62,62 +62,62 @@ void Selector::ClassificationSelector::doSelection(
                                    res.second);
             });
 
-        // Keep the best nbAgentsKeptPerClass (or less for reasons explained
+        // Keep the best nbIndividualsKeptPerClass (or less for reasons explained
         // in the loop)
-        auto iterator = sortedAgent.rbegin();
-        for (auto i = 0; i < nbAgentsKeptPerClass; i++) {
-            // If the agent is not already marked to be kept
-            const Representation::Individual& agent = iterator->second;
-            if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&agent](const std::reference_wrapper<const Representation::Individual>& agentToKeep) {
-                    return agent == agentToKeep.get();
-                }) == agentsToKeep.end()) {
-                agentsToKeep.push_back(iterator->second);
+        auto iterator = sortedIndividual.rbegin();
+        for (auto i = 0; i < nbIndividualsKeptPerClass; i++) {
+            // If the individual is not already marked to be kept
+            const Representation::Individual& individual = iterator->second;
+            if (std::find_if(individualsToKeep.begin(), individualsToKeep.end(), 
+                [&individual](const std::reference_wrapper<const Representation::Individual>& individualToKeep) {
+                    return individual == individualToKeep.get();
+                }) == individualsToKeep.end()) {
+                individualsToKeep.push_back(iterator->second);
             }
             // Advance the iterator no matter what.
             iterator++;
         }
 
-    // Insert remaining agents to keep
+    // Insert remaining individuals to keep
     auto iterator2 = results.rbegin();
-    while (agentsToKeep.size() < nbAgentsToKeep && iterator2 != results.rend()) {
-        // If the agent is not already marked to be kept
-        const Representation::Individual& lockedAgent = iterator2->second;
-        if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-            [&lockedAgent](const std::reference_wrapper<const Representation::Individual>& agent) {
-                return agent.get() == lockedAgent;
-            }) == agentsToKeep.end()) {
-            agentsToKeep.push_back(iterator2->second);
+    while (individualsToKeep.size() < nbIndividualsToKeep && iterator2 != results.rend()) {
+        // If the individual is not already marked to be kept
+        const Representation::Individual& lockedIndividual = iterator2->second;
+        if (std::find_if(individualsToKeep.begin(), individualsToKeep.end(), 
+            [&lockedIndividual](const std::reference_wrapper<const Representation::Individual>& individual) {
+                return individual.get() == lockedIndividual;
+            }) == individualsToKeep.end()) {
+            individualsToKeep.push_back(iterator2->second);
         }
         // Advance the iterator no matter what.
         iterator2++;
     }
 
     // Do the removal.
-    // Because of potential agent actions, the preserved number of agents
+    // Because of potential individual actions, the preserved number of individuals
     // may be higher than the given ratio.
-    auto allAgents = population.getAgents();
+    auto allIndividuals = population.getIndividuals();
     auto& graphRef = graph;
     std::for_each(
-        allAgents.begin(), allAgents.end(),
-        [&agentsToKeep, &graphRef, this, &population,
-         &results](std::reference_wrapper<const Representation::Individual> curragent) {
+        allIndividuals.begin(), allIndividuals.end(),
+        [&individualsToKeep, &graphRef, this, &population,
+         &results](std::reference_wrapper<const Representation::Individual> currindividual) {
 
-            if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&curragent](const std::reference_wrapper<const Representation::Individual>& agent) {
-                    return agent.get() == curragent.get();
-                }) == agentsToKeep.end()) {
-                population.deleteAgent(curragent, graphRef);
+            if (std::find_if(individualsToKeep.begin(), individualsToKeep.end(), 
+                [&currindividual](const std::reference_wrapper<const Representation::Individual>& individual) {
+                    return individual.get() == currindividual.get();
+                }) == individualsToKeep.end()) {
+                population.deleteIndividual(currindividual, graphRef);
 
-                // Keep only results of non-decimated agents.
-                this->removeFromSavedResults(curragent);
+                // Keep only results of non-decimated individuals.
+                this->removeFromSavedResults(currindividual);
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Representation::Individual>>::iterator iter =
                     results.begin();
                 while (iter != results.end()) {
-                    if (iter->second == curragent) {
+                    if (iter->second == currindividual) {
                         results.erase(iter);
                         break;
                     }

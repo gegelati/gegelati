@@ -113,8 +113,8 @@ TEST(SelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
     FakedLearningEnvironment env(3.0, 1.0);
 
     // Call extraction
-    const Representation::Individual* nullAgent = nullptr;
-    metrics.extractMetricsEpisode(*nullAgent, 0, env);
+    const Representation::Individual* nullIndividual = nullptr;
+    metrics.extractMetricsEpisode(*nullIndividual, 0, env);
 
     // score and utility should be incremented
     ASSERT_DOUBLE_EQ(metrics.getScore(), 4.5);
@@ -217,7 +217,7 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
 {
     Selector::ClassificationSelectionMetrics metrics;
     FakedClassificationLearningEnvironment env(2);
-    const Representation::Individual* nullAgent = nullptr;
+    const Representation::Individual* nullIndividual = nullptr;
 
     // Prepare classification table: class 0 guessed [2,1], class 1 guessed
     // [0,3]
@@ -225,12 +225,12 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
         std::vector<std::vector<uint64_t>>{{2, 1}, {0, 3}});
 
     // init should resize internal vectors
-    metrics.initMetrics(*nullAgent, env);
+    metrics.initMetrics(*nullIndividual, env);
     ASSERT_EQ(metrics.getScorePerClass().size(), 2);
     ASSERT_EQ(metrics.getNbEvalPerClassPerClass().size(), 2);
 
     // extract should compute f-scores per class and number of evals
-    metrics.extractMetricsEpisode(*nullAgent, 0, env);
+    metrics.extractMetricsEpisode(*nullIndividual, 0, env);
 
     // class 0: TP=2 FN=1 FP=0 => precision=1 recall=2/3 => fscore=4/5 = 0.8
     ASSERT_EQ(metrics.getScorePerClass().at(0), 0.8);

@@ -43,7 +43,7 @@ namespace Representation::Maple {
          * \brief Initialize TPG Population.
          *
          * \param[in,out] graph the initialized Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -53,13 +53,13 @@ namespace Representation::Maple {
         /**
          * \brief Initialize a random Individual.
          *
-         * \param[in] agent the agent initialized.
+         * \param[in] individual the individual initialized.
          * \param[in,out] graph the Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
         
         /**
          * \brief Cross the two teams' program at the specific index of program given
@@ -67,13 +67,13 @@ namespace Representation::Maple {
          * \param[in,out] teams the Team to crossover.
          * \param[in] indexCross the index at which the programs are crossed
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while crossing over the agents
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while crossing over the individuals
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverPrograms(
-            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng);
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng);
 
 
         /**
@@ -82,26 +82,26 @@ namespace Representation::Maple {
          * \param[in,out] teams the Team to crossover.
          * \param[in] indexCross the index at which the edges are crossed
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while crossing over the agents
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while crossing over the individuals
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverEdges(
-            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng);
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng);
 
         /**
-         * \brief Do a crossover over two maple agents, by either crossover the program on edges, or crossover the edges. Calling either crossoverPrograms or crossoverEdges methods
+         * \brief Do a crossover over two maple individuals, by either crossover the program on edges, or crossover the edges. Calling either crossoverPrograms or crossoverEdges methods
          * 
-         * \param[in,out] agents the Individual to crossover.
+         * \param[in,out] individuals the Individual to crossover.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while crossing over the agents
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while crossing over the individuals
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+        virtual void crossoverIndividuals(
+            std::array<std::reference_wrapper<const Individual>, 2> individuals, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng
         ) override;
 
 
@@ -174,8 +174,8 @@ namespace Representation::Maple {
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
          * \param[in] actionClasses the actionClasses used by the action responsible for the edge.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while mutating the individual
          * \param[in] params
          * Probability parameters for the mutation.
          * \param[in] rng Random Number
@@ -184,21 +184,21 @@ namespace Representation::Maple {
         void mutateOutgoingEdge(
             EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             const std::set<size_t>& actionClasses, Population& population,
-            std::vector<std::reference_wrapper<const Individual>>& newSubAgents,
+            std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals,
             const RepresentationParameters& params, RNG::RNG& rng);
 
         /**
-         * \brief mutate a specific agent of an representation within a population
+         * \brief mutate a specific individual of an representation within a population
          * 
-         * \param[in,out] agent the Individual to mutate.
+         * \param[in,out] individual the Individual to mutate.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while mutating the individual
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateAgent(
-            const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+        virtual void mutateIndividual(
+            const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng
         ) override;
     };
 

@@ -1,5 +1,5 @@
-#ifndef AGENT_H
-#define AGENT_H
+#ifndef INDIVIDUAL_H
+#define INDIVIDUAL_H
 
 #include <cstdint>
 #include <string>
@@ -20,21 +20,21 @@ namespace Representation {
         /// ID of the representation.
         uint64_t representationID;
 
-        /// Unique ID of the agent.
-        uint64_t agentID;
+        /// Unique ID of the individual.
+        uint64_t individualID;
 
         /**
-         * \brief Incremente the agent ID counter and return the new value.
+         * \brief Incremente the individual ID counter and return the new value.
          */
         static uint64_t incrementeCounter();
 
         /**
-         * \brief Reset the agent ID counter.
+         * \brief Reset the individual ID counter.
          *
          * This method set the ID counter to a new value.
          * It can quickly lead to segmentation fault if not used carefully.
          */
-        static void resetAgentIDCounter();
+        static void resetIndividualIDCounter();
         friend struct ::CounterReset;
 
     public:
@@ -48,7 +48,7 @@ namespace Representation {
          * 
          * \param[in] representationID id of the representation used by the Individual.
          */
-        Individual(uint64_t representationID) : representationID(representationID), agentID(incrementeCounter()) {};
+        Individual(uint64_t representationID) : representationID(representationID), individualID(incrementeCounter()) {};
 
         /**
          * \brief Return the id of the representation.
@@ -56,12 +56,12 @@ namespace Representation {
         uint64_t getRepresentationID() const { return this->representationID; }
 
         /**
-         * \brief return the ID of the agent.
+         * \brief return the ID of the individual.
          */
-        static uint64_t getAgentIDCounter();
+        static uint64_t getIndividualIDCounter();
 
         /**
-         * \brief Method that return if the agent is valid for execution.
+         * \brief Method that return if the individual is valid for execution.
          */
         virtual bool isValid() const {return true;};
     
@@ -70,14 +70,14 @@ namespace Representation {
          *
          * \return the integer ID of the Individual.
          */
-        virtual uint64_t getAgentID() const;
+        virtual uint64_t getIndividualID() const;
 
         /**
          * \brief Set a new unique identifier to the Individual.
          *
          * \param[in] newID the new integer ID to set to the Individual.
          */
-        virtual void setAgentID(uint64_t newID);
+        virtual void setIndividualID(uint64_t newID);
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
         Individual(const Individual&) = delete;

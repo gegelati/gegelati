@@ -1,6 +1,6 @@
 
-#ifndef ATPG_AGENT_POPULATION_H
-#define ATPG_AGENT_POPULATION_H
+#ifndef ATPG_INDIVIDUAL_POPULATION_H
+#define ATPG_INDIVIDUAL_POPULATION_H
 
 #include "representation/tpg/tpgPopulation.h"
 #include "representation/atpg/atpgExecutionEngine.h"
@@ -11,7 +11,7 @@ namespace Representation::ATPG {
     /**
      * \brief Class representing a TpgPopulation used by the ActionTPGRepresentation.
      * 
-     * The Population is in charge of storing, creating, copying or removing Agents.
+     * The Population is in charge of storing, creating, copying or removing Individuals.
      * Basically, the population is the interface between the Representation and the Graph.
      */
     class ATpgPopulation : public TPG::TpgPopulation
@@ -20,7 +20,7 @@ namespace Representation::ATPG {
     protected:
     
 
-        /// Name of the action program representation associated with the ATPG agents.
+        /// Name of the action program representation associated with the ATPG individuals.
         uint64_t actionProgramRepresentationID;
 
     public:
@@ -28,13 +28,13 @@ namespace Representation::ATPG {
         /**
          * \brief Main ATpgPopulation constructor.
          * 
-         * \param[in] outputs outputs of the agents.
+         * \param[in] outputs outputs of the individuals.
          * \param[in] representationID id of the representation used.
          */
         ATpgPopulation(const Output::OutputHandler& outputs, uint64_t representationID) : TpgPopulation(outputs, representationID) {};
 
         /**
-         * \brief Set the id of the action program representation associated with the TPG agents.
+         * \brief Set the id of the action program representation associated with the TPG individuals.
          * 
          * \param[in] id the id of the action program representation.
          */
@@ -44,12 +44,12 @@ namespace Representation::ATPG {
         /**
          * \brief Delete the TpgIndividual.
          * 
-         * \param[in] agent the Individual to delete.
+         * \param[in] individual the Individual to delete.
          * \param[in] graph the Graph associated with the Individual.
          * 
          * \return a shared pointer to the created Individual.
          */
-        virtual void emptyAgent(const Individual& agent, EvoGraph::Graph& graph) override;
+        virtual void emptyIndividual(const Individual& individual, EvoGraph::Graph& graph) override;
 
         /**
          * \brief create and return a TPG execution engine.
@@ -58,4 +58,4 @@ namespace Representation::ATPG {
     };
 }; // namespace Representation::ATPG
 
-#endif // ATPG_AGENT_POPULATION_H
+#endif // ATPG_INDIVIDUAL_POPULATION_H

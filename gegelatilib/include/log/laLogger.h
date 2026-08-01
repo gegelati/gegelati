@@ -105,7 +105,7 @@ namespace Log {
         double decimationTime = 0;
 
         /// LearningAgent logged by the LALogger
-        Learn::LearningAgent& learningAgent;
+        Learn::LearningAgent& LearningAgent;
 
         /**
          * \brief Computes the duration from a given time to now.

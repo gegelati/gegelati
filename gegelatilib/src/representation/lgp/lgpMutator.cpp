@@ -17,31 +17,31 @@ void Representation::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& grap
     // Check configuration is valid
     this->isConfigurationValid(params, population.getOutputs());
 
-    // Empty agent population
-    population.clearAgents(graph);
+    // Empty individual population
+    population.clearIndividuals(graph);
 
     for (size_t idx = 0; idx < params.nbIndividuals; idx++) {
-        this->initRandomAgent(graph, population, params, rng);
+        this->initRandomIndividual(graph, population, params, rng);
     }
 }
 
-void Representation::LGP::LGPMutator::initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::LGP::LGPMutator::initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    // If first agent, check validity
-    if(population.getAgents().size() == 1){
+    // If first individual, check validity
+    if(population.getIndividuals().size() == 1){
         this->isConfigurationValid(params, population.getOutputs());
     }
 
-    population.emptyAgent(agent, graph);
+    population.emptyIndividual(individual, graph);
 
     LGPPopulation& lgpPopulation = dynamic_cast<LGPPopulation&>(population);
     if(&lgpPopulation == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
+        throw std::invalid_argument("LGPMutator::initRandomIndividual: the given population is not a LGPPopulation.");
     }
 
-    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(agent);
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(individual);
     if(&lgpIndividual == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LgpIndividual.");
+        throw std::invalid_argument("LGPMutator::initRandomIndividual: the created individual is not a LgpIndividual.");
     }
 
     // insert random constants in the program
@@ -49,7 +49,7 @@ void Representation::LGP::LGPMutator::initRandomSpecificAgent(const Individual& 
     for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.lgp.minConstValue,
                                  params.lgp.maxConstValue)};
-        lgpPopulation.setConstantAt(agent, i, c_value);
+        lgpPopulation.setConstantAt(individual, i, c_value);
     }
 
     // Select the number of line randomly
@@ -61,24 +61,24 @@ void Representation::LGP::LGPMutator::initRandomSpecificAgent(const Individual& 
     }
 
     // Identify Introns
-    lgpPopulation.identifyIntrons(agent);
+    lgpPopulation.identifyIntrons(individual);
 }
 
-void Representation::LGP::LGPMutator::crossoverAgents(
-    std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, 
-    Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, 
+void Representation::LGP::LGPMutator::crossoverIndividuals(
+    std::array<std::reference_wrapper<const Individual>, 2> individuals, EvoGraph::Graph& graph, 
+    Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, 
     const RepresentationParameters& params, RNG::RNG& rng)
 {
-    // Casted agent 1 and 2
-    const LgpIndividual& lgpIndividual1 = dynamic_cast<const LgpIndividual&>(agents[0].get());
-    const LgpIndividual& lgpIndividual2 = dynamic_cast<const LgpIndividual&>(agents[1].get());
+    // Casted individual 1 and 2
+    const LgpIndividual& lgpIndividual1 = dynamic_cast<const LgpIndividual&>(individuals[0].get());
+    const LgpIndividual& lgpIndividual2 = dynamic_cast<const LgpIndividual&>(individuals[1].get());
     auto lgpIndividuals = std::array<std::reference_wrapper<const LgpIndividual>, 2>{lgpIndividual1, lgpIndividual2};
     if(&lgpIndividual1 == nullptr || &lgpIndividual2 == nullptr){
-        throw std::invalid_argument("LGPMutator::crossoverAgents: the given agents are not LgpIndividuals.");
+        throw std::invalid_argument("LGPMutator::crossoverIndividuals: the given individuals are not LgpIndividuals.");
     }
     LGPPopulation& lgpPopulation = dynamic_cast<LGPPopulation&>(population);
     if(&lgpPopulation == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
+        throw std::invalid_argument("LGPMutator::initRandomIndividual: the given population is not a LGPPopulation.");
     }
 
     if(lgpIndividual1.getNbLines() < 2 || lgpIndividual2.getNbLines() < 2){
@@ -166,127 +166,127 @@ void Representation::LGP::LGPMutator::crossoverAgents(
     }
 }
 
-void Representation::LGP::LGPMutator::mutateAgent(
-    const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::LGP::LGPMutator::mutateIndividual(
+    const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
     LGPPopulation& lgpPopulation = dynamic_cast<LGPPopulation&>(population);
     if(&lgpPopulation == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
+        throw std::invalid_argument("LGPMutator::initRandomIndividual: the given population is not a LGPPopulation.");
     }
 
-    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(agent);
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(individual);
     if(&lgpIndividual == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LgpIndividual.");
+        throw std::invalid_argument("LGPMutator::initRandomIndividual: the created individual is not a LgpIndividual.");
     }
 
     if (params.lgp.forceProgramBehaviorChangeOnMutation) {
         // Copy the program to check that its behavior is changed before
         // verifying its unicity against the archive
-        const Individual& newProgCopy = lgpPopulation.copyAgent(agent, graph);
+        const Individual& newProgCopy = lgpPopulation.copyIndividual(individual, graph);
         while (!this->mutateLgpIndividual(lgpIndividual, lgpPopulation, params, rng) &&
-                !lgpPopulation.hasIdenticalBehavior(agent, newProgCopy));
-        lgpPopulation.deleteAgent(newProgCopy, graph);
+                !lgpPopulation.hasIdenticalBehavior(individual, newProgCopy));
+        lgpPopulation.deleteIndividual(newProgCopy, graph);
     } else {
         // Mutate until a mutation happen
         while (!this->mutateLgpIndividual(lgpIndividual, lgpPopulation, params, rng));
     }
 }
 
-bool Representation::LGP::LGPMutator::mutateLgpIndividual(const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+bool Representation::LGP::LGPMutator::mutateLgpIndividual(const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
-    if (agent.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.lgp.pDelete) {
+    if (individual.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.lgp.pDelete) {
         anyMutation = true;
-        deleteRandomLine(agent, population, rng);
+        deleteRandomLine(individual, population, rng);
     }
 
-    if (agent.getNbLines() < params.lgp.maxProgramSize &&
+    if (individual.getNbLines() < params.lgp.maxProgramSize &&
         rng.getDouble(0.0, 1.0) < params.lgp.pAdd) {
         anyMutation = true;
-        insertRandomLine(agent, population, params, rng);
+        insertRandomLine(individual, population, params, rng);
     }
 
     if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
-        alterRandomLine(agent, population, params, rng);
+        alterRandomLine(individual, population, params, rng);
     }
 
     if (rng.getDouble(0.0, 1.0) < params.lgp.pSwap) {
         anyMutation = true;
-        swapRandomLines(agent, population, rng);
+        swapRandomLines(individual, population, rng);
     }
 
     // mutate the programs constants if they exists
     if (params.lgp.nbProgramConstant > 0 &&
         rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
-        alterRandomConstant(agent, population, params, rng);
+        alterRandomConstant(individual, population, params, rng);
     }
 
-    for(size_t idx = 0; idx < agent.getUsedNbOutputs(population.getOutputs()); idx++) {
+    for(size_t idx = 0; idx < individual.getUsedNbOutputs(population.getOutputs()); idx++) {
         if(rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
-            alterRandomOutputs(agent, population, idx, params, rng);
+            alterRandomOutputs(individual, population, idx, params, rng);
         }
     }
 
     // Identify introns
     if (anyMutation) {
-        population.identifyIntrons(agent);
+        population.identifyIntrons(individual);
     }
     return anyMutation;
 }
 
-bool Representation::LGP::LGPMutator::deleteRandomLine(const LgpIndividual& agent, LGPPopulation& population, 
+bool Representation::LGP::LGPMutator::deleteRandomLine(const LgpIndividual& individual, LGPPopulation& population, 
                                                RNG::RNG& rng)
 {
     // Line cannot be removed from a program with a single line.
-    if (agent.getNbLines() <= 1) {
+    if (individual.getNbLines() <= 1) {
         return false;
     }
 
-    uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    population.removeLine(agent, lineIndex);
+    uint64_t lineIndex = rng.getUnsignedInt64(0, individual.getNbLines() - 1);
+    population.removeLine(individual, lineIndex);
     return true;
 }
 
-void Representation::LGP::LGPMutator::insertRandomLine(const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::LGP::LGPMutator::insertRandomLine(const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines());
-    population.addNewLine(agent, lineIndex);
-    this->lineMutator.initRandomCorrectLine(population.getLineForMutation(agent, lineIndex), rng);
+    uint64_t lineIndex = rng.getUnsignedInt64(0, individual.getNbLines());
+    population.addNewLine(individual, lineIndex);
+    this->lineMutator.initRandomCorrectLine(population.getLineForMutation(individual, lineIndex), rng);
 }
 
 
-bool Representation::LGP::LGPMutator::swapRandomLines(const LgpIndividual& agent, LGPPopulation& population, 
+bool Representation::LGP::LGPMutator::swapRandomLines(const LgpIndividual& individual, LGPPopulation& population, 
                                               RNG::RNG& rng)
 {
-    if (agent.getNbLines() < 2) {
+    if (individual.getNbLines() < 2) {
         return false;
     }
     // Select two distinct random index.
-    const uint64_t lineIndex0 = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    uint64_t lineIndex1 = rng.getUnsignedInt64(0, agent.getNbLines() - 2);
+    const uint64_t lineIndex0 = rng.getUnsignedInt64(0, individual.getNbLines() - 1);
+    uint64_t lineIndex1 = rng.getUnsignedInt64(0, individual.getNbLines() - 2);
     lineIndex1 += (lineIndex1 >= lineIndex0) ? 1 : 0;
 
-    population.swapLines(agent, lineIndex0, lineIndex1);
+    population.swapLines(individual, lineIndex0, lineIndex1);
 
     return true;
 }
 
-bool Representation::LGP::LGPMutator::alterRandomLine(const LgpIndividual& agent, LGPPopulation& population, 
+bool Representation::LGP::LGPMutator::alterRandomLine(const LgpIndividual& individual, LGPPopulation& population, 
                                               const RepresentationParameters& params, RNG::RNG& rng)
 {
-    if (agent.getNbLines() < 1) {
+    if (individual.getNbLines() < 1) {
         return false;
     }
     // Select a random index.
-    const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    this->lineMutator.alterCorrectLine(population.getLineForMutation(agent, lineIndex), rng);
+    const uint64_t lineIndex = rng.getUnsignedInt64(0, individual.getNbLines() - 1);
+    this->lineMutator.alterCorrectLine(population.getLineForMutation(individual, lineIndex), rng);
     return true;
 }
 
 bool Representation::LGP::LGPMutator::alterRandomConstant(
-    const LgpIndividual& agent, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+    const LgpIndividual& individual, LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     const uint64_t constant_idx = rng.getUnsignedInt64(
         0, params.lgp.nbProgramConstant - 1);
@@ -296,7 +296,7 @@ bool Representation::LGP::LGPMutator::alterRandomConstant(
     if (delta > 1)
         delta = delta * 2 - 1;
 
-    double currentConstantValue = agent.getConstantAt(constant_idx);
+    double currentConstantValue = individual.getConstantAt(constant_idx);
 
     double newConstantValue = currentConstantValue * delta;
 
@@ -305,14 +305,14 @@ bool Representation::LGP::LGPMutator::alterRandomConstant(
     }
 
     Data::Constant newConstant = {newConstantValue};
-    population.setConstantAt(agent, constant_idx, newConstant);
+    population.setConstantAt(individual, constant_idx, newConstant);
 
     return true;
 }
 
-bool Representation::LGP::LGPMutator::alterRandomOutputs(const LgpIndividual& agent, LGPPopulation& population, size_t location, 
+bool Representation::LGP::LGPMutator::alterRandomOutputs(const LgpIndividual& individual, LGPPopulation& population, size_t location, 
                                              const RepresentationParameters& params, RNG::RNG& rng)
 {
-    population.setOutputIndex(agent, rng.getUnsignedInt64(0, params.lgp.nbRegisters - 1), location);
+    population.setOutputIndex(individual, rng.getUnsignedInt64(0, params.lgp.nbRegisters - 1), location);
     return true;
 }

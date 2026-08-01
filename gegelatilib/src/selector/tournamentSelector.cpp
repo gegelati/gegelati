@@ -8,19 +8,19 @@ void Selector::TournamentSelector::doSelection(
                   std::reference_wrapper<const Representation::Individual>>& results,
     RNG::RNG& rng)
 {
-    this->agentsToDelete.clear();
+    this->individualsToDelete.clear();
 
 
     size_t nbToKeep =
         (size_t)(results.size() * params->tournament.ratioSavedRoots);
-    size_t nbAgentsInTournament = results.size() - nbToKeep;
+    size_t nbIndividualsInTournament = results.size() - nbToKeep;
 
-    // Copy the first agents to remove (those at the bottom of the ranking)
+    // Copy the first individuals to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Representation::Individual>>>
         elements;
     
-    for (size_t i = 0; i < nbAgentsInTournament && results.size() > 0; i++) {
+    for (size_t i = 0; i < nbIndividualsInTournament && results.size() > 0; i++) {
         elements.push_back(*results.begin());
         this->removeFromSavedResults(results.begin()->second);
         results.erase(results.begin());
@@ -34,11 +34,11 @@ void Selector::TournamentSelector::doSelection(
 
 
     // Tournament selection
-    for (size_t i = 0; i < nbAgentsInTournament;
+    for (size_t i = 0; i < nbIndividualsInTournament;
          i += params->tournament.sizeTournament) {
         size_t end = std::min(
             static_cast<size_t>(i + params->tournament.sizeTournament),
-            nbAgentsInTournament);
+            nbIndividualsInTournament);
         auto subrangeBegin = elements.begin() + i;
         auto subrangeEnd = elements.begin() + end;
 
@@ -51,7 +51,7 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->getPopulation().deleteAgent(itWorst->second, graph);
+            this->getPopulation().deleteIndividual(itWorst->second, graph);
             
 
             subMap.erase(itWorst);
@@ -64,45 +64,45 @@ void Selector::TournamentSelector::doSelection(
 }
 
 void Selector::TournamentSelector::addToVerticesToDelete(
-    const Representation::Individual& agent)
+    const Representation::Individual& individual)
 {
-    this->agentsToDelete.insert(agent);
+    this->individualsToDelete.insert(individual);
 }
 
 std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::updateContext() const 
 {
     std::unique_ptr<SelectionContext> context = std::move(Selector::updateContext());
 
-    const auto& agentsToDeleteRef = this->agentsToDelete;
+    const auto& individualsToDeleteRef = this->individualsToDelete;
 
-    context->preExistingAgents.erase(
+    context->preExistingIndividuals.erase(
         std::remove_if(
-            context->preExistingAgents.begin(),
-            context->preExistingAgents.end(),
-            [agentsToDeleteRef](const Representation::Individual& agent) -> bool {
-                return agentsToDeleteRef.find(agent) !=
-                       agentsToDeleteRef.end();
+            context->preExistingIndividuals.begin(),
+            context->preExistingIndividuals.end(),
+            [individualsToDeleteRef](const Representation::Individual& individual) -> bool {
+                return individualsToDeleteRef.find(individual) !=
+                       individualsToDeleteRef.end();
             }),
-        context->preExistingAgents.end());
+        context->preExistingIndividuals.end());
 
     if (!params->tournament.areElitesReproductible) {
-        // The agent not set to be deleted are not used during evolution
-        context->agentsClonable.erase(
+        // The individual not set to be deleted are not used during evolution
+        context->individualsClonable.erase(
             std::remove_if(
-                context->agentsClonable.begin(),
-                context->agentsClonable.end(),
-                [agentsToDeleteRef](const Representation::Individual& agent) -> bool {
-                    return agentsToDeleteRef.find(agent) ==
-                           agentsToDeleteRef.end();
+                context->individualsClonable.begin(),
+                context->individualsClonable.end(),
+                [individualsToDeleteRef](const Representation::Individual& individual) -> bool {
+                    return individualsToDeleteRef.find(individual) ==
+                           individualsToDeleteRef.end();
                 }),
-            context->agentsClonable.end());
+            context->individualsClonable.end());
     }
-    else if (context->agentsClonable.size() > 0) {
-        context->nbAgentsToCreate -=
-            context->preExistingAgents.size();
+    else if (context->individualsClonable.size() > 0) {
+        context->nbIndividualsToCreate -=
+            context->preExistingIndividuals.size();
     }
 
-    context->nbAgentsToCreate += context->agentsClonable.size();
+    context->nbIndividualsToCreate += context->individualsClonable.size();
 
     return context;
 }
@@ -110,19 +110,19 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
 void Selector::TournamentSelector::updateAfterPopulate(EvoGraph::Graph& graph)
 {
     // Remove vertex to be deleted
-    for (auto agent : this->agentsToDelete) {
-        auto mapIterator = this->resultsPerAgent.find(agent);
-        if (mapIterator != this->resultsPerAgent.end()) {
+    for (auto individual : this->individualsToDelete) {
+        auto mapIterator = this->resultsPerIndividual.find(individual);
+        if (mapIterator != this->resultsPerIndividual.end()) {
             this->removeFromSavedResults((*mapIterator).first);
         }
 
-        this->getPopulation().deleteAgent(agent, graph);
+        this->getPopulation().deleteIndividual(individual, graph);
     }
-    this->agentsToDelete.clear();
+    this->individualsToDelete.clear();
 }
 
 const std::set<std::reference_wrapper<const Representation::Individual>>& Selector::TournamentSelector::
-    getAgentsToDelete()
+    getIndividualsToDelete()
 {
-    return this->agentsToDelete;
+    return this->individualsToDelete;
 }

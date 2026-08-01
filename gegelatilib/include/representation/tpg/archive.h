@@ -59,8 +59,8 @@ namespace Representation::TPG {
      */
     typedef struct ArchiveRecording
     {
-        /// Pointer to the agent Program. This pointer may point to a freed agent.
-        const Individual* agent;
+        /// Pointer to the individual Program. This pointer may point to a freed individual.
+        const Individual* individual;
 
         /// Hash of the set of DataHandler for this recording
         const size_t dataHash;
@@ -203,7 +203,7 @@ namespace Representation::TPG {
          * If an identical recording is already in the Archive (same hash, same
          * Program), the recording is not added.
          *
-         * \param[in] agent the agent Program associated to this recording.
+         * \param[in] individual the individual Program associated to this recording.
          * \param[in] dHandler the set of dataHandler the Program worked on to
          *                     generate the associated result.
          * \param[in] result double value produced by the Program.
@@ -211,7 +211,7 @@ namespace Representation::TPG {
          *                   insertion.
          */
         virtual void addRecording(
-            const Individual& agent,
+            const Individual& individual,
             const std::vector<std::reference_wrapper<const Data::DataHandler>>&
                 dHandler,
             double result, bool forced = false);

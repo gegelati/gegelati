@@ -57,10 +57,10 @@ namespace Representation {
     typedef struct RepresentationParameters
     {
         /// JSon comment
-        inline static const std::string nbAgentsComment =
-            "// Number of agent for the evolution of the population"
+        inline static const std::string nbIndividualsComment =
+            "// Number of individual for the evolution of the population"
             "// \"nbIndividuals\" : 100, // Default value";
-        /// Number of agent for the evolution of the population
+        /// Number of individual for the evolution of the population
         size_t nbIndividuals = 100;
 
         /// JSon comment

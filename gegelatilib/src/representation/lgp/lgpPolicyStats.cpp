@@ -68,11 +68,11 @@ void Representation::LGP::LGPPolicyStats::analyzeLine(const LGPLine& line)
 
 }
 
-void Representation::LGP::LGPPolicyStats::analyzePolicy(const Individual& agent)
+void Representation::LGP::LGPPolicyStats::analyzePolicy(const Individual& individual)
 {
 
-    // Get tpgIndividual if agent is one, else throw
-    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(agent);
+    // Get tpgIndividual if individual is one, else throw
+    const LgpIndividual& lgpIndividual = dynamic_cast<const LgpIndividual&>(individual);
     if (&lgpIndividual == nullptr) {
         throw std::invalid_argument("PolicyStats can only analyze LgpIndividual");
     }

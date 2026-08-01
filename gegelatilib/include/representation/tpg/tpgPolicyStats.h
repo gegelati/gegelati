@@ -55,12 +55,12 @@ namespace Representation::TPG {
          * Analyze the policy starting from the given Individual.
          *
          * This method explores the Graph starting from the given Individual,
-         * and analyzes all Team, Action and other agents encountered along the
+         * and analyzes all Team, Action and other individuals encountered along the
          * way.
          *
          * The method updates the following stats:
          */
-        virtual void analyzePolicy(const Individual& agent) override;
+        virtual void analyzePolicy(const Individual& individual) override;
 
         /**
          * \brief TPG got no specific info to print, so we just return the name of the program sub-representation.

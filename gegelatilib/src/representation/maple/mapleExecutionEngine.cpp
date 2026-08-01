@@ -4,13 +4,13 @@
 
 std::vector<double> Representation::Maple::MapleExecutionEngine::execute()
 {
-    const MapleIndividual& mapleIndividual = dynamic_cast<const MapleIndividual&>((*this->executedAgent).get());
+    const MapleIndividual& mapleIndividual = dynamic_cast<const MapleIndividual&>((*this->executedIndividual).get());
     if(&mapleIndividual == nullptr){
-        throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute an agent which is not a Maple agent");
+        throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute an individual which is not a Maple individual");
     }
     const EvoGraph::Team& teamVertex = dynamic_cast<const EvoGraph::Team&>(mapleIndividual.getVertex());
     if(&teamVertex == nullptr){
-        throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent a team vertex");
+        throw std::runtime_error("Representation::Maple::MapleExecutionEngine::execute trying to execute a Maple individual which does not represent a team vertex");
     }
 
     this->actionValues.clear();

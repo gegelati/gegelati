@@ -43,30 +43,30 @@
 #include "util/timestamp.h"
 #include "data/demangle.h"
 
-void File::GraphDotExporter::printAgent(const Representation::Individual& agentProgram){
+void File::GraphDotExporter::printIndividual(const Representation::Individual& individualProgram){
 
-    // Find corresponding representation to the agent and print it
-    auto it = this->mapRepresentations.find(agentProgram.getRepresentationID());
+    // Find corresponding representation to the individual and print it
+    auto it = this->mapRepresentations.find(individualProgram.getRepresentationID());
     if(it != this->mapRepresentations.end()){
         const Representation::Representation& representation = it->second;
-        if(representation.containsAgent(agentProgram)){
+        if(representation.containsIndividual(individualProgram)){
             std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
-            representation.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
+            representation.printIndividual(individualProgram, this->pFile, this->offset, this->printedIndividualID, elements);
 
-            // Print the elements collected during the printAgent call
+            // Print the elements collected during the printIndividual call
             for(const EvoGraph::Element& element : elements){
                 this->printElement(element);
                 if(auto vertex = dynamic_cast<const EvoGraph::Vertex*>(&element)){
                     std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) ? "T" : "A";
                     fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",
-                            offset.c_str(), agentProgram.getAgentID(), srcLetter.c_str(), vertex->getVertexID());
+                            offset.c_str(), individualProgram.getIndividualID(), srcLetter.c_str(), vertex->getVertexID());
                 }
             }
         } else {
-            throw std::runtime_error("File::GraphDotExporter::printAgent agent not in the representation");
+            throw std::runtime_error("File::GraphDotExporter::printIndividual individual not in the representation");
         }
     } else {
-        throw std::runtime_error("File::GraphDotExporter::printAgent unknown representation");
+        throw std::runtime_error("File::GraphDotExporter::printIndividual unknown representation");
     }
 }
 
@@ -106,12 +106,12 @@ void File::GraphDotExporter::printVertex(const EvoGraph::Vertex& vertex)
         // Print the link between the vertex and its program if it has one
         if(vertex.hasProgram()){
 
-            // Print the potential agent program associated to the vertex
-            this->printAgent(vertex.getProgram());
+            // Print the potential individual program associated to the vertex
+            this->printIndividual(vertex.getProgram());
 
             std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) ? "T" : "A";
             fprintf(pFile, "%s%s%" PRIu64 " -> P%" PRIu64 " [style=dashed]\n",
-                    this->offset.c_str(), srcLetter.c_str(), vertex.getVertexID(), vertex.getProgram().getAgentID());
+                    this->offset.c_str(), srcLetter.c_str(), vertex.getVertexID(), vertex.getProgram().getIndividualID());
         }
 
         // Print outgoing edges
@@ -161,11 +161,11 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
         std::string destLetter = (dynamic_cast<const EvoGraph::Team*>(&edge.getDestination()) != nullptr) ? "T" : "A";
 
         if(edge.hasProgram()){
-            // Print the potential agent program associated to the edge
-            this->printAgent(edge.getProgram());
+            // Print the potential individual program associated to the edge
+            this->printIndividual(edge.getProgram());
 
             fprintf(pFile, "%s%s%" PRIu64 " -> P%" PRIu64 " -> %s%" PRIu64 "\n",
-                    this->offset.c_str(), srcLetter.c_str(), srcID, edge.getProgram().getAgentID(), destLetter.c_str(), destID);
+                    this->offset.c_str(), srcLetter.c_str(), srcID, edge.getProgram().getIndividualID(), destLetter.c_str(), destID);
         }
         else {
             fprintf(pFile, "%s%s%" PRIu64 " -> %s%" PRIu64 "\n",
@@ -252,11 +252,11 @@ void File::GraphDotExporter::printGraphFooter(const Representation::Representati
         this->printVertex(rootVertex);
     }
 
-    // Rank all the agents of main algoritms
+    // Rank all the individuals of main algoritms
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
-    // Main agents ids
-    for(const Representation::Individual& agent : representation.getPopulationCst().getAgents()){
-        fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
+    // Main individuals ids
+    for(const Representation::Individual& individual : representation.getPopulationCst().getIndividuals()){
+        fprintf(pFile, "P%" PRIu64 " ", individual.getIndividualID());
     }
     // Action root
     for (auto rootActionId : rootActionIDs) {
@@ -279,17 +279,17 @@ void File::GraphDotExporter::exportRepresentation(const char* filePath, const Re
 
     this->printedVertexID.clear();
     this->printedEdgeID.clear();
-    this->printedAgentID.clear();
+    this->printedIndividualID.clear();
     this->printedRepresentationsID.clear();
 
     // Print the representations header
     this->printRepresentationsSubGraph(representation);
 
-    // Print each agent representations
-    // If agent uses some vertices or edges, it will print them
-    // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(const Representation::Individual& agent : representation.getPopulationCst().getAgents()){
-        this->printAgent(agent);
+    // Print each individual representations
+    // If individual uses some vertices or edges, it will print them
+    // Then if vertices and/or edges uses program individuals it will print them, and so on...
+    for(const Representation::Individual& individual : representation.getPopulationCst().getIndividuals()){
+        this->printIndividual(individual);
     }
 
 
@@ -303,7 +303,7 @@ void File::GraphDotExporter::exportRepresentation(const char* filePath, const Re
     fclose(pFile);
 }
 
-void File::GraphDotExporter::exportAgent(const char* filePath, const Representation::Individual& agent, const Representation::Representation& representation)
+void File::GraphDotExporter::exportIndividual(const char* filePath, const Representation::Individual& individual, const Representation::Representation& representation)
 {
     if ((pFile = fopen(filePath, "w")) == NULL) {
         throw std::runtime_error("Could not open file " +
@@ -314,17 +314,17 @@ void File::GraphDotExporter::exportAgent(const char* filePath, const Representat
 
     this->printedVertexID.clear();
     this->printedEdgeID.clear();
-    this->printedAgentID.clear();
+    this->printedIndividualID.clear();
     this->printedRepresentationsID.clear();
 
-    if(representation.containsAgent(agent)){
+    if(representation.containsIndividual(individual)){
         this->printRepresentationsSubGraph(representation);
     } else {
         throw std::runtime_error("File::GraphDotExporter::printSubGraph: Individual should belong to the specified representation");
     }
 
-    // Print the agent given as parameter, its vertices and edges, and the potential agent programs associated to these vertices and edges.
-    this->printAgent(agent);
+    // Print the individual given as parameter, its vertices and edges, and the potential individual programs associated to these vertices and edges.
+    this->printIndividual(individual);
 
     // Print specific footer (no need for rank, since there is a single root)
     this->offset = "";

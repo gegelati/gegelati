@@ -65,7 +65,7 @@ class TPGTest : public ::testing::Test
     Instructions::Set set;
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e = NULL;
     Parameters params;
-    std::shared_ptr<Representation::Individual> sharedProgramAgent;
+    std::shared_ptr<Representation::Individual> sharedProgramIndividual;
 
     virtual void SetUp()
     {
@@ -82,7 +82,7 @@ class TPGTest : public ::testing::Test
         params.representation.lgp.nbRegisters = 8;
         params.representation.lgp.nbProgramConstant = 1;
         e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
-        sharedProgramAgent =
+        sharedProgramIndividual =
             std::make_shared<Representation::LGP::LgpIndividual>(*e, Output::OutputHandler(1), (uint64_t)0);
     }
 
@@ -114,7 +114,7 @@ TEST_F(TPGTest, EdgeConstructorDestructor)
 
     EvoGraph::Edge* edge;
 
-    ASSERT_NO_THROW(edge = new EvoGraph::Edge(*team, *action, *sharedProgramAgent));
+    ASSERT_NO_THROW(edge = new EvoGraph::Edge(*team, *action, *sharedProgramIndividual));
 
     ASSERT_NO_THROW(delete edge);
 }
@@ -124,7 +124,7 @@ TEST_F(TPGTest, VertexEdgesSettersGetters)
     auto team = std::make_shared<EvoGraph::Team>();
     auto action = std::make_shared<EvoGraph::Action>(0);
 
-    auto edge = std::make_shared<EvoGraph::Edge>(*team, *action, *sharedProgramAgent);
+    auto edge = std::make_shared<EvoGraph::Edge>(*team, *action, *sharedProgramIndividual);
 
     ASSERT_NO_THROW(team->addOutgoingEdge(*edge))
         << "Adding an outgoing edge to a Team vertex failed.";
@@ -179,18 +179,18 @@ TEST_F(TPGTest, EdgeGetSetProgram)
     auto team = std::make_shared<EvoGraph::Team>();
     auto action = std::make_shared<EvoGraph::Action>(0);
 
-    std::shared_ptr<EvoGraph::Edge> constEdge = std::make_shared<EvoGraph::Edge>(*team, *action, *sharedProgramAgent);
+    std::shared_ptr<EvoGraph::Edge> constEdge = std::make_shared<EvoGraph::Edge>(*team, *action, *sharedProgramIndividual);
     auto& constProg = constEdge->getProgram();
-    ASSERT_EQ(constProg, *sharedProgramAgent)
+    ASSERT_EQ(constProg, *sharedProgramIndividual)
         << "Program accessor on const Edge returns a Program different from "
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
-    std::shared_ptr<Representation::Individual> programAgent2 =
+    std::shared_ptr<Representation::Individual> programIndividual2 =
             std::make_shared<Representation::LGP::LgpIndividual>(*e, Output::OutputHandler(1), 0);
     
-    constEdge->setProgram(*programAgent2);
-    ASSERT_EQ(constEdge->getProgram(), *programAgent2)
+    constEdge->setProgram(*programIndividual2);
+    ASSERT_EQ(constEdge->getProgram(), *programIndividual2)
         << "Program accessor on Edge returns a Program different from the "
            "one set before.";
 }
@@ -202,7 +202,7 @@ TEST_F(TPGTest, EdgeGetSetSourceAndDestination)
     EvoGraph::Action action0(0);
     EvoGraph::Action action1(1);
 
-    auto edge = std::make_shared<EvoGraph::Edge>(team0, action0, *sharedProgramAgent);
+    auto edge = std::make_shared<EvoGraph::Edge>(team0, action0, *sharedProgramIndividual);
 
     ASSERT_EQ(team0, edge->getSource())
         << "Source of the Edge differs from the one given at construction.";
@@ -237,7 +237,7 @@ TEST_F(TPGTest, GraphFactory)
     ASSERT_NE(team, nullptr) << "Created Team should not be null.";
 
     ASSERT_NO_THROW(
-        edge = std::move(factory.createEdge(*team, *action, *sharedProgramAgent)))
+        edge = std::move(factory.createEdge(*team, *action, *sharedProgramIndividual)))
         << "GraphELementFactory could not build a Edge.";
     ASSERT_NE(edge, nullptr) << "Created Edge should not be null.";
 
@@ -309,17 +309,17 @@ TEST_F(TPGTest, GraphAddEdge)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
 
-    ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent))
+    ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual))
         << "Adding an edge between a team and an action failed.";
     // Add with a vertex not in the graph.
     EvoGraph::Action vertex2(2);
-    ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, *sharedProgramAgent),
+    ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, *sharedProgramIndividual),
                  std::runtime_error)
         << "Adding an edge with a vertex not from the graph should have "
            "failed.";
 
     // Add the edge from the action
-    ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, *sharedProgramAgent),
+    ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, *sharedProgramIndividual),
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
 
@@ -332,7 +332,7 @@ TEST_F(TPGTest, GraphGetEdges)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
     ASSERT_EQ(tpg.getEdges().size(), 1)
         << "Edges of the graph have incorrect size after successful add.";
 
@@ -356,7 +356,7 @@ TEST_F(TPGTest, GraphGetEdges)
               1);
 
     // Attempt an impossible add.
-    ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, *sharedProgramAgent),
+    ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, *sharedProgramIndividual),
                  std::runtime_error)
         << "An exception should be thrown when adding an impossible edge.";
 
@@ -370,7 +370,7 @@ TEST_F(TPGTest, GraphRemoveEdge)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
 
-    const auto& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const auto& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
 
     // Remove the edge
@@ -386,7 +386,7 @@ TEST_F(TPGTest, GraphRemoveEdge)
     ASSERT_EQ(vertex1.getIncomingEdges().size(), 0)
         << "Destination vertex was not disconnected from the removed Edge.";
     // Check that the edge was successfully deleted
-    ASSERT_EQ(sharedProgramAgent.use_count(), 1)
+    ASSERT_EQ(sharedProgramIndividual.use_count(), 1)
         << "Edge was not properly deleted, its shared pointer is still active.";
     // Remove an edge that does not exist anymore
     ASSERT_THROW(tpg.removeEdge(edge), std::runtime_error)
@@ -420,7 +420,7 @@ TEST_F(TPGTest, GraphRemoveVertex)
            "Vertex not from the graph.";
 
     // Add a new edge to test removal of vertex connectet to an edge.
-    tpg.addNewEdge(vertex2, vertex1, *sharedProgramAgent);
+    tpg.addNewEdge(vertex2, vertex1, *sharedProgramIndividual);
     ASSERT_NO_THROW(tpg.removeVertex(vertex2))
         << "Removing a vertex from the graph failed.";
     // Check that edge was removed from the graph
@@ -435,7 +435,7 @@ TEST_F(TPGTest, GraphRemoveVertex)
     // For code coverage, test when the destination vertex of an edge is removed
     // Add a new edge to test removal of vertex connectet to an edge.
     const EvoGraph::Team & vertex4 = tpg.addNewTeam();
-    tpg.addNewEdge(vertex4, vertex1, *sharedProgramAgent);
+    tpg.addNewEdge(vertex4, vertex1, *sharedProgramIndividual);
     ASSERT_NO_THROW(tpg.removeVertex(vertex1))
         << "Removing a vertex from the graph failed.";
     // Check that edge was removed from the graph
@@ -453,7 +453,7 @@ TEST_F(TPGTest, GraphClear)
     EvoGraph::Graph tpg;
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     ASSERT_NO_THROW(tpg.clear()) << "Clearing a non empty graph failed.";
     ASSERT_EQ(tpg.getNbVertices(), 0)
@@ -467,7 +467,7 @@ TEST_F(TPGTest, GraphGetNbRootVertices)
     EvoGraph::Graph tpg;
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     ASSERT_EQ(tpg.getNbRootVertices(), 1)
         << "Number of roots of the TPG is incorrect.";
@@ -479,7 +479,7 @@ TEST_F(TPGTest, GraphGetRootVertices)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
     ASSERT_EQ(tpg.getRootVertices().size(), 1)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootVertices().at(0), vertex0)
@@ -501,7 +501,7 @@ TEST_F(TPGTest, GraphCloneVertex)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     const EvoGraph::Action & vertex1 = tpg.addNewAction(4);
 
-    const auto& edge0 = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const auto& edge0 = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     // Clone the team
     const EvoGraph::Vertex* cloneVertex;
@@ -545,7 +545,7 @@ TEST_F(TPGTest, GraphCloneEdge)
     EvoGraph::Graph tpg;
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     auto& vertex1 = tpg.addNewAction(4);
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     const EvoGraph::Edge* clone;
     ASSERT_NO_THROW(clone = &tpg.cloneEdge(edge))
@@ -579,7 +579,7 @@ TEST_F(TPGTest, GraphCloneEdge)
 
 
     // Check throw behavior
-    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramAgent);
+    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramIndividual);
     ASSERT_THROW(tpg.cloneEdge(newEdge), std::runtime_error)
         << "Cloning an edge not from the graph should not succeed.";
 
@@ -591,7 +591,7 @@ TEST_F(TPGTest, GraphSetEdgeDestination)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     auto& vertex1 = tpg.addNewAction(4);
     auto& vertex2 = tpg.addNewAction(4);
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     // Change the destination of the edge
     ASSERT_TRUE(tpg.setEdgeDestination(edge, vertex2))
@@ -627,7 +627,7 @@ TEST_F(TPGTest, GraphSetEdgeDestination)
         << "This vertex should not have incomingEdge after destination change.";
 
     // Check failure
-    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramAgent);
+    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramIndividual);
     ASSERT_FALSE(tpg.setEdgeDestination(newEdge, vertex2))
         << "Changing destination of an edge not within the graph should not "
            "succeed.";
@@ -639,7 +639,7 @@ TEST_F(TPGTest, GraphSetEdgeSource)
     const EvoGraph::Team & vertex0 = tpg.addNewTeam();;
     auto& vertex1 = tpg.addNewAction(4);
     auto& vertex2 = tpg.addNewTeam();
-    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
 
     // Change the destination of the edge
     ASSERT_TRUE(tpg.setEdgeSource(edge, vertex2))
@@ -675,7 +675,7 @@ TEST_F(TPGTest, GraphSetEdgeSource)
         << "This vertex should not have incomingEdge after source change.";
 
     // Check failure
-    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramAgent);
+    EvoGraph::Edge newEdge(vertex0, vertex1, *sharedProgramIndividual);
     ASSERT_FALSE(tpg.setEdgeSource(newEdge, vertex2))
         << "Changing source of an edge not within the graph should not "
            "succeed.";
@@ -690,11 +690,11 @@ TEST_F(TPGTest, TPGMoveOperator)
     auto& vertex0 = source.addNewTeam();
     auto& vertex1 = source.addNewAction(4);
     auto& vertex2 = source.addNewTeam();
-    auto& edge = source.addNewEdge(vertex0, vertex1, *sharedProgramAgent);
+    auto& edge = source.addNewEdge(vertex0, vertex1, *sharedProgramIndividual);
     auto& edge2 =
-        source.addNewEdge(vertex2, vertex1, *sharedProgramAgent);
+        source.addNewEdge(vertex2, vertex1, *sharedProgramIndividual);
     auto& edge3 =
-        source.addNewEdge(vertex0, vertex2, *sharedProgramAgent);
+        source.addNewEdge(vertex0, vertex2, *sharedProgramIndividual);
 
     /*
      *	 T2
@@ -729,9 +729,9 @@ TEST_F(TPGTest, VertexHasSameAssessedActions)
     auto& action1 = tpg.addNewAction(1);
     auto& action2 = tpg.addNewAction(2);
     auto& action3 = tpg.addNewAction(3);
-    tpg.addNewEdge(team, action1, *sharedProgramAgent);
-    tpg.addNewEdge(team, action2, *sharedProgramAgent);
-    tpg.addNewEdge(team, action3, *sharedProgramAgent);
+    tpg.addNewEdge(team, action1, *sharedProgramIndividual);
+    tpg.addNewEdge(team, action2, *sharedProgramIndividual);
+    tpg.addNewEdge(team, action3, *sharedProgramIndividual);
     tpg.updateAssessedActions(team);
 
     // Case 1: Intersection is not empty (should return true)
@@ -778,8 +778,8 @@ TEST_F(TPGTest, GraphUpdateAssessedActions)
     auto& team1 = tpg.addNewTeam(); 
     auto& action1 = tpg.addNewAction(1);
     auto& action2 = tpg.addNewAction(2);
-    tpg.addNewEdge(team1, action1, *sharedProgramAgent);
-    tpg.addNewEdge(team1, action2, *sharedProgramAgent);
+    tpg.addNewEdge(team1, action1, *sharedProgramIndividual);
+    tpg.addNewEdge(team1, action2, *sharedProgramIndividual);
 
     // Should update without throwing
     ASSERT_NO_THROW(tpg.updateAssessedActions(team1));
@@ -792,13 +792,13 @@ TEST_F(TPGTest, GraphUpdateAssessedActions)
     auto& team2 = tpg.addNewTeam(); 
     auto& action3 = tpg.addNewAction(1);
     auto& action4 = tpg.addNewAction(3);
-    tpg.addNewEdge(team2, action3, *sharedProgramAgent);
-    tpg.addNewEdge(team2, action4, *sharedProgramAgent);
+    tpg.addNewEdge(team2, action3, *sharedProgramIndividual);
+    tpg.addNewEdge(team2, action4, *sharedProgramIndividual);
 
     // Vertex should contain action 1, 2 and 3 now.
     auto& vertex = tpg.addNewTeam();
-    tpg.addNewEdge(vertex, team1, *sharedProgramAgent);
-    tpg.addNewEdge(vertex, team2, *sharedProgramAgent);
+    tpg.addNewEdge(vertex, team1, *sharedProgramIndividual);
+    tpg.addNewEdge(vertex, team2, *sharedProgramIndividual);
 
     // Should update without throwing
     ASSERT_NO_THROW(tpg.updateAssessedActions(team2));
@@ -819,8 +819,8 @@ TEST_F(TPGTest, GraphUpdateAllAssessedActions)
     auto& team1 = tpg.addNewTeam(); 
     auto& action1 = tpg.addNewAction(1);
     auto& action2 = tpg.addNewAction(2);
-    tpg.addNewEdge(team1, action1, *sharedProgramAgent);
-    tpg.addNewEdge(team1, action2, *sharedProgramAgent);
+    tpg.addNewEdge(team1, action1, *sharedProgramIndividual);
+    tpg.addNewEdge(team1, action2, *sharedProgramIndividual);
 
     // Should update all actions without throwing
     ASSERT_NO_THROW(tpg.updateAllAssessedActions());
@@ -838,9 +838,9 @@ TEST_F(TPGTest, GraphOrderActionEdges)
     auto& action1 = tpg.addNewAction(5);
     auto& action2 = tpg.addNewAction(2);
     auto& action3 = tpg.addNewAction(9);
-    tpg.addNewEdge(team1, action1, *sharedProgramAgent);
-    tpg.addNewEdge(team1, action2, *sharedProgramAgent);
-    tpg.addNewEdge(team1, action3, *sharedProgramAgent);
+    tpg.addNewEdge(team1, action1, *sharedProgramIndividual);
+    tpg.addNewEdge(team1, action2, *sharedProgramIndividual);
+    tpg.addNewEdge(team1, action3, *sharedProgramIndividual);
 
     // Call orderActionEdges (should not throw)
     ASSERT_NO_THROW(tpg.orderActionEdges(team1));
@@ -902,9 +902,9 @@ TEST_F(TPGTest, GraphEdgeID)
     auto& team1 = tpg.addNewTeam();
     auto& action0 = tpg.addNewAction(0);
 
-    auto& edge0 = tpg.addNewEdge(team0, team1, *sharedProgramAgent);
-    auto& edge1 = tpg.addNewEdge(team1, action0, *sharedProgramAgent);
-    auto& edge2 = tpg.addNewEdge(team1, action0, *sharedProgramAgent);
+    auto& edge0 = tpg.addNewEdge(team0, team1, *sharedProgramIndividual);
+    auto& edge1 = tpg.addNewEdge(team1, action0, *sharedProgramIndividual);
+    auto& edge2 = tpg.addNewEdge(team1, action0, *sharedProgramIndividual);
 
     ASSERT_EQ(edge0.getEdgeID(), 0) << "ID of edge is incorrect.";
     ASSERT_EQ(edge1.getEdgeID(), 1) << "ID of edge is incorrect.";

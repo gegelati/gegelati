@@ -125,7 +125,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.5, params.representation.maple.pMutateActionProgram);
     ASSERT_EQ(0.9, params.representation.maple.pSwapActionProgram);
     ASSERT_EQ(3, params.representation.maple.nbActionEdgeInit);
-    ASSERT_EQ(0.2, params.representation.maple.pCrossAgents);
+    ASSERT_EQ(0.2, params.representation.maple.pCrossIndividuals);
     ASSERT_EQ(0.5, params.representation.maple.pCrossPrograms);
 
     ASSERT_EQ(3.0, params.representation.lgp.nbRegisters);
@@ -276,8 +276,8 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.representation.maple.pSwapActionProgram);
     ASSERT_EQ(params.representation.maple.nbActionEdgeInit,
               params2.representation.maple.nbActionEdgeInit);
-    ASSERT_EQ(params.representation.maple.pCrossAgents,
-              params2.representation.maple.pCrossAgents);
+    ASSERT_EQ(params.representation.maple.pCrossIndividuals,
+              params2.representation.maple.pCrossIndividuals);
     ASSERT_EQ(params.representation.maple.pCrossPrograms,
               params2.representation.maple.pCrossPrograms);
 

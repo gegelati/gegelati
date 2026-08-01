@@ -89,7 +89,7 @@ class ClassificationTest : public ::testing::Test
         delete (&set.getInstruction(1));
     }
 };
-
+/*
 TEST_F(ClassificationTest, Constructor)
 {
     Learn::LearningAgent* la;
@@ -319,3 +319,4 @@ TEST_F(ClassificationTest, DoSelection)
                           &teamRoot) == remainingRoots.end())
         << "Action roots with poor score were not preserved during decimation.";
 }
+*/

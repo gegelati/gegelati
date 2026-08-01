@@ -2,30 +2,30 @@
 
 #include "representation/population.h"
 
-std::set<std::unique_ptr<Representation::Individual>>::iterator Representation::Population::getAgentFromCst(const Individual& agent)
+std::set<std::unique_ptr<Representation::Individual>>::iterator Representation::Population::getIndividualFromCst(const Individual& individual)
 {
-    auto iterator = this->agents.find(&agent);
-    if(iterator == this->agents.end() || (*iterator).get() != &agent){
-        throw std::invalid_argument("Population::getAgentFromCst: the given agent is not managed by this population.");
+    auto iterator = this->individuals.find(&individual);
+    if(iterator == this->individuals.end() || (*iterator).get() != &individual){
+        throw std::invalid_argument("Population::getIndividualFromCst: the given individual is not managed by this population.");
     }
 
     return iterator;
 }
 
-bool Representation::Population::containsAgent(const Individual& agent) const
+bool Representation::Population::containsIndividual(const Individual& individual) const
 {
-    auto iterator = this->agents.find(&agent);
-    return iterator != this->agents.end() && (*iterator).get() == &agent;
+    auto iterator = this->individuals.find(&individual);
+    return iterator != this->individuals.end() && (*iterator).get() == &individual;
 }
 
-bool Representation::Population::isAgentAccessible(const Individual& agent) const
+bool Representation::Population::isIndividualAccessible(const Individual& individual) const
 {
-    if(this->containsAgent(agent)){
+    if(this->containsIndividual(individual)){
         return true;
     }
 
     for(const auto& population: this->aggregatedPopulations){
-        if(population.get().containsAgent(agent)){
+        if(population.get().containsIndividual(individual)){
             return true;
         }
     }
@@ -77,49 +77,49 @@ const std::vector<std::reference_wrapper<const Representation::Population>>& Rep
     return this->aggregatedPopulations;
 }
 
-const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::Population::getAgents() const
+const std::vector<std::reference_wrapper<const Representation::Individual>> Representation::Population::getIndividuals() const
 {
     std::vector<std::reference_wrapper<const Representation::Individual>> refs;
-    for (const auto& ptr : agents) {
+    for (const auto& ptr : individuals) {
         refs.emplace_back(std::cref(*ptr));
     }
     return refs;
 }
 
-void Representation::Population::deleteAgent(const Individual& agent, EvoGraph::Graph& graph)
+void Representation::Population::deleteIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    this->emptyAgent(agent, graph);
-    this->agents.erase(this->getAgentFromCst(agent));
+    this->emptyIndividual(individual, graph);
+    this->individuals.erase(this->getIndividualFromCst(individual));
 }
 
-void Representation::Population::clearAgents(EvoGraph::Graph& graph)
+void Representation::Population::clearIndividuals(EvoGraph::Graph& graph)
 {
-    while(this->agents.size() > 0){
-        this->deleteAgent(**this->agents.begin(), graph);
+    while(this->individuals.size() > 0){
+        this->deleteIndividual(**this->individuals.begin(), graph);
     }
 
     // Also clear sub populations;
     for(const auto& pair : this->subPopulations) {
-        pair.second.get().clearAgents(graph);
+        pair.second.get().clearIndividuals(graph);
     }
 }
 
 
-void Representation::Population::setNewAgentID(const Individual& agent, uint64_t newID)
+void Representation::Population::setNewIndividualID(const Individual& individual, uint64_t newID)
 {
-    // Check that the agent to modify exists in the population
-    auto itAgent = this->getAgentFromCst(agent);
+    // Check that the individual to modify exists in the population
+    auto itIndividual = this->getIndividualFromCst(individual);
 
     // Check that no other vertex has the same ID
-    for (const auto& vptr : this->agents) {
-        if (vptr.get() != itAgent->get() && vptr->getAgentID() == newID) {
-            throw std::runtime_error("Another agent with the same ID already "
+    for (const auto& vptr : this->individuals) {
+        if (vptr.get() != itIndividual->get() && vptr->getIndividualID() == newID) {
+            throw std::runtime_error("Another individual with the same ID already "
                                      "exists in the population.");
         }
     }
 
-    // Modify the ID, but removed and add again the agent for that.
-    auto tmp = this->agents.extract(itAgent);
-    tmp.value()->setAgentID(newID);
-    this->agents.insert(std::move(tmp));
+    // Modify the ID, but removed and add again the individual for that.
+    auto tmp = this->individuals.extract(itIndividual);
+    tmp.value()->setIndividualID(newID);
+    this->individuals.insert(std::move(tmp));
 }

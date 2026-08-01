@@ -24,7 +24,7 @@ namespace Representation::ATPG {
     {
         protected:
 
-            /// ID of the program representation associated with the TPG agents.
+            /// ID of the program representation associated with the TPG individuals.
             uint64_t actionProgramRepresentationID;
 
         public:
@@ -81,11 +81,11 @@ namespace Representation::ATPG {
 
             
             /**
-             * \brief Inherited method to clear all the unused sub agents
+             * \brief Inherited method to clear all the unused sub individuals
              * 
-             * The sub agents are the agents used by the program sub-representation and the action sub-representation.
+             * The sub individuals are the individuals used by the program sub-representation and the action sub-representation.
              */
-            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubAgents() const override;
+            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubIndividuals() const override;
 
             /**
              * \brief Inherited method to create the policy stats of the representation
@@ -98,7 +98,7 @@ namespace Representation::ATPG {
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
+            virtual void printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const;
 
             /**
              * Copy and return a uniqure pointer of the representation

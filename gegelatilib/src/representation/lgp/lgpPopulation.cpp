@@ -1,123 +1,123 @@
 
 #include "representation/lgp/lgpPopulation.h"
 
-Representation::LGP::LgpIndividual& Representation::LGP::LGPPopulation::getLgpIndividualFromCst(const Individual& agent)
+Representation::LGP::LgpIndividual& Representation::LGP::LGPPopulation::getLgpIndividualFromCst(const Individual& individual)
 {
-    return dynamic_cast<LgpIndividual&>(**this->getAgentFromCst(agent));
+    return dynamic_cast<LgpIndividual&>(**this->getIndividualFromCst(individual));
 }
 
-const Representation::Individual& Representation::LGP::LGPPopulation::createAgent(EvoGraph::Graph& graph)
+const Representation::Individual& Representation::LGP::LGPPopulation::createIndividual(EvoGraph::Graph& graph)
 {
-    this->agents.insert(std::make_unique<LgpIndividual>(this->env, this->outputs, this->getRepresentationID()));
-    return **this->agents.rbegin();
+    this->individuals.insert(std::make_unique<LgpIndividual>(this->env, this->outputs, this->getRepresentationID()));
+    return **this->individuals.rbegin();
 }
 
-const Representation::Individual& Representation::LGP::LGPPopulation::copyAgent(const Individual& agent, EvoGraph::Graph& graph)
+const Representation::Individual& Representation::LGP::LGPPopulation::copyIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    const LgpIndividual* castedAgent = dynamic_cast<const LgpIndividual*>(&agent);
-    if(castedAgent == nullptr){
-        throw std::runtime_error("Representation::LGP::LGPPopulation::copyAgent: trying to copy an agent that is not a LgpIndividual.");
+    const LgpIndividual* castedIndividual = dynamic_cast<const LgpIndividual*>(&individual);
+    if(castedIndividual == nullptr){
+        throw std::runtime_error("Representation::LGP::LGPPopulation::copyIndividual: trying to copy an individual that is not a LgpIndividual.");
     }
-    LgpIndividual& newAgent = this->getLgpIndividualFromCst(this->createAgent(graph));
+    LgpIndividual& newIndividual = this->getLgpIndividualFromCst(this->createIndividual(graph));
 
-    for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
-        newAgent.addNewLine(castedAgent->getLine(idx));
-    }
-
-    for(size_t idx = 0; idx < castedAgent->getEnvironment().getNbConstants(); idx++){
-        this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
+    for(size_t idx = 0; idx < castedIndividual->getNbLines(); idx++){
+        newIndividual.addNewLine(castedIndividual->getLine(idx));
     }
 
-    for(size_t idx = 0; idx < castedAgent->getOutputIndices().size(); idx++) {
-        this->setOutputIndex(newAgent, castedAgent->getOutputIndices().at(idx), idx);
+    for(size_t idx = 0; idx < castedIndividual->getEnvironment().getNbConstants(); idx++){
+        this->setConstantAt(newIndividual, idx, castedIndividual->getConstantAt(idx));
     }
 
-    this->identifyIntrons(newAgent);
-    return **this->agents.rbegin();
+    for(size_t idx = 0; idx < castedIndividual->getOutputIndices().size(); idx++) {
+        this->setOutputIndex(newIndividual, castedIndividual->getOutputIndices().at(idx), idx);
+    }
+
+    this->identifyIntrons(newIndividual);
+    return **this->individuals.rbegin();
 }
 
-void Representation::LGP::LGPPopulation::clearAgentsIntrons()
+void Representation::LGP::LGPPopulation::clearIndividualsIntrons()
 {
-    for(const auto& agent: this->agents) {
-        this->clearAgentIntrons(*agent);
+    for(const auto& individual: this->individuals) {
+        this->clearIndividualIntrons(*individual);
     }
 }
 
-void Representation::LGP::LGPPopulation::clearAgentIntrons(const Individual& agent)
+void Representation::LGP::LGPPopulation::clearIndividualIntrons(const Individual& individual)
 {
-    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(agent);
-    this->identifyIntrons(agent);
+    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(individual);
+    this->identifyIntrons(individual);
 
     lgpIndividual.clearIntrons();
 }
 
-void Representation::LGP::LGPPopulation::emptyAgent(const Individual& agent, EvoGraph::Graph& graph)
+void Representation::LGP::LGPPopulation::emptyIndividual(const Individual& individual, EvoGraph::Graph& graph)
 {
-    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(agent);
+    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(individual);
     while (lgpIndividual.getNbLines() > 0) {
         lgpIndividual.removeLine(0);
     }
 }
 
-void Representation::LGP::LGPPopulation::setConstantAt(const Individual& agent, size_t index, const Data::Constant& value)
+void Representation::LGP::LGPPopulation::setConstantAt(const Individual& individual, size_t index, const Data::Constant& value)
 {
-    this->getLgpIndividualFromCst(agent).getConstantHandler().setDataAt(typeid(Data::Constant), index, value);
+    this->getLgpIndividualFromCst(individual).getConstantHandler().setDataAt(typeid(Data::Constant), index, value);
 }
 
-void Representation::LGP::LGPPopulation::removeLine(const Individual& agent, size_t index)
+void Representation::LGP::LGPPopulation::removeLine(const Individual& individual, size_t index)
 {
-    this->getLgpIndividualFromCst(agent).removeLine(index);
+    this->getLgpIndividualFromCst(individual).removeLine(index);
 }
 
-const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::addNewLine(const Individual& agent, size_t index)
+const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::addNewLine(const Individual& individual, size_t index)
 {
-    return this->getLgpIndividualFromCst(agent).addNewLine(index);
+    return this->getLgpIndividualFromCst(individual).addNewLine(index);
 }
 
-const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::addNewLine(const Individual& agent)
+const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::addNewLine(const Individual& individual)
 {
-    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(agent);
+    Representation::LGP::LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(individual);
     return lgpIndividual.addNewLine(lgpIndividual.getNbLines());
 }
 
-void Representation::LGP::LGPPopulation::addNewLine(const Individual& agent, const LGPLine& newLine)
+void Representation::LGP::LGPPopulation::addNewLine(const Individual& individual, const LGPLine& newLine)
 {
-    this->getLgpIndividualFromCst(agent).addNewLine(newLine);
+    this->getLgpIndividualFromCst(individual).addNewLine(newLine);
 }
 
-void Representation::LGP::LGPPopulation::addNewLine(const Individual& agent, const LGPLine& newLine, size_t index)
+void Representation::LGP::LGPPopulation::addNewLine(const Individual& individual, const LGPLine& newLine, size_t index)
 {
-    this->getLgpIndividualFromCst(agent).addNewLine(newLine, index);
+    this->getLgpIndividualFromCst(individual).addNewLine(newLine, index);
 }
 
-void Representation::LGP::LGPPopulation::swapLines(const Individual& agent, size_t index1, size_t index2)
+void Representation::LGP::LGPPopulation::swapLines(const Individual& individual, size_t index1, size_t index2)
 {
-    this->getLgpIndividualFromCst(agent).swapLines(index1, index2);
+    this->getLgpIndividualFromCst(individual).swapLines(index1, index2);
 }
 
-const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::getLine(const Individual& agent, size_t index) const
+const Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::getLine(const Individual& individual, size_t index) const
 {
-    if(this->containsAgent(agent)){
-         return dynamic_cast<const LgpIndividual&>(agent).getLine(index);
+    if(this->containsIndividual(individual)){
+         return dynamic_cast<const LgpIndividual&>(individual).getLine(index);
     } else {
-        throw std::runtime_error("Representation::LGP::LGPPopulation::getLine: the given agent is not in the population.");
+        throw std::runtime_error("Representation::LGP::LGPPopulation::getLine: the given individual is not in the population.");
     }
 }
 
 
-void Representation::LGP::LGPPopulation::setOutputIndex(const LgpIndividual& agent, size_t newOutputIndex, size_t location)
+void Representation::LGP::LGPPopulation::setOutputIndex(const LgpIndividual& individual, size_t newOutputIndex, size_t location)
 {
-    this->getLgpIndividualFromCst(agent).setOutputIndex(newOutputIndex, location);
+    this->getLgpIndividualFromCst(individual).setOutputIndex(newOutputIndex, location);
 }
 
-Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::getLineForMutation(const Individual& agent, size_t index)
+Representation::LGP::LGPLine& Representation::LGP::LGPPopulation::getLineForMutation(const Individual& individual, size_t index)
 {
-    return this->getLgpIndividualFromCst(agent).getLineForMutation(index);
+    return this->getLgpIndividualFromCst(individual).getLineForMutation(index);
 }
 
-uint64_t Representation::LGP::LGPPopulation::identifyIntrons(const Individual& agent)
+uint64_t Representation::LGP::LGPPopulation::identifyIntrons(const Individual& individual)
 {
-    LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(agent);
+    LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(individual);
 
 
     // Create fake registers to identify accessed addresses.
@@ -178,12 +178,12 @@ uint64_t Representation::LGP::LGPPopulation::identifyIntrons(const Individual& a
     return nbIntrons;
 }
 
-bool Representation::LGP::LGPPopulation::hasIdenticalBehavior(const Individual& agent1, const Individual& agent2) const
+bool Representation::LGP::LGPPopulation::hasIdenticalBehavior(const Individual& individual1, const Individual& individual2) const
 {
-    const LgpIndividual* lgpIndividual1 = dynamic_cast<const LgpIndividual*>(&agent1);
-    const LgpIndividual* lgpIndividual2 = dynamic_cast<const LgpIndividual*>(&agent2);
+    const LgpIndividual* lgpIndividual1 = dynamic_cast<const LgpIndividual*>(&individual1);
+    const LgpIndividual* lgpIndividual2 = dynamic_cast<const LgpIndividual*>(&individual2);
     if(lgpIndividual1 == nullptr || lgpIndividual2 == nullptr){
-        throw std::runtime_error("Representation::LGP::LGPPopulation::hasIdenticalBehavior: one of the agents is not a LgpIndividual");
+        throw std::runtime_error("Representation::LGP::LGPPopulation::hasIdenticalBehavior: one of the individuals is not a LgpIndividual");
     }
 
     size_t thisLineIdx = 0;
@@ -289,13 +289,13 @@ void Representation::LGP::LGPPopulation::readOperands(std::string& str, LGPLine&
     }
 }
 
-void Representation::LGP::LGPPopulation::readLines(std::string instructionsStr, const Individual& agent)
+void Representation::LGP::LGPPopulation::readLines(std::string instructionsStr, const Individual& individual)
 {
-    LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(agent);
+    LgpIndividual& lgpIndividual = this->getLgpIndividualFromCst(individual);
     // a line is stored in the .dot file with the following format
     // inst_idx|dest_idx&op1_param1|op1_param2#...#opN_param1|opN_param2
 
-    // stores the whole agent
+    // stores the whole individual
     std::string instruction;
 
     // used to seek delimiters in the variable "instruction"
@@ -310,7 +310,7 @@ void Representation::LGP::LGPPopulation::readLines(std::string instructionsStr, 
     // store operands in a new string
     std::string operands;
 
-    // as long as there are lines in the agent, parse those lines
+    // as long as there are lines in the individual, parse those lines
     bool cont = true;
     while (cont) {
 
@@ -349,5 +349,5 @@ void Representation::LGP::LGPPopulation::readLines(std::string instructionsStr, 
             cont = false;
         }
     }
-    this->identifyIntrons(agent);
+    this->identifyIntrons(individual);
 }

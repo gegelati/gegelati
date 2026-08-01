@@ -13,7 +13,7 @@ class MapElitesDescriptorsTest : public ::testing::Test
     FakeMultiContinuousLearningEnvironment env;
     std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
         descriptor;
-    const EvoGraph::Vertex* dummyAgent;
+    const EvoGraph::Vertex* dummyIndividual;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -36,7 +36,7 @@ class MapElitesDescriptorsTest : public ::testing::Test
         params.representation.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
         graph = std::make_shared<EvoGraph::Graph>(*e);
-        dummyAgent = &graph->addNewTeam();
+        dummyIndividual = &graph->addNewTeam();
 
         descriptor = std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
@@ -56,11 +56,11 @@ class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
 TEST_F(MapElitesDescriptorsTest, EmptyMethods)
 {
     FakeDescriptor fakeD;
-    const EvoGraph::Vertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeIndividual = nullptr;
 
     std::vector<double> metrics(1, 0.0);
-    fakeD.extractMetricsStep(metrics, fakeAgent, {0.4, 0.2, 1.0}, env);
-    fakeD.extractMetricsEpisode(metrics, fakeAgent, 4, env);
+    fakeD.extractMetricsStep(metrics, fakeIndividual, {0.4, 0.2, 1.0}, env);
+    fakeD.extractMetricsEpisode(metrics, fakeIndividual, 4, env);
 }
 
 TEST_F(MapElitesDescriptorsTest, InitDescriptorMarksInitAndSetsValues)
@@ -91,13 +91,13 @@ TEST_F(MapElitesDescriptorsTest,
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::Vertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeIndividual = nullptr;
 
     std::vector<double> actions1 = {0.5, -0.2, 1.0};
     std::vector<double> actions2 = {0.1, -0.8, -0.4};
 
-    descriptor->extractMetricsStep(metrics, fakeAgent, actions1, env);
-    descriptor->extractMetricsStep(metrics, fakeAgent, actions2, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, actions1, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, actions2, env);
 
     EXPECT_DOUBLE_EQ(metrics[0], 0.5 + 0.1);
     EXPECT_DOUBLE_EQ(metrics[1], 0.2 + 0.8);
@@ -110,16 +110,16 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeConvertsSumToAverage)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::Vertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeIndividual = nullptr;
 
     // Simulate 4 steps
-    descriptor->extractMetricsStep(metrics, fakeAgent, {0.4, 0.2, 1.0}, env);
-    descriptor->extractMetricsStep(metrics, fakeAgent, {0.6, 0.8, 0.0}, env);
-    descriptor->extractMetricsStep(metrics, fakeAgent, {0.0, 0.0, 2.0}, env);
-    descriptor->extractMetricsStep(metrics, fakeAgent, {1.0, 0.0, 0.0}, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, {0.4, 0.2, 1.0}, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, {0.6, 0.8, 0.0}, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, {0.0, 0.0, 2.0}, env);
+    descriptor->extractMetricsStep(metrics, fakeIndividual, {1.0, 0.0, 0.0}, env);
 
     // Apply episode finalization
-    descriptor->extractMetricsEpisode(metrics, fakeAgent, 4, env);
+    descriptor->extractMetricsEpisode(metrics, fakeIndividual, 4, env);
 
     EXPECT_DOUBLE_EQ(metrics[0], (0.4 + 0.6 + 0.0 + 1.0) / 4.0);
     EXPECT_DOUBLE_EQ(metrics[1], (0.2 + 0.8 + 0.0 + 0.0) / 4.0);
@@ -132,9 +132,9 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeWithOneStep)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::Vertex* fakeAgent = nullptr;
-    descriptor->extractMetricsStep(metrics, fakeAgent, {0.7, 0.3, 1.5}, env);
-    descriptor->extractMetricsEpisode(metrics, fakeAgent, 1, env);
+    const EvoGraph::Vertex* fakeIndividual = nullptr;
+    descriptor->extractMetricsStep(metrics, fakeIndividual, {0.7, 0.3, 1.5}, env);
+    descriptor->extractMetricsEpisode(metrics, fakeIndividual, 1, env);
 
     EXPECT_DOUBLE_EQ(metrics[0], 0.7);
     EXPECT_DOUBLE_EQ(metrics[1], 0.3);
@@ -147,16 +147,16 @@ TEST_F(MapElitesDescriptorsTest, DoesNotCrashOnZeroMetricsBeforeEpisode)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::Vertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeIndividual = nullptr;
     EXPECT_NO_THROW(
-        descriptor->extractMetricsEpisode(metrics, fakeAgent, 5, env));
+        descriptor->extractMetricsEpisode(metrics, fakeIndividual, 5, env));
 
     for (double v : metrics) {
         EXPECT_DOUBLE_EQ(v, 0.0);
     }
 }
 
-TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepIgnoresAgentAndEnvContent)
+TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepIgnoresIndividualAndEnvContent)
 {
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();

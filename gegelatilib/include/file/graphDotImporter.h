@@ -60,7 +60,7 @@
 namespace File {
     /**
      * \brief Class used to import a graph from a dot file.
-     * It should be able to import a whole Learning agent object.
+     * It should be able to import a whole Learning Agent object.
      */
     class GraphDotImporter
     {
@@ -92,7 +92,7 @@ namespace File {
          */
         EvoGraph::Graph& graph;
 
-        /// @brief representation containing the agents.
+        /// @brief representation containing the individuals.
         Representation::Representation& representation;
 
         /// @brief vector of representations used, including subRepresentations. This is used to read the content of the programs of sub representations.
@@ -105,8 +105,8 @@ namespace File {
         /// @brief map of printed edge. This is used to avoid printing twice the same edge in case of multiple edges pointing toward the same destination vertex.
         std::map<uint64_t, std::reference_wrapper<const EvoGraph::Edge>> readEdgeID;
 
-        /// @brief map of printed agent. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent agent.
-        std::map<uint64_t, std::reference_wrapper<const Representation::Individual>> readAgentID;
+        /// @brief map of printed individual. This is used to avoid printing twice the same individual in case of multiple vertices or edges using the same individual individual.
+        std::map<uint64_t, std::reference_wrapper<const Representation::Individual>> readIndividualID;
 
 
         
@@ -156,7 +156,7 @@ namespace File {
         static const std::string teamRegex;
 
         /**
-         * \brief Contains the regex to identify a agent declaration
+         * \brief Contains the regex to identify a individual declaration
          *
          * this regex values "P([0-9]+)\\x20\\x5B.*\\x5D"
          *
@@ -174,7 +174,7 @@ namespace File {
          * P0 [fillcolor="#22cccc" shape=point]	Should pass
          * T10 [fillcolor="#1199bb"]				Should not pass
          */
-        static const std::string agentRegex;
+        static const std::string individualRegex;
 
         /**
          * \brief contains the regex to identify an action declaration
@@ -225,7 +225,7 @@ namespace File {
          * P22 -> I22[style=invis]			Should not pass
          * T0 -> P22 -> A11					Should pass
          */
-        static const std::string linkTeamAgentActionRegex;
+        static const std::string linkTeamIndividualActionRegex;
 
         /**
          * \brief contains the regex to identify a Team -> Individual -> Team Link
@@ -253,18 +253,18 @@ namespace File {
          * P22 -> I22[style=invis]			Should not pass
          * T0 -> P22 -> T11					Should pass
          */
-        static const std::string linkTeamAgentTeamRegex;
+        static const std::string linkTeamIndividualTeamRegex;
 
         /**
          * \brief contains the regex to identify a Team -> Individual
          * Link
          */
-        static const std::string linkTeamAgentRegex;
+        static const std::string linkTeamIndividualRegex;
 
         /**
          * \brief contains the regex to identify a Team -> Individual Link
          */
-        static const std::string linkAgentTeamRegex;
+        static const std::string linkIndividualTeamRegex;
 
 
         /**
@@ -313,30 +313,30 @@ namespace File {
 
 
         /**
-         * \brief read and create an agent.
+         * \brief read and create an individual.
          */
-        void readAgent(std::smatch& matches);
+        void readIndividual(std::smatch& matches);
 
         /**
          * \brief reads a link declaration and creates a team to action edge
          */
-        void readLinkTeamAgentAction(std::smatch& matches);
+        void readLinkTeamIndividualAction(std::smatch& matches);
 
         /**
          * \brief reads a link declaration and creates a team to team edge
          */
-        void readLinkTeamAgentTeam(std::smatch& matches);
+        void readLinkTeamIndividualTeam(std::smatch& matches);
 
         /**
-         * \brief reads a link declaration and add the agent to the team's agent
+         * \brief reads a link declaration and add the individual to the team's individual
          */
-        void readLinkTeamAgent(std::smatch& matches);
+        void readLinkTeamIndividual(std::smatch& matches);
         /**
-         * \brief reads a link declaration and add the team to the agent's team. 
+         * \brief reads a link declaration and add the team to the individual's team. 
          * 
          * Will throw if the representation doesn't handle it.
          */
-        void readLinkAgentTeam(std::smatch& matches);
+        void readLinkIndividualTeam(std::smatch& matches);
 
 
         /**
@@ -361,7 +361,7 @@ namespace File {
          *
          * \param[in] graphRef a Reference to the Graph to build from
          * the .dot file
-         * \param[in] representation representation containing the agents.
+         * \param[in] representation representation containing the individuals.
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */

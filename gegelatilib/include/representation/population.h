@@ -1,6 +1,6 @@
 
-#ifndef AGENT_POPULATION_H
-#define AGENT_POPULATION_H
+#ifndef POPULATION_H
+#define POPULATION_H
 
 #include <vector>
 #include <memory>
@@ -17,7 +17,7 @@ namespace Representation {
     /**
      * \brief Abstract class representing an Population used by an Representation.
      * 
-     * The Population is in charge of storing, creating, copying or removing Agents.
+     * The Population is in charge of storing, creating, copying or removing Individuals.
      * Basically, the population is the interface between the Representation and the Graph.
      * 
      * Available representations are TPG, MAPLE, and LGP
@@ -26,8 +26,8 @@ namespace Representation {
     {
     protected:
 
-        /// Current agents used by the representation
-        std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> agents;
+        /// Current individuals used by the representation
+        std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> individuals;
 
         /// Sub-populations for sub-representations
         std::map<uint64_t, std::reference_wrapper<Population>> subPopulations;
@@ -35,7 +35,7 @@ namespace Representation {
         /// Id of the representation.
         uint64_t representationID;
 
-        /// Number of outputs of the agents
+        /// Number of outputs of the individuals
         const Output::OutputHandler& outputs;
 
         /// Populations of aggregated representations
@@ -44,9 +44,9 @@ namespace Representation {
         /**
          * \brief Get the Individual from a const Individual pointer.
          * 
-         * \param[in] agent the Individual to cast.
+         * \param[in] individual the Individual to cast.
          */
-        virtual std::set<std::unique_ptr<Individual>>::iterator getAgentFromCst(const Individual& agent);
+        virtual std::set<std::unique_ptr<Individual>>::iterator getIndividualFromCst(const Individual& individual);
 
     public:
 
@@ -59,20 +59,20 @@ namespace Representation {
         Population& operator=(const Population&) = delete;
 
         /**
-         * Constructor for agent population
+         * Constructor for individual population
          * 
-         * \param[in] outputs outputs of the agents
+         * \param[in] outputs outputs of the individuals
          * \param[in] representationID id of the representation used.
          */
         Population(const Output::OutputHandler& outputs, uint64_t representationID) : outputs{outputs}, representationID{representationID} {}
 
         /**
-         * \brief Get the current agents used by the representation.
+         * \brief Get the current individuals used by the representation.
          */
-        virtual const std::vector<std::reference_wrapper<const Individual>> getAgents() const;
+        virtual const std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
 
         /**
-         * \brief Return the outputs of the agents.
+         * \brief Return the outputs of the individuals.
          */
         virtual const Output::OutputHandler& getOutputs() const {return outputs; };
 
@@ -87,7 +87,7 @@ namespace Representation {
          * \brief Method that add an access from this population to another population.
          * 
          * The population need to be the same type.
-         * This access allows for the population to dupplicate an agent from the accessed population to its own agents.
+         * This access allows for the population to dupplicate an individual from the accessed population to its own individuals.
          * 
          * \param[in] populationAggregated the population to access.
          */
@@ -125,20 +125,20 @@ namespace Representation {
         uint64_t getRepresentationID() const { return this->representationID; }
 
         /**
-         * \brief method that indicate if the population contains a specific agent.
+         * \brief method that indicate if the population contains a specific individual.
          * 
-         * \param[in] agent searched agent.
+         * \param[in] individual searched individual.
          */
-        virtual bool containsAgent(const Individual& agent) const;
+        virtual bool containsIndividual(const Individual& individual) const;
 
         /**
-         * \brief method that indicate if the agent is accessible by the population.
+         * \brief method that indicate if the individual is accessible by the population.
          * 
-         * An agent is accessible by the population if it is created by the population or by one of its aggregated populations.
+         * An individual is accessible by the population if it is created by the population or by one of its aggregated populations.
          * 
-         * \param[in] agent searched agent.
+         * \param[in] individual searched individual.
          */
-        virtual bool isAgentAccessible(const Individual& agent) const;
+        virtual bool isIndividualAccessible(const Individual& individual) const;
 
         /**
          * \brief Create a new Individual of the type used by the current representation.
@@ -147,42 +147,42 @@ namespace Representation {
          * 
          * \return a shared pointer to the created Individual.
          */
-        virtual const Individual& createAgent(EvoGraph::Graph& graph) = 0;
+        virtual const Individual& createIndividual(EvoGraph::Graph& graph) = 0;
 
         /**
          * \brief Copy a new Individual of the type used by the current representation.
          * 
-         * \param[in] agent the Individual to copy.
+         * \param[in] individual the Individual to copy.
          * \param[in] graph the Graph associated with the Individual.
          * 
          * \return a shared pointer to the created Individual.
          */
-        virtual const Individual& copyAgent(const Individual& agent, EvoGraph::Graph& graph) = 0;
+        virtual const Individual& copyIndividual(const Individual& individual, EvoGraph::Graph& graph) = 0;
 
         /**
          * \brief Create a new Individual of the type used by the current representation.
          * 
-         * \param[in] agent the Individual to delete.
+         * \param[in] individual the Individual to delete.
          * \param[in] graph the Graph associated with the Individual.
          * 
          * \return a shared pointer to the created Individual.
          */
-        virtual void deleteAgent(const Individual& agent, EvoGraph::Graph& graph);
+        virtual void deleteIndividual(const Individual& individual, EvoGraph::Graph& graph);
 
         /**
          * \brief Empty an Individual of the type used by the current representation.
          * 
-         * \param[in] agent the Individual to empty.
+         * \param[in] individual the Individual to empty.
          * \param[in] graph the Graph associated with the Individual.
          */
-        virtual void emptyAgent(const Individual& agent, EvoGraph::Graph& graph) = 0;
+        virtual void emptyIndividual(const Individual& individual, EvoGraph::Graph& graph) = 0;
 
         /**
-         * \brief Clear all agents from the population.
+         * \brief Clear all individuals from the population.
          * 
-         * \param[in] graph the Graph associated with the Agents.
+         * \param[in] graph the Graph associated with the Individuals.
          */
-        virtual void clearAgents(EvoGraph::Graph& graph);
+        virtual void clearIndividuals(EvoGraph::Graph& graph);
 
         /**
          * \brief Create the execution engine associated with the representation.
@@ -195,16 +195,16 @@ namespace Representation {
         virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const = 0;
 
         /**
-         * \brief Set a new ID to an agent
+         * \brief Set a new ID to an individual
          *
-         * An error is thrown if the agent does not belong to the population
+         * An error is thrown if the individual does not belong to the population
          * An error is thrown if the newID is already used
          *
-         * \param[in] agent the agent to change ID
+         * \param[in] individual the individual to change ID
          * \param[in] newID the new ID to set
          */
-        virtual void setNewAgentID(const Individual& agent, uint64_t newID);
+        virtual void setNewIndividualID(const Individual& individual, uint64_t newID);
     };
 }; // namespace Representation
 
-#endif // AGENT_POPULATION_H
+#endif // INDIVIDUAL_POPULATION_H

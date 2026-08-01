@@ -1,6 +1,6 @@
 
-#ifndef LGP_AGENT_H
-#define LGP_AGENT_H
+#ifndef LGP_INDIVIDUAL_H
+#define LGP_INDIVIDUAL_H
 
 #include <cstdint>
 #include "representation/individual.h"
@@ -270,4 +270,4 @@ namespace Representation::LGP {
     
 }; // namespace Representation::LGP
 
-#endif // LGP_AGENT
+#endif // LGP_INDIVIDUAL

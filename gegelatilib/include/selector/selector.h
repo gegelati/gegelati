@@ -16,26 +16,26 @@ namespace Selector {
 
     /**
      * \brief Abstract class for the selection classes, that will choose which
-     * agents survived or not at each generation
+     * individuals survived or not at each generation
      */
     class Selector
     {
       protected:
 
-        /// @brief number of agents controlled by the selector
+        /// @brief number of individuals controlled by the selector
         size_t nbIndividuals;
 
         /// Parameters for the selection
         std::unique_ptr<SelectionParameters> params;
 
-        /// Pointer to the best agent encountered during training, together with
+        /// Pointer to the best individual encountered during training, together with
         /// its EvaluationResult.
         std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                   std::shared_ptr<Learn::EvaluationResult>>
-            bestAgent{std::nullopt, nullptr};
+            bestIndividual{std::nullopt, nullptr};
 
         /**
-         * \brief Map associating agent EvoGraph::Vertex to their EvaluationResult.
+         * \brief Map associating individual EvoGraph::Vertex to their EvaluationResult.
          *
          * If a given Vertex is evaluated several times, its
          * EvaluationResult may be updated with the newer results.
@@ -43,17 +43,17 @@ namespace Selector {
          * Whenever a Vertex is removed from the Graph, its
          * EvaluationResult should also be removed from this map.
          *
-         * This map may be used to avoid reevaluating a agent that was already
+         * This map may be used to avoid reevaluating a individual that was already
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
         std::map<std::reference_wrapper<const Representation::Individual>,
                  std::shared_ptr<Learn::EvaluationResult>>
-            resultsPerAgent;
+            resultsPerIndividual;
 
 
         /**
-         * \brief population of the used representation. The population can delete or create agents in the representation population
+         * \brief population of the used representation. The population can delete or create individuals in the representation population
          */
         std::optional<std::reference_wrapper<Representation::Population>> population;
 
@@ -88,12 +88,12 @@ namespace Selector {
         {
         }
 
-        /// @brief setter for the number of agents
-        /// @param nbIndividuals number of agents set
-        void setNbAgents(size_t nbIndividuals);
+        /// @brief setter for the number of individuals
+        /// @param nbIndividuals number of individuals set
+        void setNbIndividuals(size_t nbIndividuals);
 
-        /// @brief Getter for the number of agents. 
-        size_t getNbAgents();
+        /// @brief Getter for the number of individuals. 
+        size_t getNbIndividuals();
 
         /**
          * \brief set the population of the selector
@@ -108,16 +108,16 @@ namespace Selector {
         bool hasPopulation() const;
 
         /**
-         * \brief Removes from the Graph the agent Vertex.
+         * \brief Removes from the Graph the individual Vertex.
          *
          * The given multimap is updated by removing entries corresponding to
          * decimated vertices.
          *
-         * The resultsPerAgent attribute is updated to remove results associated
+         * The resultsPerIndividual attribute is updated to remove results associated
          * to removed vertices.
          *
          * \param[in] graph the Graph on which selection is performed.
-         * \param[in,out] results a multimap containing agent Vertex
+         * \param[in,out] results a multimap containing individual Vertex
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -136,9 +136,9 @@ namespace Selector {
         virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const;
 
         /**
-         * \brief This method keeps only the best agent policy in the Graph.
+         * \brief This method keeps only the best individual policy in the Graph.
          *
-         * If the Vertex referenced in the bestAgent attribute is no longer
+         * If the Vertex referenced in the bestIndividual attribute is no longer
          * a Vertex of the Graph, nothing happens.
          * 
          * \param[in] graph the Graph on which selection is performed.
@@ -146,120 +146,120 @@ namespace Selector {
         virtual void keepBestPolicy(EvoGraph::Graph& graph);
 
         /**
-         * \brief Remove the agent from resultsPerAgent and BestAgent if already saved.
+         * \brief Remove the individual from resultsPerIndividual and BestIndividual if already saved.
          * 
-         * \param[in] agent Individual removed from the data.
+         * \param[in] individual Individual removed from the data.
          */
-        virtual void removeFromSavedResults(const Representation::Individual& agent);
+        virtual void removeFromSavedResults(const Representation::Individual& individual);
 
         /**
-         * \brief Update the bestAgent and resultsPerAgent attributes.
+         * \brief Update the bestIndividual and resultsPerIndividual attributes.
          *
-         * This method updates the value of the bestAgent attribute with the
+         * This method updates the value of the bestIndividual attribute with the
          * EvoGraph::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
-         *   bestAgent.
-         * - The current bestAgent is a nullptr.
-         * - The current bestAgent has been removed from the EvoGraph::Graph
+         *   bestIndividual.
+         * - The current bestIndividual is a nullptr.
+         * - The current bestIndividual has been removed from the EvoGraph::Graph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
          * the first one) indicates a great variability of the evaluation
-         * process as it means that a vertex currently known as the best agent
+         * process as it means that a vertex currently known as the best individual
          * from previous generations, with an EvaluationResult never beaten,
-         * was removed from the graph in a following generation, beaten by agent
+         * was removed from the graph in a following generation, beaten by individual
          * vertex with lower scores than the current record.
          *
-         * \param[in] results Map from the evaluateAllAgents method.
+         * \param[in] results Map from the evaluateAllIndividuals method.
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Representation::Individual>>& results);
 
         /**
-         * \brief Update the resultsPerAgent.
+         * \brief Update the resultsPerIndividual.
          *
-         * \param[in] results Map from the evaluateAllAgents method.
+         * \param[in] results Map from the evaluateAllIndividuals method.
          */
-        virtual void updateResultsPerAgent(
+        virtual void updateResultsPerIndividual(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Representation::Individual>>& results);
 
         /**
-         * \brief Update the bestAgent attribute.
+         * \brief Update the bestIndividual attribute.
          *
-         * This method updates the value of the bestAgent attribute with the
+         * This method updates the value of the bestIndividual attribute with the
          * EvoGraph::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
-         *   bestAgent.
-         * - The current bestAgent is a nullptr.
-         * - The current bestAgent has been removed from the EvoGraph::Graph
+         *   bestIndividual.
+         * - The current bestIndividual is a nullptr.
+         * - The current bestIndividual has been removed from the EvoGraph::Graph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
          * the first one) indicates a great variability of the evaluation
-         * process as it means that a vertex currently known as the best agent
+         * process as it means that a vertex currently known as the best individual
          * from previous generations, with an EvaluationResult never beaten,
-         * was removed from the graph in a following generation, beaten by agent
+         * was removed from the graph in a following generation, beaten by individual
          * vertex with lower scores than the current record.
          *
-         * \param[in] results Map from the evaluateAllAgents method.
+         * \param[in] results Map from the evaluateAllIndividuals method.
          */
-        virtual void updateBestAgent(
+        virtual void updateBestIndividual(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Representation::Individual>>& results);
 
                                 
         /**
-         * \brief Getter for a specific result of an agent.
+         * \brief Getter for a specific result of an individual.
          *
-         * \param[in] agent The agent whose number of evaluation is
+         * \param[in] individual The individual whose number of evaluation is
          * checked.
-         * \return true if the agent has been evaluated enough times, false
+         * \return true if the individual has been evaluated enough times, false
          * otherwise.
          */
         virtual std::shared_ptr<Learn::EvaluationResult> getResultsOf(
-            const Representation::Individual& agent) const;
+            const Representation::Individual& individual) const;
 
         /**
-         * \brief Getter for the number of evaluation of a specific agent
+         * \brief Getter for the number of evaluation of a specific individual
          *
-         * \param[in] agent The agent whose number of evaluation is
+         * \param[in] individual The individual whose number of evaluation is
          * checked.
-         * \return true if the agent has been evaluated enough times, false
+         * \return true if the individual has been evaluated enough times, false
          * otherwise.
          */
         virtual size_t getNbEvaluation(
-            const Representation::Individual& agent) const;
+            const Representation::Individual& individual) const;
 
         /**
-         * \brief Get the best agent EvoGraph::Vertex encountered since the last init.
+         * \brief Get the best individual EvoGraph::Vertex encountered since the last init.
          *
          * The returned pointers may be nullptr if no generation was trained
          * since the last init.
          *
-         * \return a reference to the bestAgent attribute.
+         * \return a reference to the bestIndividual attribute.
          */
         virtual const std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
-        getBestAgent() const;
+        getBestIndividual() const;
 
         /**
-         * \brief This method resets the previous registered scores per agent.
+         * \brief This method resets the previous registered scores per individual.
          *
-         * Resets resultsPerAgent so that, in the next training,
-         * the current agents will be considered as if they had never
+         * Resets resultsPerIndividual so that, in the next training,
+         * the current individuals will be considered as if they had never
          * been tested. To use for example when there is a scoring policy
          * change.
          */
         virtual void forgetPreviousResults();
 
         /**
-         * \brief Return the resultsPerAgent map.
+         * \brief Return the resultsPerIndividual map.
          */
         virtual const std::map<std::reference_wrapper<const Representation::Individual>,
                                std::shared_ptr<Learn::EvaluationResult>>&
-        getResultsPerAgent() const;
+        getResultsPerIndividual() const;
 
         /**
          * \brief Update the SelectionContext structure and return it.

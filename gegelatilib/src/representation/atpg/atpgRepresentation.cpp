@@ -40,18 +40,18 @@ void Representation::ATPG::ATPGRepresentation::initMutator()
     this->mutator = std::make_unique<ATPG::ATPGMutator>(*this->selector, this->representationID, *this->archive);
 }
 
-std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>> Representation::ATPG::ATPGRepresentation::getUsedSubAgents() const
+std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>> Representation::ATPG::ATPGRepresentation::getUsedSubIndividuals() const
 {
-    std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> usedSubAgents = TPGRepresentation::getUsedSubAgents();
-    usedSubAgents[this->actionProgramRepresentationID] = std::set<std::reference_wrapper<const Individual>>();
+    std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> usedSubIndividuals = TPGRepresentation::getUsedSubIndividuals();
+    usedSubIndividuals[this->actionProgramRepresentationID] = std::set<std::reference_wrapper<const Individual>>();
 
     for(const EvoGraph::Vertex& vertex: this->graph->getVertices()){
         if(vertex.hasProgram() && vertex.getProgram().getRepresentationID() == this->actionProgramRepresentationID){
-            usedSubAgents[this->actionProgramRepresentationID].insert(vertex.getProgram());
+            usedSubIndividuals[this->actionProgramRepresentationID].insert(vertex.getProgram());
         }
     }
 
-    return usedSubAgents;
+    return usedSubIndividuals;
 }
 
 
@@ -99,7 +99,7 @@ std::shared_ptr<Representation::PolicyStats> Representation::ATPG::ATPGRepresent
 }
 
 
-void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const
+void Representation::ATPG::ATPGRepresentation::printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const
 {
     fileMain
         << "int bestProgram_"<<this->representationName <<this->representationID <<"(double *results, int nb) {\n"
@@ -117,15 +117,15 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
         << "}\n"
         << std::endl;
 
-    // set of all used vertex by the list of agents
+    // set of all used vertex by the list of individuals
     std::set<std::reference_wrapper<const EvoGraph::Vertex>> printedVertices;
     std::vector<std::reference_wrapper<const EvoGraph::Vertex>> verticesToVisit;
-    for(const Individual& agent: agents) {
-        if(auto tpgIndividual = dynamic_cast<const TPG::TpgIndividual*>(&agent)) {
+    for(const Individual& individual: individuals) {
+        if(auto tpgIndividual = dynamic_cast<const TPG::TpgIndividual*>(&individual)) {
             printedVertices.insert(tpgIndividual->getVertex());
             verticesToVisit.push_back(tpgIndividual->getVertex());
         } else {
-            throw std::runtime_error("TPGRepresentation::printCodeGenAgents: agent should be a tpg agent");
+            throw std::runtime_error("TPGRepresentation::printCodeGenIndividuals: individual should be a tpg individual");
         }
     }
 
@@ -134,14 +134,14 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
         verticesToVisit.erase(verticesToVisit.begin());
 
         if(vertex.hasProgram()) {
-            subAgents.at(this->actionProgramRepresentationID).insert(vertex.getProgram());
+            subIndividuals.at(this->actionProgramRepresentationID).insert(vertex.getProgram());
         } else {
             for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
                 if(printedVertices.find(edge.getDestination()) == printedVertices.end()) {
                     printedVertices.insert(edge.getDestination());
                     verticesToVisit.push_back(edge.getDestination());
                 }
-                subAgents.at(this->programRepresentationID).insert(edge.getProgram());
+                subIndividuals.at(this->programRepresentationID).insert(edge.getProgram());
             }
         }
     }
@@ -162,10 +162,10 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
     fileMainH << "typedef void (* "<< programAlgo.getRepresentationName() << programAlgo.getRepresentationID() <<"_Program)(double*);\n";
 
 
-    for(const Individual& agent: agents) {
-        const TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TPG::TpgIndividual&>(agent);
+    for(const Individual& individual: individuals) {
+        const TPG::TpgIndividual& tpgIndividual = dynamic_cast<const TPG::TpgIndividual&>(individual);
         fileMain 
-            << "void " << this->representationName << this->representationID << "_" << agent.getAgentID() << "(double* outputs) {\n"
+            << "void " << this->representationName << this->representationID << "_" << individual.getIndividualID() << "(double* outputs) {\n"
             << "\tswitch_"<< this->representationName << this->representationID <<"(T" << tpgIndividual.getVertex().getVertexID()<<", outputs);\n"
             << "}\n"
             << std::endl;
@@ -185,7 +185,7 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
 
             fileMain 
                 << "\t\t\tcase T" << vertex.getVertexID() <<": {\n"
-                << "\t\t\t\t" << actionProgramAlgo.getRepresentationName() << actionProgramAlgo.getRepresentationID() << "_" << vertex.getProgram().getAgentID() << "(outputs);\n"
+                << "\t\t\t\t" << actionProgramAlgo.getRepresentationName() << actionProgramAlgo.getRepresentationID() << "_" << vertex.getProgram().getIndividualID() << "(outputs);\n"
                 << "\t\t\t\treturn;\n"
                 << "\t\t\t}"<<std::endl;
 
@@ -208,7 +208,7 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
 
             fileMain << "\t\t\t\t" << programAlgo.getRepresentationName() << programAlgo.getRepresentationID() <<"_Program programs[" << nbEdge << "] = {"; 
             for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
-                fileMain << programAlgo.getRepresentationName() << programAlgo.getRepresentationID() << "_" << edge.getProgram().getAgentID() << ", ";
+                fileMain << programAlgo.getRepresentationName() << programAlgo.getRepresentationID() << "_" << edge.getProgram().getIndividualID() << ", ";
             }
 
             fileMain 
@@ -227,7 +227,7 @@ void Representation::ATPG::ATPGRepresentation::printCodeGenAgents(std::ofstream&
         // If discrete environment
         } else {
 
-            throw std::runtime_error("ATPGRepresentation::printCodeGenAgents: Should not reach an action vertex");
+            throw std::runtime_error("ATPGRepresentation::printCodeGenIndividuals: Should not reach an action vertex");
         }
     }
 

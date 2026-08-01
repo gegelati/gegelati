@@ -35,7 +35,7 @@
             "pActionEdgeAddition" : 0.0,
             "pActionEdgeDeletion" : 0.0,
             "pChangeActionClass" : 0.1,
-            "pCrossAgents" : 0.7,
+            "pCrossIndividuals" : 0.7,
             "pCrossPrograms" : 0.5,
             "pMutateActionProgram" : 0.7,
             "pSwapActionProgram" : 0.5

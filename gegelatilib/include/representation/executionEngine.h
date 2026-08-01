@@ -16,13 +16,13 @@
 
 namespace Representation {
     /**
-     * \brief class used to execute the agent of an representation
+     * \brief class used to execute the individual of an representation
      */
     class ExecutionEngine {
 
     protected:
         /// Individual executed
-        std::optional<std::reference_wrapper<const Individual>> executedAgent;
+        std::optional<std::reference_wrapper<const Individual>> executedIndividual;
 
         /// Values to outputs 
         const Output::OutputHandler& outputs;
@@ -64,12 +64,12 @@ namespace Representation {
         /**
          * \brief Main ExecutionEngine constructor.
          * 
-         * \param[in] executedAgent the agent to execute.
+         * \param[in] executedIndividual the individual to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, representationID{executedAgent.getRepresentationID()}, isTraining{isTraining} {}
+        ExecutionEngine(const Individual& executedIndividual, const Output::OutputHandler& outputs, bool isTraining = false): executedIndividual{executedIndividual}, outputs{outputs}, representationID{executedIndividual.getRepresentationID()}, isTraining{isTraining} {}
 
         /**
          * \brief setter for the isTraining attribute. 
@@ -84,16 +84,16 @@ namespace Representation {
         uint64_t getRepresentationID() const { return this->representationID; }
 
         /**
-         * \brief Return the current agent executed.
+         * \brief Return the current individual executed.
          */
-        virtual const Individual& getExecutedAgent() const;
+        virtual const Individual& getExecutedIndividual() const;
 
         /**
-         * \brief Set a new agent executed by the execution engine.
+         * \brief Set a new individual executed by the execution engine.
          * 
-         * \param[in] newExecutedAgent new executed agent. 
+         * \param[in] newExecutedIndividual new executed individual. 
          */
-        virtual void setExecutedAgent(const Individual& newExecutedAgent);
+        virtual void setExecutedIndividual(const Individual& newExecutedIndividual);
 
         /**
          * \brief Setup the execution engine with the given job.
@@ -103,12 +103,12 @@ namespace Representation {
         virtual void setupJob(const Job& job);
 
         /**
-         * \brief execute the current agent saved
+         * \brief execute the current individual saved
          */
         virtual std::vector<double> execute() = 0; 
 
         /**
-         * \brief Method for changing the dataSources on which the agent will
+         * \brief Method for changing the dataSources on which the individual will
          * be executed.
          *
          * \param[in] dataSrc The vector of DataHandler references with which

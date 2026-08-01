@@ -6,13 +6,13 @@
 
 namespace Representation::ATPG {
     /**
-     * \brief class used to execute the agent of an representation
+     * \brief class used to execute the individual of an representation
      */
     class ATPGExecutionEngine : public TPG::TPGExecutionEngine {
 
     protected:
 
-        /// Execution engine used to execute the action program of the ActionTPG agents
+        /// Execution engine used to execute the action program of the ActionTPG individuals
         ExecutionEngine* actionProgramExecutionEngine = nullptr;
 
     public:
@@ -30,23 +30,23 @@ namespace Representation::ATPG {
         /**
          * \brief TPGExecutionEngine constructor.
          * 
-         * \param[in] executedAgent the agent to execute.
+         * \param[in] executedIndividual the individual to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ATPGExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
+        ATPGExecutionEngine(const Individual& executedIndividual, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedIndividual, outputs, isTraining) {}
 
 
         /**
-         * \brief Set the action program execution engine associated with the ATPG agents.
+         * \brief Set the action program execution engine associated with the ATPG individuals.
          * 
          * \param[in] actionProgramExecutionEngine the program execution engine.
          */
         void setActionProgramExecutionEngine(std::unique_ptr<ExecutionEngine> actionProgramExecutionEngine);
 
         /**
-         * \brief Get the ation program execution engine associated with the ATPG agents.
+         * \brief Get the ation program execution engine associated with the ATPG individuals.
          * 
          * \return the action program execution engine.
          */
@@ -59,7 +59,7 @@ namespace Representation::ATPG {
         virtual void setContinuousActionValues() override {};
 
         /**
-         * \brief Execute the Graph starting from the vertex pointed by the given agent.
+         * \brief Execute the Graph starting from the vertex pointed by the given individual.
          *
          * This method browse the graph by successively evaluating Teams and
          * following the Edge proposing the best bids.

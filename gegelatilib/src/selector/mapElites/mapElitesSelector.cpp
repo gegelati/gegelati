@@ -87,11 +87,11 @@ void Selector::MapElites::MapElitesSelector::doSelection(
     for (auto& pair : this->mapEliteArchives) {
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
         for (auto it = results.begin(); it != results.end(); it++) {
-            // The agent is already in the archive
-            if (mapEliteArchive->containsAgent(it->second)) {
-                // The agent has been reevaluated, delete it from the archive if
+            // The individual is already in the archive
+            if (mapEliteArchive->containsIndividual(it->second)) {
+                // The individual has been reevaluated, delete it from the archive if
                 // it has not been evaluated enough times
-                mapEliteArchive->removeAgentFromArchive(it->second, this->maxNbEvaluation);
+                mapEliteArchive->removeIndividualFromArchive(it->second, this->maxNbEvaluation);
             }
         }
     }
@@ -106,29 +106,29 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
         for (auto it = results.rbegin(); it != results.rend(); ++it) {
 
-            // Get the selectionMetrics (casted) and agent
+            // Get the selectionMetrics (casted) and individual
             auto metrics = std::dynamic_pointer_cast<MapElitesSelectionMetrics>(
                 it->first->getSelectionMetrics());
             if (metrics == nullptr) {
                 throw std::runtime_error("SelectionMetrics should be castable "
                                          "to MapElitesSelectionMetrics");
             }
-            const Representation::Individual& agent = it->second;
+            const Representation::Individual& individual = it->second;
       
             std::vector<double> descriptorUsed(
                 metrics->getMapDescriptors().at(descriptor));  
 
-            // Get the saved evaluation and agent
+            // Get the saved evaluation and individual
             const auto& pairSaved =
                 mapEliteArchive->getArchiveFromDescriptors(descriptorUsed);
 
-            // The value saved in the archive is better than the current agent
-            // There is also a verification that the agent is not the same
-            if (!pairSaved.second || (*pairSaved.second != agent &&
+            // The value saved in the archive is better than the current individual
+            // There is also a verification that the individual is not the same
+            if (!pairSaved.second || (*pairSaved.second != individual &&
                 pairSaved.first->getSelectionMetrics()->getScore() <
                      metrics->getScore())) {
                 // Saving
-                mapEliteArchive->setArchiveFromDescriptors(agent, it->first,
+                mapEliteArchive->setArchiveFromDescriptors(individual, it->first,
                                                            descriptorUsed);
 
             }
@@ -136,17 +136,17 @@ void Selector::MapElites::MapElitesSelector::doSelection(
     }
 
     for (auto it = results.begin(); it != results.end();) {
-        bool containAgent = false;
+        bool containIndividual = false;
         for (auto& pairArchive : this->mapEliteArchives) {
-            if (pairArchive.second->containsAgent(it->second)) {
-                containAgent = true;
+            if (pairArchive.second->containsIndividual(it->second)) {
+                containIndividual = true;
                 break;
             }
         }
 
-        if (!containAgent) {
+        if (!containIndividual) {
             this->removeFromSavedResults(it->second);
-            this->getPopulation().deleteAgent(it->second, graph);
+            this->getPopulation().deleteIndividual(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {
@@ -161,16 +161,16 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     std::unique_ptr<SelectionContext> context = std::move(Selector::Selector::updateContext());
 
     // Get all the vertices in the different archives
-    std::set<std::reference_wrapper<const Representation::Individual>> agentsInAllArchives;
+    std::set<std::reference_wrapper<const Representation::Individual>> individualsInAllArchives;
     for (auto& pair : this->mapEliteArchives) {
-        std::set<std::reference_wrapper<const Representation::Individual>> agentsInArchive =
+        std::set<std::reference_wrapper<const Representation::Individual>> individualsInArchive =
             pair.second->getVerticesInArchive();
-        agentsInAllArchives.insert(agentsInArchive.begin(),
-                                     agentsInArchive.end());
+        individualsInAllArchives.insert(individualsInArchive.begin(),
+                                     individualsInArchive.end());
     }
 
-    if(agentsInAllArchives.size() != 0){
-        context->nbAgentsToCreate = this->nbIndividuals + agentsInAllArchives.size();
+    if(individualsInAllArchives.size() != 0){
+        context->nbIndividualsToCreate = this->nbIndividuals + individualsInAllArchives.size();
     }
 
     return context;

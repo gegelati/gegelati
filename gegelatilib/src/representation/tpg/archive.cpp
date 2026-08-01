@@ -70,7 +70,7 @@ void Representation::TPG::TPGArchive::setRandomSeed(size_t newSeed)
 }
 
 void Representation::TPG::TPGArchive::addRecording(
-    const Representation::Individual& agent,
+    const Representation::Individual& individual,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandler,
     double result, bool forced)
@@ -96,16 +96,16 @@ void Representation::TPG::TPGArchive::addRecording(
         }
 
         // Create and stores the recording
-        ArchiveRecording recording{&agent, hash, result};
+        ArchiveRecording recording{&individual, hash, result};
         this->recordings.push_back(recording);
 
         // Update the recordings per Program
-        auto iterNbRecordings = this->recordingsPerProgram.find(&agent);
+        auto iterNbRecordings = this->recordingsPerProgram.find(&individual);
         if (iterNbRecordings != this->recordingsPerProgram.end()) {
             iterNbRecordings->second.push_back(recording);
         }
         else {
-            this->recordingsPerProgram.insert({&agent, {recording}});
+            this->recordingsPerProgram.insert({&individual, {recording}});
         }
 
         // Check if Archive max size was reached (or exceeded)
@@ -138,7 +138,7 @@ void Representation::TPG::TPGArchive::addRecording(
 
             // Update the recordingsPerProgram of the corresponding Program,
             // and remove it if it was the last.
-            auto iter = this->recordingsPerProgram.find(rec.agent);
+            auto iter = this->recordingsPerProgram.find(rec.individual);
             iter->second.pop_front();
             if (iter->second.size() == 0) {
                 this->recordingsPerProgram.erase(iter);

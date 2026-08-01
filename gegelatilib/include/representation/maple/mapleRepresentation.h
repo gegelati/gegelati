@@ -12,7 +12,7 @@ namespace Representation::Maple {
     /**
      * \brief Class representing a MapleRepresentation, inherit from TPGRepresentation
      * 
-     * Maple agents can only contain action vertex. Each action contains a 
+     * Maple individuals can only contain action vertex. Each action contains a 
      */
     class MapleRepresentation : public TPG::TPGRepresentation
     {
@@ -68,7 +68,7 @@ namespace Representation::Maple {
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
+            virtual void printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const;
             
     };
 

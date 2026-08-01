@@ -62,7 +62,7 @@
 #include "mutator/rng.h"
 
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "parameters.h"
 #include "learn/parallelLearningAgent.h"
@@ -133,7 +133,7 @@ TEST_F(LearningAgentTest, Constructor)
     Learn::LearningAgent* la;
 
     ASSERT_NO_THROW(la = new Learn::LearningAgent(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation)))
-        << "Construction of the learningAgent failed.";
+        << "Construction of the LearningAgent failed.";
 
     ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
 }
@@ -217,16 +217,16 @@ TEST_F(LearningAgentTest, addLogger)
 {
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
-    auto job = *la.makeJob(la.getRepresentationAt(0).getAgents().at(0),
+    auto job = *la.makeJob(la.getRepresentationAt(0).getIndividuals().at(0),
                            Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
     ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
-    ASSERT_EQ(la.getRepresentationAt(0).getAgents().at(0), job.getAgent())
+    ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().at(0), job.getIndividual())
         << "Encapsulate the root in a job shouldn't change it";
 
     Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     ASSERT_THROW(la2.makeJob(nullptr, Learn::LearningMode::TRAINING), std::runtime_error)
-        << "Create a job when the learning agent is not initialized should throw an error";
+        << "Create a job when the learning abcde is not initialized should throw an error";
 }
 
 TEST_F(LearningAgentTest, MakeJobs)
@@ -234,17 +234,17 @@ TEST_F(LearningAgentTest, MakeJobs)
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
-    ASSERT_EQ(la.getRepresentationAt(0).getAgents().size(), jobs.size())
+    ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().size(), jobs.size())
         << "There should be as many jobs as roots";
     for (int i = 0; i < la.getGraph().getNbRootVertices(); i++) {
-        ASSERT_EQ(la.getRepresentationAt(0).getAgents().at(i),
-                  (*jobs.front()).getAgent())
+        ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().at(i),
+                  (*jobs.front()).getIndividual())
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
     }
 }*/
 
-TEST_F(LearningAgentTest, EvalAgent)
+TEST_F(LearningAgentTest, EvalIndividual)
 {
     params.representation.tpg.archiveSize = 50;
     params.representation.tpg.archivingProbability = 1.0;
@@ -259,7 +259,7 @@ TEST_F(LearningAgentTest, EvalAgent)
     std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getPopulation().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(la.getRepresentationAt(tpg->getRepresentationID()).getAgents().at(0),
+    auto job = tpg->createJob(la.getRepresentationAt(tpg->getRepresentationID()).getIndividuals().at(0),
                            Learn::LearningMode::TRAINING, la.getRNG());
     la.setCurrentRepresentation(tpg);
     ASSERT_NO_THROW(
@@ -285,8 +285,8 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
     la.setCurrentRepresentation(tpg);
     std::shared_ptr<Learn::EvaluationResult> result;
     ASSERT_NO_THROW(
-        result = la.evaluateOneAgent(0, Learn::LearningMode::TRAINING,
-                                    la.getRepresentationAt(tpg->getRepresentationID()).getAgents().at(0)))
+        result = la.evaluateOneIndividual(0, Learn::LearningMode::TRAINING,
+                                    la.getRepresentationAt(tpg->getRepresentationID()).getIndividuals().at(0)))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -307,7 +307,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
                   std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
-                        la.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
+                        la.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), la.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
@@ -358,7 +358,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_NE(tpgRef.getSelector().getBestAgent().first, std::nullopt)
+    ASSERT_NE(tpgRef.getSelector().getBestIndividual().first, std::nullopt)
         << "Best root should be set after a trainOneGeneration iteration.";
 
     o.close();
@@ -426,7 +426,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << graph.getEdges().size() << ", "
                 << EvoGraph::Vertex::getVertexIDCounter() << ", "
                 << EvoGraph::Edge::getEdgeIDCounter() << ", "
-                << Representation::Individual::getAgentIDCounter() << ", "
+                << Representation::Individual::getIndividualIDCounter() << ", "
                 << rngValue
                 << "}"<<std::endl;
         // Nice printed infos
@@ -435,7 +435,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
                 << "Number of edges: " << graph.getEdges().size() << "\n"
                 << "Vertex ID counter: " << EvoGraph::Vertex::getVertexIDCounter() << "\n"
                 << "Edge ID counter: " << EvoGraph::Edge::getEdgeIDCounter() << "\n"
-                << "Individual ID counter: " << Representation::Individual::getAgentIDCounter() << "\n"
+                << "Individual ID counter: " << Representation::Individual::getIndividualIDCounter() << "\n"
 
                 << "RNG value: " << rngValue << std::endl;
     }
@@ -453,7 +453,7 @@ static void trainAndTestDeterminissm(Learn::LearningAgent& la, std::vector<size_
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), expectedValues[4])
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Representation::Individual::getAgentIDCounter(), expectedValues[5])
+    ASSERT_EQ(Representation::Individual::getIndividualIDCounter(), expectedValues[5])
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(rngValue, expectedValues[6])
         << "Graph does not have the expected determinst characteristics.";
@@ -775,7 +775,7 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 20;
     params.representation.nbIndividuals = 30;
-    params.representation.maple.pCrossAgents = 0.7;
+    params.representation.maple.pCrossIndividuals = 0.7;
     params.representation.maple.pCrossPrograms = 0.5;
     // A root may be evaluated at most for 3 generations
     params.evaluation.maxNbEvaluationPerPolicy =
@@ -993,7 +993,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
         tee.executeFromRoot(*(graph.getRootVertices().at(0))).first;
 
     // Clear introns
-    la.getRepresentationAt(0).clearUnusedAgentParts();
+    la.getRepresentationAt(0).clearUnusedIndividualParts();
 
     // Get new policy stats
     EvoGraph::PolicyStats psNoIntrons;
@@ -1063,7 +1063,7 @@ TEST_F(ParallelLearningAgentTest, Constructor)
     Learn::ParallelLearningAgent* pla;
 
     ASSERT_NO_THROW(pla = new Learn::ParallelLearningAgent(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation)))
-        << "Construction of the learningAgent failed.";
+        << "Construction of the LearningAgent failed.";
 
     ASSERT_NO_THROW(delete pla) << "Destruction of the LearningAgent failed.";
 }
@@ -1096,7 +1096,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     std::unique_ptr<Representation::ExecutionEngine> execEngine = tpg->getPopulation().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(pla.getRepresentationAt(0).getAgents().at(0),
+    auto job = tpg->createJob(pla.getRepresentationAt(0).getIndividuals().at(0),
                            Learn::LearningMode::TRAINING, pla.getRNG());
     pla.setCurrentRepresentation(tpg);
     ASSERT_NO_THROW(
@@ -1121,7 +1121,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
                   std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
-                        pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
+                        pla.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
@@ -1144,7 +1144,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
                   std::reference_wrapper<const Representation::Individual>>
         result;
     ASSERT_NO_THROW(result =
-                        pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
+                        pla.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
@@ -1164,7 +1164,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset RNG to 0
-    auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
+    auto results = la.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsSequential = params.evaluation;
@@ -1174,7 +1174,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-        plaSequential.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
+        plaSequential.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING);
     auto nextIntSequential =
         plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
@@ -1185,7 +1185,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-        plaParallel.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
+        plaParallel.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING);
     auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
@@ -1202,9 +1202,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterSequential++;
     }
 
-    // Check determinism of bestAgent score
-    ASSERT_EQ(tpgLa->getSelector().getBestAgent().first,
-              tpgParallel->getSelector().getBestAgent().first);
+    // Check determinism of bestIndividual score
+    ASSERT_EQ(tpgLa->getSelector().getBestIndividual().first,
+              tpgParallel->getSelector().getBestIndividual().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1242,9 +1242,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterParallel++;
     }
 
-    // Check determinism of bestAgent score
-    ASSERT_EQ(tpgSequential->getSelector().getBestAgent().first,
-              tpgParallel->getSelector().getBestAgent().first);
+    // Check determinism of bestIndividual score
+    ASSERT_EQ(tpgSequential->getSelector().getBestIndividual().first,
+              tpgParallel->getSelector().getBestIndividual().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
@@ -1277,7 +1277,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset centralized RNG to 0
-    auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
+    auto results = la.evaluateAllIndividuals(0, Learn::LearningMode::VALIDATION);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsSequential = params.evaluation;
@@ -1288,7 +1288,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-        plaSequential.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
+        plaSequential.evaluateAllIndividuals(0, Learn::LearningMode::VALIDATION);
     auto nextIntSequential =
         plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
@@ -1299,7 +1299,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-        plaParallel.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
+        plaParallel.evaluateAllIndividuals(0, Learn::LearningMode::VALIDATION);
     auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
@@ -1385,7 +1385,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_NE(tpg.getSelector().getBestAgent().first, std::nullopt)
+    ASSERT_NE(tpg.getSelector().getBestIndividual().first, std::nullopt)
         << "Best root should not be expired after training one generation.";
 }
 
@@ -1516,7 +1516,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
         << "Number of vertex in the trained graph should not be 0.";
     ASSERT_EQ(la.getGraph().getNbVertices(),
               pla.getGraph().getNbVertices())
-        << "LearningAgent and ParallelLearning agent result in different "
+        << "LearningAgent and ParallelLearning Agent result in different "
            "Graphs.";
 }
 

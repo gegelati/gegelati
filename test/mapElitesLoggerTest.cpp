@@ -3,7 +3,7 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 #include "instructions/set.h"
 

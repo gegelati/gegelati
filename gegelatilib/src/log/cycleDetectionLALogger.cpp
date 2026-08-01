@@ -37,7 +37,7 @@
 #include <set>
 #include <vector>
 
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 #include "log/cycleDetectionLALogger.h"
 
 void Log::CycleDetectionLALogger::logHeader()
@@ -58,7 +58,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     std::vector<const EvoGraph::Vertex*> currentPath;
 
     // Add all roots to the set of vertex to visit
-    const EvoGraph::Graph& tpg = this->learningAgent.getGraph();
+    const EvoGraph::Graph& tpg = this->LearningAgent.getGraph();
     auto roots = tpg.getRootVertices();
     //std::copy(roots.begin(), roots.end(), std::back_inserter(lifoToVisit)); TODO
 

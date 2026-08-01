@@ -133,12 +133,12 @@ Selector::MapElites::CvtMapElitesArchive::getArchiveFromDescriptors(
 }
 
 void Selector::MapElites::CvtMapElitesArchive::setArchiveFromDescriptors(
-    const Representation::Individual& agent, std::shared_ptr<Learn::EvaluationResult> eval,
+    const Representation::Individual& individual, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<double>& descriptors)
 {
     size_t idx = getIndexForDescriptor(descriptors);
-    std::reference_wrapper<const Representation::Individual> agentRef = agent;
-    archive[idx] = std::make_pair(eval, agentRef);
+    std::reference_wrapper<const Representation::Individual> individualRef = individual;
+    archive[idx] = std::make_pair(eval, individualRef);
 }
 
 size_t Selector::MapElites::CvtMapElitesArchive::getIndexForDescriptor(

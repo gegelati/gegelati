@@ -22,7 +22,7 @@ namespace Representation::TPG {
     {
     protected:
 
-        /// ID of the program representation associated with the TPG agents.
+        /// ID of the program representation associated with the TPG individuals.
         uint64_t programRepresentationID;
 
         /// Pre-existing teams elements used for mutation operations.
@@ -44,7 +44,7 @@ namespace Representation::TPG {
          * \param[in,out] graph the initialized Graph.
          * \param[in] leafVertices the leaf vertices to connect.
          * \param[in] rootVertices the root vertices to connect.
-         * \param[in] programAgent the program agents available in the graph.
+         * \param[in] programIndividual the program individuals available in the graph.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -52,7 +52,7 @@ namespace Representation::TPG {
             EvoGraph::Graph& graph,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::reference_wrapper<const Individual>> programAgent,
+            std::vector<std::reference_wrapper<const Individual>> programIndividual,
             const RepresentationParameters& params, RNG::RNG& rng);
 
     public:
@@ -70,7 +70,7 @@ namespace Representation::TPG {
          * \brief Update the context used by the TPGMutator to populate the Graph.
          * 
          * \param[in] graph the Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -81,14 +81,14 @@ namespace Representation::TPG {
 
 
         /**
-         * \brief Set the id of the program representation associated with the TPG agents.
+         * \brief Set the id of the program representation associated with the TPG individuals.
          * 
          * \param[in] id the id of the program representation.
          */
         void setProgramRepresentationID(uint64_t id) { this->programRepresentationID = id; }
 
         /**
-         * \brief Get the name of the program representation associated with the TPG agents.
+         * \brief Get the name of the program representation associated with the TPG individuals.
          * 
          * \return the name of the program representation.
          */
@@ -108,7 +108,7 @@ namespace Representation::TPG {
          * \brief Initialize TPG Population.
          *
          * \param[in,out] graph the initialized Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -118,13 +118,13 @@ namespace Representation::TPG {
         /**
          * \brief Initialize a random Individual.
          *
-         * \param[in] agent the agent initialized.
+         * \param[in] individual the individual initialized.
          * \param[in,out] graph the Graph.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -200,8 +200,8 @@ namespace Representation::TPG {
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while mutating the individual
          * \param[in] params
          * Probability parameters for the mutation.
          * \param[in] rng Random Number
@@ -210,21 +210,21 @@ namespace Representation::TPG {
         virtual void mutateOutgoingEdge(
             EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             Population& population,
-            std::vector<std::reference_wrapper<const Individual>>& newSubAgents,
+            std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals,
             const RepresentationParameters& params, RNG::RNG& rng);
 
         /**
-         * \brief mutate a specific agent of an representation within a population
+         * \brief mutate a specific individual of an representation within a population
          * 
-         * \param[in,out] agent the Individual to mutate.
+         * \param[in,out] individual the Individual to mutate.
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub representation created while mutating the agent
+         * \param[in] population the population to change the individuals.
+         * \param[in] newSubIndividuals vector of new individuals of sub representation created while mutating the individual
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateAgent(
-            const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng
+        virtual void mutateIndividual(
+            const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng
         ) override;
 
         
@@ -232,22 +232,22 @@ namespace Representation::TPG {
          * \brief Mutate the behavior of a Program and ensure its unicity
          * against the given TPGArchive.
          *
-         * \param[in] programAgent program agents of sub representation created while mutating the agent
+         * \param[in] programIndividual program individuals of sub representation created while mutating the individual
          * \param[in,out] graph the graph to mutate.
-         * \param[in] population the population to change the agents.
+         * \param[in] population the population to change the individuals.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateProgramAgentAgainstArchive(
-            const Individual& programAgent, EvoGraph::Graph& graph, 
+        virtual void mutateProgramIndividualAgainstArchive(
+            const Individual& programIndividual, EvoGraph::Graph& graph, 
             Population& population, const RepresentationParameters& params, 
             RNG::RNG& rng);
 
         /**
-         * \brief Specialization of mutateSubAgents method.
+         * \brief Specialization of mutateSubIndividuals method.
          */
-        virtual void mutateSubAgents(
-            std::vector<std::reference_wrapper<const Individual>>& agents, EvoGraph::Graph& graph, 
+        virtual void mutateSubIndividuals(
+            std::vector<std::reference_wrapper<const Individual>>& individuals, EvoGraph::Graph& graph, 
             Population& population, const RepresentationParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
 
@@ -255,7 +255,7 @@ namespace Representation::TPG {
         /**
          * Setter for the archive
          * 
-         * \param[in] archive TPGArchive used by the program agents.
+         * \param[in] archive TPGArchive used by the program individuals.
          */
         void setArchive(const TPGArchive& archive);
     };

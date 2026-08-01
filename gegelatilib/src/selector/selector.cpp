@@ -29,12 +29,12 @@ bool Selector::Selector::hasPopulation() const
     return this->population.has_value();
 }
 
-void Selector::Selector::setNbAgents(size_t nbIndividuals)
+void Selector::Selector::setNbIndividuals(size_t nbIndividuals)
 {
     this->nbIndividuals = nbIndividuals;
 }
 
-size_t Selector::Selector::getNbAgents()
+size_t Selector::Selector::getNbIndividuals()
 {
     return this->nbIndividuals;
 }
@@ -59,28 +59,28 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
 void Selector::Selector::keepBestPolicy(EvoGraph::Graph& graph)
 {
     Representation::Population& population = this->getPopulation();
-    auto bestAgentVertex = this->bestAgent.first;
-    if (bestAgentVertex && population.containsAgent(*bestAgentVertex)) {
+    auto bestIndividualVertex = this->bestIndividual.first;
+    if (bestIndividualVertex && population.containsIndividual(*bestIndividualVertex)) {
 
-        // Remove all but the best agent from the graph
-        while (population.getAgents().size() != 1) {
-            auto agents = population.getAgents();
-            for (const Representation::Individual& agent : agents) {
-                if (agent != bestAgentVertex.value()) {
-                    population.deleteAgent(agent, graph);
+        // Remove all but the best individual from the graph
+        while (population.getIndividuals().size() != 1) {
+            auto individuals = population.getIndividuals();
+            for (const Representation::Individual& individual : individuals) {
+                if (individual != bestIndividualVertex.value()) {
+                    population.deleteIndividual(individual, graph);
                 }
             }
         }
     }
 }
 
-void Selector::Selector::removeFromSavedResults(const Representation::Individual& agent)
+void Selector::Selector::removeFromSavedResults(const Representation::Individual& individual)
 {
-    if (&agent != nullptr) {
-        this->resultsPerAgent.erase(agent);
-        if (this->bestAgent.first && agent == *this->bestAgent.first) {
-            this->bestAgent.first = std::nullopt;
-            this->bestAgent.second = nullptr;
+    if (&individual != nullptr) {
+        this->resultsPerIndividual.erase(individual);
+        if (this->bestIndividual.first && individual == *this->bestIndividual.first) {
+            this->bestIndividual.first = std::nullopt;
+            this->bestIndividual.second = nullptr;
         }
     }
     else {
@@ -92,40 +92,40 @@ void Selector::Selector::updateEvaluationRecords(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Representation::Individual>>& results)
 {
-    // Update bestAgent
-    this->updateBestAgent(results);
+    // Update bestIndividual
+    this->updateBestIndividual(results);
 
-    // Update resultsPerAgent
-    this->updateResultsPerAgent(results);
+    // Update resultsPerIndividual
+    this->updateResultsPerIndividual(results);
 }
 
-void Selector::Selector::updateResultsPerAgent(
+void Selector::Selector::updateResultsPerIndividual(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Representation::Individual>>& results)
 {
     for (const auto& result : results) {
-        auto mapIterator = this->resultsPerAgent.find(result.second);
-        if (mapIterator == this->resultsPerAgent.end()) {
-            // First time this agent is evaluated
-            this->resultsPerAgent.emplace(result.second, result.first);
+        auto mapIterator = this->resultsPerIndividual.find(result.second);
+        if (mapIterator == this->resultsPerIndividual.end()) {
+            // First time this individual is evaluated
+            this->resultsPerIndividual.emplace(result.second, result.first);
         }
         else if (result.first != mapIterator->second) {
-            // This agent has already been evaluated.
+            // This individual has already been evaluated.
             // If the received result pointer is different from the one
             // stored in the map, update the one in the map by replacing it
             // with the new one (which was combined with the pre-existing
-            // one in evalAgent)
+            // one in evalIndividual)
             mapIterator->second = result.first;
-            // If the received result is associated to the current bestAgent,
+            // If the received result is associated to the current bestIndividual,
             // update it.
-            if (result.second == *this->bestAgent.first) {
-                this->bestAgent.second = result.first;
+            if (result.second == *this->bestIndividual.first) {
+                this->bestIndividual.second = result.first;
             }
         }
     }
 }
 
-void Selector::Selector::updateBestAgent(
+void Selector::Selector::updateBestIndividual(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Representation::Individual>>& results)
 {
@@ -134,62 +134,62 @@ void Selector::Selector::updateBestAgent(
     const Representation::Individual& candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
-    if (!this->bestAgent.first         // NULL case
-        || *this->bestAgent.second < *evaluation // new high-score case
+    if (!this->bestIndividual.first         // NULL case
+        || *this->bestIndividual.second < *evaluation // new high-score case
         ||
-        !this->getPopulation().containsAgent(*this->bestAgent.first) // bestAgent disappearance
+        !this->getPopulation().containsIndividual(*this->bestIndividual.first) // bestIndividual disappearance
     ) {
-        // Replace the best agent
-        this->bestAgent = {candidate, evaluation};
+        // Replace the best individual
+        this->bestIndividual = {candidate, evaluation};
     }
 }
 
 const std::pair<std::optional<std::reference_wrapper<const Representation::Individual>>,
                 std::shared_ptr<Learn::EvaluationResult>>&
-Selector::Selector::getBestAgent() const
+Selector::Selector::getBestIndividual() const
 {
-    return this->bestAgent;
+    return this->bestIndividual;
 }
 
 void Selector::Selector::forgetPreviousResults()
 {
-    this->resultsPerAgent.clear();
-    this->bestAgent.first = std::nullopt;
-    this->bestAgent.second = nullptr;
+    this->resultsPerIndividual.clear();
+    this->bestIndividual.first = std::nullopt;
+    this->bestIndividual.second = nullptr;
 }
 
 const std::map<std::reference_wrapper<const Representation::Individual>, std::shared_ptr<Learn::EvaluationResult>>&
-Selector::Selector::getResultsPerAgent() const
+Selector::Selector::getResultsPerIndividual() const
 {
-    return this->resultsPerAgent;
+    return this->resultsPerIndividual;
 }
 
 std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() const
 {
     std::unique_ptr<SelectionContext> context = std::make_unique<SelectionContext>();
 
-    // Insert all agents, but only the reference of weak pointer with lock available
-    // population->getAgents returns a vector of weak pointer, but the context should only have reference to the agent, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
+    // Insert all individuals, but only the reference of weak pointer with lock available
+    // population->getIndividuals returns a vector of weak pointer, but the context should only have reference to the individual, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
     const Representation::Population& population = this->cGetPopulation();
-    for (const Representation::Individual& agent : population.getAgents()) {
-        context->agentsClonable.push_back(agent); 
-        context->preExistingAgents.push_back(agent);
+    for (const Representation::Individual& individual : population.getIndividuals()) {
+        context->individualsClonable.push_back(individual); 
+        context->preExistingIndividuals.push_back(individual);
     }
     
-    context->nbAgentsToCreate =
-        this->nbIndividuals - context->preExistingAgents.size();
+    context->nbIndividualsToCreate =
+        this->nbIndividuals - context->preExistingIndividuals.size();
 
     return context;
 }
 
 
 std::shared_ptr<Learn::EvaluationResult> Selector::Selector::getResultsOf(
-    const Representation::Individual& agent) const
+    const Representation::Individual& individual) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->resultsPerAgent.find(agent);
-    if (iter != this->resultsPerAgent.end()) {
+    const auto& iter = this->resultsPerIndividual.find(individual);
+    if (iter != this->resultsPerIndividual.end()) {
         // The root has already been evaluated
         return iter->second;;
     } else {
@@ -198,12 +198,12 @@ std::shared_ptr<Learn::EvaluationResult> Selector::Selector::getResultsOf(
 }
 
 size_t Selector::Selector::getNbEvaluation(
-    const Representation::Individual& agent) const
+    const Representation::Individual& individual) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->resultsPerAgent.find(agent);
-    if (iter != this->resultsPerAgent.end()) {
+    const auto& iter = this->resultsPerIndividual.find(individual);
+    if (iter != this->resultsPerIndividual.end()) {
         // The root has already been evaluated
         return iter->second->getNbEvaluation();
     }

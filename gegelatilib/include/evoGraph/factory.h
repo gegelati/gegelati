@@ -76,10 +76,10 @@ namespace EvoGraph {
          * \brief Create a Team for a Graph.
          *
          * This method allocates and returns a new Team.
-         * \param[in] programAgent weak pointer to the Individual Program associated to the newly
+         * \param[in] programIndividual weak pointer to the Individual Program associated to the newly
          *                 created Team.
          */
-        virtual std::unique_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programAgent = std::nullopt) const;
+        virtual std::unique_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual = std::nullopt) const;
 
         /**
          * \brief Create a Action for a Graph.
@@ -87,11 +87,11 @@ namespace EvoGraph {
          * This method allocates and returns a new Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
-         * \param[in] programAgent weak pointer to the Individual Program associated to the newly
+         * \param[in] programIndividual weak pointer to the Individual Program associated to the newly
          *                 created Action.
          */
         virtual std::unique_ptr<Action> createAction(
-            const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> programAgent = std::nullopt) const;
+            const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual = std::nullopt) const;
 
         /**
          * \brief Create a Edge for a Graph.
@@ -101,12 +101,12 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] agentProgram the weak pointer to the agentProgram associated to the
+         * \param[in] individualProgram the weak pointer to the individualProgram associated to the
          *            edge.
          */
         virtual std::unique_ptr<Edge> createEdge(
             const Vertex& src, const Vertex& dest,
-            std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) const;
+            std::optional<std::reference_wrapper<const Representation::Individual>> individualProgram = std::nullopt) const;
 
 
     };

@@ -24,7 +24,7 @@ class LineMutatorTest : public ::testing::Test
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e;
     Parameters params;
     Representation::LGP::LGPLineMutator lineMutator;
-    std::shared_ptr<Representation::LGP::LgpIndividual> programAgent;
+    std::shared_ptr<Representation::LGP::LgpIndividual> programIndividual;
     Output::OutputHandler* lgpOutput;
 
     LineMutatorTest() : e{nullptr} {};
@@ -57,7 +57,7 @@ class LineMutatorTest : public ::testing::Test
         params.representation.lgp.nbRegisters = 8;
         params.representation.lgp.nbProgramConstant = 5;
         e = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
-        programAgent =
+        programIndividual =
             std::make_shared<Representation::LGP::LgpIndividual>(*e, *lgpOutput, 0);
     }
 
@@ -79,8 +79,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
     rng.setSeed(0);
 
     // Add a pseudo-random lines to the program
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l0 = programIndividual->getLineForMutation(0);
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l0, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
@@ -104,8 +104,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
         << "Selected pseudo-random operand location changed with a known seed.";
 
     // Add another pseudo-random lines to the program
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l1 = programAgent->getLineForMutation(1);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l1 = programIndividual->getLineForMutation(1);
 
     // Additionally covers correct operand type from data source
     // Instruction if lambda instruction(plus)
@@ -121,10 +121,10 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 
     // Add another pseudo-random lines to the program
     // Additionally covers nothing
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l2 = programAgent->getLineForMutation(2);
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l3 = programAgent->getLineForMutation(3);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l2 = programIndividual->getLineForMutation(2);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l3 = programIndividual->getLineForMutation(3);
 
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l2, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -134,8 +134,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
            "environment where failure should not be possible.";
 
     // Add another pseudo-random lines to the program
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l4 = programAgent->getLineForMutation(4);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l4 = programIndividual->getLineForMutation(4);
     // Additionally covers additional uneeded operand (register)
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l4, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -147,7 +147,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
            "known seed.";
 
     Output::OutputHandler output = Output::OutputHandler(Output::Output());
-    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programIndividual);
 
 
     ASSERT_NO_THROW(lgpExecutionEngine.execute())
@@ -159,12 +159,12 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 TEST_F(LineMutatorTest, LineMutatorAlterLine)
 {
     RNG::RNG rng;
-    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programIndividual);
 
     // Add a 0 lines to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
-    programAgent->addNewLine();
-    Representation::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
+    programIndividual->addNewLine();
+    Representation::LGP::LGPLine& l0 = programIndividual->getLineForMutation(0);
 
     // Alter instruction
     // i=, d=0, op0=(0,0), op1=(0,0)
@@ -251,14 +251,14 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
     std::shared_ptr<const Representation::LGP::LGPEnvironment> e2 = std::make_shared<Representation::LGP::LGPEnvironment>(set, params.representation.lgp.nbRegisters, params.representation.lgp.nbProgramConstant, vect);
-    std::shared_ptr<Representation::LGP::LgpIndividual> programAgent2 = std::make_shared<Representation::LGP::LgpIndividual>(*e2, *lgpOutput, 1);
+    std::shared_ptr<Representation::LGP::LgpIndividual> programIndividual2 = std::make_shared<Representation::LGP::LgpIndividual>(*e2, *lgpOutput, 1);
 
-    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
+    Representation::LGP::LGPExecutionEngine lgpExecutionEngine(*programIndividual2);
 
     // Add a 0 line to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
-    programAgent2->addNewLine();
-    Representation::LGP::LGPLine& l0 = programAgent2->getLineForMutation(0);
+    programIndividual2->addNewLine();
+    Representation::LGP::LGPLine& l0 = programIndividual2->getLineForMutation(0);
 
     // Alter instruction
     // i=2, d=0, op0=(0,0), op1=(0,0)

@@ -77,8 +77,8 @@ namespace Representation::LGP {
         /// Program counter of the execution engine.
         uint64_t programCounter;
 
-        /// casted executed agent
-        std::optional<std::reference_wrapper<const LgpIndividual>> lgpExecutedAgent;
+        /// casted executed individual
+        std::optional<std::reference_wrapper<const LgpIndividual>> lgpExecutedIndividual;
 
       protected:
         /**
@@ -123,17 +123,17 @@ namespace Representation::LGP {
          * This constructor is useful for testing a Program on a different
          * Environment than its own.
          *
-         * \param[in] executedAgent the const Program that will be executed or
+         * \param[in] executedIndividual the const Program that will be executed or
          * generated.
          * \param[in] dataSrc The DataHandler with which the Program
          * will be executed.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
-        LGPEngine(const LgpIndividual& executedAgent, 
+        LGPEngine(const LgpIndividual& executedIndividual, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
-            : ExecutionEngine{executedAgent, executedAgent.getOutputs(), isTraining}, programCounter{0},
-              registers{executedAgent.getEnvironment().getNbRegisters()}
+            : ExecutionEngine{executedIndividual, executedIndividual.getOutputs(), isTraining}, programCounter{0},
+              registers{executedIndividual.getEnvironment().getNbRegisters()}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -141,9 +141,9 @@ namespace Representation::LGP {
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
-            if (executedAgent.getEnvironment().getNbConstants() > 0) {
+            if (executedIndividual.getEnvironment().getNbConstants() > 0) {
                 this->dataScsConstsAndRegs.push_back(
-                    executedAgent.cGetConstantHandler());
+                    executedIndividual.cGetConstantHandler());
             }
 
             // Cannot use insert here because it dataSourcesAndRegisters
@@ -153,8 +153,8 @@ namespace Representation::LGP {
                 this->dataSources.push_back(data.get());
             }
 
-            // Set the executedAgent
-            this->setExecutedAgent(executedAgent);
+            // Set the executedIndividual
+            this->setExecutedIndividual(executedIndividual);
         };
 
         /**
@@ -163,12 +163,12 @@ namespace Representation::LGP {
          * The constructor initialize the number of registers accordingly
          * with the Environment of the given Program.
          *
-         * \param[in] executedAgent the const Program that will be executed or
+         * \param[in] executedIndividual the const Program that will be executed or
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const LgpIndividual& executedAgent,  bool isTraining = false)
-            : LGPEngine(executedAgent, executedAgent.getEnvironment().getDataSources(), isTraining){};
+        LGPEngine(const LgpIndividual& executedIndividual,  bool isTraining = false)
+            : LGPEngine(executedIndividual, executedIndividual.getEnvironment().getDataSources(), isTraining){};
 
         /**
          * \brief operator parenthesis used when iterating through the program
@@ -179,12 +179,12 @@ namespace Representation::LGP {
       public:
 
         /**
-         * \brief Method for changing the agent executed by a
+         * \brief Method for changing the individual executed by a
          * LGPEngine.
          *
-         * \param[in] newExecutedAgent the LgpIndividual executed by the lgpEngine
+         * \param[in] newExecutedIndividual the LgpIndividual executed by the lgpEngine
          */
-        virtual void setExecutedAgent(const Individual& newExecutedAgent) override;
+        virtual void setExecutedIndividual(const Individual& newExecutedIndividual) override;
 
         /**
          * \brief Method for changing the dataSources on which the Program will

@@ -12,23 +12,23 @@ bool Representation::CGP::CGPMutator::isConfigurationValid(const RepresentationP
     return true;
 }
 
-void Representation::CGP::CGPMutator::initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::CGP::CGPMutator::initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    // If first agent, check validity
-    if(population.getAgents().size() == 1){
+    // If first individual, check validity
+    if(population.getIndividuals().size() == 1){
         this->isConfigurationValid(params, population.getOutputs());
     }
 
-    population.emptyAgent(agent, graph);
+    population.emptyIndividual(individual, graph);
 
     LGP::LGPPopulation& lgpPopulation = dynamic_cast<LGP::LGPPopulation&>(population);
     if(&lgpPopulation == nullptr){
-        throw std::invalid_argument("CGPMutator::initRandomAgent: the given population is not a LGPPopulation.");
+        throw std::invalid_argument("CGPMutator::initRandomIndividual: the given population is not a LGPPopulation.");
     }
 
-    const LGP::LgpIndividual& lgpIndividual = dynamic_cast<const LGP::LgpIndividual&>(agent);
+    const LGP::LgpIndividual& lgpIndividual = dynamic_cast<const LGP::LgpIndividual&>(individual);
     if(&lgpIndividual == nullptr){
-        throw std::invalid_argument("CGPMutator::initRandomAgent: the created agent is not a CGPAgent.");
+        throw std::invalid_argument("CGPMutator::initRandomIndividual: the created individual is not a CGPIndividual.");
     }
 
     // insert random constants in the program
@@ -36,7 +36,7 @@ void Representation::CGP::CGPMutator::initRandomSpecificAgent(const Individual& 
     for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.lgp.minConstValue,
                                  params.lgp.maxConstValue)};
-        lgpPopulation.setConstantAt(agent, i, c_value);
+        lgpPopulation.setConstantAt(individual, i, c_value);
     }
 
     // Compute the number of nodes
@@ -51,33 +51,33 @@ void Representation::CGP::CGPMutator::initRandomSpecificAgent(const Individual& 
     }
 
     // Identify Introns
-    lgpPopulation.identifyIntrons(agent);
+    lgpPopulation.identifyIntrons(individual);
 }
 
-void Representation::CGP::CGPMutator::insertRandomLine(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::CGP::CGPMutator::insertRandomLine(const LGP::LgpIndividual& individual, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    uint64_t lineIndex = agent.getNbLines();
-    population.addNewLine(agent, lineIndex);
+    uint64_t lineIndex = individual.getNbLines();
+    population.addNewLine(individual, lineIndex);
     
     size_t maxIndex = params.cgp.nbNodesPerLayer * (lineIndex / params.cgp.nbNodesPerLayer);
-    this->cgpLineMutator.initRandomCorrectLine(population.getLineForMutation(agent, lineIndex), lineIndex, maxIndex, rng);
+    this->cgpLineMutator.initRandomCorrectLine(population.getLineForMutation(individual, lineIndex), lineIndex, maxIndex, rng);
 }
 
-void Representation::CGP::CGPMutator::crossoverAgents(
-    std::array<std::reference_wrapper<const Individual>, 2> agents, EvoGraph::Graph& graph, 
-    Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, 
+void Representation::CGP::CGPMutator::crossoverIndividuals(
+    std::array<std::reference_wrapper<const Individual>, 2> individuals, EvoGraph::Graph& graph, 
+    Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, 
     const RepresentationParameters& params, RNG::RNG& rng)
 { 
     /// No crossover with CGP
 }
 
-bool Representation::CGP::CGPMutator::mutateLgpIndividual(const LGP::LgpIndividual& agent, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+bool Representation::CGP::CGPMutator::mutateLgpIndividual(const LGP::LgpIndividual& individual, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
     for(size_t idx = 0; idx < params.cgp.nbLayers * params.cgp.nbNodesPerLayer; idx++) {
         if (rng.getDouble(0.0, 1.0) < params.cgp.pMutateNode) {
             anyMutation = true;
-            alterRandomlyLine(agent, idx, population, params, rng);
+            alterRandomlyLine(individual, idx, population, params, rng);
         }
     }
 
@@ -85,28 +85,28 @@ bool Representation::CGP::CGPMutator::mutateLgpIndividual(const LGP::LgpIndividu
     if (params.lgp.nbProgramConstant > 0 &&
         rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
-        alterRandomConstant(agent, population, params, rng);
+        alterRandomConstant(individual, population, params, rng);
     }
 
-    for(size_t idx = 0; idx < agent.getUsedNbOutputs(population.getOutputs()); idx++) {
+    for(size_t idx = 0; idx < individual.getUsedNbOutputs(population.getOutputs()); idx++) {
         if(rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
             anyMutation = true;
-            alterRandomOutputs(agent, population, idx, params, rng);
+            alterRandomOutputs(individual, population, idx, params, rng);
         }
     }
 
     // Identify introns
     if (anyMutation) {
-        population.identifyIntrons(agent);
+        population.identifyIntrons(individual);
     }
     return anyMutation;
 }
 
 bool Representation::CGP::CGPMutator::alterRandomlyLine(
-    const LGP::LgpIndividual& agent, size_t lineIndex, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
+    const LGP::LgpIndividual& individual, size_t lineIndex, LGP::LGPPopulation& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
     
     size_t maxIndex = params.cgp.nbNodesPerLayer * (lineIndex / params.cgp.nbNodesPerLayer);
-    this->cgpLineMutator.alterCorrectLine(population.getLineForMutation(agent, lineIndex), maxIndex, rng); // specified accessible registers
+    this->cgpLineMutator.alterCorrectLine(population.getLineForMutation(individual, lineIndex), maxIndex, rng); // specified accessible registers
     return true;
 }

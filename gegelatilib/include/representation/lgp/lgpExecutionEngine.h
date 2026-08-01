@@ -91,7 +91,7 @@ namespace Representation::LGP {
          * This constructor is useful for testing a Program on a different
          * Environment than its own.
          *
-         * \param[in] executedAgent the const Program that will be executed or
+         * \param[in] executedIndividual the const Program that will be executed or
          * generated.
          * \param[in] dataSrc The DataHandler with which the Program
          * will be executed.
@@ -99,9 +99,9 @@ namespace Representation::LGP {
          */
         template <class T>
         LGPExecutionEngine(
-            const LgpIndividual& executedAgent, 
+            const LgpIndividual& executedIndividual, 
             const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
-            : LGPEngine(executedAgent, dataSrc, isTraining){};
+            : LGPEngine(executedIndividual, dataSrc, isTraining){};
 
         /**
          * \brief Constructor of the class.
@@ -109,12 +109,12 @@ namespace Representation::LGP {
          * The constructor initialize the number of registers accordingly
          * with the Environment of the given Program.
          *
-         * \param[in] executedAgent the const Program that will be executed or
+         * \param[in] executedIndividual the const Program that will be executed or
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const LgpIndividual& executedAgent, bool isTraining = false)
-            : LGPEngine(executedAgent, isTraining){};
+        LGPExecutionEngine(const LgpIndividual& executedIndividual, bool isTraining = false)
+            : LGPEngine(executedIndividual, isTraining){};
 
         /**
          * \brief Execute the current line of the program.

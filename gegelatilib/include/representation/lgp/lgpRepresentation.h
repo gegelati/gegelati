@@ -52,9 +52,9 @@ namespace Representation::LGP {
 
             
             /**
-             * \brief Clear all the parts of agents that are not used, such as introns for LGPs
+             * \brief Clear all the parts of individuals that are not used, such as introns for LGPs
              */
-            virtual void clearUnusedAgentParts() override;
+            virtual void clearUnusedIndividualParts() override;
 
 
             
@@ -88,23 +88,23 @@ namespace Representation::LGP {
             /** 
              * \brief Inherited method to print a LgpIndividual.
              * 
-             * The LGP agent prints the different lines of its program.
+             * The LGP individual prints the different lines of its program.
              */
-            void printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            void printIndividual(const Individual& individual, FILE* pFile, std::string offset, std::set<uint64_t>& printedIndividualID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
             
 
             /**
              * \brief Inherited method to read a LgpIndividual.
              * 
-             * This method will use the current line to get the constant of the agent.
+             * This method will use the current line to get the constant of the individual.
              * Then it will get the next line to read the instruction
              */
-            virtual const Individual& readAgent(std::smatch& matches) override;
+            virtual const Individual& readIndividual(std::smatch& matches) override;
 
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
+            virtual void printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const;
         };
 }; // namespace LGP_Representation
 

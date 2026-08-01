@@ -63,12 +63,12 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] agentProgram the weak pointer to the Individual Program associated to the
+         * \param[in] individualProgram the weak pointer to the Individual Program associated to the
          *            edge.
          */
         Edge(const Vertex& src, const Vertex& dest,
-                std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt)
-            : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
+                std::optional<std::reference_wrapper<const Representation::Individual>> individualProgram = std::nullopt)
+            : Element(individualProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
         /**
          * \brief Get the source Vertex of the Edge.

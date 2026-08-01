@@ -131,7 +131,7 @@ void CodeGen::CodeGenerationExporter::initActivationFunction(const Representatio
     fileMain << "\t}\n}\n" << std::endl;
 }
 
-void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Individual& agent, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportMainIndividual(const Representation::Individual& individual, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subIndividuals) 
 {
     
     fileMainH 
@@ -140,7 +140,7 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Indi
     fileMain
         << "\n"
         << "void inference(double* actions) {\n"
-        << "\t"<<representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID()<<"(actions);\n";
+        << "\t"<<representation.getRepresentationName() << representation.getRepresentationID() << "_" << individual.getIndividualID()<<"(actions);\n";
 
 
     // If do need activation function
@@ -167,15 +167,15 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Representation::Indi
     }
 
     fileMainH
-        << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
+        << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << individual.getIndividualID() << "(double* outputs);\n";
 
-    // Print the agent by calling representation.printAgent
-    std::set<std::reference_wrapper<const Representation::Individual>> agents{agent};
-    representation.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
+    // Print the individual by calling representation.printIndividual
+    std::set<std::reference_wrapper<const Representation::Individual>> individuals{individual};
+    representation.printCodeGenIndividuals(fileMain, fileMainH, individuals, subIndividuals);
 }
 
 
-void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapper<const Representation::Individual>> agents, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subAgents) 
+void CodeGen::CodeGenerationExporter::exportIndividuals(std::set<std::reference_wrapper<const Representation::Individual>> individuals, const Representation::Representation& representation, std::map<uint64_t, std::set<std::reference_wrapper<const Representation::Individual>>>& subIndividuals) 
 {
 
     // If do need activation function
@@ -192,13 +192,13 @@ void CodeGen::CodeGenerationExporter::exportAgents(std::set<std::reference_wrapp
         }
     }
 
-    for(const Representation::Individual& agent: agents) {
+    for(const Representation::Individual& individual: individuals) {
         fileMainH
-            << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << agent.getAgentID() << "(double* outputs);\n";
+            << "void " << representation.getRepresentationName() << representation.getRepresentationID() << "_" << individual.getIndividualID() << "(double* outputs);\n";
     }
     fileMainH << std::endl;
 
-    representation.printCodeGenAgents(fileMain, fileMainH, agents, subAgents);
+    representation.printCodeGenIndividuals(fileMain, fileMainH, individuals, subIndividuals);
 }
 
 //#endif // CODE_GENERATION

@@ -14,24 +14,24 @@ void Selector::TruncationSelector::doSelection(
     // Teams and actions are not removed also if there is 1% of teams or actions
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Representation::Individual>>
-        preservedAgents;
+        preservedIndividuals;
 
-    // Estimate the number of expected agents to delete
-    size_t nbExpectedAgents =
+    // Estimate the number of expected individuals to delete
+    size_t nbExpectedIndividuals =
         (size_t)floor(this->params->truncation.ratioDeletedRoots *
                       (double)results.size());
 
     auto i = 0;
-    while (i < nbExpectedAgents && results.size() > 0) {
+    while (i < nbExpectedIndividuals && results.size() > 0) {
 
         auto it = results.begin();
-        const Representation::Individual& agent = it->second;
+        const Representation::Individual& individual = it->second;
         results.erase(it);
 
         // Removed stored result (if any)
-        this->removeFromSavedResults(agent);
+        this->removeFromSavedResults(individual);
 
-        this->getPopulation().deleteAgent(agent, graph);
+        this->getPopulation().deleteIndividual(individual, graph);
 
         // Increment loop counter
         i++;

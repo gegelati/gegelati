@@ -43,7 +43,7 @@
 #include <thread>
 
 #include "learn/evaluationResult.h"
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
@@ -68,32 +68,32 @@ namespace Learn {
         std::vector<LearningEnvironment*> allCloneLearningEnvironments;
 
         /**
-         * \brief Method for evaluating agents with parallelism.
+         * \brief Method for evaluating individuals with parallelism.
          *
          * The work is delegated in two distinct methods (this structure is
-         * made for inheritance purpose) : evaluateAgentsInParallelExecute and
-         * evaluateAgentsInParallelCompileResults.
+         * made for inheritance purpose) : evaluateIndividualsInParallelExecute and
+         * evaluateIndividualsInParallelCompileResults.
          *
          * \param[in] jobsToProcess Ordered list of jobs of
-         * Agents to process
+         * Individuals to process
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          * \param[in] results Map to store the resulting score of
-         * evaluated agents.
+         * evaluated individuals.
          */
-        virtual void evaluateAgentsInParallel(
+        virtual void evaluateIndividualsInParallel(
             std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           std::reference_wrapper<const Representation::Individual>>& results);
 
         /**
-         * \brief Subfunction of evaluateAllAgentsInParallel which handles the
+         * \brief Subfunction of evaluateAllIndividualsInParallel which handles the
          * creation of threads, their execution and junction.
          *
          * \param[in] jobsToProcess Ordered list of jobs of
-         * Agents to process
+         * Individuals to process
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -101,24 +101,24 @@ namespace Learn {
          * \param[out] resultsPerJobMap map linking the job number with its
          * results and itself.
          */
-        virtual void evaluateAgentsInParallelExecute(
+        virtual void evaluateIndividualsInParallelExecute(
             std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Representation::Job>>>&
                 resultsPerJobMap);
 
         /**
-         * \brief Subfunction of evaluateAllAgentsInParallel which handles the
+         * \brief Subfunction of evaluateAllIndividualsInParallel which handles the
          * gathering of results.
          *
          * This method just emplaces results from resultsPerJobMap, as each
-         * job only contains 1 agent is is quite easy.
+         * job only contains 1 individual is is quite easy.
          *
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
-         * @param[out] results map linking single results to their agent vertex.
+         * @param[out] results map linking single results to their individual vertex.
          */
-        virtual void evaluateAgentsInParallelCompileResults(
+        virtual void evaluateIndividualsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Representation::Job>>>&
                 resultsPerJobMap,
@@ -127,32 +127,32 @@ namespace Learn {
 
         /**
          * \brief Function implementing the behavior of slave threads during
-         * parallel evaluation of agents.
+         * parallel evaluation of individuals.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          * \param[in,out] jobsToProcess Ordered list of jobs. 
-         * The jobs are groups of agents that shall be agents in the
-         * same simulation, there is only 1 agent if there is no adversarial
+         * The jobs are groups of individuals that shall be individuals in the
+         * same simulation, there is only 1 individual if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
-         * \param[in] agentsToProcessMutex Mutex protecting the
-         * agentsToProcess
-         * \param[in] resultsPerAgentMap Map to store the
-         * resulting score of evaluated agents.
-         * \param[in] resultsPerAgentMapMutex
+         * \param[in] individualsToProcessMutex Mutex protecting the
+         * individualsToProcess
+         * \param[in] resultsPerIndividualMap Map to store the
+         * resulting score of evaluated individuals.
+         * \param[in] resultsPerIndividualMapMutex
          * Mutex protecting the results.
          * \param[in] indexEnvironment Index of the environment.
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
             std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess,
-            std::mutex& agentsToProcessMutex,
+            std::mutex& individualsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Representation::Job>>>&
-                resultsPerAgentMap,
-            std::mutex& resultsPerAgentMapMutex,
+                resultsPerIndividualMap,
+            std::mutex& resultsPerIndividualMapMutex,
             size_t indexEnvironment);
 
       public:
@@ -165,7 +165,7 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representations vector of representation learned by the learning agent
+         * \param[in] representations vector of representation learned by the learning abcde
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -183,7 +183,7 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representation vector of representation learned by the learning agent
+         * \param[in] representation vector of representation learned by the learning abcde
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -204,11 +204,11 @@ namespace Learn {
         virtual void init(uint64_t seed = 0, bool doGeneratePopulation = true) override;
 
         /**
-         * \brief Evaluate all agent of an representation.
+         * \brief Evaluate all individual of an representation.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
-         * This method must always return the same results as the evaluateOneRepresentationAgents for
+         * This method must always return the same results as the evaluateOneRepresentationIndividuals for
          * a sequential execution. 
          *
          * \param[in] generationNumber the integer number of the current
@@ -218,7 +218,7 @@ namespace Learn {
          * 
          */
         std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
-        evaluateCurrentRepresentationAgents(uint64_t generationNumber, LearningMode mode) override;
+        evaluateCurrentRepresentationIndividuals(uint64_t generationNumber, LearningMode mode) override;
     };
 } // namespace Learn
 #endif

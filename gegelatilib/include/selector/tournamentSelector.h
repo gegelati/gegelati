@@ -10,14 +10,14 @@ namespace Selector {
     /**
      * \brief Selection class that will do a selection with a tournament.
      *
-     * A small proportion X of the best agents is kept and saved from the
+     * A small proportion X of the best individuals is kept and saved from the
      * tournament, X is an hyperparameter.
      *
      * The remaining of the population is randomly put in tournament tables of
-     * size Y, Y is an hyperparameter. The best agents of each tournment is
+     * size Y, Y is an hyperparameter. The best individuals of each tournment is
      * selected, the others are deleted.
      *
-     * During mutation process, the best agents saved are not used in the
+     * During mutation process, the best individuals saved are not used in the
      * mutation process, only the survivors of the tournament. However this
      * survivors are deleted after the offspring creation.
      */
@@ -31,7 +31,7 @@ namespace Selector {
          * it. The Vertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<std::reference_wrapper<const Representation::Individual>> agentsToDelete;
+        std::set<std::reference_wrapper<const Representation::Individual>> individualsToDelete;
 
       public:
         /**
@@ -46,14 +46,14 @@ namespace Selector {
         /**
          * \brief override of doSelection method
          *
-         * A small proportion X of the best agents is kept and saved from the
+         * A small proportion X of the best individuals is kept and saved from the
          * tournament, X is an hyperparameter.
          *
          * The remaining of the population is randomly put in tournament tables
-         * of size Y, Y is an hyperparameter. The best agents of each tournment
+         * of size Y, Y is an hyperparameter. The best individuals of each tournment
          * is selected, the others are deleted.
          *
-         * During mutation process, the best agents saved are not used in the
+         * During mutation process, the best individuals saved are not used in the
          * mutation process, only the survivors of the tournament. However this
          * survivors are deleted after the offspring creation.
          *
@@ -62,7 +62,7 @@ namespace Selector {
          * "population" take over the other one
          *
          * \param[in] graph the Graph on which selection is performed.
-         * \param[in,out] results a multimap containing agent
+         * \param[in,out] results a multimap containing individual
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -82,8 +82,8 @@ namespace Selector {
         /**
          * \brief Specialization of updateContext for tournament purposes
          *
-         * The method will remove the elite agents from the clonableVertices
-         * vectors, and will remove the not elite agents from the
+         * The method will remove the elite individuals from the clonableVertices
+         * vectors, and will remove the not elite individuals from the
          * preExistingVertices vectors
          */
         virtual std::unique_ptr<SelectionContext> updateContext() const override;
@@ -91,7 +91,7 @@ namespace Selector {
         /**
          * \brief Specialization of updateAfterPopulate for tournament purposes
          *
-         * This method erase the agents that have survived the tournaments and
+         * This method erase the individuals that have survived the tournaments and
          * have generated new offsprings.
          * 
          * \param[in] graph the Graph on which selection is performed.
@@ -101,7 +101,7 @@ namespace Selector {
         /**
          * \brief getter of the verticesToDelete set.
          */
-        virtual const std::set<std::reference_wrapper<const Representation::Individual>>& getAgentsToDelete();
+        virtual const std::set<std::reference_wrapper<const Representation::Individual>>& getIndividualsToDelete();
     };
 }; // namespace Selector
 

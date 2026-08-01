@@ -116,7 +116,7 @@ namespace Representation {
         std::string getRepresentationColor() const { return this->representationColor; }
 
         /**
-         * \brief return the ID of the agent.
+         * \brief return the ID of the individual.
          */
         static uint64_t getRepresentationIDCounter();
 
@@ -150,7 +150,7 @@ namespace Representation {
          * \brief Method that aggregate another representation to this representation.
          * 
          * The representation need to be the same type.
-         * This access allows for the population to dupplicate an agent from the aggregated representation to its own agents.
+         * This access allows for the population to dupplicate an individual from the aggregated representation to its own individuals.
          * 
          * \param[in] aggregatedRepresentation the representation to aggregate.
          */
@@ -210,21 +210,21 @@ namespace Representation {
         virtual std::vector<std::reference_wrapper<Representation>> getSubRepresentations();
 
         /**
-         * \brief Get the current number of agents used by the representation.
+         * \brief Get the current number of individuals used by the representation.
          */
-        virtual size_t getNbAgents() const;
+        virtual size_t getNbIndividuals() const;
 
         /**
-         * \brief Get the current agents used by the representation.
+         * \brief Get the current individuals used by the representation.
          */
-        virtual const std::vector<std::reference_wrapper<const Individual>> getAgents () const;
+        virtual const std::vector<std::reference_wrapper<const Individual>> getIndividuals () const;
 
         /**
-         * \brief method that indicate if the representation contains a specific agent.
+         * \brief method that indicate if the representation contains a specific individual.
          * 
-         * \param[in] agent searched agent.
+         * \param[in] individual searched individual.
          */
-        virtual bool containsAgent(const Individual& agent) const;
+        virtual bool containsIndividual(const Individual& individual) const;
 
         /**
          * \brief Initialize the populationof the representation
@@ -302,34 +302,34 @@ namespace Representation {
 
 
         /**
-        * \brief Get the agents that are currently used by the representation.
-        * The returned map associate to each sub-representation id the set of agents used by this sub-representation.
+        * \brief Get the individuals that are currently used by the representation.
+        * The returned map associate to each sub-representation id the set of individuals used by this sub-representation.
         */
-        virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubAgents() const;
+        virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubIndividuals() const;
 
         /**
-         * \brief Clear all the unused sub agents
+         * \brief Clear all the unused sub individuals
          */
-        virtual void clearUnusedSubAgents();
+        virtual void clearUnusedSubIndividuals();
 
         /**
-         * \brief Clear all the parts of agents that are not used, such as introns for LGPs
+         * \brief Clear all the parts of individuals that are not used, such as introns for LGPs
          */
-        virtual void clearUnusedAgentParts() = 0;
+        virtual void clearUnusedIndividualParts() = 0;
 
         /**
          * \brief Takes a given Individual and creates a job containing it.
          *
-         * \param[in] agent the Individual to be evaluated.
+         * \param[in] individual the Individual to be evaluated.
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] rng deterministic random generator
          * \param[in] idx The index of the job, can be used to organize a map
          * for example.
          *
-         * \return A job representing the agent.
+         * \return A job representing the individual.
          */
-        virtual std::shared_ptr<Job> createJob(const Individual& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+        virtual std::shared_ptr<Job> createJob(const Individual& individual, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
 
         /**
          * \brief Create a PolicyStats object corresponding to the representation.
@@ -352,54 +352,54 @@ namespace Representation {
         virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode);
 
         /**
-         * \brief Print the content of an agent in a file.
+         * \brief Print the content of an individual in a file.
          * 
-         * \param[in] agent the agent to print.
-         * \param[in] pFile the file in which the content of the agent will be printed.
+         * \param[in] individual the individual to print.
+         * \param[in] pFile the file in which the content of the individual will be printed.
          * \param[in] offset the character chain used to control the indentation of the printed content
-         * \param[in] printedAgentID the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
+         * \param[in] printedIndividualID the set of already printed individual IDs to avoid printing the same individual twice in case of multiple vertices or edges using the same individual program.
          * \param[in] elementsToPrint the list of elements to print, filled during this method.
          */
-        virtual void printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
+        virtual void printIndividual(const Individual& individual, FILE* pFile, std::string offset, std::set<uint64_t>& printedIndividualID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
 
         /**
-         * \brief Read and create an agent.
+         * \brief Read and create an individual.
          * 
          * The pFile can be use to read the next lines that could be used by an representation.
          * 
-         * If the agent normally uses a Team, it should be created empty.
-         * The Team will be added in "linkAgentTeam" method.
+         * If the individual normally uses a Team, it should be created empty.
+         * The Team will be added in "linkIndividualTeam" method.
          * 
          * \param[in] matches the match of the regex line.
          */
-        virtual const Individual& readAgent(std::smatch& matches) = 0;
+        virtual const Individual& readIndividual(std::smatch& matches) = 0;
 
         /**
-         * \brief Link an agent to a corresponding vertex
+         * \brief Link an individual to a corresponding vertex
          * 
          * This method should be override if it is intended to be used, the basic implementation throw.
          * 
-         * \param[in] agent the agent linked to the vertex.
-         * \param[in] vertex the vertex linked to the agent.
+         * \param[in] individual the individual linked to the vertex.
+         * \param[in] vertex the vertex linked to the individual.
          */
-        virtual void linkAgentVertex(const Individual& agent, const EvoGraph::Vertex& vertex);
+        virtual void linkIndividualVertex(const Individual& individual, const EvoGraph::Vertex& vertex);
 
         /**
          * \brief Export the corresponding C code of the representation.
          */
-        virtual void exportBestAgentCodeGen(const std::string& filename = "",
+        virtual void exportBestIndividualCodeGen(const std::string& filename = "",
                            const std::string& path = "./");
 
         /**
          * \brief Export the corresponding C code of the representation.
          */
-        virtual void exportSpecificAgentCodeGen(const Individual& agent, const std::string& filename = "",
+        virtual void exportSpecificIndividualCodeGen(const Individual& individual, const std::string& filename = "",
                            const std::string& path = "./");
 
         /**
          * \brief Export the corresponding C code of the representation.
          */
-        virtual void exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Individual>> agents, const std::string& filename = "",
+        virtual void exportSpecificIndividualsCodeGen(std::set<std::reference_wrapper<const Individual>> individuals, const std::string& filename = "",
                            const std::string& path = "./");
 
         /**
@@ -410,18 +410,18 @@ namespace Representation {
         /**
          * \brief Export the corresponding dot file of the representation, and its sub representations
          */
-        virtual void exportBestAgentDotFile(const char* filePath);
+        virtual void exportBestIndividualDotFile(const char* filePath);
 
         /**
          * \brief Export the corresponding dot file of the representation, and its sub representations
          */
-        virtual void exportSpecificAgentDotFile(const Individual& agent, const char* filePath);
+        virtual void exportSpecificIndividualDotFile(const Individual& individual, const char* filePath);
 
 
         /**
-         * \brief specific exporting of an agent for the code generation
+         * \brief specific exporting of an individual for the code generation
          */
-        virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const = 0;
+        virtual void printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const = 0;
 
         /**
          * \brief Import the corresponding file

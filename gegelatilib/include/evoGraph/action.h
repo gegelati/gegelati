@@ -47,7 +47,7 @@ namespace EvoGraph {
      * \brief Class representing an Action of a Graph.
      *
      * An action is a leaf vertex of a TPG associated to an action of the
-     * learning agent within its environment.
+     * learning abcde within its environment.
      */
     class Action : public Vertex
     {
@@ -65,10 +65,10 @@ namespace EvoGraph {
          * \brief Main constructor of a Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
-         * \param[in] agentProgram the weak pointer to the Individual Program associated to the
+         * \param[in] individualProgram the weak pointer to the Individual Program associated to the
          *            Vertex.
          */
-        Action(const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> agentProgram = std::nullopt) : Vertex(agentProgram), actionID{id} {
+        Action(const uint64_t id, std::optional<std::reference_wrapper<const Representation::Individual>> individualProgram = std::nullopt) : Vertex(individualProgram), actionID{id} {
             this->updateAssessedActions();
         };
 

@@ -63,16 +63,16 @@ void Learn::ParallelLearningAgent::init(uint64_t seed, bool doGeneratePopulation
 }
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
-Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t generationNumber,
+Learn::ParallelLearningAgent::evaluateCurrentRepresentationIndividuals(uint64_t generationNumber,
                                                Learn::LearningMode mode)
 {
 
 
     if(this->currentExecutedRepresentation == nullptr){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: currentExecutedRepresentation is not set.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: currentExecutedRepresentation is not set.");
     }
     if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationAgents: The learning agent does not contain the given representation.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning abcde does not contain the given representation.");
     }
 
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>
@@ -80,7 +80,7 @@ Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t gener
 
         
     if (false && (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable())) {
-        results = Learn::LearningAgent::evaluateCurrentRepresentationAgents(generationNumber, mode);
+        results = Learn::LearningAgent::evaluateCurrentRepresentationIndividuals(generationNumber, mode);
     }
     else {
         // Create jobs to process
@@ -93,7 +93,7 @@ Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t gener
         }
 
         // Parallel mode
-        evaluateAgentsInParallel(jobsQueue, generationNumber, mode, results);
+        evaluateIndividualsInParallel(jobsQueue, generationNumber, mode, results);
 
         // Update the representation after evaluation with the jobs processed
         this->currentExecutedRepresentation->updateAfterEvaluation(jobsToProcess, mode);
@@ -105,10 +105,10 @@ Learn::ParallelLearningAgent::evaluateCurrentRepresentationAgents(uint64_t gener
 void Learn::ParallelLearningAgent::slaveEvalJobThread(
     uint64_t generationNumber, Learn::LearningMode mode,
     std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess,
-    std::mutex& agentsToProcessMutex,
+    std::mutex& individualsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Representation::Job>>>& resultsPerAgentMap,
-    std::mutex& resultsPerAgentMapMutex,
+                                 std::shared_ptr<Representation::Job>>>& resultsPerIndividualMap,
+    std::mutex& resultsPerIndividualMapMutex,
     size_t indexEnvironment)
 {
 
@@ -123,7 +123,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         std::shared_ptr<Representation::Job> jobToProcess;
 
         { // Mutual exclusion zone: atomic job acquisition + engine creation
-            std::lock_guard<std::mutex> lock(agentsToProcessMutex);
+            std::lock_guard<std::mutex> lock(individualsToProcessMutex);
             if (!jobsToProcess.empty()) {
                 jobToProcess = jobsToProcess.front();
                 jobsToProcess.pop();
@@ -142,15 +142,15 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                               *privateLearningEnvironment);
 
         { // Store result Mutual exclusion zone
-            std::lock_guard<std::mutex> lock(resultsPerAgentMapMutex);
-            resultsPerAgentMap.emplace(
+            std::lock_guard<std::mutex> lock(resultsPerIndividualMapMutex);
+            resultsPerIndividualMap.emplace(
                 jobToProcess->getIdx(),
                 std::make_pair(avgScore, jobToProcess));
         }
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
+void Learn::ParallelLearningAgent::evaluateIndividualsInParallel(
     std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>&
         results)
@@ -160,19 +160,19 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
              std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Representation::Job>>>
         resultsPerJobMap;
 
-    evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap);
+    evaluateIndividualsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap);
 
-    evaluateAgentsInParallelCompileResults(resultsPerJobMap, results);
+    evaluateIndividualsInParallelCompileResults(resultsPerJobMap, results);
 
 }
-void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
+void Learn::ParallelLearningAgent::evaluateIndividualsInParallelExecute(
     std::queue<std::shared_ptr<Representation::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Representation::Job>>>& resultsPerJobMap)
 {
     // Create mutexes
-    std::mutex agentsToProcessMutex;
-    std::mutex resultsPerAgentMutex;
+    std::mutex individualsToProcessMutex;
+    std::mutex resultsPerIndividualMutex;
     
     if(this->allCloneLearningEnvironments.size() == 0) {
         this->allCloneLearningEnvironments.push_back(&this->learningEnvironment);
@@ -186,15 +186,15 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
     for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
         threads.emplace_back(std::thread(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
-            mode, std::ref(jobsToProcess), std::ref(agentsToProcessMutex),
-            std::ref(resultsPerJobMap), std::ref(resultsPerAgentMutex),
+            mode, std::ref(jobsToProcess), std::ref(individualsToProcessMutex),
+            std::ref(resultsPerJobMap), std::ref(resultsPerIndividualMutex),
             i+1));
     }
 
     // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
-                             agentsToProcessMutex, resultsPerJobMap,
-                             resultsPerAgentMutex, 0);
+                             individualsToProcessMutex, resultsPerJobMap,
+                             resultsPerIndividualMutex, 0);
 
     // Join the threads
     for (auto& thread : threads) {
@@ -202,15 +202,15 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
+void Learn::ParallelLearningAgent::evaluateIndividualsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Representation::Job>>>& resultsPerJobMap,
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>&
         results)
 {
     // Merge the results
-    for (auto& resultPerAgent : resultsPerJobMap) {
-        results.emplace(resultPerAgent.second.first,
-                        (*resultPerAgent.second.second).getAgent());
+    for (auto& resultPerIndividual : resultsPerJobMap) {
+        results.emplace(resultPerIndividual.second.first,
+                        (*resultPerIndividual.second.second).getIndividual());
     }
 }

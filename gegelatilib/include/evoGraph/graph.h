@@ -126,12 +126,12 @@ namespace EvoGraph {
          * The new Team is added to the back of the vertices list.
          * The Team is created using the GraphFactory of the Graph.
          * 
-         * \param[in] programAgent weak pointer to the Individual Program associated to the newly
+         * \param[in] programIndividual weak pointer to the Individual Program associated to the newly
          *                 created Team.
          *
          * \return a const reference to the newly created Team.
          */
-        const EvoGraph::Team& addNewTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programAgent = std::nullopt);
+        const EvoGraph::Team& addNewTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual = std::nullopt);
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -141,12 +141,12 @@ namespace EvoGraph {
          * The Action is created using the GraphFactory of the Graph.
          *
          * \param[in] actionID the identifier to associate to the Action.
-         * \param[in] programAgent weak pointer to the Individual Program associated to the newly
+         * \param[in] programIndividual weak pointer to the Individual Program associated to the newly
          *                 created Action.
          * 
          * \return a const reference to the newly created Action.
          */
-        const EvoGraph::Action& addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Individual>> programAgent = std::nullopt);
+        const EvoGraph::Action& addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual = std::nullopt);
 
 
         /**
@@ -289,7 +289,7 @@ namespace EvoGraph {
          * \param[in] src the source Vertex of the newly created Edge.
          * \param[in] dest the destination Vertex of the newly created
          *                Edge.
-         * \param[in] programAgent shared pointer to the Individual Program associated to the newly
+         * \param[in] programIndividual shared pointer to the Individual Program associated to the newly
          *                 created Edge.
          * \return a const reference to the created Edge.
          * \throw std::runtime_error In case one of the Vertex does not
@@ -297,7 +297,7 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         const EvoGraph::Edge& addNewEdge(const Vertex& src, const Vertex& dest,
-                                  const Representation::Individual& programAgent);
+                                  const Representation::Individual& programIndividual);
 
 
         /**
@@ -322,18 +322,18 @@ namespace EvoGraph {
         void removeEdge(const Edge& edge);
 
         /**
-         * \brief Change the program agent of a Vertex
+         * \brief Change the program individual of a Vertex
          * 
          * \param[in] vertex a const reference to the modified Vertex.
-         * \param[in] programAgent weak pointer to the Individual Program to set to the vertex
+         * \param[in] programIndividual weak pointer to the Individual Program to set to the vertex
          */
-        void setVertexProgram(const Vertex& vertex, const Representation::Individual& programAgent);
+        void setVertexProgram(const Vertex& vertex, const Representation::Individual& programIndividual);
 
         /**
          * Duplicate a Edge from the Graph.
          *
          * This method creates a perfect copy of the given Edge, that is
-         * a Edge with the same source, destination and agent program shared
+         * a Edge with the same source, destination and individual program shared
          * pointer.
          *
          * \param[in] edge a const reference to the TPGedge to duplicate.
@@ -370,13 +370,13 @@ namespace EvoGraph {
         bool setEdgeSource(const Edge& edge, const Vertex& newSrc);
 
         /**
-         * \brief set a new program agent to a Edge
+         * \brief set a new program individual to a Edge
          * 
          * \param[in] edge a const reference to the modified Edge.
-         * \param[in] programAgent shared pointer to the Individual Program to set to the edge.
+         * \param[in] programIndividual shared pointer to the Individual Program to set to the edge.
          * \return true if the given edge is part of the graph, and
          */
-        bool setEdgeProgram(const Edge& edge, const Representation::Individual& programAgent);
+        bool setEdgeProgram(const Edge& edge, const Representation::Individual& programIndividual);
 
 
         /**

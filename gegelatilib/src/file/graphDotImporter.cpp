@@ -45,17 +45,17 @@ const std::string File::GraphDotImporter::endRepresentationSubGraph(R"(^\s*\}\s*
 
 const std::string File::GraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*fillcolor.*\\x5D");
-const std::string File::GraphDotImporter::agentRegex(
+const std::string File::GraphDotImporter::individualRegex(
     "P([0-9]+)\\x20\\x5B.*label=\"([^\\.]+)\\.([0-9]+)\".*");
 const std::string File::GraphDotImporter::actionRegex(
     "A([0-9]+)\\x20\\x5B.*=\"(.*)\"\\x5D");
-const std::string File::GraphDotImporter::linkTeamAgentActionRegex(
+const std::string File::GraphDotImporter::linkTeamIndividualActionRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
-const std::string File::GraphDotImporter::linkTeamAgentTeamRegex(
+const std::string File::GraphDotImporter::linkTeamIndividualTeamRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
-const std::string File::GraphDotImporter::linkTeamAgentRegex(
+const std::string File::GraphDotImporter::linkTeamIndividualRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)");
-const std::string File::GraphDotImporter::linkAgentTeamRegex(
+const std::string File::GraphDotImporter::linkIndividualTeamRegex(
     "P([0-9]+)\\x20->\\x20T([0-9]+)");
 
 Representation::Representation& File::GraphDotImporter::getRepresentation(uint64_t representationID)
@@ -215,113 +215,113 @@ void File::GraphDotImporter::readAction(std::smatch& matches)
     }
 }
 
-void File::GraphDotImporter::readAgent(std::smatch& matches) {
+void File::GraphDotImporter::readIndividual(std::smatch& matches) {
     if (!this->lastLine.empty() && !matches.empty()) {
-        uint64_t agentID = std::stoi(matches[1]);
+        uint64_t individualID = std::stoi(matches[1]);
         std::string representationName = matches[2];
         uint64_t representationID = std::stoi(matches[3]);
         
         Representation::Representation& representation = this->getRepresentation(representationID);
-        const Representation::Individual& agent = representation.readAgent(matches);
+        const Representation::Individual& individual = representation.readIndividual(matches);
 
-        this->readAgentID.insert({std::stoi(matches[1]), agent});
+        this->readIndividualID.insert({std::stoi(matches[1]), individual});
 
-        representation.getPopulation().setNewAgentID(agent, agentID);
+        representation.getPopulation().setNewIndividualID(individual, individualID);
     }
 }
 
-void File::GraphDotImporter::readLinkTeamAgentAction(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamIndividualAction(std::smatch& matches)
 {
     // Creating a edge from a team to an action
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t team_id = std::stoi(matches[1]);
-        uint64_t agent_id = std::stoi(matches[2]);
+        uint64_t individual_id = std::stoi(matches[2]);
         uint64_t action_id = std::stoi(matches[3]);
 
         // check object are found
         auto action_it = this->readVertexID.find(action_id);
         auto team_it = this->readVertexID.find(team_id);
-        auto agent_it = this->readAgentID.find(agent_id);
+        auto individual_it = this->readIndividualID.find(individual_id);
         if (action_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentAction action not found");
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualAction action not found");
         }
         if (team_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentAction team not found");
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualAction team not found");
         }
-        if (agent_it == this->readAgentID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentAction agent not found");
+        if (individual_it == this->readIndividualID.end()) {
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualAction individual not found");
         }
 
-        this->graph.addNewEdge(team_it->second, action_it->second, agent_it->second);
+        this->graph.addNewEdge(team_it->second, action_it->second, individual_it->second);
     }
 }
 
-void File::GraphDotImporter::readLinkTeamAgentTeam(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamIndividualTeam(std::smatch& matches)
 {
     // Creating a edge from a team to a team
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t team_in_id = std::stoi(matches[1]);
-        uint64_t agent_id = std::stoi(matches[2]);
+        uint64_t individual_id = std::stoi(matches[2]);
         uint64_t team_out_id = std::stoi(matches[3]);
 
         // check object are found
         auto team_in_it = this->readVertexID.find(team_in_id);
         auto team_out_it = this->readVertexID.find(team_out_id);
-        auto agent_it = this->readAgentID.find(agent_id);
+        auto individual_it = this->readIndividualID.find(individual_id);
         if (team_in_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentTeam team src not found");
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualTeam team src not found");
         }
         if (team_out_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentTeam team out not found");
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualTeam team out not found");
         }
-        if (agent_it == this->readAgentID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgentTeam agent not found");
+        if (individual_it == this->readIndividualID.end()) {
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividualTeam individual not found");
         }
 
-        this->graph.addNewEdge(team_in_it->second, team_out_it->second, agent_it->second);
+        this->graph.addNewEdge(team_in_it->second, team_out_it->second, individual_it->second);
     }
 }
 
-void File::GraphDotImporter::readLinkTeamAgent(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamIndividual(std::smatch& matches)
 {
-    // Add the agent to the team
+    // Add the individual to the team
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t team_id = std::stoi(matches[1]);
-        uint64_t agent_id = std::stoi(matches[2]);
+        uint64_t individual_id = std::stoi(matches[2]);
 
         // check object are found
         auto team_it = this->readVertexID.find(team_id);
-        auto agent_it = this->readAgentID.find(agent_id);
+        auto individual_it = this->readIndividualID.find(individual_id);
         if (team_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgent team src not found");
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividual team src not found");
         }
-        if (agent_it == this->readAgentID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkTeamAgent agent not found");
+        if (individual_it == this->readIndividualID.end()) {
+            throw std::runtime_error("GraphDotImporter::readLinkTeamIndividual individual not found");
         }
 
-        this->graph.setVertexProgram(team_it->second, agent_it->second);
+        this->graph.setVertexProgram(team_it->second, individual_it->second);
     }
 }
 
-void File::GraphDotImporter::readLinkAgentTeam(std::smatch& matches)
+void File::GraphDotImporter::readLinkIndividualTeam(std::smatch& matches)
 {
-    // Add the team to the agent
+    // Add the team to the individual
     if (!this->lastLine.empty() && !matches.empty()) {
-        uint64_t agent_id = std::stoi(matches[1]);
+        uint64_t individual_id = std::stoi(matches[1]);
         uint64_t team_id = std::stoi(matches[2]);
 
         // check object are found
-        auto agent_it = this->readAgentID.find(agent_id);
+        auto individual_it = this->readIndividualID.find(individual_id);
         auto team_it = this->readVertexID.find(team_id);
-        if (agent_it == this->readAgentID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkreadLinkAgentTeamTeamAgent agent not found");
+        if (individual_it == this->readIndividualID.end()) {
+            throw std::runtime_error("GraphDotImporter::readLinkreadLinkIndividualTeamTeamIndividual individual not found");
         }
         if (team_it == this->readVertexID.end()) {
-            throw std::runtime_error("GraphDotImporter::readLinkAgentTeam team src not found");
+            throw std::runtime_error("GraphDotImporter::readLinkIndividualTeam team src not found");
         }
 
-        Representation::Representation& representation = this->getRepresentation(agent_it->second.get().getRepresentationID());
-        representation.linkAgentVertex(agent_it->second, team_it->second);
+        Representation::Representation& representation = this->getRepresentation(individual_it->second.get().getRepresentationID());
+        representation.linkIndividualVertex(individual_it->second, team_it->second);
     }
 }
 
@@ -334,10 +334,10 @@ void File::GraphDotImporter::importGraph(const char* filePath)
     }
 
     // clear every storing objects
-    representation.getPopulation().clearAgents(this->graph);
+    representation.getPopulation().clearIndividuals(this->graph);
     this->readVertexID.clear();
     this->readEdgeID.clear();
-    this->readAgentID.clear();
+    this->readIndividualID.clear();
     // skip header
     int majorVersion = 0;
     int minorVersion = 0;
@@ -386,11 +386,11 @@ bool File::GraphDotImporter::readLineFromFile()
 
     std::regex testActionDeclare(this->actionRegex);
     std::regex testTeamDeclare(this->teamRegex);
-    std::regex testAgentDeclare(this->agentRegex);
-    std::regex testLinkTPA(this->linkTeamAgentActionRegex);
-    std::regex testLinkTPT(this->linkTeamAgentTeamRegex);
-    std::regex testLinkTP(this->linkTeamAgentRegex);
-    std::regex testLinkPT(this->linkAgentTeamRegex);
+    std::regex testIndividualDeclare(this->individualRegex);
+    std::regex testLinkTPA(this->linkTeamIndividualActionRegex);
+    std::regex testLinkTPT(this->linkTeamIndividualTeamRegex);
+    std::regex testLinkTP(this->linkTeamIndividualRegex);
+    std::regex testLinkPT(this->linkIndividualTeamRegex);
 
     std::smatch matches;
 
@@ -408,20 +408,20 @@ bool File::GraphDotImporter::readLineFromFile()
     else if (std::regex_search(this->lastLine, matches, testActionDeclare)) {
         readAction(matches);
     }
-    else if (std::regex_search(this->lastLine, matches, testAgentDeclare)) {
-        readAgent(matches);
+    else if (std::regex_search(this->lastLine, matches, testIndividualDeclare)) {
+        readIndividual(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkTPA)) {
-        readLinkTeamAgentAction(matches);
+        readLinkTeamIndividualAction(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkTPT)) {
-        readLinkTeamAgentTeam(matches);
+        readLinkTeamIndividualTeam(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkTP)) {
-        readLinkTeamAgent(matches);
+        readLinkTeamIndividual(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkPT)) {
-        readLinkAgentTeam(matches);
+        readLinkIndividualTeam(matches);
     }
     else {
         return false;

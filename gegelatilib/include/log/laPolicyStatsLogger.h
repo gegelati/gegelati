@@ -43,22 +43,22 @@
 namespace Log {
     /**
      * \brief LALogger specialization using logging the PolicyStats information
-     * on the best agent.
+     * on the best individual.
      *
-     * After each evaluation of the agents by the LearningAgent, this
-     * LALogger logs the PolicyStats of the bestAgent into its output stream.
+     * After each evaluation of the individuals by the LearningAgent, this
+     * LALogger logs the PolicyStats of the bestIndividual into its output stream.
      */
     class LAPolicyStatsLogger : public LALogger
     {
       private:
         /**
-         * \brief ID of the Last best agent whose policyStats was printed in
+         * \brief ID of the Last best individual whose policyStats was printed in
          * the log.
          *
-         * After each evaluation, the policyStats of an agent is printed in the
-         * stream only if a new agent is marked as the bestAgent.
+         * After each evaluation, the policyStats of an individual is printed in the
+         * stream only if a new individual is marked as the bestIndividual.
          */
-        int64_t lastBestAgentID = -1;
+        int64_t lastBestIndividualID = -1;
 
         /// Number of the current generation.
         uint64_t generationNumber = 0;
@@ -72,7 +72,7 @@ namespace Log {
          *
          * \param[in] la LearningAgent whose information will be logged by the
          * LAPolicyStatsLogger.
-         * \param[in] representation representation whose best agent is output.
+         * \param[in] representation representation whose best individual is output.
          * \param[in] out ostream where the logger will write its output.
          */
         LAPolicyStatsLogger(Learn::LearningAgent& la, const Representation::Representation& representation,

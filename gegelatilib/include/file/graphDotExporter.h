@@ -79,21 +79,21 @@ namespace File {
         /// @brief set of printed edge ID. This is used to avoid printing twice the same edge in case of multiple edges pointing toward the same destination vertex.
         std::set<uint64_t> printedEdgeID;
 
-        /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
-        std::set<uint64_t> printedAgentID;
+        /// @brief set of printed individual ID. This is used to avoid printing twice the same individual in case of multiple vertices or edges using the same individual program.
+        std::set<uint64_t> printedIndividualID;
 
-        /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
+        /// @brief set of printed individual ID. This is used to avoid printing twice the same individual in case of multiple vertices or edges using the same individual program.
         std::set<uint64_t> printedRepresentationsID;
 
 
         /**
          * \brief Print the dot content for the given Program.
          * 
-         * This method find the corresponding representation to the agent program given and print it.
+         * This method find the corresponding representation to the individual program given and print it.
          * 
-         * \param[in] agentProgram the agent program to be printed
+         * \param[in] individualProgram the individual program to be printed
          */
-        void printAgent(const Representation::Individual& agentProgram);
+        void printIndividual(const Representation::Individual& individualProgram);
 
         /**
          * \brief Print the dot content for the given Element.
@@ -102,7 +102,7 @@ namespace File {
          * constructor, or by a call to setNewFilePath.
          * 
          * This method will either call printVertex or printEdge depending on the type of the element given.
-         * It will also print the potential agent program associated to the element.
+         * It will also print the potential individual program associated to the element.
          */
         void printElement(const EvoGraph::Element& element);
 
@@ -114,7 +114,7 @@ namespace File {
          * constructor, or by a call to setNewFilePath.
          * 
          * This method will either call printTeam or printAction depending on the type of the vertex given.
-         * It will also print the potential agent program associated to the vertex.
+         * It will also print the potential individual program associated to the vertex.
          */
         void printVertex(const EvoGraph::Vertex& vertex);
 
@@ -241,10 +241,10 @@ namespace File {
          *
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
-         * \param[in] agent The agent printed
-         * \param[in] representation the representation the agent belongs too
+         * \param[in] individual The individual printed
+         * \param[in] representation the representation the individual belongs too
          */
-        void exportAgent(const char* filePath, const Representation::Individual& agent, const Representation::Representation& representation);
+        void exportIndividual(const char* filePath, const Representation::Individual& individual, const Representation::Representation& representation);
     };
 }; // namespace File
 

@@ -24,7 +24,7 @@ namespace Representation::TPG {
     {
         protected:
 
-            /// ID of the program representation associated with the TPG agents.
+            /// ID of the program representation associated with the TPG individuals.
             uint64_t programRepresentationID;
 
             /// TPGArchive used during the training process
@@ -59,9 +59,9 @@ namespace Representation::TPG {
             const TPGArchive& getArchive() const;
             
             /**
-             * \brief Clear all the parts of agents that are not used, such as introns for LGPs
+             * \brief Clear all the parts of individuals that are not used, such as introns for LGPs
              */
-            virtual void clearUnusedAgentParts() override {};
+            virtual void clearUnusedIndividualParts() override {};
 
 
             /**
@@ -94,16 +94,16 @@ namespace Representation::TPG {
             /**
              * \brief Takes a given Individual and creates a job containing it.
              *
-             * \param[in] agent the Individual to be evaluated.
+             * \param[in] individual the Individual to be evaluated.
              * \param[in] mode the mode of the training, determining for example
              * if we generate values that we only need for training.
              * \param[in] rng deterministic random generator
              * \param[in] idx The index of the job, can be used to organize a map
              * for example.
              *
-             * \return A job representing the agent.
+             * \return A job representing the individual.
              */
-            virtual std::shared_ptr<Job> createJob(const Individual& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
+            virtual std::shared_ptr<Job> createJob(const Individual& individual, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
 
             /**
              * \brief Inherited method to create the policy stats of the representation
@@ -120,36 +120,36 @@ namespace Representation::TPG {
             virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode) override;
 
             /**
-             * \brief Inherited method to clear all the unused sub agents
+             * \brief Inherited method to clear all the unused sub individuals
              * 
-             * The sub agents are the agents used by the program sub-representation.
+             * The sub individuals are the individuals used by the program sub-representation.
              */
-            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubAgents() const override;
+            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>> getUsedSubIndividuals() const override;
 
             /** 
              * \brief Inherited method to print a TpgIndividual.
              * 
-             * The TPG agent prints the vertex it points to.
+             * The TPG individual prints the vertex it points to.
              */
-            void printAgent(const Individual& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            void printIndividual(const Individual& individual, FILE* pFile, std::string offset, std::set<uint64_t>& printedIndividualID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
 
             /**
              * \brief Inherited method to read a TpgIndividual.
              */
-            virtual const Individual& readAgent(std::smatch& matches) override;
+            virtual const Individual& readIndividual(std::smatch& matches) override;
 
             /**
              * \brief inherrit from representation class
              */
-            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subAgents) const;
+            virtual void printCodeGenIndividuals(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Individual>>& individuals, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>& subIndividuals) const;
 
             /**
-             * \brief Link an agent to a corresponding vertex
+             * \brief Link an individual to a corresponding vertex
              * 
-             * \param[in] agent the agent linked to the vertex.
-             * \param[in] vertex the vertex linked to the agent.
+             * \param[in] individual the individual linked to the vertex.
+             * \param[in] vertex the vertex linked to the individual.
              */
-            virtual void linkAgentVertex(const Individual& agent, const EvoGraph::Vertex& vertex) override;
+            virtual void linkIndividualVertex(const Individual& individual, const EvoGraph::Vertex& vertex) override;
             
     };
 }; // namespace TPG_Representation

@@ -27,13 +27,13 @@ namespace Representation::TPG {
              * \brief Constructor enabling storing elements in the job so that the
              * Learning Agents will be able to use them later.
              *
-             * @param[in] agent The agent that will be encapsulated into the job.
+             * @param[in] individual The individual that will be encapsulated into the job.
              * @param[in] idx The index of this job.
              * @param[in] archive The archive associated to this job.
              */
-            TPGJob(const Individual& agent,
+            TPGJob(const Individual& individual,
                 uint64_t idx = 0, std::unique_ptr<TPGArchive> archive = nullptr)
-                : Job(agent, idx), archive(std::move(archive))
+                : Job(individual, idx), archive(std::move(archive))
             {
             }
 

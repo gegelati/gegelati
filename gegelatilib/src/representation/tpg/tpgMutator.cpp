@@ -25,18 +25,18 @@ void Representation::TPG::TPGMutator::updateSpecificContext(
     std::set<std::reference_wrapper<const EvoGraph::Vertex>> usableVertices;
     std::queue<std::reference_wrapper<const EvoGraph::Vertex>> toVisit;
 
-    // Initialize queue with vertices from all pre-existing agents
-    for (const Representation::Individual& agentPtr : this->currentContext->preExistingAgents) {
-        if(auto tpgIndividual = dynamic_cast<const TpgIndividual*>(&agentPtr)) {
+    // Initialize queue with vertices from all pre-existing individuals
+    for (const Representation::Individual& individualPtr : this->currentContext->preExistingIndividuals) {
+        if(auto tpgIndividual = dynamic_cast<const TpgIndividual*>(&individualPtr)) {
             toVisit.push(tpgIndividual->getVertex());
         } else {
-            throw std::runtime_error("TPGMutator::updateSpecificContext: an agent in the current context is not a TpgIndividual.");
+            throw std::runtime_error("TPGMutator::updateSpecificContext: an individual in the current context is not a TpgIndividual.");
 
         }
 
     }
 
-    // BFS to collect all vertices reachable from pre-existing agents
+    // BFS to collect all vertices reachable from pre-existing individuals
     while (!toVisit.empty()) {
         const EvoGraph::Vertex& vertex = toVisit.front();
         toVisit.pop();
@@ -112,7 +112,7 @@ void Representation::TPG::TPGMutator::addAditionnalEdges(
             EvoGraph::Graph& graph,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::reference_wrapper<const Individual>> programAgent,
+            std::vector<std::reference_wrapper<const Individual>> programIndividual,
             const RepresentationParameters& params, RNG::RNG& rng)
 {
     
@@ -125,7 +125,7 @@ void Representation::TPG::TPGMutator::addAditionnalEdges(
 
         if (nbAdditionalEdges > 0) {
             // Copy the list of programs
-            std::vector<int> availableChoices(programAgent.size());
+            std::vector<int> availableChoices(programIndividual.size());
             std::iota(availableChoices.begin(), availableChoices.end(), 0);
             // Remove already connected ones
             auto iter = availableChoices.begin();
@@ -133,10 +133,10 @@ void Representation::TPG::TPGMutator::addAditionnalEdges(
                 if (std::count_if(
                         rootVertex.getOutgoingEdges().begin(),
                         rootVertex.getOutgoingEdges().end(),
-                        [&iter, &programAgent](
+                        [&iter, &programIndividual](
                             const EvoGraph::Edge& edge) {
                             return edge.getProgram() ==
-                                   programAgent.at(*iter).get();
+                                   programIndividual.at(*iter).get();
                         }) > 0) {
                     iter = availableChoices.erase(iter);
                 }
@@ -158,7 +158,7 @@ void Representation::TPG::TPGMutator::addAditionnalEdges(
                     rootVertex,
                     leafVertices.at(
                         rng.getUnsignedInt64(0, leafVertices.size() - 1)),
-                    programAgent.at(availableChoices.at(progIndex)));
+                    programIndividual.at(availableChoices.at(progIndex)));
 
                 availableChoices.erase(availableChoices.begin() + progIndex);
             }
@@ -171,8 +171,8 @@ void Representation::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& grap
     auto outputs = population.getOutputs();
     this->isConfigurationValid(params, outputs);
     
-    // Empty agent population
-    population.clearAgents(graph);
+    // Empty individual population
+    population.clearIndividuals(graph);
 
     // Number of action vertices needed
     size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
@@ -180,11 +180,11 @@ void Representation::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& grap
     // Create teams, programs and Actions
     std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
     std::vector<std::reference_wrapper<const EvoGraph::Vertex>> teams;
-    std::vector<std::reference_wrapper<const Individual>> programAgents;
+    std::vector<std::reference_wrapper<const Individual>> programIndividuals;
 
 
     for (size_t idx = 0; idx < params.nbIndividuals; idx++) {
-        teams.push_back(dynamic_cast<const TpgIndividual&>(population.createAgent(graph)).getVertex());
+        teams.push_back(dynamic_cast<const TpgIndividual&>(population.createIndividual(graph)).getVertex());
     }
 
     // Connect each team with two distinct actions, through two distinct
@@ -195,30 +195,30 @@ void Representation::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& grap
     Population& programPopulation = population.getSubPopulation(this->programRepresentationID);
     for (size_t i = 0; i < 2 * params.nbIndividuals; i++) {
 
-        // Create a program agent
-        programAgents.push_back(programMutator.initRandomAgent(graph, programPopulation, params, rng));
+        // Create a program individual
+        programIndividuals.push_back(programMutator.initRandomIndividual(graph, programPopulation, params, rng));
 
         // Add the edge
         graph.addNewEdge(teams.at(i / 2), actions.at(i % actions.size()),
-                         programAgents.at(i));
+                         programIndividuals.at(i));
     }
 
     std::vector<std::reference_wrapper<const EvoGraph::Vertex>> actionsVertex(actions.begin(), actions.end());
-    this->addAditionnalEdges(graph, actionsVertex, teams, programAgents, params, rng);
+    this->addAditionnalEdges(graph, actionsVertex, teams, programIndividuals, params, rng);
 }
 
-void Representation::TPG::TPGMutator::initRandomSpecificAgent(const Individual& agent, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::TPG::TPGMutator::initRandomSpecificIndividual(const Individual& individual, EvoGraph::Graph& graph, Population& population, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    // First agent is initialized, check validity of the configuration.
-    if(population.getAgents().size() == 1){
+    // First individual is initialized, check validity of the configuration.
+    if(population.getIndividuals().size() == 1){
         this->isConfigurationValid(params, population.getOutputs());
         // Number of action vertices needed
         size_t nbActionVertices = (population.getOutputs().sizeDiscrete() == 0) ? 1 : population.getOutputs().front().getNbValues();
         this->initActionVertices(graph, nbActionVertices);
     }
 
-    population.emptyAgent(agent, graph);
-    const EvoGraph::Vertex& vertex = dynamic_cast<const TpgIndividual&>(agent).getVertex();
+    population.emptyIndividual(individual, graph);
+    const EvoGraph::Vertex& vertex = dynamic_cast<const TpgIndividual&>(individual).getVertex();
 
     Mutator& programMutator = this->getSubMutator(this->programRepresentationID);
     Population& programPopulation = population.getSubPopulation(this->programRepresentationID);
@@ -230,7 +230,7 @@ void Representation::TPG::TPGMutator::initRandomSpecificAgent(const Individual& 
     for(size_t idx = 0; idx < nbEdges; idx++){
         // Add edge
         graph.addNewEdge(vertex, actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
-                            programMutator.initRandomAgent(graph, programPopulation, params, rng));
+                            programMutator.initRandomIndividual(graph, programPopulation, params, rng));
     }
 }
 
@@ -309,18 +309,18 @@ void Representation::TPG::TPGMutator::mutateEdgeDestination(
 void Representation::TPG::TPGMutator::mutateOutgoingEdge(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     Population& population,
-    std::vector<std::reference_wrapper<const Individual>>& newSubAgents,
+    std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals,
     const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const Individual& originAgent = edge.getProgram();
+    const Individual& originIndividual = edge.getProgram();
     // copy program
-    const Representation::Individual& newAgent = population.getSubPopulation(originAgent.getRepresentationID()).copyAgent(originAgent, graph);
+    const Representation::Individual& newIndividual = population.getSubPopulation(originIndividual.getRepresentationID()).copyIndividual(originIndividual, graph);
 
-    // Set the mutated agent to the edge
-    graph.setEdgeProgram(edge, newAgent);
+    // Set the mutated individual to the edge
+    graph.setEdgeProgram(edge, newIndividual);
 
-    // Add it to the list of new agent to be mutated.
-    newSubAgents.push_back(newAgent);
+    // Add it to the list of new individual to be mutated.
+    newSubIndividuals.push_back(newIndividual);
 
     // Edge target modification
     // As it Stephen kelly's work, Edge target modification is conditionned
@@ -330,10 +330,10 @@ void Representation::TPG::TPGMutator::mutateOutgoingEdge(
     }
 }
 
-void Representation::TPG::TPGMutator::mutateAgent(
-    const Individual& agent, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubAgents, const RepresentationParameters& params, RNG::RNG& rng)
+void Representation::TPG::TPGMutator::mutateIndividual(
+    const Individual& individual, EvoGraph::Graph& graph, Population& population, std::vector<std::reference_wrapper<const Individual>>& newSubIndividuals, const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const EvoGraph::Vertex& vertex = dynamic_cast<const TpgIndividual&>(agent).getVertex();
+    const EvoGraph::Vertex& vertex = dynamic_cast<const TpgIndividual&>(individual).getVertex();
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // 1. Remove randomly selected edges
@@ -366,7 +366,7 @@ void Representation::TPG::TPGMutator::mutateAgent(
             // Edge->Program bid modification
             if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                 // Mutate the edge
-                this->mutateOutgoingEdge(graph, edge, population, newSubAgents,
+                this->mutateOutgoingEdge(graph, edge, population, newSubIndividuals,
                                     params, rng);
                 anyMutationDone = true;
             }
@@ -375,28 +375,28 @@ void Representation::TPG::TPGMutator::mutateAgent(
 }
 
 
-void Representation::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
-    const Individual& programAgent, EvoGraph::Graph& graph, 
+void Representation::TPG::TPGMutator::mutateProgramIndividualAgainstArchive(
+    const Individual& programIndividual, EvoGraph::Graph& graph, 
     Population& population, const RepresentationParameters& params, 
     RNG::RNG& rng)
 {
-    Mutator& subMutator = this->getSubMutator(programAgent.getRepresentationID());
+    Mutator& subMutator = this->getSubMutator(programIndividual.getRepresentationID());
 
-    std::vector<std::reference_wrapper<const Individual>> newSubAgents; //TODOTODOTODO
+    std::vector<std::reference_wrapper<const Individual>> newSubIndividuals; //TODOTODOTODO
     bool allUnique;
 
     // Check for uniqueness in archive
     const auto& archivedDataHandlers = archive.get().getDataHandlers();
     std::map<size_t, double> hashesAndResults;
     std::unique_ptr<Representation::ExecutionEngine> execEngine = population.createExecutionEngine();
-    execEngine->setExecutedAgent(programAgent);
+    execEngine->setExecutedIndividual(programIndividual);
 
     // Mutate behavior until it changes (against the archive).
     do {
 
         // Mutate until something is mutated (i.e. the function returns
         // true) And until the program behavior is changed
-        subMutator.mutateAgent(programAgent, graph, population, newSubAgents, params, rng);
+        subMutator.mutateIndividual(programIndividual, graph, population, newSubIndividuals, params, rng);
 
         hashesAndResults.clear();
         for (std::pair<
@@ -416,8 +416,8 @@ void Representation::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
     } while (!allUnique);
 }
 
-void Representation::TPG::TPGMutator::mutateSubAgents(
-    std::vector<std::reference_wrapper<const Individual>>& agents, EvoGraph::Graph& graph, 
+void Representation::TPG::TPGMutator::mutateSubIndividuals(
+    std::vector<std::reference_wrapper<const Individual>>& individuals, EvoGraph::Graph& graph, 
     Population& population, const RepresentationParameters& params, 
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
@@ -425,10 +425,10 @@ void Representation::TPG::TPGMutator::mutateSubAgents(
     // Hence the parallelization.
     if (maxNbThreads <= 1) {
         // Sequential (kept for determinism check mostly)
-        for (const Representation::Individual& programAgent : agents) {
-            Population& subPopulation = population.getSubPopulation(programAgent.getRepresentationID());
+        for (const Representation::Individual& programIndividual : individuals) {
+            Population& subPopulation = population.getSubPopulation(programIndividual.getRepresentationID());
             RNG::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
-            this->mutateProgramAgentAgainstArchive(programAgent, graph, subPopulation, params,
+            this->mutateProgramIndividualAgainstArchive(programIndividual, graph, subPopulation, params,
                                                 privateRNG);
         }
     }
@@ -437,9 +437,9 @@ void Representation::TPG::TPGMutator::mutateSubAgents(
         // Create job list with Program pointers and seed
         std::queue<std::pair<std::reference_wrapper<const Individual>, uint64_t>>
             programsToMutate;
-        for (auto programAgent : agents) {
+        for (auto programIndividual : individuals) {
             programsToMutate.push(
-                {programAgent, rng.getUnsignedInt64(0, UINT64_MAX)});
+                {programIndividual, rng.getUnsignedInt64(0, UINT64_MAX)});
         }
 
         std::mutex mutexMutation;
@@ -465,7 +465,7 @@ void Representation::TPG::TPGMutator::mutateSubAgents(
                 if (jobDone) {
                     privateRNG.setSeed(job.second);
                     Population& subPopulation = population.getSubPopulation(job.first.value().get().getRepresentationID());
-                    this->mutateProgramAgentAgainstArchive(*job.first, graph, subPopulation, params, privateRNG);
+                    this->mutateProgramIndividualAgainstArchive(*job.first, graph, subPopulation, params, privateRNG);
                 }
             } while (jobDone);
         };

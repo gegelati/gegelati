@@ -149,7 +149,7 @@ namespace Selector {
              * \brief Set the archive content at given descriptors
              */
             void setArchiveFromDescriptors(
-                const Representation::Individual& agent,
+                const Representation::Individual& individual,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors) override;
 

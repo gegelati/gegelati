@@ -38,7 +38,7 @@
 #include <iomanip>
 #include <numeric>
 
-#include "learn/learningAgent.h"
+#include "learn/LearningAgent.h"
 
 #include "log/laBasicLogger.h"
 
@@ -95,7 +95,7 @@ void Log::LABasicLogger::logHeader()
     //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "NbActR" << std::setw(colWidth)
-          << "NbAgents";
+          << "NbIndividuals";
 
     if (useUtility) {
         *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
@@ -134,15 +134,15 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     *this << std::setw(colWidth) << generationNumber;
 
     *this << std::setw(colWidth)
-          << this->learningAgent.getGraph().getNbVertices();
+          << this->LearningAgent.getGraph().getNbVertices();
 
           
     uint64_t nbIndividuals = 0;
-    for(auto& algo : this->learningAgent.getRepresentations()){
-        nbIndividuals += algo.get().getNbAgents();
+    for(auto& algo : this->LearningAgent.getRepresentations()){
+        nbIndividuals += algo.get().getNbIndividuals();
     }
 
-    uint64_t nbActionsR = this->learningAgent.getGraph().getRootActions().size();
+    uint64_t nbActionsR = this->LearningAgent.getGraph().getRootActions().size();
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
           << nbIndividuals;

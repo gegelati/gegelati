@@ -8,7 +8,7 @@
 
 namespace Representation::Maple {
     /**
-     * \brief class used to execute the agent of an representation
+     * \brief class used to execute the individual of an representation
      */
     class MapleExecutionEngine : public TPG::TPGExecutionEngine {
 
@@ -27,16 +27,16 @@ namespace Representation::Maple {
         /**
          * \brief TPGExecutionEngine constructor.
          * 
-         * \param[in] executedAgent the agent to execute.
+         * \param[in] executedIndividual the individual to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        MapleExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
+        MapleExecutionEngine(const Individual& executedIndividual, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedIndividual, outputs, isTraining) {}
 
 
         /**
-         * \brief Execute the Graph starting from the vertex pointed by the given agent.
+         * \brief Execute the Graph starting from the vertex pointed by the given individual.
          *
          * This method browse the graph by successively evaluating Teams and
          * following the Edge proposing the best bids.

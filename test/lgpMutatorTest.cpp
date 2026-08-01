@@ -26,7 +26,7 @@ class LgpMutatorTest : public ::testing::Test
     Output::OutputHandler* lgpOutput;
     Selector::Selector* selector;
     std::shared_ptr<Representation::LGP::LGPPopulation> lgpPopulation;
-    const Representation::Individual* agent;
+    const Representation::Individual* individual;
     const Representation::LGP::LgpIndividual* lgpIndividual;
     std::shared_ptr<Representation::LGP::LGPMutator> lgpMutator;
 
@@ -61,8 +61,8 @@ class LgpMutatorTest : public ::testing::Test
         lgpOutput = new Output::OutputHandler(Output::Output());
         lgpPopulation = std::make_shared<Representation::LGP::LGPPopulation>(*e, *lgpOutput, (uint64_t)1);
 
-        agent = &lgpPopulation->createAgent(*graph);
-        lgpIndividual = dynamic_cast<const Representation::LGP::LgpIndividual*>(agent);
+        individual = &lgpPopulation->createIndividual(*graph);
+        lgpIndividual = dynamic_cast<const Representation::LGP::LgpIndividual*>(individual);
         lgpMutator = std::make_shared<Representation::LGP::LGPMutator>(*selector, (uint64_t)1);
     }
 
@@ -193,7 +193,7 @@ TEST_F(LgpMutatorTest, LGPMutatorAlterRandomLine)
     ASSERT_TRUE(lgpMutator->alterRandomLine(*lgpIndividual, *lgpPopulation, params.representation, rng));
 }
 
-TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
+TEST_F(LgpMutatorTest, LGPMutatorInitIndividual)
 {
     RNG::RNG rng;
     rng.setSeed(0);
@@ -205,13 +205,13 @@ TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
 
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
-    ASSERT_NO_THROW(lgpIndividual = dynamic_cast<const Representation::LGP::LgpIndividual*>(&lgpMutator->initRandomAgent(*graph, *lgpPopulation, params.representation, rng)))
+    ASSERT_NO_THROW(lgpIndividual = dynamic_cast<const Representation::LGP::LgpIndividual*>(&lgpMutator->initRandomIndividual(*graph, *lgpPopulation, params.representation, rng)))
         << "Empty LGP Random init failed";
     ASSERT_EQ(lgpIndividual->getNbLines(), 15)
         << "Random number of line is not as expected (with known seed).";
 
 
-    ASSERT_NO_THROW(lgpMutator->initRandomSpecificAgent(*lgpIndividual, *graph, *lgpPopulation, params.representation, rng))
+    ASSERT_NO_THROW(lgpMutator->initRandomSpecificIndividual(*lgpIndividual, *graph, *lgpPopulation, params.representation, rng))
         << "Non-Empty LGP Random init failed";
     ASSERT_EQ(lgpIndividual->getNbLines(), 38)
         << "Random number of line is not as expected (with known seed).";
@@ -240,7 +240,7 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
         [](const double a, const double b, const double c) -> double {
             return (cos(a + b + c));
         })));
-    const Representation::LGP::LgpIndividual& lgpIndividual2 = *dynamic_cast<const Representation::LGP::LgpIndividual*>(&lgpPopulation->createAgent(*graph));
+    const Representation::LGP::LgpIndividual& lgpIndividual2 = *dynamic_cast<const Representation::LGP::LgpIndividual*>(&lgpPopulation->createIndividual(*graph));
 
     Representation::LGP::LGPLineMutator lineMutator;
     Selector::SelectionContext context;

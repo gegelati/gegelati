@@ -70,7 +70,7 @@ void Representation::LGP::LGPCodeGenerationEngine::generateProgram(
     const bool ignoreException)
 {
 
-    fileMain << "\nvoid " << this->representationName << this->representationID << "_" << this->executedAgent->get().getAgentID() << "(double* outputs){" << std::endl;
+    fileMain << "\nvoid " << this->representationName << this->representationID << "_" << this->executedIndividual->get().getIndividualID() << "(double* outputs){" << std::endl;
 
     // instantiate register
     fileMain << "\tdouble " << nameRegVariable << "["
@@ -88,7 +88,7 @@ void Representation::LGP::LGPCodeGenerationEngine::generateProgram(
         fileMain << "\tdouble " << nameConstantVariable << "[" << nbCst
               << "] = {";
         for (int i = 0; i < nbCst; ++i) {
-            fileMain << lgpExecutedAgent->get().getConstantAt(i).value;
+            fileMain << lgpExecutedIndividual->get().getConstantAt(i).value;
             if (i < nbCst - 1) {
                 fileMain << ", ";
             }
@@ -105,7 +105,7 @@ void Representation::LGP::LGPCodeGenerationEngine::generateProgram(
 #endif
 
     
-    const std::vector<size_t>& outputIndices = dynamic_cast<const LgpIndividual&>(this->executedAgent->get()).getOutputIndices();
+    const std::vector<size_t>& outputIndices = dynamic_cast<const LgpIndividual&>(this->executedIndividual->get()).getOutputIndices();
     for(size_t idx = 0; idx < outputIndices.size(); idx ++ ){
         fileMain << "\toutputs["<<idx<<"] = reg["<<outputIndices[idx]<<"];\n";
     }

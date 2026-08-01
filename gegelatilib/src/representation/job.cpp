@@ -42,7 +42,7 @@ uint64_t Representation::Job::getIdx() const
 }
 
 
-const Representation::Individual& Representation::Job::getAgent() const
+const Representation::Individual& Representation::Job::getIndividual() const
 {
-    return this->agent;
+    return this->individual;
 }

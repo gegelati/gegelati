@@ -14,7 +14,7 @@ class MapElitesArchiveTest : public ::testing::Test
     const double maxV = 10.0;
 
     std::shared_ptr<EvoGraph::Graph> graph;
-    const EvoGraph::Vertex* dummyAgent;
+    const EvoGraph::Vertex* dummyIndividual;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;

@@ -89,15 +89,15 @@ void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t ne
     vertices.insert(std::move(tmp));
 }
 
-const EvoGraph::Team& EvoGraph::Graph::addNewTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programAgent)
+const EvoGraph::Team& EvoGraph::Graph::addNewTeam(std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual)
 {
-    this->vertices.insert(factory->createTeam(programAgent));
+    this->vertices.insert(factory->createTeam(programIndividual));
     return dynamic_cast<const Team&>(**this->vertices.rbegin());
 }
 
-const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Individual>> programAgent)
+const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Representation::Individual>> programIndividual)
 {
-    this->vertices.insert(factory->createAction(actionID, programAgent));
+    this->vertices.insert(factory->createAction(actionID, programIndividual));
     return dynamic_cast<const Action&>(**this->vertices.rbegin());
 }
 
@@ -370,18 +370,18 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
 }
 
 
-void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, const Representation::Individual& programAgent)
+void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, const Representation::Individual& programIndividual)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&vertex);
 
     if (srcVertex == this->vertices.end() || srcVertex->get() != &vertex) {
         throw std::runtime_error(
-            "Attempting to set an agent program to a vertex "
+            "Attempting to set an individual program to a vertex "
             "not present in the Graph.");
     }
 
-    (*srcVertex)->setProgram(programAgent);
+    (*srcVertex)->setProgram(programIndividual);
 }
 
 
@@ -448,13 +448,13 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     
 }
 
-bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, const Representation::Individual& programAgent)
+bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, const Representation::Individual& programIndividual)
 {
     
     auto iterEdge = this->edges.find(&edge);
     if (iterEdge != this->edges.end() && iterEdge->get() == &edge) {
         // Found the edge, modify it as needed
-        iterEdge->get()->setProgram(programAgent);
+        iterEdge->get()->setProgram(programIndividual);
         return true;
     }
     return false;

@@ -65,7 +65,7 @@ namespace Learn {
         /// LearningEnvironment with which the LearningAgent will interact.
         LearningEnvironment& learningEnvironment;
 
-        /// Map of reference of representations learned by the learning agent.
+        /// Map of reference of representations learned by the learning abcde.
         std::map<uint64_t, std::reference_wrapper<Representation::Representation>> representations;
 
         /// Parameters for the learning process
@@ -96,7 +96,7 @@ namespace Learn {
         Representation::Representation* currentBestRepresentation;
 
         /**
-         * \brief return the representation managed by the learning agent corresponding to the given representation.
+         * \brief return the representation managed by the learning abcde corresponding to the given representation.
          * 
          * \param[in] representation the representation to get.
          */
@@ -107,7 +107,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representations vector of representations learned by the learning agent
+         * \param[in] representations vector of representations learned by the learning abcde
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -126,7 +126,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representation representation learned by the learning agent
+         * \param[in] representation representation learned by the learning abcde
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -154,7 +154,7 @@ namespace Learn {
         void setCurrentRepresentation(Representation::Representation* representation);
 
         /**
-         * \brief Add an representation to the learning agent.
+         * \brief Add an representation to the learning abcde.
          * 
          * \param[in] representation the representation to add.
          */
@@ -240,11 +240,11 @@ namespace Learn {
 
 
         /**
-         * \brief Evaluate all agent of the representations.
+         * \brief Evaluate all individual of the representations.
          *
-         * This method calls the evaluateJob method for every agent
+         * This method calls the evaluateJob method for every individual
          * of the representations. The method returns a sorted map associating each
-         * agent to its average score, in ascending order or score.
+         * individual to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -253,14 +253,14 @@ namespace Learn {
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               std::reference_wrapper<const Representation::Individual>>
-        evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
+        evaluateAllIndividuals(uint64_t generationNumber, LearningMode mode);
 
         /**
-         * \brief Evaluate all agents of one representation.
+         * \brief Evaluate all individuals of one representation.
          *
-         * This method calls the evaluateJob method for every agent
+         * This method calls the evaluateJob method for every individual
          * of one representation. The method returns a sorted map associating each
-         * agent to its average score, in ascending order or score.
+         * individual to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -269,33 +269,33 @@ namespace Learn {
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               std::reference_wrapper<const Representation::Individual>>
-        evaluateCurrentRepresentationAgents(uint64_t generationNumber, LearningMode mode);
+        evaluateCurrentRepresentationIndividuals(uint64_t generationNumber, LearningMode mode);
 
         /**
-         * \brief Evaluate one agent.
+         * \brief Evaluate one individual.
          *
          * This method calls the evaluateJob method for a specified Agebt
-         * The method returns the average score of this agent.
+         * The method returns the average score of this individual.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] agent the evaluated Individual.
+         * \param[in] individual the evaluated Individual.
          * \return the averaged EvaluationResult for the given Individual.
-         * \throws an exception in case the given agent does not exist.
+         * \throws an exception in case the given individual does not exist.
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
+        virtual std::shared_ptr<EvaluationResult> evaluateOneIndividual(
             uint64_t generationNumber, LearningMode mode,
-            const Representation::Individual& agent);
+            const Representation::Individual& individual);
 
         /**
          * \brief Train the Graph for one generation.
          *
          * Training for one generation includes:
          * - Populating the Graph according to given MutationParameters.
-         * - Evaluating all agents of the Graph. (call to evaluateAllRoots)
-         * - Removing from the Graph and Representations the worst performing agents.
+         * - Evaluating all individuals of the Graph. (call to evaluateAllRoots)
+         * - Removing from the Graph and Representations the worst performing individuals.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -368,7 +368,7 @@ namespace Learn {
         const Representation::Representation& getBestRepresentation();
 
         /**
-         * \brief Method that indicate if the learning agent contains a specific representation.
+         * \brief Method that indicate if the learning abcde contains a specific representation.
          * 
          * \param[in] representation the representation to search.
          */

@@ -64,14 +64,14 @@ std::vector<std::reference_wrapper<const EvoGraph::Action>> Representation::Muta
     return actions;
 }
 
-const Representation::Individual& Representation::Mutator::initRandomAgent(
+const Representation::Individual& Representation::Mutator::initRandomIndividual(
     EvoGraph::Graph& graph,
     Population& population,
     const RepresentationParameters& params, RNG::RNG& rng)
 {
-    const Representation::Individual& agent = population.createAgent(graph);
-    this->initRandomSpecificAgent(agent, graph, population, params, rng);
-    return agent;
+    const Representation::Individual& individual = population.createIndividual(graph);
+    this->initRandomSpecificIndividual(individual, graph, population, params, rng);
+    return individual;
 }
 
 void Representation::Mutator::mutatePopulation(
@@ -84,68 +84,68 @@ void Representation::Mutator::mutatePopulation(
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
-    if (this->currentContext->agentsClonable.size() <= 1) {
-        throw std::runtime_error("At least two agents should survive the selection");
+    if (this->currentContext->individualsClonable.size() <= 1) {
+        throw std::runtime_error("At least two individuals should survive the selection");
     } 
-    std::vector<std::reference_wrapper<const Representation::Individual>> subAgentsClonable1(
-        this->currentContext->agentsClonable);
+    std::vector<std::reference_wrapper<const Representation::Individual>> subIndividualsClonable1(
+        this->currentContext->individualsClonable);
 
-    // Divide agents clonable into two subVector with half of the agents, randomly
+    // Divide individuals clonable into two subVector with half of the individuals, randomly
     // selected.
-    std::vector<std::reference_wrapper<const Representation::Individual>> subAgentsClonable2;
-    for (size_t idx = 0; idx < this->currentContext->agentsClonable.size() / 2; idx++) {
-        auto agent = subAgentsClonable1.at(
-            rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
-        subAgentsClonable2.push_back(agent);
-        std::swap(agent, subAgentsClonable1.back());
-        subAgentsClonable1.pop_back();
+    std::vector<std::reference_wrapper<const Representation::Individual>> subIndividualsClonable2;
+    for (size_t idx = 0; idx < this->currentContext->individualsClonable.size() / 2; idx++) {
+        auto individual = subIndividualsClonable1.at(
+            rng.getUnsignedInt64(0, subIndividualsClonable1.size() - 1));
+        subIndividualsClonable2.push_back(individual);
+        std::swap(individual, subIndividualsClonable1.back());
+        subIndividualsClonable1.pop_back();
     }
 
-    // Agents newly created during the evolution that belong to another representation.
-    std::vector<std::reference_wrapper<const Individual>>  newSubAgents;
+    // Individuals newly created during the evolution that belong to another representation.
+    std::vector<std::reference_wrapper<const Individual>>  newSubIndividuals;
 
     
-    // Create the new agents
-    uint64_t nbAgentsToReach = population.getAgents().size() + this->currentContext->nbAgentsToCreate;
-    while (population.getAgents().size() < nbAgentsToReach) {
+    // Create the new individuals
+    uint64_t nbIndividualsToReach = population.getIndividuals().size() + this->currentContext->nbIndividualsToCreate;
+    while (population.getIndividuals().size() < nbIndividualsToReach) {
 
         // Clone one random offspring.
         uint64_t clonedRootIndex1 =
-            rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1);
+            rng.getUnsignedInt64(0, subIndividualsClonable1.size() - 1);
 
         std::vector<std::reference_wrapper<const Individual>> offsprings;
 
-        offsprings.push_back(population.copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
+        offsprings.push_back(population.copyIndividual(subIndividualsClonable1.at(clonedRootIndex1), graph));
 
-        // Be sure we have agents in both sub lists, and we still have at least
-        // two agents to create
-        if (subAgentsClonable2.size() > 0 &&
-            population.getAgents().size() < nbAgentsToReach - 1) {
+        // Be sure we have individuals in both sub lists, and we still have at least
+        // two individuals to create
+        if (subIndividualsClonable2.size() > 0 &&
+            population.getIndividuals().size() < nbIndividualsToReach - 1) {
 
             uint64_t clonedRootIndex2 =
-                rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
+                rng.getUnsignedInt64(0, subIndividualsClonable2.size() - 1);
 
             // clone the offset
-            offsprings.push_back(population.copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
+            offsprings.push_back(population.copyIndividual(subIndividualsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
-            this->crossoverAgents({offsprings.at(0), offsprings.at(1)}, graph, population, newSubAgents, params, rng);
+            this->crossoverIndividuals({offsprings.at(0), offsprings.at(1)}, graph, population, newSubIndividuals, params, rng);
         }
 
         // Do the mutation over the childs
         for (const Representation::Individual& offspring : offsprings) {
             if (!offspring.isValid()) {
-                population.deleteAgent(offspring, graph);
+                population.deleteIndividual(offspring, graph);
             }
             else {
                 // Apply mutations to the root and increase the number of roots
-                this->mutateAgent(offspring, graph, population, newSubAgents,
+                this->mutateIndividual(offspring, graph, population, newSubIndividuals,
                                   params, rng);
             }
         }
 
     }
 
-    // Mutate the new subAgents.
-    this->mutateSubAgents(newSubAgents, graph, population, params, rng, maxNbThreads);
+    // Mutate the new subIndividuals.
+    this->mutateSubIndividuals(newSubIndividuals, graph, population, params, rng, maxNbThreads);
 }

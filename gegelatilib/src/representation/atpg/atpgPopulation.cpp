@@ -3,11 +3,11 @@
 
 
 
-void Representation::ATPG::ATpgPopulation::emptyAgent(const Individual& agent, EvoGraph::Graph& graph) 
+void Representation::ATPG::ATpgPopulation::emptyIndividual(const Individual& individual, EvoGraph::Graph& graph) 
 {
     std::vector<std::reference_wrapper<const EvoGraph::Vertex>> verticesToDelete;
-    // get vertex of agent to delete;
-    const EvoGraph::Vertex& vertex = this->getTpgIndividualFromCst(agent).getVertex();
+    // get vertex of individual to delete;
+    const EvoGraph::Vertex& vertex = this->getTpgIndividualFromCst(individual).getVertex();
     while(vertex.getOutgoingEdges().size() > 0){
         const EvoGraph::Edge& edge = vertex.getOutgoingEdges().front();
 

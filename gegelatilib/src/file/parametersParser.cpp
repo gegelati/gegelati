@@ -208,8 +208,8 @@ void File::ParametersParser::setParameterFromString(
         params.representation.maple.pSwapActionProgram = value.asDouble();
         return;
     }
-    if (param == "pCrossAgents") {
-        params.representation.maple.pCrossAgents = (double)value.asDouble();
+    if (param == "pCrossIndividuals") {
+        params.representation.maple.pCrossIndividuals = (double)value.asDouble();
         return;
     }
     if (param == "pCrossPrograms") {
@@ -397,7 +397,7 @@ void File::ParametersParser::writeParametersToJson(
 
     root["representation"]["nbIndividuals"] = params.representation.nbIndividuals;
     root["representation"]["nbIndividuals"].setComment(
-        Representation::RepresentationParameters::nbAgentsComment, Json::commentBefore);
+        Representation::RepresentationParameters::nbIndividualsComment, Json::commentBefore);
 
     root["representation"]["activationFunction"] = params.representation.activationFunction;
     root["representation"]["activationFunction"].setComment(
@@ -487,9 +487,9 @@ void File::ParametersParser::writeParametersToJson(
         params.representation.maple.pSwapActionProgram;
     root["representation"]["maple"]["pSwapActionProgram"].setComment(
         Representation::Maple::MapleParameters::pSwapActionProgramComment, Json::commentBefore);
-    root["representation"]["maple"]["pCrossAgents"] = params.representation.maple.pCrossAgents;
-    root["representation"]["maple"]["pCrossAgents"].setComment(
-        Representation::Maple::MapleParameters::pCrossAgentsComment, Json::commentBefore);
+    root["representation"]["maple"]["pCrossIndividuals"] = params.representation.maple.pCrossIndividuals;
+    root["representation"]["maple"]["pCrossIndividuals"].setComment(
+        Representation::Maple::MapleParameters::pCrossIndividualsComment, Json::commentBefore);
     root["representation"]["maple"]["pCrossPrograms"] =
         params.representation.maple.pCrossPrograms;
     root["representation"]["maple"]["pCrossPrograms"].setComment(

@@ -13,16 +13,16 @@
 
 namespace Representation::TPG {
     /**
-     * \brief class used to execute the agent of an representation
+     * \brief class used to execute the individual of an representation
      */
     class TPGExecutionEngine : public ExecutionEngine {
 
     protected:
 
-        /// Execution engine used to execute the program of the TPG agents
+        /// Execution engine used to execute the program of the TPG individuals
         uint64_t programExecutionEngineID;
 
-        /// TPGArchive used by the program agents.
+        /// TPGArchive used by the program individuals.
         std::optional<std::reference_wrapper<TPGArchive>> archive = std::nullopt;
 
         /// Action values selected
@@ -47,17 +47,17 @@ namespace Representation::TPG {
         /**
          * \brief TPGExecutionEngine constructor. 
          * 
-         * \param[in] executedAgent the agent to execute.
+         * \param[in] executedIndividual the individual to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(const Individual& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
+        TPGExecutionEngine(const Individual& executedIndividual, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedIndividual, outputs, isTraining) {}
 
         /**
          * Setter for the archive
          * 
-         * \param[in] archive TPGArchive used by the program agents.
+         * \param[in] archive TPGArchive used by the program individuals.
          */
         void setArchive(TPGArchive& archive);
 
@@ -74,14 +74,14 @@ namespace Representation::TPG {
         void setupJob(const Job& job) override;
         
         /**
-         * \brief Set the program execution engine associated with the TPG agents.
+         * \brief Set the program execution engine associated with the TPG individuals.
          * 
          * \param[in] programExecutionEngine the program execution engine.
          */
         void setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine);
 
         /**
-         * \brief Get the program execution engine associated with the TPG agents.
+         * \brief Get the program execution engine associated with the TPG individuals.
          * 
          * \return the program execution engine.
          */
@@ -126,7 +126,7 @@ namespace Representation::TPG {
         virtual const EvoGraph::Edge& evaluateTeam(const EvoGraph::Team& team);
 
         /**
-         * \brief Execute the Graph starting from the vertex pointed by the given agent.
+         * \brief Execute the Graph starting from the vertex pointed by the given individual.
          *
          * This method browse the graph by successively evaluating Teams and
          * following the Edge proposing the best bids.

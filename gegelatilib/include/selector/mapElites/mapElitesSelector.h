@@ -28,7 +28,7 @@ namespace Selector {
                      std::shared_ptr<MapElitesArchive>>
                 mapEliteArchives;
 
-            /// max number of evaluation for an agent.            
+            /// max number of evaluation for an individual.            
             size_t maxNbEvaluation;
 
           public:
@@ -37,7 +37,7 @@ namespace Selector {
              *
              * \param[in] parameters parameters used by the
              * Selector.
-             * \param[in] maxNbEvaluation max number of evaluation for an agent.
+             * \param[in] maxNbEvaluation max number of evaluation for an individual.
              */
             MapElitesSelector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>(), size_t maxNbEvaluation = 0)
                 : Selector{std::move(parameters)}, maxNbEvaluation{maxNbEvaluation}
@@ -116,7 +116,7 @@ namespace Selector {
              *
              *
              * \param[in] graph the Graph on which selection is performed.
-             * \param[in,out] results a multimap containing agent
+             * \param[in,out] results a multimap containing individual
              * associated to their score during an evaluation.
              * \param[in] rng Random Number Generator used in the mutation
              * process.
