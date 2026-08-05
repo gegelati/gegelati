@@ -164,8 +164,6 @@ namespace Representation {
          * 
          * \param[in] individual the Individual to delete.
          * \param[in] graph the Graph associated with the Individual.
-         * 
-         * \return a shared pointer to the created Individual.
          */
         virtual void deleteIndividual(const Individual& individual, EvoGraph::Graph& graph);
 

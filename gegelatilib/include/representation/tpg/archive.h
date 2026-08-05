@@ -37,6 +37,8 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+
+#include <algorithm>
 #include <deque>
 #include <map>
 #include <memory>
