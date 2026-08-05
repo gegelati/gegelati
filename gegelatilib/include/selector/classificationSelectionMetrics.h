@@ -4,6 +4,7 @@
 #define CLASSIFICATION_SELECTION_METRICS_H
 
 #include <numeric>
+#include <algorithm>
 
 #include "selector/selectionMetrics.h"
 
