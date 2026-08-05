@@ -60,8 +60,6 @@ namespace Representation::LGP {
             
             /**
              * \brief Initialize the populationof the representation
-             * 
-             * \param[in] outputs outputs needed for the representation.
              */
             virtual void initPopulation() override;
 
