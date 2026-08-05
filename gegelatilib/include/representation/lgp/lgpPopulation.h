@@ -72,8 +72,6 @@ namespace Representation {
              * 
              * \param[in] individual the Individual to empty.
              * \param[in] graph the Graph associated with the Individual.
-             * 
-             * \return a shared pointer to the created Individual.
              */
             virtual void emptyIndividual(const Individual& individual, EvoGraph::Graph& graph) override;
 
