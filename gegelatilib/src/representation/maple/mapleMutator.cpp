@@ -290,8 +290,8 @@ void Representation::Maple::MapleMutator::mutateEdgeDestination(
     actionVertices.erase(
         std::remove_if(
             actionVertices.begin(), actionVertices.end(),
-            [&actionClasses](const EvoGraph::Action& actionVertex) {
-                return actionClasses.find(actionVertex.getActionID()) != actionClasses.end();
+            [&actionClasses](const std::reference_wrapper<const EvoGraph::Action>& actionVertex) {
+                return actionClasses.find(actionVertex.get().getActionID()) != actionClasses.end();
             }
         ),
         actionVertices.end()
