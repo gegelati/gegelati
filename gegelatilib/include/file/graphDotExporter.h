@@ -155,9 +155,9 @@ namespace File {
         void printEdge(const EvoGraph::Edge& edge);
 
         /**
-         * \brief Prints the dot content for the given Program.
+         * \ brief Prints the dot content for the given Program.
          *
-         * \param[in] lgpIndividual the lgpIndividual to be printed
+         * \ param[in] lgpIndividual the lgpIndividual to be printed
          *
          * a lgpIndividual is stored in the .dot file with the format :
          * line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
