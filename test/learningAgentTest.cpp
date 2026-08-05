@@ -163,86 +163,66 @@ TEST_F(LearningAgentTest, addLogger)
     }
 }
 
-/*TEST_F(LearningAgentTest, IsRootEvalSkipped)
+TEST_F(LearningAgentTest, IsIndividualEvalSkipped)
 {
     params.evaluation.maxNbEvaluationPerPolicy = 2;
+    params.evaluation.nbIterationsPerPolicyEvaluation = 1;
 
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
 
-    // Test a new root
+    // Test a result
     std::shared_ptr<Learn::EvaluationResult> result1;
-    ASSERT_FALSE(la.isRootEvalSkipped(
-        la.getGraph().getRootVertices().at(0), result1))
+    ASSERT_EQ(
+        la.getNbEvaluationIndiv(result1, Learn::LearningMode::TRAINING),
+        params.evaluation.nbIterationsPerPolicyEvaluation)
         << "Method should return false for a root that has never been "
            "evaluated before.";
-    ASSERT_EQ(result1, nullptr) << "Method should return a nullptr for a root "
-                                   "that has not been evaluated before.";
+                                ASSERT_EQ(result1, nullptr) << "Method should return a nullptr for a root "
+       "that has not been evaluated before.";
 
     // Add an EvaluationResult artificially
     result1 = std::make_shared<Learn::EvaluationResult>(
         std::make_shared<Selector::SelectionMetrics>(1.0), 1);
-    la.getSelector().updateEvaluationRecords(
-        {{result1, la.getGraph().getRootVertices().at(0)}});
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                    std::reference_wrapper<const Representation::Individual>> fakeMap{{result1, tpg->getIndividuals().at(0)}};
+    tpg->getSelector().updateEvaluationRecords(fakeMap);
 
-    // Test the root again
-    std::shared_ptr<Learn::EvaluationResult> result2;
-    ASSERT_FALSE(la.isRootEvalSkipped(
-        la.getGraph().getRootVertices().at(0), result2))
-        << "Method should return false for a root that has been evaluated "
-           "before.";
-    ASSERT_EQ(result2, result1)
-        << "Method should return a valid pointer for a root that has not been "
-           "evaluated enough times before.";
+    // Test the result again
+    ASSERT_EQ(la.getNbEvaluationIndiv(
+        result1, Learn::LearningMode::TRAINING),
+        1)
+        << "Method should return 1";
 
     // Update the EvaluationResult artificially
-    result2 = std::make_shared<Learn::EvaluationResult>(
+    std::shared_ptr<Learn::EvaluationResult> result2 = std::make_shared<Learn::EvaluationResult>(
         std::make_shared<Selector::SelectionMetrics>(1.0), 2);
-    la.getSelector().updateEvaluationRecords(
-        {{result2, la.getGraph().getRootVertices().at(0)}});
+    fakeMap = {{result2, tpg->getIndividuals().at(0)}};
+    tpg->getSelector().updateEvaluationRecords(fakeMap);
 
-    // Test the root again.
-    std::shared_ptr<Learn::EvaluationResult> result3;
-    ASSERT_TRUE(la.isRootEvalSkipped(la.getGraph().getRootVertices().at(0),
-                                     result3))
-        << "Method should return true for a root that has been evaluated "
-           "before more times than maxNbEvaluationPerPolicy.";
-    ASSERT_EQ(result3, result2)
-        << "Method should return a the EvaluationResult from the "
-           "resultsPerRoot map when the number of evaluation exceeds "
-           "maxNbEvaluationPerPolicy.";
-}*/
-
-/*TEST_F(LearningAgentTest, MakeJob)
-{
-    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
-    la.init();
-    auto job = *la.makeJob(la.getRepresentationAt(0).getIndividuals().at(0),
-                           Learn::LearningMode::TRAINING);
-    ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
-    ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
-    ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().at(0), job.getIndividual())
-        << "Encapsulate the root in a job shouldn't change it";
-
-    Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
-    ASSERT_THROW(la2.makeJob(nullptr, Learn::LearningMode::TRAINING), std::runtime_error)
-        << "Create a job when the learning abcde is not initialized should throw an error";
+    // Test the result again
+    ASSERT_EQ(la.getNbEvaluationIndiv(
+        result2, Learn::LearningMode::TRAINING),
+        0)
+        << "Method should return 0.";
 }
+
 
 TEST_F(LearningAgentTest, MakeJobs)
 {
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
+    la.setCurrentRepresentation(tpg);
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
-    ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().size(), jobs.size())
+    ASSERT_EQ(tpg->getIndividuals().size(), jobs.size())
         << "There should be as many jobs as roots";
-    for (int i = 0; i < la.getGraph().getNbRootVertices(); i++) {
-        ASSERT_EQ(la.getRepresentationAt(0).getIndividuals().at(i),
+    for (int i = 0; i < tpg->getIndividuals().size(); i++) {
+        ASSERT_EQ(tpg->getIndividuals().at(i),
                   (*jobs.front()).getIndividual())
             << "Encapsulate the root in a job shouldn't change it";
-        jobs.pop();
+        jobs.erase(jobs.begin());
     }
-}*/
+}
 
 TEST_F(LearningAgentTest, EvalIndividual)
 {
