@@ -201,8 +201,6 @@ namespace File {
         /**
          * \brief Constructor for the exporter.
          *
-         * \param[in] filePath initial path to the file where the dot content
-         * will be written.
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
