@@ -266,8 +266,6 @@ TEST_F(ExporterTest, exportIndividualWritesOnlyTheRequestedSubgraph)
     EXPECT_NE(content.find("T"), std::string::npos);
     EXPECT_NE(content.find("A"), std::string::npos);
     EXPECT_NE(content.find("Root."), std::string::npos);
-
-    std::filesystem::remove(outputPath);
 }
 
 TEST_F(ExporterTest, exportRepresentationThrowsForInvalidPath)
@@ -301,7 +299,7 @@ TEST_F(ExporterTest, exportIndividualThrowsForUnknownIndividual)
     auto unknownIndividual = std::make_unique<MockIndividual>(representation->getRepresentationID());
 
     File::GraphDotExporter exporter;
-    EXPECT_THROW(exporter.exportIndividual("unused.dot", *unknownIndividual, *representation), std::runtime_error);
+    EXPECT_THROW(exporter.exportIndividual(TESTS_DAT_PATH "unused.dot", *unknownIndividual, *representation), std::runtime_error);
 }
 
 } // namespace
