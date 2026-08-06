@@ -7,6 +7,7 @@
 #include "representation/representation.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
+#include "node/gpNode.h"
 
 /**
  * \brief Struct to reset static counters in classes.

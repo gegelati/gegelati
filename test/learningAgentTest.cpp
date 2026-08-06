@@ -481,6 +481,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
+    params.representation.lgp.nbProgramConstant=0;
 
 
     auto lgp1 = new Representation::LGPRepresentation(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
@@ -488,7 +489,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);
 
-    trainAndTestDeterminissm(la, {0, 0, 0, 0, 0, 144, 2805795284291322615U}, false);
+    trainAndTestDeterminissm(la, {0, 0, 0, 0, 0, 144, 10372451540396096029U}, false);
 }
 
 // Similar to previous test, but verifications of graphs properties are here to
