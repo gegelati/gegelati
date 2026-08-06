@@ -38,306 +38,270 @@
 
 #include <gtest/gtest.h>
 
+#include <cinttypes>
+#include <filesystem>
 #include <fstream>
+#include <map>
+#include <memory>
+#include <optional>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
-#include "instructions/addPrimitiveType.h"
-#include "instructions/lambdaInstruction.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
+#include "file/graphDotExporter.h"
+#include "representation/population.h"
+#include "representation/representation.h"
 #include "util/counterReset.h"
 
-#include "file/graphDotExporter.h"
+namespace Representation{
 
-#include "goldenReferenceComparison.h"
-
-/*
-class ExporterTest : public ::testing::Test
+class MockIndividual : public Individual
 {
   public:
-    ExporterTest() : tpg(NULL){};
+    explicit MockIndividual(uint64_t representationID)
+        : Individual(representationID) {}
 
-  protected:
-    const size_t size1{24};
-    std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
-    Instructions::Set set;
-    Environment* e = NULL;
-    Learn::LearningParameters params;
-    std::vector<std::shared_ptr<Program::Program>> progPointers;
-
-    EvoGraph::Graph* tpg;
-    std::vector<const EvoGraph::Edge*> edges;
-    size_t constant_size = 5;
-
-    virtual void SetUp()
+    void setVertex(const EvoGraph::Vertex& vertex)
     {
-
-        CounterReset::counterReset();
-        // Setup environment
-        vect.push_back(
-            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
-
-        // Put a 1 in the dataHandler to make it easy to have non-zero return in
-        // Programs.
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 0, 1.0);
-
-        auto minus = [](double a, double b) -> double { return a - b; };
-
-        set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-
-        params.representation.lgp.nbRegisters = 8;
-        params.representation.lgp.nbProgramConstant = 5;
-        e = new Environment(set, params, vect, 3);
-        tpg = new EvoGraph::Graph(*e);
-
-        // Create 10 programs
-        for (int i = 0; i < 8; i++) {
-            std::shared_ptr<Program::Program> p =
-                std::make_shared<Program::Program>(*e, false);
-            for (int j = 0; j < constant_size; j++) {
-                p.get()->getConstantHandler().setDataAt(
-                    typeid(Data::Constant), j, {(double)(j - 2) / 3});
-            }
-            progPointers.push_back(p);
-        }
-
-        // add instructions to at least one program.
-        for (int i = 0; i < 3; i++) {
-            Program::Line& l = progPointers.at(0).get()->addNewLine();
-            l.setInstructionIndex(0);
-            l.setDestinationIndex(1);
-            l.setOperand(0, 0, 1);
-        }
-
-        // Create a TPG
-        // (T= Team, A= Action)
-        //
-        //        .------.
-        //        v      |
-        // T0---->T1---->T2     T4
-        // |     /| \    |      |
-        // v    / v  \   v      v
-        // A0<-'  A1  `->A2     A3   A4
-        //
-        // With four action and four teams
-        // All Edges have a unique Program, except T1->A0 and T0->A0 which
-        // share the same program: progPointers.at(0)
-        for (int i = 0; i < 4; i++) {
-            tpg->addNewTeam();
-        }
-
-        for (int i = 0; i < 4; i++) {
-            // Each action is linked to a team (and vice-versa)
-            tpg->addNewAction(i);
-            edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(i),
-                                             *tpg->getVertices().back(),
-                                             progPointers.at(i)));
-        }
-
-        // Add an additional Root Action
-        tpg->addNewAction(4);
-
-        // Add new Edges between teams
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0),
-                                         *tpg->getVertices().at(1),
-                                         progPointers.at(4)));
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
-                                         *tpg->getVertices().at(2),
-                                         progPointers.at(5)));
-
-        // Add a cyclic edge
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2),
-                                         *tpg->getVertices().at(1),
-                                         progPointers.at(6)));
-
-        // Add new outgoing edge to one team
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
-                                         *tpg->getVertices().at(4),
-                                         progPointers.at(0)));
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
-                                         *tpg->getVertices().at(6),
-                                         progPointers.at(7)));
-
-        // Check the characteristics
-        ASSERT_EQ(tpg->getNbVertices(), 9);
-        ASSERT_EQ(tpg->getEdges().size(), 9);
-        ASSERT_EQ(tpg->getRootVertices().size(), 3);
+        this->vertex = std::cref(vertex);
     }
 
-    virtual void TearDown()
+    bool hasVertex() const { return this->vertex.has_value(); }
+
+    const EvoGraph::Vertex& getVertex() const { return this->vertex.value().get(); }
+
+  private:
+    std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex;
+};
+
+class MockPopulation : public Population
+{
+  public:
+    MockPopulation(const Output::OutputHandler& outputs, uint64_t representationID)
+        : Population(outputs, representationID) {}
+
+    const Individual& createIndividual(EvoGraph::Graph&) override
     {
-        delete tpg;
-        delete e;
-        delete (&(vect.at(0).get()));
-        delete (&set.getInstruction(0));
-        delete (&set.getInstruction(1));
+        auto newIndividual = std::make_unique<MockIndividual>(this->getRepresentationID());
+        const auto& ref = *newIndividual;
+        this->individuals.insert(std::move(newIndividual));
+        return ref;
+    }
+
+    const Individual& copyIndividual(const Individual& individual,
+                                                     EvoGraph::Graph&) override
+    {
+        auto newIndividual = std::make_unique<MockIndividual>(individual.getRepresentationID());
+        const auto& ref = *newIndividual;
+        this->individuals.insert(std::move(newIndividual));
+        return ref;
+    }
+
+    void emptyIndividual(const Individual&, EvoGraph::Graph&) override {}
+
+    std::unique_ptr<ExecutionEngine> createExecutionEngine(
+        std::vector<std::reference_wrapper<const Data::DataHandler>>,
+        bool) const override
+    {
+        return nullptr;
     }
 };
 
-TEST_F(ExporterTest, Constructor)
+class MockRepresentation : public Representation
 {
-    File::GraphDotExporter* dotExporter;
-    ASSERT_NO_THROW(dotExporter =
-                        new File::GraphDotExporter("exported_tpg.dot", *tpg))
-        << "The GraphDotExporter could not be constructed with a valid file "
-           "path.";
+  public:
+    MockRepresentation(std::string name = "MockRepresentation",
+                       std::string color = "#123456")
+        : Representation(std::make_unique<RepresentationParameters>(),
+                                          std::move(name), std::move(color))
+    {
+    }
 
-    ASSERT_NO_THROW(delete dotExporter;)
-        << "GraphDotExporter could not be deleted.";
+    void attachGraph(std::shared_ptr<EvoGraph::Graph> graph) { this->graph = std::move(graph); }
 
-    ASSERT_THROW(dotExporter =
-                     new File::GraphDotExporter("XXX://INVALID_PATH", *tpg),
-                 std::runtime_error)
-        << "The GraphDotExplorer construction should fail with an invalid "
-           "path.";
-}
+    void initializePopulation()
+    {
+        this->outputs = std::make_unique<Output::OutputHandler>(Output::OutputHandler(1));
+        this->population = std::make_unique<MockPopulation>(*this->outputs, this->representationID);
+        this->init = true;
+    }
 
-TEST_F(ExporterTest, print)
-{
-    File::GraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+    const Individual& addTestIndividual(const EvoGraph::Vertex& vertex)
+    {
+        MockPopulation& pop = dynamic_cast<MockPopulation&>(*this->population);
+        const Individual& created = pop.createIndividual(*this->graph);
+        auto& mockIndividual = dynamic_cast<MockIndividual&>(const_cast<Individual&>(created));
+        mockIndividual.setVertex(vertex);
+        return created;
+    }
 
-    ASSERT_NO_THROW(dotExporter.print())
-        << "File export was executed without error.";
-}
+    void initPopulation() override
+    {
+        this->outputs = std::make_unique<Output::OutputHandler>(Output::OutputHandler(1));
+        this->population = std::make_unique<MockPopulation>(*this->outputs, this->representationID);
+    }
 
-TEST_F(ExporterTest, printSingleActionProgGraph)
-{
-    // Create 5 programs
-    int currentNbPrograms = progPointers.size();
-    for (int i = 0; i < 5; i++) {
-        std::shared_ptr<Program::Program> p =
-            std::make_shared<Program::Program>(*e, false);
-        for (int j = 0; j < constant_size; j++) {
-            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2) / 3});
+    void initMutator() override {}
+
+    std::unique_ptr<Representation> copy() const override
+    {
+        auto copy = std::make_unique<MockRepresentation>(this->representationName,
+                                                         this->representationColor);
+        copy->setRepresentationID(this->representationID);
+        return copy;
+    }
+
+    void clearUnusedIndividualParts() override {}
+
+    std::shared_ptr<PolicyStats> createPolicyStats() const override
+    {
+        return nullptr;
+    }
+
+    void printCodeGenIndividuals(std::ofstream&, std::ofstream&,
+                                 const std::set<std::reference_wrapper<const Individual>>&, std::map<uint64_t, std::set<std::reference_wrapper<const Individual>>>&) const override
+    {
+    }
+
+    void printIndividual(const Individual& individual, FILE* pFile,
+                         std::string offset,
+                         std::set<uint64_t>& printedIndividualID,
+                         std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override
+    {
+        if (printedIndividualID.find(individual.getIndividualID()) == printedIndividualID.end() &&
+            this->containsIndividual(individual)) {
+            printedIndividualID.insert(individual.getIndividualID());
+
+            const auto& mockIndividual = dynamic_cast<const MockIndividual&>(individual);
+            if (mockIndividual.hasVertex()) {
+                elementsToPrint.push_back(mockIndividual.getVertex());
+            }
+
+            fprintf(pFile,
+                    "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
+                    offset.c_str(), individual.getIndividualID(), this->representationColor.c_str(),
+                    this->representationName.c_str(), this->representationID);
         }
-        progPointers.push_back(p);
     }
 
-    // add constant instructions to at least one program.
-    for (int i = 8; i < 10; i++) {
-        Program::Line& l = progPointers.at(i).get()->addNewLine();
-        l.setInstructionIndex(2);
-        l.setDestinationIndex(1);
-        l.setOperand(0, 0, 1);
-
-        Program::Line& l2 = progPointers.at(i).get()->addNewLine();
-        l2.setInstructionIndex(2);
-        l2.setDestinationIndex(1);
-        l2.setOperand(0, 0, 1);
+    const Individual& readIndividual(std::smatch&) override
+    {
+        throw std::runtime_error("MockRepresentation::readIndividual is not implemented");
     }
+};
 
-    // Add one action edge to each action
-    for (int i = 4; i < 9; i++) {
-        tpg->addNewActionEdge(*tpg->getVertices().at(i),
-                              progPointers.at(currentNbPrograms + i - 4),
-                              i % e->getNbContinuousActions());
-    }
-
-    File::GraphDotExporter dotExporter("exported_single_action_tpg.dot",
-                                          *tpg);
-
-    ASSERT_NO_THROW(dotExporter.print())
-        << "File export was executed without error.";
-
-    // Compare the two files
-    ASSERT_TRUE(compare_files("exported_single_action_tpg.dot", TESTS_DAT_PATH
-                              "exported_single_action_tpg_ref.dot"))
-        << "Differences between reference file and exported "
-           "file were detected.";
-}
-
-TEST_F(ExporterTest, printSubGraph)
+class ExporterTest : public ::testing::Test
 {
-    File::GraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
+  protected:
+    void SetUp() override { CounterReset::counterReset(); }
 
-    ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
-        << "File export was executed without error.";
-
-    // Compare the file with a golden ref
-    ASSERT_TRUE(compare_files("exported_subtpg.dot",
-                              TESTS_DAT_PATH "exported_subtpg_ref.dot"))
-        << "Differences between reference file and exported "
-           "file were detected.";
-}
-
-TEST_F(ExporterTest, printMultiActionProgSubGraph)
-{
-    // Create 6 programs
-    int currentNbPrograms = progPointers.size();
-    for (int i = 0; i < 6; i++) {
-        std::shared_ptr<Program::Program> p =
-            std::make_shared<Program::Program>(*e, false);
-        for (int j = 0; j < constant_size; j++) {
-            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2) / 3});
-        }
-        progPointers.push_back(p);
+    static std::string readFile(const std::filesystem::path& path)
+    {
+        std::ifstream input(path);
+        return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
     }
+};
 
-    // add constant instructions to at least one program.
-    for (int i = 8; i < 10; i++) {
-        Program::Line& l = progPointers.at(i).get()->addNewLine();
-        l.setInstructionIndex(2);
-        l.setDestinationIndex(1);
-        l.setOperand(0, 0, 1);
-
-        Program::Line& l2 = progPointers.at(i).get()->addNewLine();
-        l2.setInstructionIndex(2);
-        l2.setDestinationIndex(1);
-        l2.setOperand(0, 0, 1);
-    }
-
-    // Add three action edges to first action, two to second and one to third
-    tpg->addNewActionEdge(*tpg->getVertices().at(4),
-                          progPointers.at(currentNbPrograms), 0);
-    tpg->addNewActionEdge(*tpg->getVertices().at(4),
-                          progPointers.at(currentNbPrograms + 1), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(4),
-                          progPointers.at(currentNbPrograms + 2), 2);
-
-    tpg->addNewActionEdge(*tpg->getVertices().at(5),
-                          progPointers.at(currentNbPrograms + 3), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(5),
-                          progPointers.at(currentNbPrograms + 4), 2);
-
-    tpg->addNewActionEdge(*tpg->getVertices().at(6),
-                          progPointers.at(currentNbPrograms + 5), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(6),
-                          progPointers.at(currentNbPrograms + 4), 2);
-
-    File::GraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot",
-                                          *tpg);
-
-    ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
-        << "File export was executed without error.";
-
-    // Compare the two files
-    ASSERT_TRUE(compare_files("exported_multi_action_sub_tpg.dot",
-                              TESTS_DAT_PATH
-                              "exported_multi_action_sub_tpg_ref.dot"))
-        << "Differences between reference file and exported "
-           "file were detected.";
-}
-
-TEST_F(ExporterTest, FileContentVerification)
+TEST_F(ExporterTest, exportRepresentationWritesADotFile)
 {
-    // This Test checks the content of the exported file against a golden
-    // reference.
-    File::GraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+    auto graph = std::make_shared<EvoGraph::Graph>();
+    auto representation = std::make_unique<MockRepresentation>("Root", "#112233");
+    representation->attachGraph(graph);
+    representation->initializePopulation();
 
-    dotExporter.print();
+    auto subRepresentation = std::make_unique<MockRepresentation>("Sub", "#445566");
+    subRepresentation->attachGraph(graph);
+    subRepresentation->initializePopulation();
+    representation->addSubRepresentation(*subRepresentation);
 
-    // Compare the two files
-    ASSERT_TRUE(compare_files("exported_tpg.dot",
-                              TESTS_DAT_PATH "exported_tpg_ref.dot"))
-        << "Differences between reference file and exported "
-           "file were detected.";
+    const auto& team = graph->addNewTeam();
+    const auto& action = graph->addNewAction(0);
+    const auto& program = representation->addTestIndividual(team);
+    graph->addNewEdge(team, action, program);
+
+    const auto outputPath = std::filesystem::temp_directory_path() / "gegelati_export_representation.dot";
+    std::filesystem::remove(outputPath);
+
+    File::GraphDotExporter exporter;
+    ASSERT_NO_THROW(exporter.exportRepresentation(outputPath.string().c_str(), *representation));
+
+    ASSERT_TRUE(std::filesystem::exists(outputPath));
+    const std::string content = readFile(outputPath);
+    EXPECT_NE(content.find("digraph"), std::string::npos);
+    EXPECT_NE(content.find("ALGO"), std::string::npos);
+    EXPECT_NE(content.find("P"), std::string::npos);
+    EXPECT_NE(content.find("T"), std::string::npos);
+    EXPECT_NE(content.find("A"), std::string::npos);
+
+    std::filesystem::remove(outputPath);
 }
-*/
+
+TEST_F(ExporterTest, exportIndividualWritesOnlyTheRequestedSubgraph)
+{
+    auto graph = std::make_shared<EvoGraph::Graph>();
+    auto representation = std::make_unique<MockRepresentation>("Root", "#112233");
+    representation->attachGraph(graph);
+    representation->initializePopulation();
+
+    const auto& team = graph->addNewTeam();
+    const auto& action = graph->addNewAction(0);
+    const auto& firstProgram = representation->addTestIndividual(team);
+    graph->addNewEdge(team, action, firstProgram);
+
+    const auto outputPath = std::filesystem::temp_directory_path() / "gegelati_export_individual.dot";
+    std::filesystem::remove(outputPath);
+
+    File::GraphDotExporter exporter;
+    ASSERT_NO_THROW(exporter.exportIndividual(outputPath.string().c_str(), firstProgram, *representation));
+
+    ASSERT_TRUE(std::filesystem::exists(outputPath));
+    const std::string content = readFile(outputPath);
+    EXPECT_NE(content.find("P"), std::string::npos);
+    EXPECT_NE(content.find("T"), std::string::npos);
+    EXPECT_NE(content.find("A"), std::string::npos);
+    EXPECT_NE(content.find("Root."), std::string::npos);
+
+    std::filesystem::remove(outputPath);
+}
+
+TEST_F(ExporterTest, exportRepresentationThrowsForInvalidPath)
+{
+    auto graph = std::make_shared<EvoGraph::Graph>();
+    auto representation = std::make_unique<MockRepresentation>("Root", "#112233");
+    representation->attachGraph(graph);
+    representation->initializePopulation();
+
+    const auto& team = graph->addNewTeam();
+    const auto& action = graph->addNewAction(0);
+    const auto& program = representation->addTestIndividual(team);
+    graph->addNewEdge(team, action, program);
+
+    File::GraphDotExporter exporter;
+    EXPECT_THROW(exporter.exportRepresentation("XXX://INVALID_PATH", *representation), std::runtime_error);
+}
+
+TEST_F(ExporterTest, exportIndividualThrowsForUnknownIndividual)
+{
+    auto graph = std::make_shared<EvoGraph::Graph>();
+    auto representation = std::make_unique<MockRepresentation>("Root", "#112233");
+    representation->attachGraph(graph);
+    representation->initializePopulation();
+
+    const auto& team = graph->addNewTeam();
+    const auto& action = graph->addNewAction(0);
+    const auto& program = representation->addTestIndividual(team);
+    graph->addNewEdge(team, action, program);
+
+    auto unknownIndividual = std::make_unique<MockIndividual>(representation->getRepresentationID());
+
+    File::GraphDotExporter exporter;
+    EXPECT_THROW(exporter.exportIndividual("unused.dot", *unknownIndividual, *representation), std::runtime_error);
+}
+
+} // namespace
