@@ -41,6 +41,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "evolution/individual.h"
 #include "node/gpNode.h"
 #include "util/counterReset.h"
 
@@ -63,54 +64,69 @@ class GPNodeTest : public ::testing::Test
 
 TEST_F(GPNodeTest, Constructor)
 {
-    Node::GPNode* node1;
-    Node::GPNode* node2;
+    Node::GPNode* intNode;
+    Node::GPNode* doubleNode;
+    Node::GPNode* indivNode;
+    Node::GPNode* variantNode;
 
-    ASSERT_NO_THROW(node1 = new Node::GPNode({1, 2, 3}, {10, 20, 30}))
-        << "Construction of the GPNode failed.";
+    std::vector<size_t> intValues = {1,2,3};
+    ASSERT_NO_THROW(intNode = new Node::GPNode(intValues))
+        << "Construction of the int GPNode failed.";
 
-        
-    ASSERT_NO_THROW(node2 = new Node::GPNode( {10, 20, 30}))
-        << "Construction of the GPNode failed.";
+    std::vector<double> doubleValues = {1.0, 2.0, 3.0};
+    ASSERT_NO_THROW(doubleNode = new Node::GPNode(doubleValues))
+        << "Construction of the double GPNode failed.";
 
-    ASSERT_NO_THROW(delete node1) << "Destruction of the GPNode failed.";
-    ASSERT_NO_THROW(delete node2) << "Destruction of the GPNode failed.";
+    Evolution::Individual indiv1;
+    Evolution::Individual indiv2;
+    std::vector<std::reference_wrapper<const Evolution::Individual>> indivValues = {indiv1, indiv2};
+    ASSERT_NO_THROW(indivNode = new Node::GPNode(indivValues))
+        << "Construction of the individual GPNode failed.";
+
+    std::vector<Node::NodeType> variantValues = {size_t{1}, 2.5, indiv1};
+    ASSERT_NO_THROW(variantNode = new Node::GPNode(variantValues))
+        << "Construction of the variant GPNode failed.";
+
+    ASSERT_NO_THROW(delete intNode) << "Destruction of the int GPNode failed.";
+    ASSERT_NO_THROW(delete doubleNode) << "Destruction of the double GPNode failed.";
+    ASSERT_NO_THROW(delete indivNode) << "Destruction of the individual GPNode failed.";
+    ASSERT_NO_THROW(delete variantNode) << "Destruction of the variant GPNode failed.";
 }
 
 TEST_F(GPNodeTest, SetGetValue)
 {
-    Node::GPNode node({1, 2, 3}, {10, 20, 30});
+    Evolution::Individual indiv1;
+    std::vector<Node::NodeType> variantValues = {size_t{1}, 2.5, indiv1};
+    Node::GPNode node(variantValues);
 
-    ASSERT_NO_THROW(node.setValue(0, 5)) << "Setting value of the GPNode failed.";
-    ASSERT_NO_THROW(node.setValue(1, 15)) << "Setting value of the GPNode failed.";
-    ASSERT_NO_THROW(node.setValue(2, 25)) << "Setting value of the GPNode failed.";
-
-    ASSERT_THROW(node.setValue(0, 15), std::runtime_error) << "Setting value of the GPNode should have failed.";
-    ASSERT_THROW(node.setValue(3, 25), std::runtime_error) << "Setting value of the GPNode should have failed.";
-
-
-    ASSERT_EQ(node.getValue(0), 5) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(1), 15) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(2), 25) << "Getting value of the GPNode failed.";
-
-    ASSERT_THROW(node.getValue(3), std::runtime_error) << "Getting value of the GPNode should have failed.";
+    
+    ASSERT_EQ(node.getValue(0), Node::NodeType(size_t{1})) << "Getting value of the GPNode failed.";
+    ASSERT_EQ(node.getValue(1), Node::NodeType(2.5)) << "Getting value of the GPNode failed.";
+    ASSERT_EQ(node.getValue(2), Node::NodeType(indiv1)) << "Getting value of the GPNode failed.";
 
 
-    ASSERT_EQ(node.getMaxRange(0), 10) << "Getting range of the GPNode failed.";
-    ASSERT_THROW(node.getMaxRange(3), std::runtime_error) << "Getting range of the GPNode should have failed.";
+    ASSERT_NO_THROW(node.setValue(0, size_t{5})) << "Setting value of the GPNode failed.";
+    ASSERT_NO_THROW(node.setValue(1, indiv1)) << "Setting value of the GPNode failed.";
+    ASSERT_NO_THROW(node.setValue(2, 2.9)) << "Setting value of the GPNode failed.";
 
+    ASSERT_EQ(node.getValue(0), Node::NodeType(size_t{5})) << "Getting value of the GPNode failed.";
+    ASSERT_EQ(node.getValue(1), Node::NodeType(indiv1)) << "Getting value of the GPNode failed.";
+    ASSERT_EQ(node.getValue(2), Node::NodeType(2.9)) << "Getting value of the GPNode failed.";
+
+    ASSERT_THROW(node.setValue(3, size_t(25)), std::runtime_error) << "Setting value of the GPNode should have failed.";
 
     ASSERT_EQ(node.getSize(), 3) << "Getting size of the GPNode failed.";
-    ASSERT_EQ(node.getValues(), std::vector<size_t>({5, 15, 25})) << "Getting values of the GPNode failed.";
-    ASSERT_EQ(node.getMaxRanges(), std::vector<size_t>({10, 20, 30})) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(node.getValues(), std::vector<Node::NodeType>({size_t{5}, indiv1, 2.9})) << "Getting values of the GPNode failed.";
 }
 
 TEST_F(GPNodeTest, IDCounter)
 {
     ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 0) << "GPNode ID counter should be 0 at the beginning.";
 
-    Node::GPNode node1({1, 2, 3}, {10, 20, 30});
-    Node::GPNode node2({1, 2, 3}, {10, 20, 30});
+    std::vector<size_t> values = {1, 2, 3};
+    std::vector<double> doubleValues = {1.1, 2.1, 3.1};
+    Node::GPNode node1(values);
+    Node::GPNode node2(doubleValues);
 
     size_t id1 = node1.getGPNodeID();
     size_t id2 = node2.getGPNodeID();

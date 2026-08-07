@@ -1,9 +1,18 @@
-#/bin/bash!
+#!/bin/bash
+set -e
 
-cd bin
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-cmake --build . --target runTests
-./bin/runTests
-mkdir coverage
-gcovr -r .. -e '.*deterministicRandom.h' -e '.*test/.*' -e '.*lib/.*' --html --html-details -s -o ./coverage/coverage.html
+rm -rf bin
 
+cmake -S . -B bin -DCMAKE_BUILD_TYPE=Debug
+cmake --build bin --target runTests -j 18
+
+./bin/bin/runTests
+
+mkdir -p bin/coverage
+
+gcovr \
+    -r . \
+    -s \
+    --html \
+    --html-details \
+    -o bin/coverage/coverage.html

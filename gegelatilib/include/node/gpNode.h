@@ -4,10 +4,23 @@
 
 #include <vector>
 #include <stdexcept>
+#include <variant>
+#include <functional>
 
 struct CounterReset;
 
+
+namespace Evolution {
+    class Individual;
+};
+
 namespace Node {
+
+    using NodeType = std::variant<
+        double,
+        std::size_t,
+        std::reference_wrapper<const Evolution::Individual>
+    >;
 
     /**
      * \brief Class representing a GPNode
@@ -38,13 +51,7 @@ namespace Node {
             friend struct ::CounterReset;
 
             /// \brief Values of the GPNode.
-            std::vector<size_t> values;
-
-            /// \brief Maximum ranges of the values of the GPNode.
-            std::vector<size_t> max_ranges;
-
-            /// \brief Size of the GPNode.
-            size_t size;
+            std::vector<NodeType> values;
 
         public:
         
@@ -59,22 +66,29 @@ namespace Node {
              * \brief GPNode constructor.
              *  
              * \param[in] values the values of the GPNode.
-             * \param[in] max_ranges the maximum ranges of the values of the GPNode.
              */
-            GPNode(const std::vector<size_t>& values, const std::vector<size_t>& max_ranges): values(values), max_ranges(max_ranges), size(max_ranges.size()), gpNodeID(incrementeCounter()) {
-                if (values.size() != max_ranges.size()){
-                    throw std::runtime_error("Node::GPNode: values and max_ranges must have the same size.");
-                }
-            };
+            GPNode(const std::vector<NodeType>& values): values(values), gpNodeID(incrementeCounter()) {};
 
+            /**
+             * \brief GPNode size_t constructor.
+             * 
+             * \param[in] values the integer values of the GPNode.
+             */
+            GPNode(const std::vector<size_t>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
             
             /**
-             * \brief GPNode constructor.
-             *  
-             * \param[in] max_ranges the maximum ranges of the values of the GPNode.
+             * \brief GPNode double constructor.
+             * 
+             * \param[in] values the double values of the GPNode.
              */
-            GPNode(const std::vector<size_t>& max_ranges): GPNode(std::vector<size_t>(max_ranges.size(), 0), max_ranges){};
-
+            GPNode(const std::vector<double>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
+            
+            /**
+             * \brief GPNode reference constructor.
+             * 
+             * \param[in] values the reference values of the GPNode.
+             */
+            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
 
             /**
              * \brief return the ID of the GPNode.
@@ -101,22 +115,14 @@ namespace Node {
              * \param[in] index the index of the value to get.
              * \param[in] value the value to set.
              */
-            void setValue(size_t index, size_t value);
+            void setValue(size_t index, NodeType value);
 
             /**
              * \brief Get the value of the GPNode at the given index.
              * 
              * \param[in] index the index of the value to get.
              */
-            size_t getValue(size_t index) const;
-
-
-            /**
-             * \brief Get the max range of the GPNode at the given index.
-             * 
-             * \param[in] index the index of the max range to get.
-             */
-            size_t getMaxRange(size_t index) const;
+            NodeType getValue(size_t index) const;
 
             /**
              * \brief Get the number of values of the GPNode.
@@ -126,7 +132,7 @@ namespace Node {
             /**
              * \brief Get the values of the GPNode.
              */
-            const std::vector<size_t>& getValues() const;
+            const std::vector<NodeType>& getValues() const;
 
             /**
              * \brief Get the maximum ranges of the GPNode.

@@ -50,48 +50,30 @@ bool Node::operator!=(const Node::GPNode& a, const Node::GPNode& b)
     return a.getGPNodeID() != b.getGPNodeID();
 }
 
-void Node::GPNode::setValue(size_t index, size_t value)
+void Node::GPNode::setValue(size_t index, NodeType value)
 {
-    if(index >= this->size){
+    if(index >= this->getSize()){
         throw std::runtime_error("Node::GPNode::setValue: index out of range.");
-    }
-    if(value >= this->max_ranges[index]){
-        throw std::runtime_error("Node::GPNode::setValue: value out of range.");
     }
     this->values[index] = value;
 }
 
 
-size_t Node::GPNode::getValue(size_t index) const
+Node::NodeType Node::GPNode::getValue(size_t index) const
 {
-    if(index >= this->size){
+    if(index >= this->getSize()){
         throw std::runtime_error("Node::GPNode::getValue: index out of range.");
     }
     return this->values[index];
 }
 
-size_t Node::GPNode::getMaxRange(size_t index) const
-{
-    if(index >= this->size){
-        throw std::runtime_error("Node::GPNode::getMaxRange: index out of range.");
-    }
-    return this->max_ranges[index];
-}
-
-
 size_t Node::GPNode::getSize() const
 {
-    return this->size;
+    return this->values.size();
 }
 
 
-const std::vector<size_t>& Node::GPNode::getValues() const
+const std::vector<Node::NodeType>& Node::GPNode::getValues() const
 {
     return this->values;
-}
-
-
-const std::vector<size_t>& Node::GPNode::getMaxRanges() const
-{
-    return this->max_ranges;
 }
