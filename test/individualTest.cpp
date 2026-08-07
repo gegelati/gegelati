@@ -70,7 +70,7 @@ TEST_F(IndividualTest, Constructor)
     ASSERT_NO_THROW(delete individual) << "Destructor of Individual failed.";
 }
 
-TEST_F(IndividualTest, SetGetNodes)
+TEST_F(IndividualTest, addRemoveNodes)
 {
     Evolution::Individual individual;
 
@@ -89,18 +89,27 @@ TEST_F(IndividualTest, SetGetNodes)
     ASSERT_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}), size_t(3)), std::runtime_error) << "Adding GPNode to the Individual should have failed.";
     ASSERT_THROW(individual.getGPNode(2), std::runtime_error) << "Getting GPNode of the Individual should have failed.";
     ASSERT_THROW(individual.getMutableGPNode(2), std::runtime_error) << "Getting GPNode of the Individual should have failed.";
+
+    ASSERT_NO_THROW(individual.removeGPNode(0)) << "Removing GPNode to the Individual failed.";
+    ASSERT_EQ(individual.getSize(), 1) << "Getting size of the Individual failed.";
+    ASSERT_EQ(individual.getMutableGPNode(0).getValues().at(2), Node::NodeType(3.0)) << "Getting values of the GPNode failed.";
+    
+    ASSERT_THROW(individual.removeGPNode(1), std::runtime_error) << "Removing GPNode of the Individual should have failed.";
 }
 
 TEST_F(IndividualTest, SetGetIntron)
 {
     Evolution::Individual individual;
 
-    ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}), true)) << "Adding GPNode to the Individual failed.";
+    ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}), false)) << "Adding GPNode to the Individual failed.";
     ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), false)) << "Adding GPNode to the Individual failed.";
+
+    ASSERT_NO_THROW(individual.setIsIntronNode(0, true)) << "Setting intron property of the Individual failed.";
 
     ASSERT_EQ(individual.getAreIntronNodes(), std::vector<bool>({true, false})) << "Getting intron property of the Individual failed.";
     ASSERT_EQ(individual.getIsIntronNode(0), true) << "Getting intron property of the Individual failed.";
     ASSERT_EQ(individual.getIsIntronNode(1), false) << "Getting intron property of the Individual failed.";
+
 
     ASSERT_THROW(individual.getIsIntronNode(2), std::runtime_error) << "Getting intron property of the Individual should have failed.";
     ASSERT_THROW(individual.setIsIntronNode(2, true), std::runtime_error) << "Setting intron property of the Individual should have failed.";
@@ -124,5 +133,9 @@ TEST_F(IndividualTest, IDCounter)
     ASSERT_EQ(individual1.getIndividualID(), 100) << "Setting Individual ID failed.";
 
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 101) << "Individual ID counter should be 101 after setting the first individual's ID.";
-
+    
+    // Check <, = and != operators
+    ASSERT_TRUE(individual1 != individual2) << "operator != failed.";
+    ASSERT_TRUE(individual2 < individual1) << "operator < failed.";
+    ASSERT_FALSE(individual1 == individual2) << "operator == failed.";
 }

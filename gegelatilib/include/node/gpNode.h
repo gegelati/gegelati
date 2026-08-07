@@ -133,11 +133,6 @@ namespace Node {
              * \brief Get the values of the GPNode.
              */
             const std::vector<NodeType>& getValues() const;
-
-            /**
-             * \brief Get the maximum ranges of the GPNode.
-             */
-            const std::vector<size_t>& getMaxRanges() const;
     };
 
     

@@ -1,6 +1,6 @@
 
-#ifndef POPULATION_H
-#define POPULATION_H
+#ifndef R_POPULATION_H
+#define R_POPULATION_H
 
 #include <vector>
 #include <memory>

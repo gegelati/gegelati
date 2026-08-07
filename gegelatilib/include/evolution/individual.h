@@ -25,12 +25,12 @@ namespace Evolution {
         std::vector<bool> isIntronNode;
 
         /// Unique ID of the individual.
-        uint64_t individualID;
+        size_t individualID;
 
         /**
          * \brief Incremente the individual ID counter and return the new value.
          */
-        static uint64_t incrementeCounter();
+        static size_t incrementeCounter();
 
         /**
          * \brief Reset the individual ID counter.
@@ -54,21 +54,21 @@ namespace Evolution {
         /**
          * \brief return the ID of the individual.
          */
-        static uint64_t getIndividualIDCounter();
+        static size_t getIndividualIDCounter();
     
         /**
          * \brief Get the unique identifier of the Individual.
          *
          * \return the integer ID of the Individual.
          */
-        virtual uint64_t getIndividualID() const;
+        virtual size_t getIndividualID() const;
 
         /**
          * \brief Set a new unique identifier to the Individual.
          *
          * \param[in] newID the new integer ID to set to the Individual.
          */
-        virtual void setIndividualID(uint64_t newID);
+        virtual void setIndividualID(size_t newID);
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
         Individual(const Individual&) = delete;
@@ -82,6 +82,13 @@ namespace Evolution {
          * \param[in] isIntron whether the GPNode is an intron or not.
          */
         virtual void addGPNode(std::unique_ptr<Node::GPNode> node, size_t index, bool isIntron = false);
+
+        /**
+         * \brief Remove a GPNode from the Individual.
+         * 
+         * \param[in] index the index at which to remove the GPNode.
+         */
+        virtual void removeGPNode(size_t index);
 
         /**
          * \brief Add a GPNode to the Individual.

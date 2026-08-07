@@ -114,6 +114,7 @@ TEST_F(GPNodeTest, SetGetValue)
     ASSERT_EQ(node.getValue(2), Node::NodeType(2.9)) << "Getting value of the GPNode failed.";
 
     ASSERT_THROW(node.setValue(3, size_t(25)), std::runtime_error) << "Setting value of the GPNode should have failed.";
+    ASSERT_THROW(node.getValue(3), std::runtime_error) << "Getting value of the GPNode should have failed.";
 
     ASSERT_EQ(node.getSize(), 3) << "Getting size of the GPNode failed.";
     ASSERT_EQ(node.getValues(), std::vector<Node::NodeType>({size_t{5}, indiv1, 2.9})) << "Getting values of the GPNode failed.";
@@ -137,5 +138,9 @@ TEST_F(GPNodeTest, IDCounter)
     ASSERT_EQ(node1.getGPNodeID(), 100) << "Setting GPNode ID failed.";
 
     ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 101) << "GPNode ID counter should be 101 after setting the first node's ID.";
-
+    
+    // Check <, = and != operators
+    ASSERT_TRUE(node1 != node2) << "operator != failed.";
+    ASSERT_TRUE(node2 < node1) << "operator < failed.";
+    ASSERT_FALSE(node1 == node2) << "operator == failed.";
 }

@@ -9,6 +9,7 @@
 #include "evoGraph/vertex.h"
 #include "node/gpNode.h"
 #include "evolution/individual.h"
+#include "evolution/population.h"
 
 /**
  * \brief Struct to reset static counters in classes.

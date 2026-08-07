@@ -2,6 +2,8 @@
 
 #include "representation/population.h"
 
+
+
 std::set<std::unique_ptr<Representation::Individual>>::iterator Representation::Population::getIndividualFromCst(const Individual& individual)
 {
     auto iterator = this->individuals.find(&individual);
