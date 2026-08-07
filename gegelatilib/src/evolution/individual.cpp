@@ -49,3 +49,73 @@ bool Evolution::operator!=(const Evolution::Individual& a, const Evolution::Indi
 {
     return a.getIndividualID() != b.getIndividualID();
 }
+
+
+
+void Evolution::Individual::addGPNode(std::unique_ptr<Node::GPNode> node, size_t index, bool isIntron)
+{
+    if(index > this->genotype.size()){
+        throw std::runtime_error("Evolution::Individual::addGPNode: index out of range.");
+    }
+    this->genotype.insert(this->genotype.begin() + index, std::move(node));
+    this->isIntronNode.insert(this->isIntronNode.begin() + index, isIntron);
+}
+
+void Evolution::Individual::addGPNode(std::unique_ptr<Node::GPNode> node, bool isIntron)
+{
+    this->addGPNode(std::move(node), this->genotype.size(), isIntron);
+}
+
+Node::GPNode& Evolution::Individual::getMutableGPNode(size_t index)
+{
+    if(index >= this->getSize()){
+        throw std::runtime_error("Evolution::Individual::getMutableGPNode: index out of range.");
+    }
+    return *this->genotype[index];
+}
+
+const Node::GPNode& Evolution::Individual::getGPNode(size_t index) const
+{
+    if(index >= this->getSize()){
+        throw std::runtime_error("Evolution::Individual::getGPNode: index out of range.");
+    }
+    return *this->genotype[index];
+}
+
+size_t Evolution::Individual::getSize() const
+{
+    return this->genotype.size();
+}
+
+std::vector<std::reference_wrapper<const Node::GPNode>> Evolution::Individual::getGenotype() const
+{
+    std::vector<std::reference_wrapper<const Node::GPNode>> result;
+    result.reserve(genotype.size());
+
+    for (const auto& node : genotype) {
+        result.emplace_back(*node);
+    }
+
+    return result;
+}
+
+void Evolution::Individual::setIsIntronNode(size_t index, bool isIntron)
+{
+    if(index >= this->getSize()){
+        throw std::runtime_error("Evolution::Individual::setIsIntronNode: index out of range.");
+    }
+    this->isIntronNode[index] = isIntron;
+}
+
+bool Evolution::Individual::getIsIntronNode(size_t index) const
+{
+    if(index >= this->getSize()){
+        throw std::runtime_error("Evolution::Individual::getIsIntronNode: index out of range.");
+    }
+    return this->isIntronNode[index];
+}
+
+const std::vector<bool>& Evolution::Individual::getAreIntronNodes() const
+{
+    return this->isIntronNode;
+}

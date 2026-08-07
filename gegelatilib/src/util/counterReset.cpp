@@ -8,4 +8,5 @@ void CounterReset::counterReset()
     Representation::Individual::resetIndividualIDCounter();
     Representation::Representation::resetRepresentationIDCounter();
     Node::GPNode::resetGPNodeIDCounter();
+    Evolution::Individual::resetIndividualIDCounter();
 }

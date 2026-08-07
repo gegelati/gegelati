@@ -128,12 +128,10 @@ TEST_F(GPNodeTest, IDCounter)
     Node::GPNode node1(values);
     Node::GPNode node2(doubleValues);
 
-    size_t id1 = node1.getGPNodeID();
-    size_t id2 = node2.getGPNodeID();
+    ASSERT_EQ(node1.getGPNodeID(), 0) << "GPNode ID should be 0.";
+    ASSERT_EQ(node2.getGPNodeID(), 1) << "GPNode ID should be 1.";
 
     ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 2) << "GPNode ID counter should be 2 after creating two nodes.";
-
-    ASSERT_NE(id1, id2) << "GPNode IDs should be different.";
 
     node1.setGPNodeID(100);
     ASSERT_EQ(node1.getGPNodeID(), 100) << "Setting GPNode ID failed.";
