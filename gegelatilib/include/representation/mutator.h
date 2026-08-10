@@ -1,6 +1,6 @@
 
-#ifndef MUTATOR_H
-#define MUTATOR_H
+#ifndef R_MUTATOR_H
+#define R_MUTATOR_H
 
 #include <vector>
 #include <string>

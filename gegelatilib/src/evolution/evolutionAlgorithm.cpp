@@ -1,13 +1,13 @@
 #include "evolution/evolutionAlgorithm.h"
 
-void Evolution::EvolutionAlgorithm::initializedPopulation()
+void Evolution::EvolutionAlgorithm::initializePopulation()
 {
     //structure = this->representation->getNodesStructure;
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
         Individual& indiv = this->population->getMutableIndividual(this->population->createIndividual());
-        // mutator.initializeIndividual(indiv, structure, this->rng);
+        this->mutation->initRandomIndividual(indiv, this->rng);
     }
 }
 
