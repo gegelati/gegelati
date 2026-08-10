@@ -1,6 +1,6 @@
 
-#ifndef REPRESENTATION_H
-#define REPRESENTATION_H
+#ifndef R_REPRESENTATION_H
+#define R_REPRESENTATION_H
 
 #include <memory>
 #include <vector>
@@ -448,4 +448,4 @@ namespace Representation {
     bool operator!=(const Representation& a, const Representation& b);
 }; // namespace Representation
 
-#endif // REPRESENTATION_H
+#endif // R_REPRESENTATION_H
