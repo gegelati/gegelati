@@ -36,21 +36,6 @@ void Evolution::Individual::setIndividualID(size_t newID)
     }
 }
 
-bool Evolution::operator<(const Evolution::Individual& a, const Evolution::Individual& b)
-{
-    return a.getIndividualID() < b.getIndividualID();
-}
-
-bool Evolution::operator==(const Evolution::Individual& a, const Evolution::Individual& b)
-{
-    return a.getIndividualID() == b.getIndividualID();
-}
-bool Evolution::operator!=(const Evolution::Individual& a, const Evolution::Individual& b)
-{
-    return a.getIndividualID() != b.getIndividualID();
-}
-
-
 
 void Evolution::Individual::addGPNode(std::unique_ptr<Node::GPNode> node, size_t index, bool isIntron)
 {
@@ -107,6 +92,19 @@ std::vector<std::reference_wrapper<const Node::GPNode>> Evolution::Individual::g
     return result;
 }
 
+std::vector<std::reference_wrapper<const Node::GPNode>> Evolution::Individual::getEffectiveGenotype() const
+{
+    std::vector<std::reference_wrapper<const Node::GPNode>> result;
+
+    for(size_t idx = 0; idx < this->getSize(); idx++) {
+        if(!this->getIsIntronNode(idx)) {
+            result.emplace_back(this->getGPNode(idx));
+        }
+    }
+
+    return result;
+}
+
 void Evolution::Individual::setIsIntronNode(size_t index, bool isIntron)
 {
     if(index >= this->getSize()){
@@ -126,4 +124,32 @@ bool Evolution::Individual::getIsIntronNode(size_t index) const
 const std::vector<bool>& Evolution::Individual::getAreIntronNodes() const
 {
     return this->isIntronNode;
+}
+
+
+
+bool Evolution::operator<(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return a.getIndividualID() < b.getIndividualID();
+}
+
+bool Evolution::operator==(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return a.getIndividualID() == b.getIndividualID();
+}
+bool Evolution::operator!=(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return !(a==b);
+}
+bool Evolution::operator>(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return b < a;
+}
+bool Evolution::operator<=(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return (a < b) || (a == b);
+}
+bool Evolution::operator>=(const Evolution::Individual& a, const Evolution::Individual& b)
+{
+    return (a > b) || (a == b);
 }

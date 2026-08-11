@@ -131,6 +131,13 @@ namespace Evolution {
         virtual std::vector<std::reference_wrapper<const Node::GPNode>> getGenotype() const;
 
         /**
+         * \brief Get the effective genotype of the Individual: the non-intron GPNodes.
+         * 
+         * \return a reference to the vector of unique pointers to GPNode representing the effective genotype of the Individual.
+         */
+        virtual std::vector<std::reference_wrapper<const Node::GPNode>> getEffectiveGenotype() const;
+
+        /**
          * \brief Set the intron property of the Individual.
          * 
          * \param[in] index the index of the GPNode to set.
@@ -173,6 +180,25 @@ namespace Evolution {
      * STL.
      */
     bool operator!=(const Individual& a, const Individual& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Individual with
+     * STL.
+     */
+    bool operator>(const Individual& a, const Individual& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Individual with
+     * STL.
+     */
+    bool operator<=(const Individual& a, const Individual& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Individual with
+     * STL.
+     */
+    bool operator>=(const Individual& a, const Individual& b);
+
 }; // namespace Evolution
 
 #endif

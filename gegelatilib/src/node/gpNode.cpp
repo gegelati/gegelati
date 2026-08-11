@@ -59,7 +59,7 @@ void Node::GPNode::setValue(size_t index, NodeType value)
 }
 
 
-Node::NodeType Node::GPNode::getValue(size_t index) const
+const Node::NodeType& Node::GPNode::getValue(size_t index) const
 {
     if(index >= this->getSize()){
         throw std::runtime_error("Node::GPNode::getValue: index out of range.");

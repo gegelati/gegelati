@@ -59,26 +59,44 @@ class RepresentationTest : public ::testing::Test
     }
 };
 
+class FakeRepresentation : public Evolution::Representation 
+{
+    public: 
+        std::unique_ptr<Evolution::Representation> cloneUniquePtr() const {
+            return std::make_unique<FakeRepresentation>(*this);
+        }
+        
+        FakeRepresentation(size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(nbNodesMin, nbNodesMax, representationName, representationColor) {};
+
+        bool isValid(const Evolution::Individual& indiv) {
+            return true;
+        }
+
+        std::vector<double> executeIndividual(const Evolution::Individual& indiv) {
+            return {0.0};
+        }
+};
+
 
 TEST_F(RepresentationTest, Constructor)
 {
-    Evolution::Representation* representation;
+    FakeRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new Evolution::Representation(1, 5)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new FakeRepresentation(1, 5)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
 TEST_F(RepresentationTest, getSet)
 {
-    Evolution::Representation representation(10);
+    FakeRepresentation representation(10);
 
     ASSERT_EQ(representation.getMinNbNodes(), 10) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(representation.getMaxNbNodes(), 10) << "MinNbNodes value got unexpected value";
-    ASSERT_EQ(representation.getRepresentationName(), "Representation") << "Param value got unexpected value";
+    ASSERT_EQ(representation.getRepresentationName(), "FakeRepresentation") << "Param value got unexpected value";
     ASSERT_EQ(representation.getRepresentationColor(), "#000000") << "Param value got unexpected value";
 
-    Evolution::Representation customRep(1, 5, "CustomRep", "#123456");
+    FakeRepresentation customRep(1, 5, "CustomRep", "#123456");
     
     ASSERT_EQ(customRep.getMinNbNodes(), 1) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(customRep.getMaxNbNodes(), 5) << "MinNbNodes value got unexpected value";

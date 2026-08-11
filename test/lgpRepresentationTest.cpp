@@ -41,22 +41,18 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "instructions/set.h"
-#include "evolution/evolutionAlgorithm.h"
 #include "representations/lgpRepresentation.h"
 
 
 // Set all file in comment
 
-class EvolutionAlgorithmTest : public ::testing::Test
+class LGPRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Evolution::Representation* representation;
 
     virtual void SetUp()
     {
-        representation = new Representations::LGPRepresentation(set, 8, 10);
     }
 
     virtual void TearDown()
@@ -64,23 +60,43 @@ class EvolutionAlgorithmTest : public ::testing::Test
     }
 };
 
-
-TEST_F(EvolutionAlgorithmTest, Constructor)
+TEST_F(LGPRepresentationTest, Constructor)
 {
-    Evolution::EvolutionAlgorithm* ea;
+    Representations::LGPRepresentation* representation;
 
-    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation)) << "Constructor of EA failed.";
+    ASSERT_NO_THROW(representation = new Representations::LGPRepresentation(set, 8, 5, 10)) << "Constructor of Representation failed.";
 
-    ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
-
-    ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
+    ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
-TEST_F(EvolutionAlgorithmTest, initializePopulation)
+TEST_F(LGPRepresentationTest, isValid)
 {
-    Evolution::EvolutionAlgorithm ea(*representation);
+    Representations::LGPRepresentation representation(set, 8, 5, 10);
 
-    ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
+    Evolution::Individual indiv;
+    for(size_t i = 0; i < 4; i++) {
+        indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
+    }
 
-    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
+
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
+    ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
+
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
+    indiv.removeGPNode(indiv.getSize() - 1);
+
+    
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
+    indiv.removeGPNode(indiv.getSize() - 1);
+
+
+    for(size_t i = 0; i < 6; i++) {
+        indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
+    }
+
+    ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 11 nodes";
 }

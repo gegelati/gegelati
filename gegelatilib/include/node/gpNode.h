@@ -122,7 +122,7 @@ namespace Node {
              * 
              * \param[in] index the index of the value to get.
              */
-            NodeType getValue(size_t index) const;
+            const NodeType& getValue(size_t index) const;
 
             /**
              * \brief Get the number of values of the GPNode.

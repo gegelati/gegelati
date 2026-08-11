@@ -40,6 +40,8 @@ namespace Evolution {
       
         /// Default polymorphic destructor
         virtual ~Representation() = default;
+        /// @brief clone pattern 
+        virtual std::unique_ptr<Representation> cloneUniquePtr() const = 0;
 
 
         /**
@@ -79,6 +81,17 @@ namespace Evolution {
          */
         virtual size_t getMaxNbNodes() const;
 
+        /**
+         * \brief identified wether the individual is valid faced to the expected node structure of the representation.
+         * 
+         * \param[in] indiv individual controlled.
+         */
+        virtual bool isValid(const Individual& indiv) = 0;
+
+        /**
+         * \brief execute the specified individual based on the current dataSources
+         */
+        virtual std::vector<double> executeIndividual(const Individual& indiv) = 0;
     };
 }; // namespace Representation
 

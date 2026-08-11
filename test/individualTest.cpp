@@ -115,6 +115,23 @@ TEST_F(IndividualTest, SetGetIntron)
     ASSERT_THROW(individual.setIsIntronNode(2, true), std::runtime_error) << "Setting intron property of the Individual should have failed.";
 }
 
+TEST_F(IndividualTest, GetGenotype)
+{
+    Evolution::Individual individual;
+
+    ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}), true)) << "Adding GPNode to the Individual failed.";
+    ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), false)) << "Adding GPNode to the Individual failed.";
+
+    std::vector<std::reference_wrapper<const Node::GPNode>> genotype = individual.getGenotype();
+    ASSERT_EQ(genotype.size(), 2) << "Getting genotype of the Individual failed.";
+    ASSERT_EQ(genotype[0].get().getValues().at(0), Node::NodeType(1.0)) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(genotype[1].get().getValues().at(0), Node::NodeType(size_t{4})) << "Getting values of the GPNode failed.";
+
+    std::vector<std::reference_wrapper<const Node::GPNode>> effectiveGenotype = individual.getEffectiveGenotype();
+    ASSERT_EQ(effectiveGenotype.size(), 1) << "Getting effective genotype of the Individual failed.";
+    ASSERT_EQ(effectiveGenotype[0].get().getValues().at(0), Node::NodeType(size_t{4})) << "Getting values of the GPNode failed.";
+}
+
 TEST_F(IndividualTest, IDCounter)
 {
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 0) << "Individual ID counter should be 0 at the beginning.";
@@ -135,7 +152,12 @@ TEST_F(IndividualTest, IDCounter)
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 101) << "Individual ID counter should be 101 after setting the first individual's ID.";
     
     // Check <, = and != operators
-    ASSERT_TRUE(individual1 != individual2) << "operator != failed.";
-    ASSERT_TRUE(individual2 < individual1) << "operator < failed.";
     ASSERT_FALSE(individual1 == individual2) << "operator == failed.";
+    ASSERT_TRUE(individual1 != individual2) << "operator != failed.";
+    
+    ASSERT_TRUE(individual2 < individual1) << "operator < failed.";
+    ASSERT_TRUE(individual1 > individual2) << "operator > failed.";
+
+    ASSERT_TRUE(individual2 <= individual1) << "operator <= failed.";
+    ASSERT_TRUE(individual1 >= individual2) << "operator >= failed.";
 }

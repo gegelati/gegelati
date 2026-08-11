@@ -1,6 +1,6 @@
 
-#ifndef LGP_REPRESENTATION_H
-#define LGP_REPRESENTATION_H
+#ifndef R_LGP_REPRESENTATION_H
+#define R_LGP_REPRESENTATION_H
 
 #include <memory>
 #include <vector>

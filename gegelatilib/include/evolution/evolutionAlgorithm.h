@@ -41,7 +41,7 @@ namespace Evolution {
          * \param[in] seed seed used for the random number generator.
          */
         EvolutionAlgorithm(const Representation& representation, size_t seed = 0)
-        : representation(std::make_unique<Representation>(representation)), 
+        : representation(std::move(representation.cloneUniquePtr())), 
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
           rng{seed} {};
