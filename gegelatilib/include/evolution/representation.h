@@ -31,6 +31,12 @@ namespace Evolution {
         /// Maximum number of nodes in the representation.
         size_t nbNodesMax;
 
+        /// Number of input sources
+        size_t nbInputSources;
+
+        /// Maximum index of input source
+        size_t maxInputSourceIdx;
+
         /// Name of the representation.
         std::string representationName;
         /// Color of the representation.
@@ -81,6 +87,23 @@ namespace Evolution {
          * \brief get the maximum number of nodes
          */
         virtual size_t getMaxNbNodes() const;
+
+        /**
+         * \brief set the number of input sources
+         * 
+         * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
+         */
+        virtual void setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources);
+
+        /**
+         * \brief get the number of input sources
+         */
+        virtual size_t getNbInputSources() const;
+
+        /**
+         * \brief get the maximum index of input source
+         */
+        virtual size_t getMaxInputSourceIdx() const;
 
         /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.

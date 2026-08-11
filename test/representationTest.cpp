@@ -88,6 +88,8 @@ TEST_F(RepresentationTest, Constructor)
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
+
+
 TEST_F(RepresentationTest, getSet)
 {
     FakeRepresentation representation(10);
@@ -103,4 +105,23 @@ TEST_F(RepresentationTest, getSet)
     ASSERT_EQ(customRep.getMaxNbNodes(), 5) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(customRep.getRepresentationName(), "CustomRep") << "Param value got unexpected value";
     ASSERT_EQ(customRep.getRepresentationColor(), "#123456") << "Param value got unexpected value";
+}
+
+TEST_F(RepresentationTest, setInputDimensions)
+{
+    FakeRepresentation representation(10);
+
+    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources;
+    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(4)));
+    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(8)));
+    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(6)));
+
+    ASSERT_NO_THROW(representation.setInputDimensions(inputSources)) << "Setting input dimensions failed";
+
+    ASSERT_EQ(representation.getNbInputSources(), 3) << "Number of input sources set is wrong";
+    ASSERT_EQ(representation.getMaxInputSourceIdx(), 8) << "max index of input source set is wrong";
+    
+    delete (&(inputSources.at(0).get()));
+    delete (&(inputSources.at(1).get()));
+    delete (&(inputSources.at(2).get()));
 }

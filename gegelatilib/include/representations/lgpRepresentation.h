@@ -17,15 +17,11 @@ namespace Representations {
     {
         protected:
 
-            /// Environment for executing LGP 
-            //std::unique_ptr<LGPEnvironment> env;
-
             /// Instruction Set used by the LGPRepresentation
             const Instructions::Set& iSet;
 
             /// The number of registers used by the LGPs
             size_t nbRegisters;
-
             
             /// Registers used for the Program execution.
             Data::PrimitiveTypeArray<double> registers; 
@@ -48,6 +44,15 @@ namespace Representations {
             LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, registers{nbRegisters} {};
         
+
+        /**
+         * \brief set the number of input sources. 
+         * LGP representation adds register dataHandler as input.
+         * 
+         * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
+         */
+        virtual void setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) override;
+
         /**
          * \brief individual nodes should have six values, with limited ranges.
          * 

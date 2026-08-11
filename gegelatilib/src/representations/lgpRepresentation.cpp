@@ -5,13 +5,30 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
     return std::make_unique<Representations::LGPRepresentation>(*this);
 }
 
+void Representations::LGPRepresentation::setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
+{
+    Evolution::Representation::setInputDimensions(inputSources);
+    this->nbInputSources++;
+    if(this->nbRegisters > this->maxInputSourceIdx) {
+        this->maxInputSourceIdx = this->nbRegisters;
+    }
+}
+
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv)
 {
+    // Return false if genotype length is out of bounds.
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;
     }
 
-    std::vector<size_t> ranges = {this->nbRegisters, 4, 2, 8, 2, 8};
+    // Ranges should look like {nbRegister, NbInstr, NbTypeInput, MaxInput, NbTypeInput, MaxInput...}.
+    std::vector<size_t> ranges = {this->nbRegisters, this->iSet.getNbInstructions()};
+    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
+        ranges.push_back(this->nbInputSources);
+        ranges.push_back(this->maxInputSourceIdx);
+    }
+
+    // Verify each (effective) node corresponds to the required specifications.
     for(const Node::GPNode& node: indiv.getEffectiveGenotype()) {
         if(node.getSize() != ranges.size()) {
             return false;

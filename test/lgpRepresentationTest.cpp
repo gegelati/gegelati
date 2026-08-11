@@ -89,6 +89,33 @@ TEST_F(LGPRepresentationTest, Constructor)
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
+
+TEST_F(LGPRepresentationTest, setInputDimensions)
+{
+    
+    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources;
+    inputSources.push_back(*inputSource);
+    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(8)));
+    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(6)));
+    
+    Representations::LGPRepresentation representation(set, 4, 5, 10);
+
+    ASSERT_NO_THROW(representation.setInputDimensions(inputSources)) << "Setting input dimensions failed";
+
+    ASSERT_EQ(representation.getNbInputSources(), 4) << "Number of input sources set is wrong";
+    ASSERT_EQ(representation.getMaxInputSourceIdx(), 8) << "max index of input source set is wrong";
+    
+    Representations::LGPRepresentation representation2(set, 16, 5, 10);
+
+    ASSERT_NO_THROW(representation2.setInputDimensions(inputSources)) << "Setting input dimensions failed";
+
+    ASSERT_EQ(representation2.getNbInputSources(), 4) << "Number of input sources set is wrong";
+    ASSERT_EQ(representation2.getMaxInputSourceIdx(), 16) << "max index of input source set is wrong";
+    
+    delete (&(inputSources.at(1).get()));
+    delete (&(inputSources.at(2).get()));
+}
+
 TEST_F(LGPRepresentationTest, isValid)
 {
     Representations::LGPRepresentation representation(set, 8, 5, 10);
@@ -107,6 +134,9 @@ TEST_F(LGPRepresentationTest, isValid)
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
     indiv.removeGPNode(indiv.getSize() - 1);
 
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1}));
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
+    indiv.removeGPNode(indiv.getSize() - 1);
     
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
@@ -134,7 +164,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
     Evolution::Individual indiv;
     
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 1, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
