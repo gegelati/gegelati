@@ -172,7 +172,6 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
     ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
 
-
     double output;
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, -0.5) << "Value is not correct.";

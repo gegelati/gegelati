@@ -106,6 +106,11 @@ namespace Evolution {
         virtual size_t getMaxInputSourceIdx() const;
 
         /**
+         * \brief return the genotype template an individual.
+         */
+        virtual void getGenotypeTemplate() const = 0;
+
+        /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.
          * 
          * \param[in] indiv individual controlled.

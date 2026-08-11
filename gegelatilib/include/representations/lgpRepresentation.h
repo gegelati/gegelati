@@ -54,6 +54,11 @@ namespace Representations {
         virtual void setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) override;
 
         /**
+         * \brief return the genotype template an individual.
+         */
+        virtual void getGenotypeTemplate() const;
+
+        /**
          * \brief individual nodes should have six values, with limited ranges.
          * 
          * \param[in] indiv Individual controlled.
