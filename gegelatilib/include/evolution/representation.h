@@ -11,6 +11,7 @@
 
 #include "evolution/individual.h"
 #include "representation/repParameters.h"
+#include "data/primitiveTypeArray.h"
 
 using RepParam = Representation::RepresentationParameters;
 
@@ -90,8 +91,12 @@ namespace Evolution {
 
         /**
          * \brief execute the specified individual based on the current dataSources
+         * 
+         * \param[in] indiv Individual executed
+         * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual std::vector<double> executeIndividual(const Individual& indiv) = 0;
+        virtual std::vector<double> executeIndividual(
+            const Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) = 0;
     };
 }; // namespace Representation
 

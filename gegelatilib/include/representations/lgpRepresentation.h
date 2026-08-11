@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "evolution/representation.h"
-#include "data/primitiveTypeArray.h"
 #include "instructions/set.h"
 
 namespace Representations {
@@ -67,9 +66,11 @@ namespace Representations {
          *  - "e" is indicates the second input type (register, state value, weight...).
          *  - "f" is the index of the second input.
          * 
-         * \param[in] indiv
+         * \param[in] indiv Individual executed
+         * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual std::vector<double> executeIndividual(const Evolution::Individual& indiv) override;
+        virtual std::vector<double> executeIndividual(
+            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) override;
 
         };
 }; // namespace LGP_Representation

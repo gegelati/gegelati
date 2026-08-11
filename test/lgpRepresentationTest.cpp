@@ -53,22 +53,30 @@ class LGPRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
+    Data::PrimitiveTypeArray<double>* inputSource;
 
     virtual void SetUp()
     {   
         auto add = [](double a, double b) -> double { return a + b; };
         auto minus = [](double a, double b) -> double { return a - b; };
+        auto times = [](double a, double b) -> double { return a * b; };
         auto div = [](double a, double b) -> double { return a / b; };
-        auto cos = [](double a, double b) -> double { return std::cos(a); };
         
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(cos)));
+
+        inputSource = new Data::PrimitiveTypeArray<double>(4);
     }
 
     virtual void TearDown()
     {
+        delete inputSource;
+        delete (&set.getInstruction(0));
+        delete (&set.getInstruction(1));
+        delete (&set.getInstruction(2));
+        delete (&set.getInstruction(3));
     }
 };
 
@@ -116,28 +124,31 @@ TEST_F(LGPRepresentationTest, isValid)
 
 TEST_F(LGPRepresentationTest, executeIndividual)
 {
+    inputSource->setDataAt(typeid(double), 0, 1.0);
+    inputSource->setDataAt(typeid(double), 1, 1.5);
+    inputSource->setDataAt(typeid(double), 2, 2.0);
+    inputSource->setDataAt(typeid(double), 3, -1.0);
+    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources{*inputSource};
+
     Representations::LGPRepresentation representation(set, 8, 5, 10);
 
     Evolution::Individual indiv;
-    // R[1] = cos(R[0],R[0]) = cos(0) = 1
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 3, 0, 0, 0, 0}));
-    // R[2] = R[1] + R[2] = 1 + 0 = 1
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 1, 0, 2}));
-    // R[0] = R[2] + R[1] = 1 + 1 = 2
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 2, 0, 1}));
-    // R[3] = R[1] / R[0] = 2 / 1 = 0.5
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{3, 2, 0, 1, 0, 0}));
-    // R[0] = R[3] - R[2] = 0.5 - 1 = -0.5
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 3, 0, 2}));
+    
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 1, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
 
     ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
 
+
     double output;
-    ASSERT_NO_THROW(output = representation.executeIndividual(indiv).at(0)) << "Execution of individual failed.";
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, -0.5) << "Value is not correct.";
 
     // R[0] = R[0] + R[0] = -1, but set as intron
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}), true);
-    ASSERT_NO_THROW(output = representation.executeIndividual(indiv).at(0)) << "Execution of individual failed.";
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, -0.5) << "Value is not correct.";
 }
