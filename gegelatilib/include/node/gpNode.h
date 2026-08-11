@@ -16,11 +16,22 @@ namespace Evolution {
 
 namespace Node {
 
-    using NodeType = std::variant<
+    using NodeValue = std::variant<
         double,
         std::size_t,
         std::reference_wrapper<const Evolution::Individual>
     >;
+
+    using NodeRange = std::variant<
+        std::pair<size_t, size_t>,
+        std::pair<double, double>
+    >;
+
+    using NodeValueTemplate = std::variant<
+        std::vector<NodeValue>, NodeRange
+    >;
+
+
 
     /**
      * \brief Class representing a GPNode
@@ -51,7 +62,7 @@ namespace Node {
             friend struct ::CounterReset;
 
             /// \brief Values of the GPNode.
-            std::vector<NodeType> values;
+            std::vector<NodeValue> values;
 
         public:
         
@@ -67,28 +78,28 @@ namespace Node {
              *  
              * \param[in] values the values of the GPNode.
              */
-            GPNode(const std::vector<NodeType>& values): values(values), gpNodeID(incrementeCounter()) {};
+            GPNode(const std::vector<NodeValue>& values): values(values), gpNodeID(incrementeCounter()) {};
 
             /**
              * \brief GPNode size_t constructor.
              * 
              * \param[in] values the integer values of the GPNode.
              */
-            GPNode(const std::vector<size_t>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
+            GPNode(const std::vector<size_t>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
             
             /**
              * \brief GPNode double constructor.
              * 
              * \param[in] values the double values of the GPNode.
              */
-            GPNode(const std::vector<double>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
+            GPNode(const std::vector<double>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
             
             /**
              * \brief GPNode reference constructor.
              * 
              * \param[in] values the reference values of the GPNode.
              */
-            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values): GPNode(std::vector<NodeType>(values.begin(), values.end())) {};
+            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
 
             /**
              * \brief return the ID of the GPNode.
@@ -115,14 +126,14 @@ namespace Node {
              * \param[in] index the index of the value to get.
              * \param[in] value the value to set.
              */
-            void setValue(size_t index, NodeType value);
+            void setValue(size_t index, NodeValue value);
 
             /**
              * \brief Get the value of the GPNode at the given index.
              * 
              * \param[in] index the index of the value to get.
              */
-            const NodeType& getValue(size_t index) const;
+            const NodeValue& getValue(size_t index) const;
 
             /**
              * \brief Get the number of values of the GPNode.
@@ -132,7 +143,7 @@ namespace Node {
             /**
              * \brief Get the values of the GPNode.
              */
-            const std::vector<NodeType>& getValues() const;
+            const std::vector<NodeValue>& getValues() const;
     };
 
     

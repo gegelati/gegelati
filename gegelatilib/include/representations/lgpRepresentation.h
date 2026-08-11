@@ -56,7 +56,7 @@ namespace Representations {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual void getGenotypeTemplate() const;
+        virtual std::vector<Node::NodeValueTemplate> getGenotypeTemplate() const;
 
         /**
          * \brief individual nodes should have six values, with limited ranges.

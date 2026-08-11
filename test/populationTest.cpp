@@ -100,7 +100,7 @@ TEST_F(PopulationTest, copyIndividual)
     ASSERT_NO_THROW(copyIndiv = &population.copyIndividual(individual)) << "Copying individual failed";
 
     ASSERT_EQ(copyIndiv->getSize(), 3) << "Copy was not effective";
-    ASSERT_EQ(copyIndiv->getGPNode(1).getValue(1), Node::NodeType{5.0}) << "Copy was not effective";
+    ASSERT_EQ(copyIndiv->getGPNode(1).getValue(1), Node::NodeValue{5.0}) << "Copy was not effective";
 }
 TEST_F(PopulationTest, deleteIndividual)
 {       

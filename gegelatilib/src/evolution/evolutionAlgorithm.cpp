@@ -2,12 +2,12 @@
 
 void Evolution::EvolutionAlgorithm::initializePopulation()
 {
-    //structure = this->representation->getNodesStructure;
+    std::vector<Node::NodeValueTemplate> genotypeTemplate = this->representation->getGenotypeTemplate();
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
         Individual& indiv = this->population->getMutableIndividual(this->population->createIndividual());
-        this->mutation->initRandomIndividual(indiv, this->rng);
+        this->mutation->initRandomIndividual(indiv, genotypeTemplate, this->rng);
     }
 }
 

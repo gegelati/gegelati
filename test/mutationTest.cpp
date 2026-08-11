@@ -74,9 +74,14 @@ TEST_F(MutationTest, createRandomNode)
 {
     Evolution::Mutation mutation;
     std::unique_ptr<Node::GPNode> node;
-    std::vector<size_t> maxRanges =  {8, 4, 2, 8, 2, 8};
     
-    ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(rng))) << "Creation of random node failed.";
+    std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
+    std::vector<Node::NodeValueTemplate> genotypeTemplate;
+    for(size_t idx = 0; idx < maxRanges.size(); idx++) {
+        genotypeTemplate.push_back(Node::NodeRange(std::make_pair(size_t(0), maxRanges[idx])));
+    }
+    
+    ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(genotypeTemplate, rng))) << "Creation of random node failed.";
     
     ASSERT_EQ(node->getSize(), 6) << "Node does not have the right size";
     
@@ -91,7 +96,13 @@ TEST_F(MutationTest, initRandomIndividual)
     Evolution::Mutation mutation;
     Evolution::Individual indiv;
 
-    ASSERT_NO_THROW(mutation.initRandomIndividual(indiv, rng)) << "Initialization of individual failed";
+    std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
+    std::vector<Node::NodeValueTemplate> genotypeTemplate;
+    for(size_t idx = 0; idx < maxRanges.size(); idx++) {
+        genotypeTemplate.push_back(Node::NodeRange(std::make_pair(size_t(0), maxRanges[idx])));
+    }
+
+    ASSERT_NO_THROW(mutation.initRandomIndividual(indiv, genotypeTemplate, rng)) << "Initialization of individual failed";
 
     ASSERT_GE(indiv.getSize(), 5) << "Individual does not have enough nodes";
     ASSERT_LE(indiv.getSize(), 10) << "Individual has too much nodes";

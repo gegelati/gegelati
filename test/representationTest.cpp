@@ -68,7 +68,7 @@ class FakeRepresentation : public Evolution::Representation
         
         FakeRepresentation(size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(nbNodesMin, nbNodesMax, representationName, representationColor) {};
 
-        void getGenotypeTemplate() const override {}; 
+        std::vector<Node::NodeValueTemplate> getGenotypeTemplate() const override { return {};}; 
 
         bool isValid(const Evolution::Individual& indiv) {
             return true;

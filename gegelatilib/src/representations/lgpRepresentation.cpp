@@ -15,9 +15,20 @@ void Representations::LGPRepresentation::setInputDimensions(const std::vector<st
 }
 
 
-void Representations::LGPRepresentation::getGenotypeTemplate() const
+std::vector<Node::NodeValueTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
     
+    Node::NodeValueTemplate registerValueTemplate = std::make_pair(size_t(0), this->nbRegisters);
+    Node::NodeValueTemplate functionValueTemplate = std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()));
+    Node::NodeValueTemplate nbInputSourcesValueTemplate = std::make_pair(size_t(0), this->nbInputSources);
+    Node::NodeValueTemplate maxInputSourceIdxValueTemplate = std::make_pair(size_t(0), this->maxInputSourceIdx);
+
+    std::vector<Node::NodeValueTemplate> genotypeTemplate{registerValueTemplate, functionValueTemplate};
+    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
+        genotypeTemplate.push_back(nbInputSourcesValueTemplate);
+        genotypeTemplate.push_back(maxInputSourceIdxValueTemplate);
+    }
+    return genotypeTemplate;
 }
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv)
@@ -44,7 +55,7 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
             if(!std::holds_alternative<size_t>(node.getValue(idxNode))) {
                 return false;
             }
-            if(node.getValue(idxNode) >= Node::NodeType(ranges.at(idxNode))){
+            if(node.getValue(idxNode) >= Node::NodeValue(ranges.at(idxNode))){
                 return false;
             }
         }

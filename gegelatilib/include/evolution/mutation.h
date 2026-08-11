@@ -32,19 +32,33 @@ namespace Evolution {
         Mutation() {};
 
         /**
-         * \brief Initialize a random Individual.
+         * \brief Sample a node value based on possible nodeValueTemplates.
+         * 
+         * If multiple nodeValueTemplates are proposed, a template is sampled uniformaly.
+         * A nodeValue is then sampled based on the template.
          *
-         * \param[in,out] indiv the individual initialized.
+         * \param[in] valueTemplates node value templates of the sample value
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomIndividual(Individual& indiv, RNG::RNG& rng);
+        virtual Node::NodeValue sampleNodeValue(const std::vector<Node::NodeValueTemplate>& valueTemplates, RNG::RNG& rng);
 
         /**
          * \brief Create a random GPNode, and place it at a random index in the individual.
          *
+         * \param[in] genotypeTemplate node template of the created individual
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Node::GPNode> createRandomNode(RNG::RNG& rng);
+        virtual std::unique_ptr<Node::GPNode> createRandomNode(const std::vector<Node::NodeValueTemplate>& genotypeTemplate, RNG::RNG& rng);
+        
+
+        /**
+         * \brief Initialize a random Individual.
+         *
+         * \param[in,out] indiv the individual initialized.
+         * \param[in] genotypeTemplate genotype template of the individual
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void initRandomIndividual(Individual& indiv, const std::vector<Node::NodeValueTemplate>& genotypeTemplate, RNG::RNG& rng);
     };
 }; // namespace Mutation
 

@@ -83,8 +83,8 @@ TEST_F(IndividualTest, addRemoveNodes)
     ASSERT_NO_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), size_t(0))) << "Adding GPNode to the Individual failed.";
 
     ASSERT_EQ(individual.getSize(), 2) << "Getting size of the Individual failed.";
-    ASSERT_EQ(individual.getGPNode(0).getValues().at(0), Node::NodeType(size_t{4})) << "Getting values of the GPNode failed.";
-    ASSERT_EQ(individual.getMutableGPNode(1).getValues().at(2), Node::NodeType(3.0)) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(individual.getGPNode(0).getValues().at(0), Node::NodeValue(size_t{4})) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(individual.getMutableGPNode(1).getValues().at(2), Node::NodeValue(3.0)) << "Getting values of the GPNode failed.";
 
     ASSERT_THROW(individual.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}), size_t(3)), std::runtime_error) << "Adding GPNode to the Individual should have failed.";
     ASSERT_THROW(individual.getGPNode(2), std::runtime_error) << "Getting GPNode of the Individual should have failed.";
@@ -92,7 +92,7 @@ TEST_F(IndividualTest, addRemoveNodes)
 
     ASSERT_NO_THROW(individual.removeGPNode(0)) << "Removing GPNode to the Individual failed.";
     ASSERT_EQ(individual.getSize(), 1) << "Getting size of the Individual failed.";
-    ASSERT_EQ(individual.getMutableGPNode(0).getValues().at(2), Node::NodeType(3.0)) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(individual.getMutableGPNode(0).getValues().at(2), Node::NodeValue(3.0)) << "Getting values of the GPNode failed.";
     
     ASSERT_THROW(individual.removeGPNode(1), std::runtime_error) << "Removing GPNode of the Individual should have failed.";
 }
@@ -124,12 +124,12 @@ TEST_F(IndividualTest, GetGenotype)
 
     std::vector<std::reference_wrapper<const Node::GPNode>> genotype = individual.getGenotype();
     ASSERT_EQ(genotype.size(), 2) << "Getting genotype of the Individual failed.";
-    ASSERT_EQ(genotype[0].get().getValues().at(0), Node::NodeType(1.0)) << "Getting values of the GPNode failed.";
-    ASSERT_EQ(genotype[1].get().getValues().at(0), Node::NodeType(size_t{4})) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(genotype[0].get().getValues().at(0), Node::NodeValue(1.0)) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(genotype[1].get().getValues().at(0), Node::NodeValue(size_t{4})) << "Getting values of the GPNode failed.";
 
     std::vector<std::reference_wrapper<const Node::GPNode>> effectiveGenotype = individual.getEffectiveGenotype();
     ASSERT_EQ(effectiveGenotype.size(), 1) << "Getting effective genotype of the Individual failed.";
-    ASSERT_EQ(effectiveGenotype[0].get().getValues().at(0), Node::NodeType(size_t{4})) << "Getting values of the GPNode failed.";
+    ASSERT_EQ(effectiveGenotype[0].get().getValues().at(0), Node::NodeValue(size_t{4})) << "Getting values of the GPNode failed.";
 }
 
 TEST_F(IndividualTest, IDCounter)
