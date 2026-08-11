@@ -51,6 +51,12 @@ namespace Evolution {
          */
         void initializePopulation();
 
+        /// @brief Return the population of the EA
+        const Population& getPopulation();
+
+        /// @brief Return the representation of the EA
+        const Representation& getRepresentation();
+
     };
 }; // namespace Evolution
 

@@ -73,5 +73,9 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
+    Evolution::EvolutionAlgorithm ea(*representation);
 
+    ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
+
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
 }

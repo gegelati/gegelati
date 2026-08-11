@@ -11,3 +11,13 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
     }
 }
 
+
+const Evolution::Population& Evolution::EvolutionAlgorithm::getPopulation()
+{
+    return *this->population;
+}
+
+const Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation()
+{
+    return *this->representation;
+}
