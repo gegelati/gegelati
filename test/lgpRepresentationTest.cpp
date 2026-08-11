@@ -40,8 +40,11 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <numeric>
+#include <cmath>
 
 #include "representations/lgpRepresentation.h"
+
+#include "instructions/lambdaInstruction.h"
 
 
 // Set all file in comment
@@ -52,7 +55,16 @@ class LGPRepresentationTest : public ::testing::Test
     Instructions::Set set;
 
     virtual void SetUp()
-    {
+    {   
+        auto add = [](double a, double b) -> double { return a + b; };
+        auto minus = [](double a, double b) -> double { return a - b; };
+        auto div = [](double a, double b) -> double { return a / b; };
+        auto cos = [](double a, double b) -> double { return std::cos(a); };
+        
+        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(cos)));
     }
 
     virtual void TearDown()
@@ -99,4 +111,33 @@ TEST_F(LGPRepresentationTest, isValid)
 
     ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 11 nodes";
+}
+
+
+TEST_F(LGPRepresentationTest, executeIndividual)
+{
+    Representations::LGPRepresentation representation(set, 8, 5, 10);
+
+    Evolution::Individual indiv;
+    // R[1] = cos(R[0],R[0]) = cos(0) = 1
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 3, 0, 0, 0, 0}));
+    // R[2] = R[1] + R[2] = 1 + 0 = 1
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 1, 0, 2}));
+    // R[0] = R[2] + R[1] = 1 + 1 = 2
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 2, 0, 1}));
+    // R[3] = R[1] / R[0] = 2 / 1 = 0.5
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{3, 2, 0, 1, 0, 0}));
+    // R[0] = R[3] - R[2] = 0.5 - 1 = -0.5
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 3, 0, 2}));
+
+    ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
+
+    double output;
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv).at(0)) << "Execution of individual failed.";
+    ASSERT_EQ(output, -0.5) << "Value is not correct.";
+
+    // R[0] = R[0] + R[0] = -1, but set as intron
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}), true);
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv).at(0)) << "Execution of individual failed.";
+    ASSERT_EQ(output, -0.5) << "Value is not correct.";
 }

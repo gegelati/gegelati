@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "evolution/representation.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/set.h"
 
 namespace Representations {
@@ -13,7 +14,7 @@ namespace Representations {
     /**
      * \brief Abstract class representing a LGPRepresentation
      */
-    class   LGPRepresentation : public Evolution::Representation
+    class LGPRepresentation : public Evolution::Representation
     {
         protected:
 
@@ -26,8 +27,9 @@ namespace Representations {
             /// The number of registers used by the LGPs
             size_t nbRegisters;
 
-            /// @brief regex use to read an lgpIndividual from a .dot file.
-            static const std::string lgpIndividualRegex;
+            
+            /// Registers used for the Program execution.
+            Data::PrimitiveTypeArray<double> registers; 
 
         public:
 
@@ -45,7 +47,7 @@ namespace Representations {
              * \param[in] representationColor name of the representation used.
              */
             LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters} {};
+                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, registers{nbRegisters} {};
         
         /**
          * \brief individual nodes should have six values, with limited ranges.
