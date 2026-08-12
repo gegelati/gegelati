@@ -15,7 +15,7 @@ Node::NodeValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueTempla
         idxTemplate = rng.getUnsignedInt64(0, nodeValueTemplate.size() - 1);
     }
 
-    const Node::NodeValueConfiguration& valueTemplate = nodeValueTemplate.getconfigurationAt(idxTemplate);
+    const Node::NodeValueConfiguration& valueTemplate = *nodeValueTemplate.getconfigurationAt(idxTemplate);
     Node::NodeValue value;
 
     if(std::holds_alternative<Node::NodeValueRange>(valueTemplate)) {
@@ -58,9 +58,8 @@ std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(const Node::
     }
 
     std::vector<Node::NodeValue> values;
-    const std::vector<Node::NodeValueTemplate>& nodeValueTemplates = nodeTemplate.getValueTemplates();
-    for(const Node::NodeValueTemplate& nodeValueTemplate: nodeValueTemplates) {
-        values.push_back(this->sampleNodeValue(nodeValueTemplate, rng));
+    for(size_t idxValue = 0; idxValue < nodeTemplate.size(); idxValue++) {
+        values.push_back(this->sampleNodeValue(*nodeTemplate.getValueTemplateAt(idxValue), rng));
     }
     return std::make_unique<Node::GPNode>(values);
 }
@@ -79,7 +78,7 @@ void Evolution::Mutation::initRandomIndividual(Individual& indiv, const Node::Ge
         size_t nbNodesOfTemplate = rng.getUnsignedInt64(range.first, range.second);
         
         for(size_t idxNode = 0; idxNode < nbNodesOfTemplate; idxNode++) {
-            indiv.addGPNode(this->createRandomNode(genotypeTemplate.getNodeTemplateAt(idxTemplate), rng));
+            indiv.addGPNode(this->createRandomNode(*genotypeTemplate.getNodeTemplateAt(idxTemplate), rng));
         }
     }
 }

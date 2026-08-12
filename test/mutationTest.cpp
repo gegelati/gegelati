@@ -78,7 +78,8 @@ TEST_F(MutationTest, createRandomNode)
     std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
     Node::NodeTemplate nodeTemplate;
     for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        nodeTemplate.addValueTemplate(Node::NodeValueTemplate({std::make_pair(size_t(0), maxRanges[idx])}));
+        auto config(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxRanges[idx])));
+        nodeTemplate.addValueTemplate(std::make_shared<Node::NodeValueTemplate>(config));
     }
     
     ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(nodeTemplate, rng))) << "Creation of random node failed.";
@@ -98,9 +99,10 @@ TEST_F(MutationTest, initRandomIndividual)
 
 
     std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
-    Node::NodeTemplate nodeTemplate;
+    auto nodeTemplate(std::make_shared<Node::NodeTemplate>());
     for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        nodeTemplate.addValueTemplate(Node::NodeValueTemplate({std::make_pair(size_t(0), maxRanges[idx])}));
+        auto config(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxRanges[idx])));
+        nodeTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(config));
     }
 
     Node::GenotypeTemplate genotypeTemplate;

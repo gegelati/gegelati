@@ -9,7 +9,7 @@ namespace Node {
 
         protected:
             /// @brief Vector of NodeValueTemplate for the node.
-            std::vector<NodeValueTemplate> nodeValueTemplates;
+            std::vector<std::shared_ptr<const NodeValueTemplate>> nodeValueTemplates;
         public:
             /**
              * @brief Default template constructor
@@ -19,23 +19,37 @@ namespace Node {
             /**
              * @brief Constructor with a vector of NodeValueTemplate
              * 
+             * \param[in] nodeValueTemplate single NodeValueTemplate to initialize the NodeTemplate
+             */
+            NodeTemplate(std::shared_ptr<const NodeValueTemplate> nodeValueTemplate) : nodeValueTemplates{nodeValueTemplate} {};
+
+            /**
+             * @brief Constructor with a vector of NodeValueTemplate
+             * 
              * \param[in] nodeValueTemplates vector of NodeValueTemplate to initialize the NodeTemplate
              */
-            NodeTemplate(const std::vector<NodeValueTemplate>& nodeValueTemplates) : nodeValueTemplates{nodeValueTemplates} {};
+            NodeTemplate(const std::vector<std::shared_ptr<const NodeValueTemplate>>& nodeValueTemplates) : nodeValueTemplates{nodeValueTemplates} {};
 
             /**
              * @brief Add a new NodeValueTemplate to the template.
              * 
              * \param nodeValueTemplate the NodeValueTemplate to add to the template.
              */
-            void addValueTemplate(const NodeValueTemplate& nodeValueTemplate);
+            void addValueTemplate(std::shared_ptr<const NodeValueTemplate> nodeValueTemplate);
 
             /**
              * @brief Get the vector of NodeValueTemplate of the template.
              * 
              * \return the vector of NodeValueTemplate of the template.
              */
-            const std::vector<NodeValueTemplate>& getValueTemplates() const;
+            const std::vector<std::shared_ptr<const NodeValueTemplate>>& getValueTemplates() const;
+
+            /**
+             * \brief Get the NodeValuteTemplate at specified index
+             * 
+             * \param[in] idxValue specified index
+             */
+            std::shared_ptr<const NodeValueTemplate> getValueTemplateAt(size_t idxValue) const;
 
             /**
              * \brief get the number of valueTemplates

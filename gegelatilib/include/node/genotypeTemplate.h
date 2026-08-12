@@ -22,7 +22,7 @@ namespace Node {
 
         protected:
             /// @brief The vector of node template.
-            std::vector<NodeTemplate> nodeTemplates;
+            std::vector<std::shared_ptr<const NodeTemplate>> nodeTemplates;
 
             /// @brief vector of Node ranges.
             std::vector<std::pair<size_t, size_t>> nodeRanges;
@@ -35,11 +35,25 @@ namespace Node {
              */
             GenotypeTemplate() {};
 
+
             /**
              * \brief Constructor with templates and ranges
+             * 
+             * \param[in] nodeTemplate single NodeTemplate to initialize the GenotypeTemplate
+             * \param[in] nodeRange single range.
              */
             GenotypeTemplate(
-                const std::vector<NodeTemplate>& nodeTemplates,
+                std::shared_ptr<const NodeTemplate> nodeTemplate, const std::pair<size_t, size_t>& nodeRange
+            ) : nodeTemplates{nodeTemplate}, nodeRanges{nodeRange} {};
+
+            /**
+             * \brief Constructor with templates and ranges
+             * 
+             * \param[in] nodeTemplates vector of NodeTemplate to initialize the GenotypeTemplate
+             * \param[in] nodeRanges vector of ranges.
+             */
+            GenotypeTemplate(
+                const std::vector<std::shared_ptr<const NodeTemplate>>& nodeTemplates,
                 const std::vector<std::pair<size_t, size_t>>& nodeRanges
             ) : nodeTemplates{nodeTemplates}, nodeRanges{nodeRanges} {
                 if(nodeTemplates.size() != nodeRanges.size()){
@@ -59,14 +73,14 @@ namespace Node {
              * \param[in] minRange minimal range, default to 1.
              * \param[in] maxRange maximal range, default to 0. If value is 0, it is set to minRange.
              */
-            void addNodeTemplate(const NodeTemplate& nodeTemplate, size_t minRange = 1, size_t maxRange = 0);
+            void addNodeTemplate(std::shared_ptr<const NodeTemplate> nodeTemplate, size_t minRange = 1, size_t maxRange = 0);
 
             /**
              * \brief Return the node template at specified index.
              * 
              * \param[in] idx specified index
              */
-            const NodeTemplate& getNodeTemplateAt(size_t idx) const;
+            std::shared_ptr<const NodeTemplate> getNodeTemplateAt(size_t idx) const;
 
             /**
              * \brief Return the range at specified index.
@@ -78,7 +92,7 @@ namespace Node {
             /**
              * \brief Return the vector of node templates.
              */
-            const std::vector<NodeTemplate>& getNodeTemplates() const;
+            const std::vector<std::shared_ptr<const NodeTemplate>>& getNodeTemplates() const;
 
             /**
              * \brief Return the vector of ranges.

@@ -42,6 +42,7 @@
 #include <numeric>
 
 #include "instructions/set.h"
+#include "instructions/lambdaInstruction.h"
 #include "evolution/evolutionAlgorithm.h"
 #include "representations/lgpRepresentation.h"
 
@@ -52,10 +53,23 @@ class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
+    Data::PrimitiveTypeArray<double>* inputSource;
     Evolution::Representation* representation;
 
     virtual void SetUp()
     {
+        auto add = [](double a, double b) -> double { return a + b; };
+        auto minus = [](double a, double b) -> double { return a - b; };
+        auto times = [](double a, double b) -> double { return a * b; };
+        auto div = [](double a, double b) -> double { return a / b; };
+        
+        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
+
+        inputSource = new Data::PrimitiveTypeArray<double>(4);
+    
         representation = new Representations::LGPRepresentation(set, 8, 10);
     }
 
@@ -79,6 +93,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
     Evolution::EvolutionAlgorithm ea(*representation);
+    representation->setInputDimensions({*inputSource});
 
     ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
 

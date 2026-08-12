@@ -7,8 +7,11 @@ size_t Node::GenotypeTemplate::size() const
 }
 
 
-void Node::GenotypeTemplate::addNodeTemplate(const Node::NodeTemplate& nodeTemplate, size_t minRange, size_t maxRange)
+void Node::GenotypeTemplate::addNodeTemplate(std::shared_ptr<const NodeTemplate> nodeTemplate, size_t minRange, size_t maxRange)
 {
+    if(nodeTemplate->size() == 0) {
+        throw std::runtime_error("Node:GenotypeTemplate:addNodeTemplate: nodeTemplate is empty.");
+    }
     this->nodeTemplates.push_back(nodeTemplate);
 
     // if Max range is 0 (default value), it is automatically set to minRange, to have a fix number of node for this template.
@@ -19,7 +22,7 @@ void Node::GenotypeTemplate::addNodeTemplate(const Node::NodeTemplate& nodeTempl
 }
 
 
-const Node::NodeTemplate& Node::GenotypeTemplate::getNodeTemplateAt(size_t idx) const
+std::shared_ptr<const Node::NodeTemplate> Node::GenotypeTemplate::getNodeTemplateAt(size_t idx) const
 {
     if(idx >= this->nodeTemplates.size()) {
         throw std::runtime_error("Node:GenotypeTemplate:getNodeTemplateAt: index out of bounds.");
@@ -37,7 +40,7 @@ const std::pair<size_t, size_t>& Node::GenotypeTemplate::getRangeAt(size_t idx) 
 }
 
 
-const std::vector<Node::NodeTemplate>& Node::GenotypeTemplate::getNodeTemplates() const
+const std::vector<std::shared_ptr<const Node::NodeTemplate>>& Node::GenotypeTemplate::getNodeTemplates() const
 {
     return this->nodeTemplates;
 }

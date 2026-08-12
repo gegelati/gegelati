@@ -109,7 +109,7 @@ namespace Evolution {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual Node::GenotypeTemplate getGenotypeTemplate() const = 0;
+        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const = 0;
 
         /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.

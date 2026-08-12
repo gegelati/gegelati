@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <variant>
 #include <functional>
+#include <memory>
 
 struct CounterReset;
 

@@ -22,32 +22,33 @@ void Representations::LGPRepresentation::setInputDimensions(const std::vector<st
 }
 
 
-Node::GenotypeTemplate Representations::LGPRepresentation::getGenotypeTemplate() const
+std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
     // Instruction node template is fixed during evolution, so created only once.
     if(this->instructionNodesTemplate->size() == 0) {
 
         // Value Template for register
-        Node::NodeValueTemplate registerValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->nbRegisters))});
-        this->instructionNodesTemplate->addValueTemplate(registerValueTemplate);
+        std::shared_ptr<Node::NodeValueConfiguration> configRegister(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbRegisters)));
+        this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configRegister));
         
         // Value template for instruction
-        Node::NodeValueTemplate functionValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), size_t(iSet.getNbInstructions())))});
-        this->instructionNodesTemplate->addValueTemplate(registerValueTemplate);
+        std::shared_ptr<Node::NodeValueConfiguration> configFunction(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()))));
+        this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configFunction));
     
         // Value templates for input type and index
-        Node::NodeValueTemplate nbInputSourcesValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->nbInputSources))});
-        Node::NodeValueTemplate maxInputSourceIdxValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->maxInputSourceIdx))});
+        std::shared_ptr<Node::NodeValueConfiguration> configNbInput(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbInputSources)));
+        std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->maxInputSourceIdx)));
         for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-            this->instructionNodesTemplate->addValueTemplate(nbInputSourcesValueTemplate);
-            this->instructionNodesTemplate->addValueTemplate(maxInputSourceIdxValueTemplate);
+            this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configNbInput));
+            this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMaxInput));
         }
     }
 
-    Node::GenotypeTemplate genotypeTemplate;
-    genotypeTemplate.addNodeTemplate(*this->instructionNodesTemplate, this->nbNodesMin, this->nbNodesMax);
+      auto gt(std::make_unique<Node::GenotypeTemplate>(
+        this->instructionNodesTemplate,
+        std::make_pair(this->nbNodesMin, this->nbNodesMax)));
 
-    return genotypeTemplate;
+    return std::move(gt);
 }
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv)
