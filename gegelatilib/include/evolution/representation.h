@@ -10,6 +10,7 @@
 #include "iostream"
 
 #include "evolution/individual.h"
+#include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
 #include "data/primitiveTypeArray.h"
 
@@ -108,7 +109,7 @@ namespace Evolution {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual std::vector<Node::NodeValueTemplate> getGenotypeTemplate() const = 0;
+        virtual Node::GenotypeTemplate getGenotypeTemplate() const = 0;
 
         /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.

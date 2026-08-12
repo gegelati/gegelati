@@ -22,17 +22,6 @@ namespace Node {
         std::reference_wrapper<const Evolution::Individual>
     >;
 
-    using NodeRange = std::variant<
-        std::pair<size_t, size_t>,
-        std::pair<double, double>
-    >;
-
-    using NodeValueTemplate = std::variant<
-        std::vector<NodeValue>, NodeRange
-    >;
-
-
-
     /**
      * \brief Class representing a GPNode
      * 

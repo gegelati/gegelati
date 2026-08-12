@@ -76,12 +76,12 @@ TEST_F(MutationTest, createRandomNode)
     std::unique_ptr<Node::GPNode> node;
     
     std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
-    std::vector<Node::NodeValueTemplate> genotypeTemplate;
+    Node::NodeTemplate nodeTemplate;
     for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        genotypeTemplate.push_back(Node::NodeRange(std::make_pair(size_t(0), maxRanges[idx])));
+        nodeTemplate.addValueTemplate(Node::NodeValueTemplate({std::make_pair(size_t(0), maxRanges[idx])}));
     }
     
-    ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(genotypeTemplate, rng))) << "Creation of random node failed.";
+    ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(nodeTemplate, rng))) << "Creation of random node failed.";
     
     ASSERT_EQ(node->getSize(), 6) << "Node does not have the right size";
     
@@ -96,11 +96,15 @@ TEST_F(MutationTest, initRandomIndividual)
     Evolution::Mutation mutation;
     Evolution::Individual indiv;
 
+
     std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
-    std::vector<Node::NodeValueTemplate> genotypeTemplate;
+    Node::NodeTemplate nodeTemplate;
     for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        genotypeTemplate.push_back(Node::NodeRange(std::make_pair(size_t(0), maxRanges[idx])));
+        nodeTemplate.addValueTemplate(Node::NodeValueTemplate({std::make_pair(size_t(0), maxRanges[idx])}));
     }
+
+    Node::GenotypeTemplate genotypeTemplate;
+    genotypeTemplate.addNodeTemplate(nodeTemplate, 5, 10);
 
     ASSERT_NO_THROW(mutation.initRandomIndividual(indiv, genotypeTemplate, rng)) << "Initialization of individual failed";
 

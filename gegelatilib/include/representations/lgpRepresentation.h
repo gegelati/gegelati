@@ -24,7 +24,14 @@ namespace Representations {
             size_t nbRegisters;
             
             /// Registers used for the Program execution.
-            Data::PrimitiveTypeArray<double> registers; 
+            Data::PrimitiveTypeArray<double> registers;
+
+            /**
+             *  @brief instruction nodes template
+             * 
+             * This node templates gives template for instruction nodes.
+             */
+            std::unique_ptr<Node::NodeTemplate> instructionNodesTemplate;
 
         public:
 
@@ -42,7 +49,7 @@ namespace Representations {
              * \param[in] representationColor name of the representation used.
              */
             LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, registers{nbRegisters} {};
+                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, registers{nbRegisters}, instructionNodesTemplate(std::make_unique<Node::NodeTemplate>()) {};
         
 
         /**
@@ -56,7 +63,7 @@ namespace Representations {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual std::vector<Node::NodeValueTemplate> getGenotypeTemplate() const;
+        virtual Node::GenotypeTemplate getGenotypeTemplate() const;
 
         /**
          * \brief individual nodes should have six values, with limited ranges.

@@ -2,7 +2,7 @@
 
 void Evolution::EvolutionAlgorithm::initializePopulation()
 {
-    std::vector<Node::NodeValueTemplate> genotypeTemplate = this->representation->getGenotypeTemplate();
+    const Node::GenotypeTemplate& genotypeTemplate = this->representation->getGenotypeTemplate();
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {

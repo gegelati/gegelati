@@ -2,7 +2,14 @@
 
 std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneUniquePtr() const
 {
-    return std::make_unique<Representations::LGPRepresentation>(*this);
+    return std::make_unique<Representations::LGPRepresentation>(
+        this->iSet,
+        this->nbRegisters,
+        this->nbNodesMin,
+        this->nbNodesMax,
+        this->representationName,
+        this->representationColor
+    );
 }
 
 void Representations::LGPRepresentation::setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
@@ -15,19 +22,31 @@ void Representations::LGPRepresentation::setInputDimensions(const std::vector<st
 }
 
 
-std::vector<Node::NodeValueTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
+Node::GenotypeTemplate Representations::LGPRepresentation::getGenotypeTemplate() const
 {
-    
-    Node::NodeValueTemplate registerValueTemplate = std::make_pair(size_t(0), this->nbRegisters);
-    Node::NodeValueTemplate functionValueTemplate = std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()));
-    Node::NodeValueTemplate nbInputSourcesValueTemplate = std::make_pair(size_t(0), this->nbInputSources);
-    Node::NodeValueTemplate maxInputSourceIdxValueTemplate = std::make_pair(size_t(0), this->maxInputSourceIdx);
+    // Instruction node template is fixed during evolution, so created only once.
+    if(this->instructionNodesTemplate->size() == 0) {
 
-    std::vector<Node::NodeValueTemplate> genotypeTemplate{registerValueTemplate, functionValueTemplate};
-    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        genotypeTemplate.push_back(nbInputSourcesValueTemplate);
-        genotypeTemplate.push_back(maxInputSourceIdxValueTemplate);
+        // Value Template for register
+        Node::NodeValueTemplate registerValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->nbRegisters))});
+        this->instructionNodesTemplate->addValueTemplate(registerValueTemplate);
+        
+        // Value template for instruction
+        Node::NodeValueTemplate functionValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), size_t(iSet.getNbInstructions())))});
+        this->instructionNodesTemplate->addValueTemplate(registerValueTemplate);
+    
+        // Value templates for input type and index
+        Node::NodeValueTemplate nbInputSourcesValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->nbInputSources))});
+        Node::NodeValueTemplate maxInputSourceIdxValueTemplate({Node::NodeValueRange(std::make_pair(size_t(0), this->maxInputSourceIdx))});
+        for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
+            this->instructionNodesTemplate->addValueTemplate(nbInputSourcesValueTemplate);
+            this->instructionNodesTemplate->addValueTemplate(maxInputSourceIdxValueTemplate);
+        }
     }
+
+    Node::GenotypeTemplate genotypeTemplate;
+    genotypeTemplate.addNodeTemplate(*this->instructionNodesTemplate, this->nbNodesMin, this->nbNodesMax);
+
     return genotypeTemplate;
 }
 
