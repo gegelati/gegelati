@@ -22,9 +22,6 @@ namespace Representations {
 
             /// The number of registers used by the LGPs
             size_t nbRegisters;
-            
-            /// Registers used for the Program execution.
-            Data::PrimitiveTypeArray<double> registers;
 
             /**
              *  @brief instruction nodes template
@@ -49,7 +46,7 @@ namespace Representations {
              * \param[in] representationColor name of the representation used.
              */
             LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, registers{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {};
+                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {};
         
 
         /**
@@ -87,7 +84,7 @@ namespace Representations {
          * \param[in] inputSources input sources on which the individual is executed.
          */
         virtual std::vector<double> executeIndividual(
-            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) override;
+            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const override;
 
         };
 }; // namespace LGP_Representation

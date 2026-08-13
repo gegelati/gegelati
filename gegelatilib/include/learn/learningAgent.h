@@ -65,7 +65,7 @@ namespace Learn {
         /// LearningEnvironment with which the LearningAgent will interact.
         LearningEnvironment& learningEnvironment;
 
-        /// Map of reference of representations learned by the learning abcde.
+        /// Map of reference of representations learned by the learning agent.
         std::map<uint64_t, std::reference_wrapper<Representation::Representation>> representations;
 
         /// Parameters for the learning process
@@ -96,7 +96,7 @@ namespace Learn {
         Representation::Representation* currentBestRepresentation = nullptr;
 
         /**
-         * \brief return the representation managed by the learning abcde corresponding to the given representation.
+         * \brief return the representation managed by the learning agent corresponding to the given representation.
          * 
          * \param[in] representation the representation to get.
          */
@@ -107,7 +107,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representations vector of representations learned by the learning abcde
+         * \param[in] representations vector of representations learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -126,7 +126,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representation representation learned by the learning abcde
+         * \param[in] representation representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -154,7 +154,7 @@ namespace Learn {
         void setCurrentRepresentation(Representation::Representation* representation);
 
         /**
-         * \brief Add an representation to the learning abcde.
+         * \brief Add an representation to the learning agent.
          * 
          * \param[in] representation the representation to add.
          */
@@ -380,7 +380,7 @@ namespace Learn {
         const Representation::Representation& getBestRepresentation();
 
         /**
-         * \brief Method that indicate if the learning abcde contains a specific representation.
+         * \brief Method that indicate if the learning agent contains a specific representation.
          * 
          * \param[in] representation the representation to search.
          */

@@ -165,7 +165,7 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representations vector of representation learned by the learning abcde
+         * \param[in] representations vector of representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
@@ -183,7 +183,7 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] representation vector of representation learned by the learning abcde
+         * \param[in] representation vector of representation learned by the learning agent
          * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.

@@ -47,7 +47,7 @@ namespace EvoGraph {
      * \brief Class representing an Action of a Graph.
      *
      * An action is a leaf vertex of a TPG associated to an action of the
-     * learning abcde within its environment.
+     * learning agent within its environment.
      */
     class Action : public Vertex
     {

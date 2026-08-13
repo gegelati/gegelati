@@ -72,7 +72,7 @@ Learn::ParallelLearningAgent::evaluateCurrentRepresentationIndividuals(uint64_t 
         throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: currentExecutedRepresentation is not set.");
     }
     if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning abcde does not contain the given representation.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning agent does not contain the given representation.");
     }
 
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>

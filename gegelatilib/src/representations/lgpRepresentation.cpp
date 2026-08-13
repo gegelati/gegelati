@@ -85,13 +85,14 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
 
 
 std::vector<double> Representations::LGPRepresentation::executeIndividual(
-    const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
+    const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const
 {
     // Define Inputs
     // Define function/instruction or index of it
     std::vector<std::reference_wrapper<const Node::GPNode>> genotype = indiv.getEffectiveGenotype();
 
-    registers.resetData();
+    /// Registers used as internal memory. TODO AAAAAAAA not sure creating register here is the most efficient..
+    Data::PrimitiveTypeArray<double> registers(this->nbRegisters);
 
     for(const Node::GPNode& node: genotype) {
 
@@ -109,7 +110,7 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
             size_t inputIndex = std::get<size_t>(node.getValue(nodeIndex + 1));
 
             const std::type_info& operandType = instruction.getOperandTypes().at(0).get();
-            const Data::DataHandler& dataSource = (inputType==0) ? this->registers : inputSources[inputType - 1];
+            const Data::DataHandler& dataSource = (inputType==0) ? registers : inputSources[inputType - 1];
 
             uint64_t operandLocation = dataSource.scaleLocation(inputIndex, operandType);
             Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
@@ -118,9 +119,9 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
         }
 
         double result = instruction.execute(operands);
-        this->registers.setDataAt(typeid(double), outputIndex, result);
+        registers.setDataAt(typeid(double), outputIndex, result);
     }
 
     // Return value of first register
-    return {*(this->registers.getDataAt(typeid(double), 0).getSharedPointer<const double>())};
+    return {*(registers.getDataAt(typeid(double), 0).getSharedPointer<const double>())};
 }

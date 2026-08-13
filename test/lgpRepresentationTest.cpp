@@ -119,6 +119,7 @@ TEST_F(LGPRepresentationTest, setInputDimensions)
 TEST_F(LGPRepresentationTest, isValid)
 {
     Representations::LGPRepresentation representation(set, 8, 5, 10);
+    representation.setInputDimensions({*inputSource});
 
     Evolution::Individual indiv;
     for(size_t i = 0; i < 4; i++) {
@@ -128,6 +129,7 @@ TEST_F(LGPRepresentationTest, isValid)
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
 
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
+    ASSERT_EQ(indiv.getSize(), 5) << "Mejh";
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
 
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));

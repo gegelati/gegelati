@@ -125,7 +125,7 @@ namespace Evolution {
          * \param[in] inputSources input sources on which the individual is executed.
          */
         virtual std::vector<double> executeIndividual(
-            const Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) = 0;
+            const Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const  = 0;
     };
 }; // namespace Representation
 

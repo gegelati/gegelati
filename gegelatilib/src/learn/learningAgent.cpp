@@ -62,7 +62,7 @@ void Learn::LearningAgent::setCurrentRepresentation(Representation::Representati
         throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is a null pointer.");
     }
     if(this->representations.find(representation->getRepresentationID()) == this->representations.end()){
-        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is not part of the learning abcde representations.");
+        throw std::runtime_error("LearningAgent::setCurrentRepresentation: given representation is not part of the learning agent representations.");
     }
 
     this->currentExecutedRepresentation = representation;
@@ -78,7 +78,7 @@ Representation::Representation& Learn::LearningAgent::getRepresentation(const Re
 {
     auto iterator = this->representations.find(representation.getRepresentationID());
     if(iterator == this->representations.end() || (*iterator).second.get().getRepresentationID() != representation.getRepresentationID()){
-        throw std::invalid_argument("LearningAgent::getRepresentation: the given representation is not managed by this learning abcde.");
+        throw std::invalid_argument("LearningAgent::getRepresentation: the given representation is not managed by this learning agent.");
     }
     return iterator->second;
 }
@@ -273,7 +273,7 @@ Learn::LearningAgent::evaluateCurrentRepresentationIndividuals(uint64_t generati
         throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: currentExecutedRepresentation is not set.");
     }
     if(!this->containsRepresentation(*this->currentExecutedRepresentation)){
-        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning abcde does not contain the given representation.");
+        throw std::runtime_error("LearningAgent::evaluateOneRepresentationIndividuals: The learning agent does not contain the given representation.");
     }
 
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Representation::Individual>>

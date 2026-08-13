@@ -75,7 +75,7 @@ class FakeRepresentation : public Evolution::Representation
         }
 
         std::vector<double> executeIndividual(
-            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) {
+            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const {
             return {0.0};
         }
 };

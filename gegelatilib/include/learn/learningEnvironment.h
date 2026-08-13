@@ -254,7 +254,7 @@ namespace Learn {
          * method will have no effects on the dataSources of the
          * LearningEnvironment, or on its score. For example, this terminal
          * state may be reached for a Game Over state within a game, or in case
-         * the objective of the learning abcde has been successfuly reached.
+         * the objective of the learning agent has been successfuly reached.
          *
          * \return a boolean indicating termination.
          */
