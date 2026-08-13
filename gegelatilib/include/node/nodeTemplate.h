@@ -5,6 +5,11 @@
 
 namespace Node {
 
+    /**
+     * \brief class representation the template of a GPNode.
+     * 
+     * The class is essentially composed on a vector of nodeValueTemplate, each one indicating the template of a value in the node.
+     */
     class NodeTemplate {
 
         protected:

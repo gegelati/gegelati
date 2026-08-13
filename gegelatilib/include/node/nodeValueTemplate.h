@@ -70,7 +70,7 @@ namespace Node {
             /**
              * @brief Get the NodeValueConfiguration of the template.
              * 
-             * \param[in] idxCondif index of the required configuration
+             * \param[in] idxConfig index of the required configuration
              */
             std::shared_ptr<const NodeValueConfiguration> getconfigurationAt(size_t idxConfig) const;
 
