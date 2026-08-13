@@ -50,6 +50,7 @@ class MutationTest : public ::testing::Test
 {
   protected:
     RNG::RNG rng = RNG::RNG(0);
+    size_t nbRepeats = 100;
 
     virtual void SetUp()
     {
@@ -70,50 +71,176 @@ TEST_F(MutationTest, Constructor)
     ASSERT_NO_THROW(delete mutation) << "Destructor of mutation failed.";
 }
 
+TEST_F(MutationTest, sampleNodeValue)
+{
+    Evolution::Mutation mutation;
+    Node::NodeValue value;
+
+    Node::NodeValueTemplate emptyValueTemplate;
+    ASSERT_THROW(value = mutation.sampleNodeValue(emptyValueTemplate, rng), std::runtime_error) << "Should fail with empty value";
+
+    // Range of size_t
+    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    Node::NodeValueTemplate valueTemplate0(config0);
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate0, rng)) << "Should not have failed";
+        ASSERT_TRUE(std::holds_alternative<size_t>(value)) << "Value should be a size_t";
+        ASSERT_GE(std::get<size_t>(value), 5) << "Value should be above or equal to 5";
+        ASSERT_LT(std::get<size_t>(value), 10) << "Value should be below to 10";
+    }
+    
+    // Range of double
+    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    Node::NodeValueTemplate valueTemplate1(config1);
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate1, rng)) << "Should not have failed";
+        ASSERT_TRUE(std::holds_alternative<double>(value)) << "Value should be a double";
+        ASSERT_GE(std::get<double>(value), -2.0) << "Value should be above or equal to -2.0";
+        ASSERT_LE(std::get<double>(value), 3.0) << "Value should be below or equal to 3.0";
+    }
+
+    // Vector of diverse accepted values.
+    Evolution::Individual indiv;
+    std::vector<Node::NodeValue> vectValues = {size_t(0), size_t(1), 5.0, 5.5, indiv};
+    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
+    Node::NodeValueTemplate valueTemplate2(config2);
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate2, rng)) << "Should not have failed";
+        bool isValueContained = false;
+        for(size_t idx = 0; idx < vectValues.size() && !isValueContained; idx++) {
+            isValueContained = (value == vectValues.at(idx));
+        }
+        ASSERT_TRUE(isValueContained) << "Value should have been found in the vector";
+    }
+
+    // Vector of diverse accepted values AND range of doubles
+    Node::NodeValueTemplate valueTemplate3({config1, config2});
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate3, rng)) << "Should not have failed";
+        bool isRange = false;
+        if(std::holds_alternative<double>(value)) {
+            isRange = std::get<double>(value) >= -2.0 && std::get<double>(value) <= 3.0;
+        }
+        bool isValueContained = false;
+        for(size_t idx = 0; idx < vectValues.size() && !isValueContained; idx++) {
+            isValueContained = (value == vectValues.at(idx));
+        }
+        ASSERT_TRUE(isRange || isValueContained) << "Value Should be sampled in range or in vector";
+        ASSERT_FALSE(isRange && isValueContained) << "Value should node be both in range and vector";
+    }
+}
+
 TEST_F(MutationTest, createRandomNode)
 {
     Evolution::Mutation mutation;
     std::unique_ptr<Node::GPNode> node;
     
-    std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
-    Node::NodeTemplate nodeTemplate;
-    for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        auto config(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxRanges[idx])));
-        nodeTemplate.addValueTemplate(std::make_shared<Node::NodeValueTemplate>(config));
-    }
+    Node::NodeTemplate nodeEmptyTemplate;
+    ASSERT_THROW(mutation.createRandomNode(nodeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
+
+    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+
+    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+
+    Evolution::Individual indiv0; 
+    Evolution::Individual indiv1;
+    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+
+    Node::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(nodeTemplate, rng))) << "Creation of random node failed.";
+        
+        ASSERT_EQ(node->getSize(), 4) << "Node does not have the right size";
+        
+        // Node value 0
+        ASSERT_TRUE(std::holds_alternative<size_t>(node->getValue(0))) << "Node value is not size_t";
+        ASSERT_GE(std::get<size_t>(node->getValue(0)), 5) << "Value should be above or equal to 5";
+        ASSERT_LT(std::get<size_t>(node->getValue(0)), 10) << "Value should be below to 10";
     
-    ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(nodeTemplate, rng))) << "Creation of random node failed.";
+        // Node value 1
+        ASSERT_TRUE(std::holds_alternative<double>(node->getValue(1))) << "Node value is not double";
+        ASSERT_GE(std::get<double>(node->getValue(1)), -2.0) << "Value should be above or equal to -2.0";
+        ASSERT_LT(std::get<double>(node->getValue(1)), 3.0) << "Value should be below or equal to 3.0";
     
-    ASSERT_EQ(node->getSize(), 6) << "Node does not have the right size";
+        // Node value 2
+        ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node->getValue(2))) << "Node value is not indiv";
+        const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node->getValue(2));
+        ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
     
-    for(size_t idx = 0; idx < node->getSize(); idx++) {
-        ASSERT_TRUE(std::holds_alternative<size_t>(node->getValue(idx))) << "Node value is not size_t";
-        ASSERT_LT(std::get<size_t>(node->getValue(idx)), maxRanges[idx]) << "Node value is out of range";
+        // Node value 3
+        ASSERT_TRUE(std::holds_alternative<size_t>(node->getValue(3))) << "Node value is not size_t";
+        ASSERT_GE(std::get<size_t>(node->getValue(3)), 5) << "Value should be above or equal to 5";
+        ASSERT_LT(std::get<size_t>(node->getValue(3)), 10) << "Value should be below to 10";
     }
 }
 
 TEST_F(MutationTest, initRandomIndividual)
 {
     Evolution::Mutation mutation;
-    Evolution::Individual indiv;
 
+    Evolution::Individual emptyIndiv;
+    Node::GenotypeTemplate genotypeEmptyTemplate;
+    ASSERT_THROW(mutation.initRandomIndividual(emptyIndiv, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
 
-    std::vector<size_t> maxRanges = {8, 4, 2, 8, 2, 8};
-    auto nodeTemplate(std::make_shared<Node::NodeTemplate>());
-    for(size_t idx = 0; idx < maxRanges.size(); idx++) {
-        auto config(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxRanges[idx])));
-        nodeTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(config));
-    }
+    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+
+    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+
+    Evolution::Individual indiv0; 
+    Evolution::Individual indiv1;
+    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+
+    std::vector<std::shared_ptr<const Node::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
+    auto nodeTemplate0(std::make_shared<Node::NodeTemplate>(vect));
+    auto nodeTemplate1(std::make_shared<Node::NodeTemplate>(valueTemplate1));
 
     Node::GenotypeTemplate genotypeTemplate;
-    genotypeTemplate.addNodeTemplate(nodeTemplate, 5, 10);
+    genotypeTemplate.addNodeTemplate(nodeTemplate0, 5, 10);
+    genotypeTemplate.addNodeTemplate(nodeTemplate1);
 
-    ASSERT_NO_THROW(mutation.initRandomIndividual(indiv, genotypeTemplate, rng)) << "Initialization of individual failed";
+    
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        Evolution::Individual initIndiv;
+        ASSERT_NO_THROW(mutation.initRandomIndividual(initIndiv, genotypeTemplate, rng)) << "Initialization of individual failed";
 
-    ASSERT_GE(indiv.getSize(), 5) << "Individual does not have enough nodes";
-    ASSERT_LE(indiv.getSize(), 10) << "Individual has too much nodes";
+        ASSERT_GE(initIndiv.getSize(), 5 + 1) << "Individual does not have enough nodes";
+        ASSERT_LE(initIndiv.getSize(), 10 + 1) << "Individual has too much nodes";
 
-    for(size_t idx = 0; idx < indiv.getSize(); idx++) {
-        ASSERT_EQ(indiv.getGPNode(idx).getSize(), 6) << "Nodes have different sizes";
+        for(size_t idxNode = 0; idxNode < initIndiv.getSize(); idxNode++) {
+            const Node::GPNode& node = initIndiv.getGPNode(idxNode);
+            if(idxNode < initIndiv.getSize() - 1) {
+                
+                ASSERT_EQ(node.getSize(), 3) << "Node does not have the right size";
+
+                // Node value 0
+                ASSERT_TRUE(std::holds_alternative<size_t>(node.getValue(0))) << "Node value is not size_t";
+                ASSERT_GE(std::get<size_t>(node.getValue(0)), 5) << "Value should be above or equal to 5";
+                ASSERT_LT(std::get<size_t>(node.getValue(0)), 10) << "Value should be below to 10";
+            
+                // Node value 1
+                ASSERT_TRUE(std::holds_alternative<double>(node.getValue(1))) << "Node value is not double";
+                ASSERT_GE(std::get<double>(node.getValue(1)), -2.0) << "Value should be above or equal to -2.0";
+                ASSERT_LT(std::get<double>(node.getValue(1)), 3.0) << "Value should be below or equal to 3.0";
+            
+                // Node value 2
+                ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2))) << "Node value is not indiv";
+                const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2));
+                ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
+            } else {
+                ASSERT_EQ(node.getSize(), 1) << "Node does not have the right size";
+                // Node value 0
+                ASSERT_TRUE(std::holds_alternative<double>(node.getValue(0))) << "Node value is not double";
+                ASSERT_GE(std::get<double>(node.getValue(0)), -2.0) << "Value should be above or equal to -2.0";
+                ASSERT_LT(std::get<double>(node.getValue(0)), 3.0) << "Value should be below or equal to 3.0";
+            }
+        }
     }
 }

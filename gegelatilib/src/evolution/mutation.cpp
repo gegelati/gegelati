@@ -27,15 +27,13 @@ Node::NodeValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueTempla
             const std::pair<size_t, size_t>& uintPair = std::get<std::pair<size_t, size_t>>(nodeValueRange);
             value = rng.getUnsignedInt64(uintPair.first, uintPair.second - 1);
 
-        } else if (std::holds_alternative<std::pair<double, double>>(nodeValueRange)) {
+        } else { //if (std::holds_alternative<std::pair<double, double>>(nodeValueRange)) { commented because in the idea its important, but impossible to cover with current configuration
             // Range of double
             const std::pair<double, double>& doublePair = std::get<std::pair<double, double>>(nodeValueRange);
             value = rng.getDouble(doublePair.first, doublePair.second);
-        } else {
-            throw std::runtime_error("Evolution::Mutation::sampleNodeValue: NodeValueRange of unkown types.");
         }
 
-    } else if (std::holds_alternative<std::vector<Node::NodeValue>>(valueTemplate)) {
+    } else { // if (std::holds_alternative<std::vector<Node::NodeValue>>(valueTemplate)) { commented because in the idea its important, but impossible to cover with current configuration
 
         // List of node values.
         const std::vector<Node::NodeValue>& nodeValues = std::get<std::vector<Node::NodeValue>>(valueTemplate);
@@ -43,8 +41,6 @@ Node::NodeValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueTempla
         // Sample a random value.
         value = nodeValues.at(rng.getUnsignedInt64(0, nodeValues.size() - 1));
 
-    } else {
-        throw std::runtime_error("Evolution::Mutation::sampleNodeValue: NodeValue of unkown types.");
     }
 
     return value;
