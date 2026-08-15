@@ -68,10 +68,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::EvaluationAgent::evaluateIndivid
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
     const Selector::Selector& selector,
+    Learn::LearningEnvironment& le,
     uint64_t generationNumber,
-    Learn::LearningMode mode,
-    Learn::LearningEnvironment& le) const
+    Learn::LearningMode mode) const
 {
+    if(!representation.isValid(individual)){
+        throw std::runtime_error("Learn::EvaluationAgent::evaluateIndividual: Individual not valid for the representation");
+    }
 
     Representation::Individual falseIndividual(0);
 
@@ -147,9 +150,9 @@ Learn::EvaluationAgent::evaluateIndividuals(
     const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
     const Selector::Selector& selector,
+    Learn::LearningEnvironment& le,
     uint64_t generationNumber,
-    Learn::LearningMode mode,
-    Learn::LearningEnvironment& le) const
+    Learn::LearningMode mode) const
 {
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Evolution::Individual>>
         results;
@@ -158,7 +161,7 @@ Learn::EvaluationAgent::evaluateIndividuals(
     for(const Evolution::Individual& indiv: individuals){
         // Evaluate the individuals and insert the results
         const auto& result = this->evaluateIndividual(
-            indiv, representation, selector, generationNumber, mode, le
+            indiv, representation, selector, le, generationNumber, mode
         );
         
         results.insert({result, indiv});

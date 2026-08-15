@@ -88,7 +88,10 @@ namespace Learn {
          * \param[in] parameters The LearningParameters for the EvaluationAgent.
          * \param[in] seed Seed for random number generator
          */
-        EvaluationAgent(LearningEnvironment& le, std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(), size_t seed = 0)
+        EvaluationAgent(
+          LearningEnvironment& le, 
+          std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
+          size_t seed = 0)
             : learningEnvironment{le},
               params{std::make_unique<LearningParameters>(*parameters)} {
                 rng.setSeed(seed);
@@ -129,13 +132,13 @@ namespace Learn {
          * \param[in] individual The individual whose genotype is evaluted.
          * \param[in] representation The representation of the individual evaluated, used to map the individual genotype to phenotype
          * \param[in] selector Selector of the individuals (TODO to remove later)
+         * \param[in] le Reference to the LearningEnvironment to use
+         * during the policy evaluation (may be different from the attribute of
+         * the class in child EvaluationAgentClass).
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] le Reference to the LearningEnvironment to use
-         * during the policy evaluation (may be different from the attribute of
-         * the class in child EvaluationAgentClass).
          *
          * \return a std::shared_ptr to the EvaluationResult for the root. If
          * this root was already evaluated more times then the limit in
@@ -148,9 +151,9 @@ namespace Learn {
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             const Selector::Selector& selector,
+            LearningEnvironment& le,
             uint64_t generationNumber,
-            LearningMode mode,
-            LearningEnvironment& le) const;
+            LearningMode mode) const;
 
 
         /**
@@ -163,13 +166,13 @@ namespace Learn {
          * \param[in] individuals The individuals whose genotypes are evaluted.
          * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
          * \param[in] selector Selector of the individuals (TODO to remove later)
+         * \param[in] le Reference to the LearningEnvironment to use
+         * during the policy evaluation (may be different from the attribute of
+         * the class in child EvaluationAgentClass).
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] le Reference to the LearningEnvironment to use
-         * during the policy evaluation (may be different from the attribute of
-         * the class in child EvaluationAgentClass).
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               std::reference_wrapper<const Evolution::Individual>>
@@ -177,9 +180,9 @@ namespace Learn {
             const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
             const Selector::Selector& selector,
+            LearningEnvironment& le,
             uint64_t generationNumber,
-            LearningMode mode,
-            LearningEnvironment& le) const;
+            LearningMode mode) const;
     };
 }; // namespace Learn
 

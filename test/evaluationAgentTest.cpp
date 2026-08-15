@@ -41,20 +41,27 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "evaluation/evaluationAgent.h"
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
-#include "evolution/evolutionAlgorithm.h"
 #include "representations/lgpRepresentation.h"
 
+#include "learn/stickGameWithOpponentDupDouble.h"
+#include "selector/truncationSelector.h"
 
 // Set all file in comment
 
-class EvolutionAlgorithmTest : public ::testing::Test
+class EvaluationAgentTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Data::PrimitiveTypeArray<double>* inputSource;
     Evolution::Representation* representation;
+
+    std::unique_ptr<Learn::LearningParameters> params;
+
+    Selector::Selector* selector;
+
+    StickGameWithOpponentD le;
 
     virtual void SetUp()
     {
@@ -67,10 +74,13 @@ class EvolutionAlgorithmTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
-
-        inputSource = new Data::PrimitiveTypeArray<double>(4);
     
-        representation = new Representations::LGPRepresentation(set, 8, 10);
+        representation = new Representations::LGPRepresentation(set, 8, 5, 10);
+        
+
+        selector = new Selector::TruncationSelector();
+
+        params = std::make_unique<Learn::LearningParameters>();
     }
 
     virtual void TearDown()
@@ -79,29 +89,43 @@ class EvolutionAlgorithmTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
-        delete inputSource;
         delete representation;
+        delete selector;
     }
 };
 
 
-TEST_F(EvolutionAlgorithmTest, Constructor)
+TEST_F(EvaluationAgentTest, Constructor)
 {
-    Evolution::EvolutionAlgorithm* ea;
+    Learn::EvaluationAgent* evalAgent;
+    Learn::EvaluationAgent* evalAgent2;
+    size_t seed = 0;
 
-    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation)) << "Constructor of EA failed.";
+    ASSERT_NO_THROW(evalAgent = new Learn::EvaluationAgent(le, std::move(params), seed)) << "Constructor of evalAgent failed.";
 
-    ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
+    ASSERT_NO_THROW(evalAgent2 = new Learn::EvaluationAgent(le)) << "Constructor of evalAgent failed.";
 
-    ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
+    ASSERT_NO_THROW(delete evalAgent) << "Destructor of evalAgent failed.";
+    ASSERT_NO_THROW(delete evalAgent2) << "Destructor of evalAgent failed.";
 }
 
-TEST_F(EvolutionAlgorithmTest, initializePopulation)
+TEST_F(EvaluationAgentTest, evaluateIndividual)
 {
-    Evolution::EvolutionAlgorithm ea(*representation);
-    representation->setInputDimensions({*inputSource});
+    Learn::EvaluationAgent evalAgent(le, std::move(params));
+    Learn::LearningMode mode = Learn::LearningMode::TRAINING;
 
-    ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
+    Evolution::Individual indiv;
+    representation->setInputDimensions(le.getDataSources());
 
-    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
+    ASSERT_THROW(evalAgent.evaluateIndividual(indiv, *representation, *selector, le, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
+
+    // Fill individual
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
+
+    std::shared_ptr<Learn::EvaluationResult> result;
+    ASSERT_NO_THROW(result = evalAgent.evaluateIndividual(indiv, *representation, *selector, le, 0, mode)) << "Evaluation should not have fail";
 }

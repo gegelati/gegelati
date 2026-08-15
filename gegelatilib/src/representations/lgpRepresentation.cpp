@@ -51,8 +51,12 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
     return std::move(gt);
 }
 
-bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv)
+bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
+    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+        throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without input dimensions set.");
+    }
+
     // Return false if genotype length is out of bounds.
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;

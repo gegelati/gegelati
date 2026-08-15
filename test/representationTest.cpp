@@ -70,7 +70,7 @@ class FakeRepresentation : public Evolution::Representation
 
         std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override { return nullptr;}; 
 
-        bool isValid(const Evolution::Individual& indiv) {
+        bool isValid(const Evolution::Individual& indiv) const {
             return true;
         }
 

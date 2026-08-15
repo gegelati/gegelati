@@ -27,21 +27,21 @@ namespace Evolution {
       protected:
 
         /// Minimum Number of nodes in the representation.
-        size_t nbNodesMin;
+        size_t nbNodesMin = 0;
 
         /// Maximum number of nodes in the representation.
-        size_t nbNodesMax;
+        size_t nbNodesMax = 0;
 
         /// Number of input sources
-        size_t nbInputSources;
+        size_t nbInputSources = 0;
 
         /// Maximum index of input source
-        size_t maxInputSourceIdx;
+        size_t maxInputSourceIdx = 0;
 
         /// Name of the representation.
-        std::string representationName;
+        std::string representationName = "";
         /// Color of the representation.
-        std::string representationColor;
+        std::string representationColor = "";
 
       public:
 
@@ -116,7 +116,7 @@ namespace Evolution {
          * 
          * \param[in] indiv individual controlled.
          */
-        virtual bool isValid(const Individual& indiv) = 0;
+        virtual bool isValid(const Individual& indiv) const = 0;
 
         /**
          * \brief execute the specified individual based on the current dataSources

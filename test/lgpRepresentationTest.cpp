@@ -119,9 +119,11 @@ TEST_F(LGPRepresentationTest, setInputDimensions)
 TEST_F(LGPRepresentationTest, isValid)
 {
     Representations::LGPRepresentation representation(set, 8, 5, 10);
+    Evolution::Individual indiv;
+
+    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
     representation.setInputDimensions({*inputSource});
 
-    Evolution::Individual indiv;
     for(size_t i = 0; i < 4; i++) {
         indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
@@ -163,6 +165,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources{*inputSource};
 
     Representations::LGPRepresentation representation(set, 8, 5, 10);
+    representation.setInputDimensions(inputSources);
 
     Evolution::Individual indiv;
     

@@ -67,7 +67,7 @@ namespace Representations {
          * 
          * \param[in] indiv Individual controlled.
          */
-        virtual bool isValid(const Evolution::Individual& indiv) override;
+        virtual bool isValid(const Evolution::Individual& indiv) const override;
 
         /**
          * \brief execute each node as an instruction line. 
