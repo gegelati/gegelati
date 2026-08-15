@@ -166,9 +166,6 @@ namespace Learn {
          * \param[in] individuals The individuals whose genotypes are evaluted.
          * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
          * \param[in] selector Selector of the individuals (TODO to remove later)
-         * \param[in] le Reference to the LearningEnvironment to use
-         * during the policy evaluation (may be different from the attribute of
-         * the class in child EvaluationAgentClass).
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -180,7 +177,6 @@ namespace Learn {
             const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
             const Selector::Selector& selector,
-            LearningEnvironment& le,
             uint64_t generationNumber,
             LearningMode mode) const;
     };

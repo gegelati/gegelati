@@ -61,7 +61,7 @@ void Learn::LearningEnvironment::doAction(double actionID)
             "With more than one continuous action, doAction() "
             "method should not be called. Use doActions() instead.");
     } else if (actionID < 0 || actionID >= this->actions->front().getNbValues()) {
-        throw std::runtime_error("Action ID is out of range.");
+        throw std::runtime_error("Action ID " + std::to_string(actionID) + " is out of range.");
     }
 }
 

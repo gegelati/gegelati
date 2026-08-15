@@ -150,7 +150,6 @@ Learn::EvaluationAgent::evaluateIndividuals(
     const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
     const Selector::Selector& selector,
-    Learn::LearningEnvironment& le,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
@@ -161,7 +160,7 @@ Learn::EvaluationAgent::evaluateIndividuals(
     for(const Evolution::Individual& indiv: individuals){
         // Evaluate the individuals and insert the results
         const auto& result = this->evaluateIndividual(
-            indiv, representation, selector, le, generationNumber, mode
+            indiv, representation, selector, this->learningEnvironment, generationNumber, mode
         );
         
         results.insert({result, indiv});

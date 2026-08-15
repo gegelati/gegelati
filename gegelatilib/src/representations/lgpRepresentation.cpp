@@ -24,6 +24,10 @@ void Representations::LGPRepresentation::setInputDimensions(const std::vector<st
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
+    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+        throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
+    }
+
     // Instruction node template is fixed during evolution, so created only once.
     if(this->instructionNodesTemplate->size() == 0) {
 
@@ -44,11 +48,10 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
         }
     }
 
-      auto gt(std::make_unique<Node::GenotypeTemplate>(
+    return std::make_unique<Node::GenotypeTemplate>(
         this->instructionNodesTemplate,
-        std::make_pair(this->nbNodesMin, this->nbNodesMax)));
-
-    return std::move(gt);
+        std::make_pair(this->nbNodesMin, this->nbNodesMax)
+    );
 }
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
@@ -126,6 +129,13 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
         registers.setDataAt(typeid(double), outputIndex, result);
     }
 
+    double value = *(registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
+    if(value > 2.0) {
+        value = 2.0;
+    } else if (value < 0.0) {
+        value = 0.0;
+    }
+
     // Return value of first register
-    return {*(registers.getDataAt(typeid(double), 0).getSharedPointer<const double>())};
+    return {value};
 }

@@ -45,6 +45,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "evolution/evolutionAlgorithm.h"
 #include "representations/lgpRepresentation.h"
+#include "learn/stickGameWithOpponentDupDouble.h"
 
 
 // Set all file in comment
@@ -55,6 +56,11 @@ class EvolutionAlgorithmTest : public ::testing::Test
     Instructions::Set set;
     Data::PrimitiveTypeArray<double>* inputSource;
     Evolution::Representation* representation;
+
+    std::unique_ptr<Learn::LearningParameters> evalParams;
+
+    StickGameWithOpponentD le;
+
 
     virtual void SetUp()
     {
@@ -71,6 +77,8 @@ class EvolutionAlgorithmTest : public ::testing::Test
         inputSource = new Data::PrimitiveTypeArray<double>(4);
     
         representation = new Representations::LGPRepresentation(set, 8, 10);
+
+        evalParams = std::make_unique<Learn::LearningParameters>();
     }
 
     virtual void TearDown()
@@ -89,7 +97,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 {
     Evolution::EvolutionAlgorithm* ea;
 
-    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation)) << "Constructor of EA failed.";
+    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation, le, std::move(evalParams), 12, 10)) << "Constructor of EA failed.";
 
     ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
 
@@ -98,10 +106,36 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
-    Evolution::EvolutionAlgorithm ea(*representation);
-    representation->setInputDimensions({*inputSource});
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
 
     ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
+
+    for(const Evolution::Individual& indiv: ea.getPopulation().getIndividuals()) {
+        ASSERT_TRUE(ea.getRepresentation().isValid(indiv)) << "An individual is not valid after population initialization";
+    }
+}
+
+TEST_F(EvolutionAlgorithmTest, evaluatePopulation) 
+{
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results1;
+    ASSERT_NO_THROW(results1 = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
+
+    ASSERT_EQ(results1.size(), 100) << "Results should have the size of the current population";
+    
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results2;
+    ASSERT_NO_THROW(results2 = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
+
+    auto it1 = results1.begin();
+    auto it2 = results2.begin();
+    while(it1 != results1.end() && it2 != results2.end()) {
+        ASSERT_EQ(it1->first->getSelectionMetrics()->getScore(), it2->first->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
+        ASSERT_EQ(it1->second, it2->second) << "Individuals should be equal";
+
+        it1++; it2++;
+    }
 }

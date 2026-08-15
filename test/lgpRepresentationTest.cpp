@@ -116,6 +116,39 @@ TEST_F(LGPRepresentationTest, setInputDimensions)
     delete (&(inputSources.at(2).get()));
 }
 
+TEST_F(LGPRepresentationTest, getGenotypeTemplate)
+{
+    Representations::LGPRepresentation representation(set, 8, 5, 10);
+    std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
+
+    ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
+    representation.setInputDimensions({*inputSource});
+
+    ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
+    
+    ASSERT_EQ(genotypeTemplate->size(), 1) << "Template should have a single nodeTemplate";
+    ASSERT_EQ(genotypeTemplate->getRangeAt(0).first, 5) << "Minimal range of the template should be 5";
+    ASSERT_EQ(genotypeTemplate->getRangeAt(0).second, 10) << "Maximal range of the template should be 10";
+
+    std::shared_ptr<const Node::NodeTemplate> nodeTemplate = genotypeTemplate->getNodeTemplateAt(0);
+    ASSERT_EQ(nodeTemplate->size(), 6) << "Node template should be of size 6 with current input sources";
+    std::vector<size_t> expectedRanges{8, 4, 2, 8, 2, 8};
+
+    for(size_t idx = 0; idx < nodeTemplate->size(); idx++) {
+        const std::shared_ptr<const Node::NodeValueTemplate>& nodeValueTemplate = nodeTemplate->getValueTemplateAt(idx);
+        ASSERT_EQ(nodeValueTemplate->size(), 1) << "Template should be of size 1";
+
+        ASSERT_TRUE(std::holds_alternative<Node::NodeValueRange>(*nodeValueTemplate->getconfigurationAt(0))) << "Configuration should be a valueRange";
+        const Node::NodeValueRange& range = std::get<Node::NodeValueRange>(*nodeValueTemplate->getconfigurationAt(0));
+        bool isSize_tPair = std::holds_alternative<std::pair<size_t, size_t>>(range);
+        ASSERT_TRUE(isSize_tPair) << "range should be a pair of size_t";
+
+        std::pair<size_t, size_t> pairRange = std::get<std::pair<size_t, size_t>>(range);
+        ASSERT_EQ(pairRange.first, 0) << "Lower range should always be 0";
+        ASSERT_EQ(pairRange.second, expectedRanges.at(idx)) << "Expected upper range is incorrect";
+    }
+}
+
 TEST_F(LGPRepresentationTest, isValid)
 {
     Representations::LGPRepresentation representation(set, 8, 5, 10);
