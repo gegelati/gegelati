@@ -154,34 +154,38 @@ TEST_F(LGPRepresentationTest, isValid)
     Representations::LGPRepresentation representation(set, 8, 5, 10);
     Evolution::Individual indiv;
 
+    Evolution::Genotype& genotype = indiv.getMutableGenotype();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
     representation.setInputDimensions({*inputSource});
 
     for(size_t i = 0; i < 4; i++) {
-        indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
+        group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
 
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
 
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
     ASSERT_EQ(indiv.getSize(), 5) << "Mejh";
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
 
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
-    indiv.removeGPNode(indiv.getSize() - 1);
+    group.removeNode(indiv.getSize() - 1);
 
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
-    indiv.removeGPNode(indiv.getSize() - 1);
+    group.removeNode(indiv.getSize() - 1);
     
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong node";
-    indiv.removeGPNode(indiv.getSize() - 1);
+    group.removeNode(indiv.getSize() - 1);
 
 
     for(size_t i = 0; i < 6; i++) {
-        indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
+        group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
 
     ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
@@ -201,12 +205,15 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     representation.setInputDimensions(inputSources);
 
     Evolution::Individual indiv;
+    Evolution::Genotype& genotype = indiv.getMutableGenotype();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
     
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
     ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
 
@@ -215,7 +222,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     ASSERT_EQ(output, 1.5) << "Value is not correct.";
 
     // R[0] = R[0] + R[0] = -1, but set as intron
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}), true);
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}, true));
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, 1.5) << "Value is not correct.";
 }

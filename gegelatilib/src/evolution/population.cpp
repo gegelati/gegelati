@@ -95,8 +95,16 @@ const Evolution::Individual& Evolution::Population::copyIndividual(const Individ
     const Individual& newIndividual = this->createIndividual();
     auto it = this->getIndividualFromCst(newIndividual);
 
-    for(const Node::GPNode& node: individual.getGenotype()) {
-        it->get()->addGPNode(std::make_unique<Node::GPNode>(node.getValues()));
+    const Genotype& genotype = individual.getGenotype();
+    Genotype& newGenotype = it->get()->getMutableGenotype();
+
+    for(const Node::NodeGroup& group: genotype.getNodeGroups()) {
+        newGenotype.addNodeGroup();
+        Node::NodeGroup& newNodeGroup = newGenotype.getMutableNodeGroup(newGenotype.getSize() - 1);
+        
+        for(const Node::GPNode& node: group.getNodes()) {
+            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
+        }
     }
 
     return newIndividual;
@@ -105,9 +113,15 @@ const Evolution::Individual& Evolution::Population::copyIndividual(const Individ
 void Evolution::Population::emptyIndividual(const Individual& individual)
 {
     auto it = this->getIndividualFromCst(individual);
-    while (it->get()->getSize() > 0) {
-        it->get()->removeGPNode(0);
-    }
+
+    Genotype& genotype = it->get()->getMutableGenotype();
+    while (genotype.getSize() > 0) {
+        Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(0);
+        while(nodeGroup.getSize() > 0) {
+            nodeGroup.removeNode(0);
+        }
+        genotype.removeNodeGroup(0);
+    } 
 }
 
 void Evolution::Population::deleteIndividual(const Individual& individual)

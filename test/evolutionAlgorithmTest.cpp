@@ -158,7 +158,7 @@ TEST_F(EvolutionAlgorithmTest, reproduceParents)
 
     for(size_t idx = 0; idx < offspring.size(); idx++) {
         ASSERT_TRUE(ea.getPopulation().containsIndividual(offspring.at(idx))) << "Offspring should be contained in the population";
-        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents";
+        ASSERT_TRUE(offspring.at(idx).get().getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents";
     }
 }
 
@@ -171,20 +171,19 @@ TEST_F(EvolutionAlgorithmTest, mutateOffspring)
 
 
     for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents before mutation";
+        ASSERT_TRUE(offspring.at(idx).get().getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents before mutation";
     }
 
     ASSERT_NO_THROW(ea.mutateOffspring(offspring)) << "Mutating the offspring vector failed";
 
     for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_FALSE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
+        ASSERT_TRUE(offspring.at(idx).get().getGenotype() != parents.at(idx).get().getGenotype()) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
     }
 
     
     Evolution::EvolutionAlgorithm ea2(*representation, le);
     ea2.initializePopulation();
     ASSERT_THROW(ea.mutateOffspring(ea2.reproduceParents(ea2.selectParents(100))), std::runtime_error) << "Should throw with wrong population";
-
 }
 
 

@@ -118,6 +118,10 @@ TEST_F(GPNodeTest, SetGetValue)
 
     ASSERT_EQ(node.getSize(), 3) << "Getting size of the GPNode failed.";
     ASSERT_EQ(node.getValues(), std::vector<Node::NodeValue>({size_t{5}, indiv1, 2.9})) << "Getting values of the GPNode failed.";
+
+    ASSERT_FALSE(node.getIsIntron()) << "Node should not be an intron by default.";
+    ASSERT_NO_THROW(node.setIsIntron(true)) << "Setting node to intron state failed";
+    ASSERT_TRUE(node.getIsIntron()) << "Node should now be an intron";
 }
 
 TEST_F(GPNodeTest, IDCounter)

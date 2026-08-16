@@ -92,15 +92,18 @@ TEST_F(PopulationTest, copyIndividual)
 
     Evolution::Individual* mutIndiv;
     ASSERT_NO_THROW(mutIndiv = &population.getMutableIndividual(individual)) << "Getting individual should not fail.";
-    mutIndiv->addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    mutIndiv->addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
-    mutIndiv->addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
+    Evolution::Genotype& genotype = mutIndiv->getMutableGenotype();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
 
     const Evolution::Individual* copyIndiv;
     ASSERT_NO_THROW(copyIndiv = &population.copyIndividual(individual)) << "Copying individual failed";
 
     ASSERT_EQ(copyIndiv->getSize(), 3) << "Copy was not effective";
-    ASSERT_EQ(copyIndiv->getGPNode(1).getValue(1), Node::NodeValue{5.0}) << "Copy was not effective";
+    ASSERT_EQ(copyIndiv->getGenotype().getNodeGroup(0).getNode(1).getValue(1), Node::NodeValue{5.0}) << "Copy was not effective";
 }
 TEST_F(PopulationTest, deleteIndividual)
 {       
@@ -128,9 +131,13 @@ TEST_F(PopulationTest, emptyIndividual)
     const Evolution::Individual& individual = population.createIndividual();
     Evolution::Individual& mutIndiv = population.getMutableIndividual(individual);
 
-    mutIndiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    mutIndiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
-    mutIndiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
+    Evolution::Genotype& genotype = mutIndiv.getMutableGenotype();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
 
     ASSERT_NO_THROW(population.emptyIndividual(individual)) << "Emptying individual failed";
     ASSERT_EQ(individual.getSize(), 0) << "Size of the individual after empty should be 0.";

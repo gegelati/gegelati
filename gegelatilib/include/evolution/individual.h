@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include "node/gpNode.h"
+#include "evolution/genotype.h"
 
 struct CounterReset;
 namespace Evolution {
@@ -19,10 +19,7 @@ namespace Evolution {
     protected:
 
         /// \brief Genotype of the individual.
-        std::vector<std::unique_ptr<Node::GPNode>> genotype;
-
-        /// \brief Intron property of the individual, by default, no node is intron.
-        std::vector<bool> isIntronNode;
+        std::unique_ptr<Genotype> genotype;
 
         /// Unique ID of the individual.
         size_t individualID;
@@ -49,7 +46,7 @@ namespace Evolution {
         /**
          * \brief Constructor for the Individual.
          */
-        Individual() : individualID(incrementeCounter()) {};
+        Individual() : genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()) {};
 
         /**
          * \brief return the ID of the individual.
@@ -75,91 +72,21 @@ namespace Evolution {
         Individual& operator=(const Individual&) = delete;
 
         /**
-         * \brief Add a GPNode to the Individual.
+         * \brief Get the size of the Genotype.
          * 
-         * \param[in] node the GPNode to add.
-         * \param[in] index the index at which to add the GPNode.
-         * \param[in] isIntron whether the GPNode is an intron or not.
-         */
-        virtual void addGPNode(std::unique_ptr<Node::GPNode> node, size_t index, bool isIntron = false);
-
-        /**
-         * \brief Remove a GPNode from the Individual.
-         * 
-         * \param[in] index the index at which to remove the GPNode.
-         */
-        virtual void removeGPNode(size_t index);
-
-        /**
-         * \brief Add a GPNode to the Individual.
-         * 
-         * \param[in] node the GPNode to add.
-         * \param[in] isIntron whether the GPNode is an intron or not.
-         */
-        virtual void addGPNode(std::unique_ptr<Node::GPNode> node, bool isIntron = false);
-
-        /**
-         * \brief Get the GPNode at the given index.
-         * 
-         * \param[in] index the index of the GPNode to get.
-         * 
-         * \return a reference to the GPNode at the given index.
-         */
-        virtual const Node::GPNode& getGPNode(size_t index) const;
-
-        /**
-         * \brief Get the mutable GPNode at the given index.
-         * 
-         * \param[in] index the index of the GPNode to get.
-         * 
-         * \return a reference to the GPNode at the given index.
-         */
-        virtual Node::GPNode& getMutableGPNode(size_t index);
-
-        /**
-         * \brief Get the number of GPNode in the Individual.
-         * 
-         * \return the number of GPNode in the Individual.
+         * \return the size of the Genotype.
          */
         virtual size_t getSize() const;
 
         /**
          * \brief Get the genotype of the Individual.
-         * 
-         * \return a reference to the vector of unique pointers to GPNode representing the genotype of the Individual.
          */
-        virtual std::vector<std::reference_wrapper<const Node::GPNode>> getGenotype() const;
+        virtual const Genotype& getGenotype() const;
 
         /**
-         * \brief Get the effective genotype of the Individual: the non-intron GPNodes.
-         * 
-         * \return a reference to the vector of unique pointers to GPNode representing the effective genotype of the Individual.
+         * \brief Get the mutable genotype of the Individual.
          */
-        virtual std::vector<std::reference_wrapper<const Node::GPNode>> getEffectiveGenotype() const;
-
-        /**
-         * \brief Set the intron property of the Individual.
-         * 
-         * \param[in] index the index of the GPNode to set.
-         * \param[in] isIntron whether the GPNode is an intron or not.
-         */
-        virtual void setIsIntronNode(size_t index, bool isIntron);
-
-        /**
-         * \brief Get the intron property of the Individual.
-         * 
-         * \return a reference to the vector of bool representing the intron property of the Individual.
-         */
-        virtual const std::vector<bool>& getAreIntronNodes() const;
-
-        /**
-         * \brief Get the intron property of the Individual at the given index.
-         * 
-         * \param[in] index the index of the GPNode to get.
-         * 
-         * \return whether the GPNode is an intron or not.
-         */
-        virtual bool getIsIntronNode(size_t index) const;
+        virtual Genotype& getMutableGenotype();
 
         /**
          * \brief Compare two individuals' genotype.
@@ -167,7 +94,7 @@ namespace Evolution {
          * \param[in] other the individual compared.
          * \param[in] effectiveGenotype true to compare only the effective genotype.
          */
-        virtual bool hasSameGenotypeAs(const Individual& other, bool effectiveGenotype = false) const;
+        //virtual bool hasSameGenotypeAs(const Individual& other, bool effectiveGenotype = false) const;
     };
     
     /**

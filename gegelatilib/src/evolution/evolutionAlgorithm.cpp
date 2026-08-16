@@ -34,7 +34,7 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
         Individual& indiv = this->population->getMutableIndividual(this->population->createIndividual());
-        this->mutation->initRandomIndividual(indiv, *genotypeTemplate, this->rng);
+        this->mutation->initRandomGenotype(indiv.getMutableGenotype(), *genotypeTemplate, this->rng);
     }
 }
 
@@ -64,8 +64,9 @@ std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Evol
 void Evolution::EvolutionAlgorithm::mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring)
 {
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
-    for(const Individual& os: offspring) {
-        this->mutation->mutateIndividual(this->population->getMutableIndividual(os), *genotypeTemplate, rng);
+    for(const Individual& constIndiv: offspring) {
+        Individual& indiv = this->population->getMutableIndividual(constIndiv);
+        this->mutation->mutateGenotype(indiv.getMutableGenotype(), *genotypeTemplate, rng);
     }
 }
 

@@ -32,8 +32,6 @@ namespace Node {
     class GPNode
     {
         private:
-
-        
             /// Unique ID of the GPNode.
             size_t gpNodeID;
 
@@ -54,6 +52,9 @@ namespace Node {
             /// \brief Values of the GPNode.
             std::vector<NodeValue> values;
 
+            /// @brief Indicate wether the node is intron or not, default value is false.
+            bool isIntron;
+
         public:
         
             /// Default polymorphic destructor
@@ -67,29 +68,37 @@ namespace Node {
              * \brief GPNode constructor.
              *  
              * \param[in] values the values of the GPNode.
+             * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<NodeValue>& values): values(values), gpNodeID(incrementeCounter()) {};
+            GPNode(const std::vector<NodeValue>& values, bool isIntron = false)
+            : values(values), isIntron{isIntron}, gpNodeID(incrementeCounter()) {};
 
             /**
              * \brief GPNode size_t constructor.
              * 
              * \param[in] values the integer values of the GPNode.
+             * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<size_t>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
+            GPNode(const std::vector<size_t>& values, bool isIntron = false)
+            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
             
             /**
              * \brief GPNode double constructor.
              * 
              * \param[in] values the double values of the GPNode.
+             * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<double>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
+            GPNode(const std::vector<double>& values, bool isIntron = false)
+            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
             
             /**
              * \brief GPNode reference constructor.
              * 
              * \param[in] values the reference values of the GPNode.
+             * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values): GPNode(std::vector<NodeValue>(values.begin(), values.end())) {};
+            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values, bool isIntron = false)
+            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
 
             /**
              * \brief return the ID of the GPNode.
@@ -124,6 +133,18 @@ namespace Node {
              * \param[in] index the index of the value to get.
              */
             const NodeValue& getValue(size_t index) const;
+
+            /**
+             * \brief set if the node is intron or not.
+             * 
+             * \param[in] isIntron value of statement.
+             */
+            void setIsIntron(bool isIntron);
+
+            /**
+             * \brief return if the node is intron or not.
+             */
+            bool getIsIntron() const;
 
             /**
              * \brief Get the number of values of the GPNode.

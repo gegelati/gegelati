@@ -1,5 +1,7 @@
 #include "evolution/mutation.h"
 
+#include "evolution/individual.h"
+
 
 
 Node::NodeValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueTemplate& nodeValueTemplate, RNG::RNG& rng)
@@ -62,19 +64,21 @@ std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(const Node::
 
 
 
-void Evolution::Mutation::initRandomIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng)
+void Evolution::Mutation::initRandomGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng)
 {
     if(genotypeTemplate.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::initRandomIndividual: genotypeTemplate is empty.");
+        throw std::runtime_error("Evolution::Mutation::initRandomGenotype: genotypeTemplate is empty.");
     }
 
     for(size_t idxTemplate = 0; idxTemplate < genotypeTemplate.size(); idxTemplate++) {
+        genotype.addNodeGroup();
+        Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(genotype.getSize() - 1);
         
         const std::pair<size_t, size_t>& range = genotypeTemplate.getRangeAt(idxTemplate);
         size_t nbNodesOfTemplate = rng.getUnsignedInt64(range.first, range.second);
-        
+
         for(size_t idxNode = 0; idxNode < nbNodesOfTemplate; idxNode++) {
-            indiv.addGPNode(this->createRandomNode(*genotypeTemplate.getNodeTemplateAt(idxTemplate), rng));
+            nodeGroup.addNode(this->createRandomNode(*genotypeTemplate.getNodeTemplateAt(idxTemplate), rng));
         }
     }
 }
@@ -82,7 +86,7 @@ void Evolution::Mutation::initRandomIndividual(Individual& indiv, const Node::Ge
 void Evolution::Mutation::mutateNode(Node::GPNode& node, const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng)
 {
     if(nodeTemplate.size() != node.getSize()) {
-        throw std::runtime_error("Evolution::Mutation::mutateNode: NodeTemplates size does not correspond to the individual.");
+        throw std::runtime_error("Evolution::Mutation::mutateNode: NodeTemplates size does not correspond to the genotypeidual.");
     }
     size_t idxValueMutated;
     Node::NodeValue newValue;
@@ -96,18 +100,22 @@ void Evolution::Mutation::mutateNode(Node::GPNode& node, const Node::NodeTemplat
 }
 
 
-void Evolution::Mutation::mutateIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng)
+void Evolution::Mutation::mutateGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng)
 {
     if(genotypeTemplate.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::initRandomIndividual: genotypeTemplate is empty.");
+        throw std::runtime_error("Evolution::Mutation::mutateGenotype: genotypeTemplate is empty.");
     }
 
     double pMutateNode = 0.5;
 
     const Node::NodeTemplate& nodeTemplate = *genotypeTemplate.getNodeTemplateAt(0);
-    for(size_t idxNode = 0; idxNode < indiv.getSize(); idxNode++) {
-        if(rng.getDouble(0, 1) < pMutateNode) {
-            this->mutateNode(indiv.getMutableGPNode(idxNode), nodeTemplate, rng);
+    for(size_t idxNodeGroup = 0; idxNodeGroup < genotype.getSize(); idxNodeGroup++) {
+        Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(idxNodeGroup);
+
+        for(size_t idxNode = 0; idxNode < nodeGroup.getSize(); idxNode++) {
+            if(rng.getDouble(0, 1) < pMutateNode) {
+                this->mutateNode(nodeGroup.getMutableNode(idxNode), nodeTemplate, rng);
+            }
         }
     }
 }

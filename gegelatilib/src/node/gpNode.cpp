@@ -67,6 +67,16 @@ const Node::NodeValue& Node::GPNode::getValue(size_t index) const
     return this->values[index];
 }
 
+void Node::GPNode::setIsIntron(bool isIntron)
+{
+    this->isIntron = isIntron;
+}
+
+bool Node::GPNode::getIsIntron() const
+{
+    return this->isIntron;
+}
+
 size_t Node::GPNode::getSize() const
 {
     return this->values.size();

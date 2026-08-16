@@ -6,9 +6,10 @@
 #include <string>
 #include <array>
 
-#include "evolution/individual.h"
+#include "evolution/genotype.h"
 #include "node/genotypeTemplate.h"
 #include "mutator/rng.h"
+
 
 namespace Evolution {
     /**
@@ -53,13 +54,13 @@ namespace Evolution {
         
 
         /**
-         * \brief Initialize a random Individual.
+         * \brief Initialize a random Genotype.
          *
-         * \param[in,out] indiv the individual initialized.
-         * \param[in] genotypeTemplate genotype template of the individual
+         * \param[in,out] genotype the genotype initialized.
+         * \param[in] genotypeTemplate genotype template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+        virtual void initRandomGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
 
 
         /**
@@ -72,13 +73,13 @@ namespace Evolution {
         virtual void mutateNode(Node::GPNode& node, const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
 
         /**
-         * \brief Mutate an Individual.
+         * \brief Mutate a Genotype.
          *
-         * \param[in,out] indiv the individual mutated.
-         * \param[in] genotypeTemplate genotype template of the individual
+         * \param[in,out] genotype the genotype mutated.
+         * \param[in] genotypeTemplate genotype template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+        virtual void mutateGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
 
 
     };

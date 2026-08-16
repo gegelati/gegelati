@@ -72,8 +72,10 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
         ranges.push_back(this->maxInputSourceIdx);
     }
 
+    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
+
     // Verify each (effective) node corresponds to the required specifications.
-    for(const Node::GPNode& node: indiv.getEffectiveGenotype()) {
+    for(const Node::GPNode& node: effectiveNodes.at(0)) {
         if(node.getSize() != ranges.size()) {
             return false;
         }
@@ -94,14 +96,13 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
 std::vector<double> Representations::LGPRepresentation::executeIndividual(
     const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const
 {
-    // Define Inputs
-    // Define function/instruction or index of it
-    std::vector<std::reference_wrapper<const Node::GPNode>> genotype = indiv.getEffectiveGenotype();
+    // Get effective nodes
+    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 
     /// Registers used as internal memory. TODO AAAAAAAA not sure creating register here is the most efficient..
     Data::PrimitiveTypeArray<double> registers(this->nbRegisters);
 
-    for(const Node::GPNode& node: genotype) {
+    for(const Node::GPNode& node: effectiveNodes.at(0)) {
 
         size_t outputIndex = std::get<size_t>(node.getValue(0));
         size_t functionIndex = std::get<size_t>(node.getValue(1));

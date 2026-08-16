@@ -42,6 +42,7 @@
 #include <numeric>
 
 #include "evolution/mutation.h"
+#include "evolution/individual.h"
 
 
 // Set all file in comment
@@ -178,13 +179,13 @@ TEST_F(MutationTest, createRandomNode)
     }
 }
 
-TEST_F(MutationTest, initRandomIndividual)
+TEST_F(MutationTest, initRandomGenotype)
 {
     Evolution::Mutation mutation;
 
-    Evolution::Individual emptyIndiv;
+    Evolution::Genotype emptyGenotype;
     Node::GenotypeTemplate genotypeEmptyTemplate;
-    ASSERT_THROW(mutation.initRandomIndividual(emptyIndiv, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
+    ASSERT_THROW(mutation.initRandomGenotype(emptyGenotype, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
 
     auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
     auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
@@ -208,40 +209,48 @@ TEST_F(MutationTest, initRandomIndividual)
 
     
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
-        Evolution::Individual initIndiv;
-        ASSERT_NO_THROW(mutation.initRandomIndividual(initIndiv, genotypeTemplate, rng)) << "Initialization of individual failed";
+        Evolution::Genotype initGenotype;
+        ASSERT_NO_THROW(mutation.initRandomGenotype(initGenotype, genotypeTemplate, rng)) << "Initialization of genotype failed";
 
-        ASSERT_GE(initIndiv.getSize(), 5 + 1) << "Individual does not have enough nodes";
-        ASSERT_LE(initIndiv.getSize(), 10 + 1) << "Individual has too much nodes";
+        ASSERT_GE(initGenotype.getFullSize(), 5 + 1) << "Genotype does not have enough nodes";
+        ASSERT_LE(initGenotype.getFullSize(), 10 + 1) << "Genotype has too much nodes";
 
-        for(size_t idxNode = 0; idxNode < initIndiv.getSize(); idxNode++) {
-            const Node::GPNode& node = initIndiv.getGPNode(idxNode);
-            if(idxNode < initIndiv.getSize() - 1) {
-                
-                ASSERT_EQ(node.getSize(), 3) << "Node does not have the right size";
+        const Node::NodeGroup& group1 = initGenotype.getNodeGroup(0);
+        ASSERT_GE(group1.getSize(), 5) << "group node 0 does not have enough nodes";
+        ASSERT_LE(group1.getSize(), 10) << "group node 0 has too much nodes";
 
-                // Node value 0
-                ASSERT_TRUE(std::holds_alternative<size_t>(node.getValue(0))) << "Node value is not size_t";
-                ASSERT_GE(std::get<size_t>(node.getValue(0)), 5) << "Value should be above or equal to 5";
-                ASSERT_LT(std::get<size_t>(node.getValue(0)), 10) << "Value should be below to 10";
+        for(size_t idxNode = 0; idxNode < group1.getSize(); idxNode++) {
+
+            const Node::GPNode& node = group1.getNode(idxNode);
+            ASSERT_EQ(node.getSize(), 3) << "Node does not have the right size";
+
+            // Node value 0
+            ASSERT_TRUE(std::holds_alternative<size_t>(node.getValue(0))) << "Node value is not size_t";
+            ASSERT_GE(std::get<size_t>(node.getValue(0)), 5) << "Value should be above or equal to 5";
+            ASSERT_LT(std::get<size_t>(node.getValue(0)), 10) << "Value should be below to 10";
+        
+            // Node value 1
+            ASSERT_TRUE(std::holds_alternative<double>(node.getValue(1))) << "Node value is not double";
+            ASSERT_GE(std::get<double>(node.getValue(1)), -2.0) << "Value should be above or equal to -2.0";
+            ASSERT_LT(std::get<double>(node.getValue(1)), 3.0) << "Value should be below or equal to 3.0";
+        
+            // Node value 2
+            ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2))) << "Node value is not indiv";
+            const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2));
+            ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
             
-                // Node value 1
-                ASSERT_TRUE(std::holds_alternative<double>(node.getValue(1))) << "Node value is not double";
-                ASSERT_GE(std::get<double>(node.getValue(1)), -2.0) << "Value should be above or equal to -2.0";
-                ASSERT_LT(std::get<double>(node.getValue(1)), 3.0) << "Value should be below or equal to 3.0";
-            
-                // Node value 2
-                ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2))) << "Node value is not indiv";
-                const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2));
-                ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
-            } else {
-                ASSERT_EQ(node.getSize(), 1) << "Node does not have the right size";
-                // Node value 0
-                ASSERT_TRUE(std::holds_alternative<double>(node.getValue(0))) << "Node value is not double";
-                ASSERT_GE(std::get<double>(node.getValue(0)), -2.0) << "Value should be above or equal to -2.0";
-                ASSERT_LT(std::get<double>(node.getValue(0)), 3.0) << "Value should be below or equal to 3.0";
-            }
         }
+
+        const Node::NodeGroup& group2 = initGenotype.getNodeGroup(1);
+        ASSERT_EQ(group2.getSize(), 1) << "group node 1 should have a single node";
+        const Node::GPNode& node = group2.getNode(0);
+
+        ASSERT_EQ(node.getSize(), 1) << "Node does not have the right size";
+        // Node value 0
+        ASSERT_TRUE(std::holds_alternative<double>(node.getValue(0))) << "Node value is not double";
+        ASSERT_GE(std::get<double>(node.getValue(0)), -2.0) << "Value should be above or equal to -2.0";
+        ASSERT_LT(std::get<double>(node.getValue(0)), 3.0) << "Value should be below or equal to 3.0";
+            
     }
 }
 
@@ -265,7 +274,6 @@ TEST_F(MutationTest, mutateNode)
 
 
     std::vector<Node::NodeValue> vect{size_t(6), 1.0, indiv0, size_t(8)};
-    size_t globalNbChanges;
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         Node::GPNode node(vect);
         
@@ -287,5 +295,61 @@ TEST_F(MutationTest, mutateNode)
 
 TEST_F(MutationTest, mutateIndividual)
 {
-    //ASSERT_FALSE(true) << "TODO";
+    Evolution::Mutation mutation;
+
+    Evolution::Genotype emptyGenotype;
+    Node::GenotypeTemplate genotypeEmptyTemplate;
+    ASSERT_THROW(mutation.mutateGenotype(emptyGenotype, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
+
+    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+
+    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+
+    Evolution::Individual indiv0; 
+    Evolution::Individual indiv1;
+    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+
+    std::vector<std::shared_ptr<const Node::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
+    auto nodeTemplate0(std::make_shared<Node::NodeTemplate>(vect));
+    auto nodeTemplate1(std::make_shared<Node::NodeTemplate>(valueTemplate1));
+
+    Node::GenotypeTemplate genotypeTemplate;
+    genotypeTemplate.addNodeTemplate(nodeTemplate0, 5, 10);
+    genotypeTemplate.addNodeTemplate(nodeTemplate1);
+
+    Evolution::Genotype genotype;
+    genotype.addNodeGroup();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group1 = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group2 = genotype.getMutableNodeGroup(1);
+    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
+    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
+    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));
+    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
+    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
+
+    group2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({double(0.5)})));
+
+    // COPY GENOTYPE (Should need proper method)    
+    Evolution::Genotype genotypeCopy;
+    genotypeCopy.addNodeGroup();
+    genotypeCopy.addNodeGroup();
+    Node::NodeGroup& groupCopy1 = genotypeCopy.getMutableNodeGroup(0);
+    Node::NodeGroup& groupCopy2 = genotypeCopy.getMutableNodeGroup(1);
+    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
+    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
+    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));
+    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
+    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
+
+    groupCopy2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({double(0.5)})));
+
+
+    ASSERT_TRUE(genotype == genotypeCopy) << "Genotypes should be equal before mutation";
+    ASSERT_NO_THROW(mutation.mutateGenotype(genotype, genotypeTemplate, rng)) << "Mutating genotype should no throw";
+    ASSERT_TRUE(genotype != genotypeCopy) << "Genotype should have changed";
 }

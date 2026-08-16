@@ -34,99 +34,24 @@ void Evolution::Individual::setIndividualID(size_t newID)
     if (newID >= INDIVIDUAL_COUNTER_ID) {
         INDIVIDUAL_COUNTER_ID = newID + 1;
     }
-}
-
-
-void Evolution::Individual::addGPNode(std::unique_ptr<Node::GPNode> node, size_t index, bool isIntron)
-{
-    if(index > this->genotype.size()){
-        throw std::runtime_error("Evolution::Individual::addGPNode: index out of range.");
-    }
-    this->genotype.insert(this->genotype.begin() + index, std::move(node));
-    this->isIntronNode.insert(this->isIntronNode.begin() + index, isIntron);
-}
-
-void Evolution::Individual::addGPNode(std::unique_ptr<Node::GPNode> node, bool isIntron)
-{
-    this->addGPNode(std::move(node), this->genotype.size(), isIntron);
-}
-
-void Evolution::Individual::removeGPNode(size_t index)
-{
-    if(index >= this->genotype.size()){
-        throw std::runtime_error("Evolution::Individual::removeGPNode: index out of range.");
-    }
-    this->genotype.erase(this->genotype.begin() + index);
-}
-
-Node::GPNode& Evolution::Individual::getMutableGPNode(size_t index)
-{
-    if(index >= this->getSize()){
-        throw std::runtime_error("Evolution::Individual::getMutableGPNode: index out of range.");
-    }
-    return *this->genotype[index];
-}
-
-const Node::GPNode& Evolution::Individual::getGPNode(size_t index) const
-{
-    if(index >= this->getSize()){
-        throw std::runtime_error("Evolution::Individual::getGPNode: index out of range.");
-    }
-    return *this->genotype[index];
-}
+}        
 
 size_t Evolution::Individual::getSize() const
 {
-    return this->genotype.size();
+    return this->genotype->getFullSize();
 }
 
-std::vector<std::reference_wrapper<const Node::GPNode>> Evolution::Individual::getGenotype() const
+const Evolution::Genotype& Evolution::Individual::getGenotype() const
 {
-    std::vector<std::reference_wrapper<const Node::GPNode>> result;
-    result.reserve(genotype.size());
-
-    for (const auto& node : genotype) {
-        result.emplace_back(*node);
-    }
-
-    return result;
+    return *this->genotype;
 }
 
-std::vector<std::reference_wrapper<const Node::GPNode>> Evolution::Individual::getEffectiveGenotype() const
+Evolution::Genotype& Evolution::Individual::getMutableGenotype()
 {
-    std::vector<std::reference_wrapper<const Node::GPNode>> result;
-
-    for(size_t idx = 0; idx < this->getSize(); idx++) {
-        if(!this->getIsIntronNode(idx)) {
-            result.emplace_back(this->getGPNode(idx));
-        }
-    }
-
-    return result;
+    return *this->genotype;
 }
-
-void Evolution::Individual::setIsIntronNode(size_t index, bool isIntron)
-{
-    if(index >= this->getSize()){
-        throw std::runtime_error("Evolution::Individual::setIsIntronNode: index out of range.");
-    }
-    this->isIntronNode[index] = isIntron;
-}
-
-bool Evolution::Individual::getIsIntronNode(size_t index) const
-{
-    if(index >= this->getSize()){
-        throw std::runtime_error("Evolution::Individual::getIsIntronNode: index out of range.");
-    }
-    return this->isIntronNode[index];
-}
-
-const std::vector<bool>& Evolution::Individual::getAreIntronNodes() const
-{
-    return this->isIntronNode;
-}
-
-bool Evolution::Individual::hasSameGenotypeAs(const Individual& other, bool effectiveGenotype) const
+        
+/*bool Evolution::Individual::hasSameGenotypeAs(const Individual& other, bool effectiveGenotype) const
 {
     auto thisGenotype = (effectiveGenotype) ? this->getEffectiveGenotype() : this->getGenotype();
     auto otherGenotype = (effectiveGenotype) ? other.getEffectiveGenotype() : other.getGenotype();
@@ -149,7 +74,7 @@ bool Evolution::Individual::hasSameGenotypeAs(const Individual& other, bool effe
         }
     }
     return true;
-}
+}*/
 
 
 
