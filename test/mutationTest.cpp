@@ -244,3 +244,48 @@ TEST_F(MutationTest, initRandomIndividual)
         }
     }
 }
+
+TEST_F(MutationTest, mutateNode)
+{
+    Evolution::Mutation mutation;
+
+    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+
+    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+
+    Evolution::Individual indiv0; 
+    Evolution::Individual indiv1;
+    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+
+    Node::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
+
+
+    std::vector<Node::NodeValue> vect{size_t(6), 1.0, indiv0, size_t(8)};
+    size_t globalNbChanges;
+    for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
+        Node::GPNode node(vect);
+        
+        ASSERT_NO_THROW(mutation.mutateNode(node, nodeTemplate, rng)) << "Mutating a node failed";
+        size_t nbValueChanged = 0;
+        for(size_t idx = 0; idx < node.getSize(); idx++) {
+            const Node::NodeValue& value = node.getValue(idx);
+            if(value != vect.at(idx)) {
+                nbValueChanged++;
+            }
+        }
+        ASSERT_EQ(nbValueChanged, 1) << "Mutating a node should change a single value";
+    }
+
+    vect.pop_back();
+    Node::GPNode node(vect);
+    ASSERT_THROW(mutation.mutateNode(node, nodeTemplate, rng), std::runtime_error) << "Mutating should fail with different sizes";
+}
+
+TEST_F(MutationTest, mutateIndividual)
+{
+    ASSERT_FALSE(true) << "TODO";
+}

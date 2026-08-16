@@ -132,6 +132,38 @@ TEST_F(IndividualTest, GetGenotype)
     ASSERT_EQ(effectiveGenotype[0].get().getValues().at(0), Node::NodeValue(size_t{4})) << "Getting values of the GPNode failed.";
 }
 
+TEST_F(IndividualTest, hasSameGenotypeAs){
+    
+    Evolution::Individual individual1;
+    Evolution::Individual individual2;
+
+    ASSERT_TRUE(individual1.hasSameGenotypeAs(individual2)) << "Empty individuals should be equal!";
+
+    individual1.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}), false);
+
+    ASSERT_FALSE(individual1.hasSameGenotypeAs(individual2)) << "Should not be equal with different number of nodes";
+
+    individual2.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0}), false);
+    ASSERT_FALSE(individual1.hasSameGenotypeAs(individual2)) << "Should not be equal with different sizes of nodes";
+
+    individual2.removeGPNode(0);
+    individual2.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 4.0}), false);
+    ASSERT_FALSE(individual1.hasSameGenotypeAs(individual2)) << "Should not be equal with different values of nodes";
+    
+    individual2.removeGPNode(0);
+    individual2.addGPNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}), false);
+    ASSERT_TRUE(individual1.hasSameGenotypeAs(individual2)) << "Individuals should be equal";
+    
+    individual1.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), false);
+    individual2.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), true);
+    
+    ASSERT_TRUE(individual1.hasSameGenotypeAs(individual2)) << "Individuals should be equal";
+    ASSERT_TRUE(individual2.hasSameGenotypeAs(individual1)) << "Individuals should be equal both directions";
+    ASSERT_FALSE(individual1.hasSameGenotypeAs(individual2, true)) << "Effective genotype should not be equal";
+    
+
+}
+
 TEST_F(IndividualTest, IDCounter)
 {
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 0) << "Individual ID counter should be 0 at the beginning.";

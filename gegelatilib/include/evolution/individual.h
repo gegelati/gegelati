@@ -161,6 +161,13 @@ namespace Evolution {
          */
         virtual bool getIsIntronNode(size_t index) const;
 
+        /**
+         * \brief Compare two individuals' genotype.
+         * 
+         * \param[in] other the individual compared.
+         * \param[in] effectiveGenotype true to compare only the effective genotype.
+         */
+        virtual bool hasSameGenotypeAs(const Individual& other, bool effectiveGenotype = false) const;
     };
     
     /**

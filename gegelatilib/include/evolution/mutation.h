@@ -44,9 +44,9 @@ namespace Evolution {
         virtual Node::NodeValue sampleNodeValue(const Node::NodeValueTemplate& nodeValueTemplate, RNG::RNG& rng);
 
         /**
-         * \brief Create a random GPNode, and place it at a random index in the individual.
+         * \brief Create a random GPNode.
          *
-         * \param[in] nodeTemplate node template of the created individual
+         * \param[in] nodeTemplate node template of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual std::unique_ptr<Node::GPNode> createRandomNode(const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
@@ -60,6 +60,27 @@ namespace Evolution {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void initRandomIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+
+
+        /**
+         * \brief mutate a GPNode.
+         *
+         * \param[in] node the node to mutate.
+         * \param[in] nodeTemplate node template of the node
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void mutateNode(Node::GPNode& node, const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
+
+        /**
+         * \brief Mutate an Individual.
+         *
+         * \param[in,out] indiv the individual mutated.
+         * \param[in] genotypeTemplate genotype template of the individual
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void mutateIndividual(Individual& indiv, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+
+
     };
 }; // namespace Mutation
 

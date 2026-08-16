@@ -13,7 +13,7 @@
 
 namespace Evolution {
     /**
-     * \brief Class representing an Population used by an Representation.
+     * \brief Class representing an Population used by an EvolutionAlgorithm.
      * 
      * The Population is in charge of storing, creating, copying or removing Individuals.
      */
@@ -21,7 +21,7 @@ namespace Evolution {
     {
     protected:
 
-        /// Current individuals used by the representation
+        /// Current individuals used by the Population
         std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> individuals;
 
         
@@ -85,7 +85,7 @@ namespace Evolution {
         virtual void setPopulationID(size_t newID);
 
         /**
-         * \brief Get the current individuals used by the representation.
+         * \brief Get the current individuals.
          */
         virtual const std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
 
@@ -104,14 +104,14 @@ namespace Evolution {
         virtual Individual& getMutableIndividual(const Individual& individual);
 
         /**
-         * \brief Create a new Individual of the type used by the current representation.
+         * \brief Create a new empty Individual.
          * 
          * \return a shared pointer to the created Individual.
          */
         virtual const Individual& createIndividual();
 
         /**
-         * \brief Copy a new Individual of the type used by the current representation.
+         * \brief Copy an Individual.
          * 
          * \param[in] individual the Individual to copy.
          * 
@@ -120,14 +120,14 @@ namespace Evolution {
         virtual const Individual& copyIndividual(const Individual& individual);
 
         /**
-         * \brief Create a new Individual of the type used by the current representation.
+         * \brief Delete an individual.
          * 
          * \param[in] individual the Individual to delete.
          */
         virtual void deleteIndividual(const Individual& individual);
 
         /**
-         * \brief Empty an Individual of the type used by the current representation.
+         * \brief Empty an Individual by clearing its gneotype.
          * 
          * \param[in] individual the Individual to empty.
          */
@@ -165,6 +165,6 @@ namespace Evolution {
      */
     bool operator!=(const Population& a, const Population& b);
 
-}; // namespace Representation
+}; // namespace Evolution
 
 #endif // INDIVIDUAL_POPULATION_H

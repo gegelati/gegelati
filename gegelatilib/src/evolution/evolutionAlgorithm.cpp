@@ -47,3 +47,35 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>,
         this->population->getIndividuals(),*this->representation, 
         *this->selection, generationNumber, mode);
 }
+
+
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectParents(size_t nbParents)
+{
+    std::vector<std::reference_wrapper<const Evolution::Individual>> currentIndividuals(this->population->getIndividuals());
+
+    std::vector<std::reference_wrapper<const Evolution::Individual>> selectedParents;
+    for(size_t idx = 0; idx < nbParents; idx ++) {
+        // Random parent selection for now
+        selectedParents.push_back(currentIndividuals.at(rng.getUnsignedInt64(0, currentIndividuals.size() - 1)));
+    }
+    return selectedParents;
+}
+
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::reproduce(
+    std::vector<std::reference_wrapper<const Individual>> parents
+)
+{    // Reproduction process, only replication for now.
+    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring;
+    for(size_t idx = 0; idx < parents.size(); idx++) {
+        offspring.push_back(this->population->copyIndividual(parents.at(idx)));
+    }
+    return offspring;
+}
+
+void Evolution::EvolutionAlgorithm::mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring)
+{
+    std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
+    for(const Individual& os: offspring) {
+        this->mutation->mutateIndividual(this->population->getMutableIndividual(os), *genotypeTemplate, rng);
+    }
+}

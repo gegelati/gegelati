@@ -100,6 +100,29 @@ namespace Evolution {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Individual>> evaluatePopulation(
                                 size_t generationNumber, Learn::LearningMode mode);
+
+        /**
+         * \brief Select parents used to generate offspring.
+         * 
+         * \param[in] nbParents the number of parents to select.
+         */
+        virtual std::vector<std::reference_wrapper<const Individual>> selectParents(size_t nbParents);
+
+        /**
+         * \brief Generate offspring based on selected parents
+         * 
+         * \param[in] parents the vector of selected parents
+         */
+        virtual std::vector<std::reference_wrapper<const Individual>> reproduce(
+          std::vector<std::reference_wrapper<const Individual>> parents
+        );
+
+        /**
+         * \brief mutate the specified offspring based on the genotypeTemplate of the representation.
+         * 
+         * \param[in] offspring the vector of offspring to mutate
+         */
+        virtual void mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring);
     };
 }; // namespace Evolution
 
