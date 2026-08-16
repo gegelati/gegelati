@@ -206,16 +206,16 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
-    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
+    indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
     ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
 
     double output;
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, -0.5) << "Value is not correct.";
+    ASSERT_EQ(output, 1.5) << "Value is not correct.";
 
     // R[0] = R[0] + R[0] = -1, but set as intron
     indiv.addGPNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}), true);
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, -0.5) << "Value is not correct.";
+    ASSERT_EQ(output, 1.5) << "Value is not correct.";
 }

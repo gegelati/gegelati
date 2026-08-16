@@ -117,6 +117,68 @@ TEST_F(EvolutionAlgorithmTest, initializePopulation)
     }
 }
 
+TEST_F(EvolutionAlgorithmTest, selectParents) 
+{
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+
+    std::vector<std::reference_wrapper<const Evolution::Individual>> parents;
+    ASSERT_NO_THROW(parents = ea.selectParents(100)) << "Selecting parents failed";
+    for(const Evolution::Individual& parent: parents) {
+        ASSERT_TRUE(ea.getPopulation().containsIndividual(parent)) << "Parent should be contained in the population";
+    }
+
+    std::vector<std::reference_wrapper<const Evolution::Individual>> parents2;
+    ASSERT_NO_THROW(parents2 = ea.selectParents(100)) << "Selecting parents failed";
+    bool sameParents = true;
+    for(size_t idx = 0; idx < 100 && sameParents; idx++) {
+        sameParents = parents.at(idx) == parents2.at(idx);
+    }
+    ASSERT_FALSE(sameParents) << "It is very unlikely that the parents were sampled in the same order";
+}
+
+TEST_F(EvolutionAlgorithmTest, reproduceParents) 
+{
+    
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
+
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should be 100 before reproduction";
+
+    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring;
+    ASSERT_NO_THROW(offspring = ea.reproduceParents(parents)) << "Reproducing failed.";
+
+    ASSERT_EQ(ea.getPopulation().size(), 200) << "Population Size should be 200 after reproduction";
+    ASSERT_EQ(offspring.size(), 100) << "Offspring Size should be 100 after reproduction";
+
+    for(size_t idx = 0; idx < offspring.size(); idx++) {
+        ASSERT_TRUE(ea.getPopulation().containsIndividual(offspring.at(idx))) << "Offspring should be contained in the population";
+        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents";
+    }
+}
+
+TEST_F(EvolutionAlgorithmTest, mutateOffspring) 
+{
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
+    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring = ea.reproduceParents(parents);
+
+
+    for(size_t idx = 0; idx < offspring.size(); idx++) {
+        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents before mutation";
+    }
+
+    ASSERT_NO_THROW(ea.mutateOffspring(offspring)) << "Mutating the offspring vector failed";
+
+    for(size_t idx = 0; idx < offspring.size(); idx++) {
+        ASSERT_FALSE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
+    }
+}
+
+
+
 TEST_F(EvolutionAlgorithmTest, evaluatePopulation) 
 {
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
@@ -140,62 +202,29 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     }
 }
 
-TEST_F(EvolutionAlgorithmTest, selectParents) 
+TEST_F(EvolutionAlgorithmTest, replacePopulation) 
 {
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
     ea.initializePopulation();
+    ea.mutateOffspring(ea.reproduceParents(ea.selectParents(100)));
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents;
-    ASSERT_NO_THROW(parents = ea.selectParents(100)) << "Selecting parents failed";
-    for(const Evolution::Individual& parent: parents) {
-        ASSERT_TRUE(ea.getPopulation().containsIndividual(parent)) << "Parent should be contained in the population";
-    }
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
+        ea.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> resultsCopy(results);
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents2;
-    ASSERT_NO_THROW(parents2 = ea.selectParents(100)) << "Selecting parents failed";
-    bool sameParents = true;
-    for(size_t idx = 0; idx < 100 && sameParents; idx++) {
-        sameParents = parents.at(idx) == parents2.at(idx);
-    }
-    ASSERT_FALSE(sameParents) << "It is very unlikely that the parents were sampled in the same order";
-}
+    ASSERT_EQ(ea.getPopulation().size(), 200) << "Population size should be 200 before replacement";
+    ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
 
-TEST_F(EvolutionAlgorithmTest, reproduce) 
-{
-    
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
-    ea.initializePopulation();
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
+    ea.replacePopulation(results);
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size should be 100 after replacement";
+    ASSERT_EQ(results.size(), 100) << "Results size should be 100 after replacement";
 
-    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should be 100 before reproduction";
+    auto rit = results.rbegin();
+    auto ritCopy = resultsCopy.rbegin();
+    while(rit != results.rend() && ritCopy != results.rend()) {
+        ASSERT_EQ(rit->first->getSelectionMetrics()->getScore(), ritCopy->first->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
+        ASSERT_EQ(rit->second, ritCopy->second) << "Individuals should be equal";
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring;
-    ASSERT_NO_THROW(offspring = ea.reproduce(parents)) << "Reproducing failed.";
-
-    ASSERT_EQ(ea.getPopulation().size(), 200) << "Population Size should be 200 after reproduction";
-    ASSERT_EQ(offspring.size(), 100) << "Offspring Size should be 100 after reproduction";
-
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(ea.getPopulation().containsIndividual(offspring.at(idx))) << "Offspring should be contained in the population";
-        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents";
-    }
-}
-
-TEST_F(EvolutionAlgorithmTest, mutateOffspring) 
-{
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
-    ea.initializePopulation();
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
-    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring = ea.reproduce(parents);
-
-
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have the same genotype has their parents before mutation";
-    }
-
-    ASSERT_NO_THROW(ea.mutateOffspring(offspring)) << "Mutating the offspring vector failed";
-
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_FALSE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
+        rit++; ritCopy++;
     }
 }

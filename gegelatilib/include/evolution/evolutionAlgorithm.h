@@ -91,17 +91,6 @@ namespace Evolution {
         void initializePopulation();
 
         /**
-         * \brief Evaluate the current individuals of the population.
-         * 
-         * \param[in] generationNumber the integer number of the current
-         * generation.
-         * \param[in] mode the LearningMode to use during the evaluation.
-         */
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Individual>> evaluatePopulation(
-                                size_t generationNumber, Learn::LearningMode mode);
-
-        /**
          * \brief Select parents used to generate offspring.
          * 
          * \param[in] nbParents the number of parents to select.
@@ -113,7 +102,7 @@ namespace Evolution {
          * 
          * \param[in] parents the vector of selected parents
          */
-        virtual std::vector<std::reference_wrapper<const Individual>> reproduce(
+        virtual std::vector<std::reference_wrapper<const Individual>> reproduceParents(
           std::vector<std::reference_wrapper<const Individual>> parents
         );
 
@@ -123,6 +112,26 @@ namespace Evolution {
          * \param[in] offspring the vector of offspring to mutate
          */
         virtual void mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring);
+
+        
+        /**
+         * \brief Evaluate the current individuals of the population.
+         * 
+         * \param[in] generationNumber the integer number of the current
+         * generation.
+         * \param[in] mode the LearningMode to use during the evaluation.
+         */
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                              std::reference_wrapper<const Individual>> evaluatePopulation(
+                                size_t generationNumber, Learn::LearningMode mode);
+
+        /**
+         * \brief perform the replacement of the population based on a selection method.
+         * 
+         * \param[in] scores score achieved by the individuals of the population.
+         */
+        virtual void replacePopulation(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                              std::reference_wrapper<const Individual>>& scores);
     };
 }; // namespace Evolution
 
