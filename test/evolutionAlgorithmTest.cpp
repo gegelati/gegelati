@@ -101,6 +101,10 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 
     ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
 
+    ASSERT_NO_THROW(ea->getMutation()) << "For Coverage :D";
+    ASSERT_NO_THROW(ea->getEvaluation()) << "For Coverage :D";
+    ASSERT_NO_THROW(ea->getSelector()) << "For Coverage :D";
+
     ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
 }
 
@@ -175,6 +179,12 @@ TEST_F(EvolutionAlgorithmTest, mutateOffspring)
     for(size_t idx = 0; idx < offspring.size(); idx++) {
         ASSERT_FALSE(offspring.at(idx).get().hasSameGenotypeAs(parents.at(idx))) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
     }
+
+    
+    Evolution::EvolutionAlgorithm ea2(*representation, le);
+    ea2.initializePopulation();
+    ASSERT_THROW(ea.mutateOffspring(ea2.reproduceParents(ea2.selectParents(100))), std::runtime_error) << "Should throw with wrong population";
+
 }
 
 
@@ -215,7 +225,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
     ASSERT_EQ(ea.getPopulation().size(), 200) << "Population size should be 200 before replacement";
     ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
 
-    ea.replacePopulation(results);
+    ASSERT_NO_THROW(ea.replacePopulation(results)) << "Fail to replace population";
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size should be 100 after replacement";
     ASSERT_EQ(results.size(), 100) << "Results size should be 100 after replacement";
 
@@ -227,6 +237,15 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
 
         rit++; ritCopy++;
     }
+
+    
+    Evolution::EvolutionAlgorithm ea2(*representation, le);
+    ea2.initializePopulation();
+    ea2.mutateOffspring(ea2.reproduceParents(ea2.selectParents(100)));
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> fakeResults = 
+        ea2.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+    ASSERT_THROW(ea.replacePopulation(fakeResults), std::runtime_error) << "Should fail to replace population with wrong results";
 }
 
 TEST_F(EvolutionAlgorithmTest, doGenerations) {
