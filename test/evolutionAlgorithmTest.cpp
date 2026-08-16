@@ -228,3 +228,21 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
         rit++; ritCopy++;
     }
 }
+
+TEST_F(EvolutionAlgorithmTest, doGenerations) {
+    
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+
+    size_t nbGen = 20;
+    double formerBest = -1;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+        ea.mutateOffspring(ea.reproduceParents(ea.selectParents(100)));
+        auto results = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+        ea.replacePopulation(results);
+
+        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
+        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
+        formerBest = best;
+    }
+}
