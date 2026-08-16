@@ -59,6 +59,8 @@ class TPGRepresentationTest : public ::testing::Test
     Evolution::Representation* memberRepresentation;
     Evolution::Population* memberPopulation;
 
+    Evolution::Population* tpgPopulation;
+
     virtual void SetUp()
     {   
         auto add = [](double a, double b) -> double { return a + b; };
@@ -76,8 +78,10 @@ class TPGRepresentationTest : public ::testing::Test
         memberRepresentation = new Representations::LGPRepresentation(set, 8, 1, 10);
         memberRepresentation->setInputDimensions({*inputSource});
         memberPopulation = new Evolution::Population();
+        tpgPopulation = new Evolution::Population();
         for(size_t idx = 0; idx < 100; idx++) {
             memberPopulation->createIndividual();
+            tpgPopulation->createIndividual();
         }
     }
 
@@ -97,7 +101,7 @@ TEST_F(TPGRepresentationTest, Constructor)
 {
     Representations::TPGRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation(*memberRepresentation, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation(*memberRepresentation, *memberPopulation, *tpgPopulation, 2, 10)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
@@ -110,7 +114,7 @@ TEST_F(TPGRepresentationTest, setInputDimensions)
 
 TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 5, 10);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
@@ -137,20 +141,32 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
         ASSERT_TRUE(member == memberPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
     }
 
-    /// CHECK ACTION TEMPLATE
+    /// CHECK ACTION/TANGLED TEMPLATE
     const std::shared_ptr<const Node::NodeValueTemplate>& nodeValueTemplate1 = nodeTemplate->getValueTemplateAt(1);
-    ASSERT_EQ(nodeValueTemplate1->size(), 1) << "Template should be of size 1";
+    ASSERT_EQ(nodeValueTemplate1->size(), 2) << "Template should be of size 2";
+
+    /// CHECK ACTION CONFIG
     ASSERT_TRUE(std::holds_alternative<Node::NodeValueRange>(*nodeValueTemplate1->getconfigurationAt(0))) << "Configuration should be a valueRange";
     const Node::NodeValueRange& range = std::get<Node::NodeValueRange>(*nodeValueTemplate1->getconfigurationAt(0));
     bool isSize_tPair = std::holds_alternative<std::pair<size_t, size_t>>(range);
     std::pair<size_t, size_t> pairRange = std::get<std::pair<size_t, size_t>>(range);
     ASSERT_EQ(pairRange.first, 0) << "Lower range should always be 0";
     ASSERT_EQ(pairRange.second, 3) << "Expected upper range is incorrect";
+
+    /// CHECK TANGLED CONFIG
+    ASSERT_TRUE(std::holds_alternative<std::vector<Node::NodeValue>>(*nodeValueTemplate1->getconfigurationAt(1))) << "Configuration should be a vector of nodes";
+    const std::vector<Node::NodeValue>& valuesT = std::get<std::vector<Node::NodeValue>>(*nodeValueTemplate1->getconfigurationAt(1));
+    ASSERT_EQ(valuesT.size(), tpgPopulation->size()) << "Value vector size should be the same as the tpg population";
+    for(size_t idx = 0; idx < valuesT.size(); idx++) {
+        ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(valuesT.at(idx))) << "Value should be an individual";
+        const Evolution::Individual& tpgIndiv = std::get<std::reference_wrapper<const Evolution::Individual>>(valuesT.at(idx));
+        ASSERT_TRUE(tpgIndiv == tpgPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
+    }
 }
 
 TEST_F(TPGRepresentationTest, isValid)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 5, 10);
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
@@ -166,12 +182,6 @@ TEST_F(TPGRepresentationTest, isValid)
         goodMemberGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
     
-    Evolution::Individual badPopMember;
-    Evolution::Genotype& badPopMemberGenotype = badPopMember.getMutableGenotype();
-    Node::NodeGroup& badPopMemberGroup = badPopMemberGenotype.addNodeGroup();
-    for(size_t i = 0; i < 8; i++) {
-        badPopMemberGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
-    }
 
 
 
@@ -188,10 +198,6 @@ TEST_F(TPGRepresentationTest, isValid)
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
 
     group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, size_t(6)}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{badPopMember, size_t(2)}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
@@ -218,6 +224,8 @@ TEST_F(TPGRepresentationTest, isValid)
 
     ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 11 nodes";
+
+    ASSERT_FALSE(true) << "TODO: Test for wrong tangled individuals missing";
 }
 
 
@@ -257,20 +265,31 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(memberRepresentation->isValid(member2)) << "Member should be equal";
 
 
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 2, 10);
     representation.setInputDimensions(inputSources);
+
+    // Tangled Individual
+    Evolution::Individual tangledIndiv;
+    Evolution::Genotype& tangledGenotype = tangledIndiv.getMutableGenotype();
+    Node::NodeGroup& tangledGroup = tangledGenotype.addNodeGroup();
+    
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member0, size_t(0)}));
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member1, size_t(1)}));
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member2, size_t(2)}));
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
     
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member0, size_t(0)}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member1, size_t(1)}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member2, size_t(2)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member1, tangledIndiv}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member2, size_t(0)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member0, size_t(2)}));
 
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid";
 
     double output;
+    ASSERT_NO_THROW(output = representation.executeIndividual(tangledIndiv, inputSources).at(0)) << "Execution of individual failed.";
+    ASSERT_EQ(output, 1.0) << "Value is not correct.";
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, 1.0) << "Value is not correct.";
 }

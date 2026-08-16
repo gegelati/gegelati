@@ -71,8 +71,7 @@ void Evolution::Mutation::initRandomGenotype(Genotype& genotype, const Node::Gen
     }
 
     for(size_t idxTemplate = 0; idxTemplate < genotypeTemplate.size(); idxTemplate++) {
-        genotype.addNodeGroup();
-        Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(genotype.getSize() - 1);
+        Node::NodeGroup& nodeGroup = genotype.addNodeGroup();
         
         const std::pair<size_t, size_t>& range = genotypeTemplate.getRangeAt(idxTemplate);
         size_t nbNodesOfTemplate = rng.getUnsignedInt64(range.first, range.second);
