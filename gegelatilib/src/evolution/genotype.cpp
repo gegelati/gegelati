@@ -1,18 +1,18 @@
 #include "evolution/genotype.h"
 #include "evolution/individual.h"
 
-void Evolution::Genotype::addNodeGroup(size_t index)
+Node::NodeGroup& Evolution::Genotype::addNodeGroup(size_t index)
 {
     if(index > this->nodeGroups.size()){
         throw std::runtime_error("Evolution::Genotype::addNodeGroup: index out of range.");
     }
     this->nodeGroups.insert(this->nodeGroups.begin() + index, std::make_unique<Node::NodeGroup>());
-
+    return *this->nodeGroups.at(index);
 }
 
-void Evolution::Genotype::addNodeGroup()
+Node::NodeGroup& Evolution::Genotype::addNodeGroup()
 {
-    this->addNodeGroup(this->nodeGroups.size());
+    return this->addNodeGroup(this->nodeGroups.size());
 }
 
 void Evolution::Genotype::removeNodeGroup(size_t index)

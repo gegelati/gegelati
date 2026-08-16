@@ -322,10 +322,8 @@ TEST_F(MutationTest, mutateIndividual)
     genotypeTemplate.addNodeTemplate(nodeTemplate1);
 
     Evolution::Genotype genotype;
-    genotype.addNodeGroup();
-    genotype.addNodeGroup();
-    Node::NodeGroup& group1 = genotype.getMutableNodeGroup(0);
-    Node::NodeGroup& group2 = genotype.getMutableNodeGroup(1);
+    Node::NodeGroup& group1 = genotype.addNodeGroup();
+    Node::NodeGroup& group2 = genotype.addNodeGroup();
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));
@@ -336,10 +334,8 @@ TEST_F(MutationTest, mutateIndividual)
 
     // COPY GENOTYPE (Should need proper method)    
     Evolution::Genotype genotypeCopy;
-    genotypeCopy.addNodeGroup();
-    genotypeCopy.addNodeGroup();
-    Node::NodeGroup& groupCopy1 = genotypeCopy.getMutableNodeGroup(0);
-    Node::NodeGroup& groupCopy2 = genotypeCopy.getMutableNodeGroup(1);
+    Node::NodeGroup& groupCopy1 = genotypeCopy.addNodeGroup();
+    Node::NodeGroup& groupCopy2 = genotypeCopy.addNodeGroup();
     groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
     groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
     groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));

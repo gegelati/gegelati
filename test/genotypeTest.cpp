@@ -89,14 +89,12 @@ TEST(GenotypeTest, getSizes)
 {
     Evolution::Genotype genotype;
 
-    genotype.addNodeGroup();
-    Node::NodeGroup& group1 = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group1 = genotype.addNodeGroup();
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
 
-    genotype.addNodeGroup();
-    Node::NodeGroup& group2 = genotype.getMutableNodeGroup(1);
+    Node::NodeGroup& group2 = genotype.addNodeGroup();
     group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
     group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{6, 5, 4}));
 
@@ -110,14 +108,12 @@ TEST(GenotypeTest, getEffectiveNodes)
 {
     Evolution::Genotype genotype;
 
-    genotype.addNodeGroup();
-    Node::NodeGroup& group1 = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group1 = genotype.addNodeGroup();
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
 
-    genotype.addNodeGroup();
-    Node::NodeGroup& group2 = genotype.getMutableNodeGroup(1);
+    Node::NodeGroup& group2 = genotype.addNodeGroup();
     group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
     group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{6, 5, 4}));
 
@@ -144,16 +140,12 @@ TEST(GenotypeTest, getEffectiveNodes)
 TEST(GenotypeTest, equality){
 
     Evolution::Genotype genotype1;
-    genotype1.addNodeGroup();
-    genotype1.addNodeGroup();
-    Node::NodeGroup& group1_1 = genotype1.getMutableNodeGroup(0);
-    Node::NodeGroup& group1_2 = genotype1.getMutableNodeGroup(1);
+    Node::NodeGroup& group1_1 = genotype1.addNodeGroup();
+    Node::NodeGroup& group1_2 = genotype1.addNodeGroup();
 
     Evolution::Genotype genotype2;
-    genotype2.addNodeGroup();
-    genotype2.addNodeGroup();
-    Node::NodeGroup& group2_1 = genotype2.getMutableNodeGroup(0);
-    Node::NodeGroup& group2_2 = genotype2.getMutableNodeGroup(1);
+    Node::NodeGroup& group2_1 = genotype2.addNodeGroup();
+    Node::NodeGroup& group2_2 = genotype2.addNodeGroup();
 
 
     ASSERT_TRUE(genotype1 == genotype2) << "Empty genotypes should be equal!";

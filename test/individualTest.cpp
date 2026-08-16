@@ -76,14 +76,12 @@ TEST_F(IndividualTest, GetGenotype)
     Evolution::Genotype* genotype;
     ASSERT_NO_THROW(genotype = &individual.getMutableGenotype()) << "Getting genotype failed";
 
-    genotype->addNodeGroup();
-    Node::NodeGroup& group1 = genotype->getMutableNodeGroup(0);
+    Node::NodeGroup& group1 = genotype->addNodeGroup();
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
 
-    genotype->addNodeGroup();
-    Node::NodeGroup& group2 = genotype->getMutableNodeGroup(1);
+    Node::NodeGroup& group2 = genotype->addNodeGroup();
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{6, 5, 4}));
 

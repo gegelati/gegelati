@@ -99,8 +99,7 @@ const Evolution::Individual& Evolution::Population::copyIndividual(const Individ
     Genotype& newGenotype = it->get()->getMutableGenotype();
 
     for(const Node::NodeGroup& group: genotype.getNodeGroups()) {
-        newGenotype.addNodeGroup();
-        Node::NodeGroup& newNodeGroup = newGenotype.getMutableNodeGroup(newGenotype.getSize() - 1);
+        Node::NodeGroup& newNodeGroup = newGenotype.addNodeGroup();
         
         for(const Node::GPNode& node: group.getNodes()) {
             newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));

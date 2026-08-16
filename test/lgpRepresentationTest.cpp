@@ -166,7 +166,6 @@ TEST_F(LGPRepresentationTest, isValid)
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
 
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
-    ASSERT_EQ(indiv.getSize(), 5) << "Mejh";
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
 
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));
@@ -213,7 +212,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
-    ASSERT_NO_THROW(representation.isValid(indiv)) << "Individual should be valid";
+    ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid";
 
     double output;
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";

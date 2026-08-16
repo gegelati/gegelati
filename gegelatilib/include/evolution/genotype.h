@@ -36,12 +36,12 @@ namespace Evolution {
              * 
              * \param[in] index the index at which to add the NodeGroup.
              */
-            virtual void addNodeGroup(size_t index);
+            virtual Node::NodeGroup& addNodeGroup(size_t index);
 
             /**
              * \brief Add a NodeGroup at the end of the Genotype.
              */
-            virtual void addNodeGroup();
+            virtual Node::NodeGroup& addNodeGroup();
 
             /**
              * \brief Remove a NodeGroup from the Genotype.

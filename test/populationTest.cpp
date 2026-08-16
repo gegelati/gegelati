@@ -93,8 +93,7 @@ TEST_F(PopulationTest, copyIndividual)
     Evolution::Individual* mutIndiv;
     ASSERT_NO_THROW(mutIndiv = &population.getMutableIndividual(individual)) << "Getting individual should not fail.";
     Evolution::Genotype& genotype = mutIndiv->getMutableGenotype();
-    genotype.addNodeGroup();
-    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group = genotype.addNodeGroup();
     group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
     group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
@@ -132,8 +131,7 @@ TEST_F(PopulationTest, emptyIndividual)
     Evolution::Individual& mutIndiv = population.getMutableIndividual(individual);
 
     Evolution::Genotype& genotype = mutIndiv.getMutableGenotype();
-    genotype.addNodeGroup();
-    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group = genotype.addNodeGroup();
 
     group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));

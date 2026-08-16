@@ -116,8 +116,7 @@ TEST_F(EvaluationAgentTest, evaluateIndividual)
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
-    genotype.addNodeGroup();
-    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+    Node::NodeGroup& group = genotype.addNodeGroup();
     
     representation->setInputDimensions(le.getDataSources());
 
