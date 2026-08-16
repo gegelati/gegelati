@@ -47,8 +47,6 @@
 #include "instructions/lambdaInstruction.h"
 
 
-// Set all file in comment
-
 class LGPRepresentationTest : public ::testing::Test
 {
   protected:

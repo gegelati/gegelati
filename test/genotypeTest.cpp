@@ -80,8 +80,9 @@ TEST(GenotypeTest, addRemoveNodeGroup)
     ASSERT_NO_THROW(genotype.removeNodeGroup(0)) << "Removing NodeGroup to the Genotype failed.";
     ASSERT_EQ(genotype.getSize(), 1) << "Getting size of the Genotype failed.";
     
-    ASSERT_THROW(genotype.removeNodeGroup(1), std::runtime_error) << "Removing NodeGroup of the Genotype should have failed.";
-    ASSERT_THROW(genotype.addNodeGroup(2), std::runtime_error) << "Adding NodeGroup of the Genotype should have failed.";
+    ASSERT_THROW(genotype.removeNodeGroup(1), std::runtime_error) << "Removing NodeGroup of the Genotype should have failed with wrong index.";
+    ASSERT_THROW(genotype.addNodeGroup(2), std::runtime_error) << "Adding NodeGroup of the Genotype should have failed with wrong index.";
+    ASSERT_THROW(genotype.getNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
 }
 
 TEST(GenotypeTest, getSizes)
