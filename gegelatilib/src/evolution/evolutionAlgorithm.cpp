@@ -29,6 +29,10 @@ const Selector::Selector& Evolution::EvolutionAlgorithm::getSelector()
 
 void Evolution::EvolutionAlgorithm::initializePopulation()
 {
+    if(representation->isTangled()) {
+        representation->setTangledPopulation(*population);
+    }
+
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
 
     size_t nbIndividuals = 100;

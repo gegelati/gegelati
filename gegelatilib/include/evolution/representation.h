@@ -10,6 +10,7 @@
 #include "iostream"
 
 #include "evolution/individual.h"
+#include "evolution/population.h"
 #include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
 #include "data/primitiveTypeArray.h"
@@ -42,6 +43,12 @@ namespace Evolution {
         std::string representationName = "";
         /// Color of the representation.
         std::string representationColor = "";
+
+        /// True if represnetation allows tangled connections.
+        bool tangled = false;
+
+        /// Tangled population
+        std::optional<std::reference_wrapper<const Population>> tangledPopulation;
 
       public:
 
@@ -117,6 +124,25 @@ namespace Evolution {
          * \param[in] indiv individual controlled.
          */
         virtual bool isValid(const Individual& indiv) const = 0;
+
+        /**
+         * \brief set the statue of the tangled property
+         * 
+         * \param[in] tangled statue of the tangled property
+         */
+        virtual void setTangled(bool tangled);
+
+        /**
+         * \brief get if the representation is tangled
+         */
+        virtual bool isTangled() const;
+
+        /**
+         * Set a tangled population
+         * 
+         * \param[in] tangledPop population set
+         */
+        virtual void setTangledPopulation(const Population& tangledPop);
 
         /**
          * \brief execute the specified individual based on the current dataSources

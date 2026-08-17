@@ -7,6 +7,7 @@
 #include <ranges>
 #include <string>
 #include <set>
+#include <map>
 
 #include "evolution/individual.h"
 #include "util/genericComparator.h"
@@ -16,14 +17,16 @@ namespace Evolution {
      * \brief Class representing an Population used by an EvolutionAlgorithm.
      * 
      * The Population is in charge of storing, creating, copying or removing Individuals.
+     * 
+     * To unable aggregation of individuals from other individual with either member or tangled connections, the individuals are stored as shared_ptr.
+     * The count of the shared_ptr indicate the number of aggregation.
      */
     class Population
     {
     protected:
 
         /// Current individuals used by the Population
-        std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> individuals;
-
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals;
         
         /// Unique ID of the Population.
         size_t populationID;
@@ -47,7 +50,7 @@ namespace Evolution {
          * 
          * \param[in] individual the Individual to get.
          */
-        virtual std::set<std::unique_ptr<Individual>>::iterator getIndividualFromCst(const Individual& individual);
+        virtual std::set<std::shared_ptr<Individual>>::iterator getIndividualFromCst(const Individual& individual);
 
     public:
 
@@ -87,7 +90,14 @@ namespace Evolution {
         /**
          * \brief Get the current individuals.
          */
-        virtual const std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
+        virtual std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
+
+        /**
+         * \brief Get the pointers towards the current individuals.
+         * 
+         * The vector return references of shared_ptr to limit the increase of counts.
+         */
+        virtual std::vector<std::weak_ptr<const Individual>> getIndividualPtrs() const;
 
         /**
          * \brief method that indicate if the population contains a specific individual.
@@ -124,7 +134,7 @@ namespace Evolution {
          * 
          * \param[in] individual the Individual to delete.
          */
-        virtual void deleteIndividual(const Individual& individual);
+        virtual bool deleteIndividual(const Individual& individual);
 
         /**
          * \brief Empty an Individual by clearing its gneotype.

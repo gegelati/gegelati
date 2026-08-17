@@ -53,7 +53,7 @@ bool Evolution::operator!=(const Evolution::Population& a, const Evolution::Popu
 }
 
 
-std::set<std::unique_ptr<Evolution::Individual>>::iterator Evolution::Population::getIndividualFromCst(const Individual& individual)
+std::set<std::shared_ptr<Evolution::Individual>>::iterator Evolution::Population::getIndividualFromCst(const Individual& individual)
 {
     auto iterator = this->individuals.find(&individual);
     if(iterator == this->individuals.end() || (*iterator).get() != &individual){
@@ -74,19 +74,28 @@ Evolution::Individual& Evolution::Population::getMutableIndividual(const Individ
     return *(this->getIndividualFromCst(individual)->get());
 }
 
-const std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getIndividuals() const
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getIndividuals() const
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> refs;
+    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
     for (const auto& ptr : individuals) {
-        refs.emplace_back(std::cref(*ptr));
+        vect.push_back(*ptr);
     }
-    return refs;
+    return vect;
 }
 
+std::vector<std::weak_ptr<const Evolution::Individual>> Evolution::Population::getIndividualPtrs() const
+{
+    std::vector<std::weak_ptr<const Evolution::Individual>> vect;
+    for (const auto& ptr : individuals) {
+        vect.push_back(ptr);
+    }
+    return vect;
+}
 
 const Evolution::Individual& Evolution::Population::createIndividual()
 {
     this->individuals.insert(std::make_unique<Individual>());
+    //this->individualAggregations.insert({**this->individuals.rbegin(), std::make_unique<uint64_t>(0)});
     return **this->individuals.rbegin();
 }
 
@@ -123,16 +132,35 @@ void Evolution::Population::emptyIndividual(const Individual& individual)
     } 
 }
 
-void Evolution::Population::deleteIndividual(const Individual& individual)
+bool Evolution::Population::deleteIndividual(const Individual& individual)
 {
+    auto it = this->getIndividualFromCst(individual);
+    if(it->use_count() > 1) {
+        // Individual is aggregated
+        return false;
+    }
     this->emptyIndividual(individual);
+    //this->individualAggregations.erase(individual);
     this->individuals.erase(this->getIndividualFromCst(individual));
+    return true;
 }
 
-void Evolution::Population::clearIndividuals()
-{
-    while(this->individuals.size() > 0){
-        this->deleteIndividual(**this->individuals.begin());
+void Evolution::Population::clearIndividuals() {
+
+    // Keep trying until the container is empty
+    while (this->individuals.size() > 0) {
+        std::size_t const sizeBefore = this->individuals.size();
+
+        // One full removing iteration: attempt to delete from the front until empty
+        auto individualsCopy(this->getIndividuals());
+        for(const Individual& individual: individualsCopy){
+            this->deleteIndividual(individual);
+        }
+
+        if (this->individuals.size() == sizeBefore) {
+                throw std::runtime_error("Evolution::Population::clearIndividuals: individuals remain after a full removal pass. Check deleteIndividual ordering or container management.");
+        }
+        
     }
 }
 

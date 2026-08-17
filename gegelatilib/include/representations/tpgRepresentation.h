@@ -23,9 +23,6 @@ namespace Representations {
             /// @brief Context Member population
             const Evolution::Population& contextMemberPop;
 
-            /// @brief Tangled Population
-            const Evolution::Population& tangledPopulation;
-
 
         public:
 
@@ -37,14 +34,15 @@ namespace Representations {
              * 
              * \param[in] contextMemberRep Representation of the context members
              * \param[in] contextMemberPop Context Member population
-             * \param[in] tangledPopulation Tangled Population
              * \param[in] nbNodesMin the minimum number of nodes in the representation.
              * \param[in] nbNodesMax the maximum number of nodes in the representation.
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            TPGRepresentation(const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop,  const Evolution::Population& tangledPopulation, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop}, tangledPopulation{tangledPopulation} {};
+            TPGRepresentation(const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
+                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
+                    this->setTangled(true);
+                };
         
 
         /**

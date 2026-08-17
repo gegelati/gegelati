@@ -3,15 +3,18 @@
 
 std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneUniquePtr() const
 {
-    return std::make_unique<Representations::TPGRepresentation>(
-        this->contextMemberRep,
-        this->contextMemberPop,
-        this->tangledPopulation,
-        this->nbNodesMin,
-        this->nbNodesMax,
-        this->representationName,
-        this->representationColor
-    );
+    std::unique_ptr<Evolution::Representation> clone = std::make_unique<Representations::TPGRepresentation>(
+                                                        this->contextMemberRep,
+                                                        this->contextMemberPop,
+                                                        this->nbNodesMin,
+                                                        this->nbNodesMax,
+                                                        this->representationName,
+                                                        this->representationColor
+                                                    );
+    if(this->tangledPopulation.has_value()) {
+        clone->setTangledPopulation(this->tangledPopulation.value());
+    }
+    return std::move(clone);
 }
 
 void Representations::TPGRepresentation::setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
@@ -24,6 +27,9 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 {
     if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
+    }
+    if(!this->tangled || !this->tangledPopulation.has_value()) {
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
     }
 
     size_t nbActions = 3;
@@ -40,17 +46,20 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
     // Value template for actions/Tangled connections
 
     // Action config
-    std::shared_ptr<Node::NodeValueConfiguration> configActions(
+    std::vector<std::shared_ptr<const Node::NodeValueConfiguration>> configs;
+    configs.push_back(
         std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), size_t(nbActions))));
 
     // Tangled config
-    std::vector<std::reference_wrapper<const Evolution::Individual>> tangledIndividuals(this->tangledPopulation.getIndividuals());
-    std::vector<Node::NodeValue> nodeValueTangledIndividuals(tangledIndividuals.begin(), tangledIndividuals.end());
-    std::shared_ptr<Node::NodeValueConfiguration> configTangled(
-        std::make_shared<Node::NodeValueConfiguration>(nodeValueTangledIndividuals));
+    if(this->tangledPopulation->get().size() > 0) {
+        std::vector<std::reference_wrapper<const Evolution::Individual>> tangledIndividuals(this->tangledPopulation->get().getIndividuals());
+        std::vector<Node::NodeValue> nodeValueTangledIndividuals(tangledIndividuals.begin(), tangledIndividuals.end());
+        configs.push_back(
+            std::make_shared<Node::NodeValueConfiguration>(nodeValueTangledIndividuals));
+    }
 
-    // Vector of both configs
-    std::vector<std::shared_ptr<const Node::NodeValueConfiguration>> configs{configActions, configTangled};
+
+    // Vector of both configs if tangled population is not empty
     bidNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configs));
 
     return std::make_unique<Node::GenotypeTemplate>(

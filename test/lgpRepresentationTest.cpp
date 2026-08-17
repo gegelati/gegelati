@@ -84,6 +84,8 @@ TEST_F(LGPRepresentationTest, Constructor)
 
     ASSERT_NO_THROW(representation = new Representations::LGPRepresentation(set, 8, 5, 10)) << "Constructor of Representation failed.";
 
+    ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
+
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 

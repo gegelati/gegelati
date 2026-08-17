@@ -330,7 +330,7 @@ TEST_F(MutationTest, mutateIndividual)
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
     group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({double(0.5)})));
+    group2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>(double(0.5))));
 
     // COPY GENOTYPE (Should need proper method)    
     Evolution::Genotype genotypeCopy;
@@ -342,7 +342,7 @@ TEST_F(MutationTest, mutateIndividual)
     groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
     groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
 
-    groupCopy2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({double(0.5)})));
+    groupCopy2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>(double(0.5))));
 
 
     ASSERT_TRUE(genotype == genotypeCopy) << "Genotypes should be equal before mutation";

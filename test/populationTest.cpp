@@ -113,7 +113,7 @@ TEST_F(PopulationTest, deleteIndividual)
 
     ASSERT_EQ(population.size(), 3) << "Size of the Population should be 3.";
 
-    ASSERT_NO_THROW(population.deleteIndividual(individual2)) << "Delete individual failed";
+    ASSERT_TRUE(population.deleteIndividual(individual2)) << "Delete individual failed";
 
     ASSERT_EQ(population.size(), 2) << "Size of the Population should be 2.";
 
@@ -151,7 +151,27 @@ TEST_F(PopulationTest, clearIndividuals)
 
     ASSERT_NO_THROW(population.clearIndividuals()) << "Clear Individuals failed";
     ASSERT_EQ(population.size(), 0) << "Size of the Population should be 0.";
+}
 
+TEST_F(PopulationTest, testAggragtions)
+{
+    Evolution::Population population;
+    const Evolution::Population& constPop = population;
+    const Evolution::Individual& individual1 = population.createIndividual();
+    const Evolution::Individual& individual2 = population.createIndividual();
+    const Evolution::Individual& individual3 = population.createIndividual();
+    
+    std::vector<std::weak_ptr<const Evolution::Individual>> individualPtrs = constPop.getIndividualPtrs();
+    ASSERT_EQ(individualPtrs.size(), 3) << "Size should be three after creation";
+
+    for(const std::weak_ptr<const Evolution::Individual>& ptr: individualPtrs) {
+        ASSERT_EQ(ptr.use_count(), size_t(1)) << "Pointer should be used once.";
+    }
+
+    std::shared_ptr<const Evolution::Individual> indivAggreagted = individualPtrs.at(1).lock();
+
+    ASSERT_EQ(individualPtrs.at(1).use_count(), 2) << "Value should be 2";
+    ASSERT_FALSE(population.deleteIndividual(individual2)) << "Deleting aggregated individual should fail";
 }
 
 TEST_F(PopulationTest, IDCounter)

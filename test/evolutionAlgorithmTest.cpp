@@ -44,10 +44,10 @@
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
 #include "evolution/evolutionAlgorithm.h"
-#include "representations/lgpRepresentation.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
 
-
+#include "representations/lgpRepresentation.h"
+#include "representations/tpgRepresentation.h"
 // Set all file in comment
 
 class EvolutionAlgorithmTest : public ::testing::Test
@@ -230,7 +230,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
 
     auto rit = results.rbegin();
     auto ritCopy = resultsCopy.rbegin();
-    while(rit != results.rend() && ritCopy != results.rend()) {
+    while (rit != results.rend() && ritCopy != resultsCopy.rend()) {
         ASSERT_EQ(rit->first->getSelectionMetrics()->getScore(), ritCopy->first->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
         ASSERT_EQ(rit->second, ritCopy->second) << "Individuals should be equal";
 
@@ -263,4 +263,40 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
         ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
         formerBest = best;
     }
+}
+
+TEST_F(EvolutionAlgorithmTest, evolveTPG) {
+    Evolution::EvolutionAlgorithm eaLgp(*representation, le, std::move(evalParams), 12, 10);
+    eaLgp.initializePopulation();
+
+    size_t nbGen = 3;
+    double formerBest = -1;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+        eaLgp.mutateOffspring(eaLgp.reproduceParents(eaLgp.selectParents(100)));
+        auto results = eaLgp.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+        eaLgp.replacePopulation(results);
+
+        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
+        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
+        formerBest = best;
+    }
+
+    Representations::TPGRepresentation tpgRep = Representations::TPGRepresentation(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    Evolution::EvolutionAlgorithm eaTpg(tpgRep, le);
+    ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
+
+    nbGen = 2;
+    formerBest = -1;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+        auto parents = eaTpg.selectParents(100);
+        auto offspring = eaTpg.reproduceParents(parents);
+        eaTpg.mutateOffspring(offspring);
+        auto results = eaTpg.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+        eaTpg.replacePopulation(results);
+
+        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
+        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
+        formerBest = best;
+    }
+
 }

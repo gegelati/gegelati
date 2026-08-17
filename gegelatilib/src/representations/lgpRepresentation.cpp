@@ -32,16 +32,20 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
     if(this->instructionNodesTemplate->size() == 0) {
 
         // Value Template for register
-        std::shared_ptr<Node::NodeValueConfiguration> configRegister(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbRegisters)));
+        std::shared_ptr<Node::NodeValueConfiguration> configRegister(
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbRegisters)));
         this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configRegister));
         
         // Value template for instruction
-        std::shared_ptr<Node::NodeValueConfiguration> configFunction(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()))));
+        std::shared_ptr<Node::NodeValueConfiguration> configFunction(
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()))));
         this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configFunction));
     
         // Value templates for input type and index
-        std::shared_ptr<Node::NodeValueConfiguration> configNbInput(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbInputSources)));
-        std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->maxInputSourceIdx)));
+        std::shared_ptr<Node::NodeValueConfiguration> configNbInput(
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbInputSources)));
+        std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->maxInputSourceIdx)));
         for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
             this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configNbInput));
             this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMaxInput));

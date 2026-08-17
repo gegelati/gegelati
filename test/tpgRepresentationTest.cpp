@@ -101,7 +101,9 @@ TEST_F(TPGRepresentationTest, Constructor)
 {
     Representations::TPGRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation(*memberRepresentation, *memberPopulation, *tpgPopulation, 2, 10)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation(*memberRepresentation, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
+
+    ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
@@ -114,7 +116,8 @@ TEST_F(TPGRepresentationTest, setInputDimensions)
 
 TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 5, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    representation.setTangledPopulation(*tpgPopulation);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
@@ -166,7 +169,8 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 
 TEST_F(TPGRepresentationTest, isValid)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 5, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    representation.setTangledPopulation(*tpgPopulation);
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
@@ -265,7 +269,8 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(memberRepresentation->isValid(member2)) << "Member should be equal";
 
 
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, *tpgPopulation, 2, 10);
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
+    representation.setTangledPopulation(*tpgPopulation);
     representation.setInputDimensions(inputSources);
 
     // Tangled Individual

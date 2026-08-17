@@ -83,6 +83,7 @@ TEST(GenotypeTest, addRemoveNodeGroup)
     ASSERT_THROW(genotype.removeNodeGroup(1), std::runtime_error) << "Removing NodeGroup of the Genotype should have failed with wrong index.";
     ASSERT_THROW(genotype.addNodeGroup(2), std::runtime_error) << "Adding NodeGroup of the Genotype should have failed with wrong index.";
     ASSERT_THROW(genotype.getNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
+    ASSERT_THROW(genotype.getMutableNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
 }
 
 TEST(GenotypeTest, getSizes)
