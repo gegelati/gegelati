@@ -135,13 +135,13 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
     /// CHECK MEMBER TEMPLATE
     const std::shared_ptr<const Node::NodeValueTemplate>& nodeValueTemplate0 = nodeTemplate->getValueTemplateAt(0);
     ASSERT_EQ(nodeValueTemplate0->size(), 1) << "Template should be of size 1";
-    ASSERT_TRUE(std::holds_alternative<std::vector<Node::NodeValue>>(*nodeValueTemplate0->getconfigurationAt(0))) << "Configuration should be a vector of nodes";
-    const std::vector<Node::NodeValue>& values = std::get<std::vector<Node::NodeValue>>(*nodeValueTemplate0->getconfigurationAt(0));
+
+    ASSERT_TRUE(std::holds_alternative<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate0->getconfigurationAt(0))) << "Configuration should be a vector of weak ptrs";
+    const std::vector<std::weak_ptr<const Evolution::Individual>>& values = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate0->getconfigurationAt(0));
+    
     ASSERT_EQ(values.size(), memberPopulation->size()) << "Value vector size should be the same as the member population";
     for(size_t idx = 0; idx < values.size(); idx++) {
-        ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(values.at(idx))) << "Value should be an individual";
-        const Evolution::Individual& member = std::get<std::reference_wrapper<const Evolution::Individual>>(values.at(idx));
-        ASSERT_TRUE(member == memberPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
+        ASSERT_TRUE(*values.at(idx).lock() == memberPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
     }
 
     /// CHECK ACTION/TANGLED TEMPLATE
@@ -157,13 +157,11 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
     ASSERT_EQ(pairRange.second, 3) << "Expected upper range is incorrect";
 
     /// CHECK TANGLED CONFIG
-    ASSERT_TRUE(std::holds_alternative<std::vector<Node::NodeValue>>(*nodeValueTemplate1->getconfigurationAt(1))) << "Configuration should be a vector of nodes";
-    const std::vector<Node::NodeValue>& valuesT = std::get<std::vector<Node::NodeValue>>(*nodeValueTemplate1->getconfigurationAt(1));
+    ASSERT_TRUE(std::holds_alternative<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate1->getconfigurationAt(1))) << "Configuration should be a vector of weak ptr";
+    const std::vector<std::weak_ptr<const Evolution::Individual>>& valuesT = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate1->getconfigurationAt(1));
     ASSERT_EQ(valuesT.size(), tpgPopulation->size()) << "Value vector size should be the same as the tpg population";
     for(size_t idx = 0; idx < valuesT.size(); idx++) {
-        ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(valuesT.at(idx))) << "Value should be an individual";
-        const Evolution::Individual& tpgIndiv = std::get<std::reference_wrapper<const Evolution::Individual>>(valuesT.at(idx));
-        ASSERT_TRUE(tpgIndiv == tpgPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
+        ASSERT_TRUE(*valuesT.at(idx).lock() == tpgPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
     }
 }
 
@@ -176,10 +174,10 @@ TEST_F(TPGRepresentationTest, isValid)
     Node::NodeGroup& group = genotype.addNodeGroup();
     
     // Create member individuals
-    const Evolution::Individual& badRepMember = memberPopulation->getIndividuals().at(0);
-    const Evolution::Individual& goodMember = memberPopulation->getIndividuals().at(1);
+    const std::shared_ptr<const Evolution::Individual>& badRepMemberPtr = memberPopulation->getIndividualPtrs().at(0).lock();
+    const std::shared_ptr<const Evolution::Individual>& goodMemberPtr = memberPopulation->getIndividualPtrs().at(1).lock();
 
-    Evolution::Individual& goodMemberMut = memberPopulation->getMutableIndividual(goodMember);
+    Evolution::Individual& goodMemberMut = memberPopulation->getMutableIndividual(*goodMemberPtr);
     Evolution::Genotype& goodMemberGenotype = goodMemberMut.getMutableGenotype();
     Node::NodeGroup& goodMemberGroup = goodMemberGenotype.addNodeGroup();
     for(size_t i = 0; i < 8; i++) {
@@ -193,37 +191,37 @@ TEST_F(TPGRepresentationTest, isValid)
     representation.setInputDimensions({*inputSource});
 
     for(size_t i = 0; i < 4; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, size_t(0)}));
+        group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
     }
 
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, size_t(0)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, size_t(6)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(6)}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{badRepMember, size_t(6)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{badRepMemberPtr, size_t(6)}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{size_t(6), goodMemberMut}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{size_t(6), goodMemberPtr}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, goodMemberMut}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, goodMemberPtr}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
     
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
     for(size_t i = 0; i < 6; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberMut, size_t(0)}));
+        group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
     }
 
     ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
@@ -274,26 +272,26 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     representation.setInputDimensions(inputSources);
 
     // Tangled Individual
-    Evolution::Individual tangledIndiv;
-    Evolution::Genotype& tangledGenotype = tangledIndiv.getMutableGenotype();
+    std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>();
+    Evolution::Genotype& tangledGenotype = tangledIndiv->getMutableGenotype();
     Node::NodeGroup& tangledGroup = tangledGenotype.addNodeGroup();
     
-    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member0, size_t(0)}));
-    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member1, size_t(1)}));
-    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member2, size_t(2)}));
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(0).lock(), size_t(0)}));
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(1).lock(), size_t(1)}));
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(2).lock(), size_t(2)}));
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
     
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member1, tangledIndiv}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member2, size_t(0)}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{member0, size_t(2)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(1).lock(), tangledIndiv}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(2).lock(), size_t(0)}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{memberPopulation->getIndividualPtrs().at(0).lock(), size_t(2)}));
 
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid";
 
     double output;
-    ASSERT_NO_THROW(output = representation.executeIndividual(tangledIndiv, inputSources).at(0)) << "Execution of individual failed.";
+    ASSERT_NO_THROW(output = representation.executeIndividual(*tangledIndiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, 1.0) << "Value is not correct.";
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
     ASSERT_EQ(output, 1.0) << "Value is not correct.";

@@ -37,10 +37,8 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 
     // Value Template for members
-    std::vector<std::reference_wrapper<const Evolution::Individual>> memberIndividuals(this->contextMemberPop.getIndividuals());
-    std::vector<Node::NodeValue> nodeValueMemberIndividuals(memberIndividuals.begin(), memberIndividuals.end());
     std::shared_ptr<Node::NodeValueConfiguration> configMember(
-        std::make_shared<Node::NodeValueConfiguration>(nodeValueMemberIndividuals));
+        std::make_shared<Node::NodeValueConfiguration>(this->contextMemberPop.getIndividualPtrs()));
     bidNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMember));
     
     // Value template for actions/Tangled connections
@@ -52,10 +50,8 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
     // Tangled config
     if(this->tangledPopulation->get().size() > 0) {
-        std::vector<std::reference_wrapper<const Evolution::Individual>> tangledIndividuals(this->tangledPopulation->get().getIndividuals());
-        std::vector<Node::NodeValue> nodeValueTangledIndividuals(tangledIndividuals.begin(), tangledIndividuals.end());
         configs.push_back(
-            std::make_shared<Node::NodeValueConfiguration>(nodeValueTangledIndividuals));
+            std::make_shared<Node::NodeValueConfiguration>(this->tangledPopulation->get().getIndividualPtrs()));
     }
 
 
@@ -89,11 +85,11 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
         }
 
         // Check member individual
-        if(!std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(0))){
+        if(!std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(0))){
             return false;
         }
-        const Evolution::Individual& member = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(0));
-        if(!this->contextMemberRep.isValid(member)) {
+        const std::shared_ptr<const Evolution::Individual>& member = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(0));
+        if(!this->contextMemberRep.isValid(*member)) {
             return false;
         }
 
@@ -104,9 +100,10 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
         }
 
         bool isTangled = false;
-        if(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(1))){
-            const Evolution::Individual& tangledIndiv = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(1));
-            if(this->isValid(tangledIndiv) && indiv != tangledIndiv) {
+        if(std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(1))){
+            const std::shared_ptr<const Evolution::Individual>& tangledIndiv = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(1));
+            std::cout <<"From " << indiv.getIndividualID() << " for checking " << tangledIndiv->getIndividualID() << std::endl;
+            if(indiv != *tangledIndiv && this->isValid(*tangledIndiv)) {
                 isTangled = true;
             }
         }
@@ -128,8 +125,8 @@ std::vector<double> Representations::TPGRepresentation::executeIndividual(
     Node::NodeValue winner;
 
     for(const Node::GPNode& node: effectiveNodes.at(0)) {
-        const Evolution::Individual& member = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(0));
-        double bid = this->contextMemberRep.executeIndividual(member, inputSources).at(0);
+        const std::shared_ptr<const Evolution::Individual>& member = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(0));
+        double bid = this->contextMemberRep.executeIndividual(*member, inputSources).at(0);
 
         if(bid > maxBid) {
             maxBid = bid;
@@ -142,6 +139,6 @@ std::vector<double> Representations::TPGRepresentation::executeIndividual(
         return {double(std::get<size_t>(winner))};
     } else {
         // Return action of tangled individual
-        return this->executeIndividual(std::get<std::reference_wrapper<const Evolution::Individual>>(winner), inputSources);
+        return this->executeIndividual(*std::get<std::shared_ptr<const Evolution::Individual>>(winner), inputSources);
     }
 }

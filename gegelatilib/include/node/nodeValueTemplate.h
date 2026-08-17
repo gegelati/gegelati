@@ -12,7 +12,8 @@ namespace Node {
 
     using NodeValueConfiguration = std::variant<
         NodeValueRange,
-        std::vector<NodeValue>
+        std::vector<NodeValue>,
+        std::vector<std::weak_ptr<const Evolution::Individual>>
     >;
 
 

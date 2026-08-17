@@ -77,9 +77,9 @@ TEST_F(GPNodeTest, Constructor)
     ASSERT_NO_THROW(doubleNode = new Node::GPNode(doubleValues))
         << "Construction of the double GPNode failed.";
 
-    Evolution::Individual indiv1;
-    Evolution::Individual indiv2;
-    std::vector<std::reference_wrapper<const Evolution::Individual>> indivValues = {indiv1, indiv2};
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
+    std::shared_ptr<const Evolution::Individual> indiv2 = std::make_shared<Evolution::Individual>();
+    std::vector<std::shared_ptr<const Evolution::Individual>> indivValues = {indiv1, indiv2};
     ASSERT_NO_THROW(indivNode = new Node::GPNode(indivValues))
         << "Construction of the individual GPNode failed.";
 
@@ -95,7 +95,7 @@ TEST_F(GPNodeTest, Constructor)
 
 TEST_F(GPNodeTest, SetGetValue)
 {
-    Evolution::Individual indiv1;
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> variantValues = {size_t{1}, 2.5, indiv1};
     Node::GPNode node(variantValues);
 

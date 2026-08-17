@@ -101,7 +101,7 @@ TEST_F(MutationTest, sampleNodeValue)
     }
 
     // Vector of diverse accepted values.
-    Evolution::Individual indiv;
+    std::shared_ptr<const Evolution::Individual> indiv = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> vectValues = {size_t(0), size_t(1), 5.0, 5.5, indiv};
     auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
     Node::NodeValueTemplate valueTemplate2(config2);
@@ -145,8 +145,8 @@ TEST_F(MutationTest, createRandomNode)
     auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
     auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
 
-    Evolution::Individual indiv0; 
-    Evolution::Individual indiv1;
+    std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
     auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
     auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
@@ -168,8 +168,8 @@ TEST_F(MutationTest, createRandomNode)
         ASSERT_LT(std::get<double>(node->getValue(1)), 3.0) << "Value should be below or equal to 3.0";
     
         // Node value 2
-        ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node->getValue(2))) << "Node value is not indiv";
-        const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node->getValue(2));
+        ASSERT_TRUE(std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node->getValue(2))) << "Node value is not indiv";
+        const std::shared_ptr<const Evolution::Individual>& indivSampled = std::get<std::shared_ptr<const Evolution::Individual>>(node->getValue(2));
         ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
     
         // Node value 3
@@ -193,8 +193,8 @@ TEST_F(MutationTest, initRandomGenotype)
     auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
     auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
 
-    Evolution::Individual indiv0; 
-    Evolution::Individual indiv1;
+    std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
     auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
     auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
@@ -235,8 +235,8 @@ TEST_F(MutationTest, initRandomGenotype)
             ASSERT_LT(std::get<double>(node.getValue(1)), 3.0) << "Value should be below or equal to 3.0";
         
             // Node value 2
-            ASSERT_TRUE(std::holds_alternative<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2))) << "Node value is not indiv";
-            const Evolution::Individual& indivSampled = std::get<std::reference_wrapper<const Evolution::Individual>>(node.getValue(2));
+            ASSERT_TRUE(std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(2))) << "Node value is not indiv";
+            const std::shared_ptr<const Evolution::Individual>& indivSampled = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(2));
             ASSERT_TRUE(indivSampled == indiv0 || indivSampled == indiv1) << "Value should be either indiv0 or indiv1";
             
         }
@@ -264,8 +264,8 @@ TEST_F(MutationTest, mutateNode)
     auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
     auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
 
-    Evolution::Individual indiv0; 
-    Evolution::Individual indiv1;
+    std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
     auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
     auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
@@ -307,8 +307,8 @@ TEST_F(MutationTest, mutateIndividual)
     auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
     auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
 
-    Evolution::Individual indiv0; 
-    Evolution::Individual indiv1;
+    std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
     std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
     auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
     auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));

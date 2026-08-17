@@ -172,6 +172,8 @@ TEST_F(PopulationTest, testAggragtions)
 
     ASSERT_EQ(individualPtrs.at(1).use_count(), 2) << "Value should be 2";
     ASSERT_FALSE(population.deleteIndividual(individual2)) << "Deleting aggregated individual should fail";
+
+    ASSERT_THROW(population.clearIndividuals(), std::runtime_error) << "Should throw with an individual aggregated and not deleted";
 }
 
 TEST_F(PopulationTest, IDCounter)

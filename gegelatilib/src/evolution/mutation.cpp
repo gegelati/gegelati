@@ -35,13 +35,21 @@ Node::NodeValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueTempla
             value = rng.getDouble(doublePair.first, doublePair.second);
         }
 
-    } else { // if (std::holds_alternative<std::vector<Node::NodeValue>>(valueTemplate)) { commented because in the idea its important, but impossible to cover with current configuration
+    } else  if (std::holds_alternative<std::vector<Node::NodeValue>>(valueTemplate)) { 
 
         // List of node values.
         const std::vector<Node::NodeValue>& nodeValues = std::get<std::vector<Node::NodeValue>>(valueTemplate);
 
         // Sample a random value.
         value = nodeValues.at(rng.getUnsignedInt64(0, nodeValues.size() - 1));
+
+    } else { //std::holds_alternative<std::vector<std::weak_ptr<const Evolution::Individual>>>(valueTemplate)
+
+        // List of weark ptr of const individuals.
+        const std::vector<std::weak_ptr<const Evolution::Individual>>& nodeValues = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(valueTemplate);
+
+        // Sample a random individual and get its shared_ptr
+        value = nodeValues.at(rng.getUnsignedInt64(0, nodeValues.size() - 1)).lock();
 
     }
 

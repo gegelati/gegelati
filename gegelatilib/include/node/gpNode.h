@@ -20,7 +20,7 @@ namespace Node {
     using NodeValue = std::variant<
         double,
         std::size_t,
-        std::reference_wrapper<const Evolution::Individual>
+        std::shared_ptr<const Evolution::Individual>
     >;
 
     /**
@@ -97,7 +97,7 @@ namespace Node {
              * \param[in] values the reference values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<std::reference_wrapper<const Evolution::Individual>>& values, bool isIntron = false)
+            GPNode(const std::vector<std::shared_ptr<const Evolution::Individual>>& values, bool isIntron = false)
             : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
 
             /**
