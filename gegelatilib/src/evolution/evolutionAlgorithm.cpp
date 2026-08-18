@@ -37,7 +37,7 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
-        Individual& indiv = this->population->getMutableIndividual(this->population->createIndividual());
+        Individual& indiv = this->population->getMutableIndividual(this->population->addIndividual());
         this->mutation->initRandomGenotype(indiv.getMutableGenotype(), *genotypeTemplate, this->rng);
     }
 }
@@ -54,52 +54,77 @@ std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Evol
     return selectedParents;
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::reproduceParents(
+std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> Evolution::EvolutionAlgorithm::reproduceParents(
     std::vector<std::reference_wrapper<const Individual>> parents
 )
 {    // Reproduction process, only replication for now.
-    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring;
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring;
     for(size_t idx = 0; idx < parents.size(); idx++) {
-        offspring.push_back(this->population->copyIndividual(parents.at(idx)));
+        offspring.insert(std::move(parents.at(idx).get().cloneUniquePtr()));
     }
     return offspring;
 }
 
-void Evolution::EvolutionAlgorithm::mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring)
+void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
 {
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
-    for(const Individual& constIndiv: offspring) {
-        Individual& indiv = this->population->getMutableIndividual(constIndiv);
-        this->mutation->mutateGenotype(indiv.getMutableGenotype(), *genotypeTemplate, rng);
+    for(const std::unique_ptr<Individual>& indiv: offspring) {
+        this->mutation->mutateGenotype(indiv->getMutableGenotype(), *genotypeTemplate, rng);
     }
 }
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
     std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::evaluatePopulation(
-        size_t generationNumber, Learn::LearningMode mode
+        const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, size_t generationNumber, Learn::LearningMode mode
     )
 {
+    std::vector<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    for (const std::unique_ptr<Individual>& os: offspring) {
+        evaluatedIndividuals.push_back(*os);
+    }
+
     return this->evaluation->evaluateIndividuals(
-        this->population->getIndividuals(),*this->representation, 
+        evaluatedIndividuals,*this->representation, 
         *this->selection, generationNumber, mode);
 }
 
-
-void Evolution::EvolutionAlgorithm::replacePopulation(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Individual>>& scores)
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                        std::reference_wrapper<const Individual>>& scores)
 {
-    // Verify that all scores correspond to existing individuals.
-    for(const auto& score: scores) {
-        if(!this->population->containsIndividual(score.second)){
-            throw std::runtime_error("Evolution::EvolutionAlgorithm::replace: scores should all correspond to individual of the population");
-        }
-    }
+    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers;
 
     // Standard (mu+lambda) replacement
     size_t mu = 100;
-    while(this->population->size() > mu) {
+    while(scores.size() > mu) {
         auto it = scores.begin();
-        this->population->deleteIndividual(it->second);
+        loosers.push_back(it->second);
         scores.erase(it);
+    }
+    return loosers;
+}
+
+void Evolution::EvolutionAlgorithm::replacePopulation(
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
+    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers)
+{
+    // Discard loosers! Bouuuuh
+    while(loosers.size() > 0) {
+        auto it = loosers.begin();
+        const Individual& loser = *it;
+
+        if(this->population->containsIndividual(loser)) {
+            bool deleted = this->population->deleteIndividual(loser);
+            if(!deleted) {
+                throw std::runtime_error("Evolution::EvolutionAlgorithm::replacePopulation: deleting indivudal failed, in current version it means a protected individual has been evaluated, which should not happend.");
+            }
+        } else {
+            offspring.erase(offspring.find(&loser));
+        }
+        loosers.erase(it);
+    }
+
+    // Add surviving offspring to the population
+    while (!offspring.empty()) {
+        this->population->addIndividual(std::move(offspring.extract(offspring.begin()).value()));
     }
 }

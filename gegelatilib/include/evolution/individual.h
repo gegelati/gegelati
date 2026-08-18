@@ -44,6 +44,11 @@ namespace Evolution {
         virtual ~Individual() = default;
 
         /**
+         * \brief Copy an Individual and return a unique_ptr.
+         */
+        virtual std::unique_ptr<Individual> cloneUniquePtr() const;
+
+        /**
          * \brief Constructor for the Individual.
          */
         Individual() : genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()) {};
@@ -87,14 +92,6 @@ namespace Evolution {
          * \brief Get the mutable genotype of the Individual.
          */
         virtual Genotype& getMutableGenotype();
-
-        /**
-         * \brief Compare two individuals' genotype.
-         * 
-         * \param[in] other the individual compared.
-         * \param[in] effectiveGenotype true to compare only the effective genotype.
-         */
-        //virtual bool hasSameGenotypeAs(const Individual& other, bool effectiveGenotype = false) const;
     };
     
     /**

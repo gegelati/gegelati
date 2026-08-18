@@ -25,7 +25,7 @@ void Representations::TPGRepresentation::setInputDimensions(const std::vector<st
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
-    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+    if(this->nbInputSources == 0) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
     }
     if(!this->tangled || !this->tangledPopulation.has_value()) {
@@ -66,8 +66,11 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+    if(this->nbInputSources == 0) {
         throw std::runtime_error("Representations::TPGRepresentation::isValid: cannot define if an individual is valid without input dimensions set.");
+    }
+    if(!this->tangled || !this->tangledPopulation.has_value()) {
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
     }
 
     // Return false if genotype length is out of bounds.
@@ -102,7 +105,6 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
         bool isTangled = false;
         if(std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(1))){
             const std::shared_ptr<const Evolution::Individual>& tangledIndiv = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(1));
-            std::cout <<"From " << indiv.getIndividualID() << " for checking " << tangledIndiv->getIndividualID() << std::endl;
             if(indiv != *tangledIndiv && this->isValid(*tangledIndiv)) {
                 isTangled = true;
             }

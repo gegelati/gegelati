@@ -58,7 +58,11 @@ namespace Representations {
         virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const;
 
         /**
-         * \brief individual nodes should have two values, one individual and one integer.
+         * \brief individual nodes should have two values, one individual and one integer or individual.
+         * 
+         * The first individual must be valid regarding the member representation, the second (if there is) must be valid regarding the tangled representation.
+         * Additionnally, this second must not be the same individual as the tested one.
+         * Important: This method do not check for cycles of tangled individuals.
          * 
          * \param[in] indiv Individual controlled.
          */

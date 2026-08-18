@@ -92,6 +92,23 @@ TEST_F(IndividualTest, GetGenotype)
     ASSERT_EQ(genotypeConst->getFullSize(), genotype->getFullSize()) << "Individual size should be size of full genotype";
 }
 
+TEST_F(IndividualTest, cloneIndividual)
+{       
+    Evolution::Individual individual;
+
+    Evolution::Genotype& genotype = individual.getMutableGenotype();
+    Node::NodeGroup& group = genotype.addNodeGroup();
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
+
+    std::unique_ptr<Evolution::Individual> copyIndiv;
+    ASSERT_NO_THROW(copyIndiv = std::move(individual.cloneUniquePtr())) << "Copying individual failed";
+
+    ASSERT_EQ(copyIndiv->getSize(), 3) << "Copy was not effective";
+    ASSERT_TRUE(copyIndiv->getGenotype() == individual.getGenotype()) << "Copy was not effective";
+}
+
 TEST_F(IndividualTest, IDCounter)
 {
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 0) << "Individual ID counter should be 0 at the beginning.";

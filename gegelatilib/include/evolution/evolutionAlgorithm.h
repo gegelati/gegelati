@@ -100,38 +100,52 @@ namespace Evolution {
         /**
          * \brief Generate offspring based on selected parents
          * 
-         * \param[in] parents the vector of selected parents
+         * \param[in] parents the set of selected parents
          */
-        virtual std::vector<std::reference_wrapper<const Individual>> reproduceParents(
+        virtual std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> reproduceParents(
           std::vector<std::reference_wrapper<const Individual>> parents
         );
 
         /**
          * \brief mutate the specified offspring based on the genotypeTemplate of the representation.
          * 
-         * \param[in] offspring the vector of offspring to mutate
+         * \param[in] offspring the set of offspring to mutate
          */
-        virtual void mutateOffspring(std::vector<std::reference_wrapper<const Individual>> offspring);
+        virtual void mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring);
 
         
         /**
-         * \brief Evaluate the current individuals of the population.
+         * \brief Evaluate the current individuals of the population if they need to, and the offspring.
          * 
+         * \param[in] offspring the set of offspring to evaluate
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the evaluation.
          */
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Individual>> evaluatePopulation(
+                                const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
                                 size_t generationNumber, Learn::LearningMode mode);
 
         /**
-         * \brief perform the replacement of the population based on a selection method.
+         * \brief select the suvivor individual from the evaluation batch.
          * 
-         * \param[in] scores score achieved by the individuals of the population.
+         * \param[in] scores score achieved by the individuals.
+         * 
+         * \return the list of looser individuals
          */
-        virtual void replacePopulation(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+        virtual std::vector<std::reference_wrapper<const Evolution::Individual>> selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Individual>>& scores);
+
+        /**
+         * \brief perform the replacement of the population based on the select survivors.
+         * 
+         * \param[in] offspring offspring generated.
+         * \param[in] loosers Individual from either the population or the offspring that are not selected.
+         */
+        virtual void replacePopulation(
+          std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
+          std::vector<std::reference_wrapper<const Evolution::Individual>> loosers);
     };
 }; // namespace Evolution
 

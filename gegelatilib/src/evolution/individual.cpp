@@ -51,30 +51,21 @@ Evolution::Genotype& Evolution::Individual::getMutableGenotype()
     return *this->genotype;
 }
         
-/*bool Evolution::Individual::hasSameGenotypeAs(const Individual& other, bool effectiveGenotype) const
+
+std::unique_ptr<Evolution::Individual> Evolution::Individual::cloneUniquePtr() const
 {
-    auto thisGenotype = (effectiveGenotype) ? this->getEffectiveGenotype() : this->getGenotype();
-    auto otherGenotype = (effectiveGenotype) ? other.getEffectiveGenotype() : other.getGenotype();
-    if(thisGenotype.size() != otherGenotype.size()) {
-        return false;
-    }
+    std::unique_ptr<Individual> newIndividual = std::make_unique<Individual>();
 
-    for(size_t idxNode = 0; idxNode < thisGenotype.size(); idxNode++) {
-        const Node::GPNode& thisNode = thisGenotype.at(idxNode);
-        const Node::GPNode& otherNode = otherGenotype.at(idxNode);
-
-        if(thisNode.getSize() != otherNode.getSize()) {
-            return false;
-        }
-
-        for(size_t idxValue = 0; idxValue < thisNode.getSize(); idxValue++) {
-            if(thisNode.getValue(idxValue) != otherNode.getValue(idxValue)) {
-                return false;
-            }
+    for(const Node::NodeGroup& group: this->genotype->getNodeGroups()) {
+        Node::NodeGroup& newNodeGroup = newIndividual->genotype->addNodeGroup();
+        
+        for(const Node::GPNode& node: group.getNodes()) {
+            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
         }
     }
-    return true;
-}*/
+
+    return std::move(newIndividual);
+}
 
 
 

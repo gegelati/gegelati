@@ -83,6 +83,28 @@ std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Popu
     return vect;
 }
 
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getProtectedIndividuals() const
+{
+    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
+    for (const auto& ptr : individuals) {
+        if(ptr.use_count() > 1) {
+            vect.push_back(*ptr);
+        }
+    }
+    return vect;
+}
+
+std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getNotProtectedIndividuals() const
+{
+    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
+    for (const auto& ptr : individuals) {
+        if(ptr.use_count() == 1) {
+            vect.push_back(*ptr);
+        }
+    }
+    return vect;
+}
+
 std::vector<std::weak_ptr<const Evolution::Individual>> Evolution::Population::getIndividualPtrs() const
 {
     std::vector<std::weak_ptr<const Evolution::Individual>> vect;
@@ -92,30 +114,15 @@ std::vector<std::weak_ptr<const Evolution::Individual>> Evolution::Population::g
     return vect;
 }
 
-const Evolution::Individual& Evolution::Population::createIndividual()
+const Evolution::Individual& Evolution::Population::addIndividual(std::unique_ptr<Individual> individual)
 {
-    this->individuals.insert(std::make_unique<Individual>());
-    //this->individualAggregations.insert({**this->individuals.rbegin(), std::make_unique<uint64_t>(0)});
+    this->individuals.insert(std::move(individual));
     return **this->individuals.rbegin();
 }
 
-const Evolution::Individual& Evolution::Population::copyIndividual(const Individual& individual)
+const Evolution::Individual& Evolution::Population::addIndividual()
 {
-    const Individual& newIndividual = this->createIndividual();
-    auto it = this->getIndividualFromCst(newIndividual);
-
-    const Genotype& genotype = individual.getGenotype();
-    Genotype& newGenotype = it->get()->getMutableGenotype();
-
-    for(const Node::NodeGroup& group: genotype.getNodeGroups()) {
-        Node::NodeGroup& newNodeGroup = newGenotype.addNodeGroup();
-        
-        for(const Node::GPNode& node: group.getNodes()) {
-            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
-        }
-    }
-
-    return newIndividual;
+    return this->addIndividual(std::make_unique<Individual>());
 }
 
 void Evolution::Population::emptyIndividual(const Individual& individual)
@@ -158,7 +165,7 @@ void Evolution::Population::clearIndividuals() {
         }
 
         if (this->individuals.size() == sizeBefore) {
-                throw std::runtime_error("Evolution::Population::clearIndividuals: individuals remain after a full removal pass. Check deleteIndividual ordering or container management.");
+            throw std::runtime_error("Evolution::Population::clearIndividuals: individuals remain after a full removal pass. Check deleteIndividual ordering or container management. However, this might be intended, this error could be removed in future versions");
         }
         
     }
@@ -167,4 +174,20 @@ void Evolution::Population::clearIndividuals() {
 size_t Evolution::Population::size() const
 {
     return this->individuals.size();
+}
+
+size_t Evolution::Population::sizeProtected() const
+{
+    return std::count_if(this->individuals.begin(), this->individuals.end(),
+                         [](const std::shared_ptr<Individual>& individual) {
+                             return individual.use_count() > 1;
+                         });
+}
+
+size_t Evolution::Population::sizeNotProtected() const
+{
+    return std::count_if(this->individuals.begin(), this->individuals.end(),
+                         [](const std::shared_ptr<Individual>& individual) {
+                             return individual.use_count() == 1;
+                         });
 }

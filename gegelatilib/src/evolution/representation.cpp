@@ -49,3 +49,13 @@ void Evolution::Representation::setTangledPopulation(const Population& tangledPo
 
     this->tangledPopulation = tangledPop;
 }
+
+bool Evolution::Representation::hasTangledPopulation()
+{
+    return this->tangledPopulation.has_value();
+}
+
+const std::optional<std::reference_wrapper<const Evolution::Population>>& Evolution::Representation::getTangledPopulation()
+{
+    return this->tangledPopulation;
+}

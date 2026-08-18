@@ -42,6 +42,7 @@
 #include <numeric>
 
 #include "evolution/representation.h"
+#include "evolution/population.h"
 
 
 // Set all file in comment
@@ -126,4 +127,22 @@ TEST_F(RepresentationTest, setInputDimensions)
     delete (&(inputSources.at(0).get()));
     delete (&(inputSources.at(1).get()));
     delete (&(inputSources.at(2).get()));
+}
+
+TEST_F(RepresentationTest, tangledRep)
+{
+    FakeRepresentation representation(10);
+    Evolution::Population population;
+
+    ASSERT_FALSE(representation.isTangled()) << "Should return false";
+    ASSERT_FALSE(representation.hasTangledPopulation()) << "Should return false";
+    ASSERT_FALSE(representation.getTangledPopulation().has_value()) << "Should be false";
+    ASSERT_THROW(representation.setTangledPopulation(population), std::runtime_error) << "Should throw because representation is not tangled";
+
+    representation.setTangled(true);
+    ASSERT_TRUE(representation.isTangled()) << "true";
+    ASSERT_NO_THROW(representation.setTangledPopulation(population)) << "Should not throw";
+    ASSERT_TRUE(representation.hasTangledPopulation()) << "Should return true";
+    ASSERT_TRUE(representation.getTangledPopulation().has_value()) << "Should be true";
+    ASSERT_TRUE(representation.getTangledPopulation().value().get() == population) << "Should be true";
 }

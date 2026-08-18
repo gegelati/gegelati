@@ -150,15 +150,16 @@ TEST_F(EvolutionAlgorithmTest, reproduceParents)
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should be 100 before reproduction";
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring;
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring;
     ASSERT_NO_THROW(offspring = ea.reproduceParents(parents)) << "Reproducing failed.";
 
-    ASSERT_EQ(ea.getPopulation().size(), 200) << "Population Size should be 200 after reproduction";
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should still be 100 after reproduction";
     ASSERT_EQ(offspring.size(), 100) << "Offspring Size should be 100 after reproduction";
 
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(ea.getPopulation().containsIndividual(offspring.at(idx))) << "Offspring should be contained in the population";
-        ASSERT_TRUE(offspring.at(idx).get().getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents";
+    size_t idx = 0;
+    for(auto it = offspring.begin(); it != offspring.end(); it++) {
+        ASSERT_TRUE((*it)->getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents";
+        idx++;
     }
 }
 
@@ -167,23 +168,21 @@ TEST_F(EvolutionAlgorithmTest, mutateOffspring)
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
     ea.initializePopulation();
     std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
-    std::vector<std::reference_wrapper<const Evolution::Individual>> offspring = ea.reproduceParents(parents);
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(parents);
 
 
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(offspring.at(idx).get().getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents before mutation";
+    size_t idx = 0;
+    for(auto it = offspring.begin(); it != offspring.end(); it++) {
+        ASSERT_TRUE((*it)->getGenotype() == parents.at(idx).get().getGenotype()) << "Offspring should have the same genotype has their parents";
+        idx++;
     }
 
     ASSERT_NO_THROW(ea.mutateOffspring(offspring)) << "Mutating the offspring vector failed";
-
-    for(size_t idx = 0; idx < offspring.size(); idx++) {
-        ASSERT_TRUE(offspring.at(idx).get().getGenotype() != parents.at(idx).get().getGenotype()) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
+    idx = 0;
+    for(auto it = offspring.begin(); it != offspring.end(); it++) {
+        ASSERT_TRUE((*it)->getGenotype() != parents.at(idx).get().getGenotype()) << "Offspring should have a different genotype has their parents after mutation with high probability of mutation";
+        idx++;
     }
-
-    
-    Evolution::EvolutionAlgorithm ea2(*representation, le);
-    ea2.initializePopulation();
-    ASSERT_THROW(ea.mutateOffspring(ea2.reproduceParents(ea2.selectParents(100))), std::runtime_error) << "Should throw with wrong population";
 }
 
 
@@ -193,13 +192,16 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
     ea.initializePopulation();
 
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results1;
-    ASSERT_NO_THROW(results1 = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    ea.mutateOffspring(offspring);
 
-    ASSERT_EQ(results1.size(), 100) << "Results should have the size of the current population";
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results1;
+    ASSERT_NO_THROW(results1 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation failed";
+
+    ASSERT_EQ(results1.size(), ea.getPopulation().size() + offspring.size()) << "Results should have the size of the current population + offspring size";
     
     std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results2;
-    ASSERT_NO_THROW(results2 = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
+    ASSERT_NO_THROW(results2 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
 
     auto it1 = results1.begin();
     auto it2 = results2.begin();
@@ -211,22 +213,25 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     }
 }
 
-TEST_F(EvolutionAlgorithmTest, replacePopulation) 
+TEST_F(EvolutionAlgorithmTest, survivorSelection) 
 {
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
     ea.initializePopulation();
-    ea.mutateOffspring(ea.reproduceParents(ea.selectParents(100)));
+
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    ea.mutateOffspring(offspring);
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
-        ea.evaluatePopulation(0, Learn::LearningMode::TRAINING);
+        ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
     std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> resultsCopy(results);
 
-    ASSERT_EQ(ea.getPopulation().size(), 200) << "Population size should be 200 before replacement";
     ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
 
-    ASSERT_NO_THROW(ea.replacePopulation(results)) << "Fail to replace population";
-    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size should be 100 after replacement";
+    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers;
+    ASSERT_NO_THROW(loosers = ea.selectSurvivors(results)) << "Fail to replace population";
+
     ASSERT_EQ(results.size(), 100) << "Results size should be 100 after replacement";
+    ASSERT_EQ(loosers.size(), 100) << "Loosers size should be 100 after replacement";
 
     auto rit = results.rbegin();
     auto ritCopy = resultsCopy.rbegin();
@@ -236,15 +241,68 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
 
         rit++; ritCopy++;
     }
+}
+
+TEST_F(EvolutionAlgorithmTest, replacePopulation) 
+{
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    ea.mutateOffspring(offspring);
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
+        ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = ea.selectSurvivors(results);
+
+    size_t minIndexOffspring = offspring.begin()->get()->getIndividualID();
+    
+    ASSERT_EQ(offspring.size(), 100) << "offspring size should be 100 before replacement";
+
+    ASSERT_NO_THROW(ea.replacePopulation(offspring, loosers)) << "Fail to replace population";
+
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size should be 100 after replacement";
+    ASSERT_EQ(offspring.size(), 0) << "Offspring size should be 0 after replacement";
+
+    size_t nbOffspringSurviving = 0;
+    std::vector<std::reference_wrapper<const Evolution::Individual>> indivs(ea.getPopulation().getIndividuals());
+    for(size_t idx = 0; idx < ea.getPopulation().size(); idx++){
+        if(indivs.at(idx).get().getIndividualID() >= minIndexOffspring) {
+            nbOffspringSurviving = ea.getPopulation().size() - idx;
+            break;
+        }
+    }
+    ASSERT_GE(nbOffspringSurviving, 1) << "At least one offspring should have survive";
+
 
     
-    Evolution::EvolutionAlgorithm ea2(*representation, le);
-    ea2.initializePopulation();
-    ea2.mutateOffspring(ea2.reproduceParents(ea2.selectParents(100)));
+    offspring = ea.reproduceParents(ea.selectParents(100));
+    ea.mutateOffspring(offspring);
 
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> fakeResults = 
-        ea2.evaluatePopulation(0, Learn::LearningMode::TRAINING);
-    ASSERT_THROW(ea.replacePopulation(fakeResults), std::runtime_error) << "Should fail to replace population with wrong results";
+    results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+    loosers = ea.selectSurvivors(results);
+
+    ASSERT_EQ(ea.getPopulation().sizeProtected(), 0) << "No individual should be protected";
+
+    // First individual will be eliminated.
+    results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+
+    // Protect this individual before suppression
+    std::vector<std::weak_ptr<const Evolution::Individual>> indivPtrs(ea.getPopulation().getIndividualPtrs());
+    std::shared_ptr<const Evolution::Individual> indivSharedPtr =nullptr;
+    for(const std::weak_ptr<const Evolution::Individual>& indivPtr: indivPtrs){
+        for(const Evolution::Individual& looser: loosers) {
+            if(indivPtr.lock().get() == &looser) {
+                indivSharedPtr = indivPtr.lock();
+                break;
+            }
+        }
+        if(indivSharedPtr != nullptr) {
+            break;
+        }
+    }
+    ASSERT_EQ(ea.getPopulation().sizeProtected(), 1) << "One individual should now be protected";
+    ASSERT_THROW(ea.replacePopulation(offspring, loosers), std::runtime_error) << "Should throw by failing to delete the protected individual";
 }
 
 TEST_F(EvolutionAlgorithmTest, doGenerations) {
@@ -255,9 +313,11 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     size_t nbGen = 20;
     double formerBest = -1;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
-        ea.mutateOffspring(ea.reproduceParents(ea.selectParents(100)));
-        auto results = ea.evaluatePopulation(0, Learn::LearningMode::TRAINING);
-        ea.replacePopulation(results);
+        std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+        ea.mutateOffspring(offspring);
+        auto results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+        std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = ea.selectSurvivors(results);
+        ea.replacePopulation(offspring, loosers);
 
         double best = results.rbegin()->first->getSelectionMetrics()->getScore();
         ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
@@ -265,38 +325,38 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     }
 }
 
-TEST_F(EvolutionAlgorithmTest, evolveTPG) {
+TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaLgp(*representation, le, std::move(evalParams), 12, 10);
     eaLgp.initializePopulation();
-
-    size_t nbGen = 3;
-    double formerBest = -1;
-    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
-        eaLgp.mutateOffspring(eaLgp.reproduceParents(eaLgp.selectParents(100)));
-        auto results = eaLgp.evaluatePopulation(0, Learn::LearningMode::TRAINING);
-        eaLgp.replacePopulation(results);
-
-        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
-        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
-        formerBest = best;
-    }
 
     Representations::TPGRepresentation tpgRep = Representations::TPGRepresentation(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, le);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
-    nbGen = 2;
-    formerBest = -1;
+    size_t nbGen = 20;
+    double formerBest = -1;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
-        auto parents = eaTpg.selectParents(100);
-        auto offspring = eaTpg.reproduceParents(parents);
-        eaTpg.mutateOffspring(offspring);
-        auto results = eaTpg.evaluatePopulation(0, Learn::LearningMode::TRAINING);
-        eaTpg.replacePopulation(results);
 
-        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
-        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
-        formerBest = best;
+        {
+            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
+            eaLgp.mutateOffspring(offspring);
+            auto results = eaLgp.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+            std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = eaLgp.selectSurvivors(results);
+            eaLgp.replacePopulation(offspring, loosers);
+        }
+
+
+
+        {
+            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
+            eaTpg.mutateOffspring(offspring);
+            auto results = eaTpg.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+            std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = eaTpg.selectSurvivors(results);
+            eaTpg.replacePopulation(offspring, loosers);
+    
+            double best = results.rbegin()->first->getSelectionMetrics()->getScore();
+            ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
+            formerBest = best;
+        }
     }
-
 }

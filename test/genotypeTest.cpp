@@ -141,15 +141,18 @@ TEST(GenotypeTest, getEffectiveNodes)
 TEST(GenotypeTest, equality){
 
     Evolution::Genotype genotype1;
+    Evolution::Genotype genotype2;
+    ASSERT_TRUE(genotype1 == genotype2) << "Empty genotypes should be equal!";
+
     Node::NodeGroup& group1_1 = genotype1.addNodeGroup();
     Node::NodeGroup& group1_2 = genotype1.addNodeGroup();
 
-    Evolution::Genotype genotype2;
     Node::NodeGroup& group2_1 = genotype2.addNodeGroup();
+    ASSERT_TRUE(genotype1 != genotype2) << "Genotypes of different sizes should not be equal!";
+
     Node::NodeGroup& group2_2 = genotype2.addNodeGroup();
 
 
-    ASSERT_TRUE(genotype1 == genotype2) << "Empty genotypes should be equal!";
 
     group1_1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
 

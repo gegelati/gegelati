@@ -70,46 +70,35 @@ TEST_F(PopulationTest, Constructor)
     ASSERT_NO_THROW(delete population) << "Destructor of Population failed.";
 }
 
-TEST_F(PopulationTest, createIndividual)
+TEST_F(PopulationTest, addIndividual)
 {       
     Evolution::Population population;
 
-    ASSERT_NO_THROW(population.createIndividual()) << "Creating Individual in Population failed.";
+    ASSERT_NO_THROW(population.addIndividual()) << "adding Individual in Population failed.";
     ASSERT_EQ(population.size(), 1) << "Size of the Population should be 1.";
     
-    const Evolution::Individual& individual = population.createIndividual();
+    const Evolution::Individual& individual = population.addIndividual();
     ASSERT_EQ(population.size(), 2) << "Size of the Population should be 2.";
     ASSERT_TRUE(population.containsIndividual(individual)) << "Population should contain the individual.";
 
     std::vector<std::reference_wrapper<const Evolution::Individual>> individuals;
     ASSERT_NO_THROW(individuals = population.getIndividuals()) << "Getting Individuals from Population failed.";
     ASSERT_EQ(individuals.size(), 2) << "Size of the Individuals vector should be 2.";
+
+    std::unique_ptr<Evolution::Individual> individualPtr = std::make_unique<Evolution::Individual>();
+    Evolution::Individual& indivRef = *individualPtr;
+    ASSERT_NO_THROW(population.addIndividual(std::move(individualPtr))) << "adding Individual in Population failed.";
+    ASSERT_EQ(population.size(), 3) << "Size of the Population should be 2.";
+    ASSERT_TRUE(population.containsIndividual(indivRef)) << "Population should contain the individual.";
+    ASSERT_TRUE(population.getIndividuals().at(2) == indivRef) << "Individuals should be equal";
 }
-TEST_F(PopulationTest, copyIndividual)
-{       
-    Evolution::Population population;
-    const Evolution::Individual& individual = population.createIndividual();
 
-    Evolution::Individual* mutIndiv;
-    ASSERT_NO_THROW(mutIndiv = &population.getMutableIndividual(individual)) << "Getting individual should not fail.";
-    Evolution::Genotype& genotype = mutIndiv->getMutableGenotype();
-    Node::NodeGroup& group = genotype.addNodeGroup();
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
-
-    const Evolution::Individual* copyIndiv;
-    ASSERT_NO_THROW(copyIndiv = &population.copyIndividual(individual)) << "Copying individual failed";
-
-    ASSERT_EQ(copyIndiv->getSize(), 3) << "Copy was not effective";
-    ASSERT_EQ(copyIndiv->getGenotype().getNodeGroup(0).getNode(1).getValue(1), Node::NodeValue{5.0}) << "Copy was not effective";
-}
 TEST_F(PopulationTest, deleteIndividual)
 {       
     Evolution::Population population;
-    const Evolution::Individual& individual1 = population.createIndividual();
-    const Evolution::Individual& individual2 = population.createIndividual();
-    const Evolution::Individual& individual3 = population.createIndividual();
+    const Evolution::Individual& individual1 = population.addIndividual();
+    const Evolution::Individual& individual2 = population.addIndividual();
+    const Evolution::Individual& individual3 = population.addIndividual();
 
     ASSERT_EQ(population.size(), 3) << "Size of the Population should be 3.";
 
@@ -119,7 +108,7 @@ TEST_F(PopulationTest, deleteIndividual)
 
     
     Evolution::Population population2;
-    const Evolution::Individual& individual4 = population2.createIndividual();
+    const Evolution::Individual& individual4 = population2.addIndividual();
     ASSERT_THROW(population.deleteIndividual(individual4), std::runtime_error) << "Delete individual should fail";
 }
 
@@ -127,7 +116,7 @@ TEST_F(PopulationTest, emptyIndividual)
 {       
 
     Evolution::Population population;
-    const Evolution::Individual& individual = population.createIndividual();
+    const Evolution::Individual& individual = population.addIndividual();
     Evolution::Individual& mutIndiv = population.getMutableIndividual(individual);
 
     Evolution::Genotype& genotype = mutIndiv.getMutableGenotype();
@@ -143,9 +132,9 @@ TEST_F(PopulationTest, emptyIndividual)
 TEST_F(PopulationTest, clearIndividuals)
 {       
     Evolution::Population population;
-    const Evolution::Individual& individual1 = population.createIndividual();
-    const Evolution::Individual& individual2 = population.createIndividual();
-    const Evolution::Individual& individual3 = population.createIndividual();
+    const Evolution::Individual& individual1 = population.addIndividual();
+    const Evolution::Individual& individual2 = population.addIndividual();
+    const Evolution::Individual& individual3 = population.addIndividual();
 
     ASSERT_EQ(population.size(), 3) << "Size of the Population should be 3.";
 
@@ -157,12 +146,15 @@ TEST_F(PopulationTest, testAggragtions)
 {
     Evolution::Population population;
     const Evolution::Population& constPop = population;
-    const Evolution::Individual& individual1 = population.createIndividual();
-    const Evolution::Individual& individual2 = population.createIndividual();
-    const Evolution::Individual& individual3 = population.createIndividual();
+    const Evolution::Individual& individual1 = population.addIndividual();
+    const Evolution::Individual& individual2 = population.addIndividual();
+    const Evolution::Individual& individual3 = population.addIndividual();
     
     std::vector<std::weak_ptr<const Evolution::Individual>> individualPtrs = constPop.getIndividualPtrs();
     ASSERT_EQ(individualPtrs.size(), 3) << "Size should be three after creation";
+    ASSERT_EQ(population.size(), 3) << "Size should be three after creation";
+    ASSERT_EQ(population.sizeNotProtected(), 3) << "Size not protected should be three after creation";
+    ASSERT_EQ(population.sizeProtected(), 0) << "Size protected should be 0 after creation";
 
     for(const std::weak_ptr<const Evolution::Individual>& ptr: individualPtrs) {
         ASSERT_EQ(ptr.use_count(), size_t(1)) << "Pointer should be used once.";
@@ -171,6 +163,18 @@ TEST_F(PopulationTest, testAggragtions)
     std::shared_ptr<const Evolution::Individual> indivAggreagted = individualPtrs.at(1).lock();
 
     ASSERT_EQ(individualPtrs.at(1).use_count(), 2) << "Value should be 2";
+    ASSERT_EQ(population.size(), 3) << "Size should be three after creation";
+    ASSERT_EQ(population.sizeNotProtected(), 2) << "Size not protected should be 2";
+    ASSERT_EQ(population.sizeProtected(), 1) << "Size protected should be 1";
+
+    std::vector<std::reference_wrapper<const Evolution::Individual>> notProtIndivs = constPop.getNotProtectedIndividuals();
+    std::vector<std::reference_wrapper<const Evolution::Individual>> protIndivs= constPop.getProtectedIndividuals();
+    ASSERT_EQ(notProtIndivs.size(), 2) << "Size not protected should be 2";
+    ASSERT_EQ(protIndivs.size(), 1) << "Size protected should be 1";
+    ASSERT_TRUE(notProtIndivs.at(0) == individual1) << "Individuals should be equal";
+    ASSERT_TRUE(notProtIndivs.at(1) == individual3) << "Individuals should be equal";
+    ASSERT_TRUE(protIndivs.at(0) == individual2) << "Individuals should be equal";
+
     ASSERT_FALSE(population.deleteIndividual(individual2)) << "Deleting aggregated individual should fail";
 
     ASSERT_THROW(population.clearIndividuals(), std::runtime_error) << "Should throw with an individual aggregated and not deleted";

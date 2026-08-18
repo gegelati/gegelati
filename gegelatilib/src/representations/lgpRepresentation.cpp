@@ -24,7 +24,7 @@ void Representations::LGPRepresentation::setInputDimensions(const std::vector<st
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
-    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+    if(this->nbInputSources == 0) {
         throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
     }
 
@@ -60,7 +60,7 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->nbInputSources == 0 || this->maxInputSourceIdx == 0) {
+    if(this->nbInputSources == 0) {
         throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without input dimensions set.");
     }
 

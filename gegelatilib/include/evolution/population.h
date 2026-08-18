@@ -8,6 +8,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <algorithm>
 
 #include "evolution/individual.h"
 #include "util/genericComparator.h"
@@ -93,6 +94,16 @@ namespace Evolution {
         virtual std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
 
         /**
+         * \brief Get the current protected individuals: the individuals whose shared_ptr have a use_count higher than 1.
+         */
+        virtual std::vector<std::reference_wrapper<const Individual>> getProtectedIndividuals() const;
+
+        /**
+         * \brief Get the current not-protected individuals: the individuals whose shared_ptr have a use_count equal to 1.
+         */
+        virtual std::vector<std::reference_wrapper<const Individual>> getNotProtectedIndividuals() const;
+
+        /**
          * \brief Get the pointers towards the current individuals.
          * 
          * The vector return references of shared_ptr to limit the increase of counts.
@@ -114,20 +125,16 @@ namespace Evolution {
         virtual Individual& getMutableIndividual(const Individual& individual);
 
         /**
-         * \brief Create a new empty Individual.
-         * 
-         * \return a shared pointer to the created Individual.
+         * \brief add a new empty Individual.
          */
-        virtual const Individual& createIndividual();
+        virtual const Individual& addIndividual();
 
         /**
-         * \brief Copy an Individual.
+         * \brief add an existing Individual.
          * 
-         * \param[in] individual the Individual to copy.
-         * 
-         * \return a shared pointer to the created Individual.
+         * \param[in] individual unique_ptr of the individual added.
          */
-        virtual const Individual& copyIndividual(const Individual& individual);
+        virtual const Individual& addIndividual(std::unique_ptr<Individual> individual);
 
         /**
          * \brief Delete an individual.
@@ -150,10 +157,18 @@ namespace Evolution {
 
         /**
          * \brief Get the number of Individuals in the Population.
-         * 
-         * \return the number of Individuals in the Population.
          */
         virtual size_t size() const;
+
+        /**
+         * \brief Get the number of protected Individuals in the Population.
+         */
+        virtual size_t sizeProtected() const;
+
+        /**
+         * \brief Get the number of non-protected Individuals in the Population.
+         */
+        virtual size_t sizeNotProtected() const;
     };
 
 

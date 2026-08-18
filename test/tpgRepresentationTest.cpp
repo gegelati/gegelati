@@ -80,8 +80,8 @@ class TPGRepresentationTest : public ::testing::Test
         memberPopulation = new Evolution::Population();
         tpgPopulation = new Evolution::Population();
         for(size_t idx = 0; idx < 100; idx++) {
-            memberPopulation->createIndividual();
-            tpgPopulation->createIndividual();
+            memberPopulation->addIndividual();
+            tpgPopulation->addIndividual();
         }
     }
 
@@ -109,19 +109,39 @@ TEST_F(TPGRepresentationTest, Constructor)
 }
 
 
+TEST_F(TPGRepresentationTest, Cloning)
+{
+    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
+
+    std::unique_ptr<Evolution::Representation> clone1;
+    ASSERT_NO_THROW(clone1 = std::move(representation.cloneUniquePtr())) << "Cloning should not fail";
+
+    representation.setTangledPopulation(*tpgPopulation);
+    ASSERT_FALSE(clone1->hasTangledPopulation()) << "Clone 1 should not have a tangled population";
+
+    std::unique_ptr<Evolution::Representation> clone2;
+    ASSERT_NO_THROW(clone2 = std::move(representation.cloneUniquePtr())) << "Cloning should not fail";
+    ASSERT_TRUE(clone2->hasTangledPopulation()) << "Clone 2 should have a tangled population";
+    ASSERT_TRUE(clone2->getTangledPopulation().value().get() == representation.getTangledPopulation().value().get()) << "Tangled population should be the same after cloning";
+}
+
 TEST_F(TPGRepresentationTest, setInputDimensions)
 {
-
+    // Todo later
 }
 
 TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 {
     Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
-    representation.setTangledPopulation(*tpgPopulation);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
     representation.setInputDimensions({*inputSource});
+    representation.setTangled(false);
+    ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with not define as tangled";
+    representation.setTangled(true);
+    ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with no tangled population set";
+    representation.setTangledPopulation(*tpgPopulation);
 
     ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
     
@@ -168,10 +188,10 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 TEST_F(TPGRepresentationTest, isValid)
 {
     Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
-    representation.setTangledPopulation(*tpgPopulation);
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
+
     
     // Create member individuals
     const std::shared_ptr<const Evolution::Individual>& badRepMemberPtr = memberPopulation->getIndividualPtrs().at(0).lock();
@@ -184,11 +204,16 @@ TEST_F(TPGRepresentationTest, isValid)
         goodMemberGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
     
-
-
-
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
     representation.setInputDimensions({*inputSource});
+
+    representation.setTangled(false);
+    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with not define as tangled";
+    representation.setTangled(true);
+    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with no tangled population set";
+    representation.setTangledPopulation(*tpgPopulation);
+
+    ASSERT_NO_THROW(representation.isValid(indiv)) << "Should not throw anymore";
 
     for(size_t i = 0; i < 4; i++) {
         group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
@@ -207,11 +232,11 @@ TEST_F(TPGRepresentationTest, isValid)
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{size_t(6), goodMemberPtr}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{size_t(6), size_t(6)}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, goodMemberPtr}));
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, 0.0}));
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
     group.removeNode(indiv.getSize() - 1);
 
@@ -226,8 +251,29 @@ TEST_F(TPGRepresentationTest, isValid)
 
     ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
     ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 11 nodes";
+    for(size_t i = 0; i < 6; i++) {
+        group.removeNode(indiv.getSize() - 1);
+    }
 
-    ASSERT_FALSE(true) << "TODO: Test for wrong tangled individuals missing";
+    // Testing tangled connections.
+    std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>();
+    Evolution::Genotype& tangledGenotype = tangledIndiv->getMutableGenotype();
+    Node::NodeGroup& tangledGroup = tangledGenotype.addNodeGroup();
+    for(size_t i = 0; i < 6; i++) {
+        tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
+    }
+    ASSERT_TRUE(representation.isValid(*tangledIndiv)) << "Individual should be valid";
+
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, tangledIndiv}));
+    ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with valid tangled individual";
+    group.removeNode(indiv.getSize() - 1);
+
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, goodMemberPtr}));
+    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with not valid tangled individual";
+    group.removeNode(indiv.getSize() - 1);
+
+    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, tangledIndiv}));
+    ASSERT_FALSE(representation.isValid(*tangledIndiv)) << "Individual should not be valid with itself has tangled individual";
 }
 
 

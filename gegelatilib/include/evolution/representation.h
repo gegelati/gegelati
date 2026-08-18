@@ -145,6 +145,16 @@ namespace Evolution {
         virtual void setTangledPopulation(const Population& tangledPop);
 
         /**
+         * \brief return if representation has a tangled population set.
+         */
+        virtual bool hasTangledPopulation();
+
+        /**
+         * \brief return the tangled population(can be null)
+         */
+        virtual const std::optional<std::reference_wrapper<const Population>>& getTangledPopulation();
+
+        /**
          * \brief execute the specified individual based on the current dataSources
          * 
          * \param[in] indiv Individual executed
