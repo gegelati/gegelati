@@ -1,4 +1,4 @@
-#include "representations/tPGRepresentation.h"
+#include "representations/tpgRepresentation.h"
 #include <limits>
 
 std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneUniquePtr() const
