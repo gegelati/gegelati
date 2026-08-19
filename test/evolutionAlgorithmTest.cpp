@@ -107,6 +107,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
     ASSERT_NO_THROW(ea->getMutation()) << "For Coverage :D";
     ASSERT_NO_THROW(ea->getEvaluation()) << "For Coverage :D";
     ASSERT_NO_THROW(ea->getSelector()) << "For Coverage :D";
+    ASSERT_NO_THROW(ea->getRNG()) << "For Coverage :D";
 
     ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
 }
@@ -374,4 +375,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             formerBest = best;
         }
     }
+
+    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 13482886404445128142U) << "RNG not determinist";
+    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
+    ASSERT_EQ(eaTpg.getPopulation().size(), 383) << "Size of TPG population not determinist";
 }

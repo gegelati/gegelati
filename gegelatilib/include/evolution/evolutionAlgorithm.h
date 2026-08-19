@@ -85,6 +85,8 @@ namespace Evolution {
         /// @brief Return the selector of the EA
         const Selector::Selector& getSelector();
 
+        /// @brief Return the Random Number Generator of the EA 
+        RNG::RNG& getRNG();
 
         /**
          * \brief Creates individuals of the first generation.

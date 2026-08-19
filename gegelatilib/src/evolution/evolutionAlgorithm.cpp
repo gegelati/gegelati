@@ -27,6 +27,11 @@ const Selector::Selector& Evolution::EvolutionAlgorithm::getSelector()
     return *this->selection;
 }
 
+RNG::RNG& Evolution::EvolutionAlgorithm::getRNG()
+{
+    return this->rng;
+}
+
 void Evolution::EvolutionAlgorithm::initializePopulation()
 {
     if(representation->isTangled()) {
