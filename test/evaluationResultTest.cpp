@@ -39,8 +39,9 @@
 #include "selector/classificationSelectionMetrics.h"
 
 #include "learn/evaluationResult.h"
+#include "evaluation/evaluationResult.h"
 
-TEST(EvaluationResultTest, Constructor)
+TEST(EvaluationResultTestR, Constructor)
 {
     Learn::EvaluationResult* eval;
 
@@ -51,7 +52,7 @@ TEST(EvaluationResultTest, Constructor)
     ASSERT_NO_THROW(delete eval);
 }
 
-TEST(EvaluationResultTest, GetResult)
+TEST(EvaluationResultTestR, GetResult)
 {
     Learn::EvaluationResult eval(
         std::make_shared<Selector::SelectionMetrics>(1.0), 10);
@@ -60,7 +61,7 @@ TEST(EvaluationResultTest, GetResult)
         << "Getter returned an unexpected value.";
 }
 
-TEST(EvaluationResultTest, GetNbEvaluation)
+TEST(EvaluationResultTestR, GetNbEvaluation)
 {
     Learn::EvaluationResult eval(
         std::make_shared<Selector::SelectionMetrics>(1.0), 10);
@@ -69,7 +70,7 @@ TEST(EvaluationResultTest, GetNbEvaluation)
         << "Getter returned an unexpected value.";
 }
 
-TEST(EvaluationResultTest, AssignmentAdditionOperator)
+TEST(EvaluationResultTestR, AssignmentAdditionOperator)
 {
     Learn::EvaluationResult eval1(
         std::make_shared<Selector::SelectionMetrics>(1.0), 10);
@@ -96,4 +97,42 @@ TEST(EvaluationResultTest, AssignmentAdditionOperator)
     ASSERT_THROW(eval1 += eval3, std::runtime_error)
         << "Call to operator += should not work with heterogeneous "
            "EvaluationResult classes.";
+}
+
+TEST(EvaluationResultTest, Constructor)
+{
+    Evaluation::EvaluationResult* eval1;
+    Evaluation::EvaluationResult* eval2;
+
+    std::unique_ptr<Evaluation::EvaluationRun> run = std::make_unique<Evaluation::EvaluationRun>();
+
+    ASSERT_NO_THROW(eval1 = new Evaluation::EvaluationResult())
+        << "Building an EvaluationRun failed unexpectedly.";
+    
+    ASSERT_NO_THROW(eval2 = new Evaluation::EvaluationResult(std::move(run), 1))
+        << "Building an EvaluationRun failed unexpectedly.";
+        
+    ASSERT_NO_THROW(delete eval1);
+    ASSERT_NO_THROW(delete eval2);
+}
+
+TEST(EvaluationResultTest, addEvaluationRun)
+{
+    std::unique_ptr<Selector::SelectionMetrics> metric = std::make_unique<Selector::SelectionMetrics>(28.0);
+    std::unique_ptr<Evaluation::EvaluationRun> run = std::make_unique<Evaluation::EvaluationRun>(std::move(metric));
+
+    Evaluation::EvaluationResult result(std::move(run), 2);
+
+    ASSERT_EQ(result.getSize(), 1) << "Wrong size";
+    ASSERT_EQ(result.getEvaluationRuns().size(), 1) << "Wrong size";
+    ASSERT_EQ(result.getEvaluationRuns().at(2)->getMetricAt(0).getScore(), 28.0) << "Wrong size";
+
+    std::unique_ptr<Selector::SelectionMetrics> metric2 = std::make_unique<Selector::SelectionMetrics>(32.0);
+    std::unique_ptr<Evaluation::EvaluationRun> run2 = std::make_unique<Evaluation::EvaluationRun>(std::move(metric2));
+
+    result.addEvaluationRun(std::move(run2), 12);
+    
+    ASSERT_EQ(result.getSize(), 2) << "Wrong size";
+    ASSERT_EQ(result.getEvaluationRuns().size(), 2) << "Wrong size";
+    ASSERT_EQ(result.getEvaluationRuns().at(12)->getMetricAt(0).getScore(), 32.0) << "Wrong size";
 }

@@ -34,8 +34,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#ifndef R_EVALUATION_RESULT_H
+#define R_EVALUATION_RESULT_H
 
 #include <cmath>
 #include <memory>

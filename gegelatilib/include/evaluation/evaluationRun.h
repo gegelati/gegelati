@@ -1,0 +1,117 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
+#ifndef EVALUATION_RUN_H
+#define EVALUATION_RUN_H
+
+#include <cmath>
+#include <memory>
+
+#include "selector/selectionMetrics.h"
+
+namespace Evaluation {
+
+    /**
+     * \brief class for storing the metrics measured on an individal for a single evaluation run.
+     */
+    class EvaluationRun {
+
+        protected:
+            /// @brief vector of metric measured during the run.
+            std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics;
+
+
+        public:
+            
+            /**
+             * \brief Virtual destructor for polymorphism.
+             */
+            virtual ~EvaluationRun() = default;
+
+            // Disable copying to avoid accidental copies (use references or pointers instead).
+            EvaluationRun(const EvaluationRun&) = delete;
+            EvaluationRun& operator=(const EvaluationRun&) = delete;
+
+            /**
+             * \brief Empty evaluation run
+             */
+            EvaluationRun() {};
+
+
+            /**
+             * \brief Evaluation run with a single measured metric
+             * 
+             * \param[in] metric of the run
+             */
+            EvaluationRun(std::unique_ptr<Selector::SelectionMetrics> metric) {
+                this->addMetric(std::move(metric));
+            };
+    
+            /**
+             * \brief Evaluation run with a vector of measured metrics
+             * 
+             * \param[in] metrics metrics of the run
+             */
+            EvaluationRun(std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics): metrics{std::move(metrics)} {};
+
+            /**
+             * \brief Add a metric to the list of metrics
+             * 
+             * \param[in] metric Metric added.
+             */
+            virtual void addMetric(std::unique_ptr<Selector::SelectionMetrics> metric);
+
+            /**
+             * \brief return the number of metrics.
+             */
+            virtual size_t getSize() const;
+
+            /**
+             * \brief return the vector of metrics
+             */
+            virtual const std::vector<std::unique_ptr<Selector::SelectionMetrics>>& getMetrics() const;
+
+            /**
+             * \brief return the metric at specific index.
+             * 
+             * \param[in] index index of the required metric
+             */
+            virtual const Selector::SelectionMetrics& getMetricAt(size_t index) const;
+
+    };
+}; // namespace Learn
+
+#endif
