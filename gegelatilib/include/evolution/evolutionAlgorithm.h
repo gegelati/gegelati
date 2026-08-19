@@ -40,6 +40,9 @@ namespace Evolution {
         /// Selection agent of the EA
         std::unique_ptr<Selector::Selector> selection;
 
+        /// Surviving Selection agent of the EA
+        std::unique_ptr<SurvivingSelection> survivingSelection;
+
         /// Random Number Generator for this EA
         RNG::RNG rng;
 
@@ -64,6 +67,7 @@ namespace Evolution {
         : representation(std::move(representation.cloneUniquePtr())), 
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
+          survivingSelection(std::make_unique<SurvivingSelection>()), 
           evaluation(std::make_unique<Learn::EvaluationAgent>(le, std::move(evalParams), evalSeed)),
           selection{std::move(Selector::selectorFactory())} {
             rng.setSeed(evoSeed);
@@ -83,7 +87,7 @@ namespace Evolution {
         const Learn::EvaluationAgent& getEvaluation();
 
         /// @brief Return the selector of the EA
-        const Selector::Selector& getSelector();
+        const SurvivingSelection& getSelector();
 
         /// @brief Return the Random Number Generator of the EA 
         RNG::RNG& getRNG();
@@ -125,8 +129,7 @@ namespace Evolution {
          * generation.
          * \param[in] mode the LearningMode to use during the evaluation.
          */
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Individual>> evaluatePopulation(
+        std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>> evaluatePopulation(
                                 const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
                                 size_t generationNumber, Learn::LearningMode mode);
 
@@ -137,8 +140,7 @@ namespace Evolution {
          * 
          * \return the list of looser individuals
          */
-        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::reference_wrapper<const Individual>>& scores);
+        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores);
 
         /**
          * \brief perform the replacement of the population based on the select survivors.

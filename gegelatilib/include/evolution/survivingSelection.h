@@ -31,9 +31,20 @@ namespace Evolution {
             /**
              * \brief method performing the surviving selection
              * 
+             * \param[in] scores the scores of the individuals' evaluation.
+             * 
              * \return a map with the individuals as keys. The values indicate if the individual survived (true) or not (false)
              */
-            std::map<std::reference_wrapper<const Individual>, bool> select(const std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Individual>>& scores) const;
+            std::map<std::reference_wrapper<const Individual>, bool> select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const;
+
+            /**
+             * \brief method returning the best individual from the given score
+             * 
+             * \param[in] scores the scores of the individuals' evaluation.
+             * 
+             * \return the pair of the individual associate with the best score.
+             */
+            std::pair<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>> getBest(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const;
     };
 };
 

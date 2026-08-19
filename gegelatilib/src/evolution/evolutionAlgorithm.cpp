@@ -22,9 +22,9 @@ const Learn::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
     return *this->evaluation;
 }
 
-const Selector::Selector& Evolution::EvolutionAlgorithm::getSelector()
+const Evolution::SurvivingSelection& Evolution::EvolutionAlgorithm::getSelector()
 {
-    return *this->selection;
+    return *this->survivingSelection;
 }
 
 RNG::RNG& Evolution::EvolutionAlgorithm::getRNG()
@@ -78,8 +78,7 @@ void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_p
     }
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-    std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::evaluatePopulation(
+std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> Evolution::EvolutionAlgorithm::evaluatePopulation(
         const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, size_t generationNumber, Learn::LearningMode mode
     )
 {
@@ -93,14 +92,13 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>,
         *this->selection, generationNumber, mode);
 }
 
-std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Individual>>& scores)
+std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores)
 {
-    SurvivingSelection selection2;
-    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = selection2.select(scores);
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(scores);
 
     for(auto it = scores.begin(); it != scores.end();) {
-        if (selectionResult.find(it->second)->second) {
+        // If individual is selected, keep it, else erase it from the scores.
+        if (selectionResult.find(it->first)->second) {
             it++;
         } else {
             it = scores.erase(it);

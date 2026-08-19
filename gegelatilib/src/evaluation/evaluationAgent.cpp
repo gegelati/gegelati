@@ -144,8 +144,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::EvaluationAgent::evaluateIndivid
 
 
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::reference_wrapper<const Evolution::Individual>>
+std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>>
 Learn::EvaluationAgent::evaluateIndividuals(
     const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
@@ -153,7 +152,7 @@ Learn::EvaluationAgent::evaluateIndividuals(
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Evolution::Individual>>
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>>
         results;
 
 
@@ -163,7 +162,7 @@ Learn::EvaluationAgent::evaluateIndividuals(
             indiv, representation, selector, this->learningEnvironment, generationNumber, mode
         );
         
-        results.insert({result, indiv});
+        results.insert({indiv, result});
     }
 
     return results;

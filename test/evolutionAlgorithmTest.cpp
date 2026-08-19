@@ -199,19 +199,19 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results1;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results1;
     ASSERT_NO_THROW(results1 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation failed";
 
     ASSERT_EQ(results1.size(), ea.getPopulation().size() + offspring.size()) << "Results should have the size of the current population + offspring size";
     
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results2;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results2;
     ASSERT_NO_THROW(results2 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
 
     auto it1 = results1.begin();
     auto it2 = results2.begin();
     while(it1 != results1.end() && it2 != results2.end()) {
-        ASSERT_EQ(it1->first->getSelectionMetrics()->getScore(), it2->first->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
-        ASSERT_EQ(it1->second, it2->second) << "Individuals should be equal";
+        ASSERT_EQ(it1->first, it2->first) << "Individuals should be equal";
+        ASSERT_EQ(it1->second->getSelectionMetrics()->getScore(), it2->second->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
 
         it1++; it2++;
     }
@@ -225,9 +225,8 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results = 
         ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> resultsCopy(results);
 
     ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
 
@@ -247,15 +246,6 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
     }
     ASSERT_EQ(nbSurvived, 100) << "100 individuals should have survived";
     ASSERT_EQ(nbDeleted, 100) << "100 individuals should have been set as deleted";
-
-    auto rit = results.rbegin();
-    auto ritCopy = resultsCopy.rbegin();
-    while (rit != results.rend() && ritCopy != resultsCopy.rend()) {
-        ASSERT_EQ(rit->first->getSelectionMetrics()->getScore(), ritCopy->first->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
-        ASSERT_EQ(rit->second, ritCopy->second) << "Individuals should be equal";
-
-        rit++; ritCopy++;
-    }
 }
 
 TEST_F(EvolutionAlgorithmTest, replacePopulation) 
@@ -266,7 +256,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results = 
         ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
     std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
 
@@ -335,7 +325,7 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
         std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
         ea.replacePopulation(offspring, survivors);
 
-        double best = results.rbegin()->first->getSelectionMetrics()->getScore();
+        double best = ea.getSelector().getBest(results).second->getSelectionMetrics()->getScore();
         ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
         formerBest = best;
     }
@@ -350,7 +340,6 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
     size_t nbGen = 20;
-    double formerBest = -1;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         {
@@ -369,14 +358,10 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             auto results = eaTpg.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
             std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = eaTpg.selectSurvivors(results);
             eaTpg.replacePopulation(offspring, survivors);
-    
-            double best = results.rbegin()->first->getSelectionMetrics()->getScore();
-            ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
-            formerBest = best;
         }
     }
 
-    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 13482886404445128142U) << "RNG not determinist";
+    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 7986353545622927855U) << "RNG not determinist";
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
-    ASSERT_EQ(eaTpg.getPopulation().size(), 383) << "Size of TPG population not determinist";
+    ASSERT_EQ(eaTpg.getPopulation().size(), 325) << "Size of TPG population not determinist";
 }

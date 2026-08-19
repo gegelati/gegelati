@@ -161,7 +161,7 @@ namespace Learn {
          *
          * This method calls the evaluateIndividual method for every individual
          * of the representations. The method returns a sorted map associating each
-         * individual to its average score, in ascending order or score.
+         * individual to its average score.
          *
          * \param[in] individuals The individuals whose genotypes are evaluted.
          * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
@@ -171,8 +171,8 @@ namespace Learn {
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::reference_wrapper<const Evolution::Individual>>
+        virtual std::map<std::reference_wrapper<const Evolution::Individual>, 
+                              std::shared_ptr<EvaluationResult>>
         evaluateIndividuals(
             const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,

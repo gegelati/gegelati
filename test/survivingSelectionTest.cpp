@@ -33,14 +33,14 @@ TEST_F(SurvivingSelectionTest, select)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     std::vector<Evolution::Individual*> indivs;
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> scores;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
         indivs.push_back(new Evolution::Individual());
         
         std::shared_ptr<Learn::EvaluationResult> result = std::make_shared<Learn::EvaluationResult>(
             std::make_shared<Selector::SelectionMetrics>(double(idx)), 1
         );
-        scores.insert({result, *indivs.back()});
+        scores.insert({*indivs.back(), result});
     }
 
     std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResults;
@@ -54,6 +54,34 @@ TEST_F(SurvivingSelectionTest, select)
             ASSERT_LT(it->first.get().getIndividualID(), 100) << "Individual ID should be in [0, 99] with set score";
         }
     }
+
+    // Delete ptr
+    for(size_t idx = 0; idx < 200; idx++) {
+        delete indivs.at(idx);
+    }
+}
+
+TEST_F(SurvivingSelectionTest, getBest)
+{
+    Evolution::SurvivingSelection selection;
+
+    // Create 200 individuals with scores 0, 1, 2, ..., 199.
+    std::vector<Evolution::Individual*> indivs;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> scores;
+    for(size_t idx = 0; idx < 200; idx++) {
+        indivs.push_back(new Evolution::Individual());
+        
+        std::shared_ptr<Learn::EvaluationResult> result = std::make_shared<Learn::EvaluationResult>(
+            std::make_shared<Selector::SelectionMetrics>(double(idx)), 1
+        );
+        scores.insert({*indivs.back(), result});
+    }
+
+    std::pair<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> bestPair = *scores.begin();
+    ASSERT_NO_THROW(bestPair = selection.getBest(scores)) << "Getting best score failed";
+    ASSERT_TRUE(bestPair.first == *indivs.back()) << "Best individual should be last indiv of the vector";
+    ASSERT_TRUE(bestPair.second->getSelectionMetrics()->getScore() == 199) << "Best score should be 199";
+
 
     // Delete ptr
     for(size_t idx = 0; idx < 200; idx++) {
