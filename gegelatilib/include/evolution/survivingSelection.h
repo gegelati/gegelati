@@ -2,6 +2,7 @@
 #define SELECTION_H
 
 #include <map>
+#include <algorithm>
 
 #include "evolution/individual.h"
 #include "learn/evaluationResult.h"
