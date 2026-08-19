@@ -40,7 +40,7 @@
 #include <cmath>
 #include <memory>
 
-#include "selector/selectionMetrics.h"
+#include "evaluation/evaluationMetric.h"
 
 namespace Evaluation {
 
@@ -51,7 +51,7 @@ namespace Evaluation {
 
         protected:
             /// @brief vector of metric measured during the run.
-            std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics;
+            std::vector<std::unique_ptr<EvaluationMetric>> metrics;
 
 
         public:
@@ -76,7 +76,7 @@ namespace Evaluation {
              * 
              * \param[in] metric of the run
              */
-            EvaluationRun(std::unique_ptr<Selector::SelectionMetrics> metric) {
+            EvaluationRun(std::unique_ptr<EvaluationMetric> metric) {
                 this->addMetric(std::move(metric));
             };
     
@@ -85,14 +85,14 @@ namespace Evaluation {
              * 
              * \param[in] metrics metrics of the run
              */
-            EvaluationRun(std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics): metrics{std::move(metrics)} {};
+            EvaluationRun(std::vector<std::unique_ptr<EvaluationMetric>> metrics): metrics{std::move(metrics)} {};
 
             /**
              * \brief Add a metric to the list of metrics
              * 
              * \param[in] metric Metric added.
              */
-            virtual void addMetric(std::unique_ptr<Selector::SelectionMetrics> metric);
+            virtual void addMetric(std::unique_ptr<EvaluationMetric> metric);
 
             /**
              * \brief return the number of metrics.
@@ -102,14 +102,14 @@ namespace Evaluation {
             /**
              * \brief return the vector of metrics
              */
-            virtual const std::vector<std::unique_ptr<Selector::SelectionMetrics>>& getMetrics() const;
+            virtual const std::vector<std::unique_ptr<EvaluationMetric>>& getMetrics() const;
 
             /**
              * \brief return the metric at specific index.
              * 
              * \param[in] index index of the required metric
              */
-            virtual const Selector::SelectionMetrics& getMetricAt(size_t index) const;
+            virtual const EvaluationMetric& getMetricAt(size_t index) const;
 
     };
 }; // namespace Learn

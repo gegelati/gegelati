@@ -118,7 +118,7 @@ TEST(EvaluationResultTest, Constructor)
 
 TEST(EvaluationResultTest, addEvaluationRun)
 {
-    std::unique_ptr<Selector::SelectionMetrics> metric = std::make_unique<Selector::SelectionMetrics>(28.0);
+    std::unique_ptr<Evaluation::EvaluationMetric> metric = std::make_unique<Evaluation::EvaluationMetric>(28.0);
     std::unique_ptr<Evaluation::EvaluationRun> run = std::make_unique<Evaluation::EvaluationRun>(std::move(metric));
 
     Evaluation::EvaluationResult result(std::move(run), 2);
@@ -127,7 +127,7 @@ TEST(EvaluationResultTest, addEvaluationRun)
     ASSERT_EQ(result.getEvaluationRuns().size(), 1) << "Wrong size";
     ASSERT_EQ(result.getEvaluationRuns().at(2)->getMetricAt(0).getScore(), 28.0) << "Wrong size";
 
-    std::unique_ptr<Selector::SelectionMetrics> metric2 = std::make_unique<Selector::SelectionMetrics>(32.0);
+    std::unique_ptr<Evaluation::EvaluationMetric> metric2 = std::make_unique<Evaluation::EvaluationMetric>(32.0);
     std::unique_ptr<Evaluation::EvaluationRun> run2 = std::make_unique<Evaluation::EvaluationRun>(std::move(metric2));
 
     result.addEvaluationRun(std::move(run2), 12);

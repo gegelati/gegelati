@@ -12,10 +12,10 @@ TEST(EvaluationRunTest, Constructor)
     Evaluation::EvaluationRun* eval2;
     Evaluation::EvaluationRun* eval3;
 
-    std::unique_ptr<Selector::SelectionMetrics> metric1 = std::make_unique<Selector::SelectionMetrics>(1.0);
-    std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics;
-    metrics.push_back(std::make_unique<Selector::SelectionMetrics>(2.0));
-    metrics.push_back(std::make_unique<Selector::SelectionMetrics>(3.0));
+    std::unique_ptr<Evaluation::EvaluationMetric> metric1 = std::make_unique<Evaluation::EvaluationMetric>(1.0);
+    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> metrics;
+    metrics.push_back(std::make_unique<Evaluation::EvaluationMetric>(2.0));
+    metrics.push_back(std::make_unique<Evaluation::EvaluationMetric>(3.0));
 
     ASSERT_NO_THROW(eval1 = new Evaluation::EvaluationRun())
         << "Building an EvaluationRun failed unexpectedly.";
@@ -33,9 +33,9 @@ TEST(EvaluationRunTest, Constructor)
 
 TEST(EvaluationRunTest, addMetric)
 {
-    std::vector<std::unique_ptr<Selector::SelectionMetrics>> metrics;
-    metrics.push_back(std::make_unique<Selector::SelectionMetrics>(2.0));
-    metrics.push_back(std::make_unique<Selector::SelectionMetrics>(3.0));
+    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> metrics;
+    metrics.push_back(std::make_unique<Evaluation::EvaluationMetric>(2.0));
+    metrics.push_back(std::make_unique<Evaluation::EvaluationMetric>(3.0));
 
     Evaluation::EvaluationRun eval(std::move(metrics));
 
@@ -46,7 +46,7 @@ TEST(EvaluationRunTest, addMetric)
 
     ASSERT_THROW(eval.getMetricAt(2), std::runtime_error) << "Should fail out of bound";
 
-    std::unique_ptr<Selector::SelectionMetrics> metric = std::make_unique<Selector::SelectionMetrics>(1.0);
+    std::unique_ptr<Evaluation::EvaluationMetric> metric = std::make_unique<Evaluation::EvaluationMetric>(1.0);
     ASSERT_NO_THROW(eval.addMetric(std::move(metric))) << "Adding a metric failed";
 
     ASSERT_EQ(eval.getSize(), 3) << "Size is wrong";
