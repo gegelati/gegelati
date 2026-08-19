@@ -33,7 +33,7 @@ namespace Representations {
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const;
+            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const override;
 
             /**
              * \brief Main Representation constructor.
@@ -60,7 +60,7 @@ namespace Representations {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const;
+        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override;
 
         /**
          * \brief individual nodes should have six values, with limited ranges.
@@ -86,7 +86,7 @@ namespace Representations {
         virtual std::vector<double> executeIndividual(
             const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const override;
 
-        };
+    };
 }; // namespace LGP_Representation
 
 

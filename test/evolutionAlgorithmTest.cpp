@@ -48,6 +48,8 @@
 
 #include "representations/lgpRepresentation.h"
 #include "representations/tpgRepresentation.h"
+
+#include "util/counterReset.h"
 // Set all file in comment
 
 class EvolutionAlgorithmTest : public ::testing::Test
@@ -64,6 +66,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        CounterReset::counterReset();
         auto add = [](double a, double b) -> double { return a + b; };
         auto minus = [](double a, double b) -> double { return a - b; };
         auto times = [](double a, double b) -> double { return a * b; };
@@ -227,11 +230,22 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
 
     ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers;
-    ASSERT_NO_THROW(loosers = ea.selectSurvivors(results)) << "Fail to replace population";
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors;
+    ASSERT_NO_THROW(survivors = ea.selectSurvivors(results)) << "Fail to replace population";
 
     ASSERT_EQ(results.size(), 100) << "Results size should be 100 after replacement";
-    ASSERT_EQ(loosers.size(), 100) << "Loosers size should be 100 after replacement";
+    ASSERT_EQ(survivors.size(), 200) << "survivors size should be 200 after replacement";
+    size_t nbSurvived = 0;
+    size_t nbDeleted = 0;
+    for(const auto& pair: survivors) {
+        if(pair.second) {
+            nbSurvived++;
+        } else {
+            nbDeleted++;
+        }
+    }
+    ASSERT_EQ(nbSurvived, 100) << "100 individuals should have survived";
+    ASSERT_EQ(nbDeleted, 100) << "100 individuals should have been set as deleted";
 
     auto rit = results.rbegin();
     auto ritCopy = resultsCopy.rbegin();
@@ -253,13 +267,13 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Evolution::Individual>> results = 
         ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = ea.selectSurvivors(results);
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
 
     size_t minIndexOffspring = offspring.begin()->get()->getIndividualID();
     
     ASSERT_EQ(offspring.size(), 100) << "offspring size should be 100 before replacement";
 
-    ASSERT_NO_THROW(ea.replacePopulation(offspring, loosers)) << "Fail to replace population";
+    ASSERT_NO_THROW(ea.replacePopulation(offspring, survivors)) << "Fail to replace population";
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size should be 100 after replacement";
     ASSERT_EQ(offspring.size(), 0) << "Offspring size should be 0 after replacement";
@@ -280,7 +294,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
     ea.mutateOffspring(offspring);
 
     results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-    loosers = ea.selectSurvivors(results);
+    survivors = ea.selectSurvivors(results);
 
     ASSERT_EQ(ea.getPopulation().sizeProtected(), 0) << "No individual should be protected";
 
@@ -291,8 +305,9 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
     std::vector<std::weak_ptr<const Evolution::Individual>> indivPtrs(ea.getPopulation().getIndividualPtrs());
     std::shared_ptr<const Evolution::Individual> indivSharedPtr =nullptr;
     for(const std::weak_ptr<const Evolution::Individual>& indivPtr: indivPtrs){
-        for(const Evolution::Individual& looser: loosers) {
-            if(indivPtr.lock().get() == &looser) {
+        for(const auto& pair: survivors) {
+            const Evolution::Individual& survivor = pair.first;
+            if(!pair.second && indivPtr.lock().get() == &survivor) {
                 indivSharedPtr = indivPtr.lock();
                 break;
             }
@@ -302,7 +317,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
         }
     }
     ASSERT_EQ(ea.getPopulation().sizeProtected(), 1) << "One individual should now be protected";
-    ASSERT_THROW(ea.replacePopulation(offspring, loosers), std::runtime_error) << "Should throw by failing to delete the protected individual";
+    ASSERT_THROW(ea.replacePopulation(offspring, survivors), std::runtime_error) << "Should throw by failing to delete the protected individual";
 }
 
 TEST_F(EvolutionAlgorithmTest, doGenerations) {
@@ -316,8 +331,8 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
         std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
         ea.mutateOffspring(offspring);
         auto results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-        std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = ea.selectSurvivors(results);
-        ea.replacePopulation(offspring, loosers);
+        std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
+        ea.replacePopulation(offspring, survivors);
 
         double best = results.rbegin()->first->getSelectionMetrics()->getScore();
         ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
@@ -341,8 +356,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
             eaLgp.mutateOffspring(offspring);
             auto results = eaLgp.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-            std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = eaLgp.selectSurvivors(results);
-            eaLgp.replacePopulation(offspring, loosers);
+            std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = eaLgp.selectSurvivors(results);
+            eaLgp.replacePopulation(offspring, survivors);
         }
 
 
@@ -351,8 +366,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
             eaTpg.mutateOffspring(offspring);
             auto results = eaTpg.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
-            std::vector<std::reference_wrapper<const Evolution::Individual>> loosers = eaTpg.selectSurvivors(results);
-            eaTpg.replacePopulation(offspring, loosers);
+            std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = eaTpg.selectSurvivors(results);
+            eaTpg.replacePopulation(offspring, survivors);
     
             double best = results.rbegin()->first->getSelectionMetrics()->getScore();
             ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";

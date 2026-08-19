@@ -27,7 +27,7 @@ namespace Representations {
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const;
+            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const override;
 
             /**
              * \brief Main Representation constructor.
@@ -55,7 +55,7 @@ namespace Representations {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const;
+        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override;
 
         /**
          * \brief individual nodes should have two values, one individual and one integer or individual.

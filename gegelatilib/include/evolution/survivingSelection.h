@@ -1,0 +1,40 @@
+#ifndef SELECTION_H
+#define SELECTION_H
+
+#include <map>
+
+#include "evolution/individual.h"
+#include "learn/evaluationResult.h"
+
+namespace Evolution {
+
+    /**
+     * \brief Class representing the surviving selection process of the evolution algorithm.
+     */
+    class SurvivingSelection {
+
+        protected:
+            
+        
+        public: 
+
+            /// Default polymorphic destructor
+            virtual ~SurvivingSelection() = default;
+
+            /// @brief Default constructor
+            SurvivingSelection() {};
+            
+            // Disable copying to avoid accidental copies (use references or pointers instead).
+            SurvivingSelection(const SurvivingSelection&) = delete;
+            SurvivingSelection& operator=(const SurvivingSelection&) = delete;
+
+            /**
+             * \brief method performing the surviving selection
+             * 
+             * \return a map with the individuals as keys. The values indicate if the individual survived (true) or not (false)
+             */
+            std::map<std::reference_wrapper<const Individual>, bool> select(const std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Individual>>& scores) const;
+    };
+};
+
+#endif // SELECTION_H

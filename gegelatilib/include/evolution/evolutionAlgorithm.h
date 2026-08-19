@@ -9,6 +9,7 @@
 #include "evolution/population.h"
 #include "evolution/representation.h"
 #include "evolution/mutation.h"
+#include "evolution/survivingSelection.h"
 
 #include "mutator/rng.h"
 
@@ -134,18 +135,18 @@ namespace Evolution {
          * 
          * \return the list of looser individuals
          */
-        virtual std::vector<std::reference_wrapper<const Evolution::Individual>> selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Individual>>& scores);
 
         /**
          * \brief perform the replacement of the population based on the select survivors.
          * 
          * \param[in] offspring offspring generated.
-         * \param[in] loosers Individual from either the population or the offspring that are not selected.
+         * \param[in] selectionResult Individuals from either the population or the offspring that are selected or not.
          */
         virtual void replacePopulation(
           std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
-          std::vector<std::reference_wrapper<const Evolution::Individual>> loosers);
+          std::map<std::reference_wrapper<const Individual>, bool>& selectionResult);
     };
 }; // namespace Evolution
 

@@ -88,43 +88,50 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>,
         *this->selection, generationNumber, mode);
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Individual>>& scores)
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers;
+    SurvivingSelection selection2;
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = selection2.select(scores);
 
-    // Standard (mu+lambda) replacement
-    size_t mu = 100;
-    while(scores.size() > mu) {
-        auto it = scores.begin();
-        loosers.push_back(it->second);
-        scores.erase(it);
+    for(auto it = scores.begin(); it != scores.end();) {
+        if (selectionResult.find(it->second)->second) {
+            it++;
+        } else {
+            it = scores.erase(it);
+        }
     }
-    return loosers;
+
+    return selectionResult;
 }
 
 void Evolution::EvolutionAlgorithm::replacePopulation(
     std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
-    std::vector<std::reference_wrapper<const Evolution::Individual>> loosers)
+    std::map<std::reference_wrapper<const Individual>, bool>& selectionResult)
 {
-    // Discard loosers! Bouuuuh
-    while(loosers.size() > 0) {
-        auto it = loosers.begin();
-        const Individual& loser = *it;
+    for (auto it = selectionResult.begin(); it != selectionResult.end();) {
+        const Individual& indiv = it->first.get();
 
-        if(this->population->containsIndividual(loser)) {
-            bool deleted = this->population->deleteIndividual(loser);
-            if(!deleted) {
-                throw std::runtime_error("Evolution::EvolutionAlgorithm::replacePopulation: deleting indivudal failed, in current version it means a protected individual has been evaluated, which should not happend.");
+        if (it->second) {
+            // Survivor: if offspring, add to the population, else do nothing
+            auto offIt = offspring.find(&indiv);
+            if (offIt != offspring.end()) {
+                this->population->addIndividual(std::move(offspring.extract(offIt).value()));
             }
-        } else {
-            offspring.erase(offspring.find(&loser));
-        }
-        loosers.erase(it);
-    }
 
-    // Add surviving offspring to the population
-    while (!offspring.empty()) {
-        this->population->addIndividual(std::move(offspring.extract(offspring.begin()).value()));
+        } else {
+            // Loser: if offspring, delete from offspring list, else delete from population
+            if (this->population->containsIndividual(indiv)) {
+                if (!this->population->deleteIndividual(indiv)) {
+                    throw std::runtime_error(
+                        "EvolutionAlgorithm::replacePopulation: "
+                        "a protected individual was evaluated and lost selection");
+                }
+            } else {
+                offspring.erase(offspring.find(&indiv));
+            }
+        }
+
+        it = selectionResult.erase(it);   // clean the whole map as we go
     }
 }

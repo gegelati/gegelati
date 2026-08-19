@@ -77,6 +77,10 @@ namespace Evolution {
                 }
             };   
 
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Representation(const Representation&) = delete;
+        Representation& operator=(const Representation&) = delete;
+
         /**
          * \brief Return the name of the representation.
          */

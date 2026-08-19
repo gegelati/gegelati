@@ -64,7 +64,9 @@ class FakeRepresentation : public Evolution::Representation
 {
     public: 
         std::unique_ptr<Evolution::Representation> cloneUniquePtr() const {
-            return std::make_unique<FakeRepresentation>(*this);
+            return std::make_unique<FakeRepresentation>(
+                nbNodesMin, nbNodesMax, representationName, representationColor
+            );
         }
         
         FakeRepresentation(size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(nbNodesMin, nbNodesMax, representationName, representationColor) {};
