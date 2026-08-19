@@ -34,7 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "StickGameWithOpponentDupDouble.h"
+#include "stickGameWithOpponentDupDouble.h"
 
 bool StickGameWithOpponentD::isCopyable() const
 {
