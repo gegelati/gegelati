@@ -33,12 +33,13 @@ TEST_F(SurvivingSelectionTest, select)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     std::vector<Evolution::Individual*> indivs;
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> scores;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
         indivs.push_back(new Evolution::Individual());
         
-        std::shared_ptr<Learn::EvaluationResult> result = std::make_shared<Learn::EvaluationResult>(
-            std::make_shared<Selector::SelectionMetrics>(double(idx)), 1
+        std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
+            std::move(std::make_unique<Evaluation::EvaluationRun>(
+                std::move(std::make_unique<Evaluation::EvaluationMetric>(double(idx))))), 1
         );
         scores.insert({*indivs.back(), result});
     }
@@ -67,20 +68,20 @@ TEST_F(SurvivingSelectionTest, getBest)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     std::vector<Evolution::Individual*> indivs;
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> scores;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
         indivs.push_back(new Evolution::Individual());
         
-        std::shared_ptr<Learn::EvaluationResult> result = std::make_shared<Learn::EvaluationResult>(
-            std::make_shared<Selector::SelectionMetrics>(double(idx)), 1
+        std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
+            std::move(std::make_unique<Evaluation::EvaluationRun>(
+                std::move(std::make_unique<Evaluation::EvaluationMetric>(double(idx))))), 1
         );
         scores.insert({*indivs.back(), result});
     }
 
-    std::pair<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> bestPair = *scores.begin();
-    ASSERT_NO_THROW(bestPair = selection.getBest(scores)) << "Getting best score failed";
-    ASSERT_TRUE(bestPair.first == *indivs.back()) << "Best individual should be last indiv of the vector";
-    ASSERT_TRUE(bestPair.second->getSelectionMetrics()->getScore() == 199) << "Best score should be 199";
+    const Evolution::Individual* best;
+    ASSERT_NO_THROW(best = &selection.getBest(scores)) << "Getting best score failed";
+    ASSERT_TRUE(best == indivs.back()) << "Best individual should be last indiv of the vector";
 
 
     // Delete ptr

@@ -1,10 +1,16 @@
 #include "evolution/survivingSelection.h"
 
-std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::SurvivingSelection::select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const
+std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::SurvivingSelection::select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const
 {
+    // Probably could update this for the better.
     std::vector<std::pair<double, std::reference_wrapper<const Individual>>> ranked;
-    for (const auto& [ind, eval] : scores)
-        ranked.emplace_back(eval->getSelectionMetrics()->getScore(), ind);
+    for (const auto& pairResult : scores){
+        double score = 0;
+        for (const auto& pairRun: pairResult.second->getEvaluationRuns()) {
+            score += pairRun.second->getMetricAt(0).getScore();
+        }
+        ranked.emplace_back(score, pairResult.first);
+    }
 
     // Sorting ranks
     std::stable_sort(ranked.begin(), ranked.end(),
@@ -19,18 +25,28 @@ std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::S
     return selection;
 }
 
-std::pair<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> Evolution::SurvivingSelection::getBest(
-    const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const
+const Evolution::Individual& Evolution::SurvivingSelection::getBest(
+    const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const
 {
     auto it = scores.begin();
-    std::pair<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> bestIndiv = *it;
+    std::pair<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> bestIndiv = *it;
     it++;
 
-    while(it != scores.end()) {
-        if(it->second->getSelectionMetrics()->getScore() > bestIndiv.second->getSelectionMetrics()->getScore()) {
-            bestIndiv = *it;
-        }    
-        it++;
+
+    // Probably could update this for the better.
+    std::vector<std::pair<double, std::reference_wrapper<const Individual>>> ranked;
+    for (const auto& pairResult : scores){
+        double score = 0;
+        for (const auto& pairRun: pairResult.second->getEvaluationRuns()) {
+            score += pairRun.second->getMetricAt(0).getScore();
+        }
+        ranked.emplace_back(score, pairResult.first);
     }
-    return bestIndiv;
+
+    // Sorting ranks
+    std::stable_sort(ranked.begin(), ranked.end(),
+        [](const auto& a, const auto& b) { return a.first > b.first; });
+
+    
+    return ranked.begin()->second;
 }

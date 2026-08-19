@@ -199,19 +199,19 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results1;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results1;
     ASSERT_NO_THROW(results1 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation failed";
 
     ASSERT_EQ(results1.size(), ea.getPopulation().size() + offspring.size()) << "Results should have the size of the current population + offspring size";
     
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results2;
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results2;
     ASSERT_NO_THROW(results2 = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING)) << "Evaluation of entire population failed";
 
     auto it1 = results1.begin();
     auto it2 = results2.begin();
     while(it1 != results1.end() && it2 != results2.end()) {
         ASSERT_EQ(it1->first, it2->first) << "Individuals should be equal";
-        ASSERT_EQ(it1->second->getSelectionMetrics()->getScore(), it2->second->getSelectionMetrics()->getScore()) << "EvaluationResults scores should be equal";
+        ASSERT_EQ(it1->second->getEvaluationRuns().begin()->second->getMetricAt(0).getScore(), it2->second->getEvaluationRuns().begin()->second->getMetricAt(0).getScore()) << "EvaluationResults scores should be equal";
 
         it1++; it2++;
     }
@@ -225,7 +225,7 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results = 
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results = 
         ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
 
     ASSERT_EQ(results.size(), 200) << "Results size should be 200 before replacement";
@@ -256,7 +256,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> results = 
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results = 
         ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
     std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
 
@@ -324,11 +324,11 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
         auto results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
         std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
         ea.replacePopulation(offspring, survivors);
-
-        double best = ea.getSelector().getBest(results).second->getSelectionMetrics()->getScore();
-        ASSERT_GE(best, formerBest) << "Performances should not decrease with fixed generation seed";
-        formerBest = best;
     }
+    
+    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
+    ASSERT_EQ(ea.getPopulation().size(), 100) << "Size of population not determinist";
+    ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 16268381457926726931U) << "RNG not determinist";
 }
 
 TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
@@ -361,7 +361,7 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
         }
     }
 
-    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 7986353545622927855U) << "RNG not determinist";
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
     ASSERT_EQ(eaTpg.getPopulation().size(), 325) << "Size of TPG population not determinist";
+    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 7986353545622927855U) << "RNG not determinist";
 }

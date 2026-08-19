@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "evolution/individual.h"
-#include "learn/evaluationResult.h"
+#include "evaluation/evaluationResult.h"
 
 namespace Evolution {
 
@@ -36,16 +36,16 @@ namespace Evolution {
              * 
              * \return a map with the individuals as keys. The values indicate if the individual survived (true) or not (false)
              */
-            std::map<std::reference_wrapper<const Individual>, bool> select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const;
+            std::map<std::reference_wrapper<const Individual>, bool> select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
 
             /**
-             * \brief method returning the best individual from the given score
+             * \brief method returning the best individual from the given scores
              * 
              * \param[in] scores the scores of the individuals' evaluation.
              * 
-             * \return the pair of the individual associate with the best score.
+             * \return the best individual.
              */
-            std::pair<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>> getBest(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores) const;
+            const Evolution::Individual& getBest(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
     };
 };
 

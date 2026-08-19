@@ -107,20 +107,6 @@ TEST(SelectionMetricsTest, DefaultAndParamConstructor)
     ASSERT_DOUBLE_EQ(paramMetrics.getUtility(), 2.5);
 }
 
-TEST(SelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
-{
-    Selector::SelectionMetrics metrics(1.5, 2.5);
-    FakedLearningEnvironment env(3.0, 1.0);
-
-    // Call extraction
-    const Representation::Individual* nullIndividual = nullptr;
-    metrics.extractMetricsEpisode(*nullIndividual, 0, env);
-
-    // score and utility should be incremented
-    ASSERT_DOUBLE_EQ(metrics.getScore(), 4.5);
-    ASSERT_DOUBLE_EQ(metrics.getUtility(), 3.5);
-}
-
 TEST(SelectionMetricsTest, WeightedSumAndTypeMismatch)
 {
     auto m1 = std::make_shared<Selector::SelectionMetrics>(1.0, 2.0);

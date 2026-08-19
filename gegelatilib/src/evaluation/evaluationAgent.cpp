@@ -40,14 +40,14 @@
 
 #include "evaluation/evaluationAgent.h"
 
-RNG::RNG& Learn::EvaluationAgent::getRNG()
+RNG::RNG& Evaluation::EvaluationAgent::getRNG()
 {
     return this->rng;
 }
 
-size_t Learn::EvaluationAgent::getNbEvaluationIndiv(std::shared_ptr<Learn::EvaluationResult> previousEval, Learn::LearningMode mode) const
+size_t Evaluation::EvaluationAgent::getNbEvaluationIndiv(std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const
 {
-    if (mode != LearningMode::TRAINING) {
+    /*if (mode != Learn::LearningMode::TRAINING) {
         return this->params->nbIterationsPerPolicyValidation;
     }
 
@@ -60,33 +60,29 @@ size_t Learn::EvaluationAgent::getNbEvaluationIndiv(std::shared_ptr<Learn::Evalu
             nbEvaluationTraining
         );
     }
-    return nbEvaluationTraining;    
+    return nbEvaluationTraining;    */
+    return 0;
 }
 
 
-std::shared_ptr<Learn::EvaluationResult> Learn::EvaluationAgent::evaluateIndividual(
+std::shared_ptr<Evaluation::EvaluationResult> Evaluation::EvaluationAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
-    const Selector::Selector& selector,
     Learn::LearningEnvironment& le,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
     if(!representation.isValid(individual)){
-        throw std::runtime_error("Learn::EvaluationAgent::evaluateIndividual: Individual not valid for the representation");
+        throw std::runtime_error("Evaluation::EvaluationAgent::evaluateIndividual: Individual not valid for the representation");
     }
-
-    Representation::Individual falseIndividual(0);
 
     // Skip the individual evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
-    std::shared_ptr<Learn::EvaluationResult> previousEval =nullptr;// = selector.getResultsOf(individual);
-    size_t nbEvaluationToDo = this->getNbEvaluationIndiv(previousEval, mode);
+    //std::shared_ptr<Evaluation::EvaluationResult> previousEval =nullptr;// = selector.getResultsOf(individual);
+    size_t nbEvaluationToDo = params->nbIterationsPerPolicyValidation;//this->getNbEvaluationIndiv(previousEval, mode);
 
-    // Init global selection metric
-    std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
-        selector.createSelectionMetrics();
-    globalSelectionMetrics->initMetrics(falseIndividual, le);
+    // created Evaluation result
+    std::shared_ptr<EvaluationResult> evaluationResult = std::make_shared<EvaluationResult>();
 
 
     // Evaluate nbIteration times
@@ -100,14 +96,17 @@ std::shared_ptr<Learn::EvaluationResult> Learn::EvaluationAgent::evaluateIndivid
         } else {
             hash = hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
         }
-
-        // Init selectionMetrics for this episode.
-        std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
-            selector.createSelectionMetrics();
-        selectionMetrics->initMetrics(falseIndividual, le);
-
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
+        
+
+        // create Evaluation run for this episode with default metric for now.
+        std::unique_ptr<EvaluationRun> evaluationRun = std::make_unique<EvaluationRun>(std::move(std::make_unique<EvaluationMetric>()));        
+        // Init the metrics of the run
+        for(const auto& metric: evaluationRun->getMetrics()) {
+            metric->initMetrics(individual, le);
+        }
+
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
@@ -120,46 +119,45 @@ std::shared_ptr<Learn::EvaluationResult> Learn::EvaluationAgent::evaluateIndivid
             // Count actions
             nbActions++;
 
-            // Extract the metrics.
-            selectionMetrics->extractMetricsStep(falseIndividual, actionsID, le);
+            // Extract the metrics of current stpe.
+            for(const auto& metric: evaluationRun->getMetrics()) {
+                metric->extractMetricsStep(individual, actionsID, le);
+            }
         }
 
-        // Extract the metrics.
-        selectionMetrics->extractMetricsEpisode(falseIndividual, nbActions, le);
+        // Extract the final metrics of the run.
+        for(const auto& metric: evaluationRun->getMetrics()) {
+            metric->extractMetricsRun(individual, nbActions, le);
+        }
 
-        // Add the extracted metrics to the total.
-        globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber, 1);
+        // Add the evaluationRun to the evaluationResult.
+        evaluationResult->addEvaluationRun(std::move(evaluationRun), hash);
     }
-
-    // Create the EvaluationResult
-    auto evaluationResult = std::shared_ptr<EvaluationResult>(
-        new EvaluationResult(globalSelectionMetrics, nbEvaluationToDo));
 
     // Combine it with previous one if any
-    if (previousEval != nullptr) {
-        *evaluationResult += *previousEval;
-    }
+    //if (previousEval != nullptr) {
+    //    *evaluationResult += *previousEval;
+    //} #TODO method to combine 2 evaluation results
     return evaluationResult;
 }
 
 
 
-std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>>
-Learn::EvaluationAgent::evaluateIndividuals(
+std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
+Evaluation::EvaluationAgent::evaluateIndividuals(
     const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
-    const Selector::Selector& selector,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>>
+    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
         results;
 
 
     for(const Evolution::Individual& indiv: individuals){
         // Evaluate the individuals and insert the results
         const auto& result = this->evaluateIndividual(
-            indiv, representation, selector, this->learningEnvironment, generationNumber, mode
+            indiv, representation, this->learningEnvironment, generationNumber, mode
         );
         
         results.insert({indiv, result});

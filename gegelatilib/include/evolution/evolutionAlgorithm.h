@@ -13,8 +13,6 @@
 
 #include "mutator/rng.h"
 
-#include "selector/selector.h"
-#include "selector/selectorFactory.h"
 
 namespace Evolution {
 
@@ -35,10 +33,7 @@ namespace Evolution {
         std::unique_ptr<Mutation> mutation;
 
         /// evaluation agent of the EA
-        std::unique_ptr<Learn::EvaluationAgent> evaluation;
-
-        /// Selection agent of the EA
-        std::unique_ptr<Selector::Selector> selection;
+        std::unique_ptr<Evaluation::EvaluationAgent> evaluation;
 
         /// Surviving Selection agent of the EA
         std::unique_ptr<SurvivingSelection> survivingSelection;
@@ -68,8 +63,7 @@ namespace Evolution {
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
           survivingSelection(std::make_unique<SurvivingSelection>()), 
-          evaluation(std::make_unique<Learn::EvaluationAgent>(le, std::move(evalParams), evalSeed)),
-          selection{std::move(Selector::selectorFactory())} {
+          evaluation(std::make_unique<Evaluation::EvaluationAgent>(le, std::move(evalParams), evalSeed)){
             rng.setSeed(evoSeed);
             this->representation->setInputDimensions(le.getDataSources());
           };
@@ -84,7 +78,7 @@ namespace Evolution {
         const Mutation& getMutation();
 
         /// @brief Return the evaluation agent of the EA
-        const Learn::EvaluationAgent& getEvaluation();
+        const Evaluation::EvaluationAgent& getEvaluation();
 
         /// @brief Return the selector of the EA
         const SurvivingSelection& getSelector();
@@ -129,7 +123,7 @@ namespace Evolution {
          * generation.
          * \param[in] mode the LearningMode to use during the evaluation.
          */
-        std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>> evaluatePopulation(
+        std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>> evaluatePopulation(
                                 const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
                                 size_t generationNumber, Learn::LearningMode mode);
 
@@ -140,7 +134,7 @@ namespace Evolution {
          * 
          * \return the list of looser individuals
          */
-        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores);
+        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores);
 
         /**
          * \brief perform the replacement of the population based on the select survivors.

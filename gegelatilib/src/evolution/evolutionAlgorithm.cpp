@@ -17,7 +17,7 @@ const Evolution::Mutation& Evolution::EvolutionAlgorithm::getMutation()
     return *this->mutation;
 }
 
-const Learn::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
+const Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
 {
     return *this->evaluation;
 }
@@ -78,7 +78,7 @@ void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_p
     }
 }
 
-std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Learn::EvaluationResult>> Evolution::EvolutionAlgorithm::evaluatePopulation(
+std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> Evolution::EvolutionAlgorithm::evaluatePopulation(
         const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, size_t generationNumber, Learn::LearningMode mode
     )
 {
@@ -88,11 +88,10 @@ std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Le
     }
 
     return this->evaluation->evaluateIndividuals(
-        evaluatedIndividuals,*this->representation, 
-        *this->selection, generationNumber, mode);
+        evaluatedIndividuals,*this->representation, generationNumber, mode);
 }
 
-std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Learn::EvaluationResult>>& scores)
+std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores)
 {
     std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(scores);
 

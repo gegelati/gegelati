@@ -52,14 +52,14 @@
 #include "mutator/rng.h"
 
 #include "learn/classificationLearningEnvironment.h"
-#include "learn/evaluationResult.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
+#include "evaluation/evaluationResult.h"
 #include "evolution/representation.h"
 #include "evolution/individual.h"
 
-namespace Learn {
+namespace Evaluation {
 
     /**
      * \brief Class used to control the learning steps of a Graph within
@@ -69,10 +69,10 @@ namespace Learn {
     {
       protected:
         /// LearningEnvironment with which the EvaluationAgent will interact.
-        LearningEnvironment& learningEnvironment;
+        Learn::LearningEnvironment& learningEnvironment;
 
         /// Parameters for the learning process
-        std::unique_ptr<LearningParameters> params;
+        std::unique_ptr<Learn::LearningParameters> params;
 
         /// Random Number Generator for this Learning Agent
         RNG::RNG rng;
@@ -89,11 +89,11 @@ namespace Learn {
          * \param[in] seed Seed for random number generator
          */
         EvaluationAgent(
-          LearningEnvironment& le, 
-          std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
+          Learn::LearningEnvironment& le, 
+          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(),
           size_t seed = 0)
             : learningEnvironment{le},
-              params{std::make_unique<LearningParameters>(*parameters)} {
+              params{std::make_unique<Learn::LearningParameters>(*parameters)} {
                 rng.setSeed(seed);
               };
 
@@ -117,7 +117,7 @@ namespace Learn {
          * \param[in] mode the LearningMode to use during the policy evaluation.
          */
         virtual size_t getNbEvaluationIndiv(
-            std::shared_ptr<Learn::EvaluationResult> previousEval, Learn::LearningMode mode) const;
+            std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const;
 
         /**
          * \brief Evaluates policy starting from the given root.
@@ -131,7 +131,6 @@ namespace Learn {
          *
          * \param[in] individual The individual whose genotype is evaluted.
          * \param[in] representation The representation of the individual evaluated, used to map the individual genotype to phenotype
-         * \param[in] selector Selector of the individuals (TODO to remove later)
          * \param[in] le Reference to the LearningEnvironment to use
          * during the policy evaluation (may be different from the attribute of
          * the class in child EvaluationAgentClass).
@@ -150,10 +149,9 @@ namespace Learn {
         virtual std::shared_ptr<EvaluationResult> evaluateIndividual(
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
-            const Selector::Selector& selector,
-            LearningEnvironment& le,
+            Learn::LearningEnvironment& le,
             uint64_t generationNumber,
-            LearningMode mode) const;
+            Learn::LearningMode mode) const;
 
 
         /**
@@ -165,7 +163,6 @@ namespace Learn {
          *
          * \param[in] individuals The individuals whose genotypes are evaluted.
          * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
-         * \param[in] selector Selector of the individuals (TODO to remove later)
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -176,9 +173,8 @@ namespace Learn {
         evaluateIndividuals(
             const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
-            const Selector::Selector& selector,
             uint64_t generationNumber,
-            LearningMode mode) const;
+            Learn::LearningMode mode) const;
     };
 }; // namespace Learn
 
