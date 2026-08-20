@@ -97,8 +97,10 @@ class ArchiveMetricTest : public ::testing::Test
 TEST_F(ArchiveMetricTest, Constructor)
 {
     Evaluation::ArchiveMetric* metric;
-    ASSERT_NO_THROW(metric = new Evaluation::ArchiveMetric(1.0, 0))
+    ASSERT_NO_THROW(metric = new Evaluation::ArchiveMetric(1.0))
         << "Default construction of an archiveMetric failed";
+
+    ASSERT_NO_THROW(metric->cloneEmptyUniquePtr()) << "Construction with cloning failed";
 
     ASSERT_NO_THROW(delete metric;) << "Destruction of an empty ArchiveMetric failed.";
 }
@@ -120,7 +122,10 @@ TEST_F(ArchiveMetricTest, CombineHash)
 TEST_F(ArchiveMetricTest, extractMetricForced)
 {
     // For these test, force archivingProbability to 1
-    Evaluation::ArchiveMetric metric(1.0, 0);
+    Evaluation::ArchiveMetric metric(1.0);
+
+    // Initialize the metric with known seed
+    ASSERT_NO_THROW(metric.initMetrics(indiv, le, 0)) << "Initialize the metric with seed 0 failed";
 
     // Add a fictive recording
     ASSERT_NO_THROW(metric.extractMetricsStep(indiv, {}, le))
@@ -148,7 +153,10 @@ TEST_F(ArchiveMetricTest, extractMetricWithProbability)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Evaluation::ArchiveMetric metric(0.5, 0);
+    Evaluation::ArchiveMetric metric(0.5);
+
+    // Initialize the metric with known seed
+    ASSERT_NO_THROW(metric.initMetrics(indiv, le, 0)) << "Initialize the metric with seed 0 failed";
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
@@ -164,7 +172,10 @@ TEST_F(ArchiveMetricTest, extractMetricWithProbability)
 TEST_F(ArchiveMetricTest, getInputs)
 {
     // extract all
-    Evaluation::ArchiveMetric metric(10, 1.0);
+    Evaluation::ArchiveMetric metric(1.0);
+
+    // Initialize the metric with known seed
+    ASSERT_NO_THROW(metric.initMetrics(indiv, le, 0)) << "Initialize the metric with seed 0 failed";
 
     le.setDataDouble(2.0);
 

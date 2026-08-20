@@ -12,6 +12,12 @@ Evaluation::ArchiveMetric::~ArchiveMetric()
     }
 }
 
+std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::ArchiveMetric::cloneEmptyUniquePtr() const
+{
+    return std::make_unique<Evaluation::ArchiveMetric>(
+        this->extractionProbability);
+}
+
 size_t Evaluation::ArchiveMetric::getCombinedHash(
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandlers)
@@ -29,6 +35,12 @@ const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandle
     return this->inputsExtracted;
 }
 
+void Evaluation::ArchiveMetric::initMetrics(
+    const Evolution::Individual& individual,
+    const Learn::LearningEnvironment& learningEnvironment,
+    size_t seed) {
+    rng.setSeed(seed);
+};
 
 void Evaluation::ArchiveMetric::extractMetricsStep(
     const Evolution::Individual& individual, std::vector<double> actionValues,

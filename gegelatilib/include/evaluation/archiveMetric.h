@@ -6,9 +6,7 @@
 #include <map>
 
 #include "evaluation/evaluationMetric.h"
-
 #include "mutator/rng.h"
-
 
 namespace Evaluation {
     /**
@@ -28,8 +26,6 @@ namespace Evaluation {
         std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> inputsExtracted;
 
       public:
-
-
         /**
          * \brief Destructor of the class.
          *
@@ -42,13 +38,14 @@ namespace Evaluation {
          * \brief Constructor.
          * 
          * \param[in] extractionProbability probability of extracting an input source.
-         * \param[in] seed seed used to initialized the deterministic RNG
          */
-        ArchiveMetric(double extractionProbability, size_t seed)
-            : EvaluationMetric(0.0), extractionProbability{extractionProbability} {
-                // set deterministic seed to the local rng.
-                rng.setSeed(seed);
-            };
+        ArchiveMetric(double extractionProbability)
+            : EvaluationMetric(0.0), extractionProbability{extractionProbability} {};
+
+        /**
+         * \brief Dupplicate the current metric with the same extractionProbability.
+         */
+        std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const;
 
         /**
          * \brief Combien the hash of a set of dataHandlers into a single one.
@@ -66,6 +63,20 @@ namespace Evaluation {
          * Return the inputs extracted.
          */
         virtual const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>&  getInputsExtracted() const;
+
+
+        /**
+         * \brief Uses the seed to set the RNG seed.
+         *
+         * \param[in] individual the individual representing the individual.
+         * \param[in] learningEnvironment the learning environment in which the
+         * individual is evaluated.
+         * \param[in] seed used to reset the learningEnvironment.
+         */
+        virtual void initMetrics(
+            const Evolution::Individual& individual,
+            const Learn::LearningEnvironment& learningEnvironment,
+            size_t seed) override;
 
         /**
          * \brief Extract metrics from the individual in the learning environment.

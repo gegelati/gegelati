@@ -45,6 +45,20 @@ RNG::RNG& Evaluation::EvaluationAgent::getRNG()
     return this->rng;
 }
 
+void Evaluation::EvaluationAgent::addRequestedMetric(const EvaluationMetric& metric)
+{
+    this->requestedMetrics.push_back(std::move(metric.cloneEmptyUniquePtr()));
+}
+
+std::unique_ptr<Evaluation::EvaluationRun> Evaluation::EvaluationAgent::createEvaluationRun() const
+{
+    std::unique_ptr<EvaluationRun> evalRun = std::make_unique<EvaluationRun>();
+    for(const auto& metric: this->requestedMetrics) {
+        evalRun->addMetric(metric->cloneEmptyUniquePtr());
+    }
+    return std::move(evalRun);
+}
+
 size_t Evaluation::EvaluationAgent::getNbEvaluationIndiv(std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const
 {
     /*if (mode != Learn::LearningMode::TRAINING) {
@@ -90,31 +104,22 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::EvaluationAgent::evalu
          iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
-        uint64_t hash;
-        if(mode == Learn::LearningMode::TRAINING) {
-            hash = hasher(generationNumber) ^ hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
-        } else {
-            hash = hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
+        uint64_t hash = hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
+        if(mode == Learn::LearningMode::TRAINING) { 
+            // In training, hash should take into consideration the generation number, else not (we don't want validation to change between generations).
+            hash = hasher(generationNumber) ^ hash;
         }
+
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
-        
 
         // create Evaluation run for this episode with default metric for now.
-        std::unique_ptr<EvaluationRun> evaluationRun = std::make_unique<EvaluationRun>(std::move(std::make_unique<EvaluationMetric>()));        
-
-        bool cheating = true;
-        if(cheating) {
-            evaluationRun->addMetric(
-                std::move(std::make_unique<ArchiveMetric>(1.0, 0))
-            );
-        }
+        std::unique_ptr<EvaluationRun> evaluationRun = std::move(this->createEvaluationRun());
 
         // Init the metrics of the run
         for(const auto& metric: evaluationRun->getMetrics()) {
-            metric->initMetrics(individual, le);
+            metric->initMetrics(individual, le, hash);
         }
-
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&

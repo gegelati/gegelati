@@ -336,6 +336,7 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
     
     Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
     ea.initializePopulation();
+    ea.getEvaluation().addRequestedMetric(Evaluation::ArchiveMetric(1.0));
 
     size_t nbGen = 20;
     double formerBest = -1;
@@ -349,8 +350,6 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
     // This is some dataSource sampled from the environment
     ASSERT_NO_THROW(results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1)) << "meh";
     auto metric = results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1);
-
-    
 }
 
 

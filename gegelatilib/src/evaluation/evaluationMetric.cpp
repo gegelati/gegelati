@@ -1,6 +1,11 @@
 
 #include "evaluation/evaluationMetric.h"
 
+std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::EvaluationMetric::cloneEmptyUniquePtr() const
+{
+    return std::make_unique<EvaluationMetric>();
+}
+
 double Evaluation::EvaluationMetric::getScore() const
 {
     return score;

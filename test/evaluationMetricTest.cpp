@@ -12,6 +12,7 @@ class FakedLearningEnvironment : public Learn::LearningEnvironment
 {
   private:
     double m_score;
+    
 
   public:
     FakedLearningEnvironment(double score)
@@ -56,6 +57,8 @@ TEST(EvaluationMetricTest, Constructor)
 
     ASSERT_NO_THROW(metric1 = new Evaluation::EvaluationMetric()) << "Constructor failed";
     ASSERT_NO_THROW(metric2 = new Evaluation::EvaluationMetric(1.5)) << "Constructor failed";
+
+    ASSERT_NO_THROW(metric1->cloneEmptyUniquePtr()) << "Construction with cloning failed";
 
     ASSERT_NO_THROW(delete metric1) << "Destructor failed";
     ASSERT_NO_THROW(delete metric2) << "Destructor failed";

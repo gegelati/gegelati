@@ -34,6 +34,11 @@ namespace Evaluation {
             : score{score} {};
 
         /**
+         * \brief Method to dupplicate the current polymorphic metric, keeping the current parameter but forgetting the extractions.
+         */
+        std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const;
+
+        /**
          * Return the score of the individual.
          */
         virtual double getScore() const;
@@ -46,10 +51,12 @@ namespace Evaluation {
          * \param[in] individual the individual representing the individual.
          * \param[in] learningEnvironment the learning environment in which the
          * individual is evaluated.
+         * \param[in] seed used to reset the learningEnvironment.
          */
         virtual void initMetrics(
             const Evolution::Individual& individual,
-            const Learn::LearningEnvironment& learningEnvironment) {
+            const Learn::LearningEnvironment& learningEnvironment,
+            size_t seed) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 

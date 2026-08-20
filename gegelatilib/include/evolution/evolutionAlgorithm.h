@@ -69,19 +69,19 @@ namespace Evolution {
           };
 
         /// @brief Return the population of the EA
-        const Population& getPopulation();
+        Population& getPopulation();
 
         /// @brief Return the representation of the EA
-        const Representation& getRepresentation();
+        Representation& getRepresentation();
 
         /// @brief Return the mutation agent of the EA
-        const Mutation& getMutation();
+        Mutation& getMutation();
 
         /// @brief Return the evaluation agent of the EA
-        const Evaluation::EvaluationAgent& getEvaluation();
+        Evaluation::EvaluationAgent& getEvaluation();
 
         /// @brief Return the selector of the EA
-        const SurvivingSelection& getSelector();
+        SurvivingSelection& getSelector();
 
         /// @brief Return the Random Number Generator of the EA 
         RNG::RNG& getRNG();

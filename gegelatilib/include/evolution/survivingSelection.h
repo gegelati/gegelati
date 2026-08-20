@@ -30,6 +30,18 @@ namespace Evolution {
             SurvivingSelection& operator=(const SurvivingSelection&) = delete;
 
             /**
+             * \brief method returning the evaluation metrics required for the selection process.
+             */
+            std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> getSelectionMetrics();
+            
+            /**
+             * \brief method ranking the individuals based on their average score on their evaluationRun
+             * 
+             * \param[in] scores the scores of the individuals' evaluation.
+             */
+            std::vector<std::pair<double, std::reference_wrapper<const Individual>>> getRankedScores(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
+
+            /**
              * \brief method performing the surviving selection
              * 
              * \param[in] scores the scores of the individuals' evaluation.

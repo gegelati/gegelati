@@ -1,28 +1,28 @@
 #include "evolution/evolutionAlgorithm.h"
 
 
-const Evolution::Population& Evolution::EvolutionAlgorithm::getPopulation()
+Evolution::Population& Evolution::EvolutionAlgorithm::getPopulation()
 {
     return *this->population;
 }
 
-const Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation()
+Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation()
 {
     return *this->representation;
 }
 
 
-const Evolution::Mutation& Evolution::EvolutionAlgorithm::getMutation()
+Evolution::Mutation& Evolution::EvolutionAlgorithm::getMutation()
 {
     return *this->mutation;
 }
 
-const Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
+Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
 {
     return *this->evaluation;
 }
 
-const Evolution::SurvivingSelection& Evolution::EvolutionAlgorithm::getSelector()
+Evolution::SurvivingSelection& Evolution::EvolutionAlgorithm::getSelector()
 {
     return *this->survivingSelection;
 }
@@ -36,6 +36,11 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 {
     if(representation->isTangled()) {
         representation->setTangledPopulation(*population);
+    }
+
+    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = this->survivingSelection->getSelectionMetrics();
+    for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
+        this->evaluation->addRequestedMetric(*metric);
     }
 
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));

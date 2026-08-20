@@ -81,6 +81,9 @@ namespace Evaluation {
         /// Control the maximum number of threads when running in parallel.
         uint64_t maxNbThreads = 1;
 
+        /// Vector of requested metric to measure during evaluation
+        std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
+
       public:
         /**
          * \brief Constructor for EvaluationAgent.
@@ -107,6 +110,20 @@ namespace Evaluation {
          * \return Get a reference to the RNG.
          */
         RNG::RNG& getRNG();
+
+        /**
+         * \brief Add a metric requested to be measured during an evaluation run.
+         * 
+         * \param[in] metric the added metric requested
+         */
+        void addRequestedMetric(const EvaluationMetric& metric);
+
+        /**
+         * \brief Create an EvaluationRun unique_ptr. 
+         * 
+         * A copy of each requested metric is added to the evaluationRun.
+         */
+        std::unique_ptr<EvaluationRun> createEvaluationRun() const;
 
         /**
          * \brief Get the number of evaluation to perform for a given individual.
