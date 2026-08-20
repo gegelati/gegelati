@@ -331,6 +331,29 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 16268381457926726931U) << "RNG not determinist";
 }
 
+
+TEST_F(EvolutionAlgorithmTest, testArchive) {
+    
+    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    ea.initializePopulation();
+
+    size_t nbGen = 20;
+    double formerBest = -1;
+
+    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    ea.mutateOffspring(offspring);
+    auto results = ea.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = ea.selectSurvivors(results);
+    ea.replacePopulation(offspring, survivors);
+
+    // This is some dataSource sampled from the environment
+    ASSERT_NO_THROW(results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1)) << "meh";
+    auto metric = results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1);
+
+    
+}
+
+
 TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaLgp(*representation, le, std::move(evalParams), 12, 10);
     eaLgp.initializePopulation();

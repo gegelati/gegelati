@@ -99,7 +99,7 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
     };
 
     std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override
+    getDataSources() const override
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
             this->data};

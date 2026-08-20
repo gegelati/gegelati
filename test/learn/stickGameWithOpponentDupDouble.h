@@ -100,7 +100,7 @@ class StickGameWithOpponentD : public Learn::LearningEnvironment
 
     // Inherited via LearningEnvironment
     virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override;
+    getDataSources() const override;
 
     /**
      * Returns 1.0 when the player won, 0.0 otherwise.

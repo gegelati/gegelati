@@ -99,7 +99,7 @@ void StickGameWithOpponentD::reset(size_t seed, Learn::LearningMode mode,
 }
 
 std::vector<std::reference_wrapper<const Data::DataHandler>>
-StickGameWithOpponentD::getDataSources()
+StickGameWithOpponentD::getDataSources() const
 {
     std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
         this->hints, this->remainingSticks};

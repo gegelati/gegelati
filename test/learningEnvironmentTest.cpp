@@ -61,7 +61,7 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
     void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
                uint64_t generationNumber) {};
     std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources()
+    getDataSources()  const
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
         vect.push_back(data);

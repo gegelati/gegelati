@@ -75,7 +75,7 @@ class FakeClassificationLearningEnvironment
         this->currentClass = 0;
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override
+    getDataSources() const override
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
         vect.push_back(data);

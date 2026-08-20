@@ -56,6 +56,7 @@
 #include "learn/learningParameters.h"
 
 #include "evaluation/evaluationResult.h"
+#include "evaluation/archiveMetric.h"
 #include "evolution/representation.h"
 #include "evolution/individual.h"
 

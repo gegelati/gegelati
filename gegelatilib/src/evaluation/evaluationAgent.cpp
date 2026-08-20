@@ -102,6 +102,14 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::EvaluationAgent::evalu
 
         // create Evaluation run for this episode with default metric for now.
         std::unique_ptr<EvaluationRun> evaluationRun = std::make_unique<EvaluationRun>(std::move(std::make_unique<EvaluationMetric>()));        
+
+        bool cheating = true;
+        if(cheating) {
+            evaluationRun->addMetric(
+                std::move(std::make_unique<ArchiveMetric>(1.0, 0))
+            );
+        }
+
         // Init the metrics of the run
         for(const auto& metric: evaluationRun->getMetrics()) {
             metric->initMetrics(individual, le);
