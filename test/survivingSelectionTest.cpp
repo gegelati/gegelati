@@ -39,7 +39,7 @@ TEST_F(SurvivingSelectionTest, select)
         
         std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
             std::move(std::make_unique<Evaluation::EvaluationRun>(
-                std::move(std::make_unique<Evaluation::EvaluationMetric>(double(idx))))), 1
+                std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
         );
         scores.insert({*indivs.back(), result});
     }
@@ -74,7 +74,7 @@ TEST_F(SurvivingSelectionTest, getBest)
         
         std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
             std::move(std::make_unique<Evaluation::EvaluationRun>(
-                std::move(std::make_unique<Evaluation::EvaluationMetric>(double(idx))))), 1
+                std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
         );
         scores.insert({*indivs.back(), result});
     }

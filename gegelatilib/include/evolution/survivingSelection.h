@@ -7,6 +7,8 @@
 #include "evolution/individual.h"
 #include "evaluation/evaluationResult.h"
 
+#include "evaluation/scoreMetric.h"
+
 namespace Evolution {
 
     /**
@@ -14,8 +16,7 @@ namespace Evolution {
      */
     class SurvivingSelection {
 
-        protected:
-            
+        protected:            
         
         public: 
 

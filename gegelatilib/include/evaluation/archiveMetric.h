@@ -40,12 +40,12 @@ namespace Evaluation {
          * \param[in] extractionProbability probability of extracting an input source.
          */
         ArchiveMetric(double extractionProbability)
-            : EvaluationMetric(0.0), extractionProbability{extractionProbability} {};
+            : EvaluationMetric(), extractionProbability{extractionProbability} {};
 
         /**
          * \brief Dupplicate the current metric with the same extractionProbability.
          */
-        std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const;
+        std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const override;
 
         /**
          * \brief Combien the hash of a set of dataHandlers into a single one.

@@ -211,7 +211,11 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
     auto it2 = results2.begin();
     while(it1 != results1.end() && it2 != results2.end()) {
         ASSERT_EQ(it1->first, it2->first) << "Individuals should be equal";
-        ASSERT_EQ(it1->second->getEvaluationRuns().begin()->second->getMetricAt(0).getScore(), it2->second->getEvaluationRuns().begin()->second->getMetricAt(0).getScore()) << "EvaluationResults scores should be equal";
+        ASSERT_TRUE(dynamic_cast<const Evaluation::ScoreMetric*>(&it1->second->getEvaluationRuns().begin()->second->getMetricAt(0)) != nullptr) << "Metric should be scoreMetric";
+        ASSERT_TRUE(dynamic_cast<const Evaluation::ScoreMetric*>(&it2->second->getEvaluationRuns().begin()->second->getMetricAt(0)) != nullptr) << "Metric should be scoreMetric";
+        const Evaluation::ScoreMetric* metric1 = dynamic_cast<const Evaluation::ScoreMetric*>(&it1->second->getEvaluationRuns().begin()->second->getMetricAt(0));
+        const Evaluation::ScoreMetric* metric2 = dynamic_cast<const Evaluation::ScoreMetric*>(&it2->second->getEvaluationRuns().begin()->second->getMetricAt(0));
+        ASSERT_EQ(metric1->getScore(), metric2->getScore()) << "EvaluationResults scores should be equal";
 
         it1++; it2++;
     }
@@ -348,8 +352,7 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
     ea.replacePopulation(offspring, survivors);
 
     // This is some dataSource sampled from the environment
-    ASSERT_NO_THROW(results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1)) << "meh";
-    auto metric = results.begin()->second->getEvaluationRuns().begin()->second->getMetricAt(1);
+    ASSERT_EQ(results.begin()->second->getEvaluationRuns().begin()->second->getSize(), 2) << "meh";
 }
 
 

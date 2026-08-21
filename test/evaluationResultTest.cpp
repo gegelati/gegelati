@@ -40,6 +40,7 @@
 
 #include "learn/evaluationResult.h"
 #include "evaluation/evaluationResult.h"
+#include "evaluation/scoreMetric.h"
 
 TEST(EvaluationResultTestR, Constructor)
 {
@@ -118,21 +119,25 @@ TEST(EvaluationResultTest, Constructor)
 
 TEST(EvaluationResultTest, addEvaluationRun)
 {
-    std::unique_ptr<Evaluation::EvaluationMetric> metric = std::make_unique<Evaluation::EvaluationMetric>(28.0);
+    std::unique_ptr<Evaluation::EvaluationMetric> metric = std::make_unique<Evaluation::ScoreMetric>(28.0);
     std::unique_ptr<Evaluation::EvaluationRun> run = std::make_unique<Evaluation::EvaluationRun>(std::move(metric));
 
     Evaluation::EvaluationResult result(std::move(run), 2);
 
     ASSERT_EQ(result.getSize(), 1) << "Wrong size";
     ASSERT_EQ(result.getEvaluationRuns().size(), 1) << "Wrong size";
-    ASSERT_EQ(result.getEvaluationRuns().at(2)->getMetricAt(0).getScore(), 28.0) << "Wrong size";
+    ASSERT_TRUE(dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(2)->getMetricAt(0)) != nullptr) << "Metric should be scoreMetric";
+    const Evaluation::ScoreMetric* scoreMetric = dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(2)->getMetricAt(0));
+    ASSERT_EQ(scoreMetric->getScore(), 28.0) << "Wrong size";
 
-    std::unique_ptr<Evaluation::EvaluationMetric> metric2 = std::make_unique<Evaluation::EvaluationMetric>(32.0);
+    std::unique_ptr<Evaluation::EvaluationMetric> metric2 = std::make_unique<Evaluation::ScoreMetric>(32.0);
     std::unique_ptr<Evaluation::EvaluationRun> run2 = std::make_unique<Evaluation::EvaluationRun>(std::move(metric2));
 
     result.addEvaluationRun(std::move(run2), 12);
     
     ASSERT_EQ(result.getSize(), 2) << "Wrong size";
     ASSERT_EQ(result.getEvaluationRuns().size(), 2) << "Wrong size";
-    ASSERT_EQ(result.getEvaluationRuns().at(12)->getMetricAt(0).getScore(), 32.0) << "Wrong size";
+    ASSERT_TRUE(dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(12)->getMetricAt(0)) != nullptr) << "Metric should be scoreMetric";
+    const Evaluation::ScoreMetric* scoreMetric2 = dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(12)->getMetricAt(0));
+    ASSERT_EQ(scoreMetric2->getScore(), 32.0) << "Wrong size";
 }

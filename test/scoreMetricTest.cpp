@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include "evaluation/evaluationMetric.h"
+#include "evaluation/scoreMetric.h"
 
 
 // Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode
@@ -49,14 +49,14 @@ class FakedLearningEnvironment : public Learn::LearningEnvironment
     }
 };
 
-TEST(EvaluationMetricTest, Constructor)
+TEST(ScoreMetricTest, Constructor)
 {
     // Default constructor
-    Evaluation::EvaluationMetric* metric1;
-    Evaluation::EvaluationMetric* metric2;
+    Evaluation::ScoreMetric* metric1;
+    Evaluation::ScoreMetric* metric2;
 
-    ASSERT_NO_THROW(metric1 = new Evaluation::EvaluationMetric()) << "Constructor failed";
-    ASSERT_NO_THROW(metric2 = new Evaluation::EvaluationMetric(1.5)) << "Constructor failed";
+    ASSERT_NO_THROW(metric1 = new Evaluation::ScoreMetric()) << "Constructor failed";
+    ASSERT_NO_THROW(metric2 = new Evaluation::ScoreMetric(1.5)) << "Constructor failed";
 
     ASSERT_NO_THROW(metric1->cloneEmptyUniquePtr()) << "Construction with cloning failed";
 
@@ -64,9 +64,9 @@ TEST(EvaluationMetricTest, Constructor)
     ASSERT_NO_THROW(delete metric2) << "Destructor failed";
 }
 
-TEST(EvaluationMetricTest, ExtractMetricsEpisode)
+TEST(ScoreMetricTest, ExtractMetricsEpisode)
 {
-    Evaluation::EvaluationMetric metric;
+    Evaluation::ScoreMetric metric;
     FakedLearningEnvironment env(3.0);
 
     // Call extraction

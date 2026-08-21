@@ -9,15 +9,11 @@
 
 namespace Evaluation {
     /**
-     * \brief Class to extract any metrics from either the individual or the environment.
+     * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
     class EvaluationMetric
     {
       protected:
-        /**
-         * Score obtained by the individual at the end of an episode
-         */
-        double score = 0;
 
       public:
         /**
@@ -26,22 +22,9 @@ namespace Evaluation {
         EvaluationMetric() = default;
 
         /**
-         * \brief Constructor with score.
-         *
-         * \param[in] score the score obtained by the individual.
-         */
-        EvaluationMetric(double score)
-            : score{score} {};
-
-        /**
          * \brief Method to dupplicate the current polymorphic metric, keeping the current parameter but forgetting the extractions.
          */
-        std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const;
-
-        /**
-         * Return the score of the individual.
-         */
-        virtual double getScore() const;
+        virtual std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const = 0;
 
         /**
          * \brief Init the metrics for the individual in the learning environment.
@@ -90,7 +73,9 @@ namespace Evaluation {
          */
         virtual void extractMetricsRun(
             const Evolution::Individual& individual, size_t nbStepsExecuted,
-            const Learn::LearningEnvironment& learningEnvironment);
+            const Learn::LearningEnvironment& learningEnvironment) {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
     };
 
 
