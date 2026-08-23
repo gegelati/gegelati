@@ -33,7 +33,7 @@ namespace Evolution {
         std::unique_ptr<Mutation> mutation;
 
         /// evaluation agent of the EA
-        std::unique_ptr<Evaluation::EvaluationAgent> evaluation;
+        Evaluation::EvaluationAgent& evaluation;
 
         /// Surviving Selection agent of the EA
         std::unique_ptr<SurvivingSelection> survivingSelection;
@@ -48,24 +48,20 @@ namespace Evolution {
          * \brief Constructor of EvolutionAlgorithm class
          * 
          * \param[in] representation the representation of the individuals.
-         * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] evalParams The LearningParameters for the EvaluationAgent.
-         * \param[in] evoSeed Seed for random number generator of the evolution.
-         * \param[in] evalSeed seed used for the random number generator of the evaluation.
+         * \param[in] evaluation The EvaluationAgent used to evaluate individuals
+         * \param[in] seed Seed for random number generator of the evolution.
          */
         EvolutionAlgorithm(
           const Representation& representation, 
-          Learn::LearningEnvironment& le, 
-          std::unique_ptr<Learn::LearningParameters> evalParams = std::make_unique<Learn::LearningParameters>(),
-          size_t evoSeed = 0,
-          size_t evalSeed = 1)
+          Evaluation::EvaluationAgent& evaluation, 
+          size_t seed = 0)
         : representation(std::move(representation.cloneUniquePtr())), 
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
           survivingSelection(std::make_unique<SurvivingSelection>()), 
-          evaluation(std::make_unique<Evaluation::EvaluationAgent>(le, std::move(evalParams), evalSeed)){
-            rng.setSeed(evoSeed);
-            this->representation->setInputDimensions(le.getDataSources());
+          evaluation(evaluation){
+            rng.setSeed(seed);
+            this->representation->setInputDimensions(evaluation.getDimensionsDataSources());
           };
 
         /// @brief Return the population of the EA

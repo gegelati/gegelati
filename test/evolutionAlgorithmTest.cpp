@@ -45,6 +45,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "evolution/evolutionAlgorithm.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
+#include "evaluation/reinforcementAgent.h"
 
 #include "representations/lgpRepresentation.h"
 #include "representations/tpgRepresentation.h"
@@ -59,9 +60,9 @@ class EvolutionAlgorithmTest : public ::testing::Test
     Data::PrimitiveTypeArray<double>* inputSource;
     Evolution::Representation* representation;
 
-    std::unique_ptr<Learn::LearningParameters> evalParams;
 
     StickGameWithOpponentD le;
+    Evaluation::EvaluationAgent* evalAgent;
 
 
     virtual void SetUp()
@@ -81,7 +82,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
     
         representation = new Representations::LGPRepresentation(set, 8, 10);
 
-        evalParams = std::make_unique<Learn::LearningParameters>();
+        evalAgent = new Evaluation::ReinforcementAgent(le);
     }
 
     virtual void TearDown()
@@ -92,6 +93,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
         delete (&set.getInstruction(3));
         delete inputSource;
         delete representation;
+        delete evalAgent;
     }
 };
 
@@ -100,7 +102,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 {
     Evolution::EvolutionAlgorithm* ea;
 
-    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation, le, std::move(evalParams), 12, 10)) << "Constructor of EA failed.";
+    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation, *evalAgent, 12)) << "Constructor of EA failed.";
 
     ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
 
@@ -114,7 +116,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
 
     ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
 
@@ -127,7 +129,7 @@ TEST_F(EvolutionAlgorithmTest, initializePopulation)
 
 TEST_F(EvolutionAlgorithmTest, selectParents) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     std::vector<std::reference_wrapper<const Evolution::Individual>> parents;
@@ -148,7 +150,7 @@ TEST_F(EvolutionAlgorithmTest, selectParents)
 TEST_F(EvolutionAlgorithmTest, reproduceParents) 
 {
     
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
     std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
 
@@ -169,7 +171,7 @@ TEST_F(EvolutionAlgorithmTest, reproduceParents)
 
 TEST_F(EvolutionAlgorithmTest, mutateOffspring) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
     std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(parents);
@@ -193,7 +195,7 @@ TEST_F(EvolutionAlgorithmTest, mutateOffspring)
 
 TEST_F(EvolutionAlgorithmTest, evaluatePopulation) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
@@ -223,7 +225,7 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
 
 TEST_F(EvolutionAlgorithmTest, survivorSelection) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
@@ -254,7 +256,7 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
 
 TEST_F(EvolutionAlgorithmTest, replacePopulation) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
@@ -317,7 +319,7 @@ TEST_F(EvolutionAlgorithmTest, replacePopulation)
 
 TEST_F(EvolutionAlgorithmTest, doGenerations) {
     
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     size_t nbGen = 20;
@@ -338,9 +340,9 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
 
 TEST_F(EvolutionAlgorithmTest, testArchive) {
     
-    Evolution::EvolutionAlgorithm ea(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
-    ea.getEvaluation().addRequestedMetric(Evaluation::ArchiveMetric(1.0));
+    evalAgent->addRequestedMetric(Evaluation::ArchiveMetric(1.0));
 
     size_t nbGen = 20;
     double formerBest = -1;
@@ -357,11 +359,11 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
 
 
 TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
-    Evolution::EvolutionAlgorithm eaLgp(*representation, le, std::move(evalParams), 12, 10);
+    Evolution::EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
     eaLgp.initializePopulation();
 
     Representations::TPGRepresentation tpgRep = Representations::TPGRepresentation(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
-    Evolution::EvolutionAlgorithm eaTpg(tpgRep, le);
+    Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
     size_t nbGen = 20;

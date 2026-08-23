@@ -19,7 +19,7 @@ Evolution::Mutation& Evolution::EvolutionAlgorithm::getMutation()
 
 Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
 {
-    return *this->evaluation;
+    return this->evaluation;
 }
 
 Evolution::SurvivingSelection& Evolution::EvolutionAlgorithm::getSelector()
@@ -40,7 +40,7 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 
     std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = this->survivingSelection->getSelectionMetrics();
     for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
-        this->evaluation->addRequestedMetric(*metric);
+        this->evaluation.addRequestedMetric(*metric);
     }
 
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
@@ -92,7 +92,7 @@ std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Ev
         evaluatedIndividuals.push_back(*os);
     }
 
-    return this->evaluation->evaluateIndividuals(
+    return this->evaluation.evaluateIndividuals(
         evaluatedIndividuals,*this->representation, generationNumber, mode);
 }
 

@@ -41,7 +41,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "evaluation/evaluationAgent.h"
+#include "evaluation/reinforcementAgent.h"
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
 #include "representations/lgpRepresentation.h"
@@ -51,7 +51,7 @@
 
 // Set all file in comment
 
-class EvaluationAgentTest : public ::testing::Test
+class ReinforcementAgentTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
@@ -95,23 +95,23 @@ class EvaluationAgentTest : public ::testing::Test
 };
 
 
-TEST_F(EvaluationAgentTest, Constructor)
+TEST_F(ReinforcementAgentTest, Constructor)
 {
-    Evaluation::EvaluationAgent* evalAgent;
-    Evaluation::EvaluationAgent* evalAgent2;
+    Evaluation::ReinforcementAgent* rlAgent;
+    Evaluation::ReinforcementAgent* rlAgent2;
     size_t seed = 0;
 
-    ASSERT_NO_THROW(evalAgent = new Evaluation::EvaluationAgent(le, std::move(params), seed)) << "Constructor of evalAgent failed.";
+    ASSERT_NO_THROW(rlAgent = new Evaluation::ReinforcementAgent(le, std::move(params), seed)) << "Constructor of rlAgent failed.";
 
-    ASSERT_NO_THROW(evalAgent2 = new Evaluation::EvaluationAgent(le)) << "Constructor of evalAgent failed.";
+    ASSERT_NO_THROW(rlAgent2 = new Evaluation::ReinforcementAgent(le)) << "Constructor of rlAgent failed.";
 
-    ASSERT_NO_THROW(delete evalAgent) << "Destructor of evalAgent failed.";
-    ASSERT_NO_THROW(delete evalAgent2) << "Destructor of evalAgent failed.";
+    ASSERT_NO_THROW(delete rlAgent) << "Destructor of rlAgent failed.";
+    ASSERT_NO_THROW(delete rlAgent2) << "Destructor of rlAgent failed.";
 }
 
-TEST_F(EvaluationAgentTest, evaluateIndividual)
+TEST_F(ReinforcementAgentTest, evaluateIndividual)
 {
-    Evaluation::EvaluationAgent evalAgent(le, std::move(params));
+    Evaluation::ReinforcementAgent rlAgent(le, std::move(params));
     Learn::LearningMode mode = Learn::LearningMode::TRAINING;
 
     Evolution::Individual indiv;
@@ -120,7 +120,7 @@ TEST_F(EvaluationAgentTest, evaluateIndividual)
     
     representation->setInputDimensions(le.getDataSources());
 
-    ASSERT_THROW(evalAgent.evaluateIndividual(indiv, *representation, le, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
+    ASSERT_THROW(rlAgent.evaluateIndividual(indiv, *representation, le, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 
     // Fill individual
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
@@ -130,5 +130,5 @@ TEST_F(EvaluationAgentTest, evaluateIndividual)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
 
     std::shared_ptr<Evaluation::EvaluationResult> result;
-    ASSERT_NO_THROW(result = evalAgent.evaluateIndividual(indiv, *representation, le, 0, mode)) << "Evaluation should not have fail";
+    ASSERT_NO_THROW(result = rlAgent.evaluateIndividual(indiv, *representation, le, 0, mode)) << "Evaluation should not have fail";
 }

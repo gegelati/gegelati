@@ -36,29 +36,10 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef EVALUATION_AGENT_H
-#define EVALUATION_AGENT_H
+#ifndef REINFORCEMENT_AGENT_H
+#define REINFORCEMENT_AGENT_H
 
-#include <map>
-#include <queue>
-#include <inttypes.h>
-#include <queue>
-#include <unordered_set>
-
-#include "log/laLogger.h"
-#include "mutator/mutationParameters.h"
-#include "evoGraph/graph.h"
-#include "data/hash.h"
-#include "mutator/rng.h"
-
-#include "learn/classificationLearningEnvironment.h"
-#include "learn/learningEnvironment.h"
-#include "learn/learningParameters.h"
-
-#include "evaluation/evaluationResult.h"
-#include "evaluation/archiveMetric.h"
-#include "evolution/representation.h"
-#include "evolution/individual.h"
+#include "evaluation/evaluationAgent.h"
 
 namespace Evaluation {
 
@@ -66,39 +47,54 @@ namespace Evaluation {
      * \brief Class used to control the learning steps of a Graph within
      * a given LearningEnvironment.
      */
-    class EvaluationAgent
+    class ReinforcementAgent : public EvaluationAgent
     {
       protected:
+        /// LearningEnvironment with which the EvaluationAgent will interact.
+        Learn::LearningEnvironment& learningEnvironment;
+
+        /// Parameters for the learning process
+        std::unique_ptr<Learn::LearningParameters> params;
+
+        /// Control the maximum number of threads when running in parallel.
+        uint64_t maxNbThreads = 1;
+
         /// Vector of requested metric to measure during evaluation
         std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
+
+        /// Seed for deterministic randomizer of evaluation.
+        size_t seed;
 
       public:
         /**
          * \brief Constructor for EvaluationAgent.
+         *
+         * \param[in] le The LearningEnvironment to optimize
+         * \param[in] parameters The LearningParameters for the EvaluationAgent.
+         * \param[in] seed Seed for deterministic randomizer of evaluation.
          */
-        EvaluationAgent() {};
-
-        /// Default destructor for polymorphism
-        virtual ~EvaluationAgent() = default;
+        ReinforcementAgent(
+          Learn::LearningEnvironment& le, 
+          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), size_t seed = 0)
+            : EvaluationAgent(), learningEnvironment{le},
+              params{std::make_unique<Learn::LearningParameters>(*parameters)}, seed{seed} {};
 
         /**
-         * \brief return the current dataSources to obtain the dimensions of the task. TODO maybe better to do.
+         * \brief Return the dataSources of the LearningEnvironment
          */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const = 0;
-        
+        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
+
         /**
-         * \brief Add a metric requested to be measured during an evaluation run.
+         * \brief Get the number of evaluation to perform for a given individual.
          * 
-         * \param[in] metric the added metric requested
-         */
-        void addRequestedMetric(const EvaluationMetric& metric);
-
-        /**
-         * \brief Create an EvaluationRun unique_ptr. 
+         * In Training mode, the number of evaluation to perform depends if the individual has already been evaluated or not. Default is parameter.nbIterationsPerPolicyEvaluation, but if the individual has already been evaluated, a verification is done to ensure that the total number of evaluation does not exceed parameter.maxNbEvaluationPerPolicy.
+         * In Validation mode, the number of evaluation to perform is always parameter.nbIterationsPerPolicyValidation.
          * 
-         * A copy of each requested metric is added to the evaluationRun.
+         * \param[in] previousEval the previous evaluation result of the individual.
+         * \param[in] mode the LearningMode to use during the policy evaluation.
          */
-        std::unique_ptr<EvaluationRun> createEvaluationRun() const;
+        virtual size_t getNbEvaluationIndiv(
+            std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const;
 
         /**
          * \brief Evaluates policy starting from the given root.
@@ -132,7 +128,7 @@ namespace Evaluation {
             const Evolution::Representation& representation,
             Learn::LearningEnvironment& le,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const = 0;
+            Learn::LearningMode mode) const override;
 
 
         /**
@@ -155,8 +151,8 @@ namespace Evaluation {
             const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const = 0;
+            Learn::LearningMode mode) const override;
     };
-}; // namespace Learn
+}; // namespace Evaluation
 
-#endif
+#endif // REINFORCEMENT_AGENT_H
