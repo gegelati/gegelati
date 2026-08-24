@@ -30,7 +30,6 @@ size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Eval
 std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ReinforcementAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
-    Learn::LearningEnvironment& le,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
@@ -59,36 +58,36 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ReinforcementAgent::ev
         }
 
         // Reset the learning Environment
-        le.reset(hash, mode, iterationNumber, generationNumber);
+        learningEnvironment.reset(hash, mode, iterationNumber, generationNumber);
 
         // create Evaluation run for this episode with default metric for now.
         std::unique_ptr<EvaluationRun> evaluationRun = std::move(this->createEvaluationRun());
 
         // Init the metrics of the run
         for(const auto& metric: evaluationRun->getMetrics()) {
-            metric->initMetrics(individual, le, hash);
+            metric->initMetrics(individual, learningEnvironment, hash);
         }
 
         uint64_t nbActions = 0;
-        while (!le.isTerminal() &&
+        while (!learningEnvironment.isTerminal() &&
                nbActions < this->params->maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
-                representation.executeIndividual(individual, le.getDataSources());
+                representation.executeIndividual(individual, learningEnvironment.getDataSources());
             // Do it
-            le.doActions(actionsID);
+            learningEnvironment.doActions(actionsID);
             // Count actions
             nbActions++;
 
             // Extract the metrics of current stpe.
             for(const auto& metric: evaluationRun->getMetrics()) {
-                metric->extractMetricsStep(individual, actionsID, le);
+                metric->extractMetricsStep(individual, actionsID, learningEnvironment);
             }
         }
 
         // Extract the final metrics of the run.
         for(const auto& metric: evaluationRun->getMetrics()) {
-            metric->extractMetricsRun(individual, nbActions, le);
+            metric->extractMetricsRun(individual, nbActions, learningEnvironment);
         }
 
         // Add the evaluationRun to the evaluationResult.
@@ -118,7 +117,7 @@ Evaluation::ReinforcementAgent::evaluateIndividuals(
     for(const Evolution::Individual& indiv: individuals){
         // Evaluate the individuals and insert the results
         const auto& result = this->evaluateIndividual(
-            indiv, representation, this->learningEnvironment, generationNumber, mode
+            indiv, representation, generationNumber, mode
         );
         
         results.insert({indiv, result});

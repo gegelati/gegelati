@@ -46,6 +46,7 @@
 #include "evolution/evolutionAlgorithm.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
 #include "evaluation/reinforcementAgent.h"
+#include "evaluation/archiveEvalAgent.h"
 
 #include "representations/lgpRepresentation.h"
 #include "representations/tpgRepresentation.h"
@@ -362,7 +363,7 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
     eaLgp.initializePopulation();
 
-    Representations::TPGRepresentation tpgRep = Representations::TPGRepresentation(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    Representations::TPGRepresentation tpgRep(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
@@ -391,4 +392,62 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
     ASSERT_EQ(eaTpg.getPopulation().size(), 325) << "Size of TPG population not determinist";
     ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 7986353545622927855U) << "RNG not determinist";
+}
+
+
+TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
+    
+    Evaluation::ArchiveEvalAgent archiveEval(le.getDataSources(), 10, 0);
+    Evolution::EvolutionAlgorithm eaLgp(*representation, archiveEval, 12);
+    eaLgp.initializePopulation();
+
+    Representations::TPGRepresentation tpgRep(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
+    eaTpg.getEvaluation().addRequestedMetric(Evaluation::ArchiveMetric(0.5));
+    ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
+
+    auto initResults =
+        eaTpg.evaluatePopulation({}, 0, Learn::LearningMode::TRAINING);
+
+    archiveEval.updateArchiveInputs(initResults);
+    archiveEval.updateArchiveOutputs(eaLgp.getPopulation().getIndividuals(),
+                                     eaLgp.getRepresentation());
+
+    size_t nbGen = 20;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+
+        size_t nbGood = 0;
+        while(nbGood < 100) {
+            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
+            eaLgp.mutateOffspring(offspring);
+            auto results = eaLgp.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+
+            std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual>>> fitnesses = eaLgp.getSelector().getRankedScores(results);
+            nbGood = std::count_if(fitnesses.begin(), fitnesses.end(),
+                                [](const std::pair<double, std::reference_wrapper<const Evolution::Individual>>& pair) {
+                                    return pair.first == 1.0;
+                                });
+
+            std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = eaLgp.selectSurvivors(results);
+
+            eaLgp.replacePopulation(offspring, survivors);
+        }
+
+
+
+        {
+            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
+            eaTpg.mutateOffspring(offspring);
+            auto results = eaTpg.evaluatePopulation(offspring, 0, Learn::LearningMode::TRAINING);
+            std::map<std::reference_wrapper<const Evolution::Individual>, bool> survivors = eaTpg.selectSurvivors(results);
+            eaTpg.replacePopulation(offspring, survivors);
+
+            
+            archiveEval.updateArchiveInputs(results);
+            archiveEval.updateArchiveOutputs(
+                eaLgp.getPopulation().getIndividuals(),
+                eaLgp.getRepresentation());
+        }
+
+    }
 }

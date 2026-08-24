@@ -112,9 +112,6 @@ namespace Evaluation {
          *
          * \param[in] individual The individual whose genotype is evaluted.
          * \param[in] representation The representation of the individual evaluated, used to map the individual genotype to phenotype
-         * \param[in] le Reference to the LearningEnvironment to use
-         * during the policy evaluation (may be different from the attribute of
-         * the class in child EvaluationAgentClass).
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -130,7 +127,6 @@ namespace Evaluation {
         virtual std::shared_ptr<EvaluationResult> evaluateIndividual(
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
-            Learn::LearningEnvironment& le,
             uint64_t generationNumber,
             Learn::LearningMode mode) const = 0;
 

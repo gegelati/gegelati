@@ -120,7 +120,7 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     
     representation->setInputDimensions(le.getDataSources());
 
-    ASSERT_THROW(rlAgent.evaluateIndividual(indiv, *representation, le, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
+    ASSERT_THROW(rlAgent.evaluateIndividual(indiv, *representation, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 
     // Fill individual
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
@@ -130,5 +130,5 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
 
     std::shared_ptr<Evaluation::EvaluationResult> result;
-    ASSERT_NO_THROW(result = rlAgent.evaluateIndividual(indiv, *representation, le, 0, mode)) << "Evaluation should not have fail";
+    ASSERT_NO_THROW(result = rlAgent.evaluateIndividual(indiv, *representation, 0, mode)) << "Evaluation should not have fail";
 }

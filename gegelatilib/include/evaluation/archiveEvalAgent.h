@@ -36,62 +36,81 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef REINFORCEMENT_AGENT_H
-#define REINFORCEMENT_AGENT_H
+#ifndef ARCHIVE_EVAL_AGENT_H
+#define ARCHIVE_EVAL_AGENT_H
+
 
 #include "evaluation/evaluationAgent.h"
+#include "evaluation/scoreMetric.h"
+#include "evaluation/archiveMetric.h"
 
 namespace Evaluation {
+
+
+    /**
+     * \brief Class used to store one recording of an Archive.
+     *
+     * A recording in the archive is a tuple consisting of:
+     * - An ID to an individual
+     * - A double resulting from the execution of the individual on the DataHandler.
+     */
+    typedef struct ArchiveRecording
+    {
+        /// ID of the individual.
+        size_t individualID;
+
+        /// Value returned by the individual for the DataHandler.
+        const double result;
+    } ArchiveRecording;
 
     /**
      * \brief Class used to control the learning steps of a Graph within
      * a given LearningEnvironment.
      */
-    class ReinforcementAgent : public EvaluationAgent
+    class ArchiveEvalAgent : public EvaluationAgent
     {
       protected:
-        /// LearningEnvironment with which the EvaluationAgent will interact.
-        Learn::LearningEnvironment& learningEnvironment;
 
-        /// Parameters for the learning process
-        std::unique_ptr<Learn::LearningParameters> params;
+        /// @brief Input used to give the input dimension of the archive.
+        std::vector<std::reference_wrapper<const Data::DataHandler>> inputDimensions;
 
-        /// Control the maximum number of threads when running in parallel.
-        uint64_t maxNbThreads = 1;
+        /// @brief Number of input sampled stored in the archive.
+        size_t archiveSize;
 
-        /// Seed for deterministic randomizer of evaluation.
-        size_t seed;
+        /// @brief Random number generator for selecting archive inputs
+        RNG::RNG rng;
+
+        /// Vector of requested metric to measure during evaluation
+        std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
+
+        /// map of input and output pair values stored in the archive.
+        std::vector<std::pair<std::vector<std::reference_wrapper<const Data::DataHandler>>, std::vector<ArchiveRecording>>> archive;
+
+        /**
+         * \brief set the dimension of data source by creating a copy of the given one
+         * 
+         * \param[in] dHandler given dataSource.
+         */
+        void setDimensionDataSource(std::vector<std::reference_wrapper<const Data::DataHandler>> dHandler);
 
       public:
         /**
          * \brief Constructor for EvaluationAgent.
          *
-         * \param[in] le The LearningEnvironment to optimize
-         * \param[in] parameters The LearningParameters for the EvaluationAgent.
-         * \param[in] seed Seed for deterministic randomizer of evaluation.
+         * \param[in] inputDimensions example inputs given as an example of dimension.
+         * \param[in] archiveSize size of the archive
+         * \param[in] seed Seed for deterministic randomizer of archive selection.
          */
-        ReinforcementAgent(
-          Learn::LearningEnvironment& le, 
-          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), size_t seed = 0)
-            : EvaluationAgent(), learningEnvironment{le},
-              params{std::make_unique<Learn::LearningParameters>(*parameters)}, seed{seed} {};
+        ArchiveEvalAgent(std::vector<std::reference_wrapper<const Data::DataHandler>> inputDimensions, size_t archiveSize, size_t seed = 0)
+            : EvaluationAgent(), archiveSize{archiveSize} {
+              rng.setSeed(seed);
+              this->setDimensionDataSource(inputDimensions);
+            };
 
         /**
          * \brief Return the dataSources of the LearningEnvironment
          */
         virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
-
-        /**
-         * \brief Get the number of evaluation to perform for a given individual.
-         * 
-         * In Training mode, the number of evaluation to perform depends if the individual has already been evaluated or not. Default is parameter.nbIterationsPerPolicyEvaluation, but if the individual has already been evaluated, a verification is done to ensure that the total number of evaluation does not exceed parameter.maxNbEvaluationPerPolicy.
-         * In Validation mode, the number of evaluation to perform is always parameter.nbIterationsPerPolicyValidation.
-         * 
-         * \param[in] previousEval the previous evaluation result of the individual.
-         * \param[in] mode the LearningMode to use during the policy evaluation.
-         */
-        virtual size_t getNbEvaluationIndiv(
-            std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const;
 
         /**
          * \brief Evaluates policy starting from the given root.
@@ -145,6 +164,30 @@ namespace Evaluation {
             const Evolution::Representation& representation,
             uint64_t generationNumber,
             Learn::LearningMode mode) const override;
+
+        /**
+         * \brief Update the input used in the archive map based on the map given.
+         * 
+         * The map should belong to the evaluationAgent on which the archiveAgent is connected.
+         * Only the EvaluationResults are used, which should contain archiveMetric.
+         * 
+         * Some archiveMetric are randomly sampled from the list.
+         * 
+         * \param[in] mapInputResults the map considered
+         */
+        virtual void updateArchiveInputs(std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> mapInputResults);
+
+        /**
+         * \brief Update the output used in the archive based on the individuals given.
+         * 
+         * Each individual is executed on each input, the output is saved in the archive.
+         * 
+         * \param[in] individuals the list of individuals evaluated.
+         * \param[in] representation the representation used to execute the individuals are evaluated.
+         */
+        virtual void updateArchiveOutputs(
+            const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+            const Evolution::Representation& representation);
     };
 }; // namespace Evaluation
 
