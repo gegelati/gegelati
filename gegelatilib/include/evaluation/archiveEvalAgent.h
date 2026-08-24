@@ -128,15 +128,8 @@ namespace Evaluation {
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         *
-         * \return a std::shared_ptr to the EvaluationResult for the root. If
-         * this root was already evaluated more times then the limit in
-         * params.maxNbEvaluationPerPolicy, then the EvaluationResult from the
-         * resultsPerRoot map is returned, else the EvaluationResult of the
-         * current generation is returned, already combined with the
-         * resultsPerRoot for this root (if any).
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateIndividual(
+        virtual void evaluateIndividual(
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
@@ -157,13 +150,11 @@ namespace Evaluation {
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::map<std::reference_wrapper<const Evolution::Individual>, 
-                              std::shared_ptr<EvaluationResult>>
-        evaluateIndividuals(
-            const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-            const Evolution::Representation& representation,
-            uint64_t generationNumber,
-            Learn::LearningMode mode) const override;
+        virtual void evaluateIndividuals(
+          const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+          const Evolution::Representation& representation,
+          uint64_t generationNumber,
+          Learn::LearningMode mode) const override;
 
         /**
          * \brief Update the input used in the archive map based on the map given.
@@ -173,22 +164,22 @@ namespace Evaluation {
          * 
          * Some archiveMetric are randomly sampled from the list.
          * 
-         * \param[in] mapInputResults the map considered
+         * \param[in] teamIndividuals the map considered
          */
-        virtual void updateArchiveInputs(std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> mapInputResults);
+        virtual void updateArchiveInputs(std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals);
 
         /**
          * \brief Update the output used in the archive based on the individuals given.
          * 
          * Each individual is executed on each input, the output is saved in the archive.
          * 
-         * \param[in] individuals the list of individuals evaluated.
-         * \param[in] representation the representation used to execute the individuals are evaluated.
+         * \param[in] memberIndividuals the list of individuals evaluated.
+         * \param[in] memberRepresentation the representation used to execute the individuals.
          */
         virtual void updateArchiveOutputs(
-            const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-            const Evolution::Representation& representation);
+            const std::set<std::reference_wrapper<const Evolution::Individual>>& memberIndividuals, 
+            const Evolution::Representation& memberRepresentation);
     };
 }; // namespace Evaluation
 
-#endif // REINFORCEMENT_AGENT_H
+#endif // ARCHIVE_EVAL_AGENT_H

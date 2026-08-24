@@ -129,6 +129,5 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
 
-    std::shared_ptr<Evaluation::EvaluationResult> result;
-    ASSERT_NO_THROW(result = rlAgent.evaluateIndividual(indiv, *representation, 0, mode)) << "Evaluation should not have fail";
+    ASSERT_NO_THROW(rlAgent.evaluateIndividual(indiv, *representation, 0, mode)) << "Evaluation should not have fail";
 }

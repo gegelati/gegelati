@@ -91,17 +91,17 @@ namespace Evolution {
         /**
          * \brief Get the current individuals.
          */
-        virtual std::vector<std::reference_wrapper<const Individual>> getIndividuals() const;
+        virtual std::set<std::reference_wrapper<const Individual>> getIndividuals() const;
 
         /**
          * \brief Get the current protected individuals: the individuals whose shared_ptr have a use_count higher than 1.
          */
-        virtual std::vector<std::reference_wrapper<const Individual>> getProtectedIndividuals() const;
+        virtual std::set<std::reference_wrapper<const Individual>> getProtectedIndividuals() const;
 
         /**
          * \brief Get the current not-protected individuals: the individuals whose shared_ptr have a use_count equal to 1.
          */
-        virtual std::vector<std::reference_wrapper<const Individual>> getNotProtectedIndividuals() const;
+        virtual std::set<std::reference_wrapper<const Individual>> getNotProtectedIndividuals() const;
 
         /**
          * \brief Get the pointers towards the current individuals.

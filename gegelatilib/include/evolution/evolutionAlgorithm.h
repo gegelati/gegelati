@@ -119,28 +119,17 @@ namespace Evolution {
          * generation.
          * \param[in] mode the LearningMode to use during the evaluation.
          */
-        std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>> evaluatePopulation(
-                                const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
-                                size_t generationNumber, Learn::LearningMode mode);
+        virtual void evaluatePopulation(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
+                            size_t generationNumber, Learn::LearningMode mode);
 
-        /**
-         * \brief select the suvivor individual from the evaluation batch.
-         * 
-         * \param[in] scores score achieved by the individuals.
-         * 
-         * \return the list of looser individuals
-         */
-        virtual std::map<std::reference_wrapper<const Individual>, bool> selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores);
 
         /**
          * \brief perform the replacement of the population based on the select survivors.
          * 
          * \param[in] offspring offspring generated.
-         * \param[in] selectionResult Individuals from either the population or the offspring that are selected or not.
          */
-        virtual void replacePopulation(
-          std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
-          std::map<std::reference_wrapper<const Individual>, bool>& selectionResult);
+        virtual void selectSurvivors(
+          std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring);
     };
 }; // namespace Evolution
 

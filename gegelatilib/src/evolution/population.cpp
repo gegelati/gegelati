@@ -74,32 +74,32 @@ Evolution::Individual& Evolution::Population::getMutableIndividual(const Individ
     return *(this->getIndividualFromCst(individual)->get());
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getIndividuals() const
+std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getIndividuals() const
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
     for (const auto& ptr : individuals) {
-        vect.push_back(*ptr);
+        vect.insert(*ptr);
     }
     return vect;
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getProtectedIndividuals() const
+std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getProtectedIndividuals() const
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
     for (const auto& ptr : individuals) {
         if(ptr.use_count() > 1) {
-            vect.push_back(*ptr);
+            vect.insert(*ptr);
         }
     }
     return vect;
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getNotProtectedIndividuals() const
+std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getNotProtectedIndividuals() const
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
     for (const auto& ptr : individuals) {
         if(ptr.use_count() == 1) {
-            vect.push_back(*ptr);
+            vect.insert(*ptr);
         }
     }
     return vect;

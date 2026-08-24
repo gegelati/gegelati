@@ -54,12 +54,14 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 
 std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectParents(size_t nbParents)
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> currentIndividuals(this->population->getIndividuals());
+    std::set<std::reference_wrapper<const Evolution::Individual>> currentIndividuals(this->population->getIndividuals());
 
     std::vector<std::reference_wrapper<const Evolution::Individual>> selectedParents;
     for(size_t idx = 0; idx < nbParents; idx ++) {
         // Random parent selection for now
-        selectedParents.push_back(currentIndividuals.at(rng.getUnsignedInt64(0, currentIndividuals.size() - 1)));
+        auto it = currentIndividuals.begin();
+        std::advance(it, rng.getUnsignedInt64(0, currentIndividuals.size() - 1));
+        selectedParents.push_back(*it);
     }
     return selectedParents;
 }
@@ -83,39 +85,31 @@ void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_p
     }
 }
 
-std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> Evolution::EvolutionAlgorithm::evaluatePopulation(
-        const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, size_t generationNumber, Learn::LearningMode mode
+void Evolution::EvolutionAlgorithm::evaluatePopulation(
+    const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
+    size_t generationNumber, Learn::LearningMode mode
     )
 {
-    std::vector<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
     for (const std::unique_ptr<Individual>& os: offspring) {
-        evaluatedIndividuals.push_back(*os);
+        evaluatedIndividuals.insert(*os);
     }
 
-    return this->evaluation.evaluateIndividuals(
-        evaluatedIndividuals,*this->representation, generationNumber, mode);
+    this->evaluation.evaluateIndividuals(
+        evaluatedIndividuals, *this->representation, generationNumber, mode);
 }
 
-std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::EvolutionAlgorithm::selectSurvivors(std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores)
+void Evolution::EvolutionAlgorithm::selectSurvivors(
+    std::set<std::unique_ptr <Individual>, UniqueLess<Individual>>& offspring)
 {
-    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(scores);
 
-    for(auto it = scores.begin(); it != scores.end();) {
-        // If individual is selected, keep it, else erase it from the scores.
-        if (selectionResult.find(it->first)->second) {
-            it++;
-        } else {
-            it = scores.erase(it);
-        }
+    std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    for (const std::unique_ptr<Individual>& os: offspring) {
+        evaluatedIndividuals.insert(*os);
     }
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(evaluatedIndividuals);
 
-    return selectionResult;
-}
 
-void Evolution::EvolutionAlgorithm::replacePopulation(
-    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
-    std::map<std::reference_wrapper<const Individual>, bool>& selectionResult)
-{
     for (auto it = selectionResult.begin(); it != selectionResult.end();) {
         const Individual& indiv = it->first.get();
 
@@ -129,11 +123,7 @@ void Evolution::EvolutionAlgorithm::replacePopulation(
         } else {
             // Loser: if offspring, delete from offspring list, else delete from population
             if (this->population->containsIndividual(indiv)) {
-                if (!this->population->deleteIndividual(indiv)) {
-                    throw std::runtime_error(
-                        "EvolutionAlgorithm::replacePopulation: "
-                        "a protected individual was evaluated and lost selection");
-                }
+                this->population->deleteIndividual(indiv);
             } else {
                 offspring.erase(offspring.find(&indiv));
             }

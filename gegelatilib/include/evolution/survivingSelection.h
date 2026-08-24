@@ -1,7 +1,7 @@
 #ifndef SELECTION_H
 #define SELECTION_H
 
-#include <map>
+#include <set>
 #include <algorithm>
 
 #include "evolution/individual.h"
@@ -38,27 +38,27 @@ namespace Evolution {
             /**
              * \brief method ranking the individuals based on their average score on their evaluationRun
              * 
-             * \param[in] scores the scores of the individuals' evaluation.
+             * \param[in] individuals the individuals containing the scores.
              */
-            std::vector<std::pair<double, std::reference_wrapper<const Individual>>> getRankedScores(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
+            std::vector<std::pair<double, std::reference_wrapper<const Individual>>> getRankedScores(const std::set<std::reference_wrapper<const Individual>>& individuals) const;
 
             /**
              * \brief method performing the surviving selection
              * 
-             * \param[in] scores the scores of the individuals' evaluation.
+             * \param[in] individuals the individuals containing the scores.
              * 
              * \return a map with the individuals as keys. The values indicate if the individual survived (true) or not (false)
              */
-            std::map<std::reference_wrapper<const Individual>, bool> select(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
+            std::map<std::reference_wrapper<const Individual>, bool> select(const std::set<std::reference_wrapper<const Individual>>& individuals) const;
 
             /**
              * \brief method returning the best individual from the given scores
              * 
-             * \param[in] scores the scores of the individuals' evaluation.
+             * \param[in] individuals the individuals containing the scores.
              * 
              * \return the best individual.
              */
-            const Evolution::Individual& getBest(const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const;
+            const Evolution::Individual& getBest(const std::set<std::reference_wrapper<const Individual>>& individuals) const;
     };
 };
 

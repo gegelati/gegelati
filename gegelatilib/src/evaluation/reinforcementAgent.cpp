@@ -27,7 +27,7 @@ size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Eval
 }
 
 
-std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ReinforcementAgent::evaluateIndividual(
+void Evaluation::ReinforcementAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
@@ -41,10 +41,6 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ReinforcementAgent::ev
     // performed. In the evaluation mode only.
     //std::shared_ptr<Evaluation::EvaluationResult> previousEval =nullptr;// = selector.getResultsOf(individual);
     size_t nbEvaluationToDo = params->nbIterationsPerPolicyValidation;//this->getNbEvaluationIndiv(previousEval, mode);
-
-    // created Evaluation result
-    std::shared_ptr<EvaluationResult> evaluationResult = std::make_shared<EvaluationResult>();
-
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < nbEvaluationToDo;
@@ -91,37 +87,20 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ReinforcementAgent::ev
         }
 
         // Add the evaluationRun to the evaluationResult.
-        evaluationResult->addEvaluationRun(std::move(evaluationRun), hash);
+        individual.addEvaluationRun(std::move(evaluationRun), hash);
     }
-
-    // Combine it with previous one if any
-    //if (previousEval != nullptr) {
-    //    *evaluationResult += *previousEval;
-    //} #TODO method to combine 2 evaluation results
-    return evaluationResult;
 }
 
 
 
-std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
-Evaluation::ReinforcementAgent::evaluateIndividuals(
-    const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+void Evaluation::ReinforcementAgent::evaluateIndividuals(
+    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
 {
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
-        results;
-
-
+    // Evaluate the individuals and insert the results
     for(const Evolution::Individual& indiv: individuals){
-        // Evaluate the individuals and insert the results
-        const auto& result = this->evaluateIndividual(
-            indiv, representation, generationNumber, mode
-        );
-        
-        results.insert({indiv, result});
+        this->evaluateIndividual(indiv, representation, generationNumber, mode);        
     }
-
-    return results;
 }

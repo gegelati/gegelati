@@ -8,14 +8,14 @@ std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Evolution::SurvivingS
 }
 
 std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual>>> Evolution::SurvivingSelection::getRankedScores(
-    const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores
+    const std::set<std::reference_wrapper<const Individual>>& individuals
 ) const
 {
     // Get the average score of each individual.
     std::vector<std::pair<double, std::reference_wrapper<const Individual>>> ranked;
-    for (const auto& pairResult : scores){
+    for (const Individual& individual : individuals){
         double score = 0;
-        for (const auto& pairRun: pairResult.second->getEvaluationRuns()) {
+        for (const auto& pairRun: individual.getEvaluationResult().getEvaluationRuns()) {
 
             // Ugly loop to find the corresponding metric, a set should be considered.
             for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: pairRun.second->getMetrics()) {
@@ -25,7 +25,7 @@ std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual
                 }
             }
         }
-        ranked.emplace_back(score, pairResult.first);
+        ranked.emplace_back(score, individual);
     }
 
     // Sort the individual to get ranks.
@@ -36,10 +36,10 @@ std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual
 }
 
 std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::SurvivingSelection::select(
-    const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores
+    const std::set<std::reference_wrapper<const Individual>>& individuals
 ) const
 {
-    std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual>>> ranked = this->getRankedScores(scores);
+    std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual>>> ranked = this->getRankedScores(individuals);
 
     // Standard (mu+lambda) replacement
     std::map<std::reference_wrapper<const Individual>, bool> selection;
@@ -51,7 +51,7 @@ std::map<std::reference_wrapper<const Evolution::Individual>, bool> Evolution::S
 }
 
 const Evolution::Individual& Evolution::SurvivingSelection::getBest(
-    const std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>>& scores) const
+    const std::set<std::reference_wrapper<const Individual>>& individuals) const
 {    
-    return this->getRankedScores(scores).begin()->second;
+    return this->getRankedScores(individuals).begin()->second;
 }

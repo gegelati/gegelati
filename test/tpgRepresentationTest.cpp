@@ -160,8 +160,11 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
     const std::vector<std::weak_ptr<const Evolution::Individual>>& values = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate0->getconfigurationAt(0));
     
     ASSERT_EQ(values.size(), memberPopulation->size()) << "Value vector size should be the same as the member population";
+    std::set<std::reference_wrapper<const Evolution::Individual>> memberIndiv = memberPopulation->getIndividuals();
+    auto itMember = memberIndiv.begin();
     for(size_t idx = 0; idx < values.size(); idx++) {
-        ASSERT_TRUE(*values.at(idx).lock() == memberPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
+        ASSERT_TRUE(*values.at(idx).lock() == *itMember) << "Order of individuals should be conserved";
+        itMember++;
     }
 
     /// CHECK ACTION/TANGLED TEMPLATE
@@ -180,8 +183,11 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
     ASSERT_TRUE(std::holds_alternative<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate1->getconfigurationAt(1))) << "Configuration should be a vector of weak ptr";
     const std::vector<std::weak_ptr<const Evolution::Individual>>& valuesT = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(*nodeValueTemplate1->getconfigurationAt(1));
     ASSERT_EQ(valuesT.size(), tpgPopulation->size()) << "Value vector size should be the same as the tpg population";
+    std::set<std::reference_wrapper<const Evolution::Individual>> tpgIndivs = tpgPopulation->getIndividuals();
+    auto itTpg = tpgIndivs.begin();
     for(size_t idx = 0; idx < valuesT.size(); idx++) {
-        ASSERT_TRUE(*valuesT.at(idx).lock() == tpgPopulation->getIndividuals().at(idx)) << "Order of individuals should be conserved";
+        ASSERT_TRUE(*valuesT.at(idx).lock() == *itTpg) << "Order of individuals should be conserved";
+        itTpg++;
     }
 }
 
@@ -285,8 +291,11 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     inputSource->setDataAt(typeid(double), 3, -1.0);
     std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources{*inputSource};
 
+    std::set<std::reference_wrapper<const Evolution::Individual>> memberPop = memberPopulation->getIndividuals();
+    auto itMember = memberPop.begin();
+
     // Fill lgp members.
-    Evolution::Individual& member0 = memberPopulation->getMutableIndividual(memberPopulation->getIndividuals().at(0));
+    Evolution::Individual& member0 = memberPopulation->getMutableIndividual(*itMember);
     Evolution::Genotype& memberGenotype0 = member0.getMutableGenotype();
     Node::NodeGroup& memberGroup0 = memberGenotype0.addNodeGroup();
     
@@ -294,8 +303,8 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     memberGroup0.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 3, 1, 0}));// R[0] = R[3] + S[0] = 1.0
     ASSERT_TRUE(memberRepresentation->isValid(member0)) << "Member should be equal";
 
-
-    Evolution::Individual& member1 = memberPopulation->getMutableIndividual(memberPopulation->getIndividuals().at(1));
+    itMember++;
+    Evolution::Individual& member1 = memberPopulation->getMutableIndividual(*itMember);
     Evolution::Genotype& memberGenotype1 = member1.getMutableGenotype();
     Node::NodeGroup& memberGroup1 = memberGenotype1.addNodeGroup();
     
@@ -304,7 +313,8 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(memberRepresentation->isValid(member1)) << "Member should be equal";
 
 
-    Evolution::Individual& member2 = memberPopulation->getMutableIndividual(memberPopulation->getIndividuals().at(2));
+    itMember++;
+    Evolution::Individual& member2 = memberPopulation->getMutableIndividual(*itMember);
     Evolution::Genotype& memberGenotype2 = member2.getMutableGenotype();
     Node::NodeGroup& memberGroup2 = memberGenotype2.addNodeGroup();
     

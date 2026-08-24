@@ -109,15 +109,8 @@ namespace Evaluation {
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         *
-         * \return a std::shared_ptr to the EvaluationResult for the root. If
-         * this root was already evaluated more times then the limit in
-         * params.maxNbEvaluationPerPolicy, then the EvaluationResult from the
-         * resultsPerRoot map is returned, else the EvaluationResult of the
-         * current generation is returned, already combined with the
-         * resultsPerRoot for this root (if any).
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateIndividual(
+        virtual void evaluateIndividual(
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
@@ -138,10 +131,8 @@ namespace Evaluation {
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::map<std::reference_wrapper<const Evolution::Individual>, 
-                              std::shared_ptr<EvaluationResult>>
-        evaluateIndividuals(
-            const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+        virtual void evaluateIndividuals(
+            const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
             Learn::LearningMode mode) const override;

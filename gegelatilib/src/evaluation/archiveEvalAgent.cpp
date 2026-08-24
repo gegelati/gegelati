@@ -17,7 +17,7 @@ std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::Archive
 }
 
 
-std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ArchiveEvalAgent::evaluateIndividual(
+void Evaluation::ArchiveEvalAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
@@ -57,18 +57,20 @@ std::shared_ptr<Evaluation::EvaluationResult> Evaluation::ArchiveEvalAgent::eval
         }
     }
 
+
     // Novelty score is 1 if the identical list is empty, else 0
     double noveltyScore = double(currentIndenticalIndivID.empty());
-    return std::make_shared<EvaluationResult>(
-               std::move(std::make_unique<EvaluationRun>(
-                   std::move(std::make_unique<ScoreMetric>(noveltyScore)))), 0);
+    individual.addEvaluationRun(
+        std::move(std::make_unique<EvaluationRun>(
+           std::move(std::make_unique<ScoreMetric>(noveltyScore))))
+        , 0
+    );
 }
 
 
 
-std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
-Evaluation::ArchiveEvalAgent::evaluateIndividuals(
-    const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
+    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
     Learn::LearningMode mode) const
@@ -84,26 +86,22 @@ Evaluation::ArchiveEvalAgent::evaluateIndividuals(
         }
     }
 
+    // Evaluate the individuals
     for(const Evolution::Individual& indiv: individuals){
-        // Evaluate the individuals and insert the results
-        const auto& result = this->evaluateIndividual(
+        this->evaluateIndividual(
             indiv, representation, generationNumber, mode
         );
-        
-        results.insert({indiv, result});
     }
-
-    return results;
 }
 
-void Evaluation::ArchiveEvalAgent::updateArchiveInputs(std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> mapInputResults)
+void Evaluation::ArchiveEvalAgent::updateArchiveInputs(std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals)
 {
     std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> inputsExtracted;
 
     // First get all archiveMetric input measured.
     // Disgusting code!
-    for(const auto& pairResults: mapInputResults) {
-        for(const auto& pairRun: pairResults.second->getEvaluationRuns()) {
+    for(const Evolution::Individual& teams: teamIndividuals) {
+        for(const auto& pairRun: teams.getEvaluationResult().getEvaluationRuns()) {
             for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: pairRun.second->getMetrics()) {
                 if(dynamic_cast<const Evaluation::ArchiveMetric*>(metric.get()) != nullptr) {
                     const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>& localInputs = 
@@ -139,7 +137,7 @@ void Evaluation::ArchiveEvalAgent::updateArchiveInputs(std::map<std::reference_w
 }
 
 void Evaluation::ArchiveEvalAgent::updateArchiveOutputs(
-    const std::vector<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation)
 {
     for(const Evolution::Individual& individual: individuals) {

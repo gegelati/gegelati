@@ -33,15 +33,15 @@ TEST_F(SurvivingSelectionTest, select)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     std::vector<Evolution::Individual*> indivs;
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> scores;
+    std::set<std::reference_wrapper<const Evolution::Individual>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
         indivs.push_back(new Evolution::Individual());
         
-        std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
-            std::move(std::make_unique<Evaluation::EvaluationRun>(
-                std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
+        const Evolution::Individual& refIndiv = *indivs.back();
+        refIndiv.addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
+                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
         );
-        scores.insert({*indivs.back(), result});
+        scores.insert(refIndiv);
     }
 
     std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResults;
@@ -68,15 +68,15 @@ TEST_F(SurvivingSelectionTest, getBest)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     std::vector<Evolution::Individual*> indivs;
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> scores;
+    std::set<std::reference_wrapper<const Evolution::Individual>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
         indivs.push_back(new Evolution::Individual());
         
-        std::shared_ptr<Evaluation::EvaluationResult> result = std::make_shared<Evaluation::EvaluationResult>(
-            std::move(std::make_unique<Evaluation::EvaluationRun>(
-                std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
+        const Evolution::Individual& refIndiv = *indivs.back();
+        refIndiv.addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
+                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1
         );
-        scores.insert({*indivs.back(), result});
+        scores.insert(refIndiv);
     }
 
     const Evolution::Individual* best;

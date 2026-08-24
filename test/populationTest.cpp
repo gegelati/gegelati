@@ -81,7 +81,7 @@ TEST_F(PopulationTest, addIndividual)
     ASSERT_EQ(population.size(), 2) << "Size of the Population should be 2.";
     ASSERT_TRUE(population.containsIndividual(individual)) << "Population should contain the individual.";
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> individuals;
+    std::set<std::reference_wrapper<const Evolution::Individual>> individuals;
     ASSERT_NO_THROW(individuals = population.getIndividuals()) << "Getting Individuals from Population failed.";
     ASSERT_EQ(individuals.size(), 2) << "Size of the Individuals vector should be 2.";
 
@@ -90,7 +90,7 @@ TEST_F(PopulationTest, addIndividual)
     ASSERT_NO_THROW(population.addIndividual(std::move(individualPtr))) << "adding Individual in Population failed.";
     ASSERT_EQ(population.size(), 3) << "Size of the Population should be 2.";
     ASSERT_TRUE(population.containsIndividual(indivRef)) << "Population should contain the individual.";
-    ASSERT_TRUE(population.getIndividuals().at(2) == indivRef) << "Individuals should be equal";
+    ASSERT_TRUE(*population.getIndividualPtrs().at(2).lock() == indivRef) << "Individuals should be equal";
 }
 
 TEST_F(PopulationTest, deleteIndividual)
@@ -167,13 +167,12 @@ TEST_F(PopulationTest, testAggragtions)
     ASSERT_EQ(population.sizeNotProtected(), 2) << "Size not protected should be 2";
     ASSERT_EQ(population.sizeProtected(), 1) << "Size protected should be 1";
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> notProtIndivs = constPop.getNotProtectedIndividuals();
-    std::vector<std::reference_wrapper<const Evolution::Individual>> protIndivs= constPop.getProtectedIndividuals();
+    std::set<std::reference_wrapper<const Evolution::Individual>> notProtIndivs = constPop.getNotProtectedIndividuals();
+    std::set<std::reference_wrapper<const Evolution::Individual>> protIndivs= constPop.getProtectedIndividuals();
     ASSERT_EQ(notProtIndivs.size(), 2) << "Size not protected should be 2";
     ASSERT_EQ(protIndivs.size(), 1) << "Size protected should be 1";
-    ASSERT_TRUE(notProtIndivs.at(0) == individual1) << "Individuals should be equal";
-    ASSERT_TRUE(notProtIndivs.at(1) == individual3) << "Individuals should be equal";
-    ASSERT_TRUE(protIndivs.at(0) == individual2) << "Individuals should be equal";
+    ASSERT_TRUE(*notProtIndivs.begin() == individual1) << "Individuals should be equal";
+    ASSERT_TRUE(*protIndivs.begin() == individual2) << "Individuals should be equal";
 
     ASSERT_FALSE(population.deleteIndividual(individual2)) << "Deleting aggregated individual should fail";
 
