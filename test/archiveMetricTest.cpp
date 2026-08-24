@@ -43,6 +43,7 @@
 #include "data/primitiveTypeArray.h"
 
 #include "evaluation/archiveMetric.h"
+#include "evolution/individual.h"
 
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Learn::LearningEnvironment

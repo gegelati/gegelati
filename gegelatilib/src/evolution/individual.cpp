@@ -67,6 +67,15 @@ std::unique_ptr<Evolution::Individual> Evolution::Individual::cloneUniquePtr() c
     return std::move(newIndividual);
 }
 
+void Evolution::Individual::addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const
+{
+    this->result->addEvaluationRun(std::move(evaluationRun), seed);
+}
+
+const Evaluation::EvaluationResult& Evolution::Individual::getEvaluationResult() const
+{
+    return *this->result;
+}
 
 
 bool Evolution::operator<(const Evolution::Individual& a, const Evolution::Individual& b)

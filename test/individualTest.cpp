@@ -41,6 +41,8 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "evaluation/scoreMetric.h"
+
 #include "evolution/individual.h"
 #include "util/counterReset.h"
 
@@ -107,6 +109,24 @@ TEST_F(IndividualTest, cloneIndividual)
 
     ASSERT_EQ(copyIndiv->getSize(), 3) << "Copy was not effective";
     ASSERT_TRUE(copyIndiv->getGenotype() == individual.getGenotype()) << "Copy was not effective";
+}
+
+TEST_F(IndividualTest, results) 
+{
+    Evolution::Individual individual;
+    const Evolution::Individual& constIndiv = individual;
+
+    ASSERT_NO_THROW(constIndiv.addEvaluationRun(        
+        std::make_unique<Evaluation::EvaluationRun>(
+            std::make_unique<Evaluation::ScoreMetric>(8)
+        ),
+        10
+    )) << "Adding an evaluationRun to the result failed";
+
+    const Evaluation::EvaluationResult* result;
+    ASSERT_NO_THROW(result = &constIndiv.getEvaluationResult()) << "Getting evaluation result failed";
+
+    ASSERT_EQ(result->getSize(), 1) << "Result should have size 1";
 }
 
 TEST_F(IndividualTest, IDCounter)

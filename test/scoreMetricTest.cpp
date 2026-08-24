@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "evaluation/scoreMetric.h"
+#include "evolution/individual.h"
 
 
 // Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode

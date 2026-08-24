@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "evolution/genotype.h"
+#include "evaluation/evaluationResult.h"
 
 struct CounterReset;
 namespace Evolution {
@@ -20,6 +21,9 @@ namespace Evolution {
 
         /// \brief Genotype of the individual.
         std::unique_ptr<Genotype> genotype;
+
+        /// \brief Evaluation result of the individual.
+        std::unique_ptr<Evaluation::EvaluationResult> result;
 
         /// Unique ID of the individual.
         size_t individualID;
@@ -51,7 +55,7 @@ namespace Evolution {
         /**
          * \brief Constructor for the Individual.
          */
-        Individual() : genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()) {};
+        Individual() : genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {};
 
         /**
          * \brief return the ID of the individual.
@@ -92,6 +96,19 @@ namespace Evolution {
          * \brief Get the mutable genotype of the Individual.
          */
         virtual Genotype& getMutableGenotype();
+
+        /**
+         * \brief add an evaluationRun to the evaluationResult of the individual
+         * 
+         * \param[in] evaluationRun evaluation run.
+         * \param[in] seed seed associated with the evaluation run.
+         */
+        virtual void addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const;
+
+        /**
+         * \brief return the current evaluation result of the individual.
+         */
+        const Evaluation::EvaluationResult& getEvaluationResult() const;
     };
     
     /**

@@ -3,9 +3,13 @@
 #ifndef EVALUATION_METRICS_H
 #define EVALUATION_METRICS_H
 
-#include "evolution/individual.h"
 #include "learn/learningEnvironment.h"
 
+
+namespace Evolution {
+    /// For include
+    class Individual;
+};
 
 namespace Evaluation {
     /**
