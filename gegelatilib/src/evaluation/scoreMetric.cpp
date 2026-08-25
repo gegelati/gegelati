@@ -13,7 +13,7 @@ double Evaluation::ScoreMetric::getScore() const
 
 void Evaluation::ScoreMetric::extractMetricsRun(
     const Evolution::Individual& individual, size_t nbStepsExecuted,
-    const Learn::LearningEnvironment& learningEnvironment)
+    const Evaluation::LearningEnvironment& learningEnvironment)
 {
     // Update score
     this->score = learningEnvironment.getScore();

@@ -41,15 +41,15 @@ bool StickGameWithOpponentD::isCopyable() const
     return true;
 }
 
-Learn::LearningEnvironment* StickGameWithOpponentD::clone() const
+Evaluation::LearningEnvironment* StickGameWithOpponentD::clone() const
 {
     // Default copy constructor does the trick.
-    return (Learn::LearningEnvironment*)new StickGameWithOpponentD(*this);
+    return (Evaluation::LearningEnvironment*)new StickGameWithOpponentD(*this);
 }
 
 void StickGameWithOpponentD::doAction(double actionID)
 {
-    LearningEnvironment::doAction(actionID);
+    ReinforcementEnvironment::doAction(actionID);
 
     // if the game is not over
     if (!this->isTerminal()) {
@@ -85,13 +85,13 @@ void StickGameWithOpponentD::doAction(double actionID)
     }
 }
 
-void StickGameWithOpponentD::reset(size_t seed, Learn::LearningMode mode,
+void StickGameWithOpponentD::reset(size_t seed, Evaluation::LearningMode mode,
                                   uint16_t iterationNumber,
                                   uint64_t generationNumber)
 {
     // Create seed from seed and mode
     size_t hash_seed =
-        Data::Hash<size_t>()(seed) ^ Data::Hash<Learn::LearningMode>()(mode);
+        Data::Hash<size_t>()(seed) ^ Data::Hash<Evaluation::LearningMode>()(mode);
     this->rng.setSeed(hash_seed);
     this->remainingSticks.setDataAt(typeid(double), 0, 21.0);
     this->win = false;

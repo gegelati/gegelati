@@ -57,7 +57,7 @@ namespace Evaluation {
          */
         virtual void extractMetricsRun(
             const Evolution::Individual& individual, size_t nbStepsExecuted,
-            const Learn::LearningEnvironment& learningEnvironment) override;
+            const Evaluation::LearningEnvironment& learningEnvironment) override;
     };
 
 

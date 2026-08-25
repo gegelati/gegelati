@@ -120,7 +120,7 @@ namespace Evolution {
          * \param[in] mode the LearningMode to use during the evaluation.
          */
         virtual void evaluatePopulation(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring,
-                            size_t generationNumber, Learn::LearningMode mode);
+                            size_t generationNumber, Evaluation::LearningMode mode);
 
 
         /**

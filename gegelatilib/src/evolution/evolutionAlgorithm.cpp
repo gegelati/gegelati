@@ -87,7 +87,7 @@ void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_p
 
 void Evolution::EvolutionAlgorithm::evaluatePopulation(
     const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
-    size_t generationNumber, Learn::LearningMode mode
+    size_t generationNumber, Evaluation::LearningMode mode
     )
 {
     std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();

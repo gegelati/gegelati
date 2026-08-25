@@ -9,7 +9,7 @@
 
 
 // Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode
-class FakedLearningEnvironment : public Learn::LearningEnvironment
+class FakedLearningEnvironment : public Evaluation::LearningEnvironment
 {
   private:
     double m_score;
@@ -17,14 +17,7 @@ class FakedLearningEnvironment : public Learn::LearningEnvironment
 
   public:
     FakedLearningEnvironment(double score)
-        : Learn::LearningEnvironment(1), m_score(score)
-    {
-    }
-
-    virtual void reset(size_t seed = 0,
-                       Learn::LearningMode mode = Learn::LearningMode::TRAINING,
-                       uint16_t iterationNumber = 0,
-                       uint64_t generationNumber = 0) override
+        : Evaluation::LearningEnvironment(1), m_score(score)
     {
     }
 
@@ -37,16 +30,6 @@ class FakedLearningEnvironment : public Learn::LearningEnvironment
     virtual double getScore() const override
     {
         return m_score;
-    }
-
-    virtual bool isTerminal() const override
-    {
-        return true;
-    }
-
-    virtual bool isUsingUtility() const override
-    {
-        return true;
     }
 };
 

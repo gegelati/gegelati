@@ -30,7 +30,7 @@ class FakedLearningEnvironment : public Learn::LearningEnvironment
     }
 
     virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() const override
+    getDataSources() override
     {
         return {};
     }
@@ -83,7 +83,7 @@ class FakedClassificationLearningEnvironment
     }
 
     virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() const override
+    getDataSources() override
     {
         return {};
     }

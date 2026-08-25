@@ -34,34 +34,12 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef R_LEARNING_ENVIRONMENT_H
-#define R_LEARNING_ENVIRONMENT_H
+#ifndef REINFORCEMENT_ENVIRONMENT_H
+#define REINFORCEMENT_ENVIRONMENT_H
 
-#include "data/dataHandler.h"
-#include "outputInfo.h"
-#include <cstdint>
-#include <vector>
+#include "evaluation/learningEnvironment.h"
 
-namespace Learn {
-
-    /**
-     * \brief Different modes in which the LearningEnvironment can be reset.
-     *
-     * Each of the following mode corresponds to a classical phase of a learning
-     * process. These mode usually refer to different parts of the data set used
-     * throughout the learning process. Classically, the TRAINING mode is used
-     * to effectively train an agent. The VALIDATION mode is used to evaluate
-     * the efficiency of the learning process during the training phase, but on
-     * data differring from the one used for training, in order to avoid biased
-     * evaluation. TESTING mode is used at the end of all training activity to
-     * evaluate the efficiency of the agent on completely new data.
-     */
-    enum class LearningMode
-    {
-        TRAINING,
-        VALIDATION,
-        TESTING
-    };
+namespace Evaluation {
 
     /**
      * \brief Interface for creating a Learning Environment.
@@ -78,71 +56,19 @@ namespace Learn {
      * learningEnvironment has reached a final state, that no action will
      * affect.
      */
-    class LearningEnvironment
+    class ReinforcementEnvironment : public LearningEnvironment
     {
       protected:
-        /// Handler storing the action
-        std::shared_ptr<Output::OutputHandler> actions;
-
-        /// Make the default copy constructor protected.
-        LearningEnvironment(const LearningEnvironment& other) = default;
 
       public:
-        /**
-         * \brief Delete the default constructor of a LearningEnvironment.
-         */
-        LearningEnvironment() = delete;
-
-        /// Default virtual destructor
-        virtual ~LearningEnvironment() = default;
-
         /**
          * \brief Constructor for LearningEnviroment.
          *
          * \param[in] actions that will be usable for
          * interacting with this LearningEnviromnent.
          */
-        LearningEnvironment(Output::OutputHandler actions)
-            : actions{std::make_shared<Output::OutputHandler>(actions)} {};
-
-        /**
-         * \brief Get a copy of the LearningEnvironment.
-         *
-         * Default implementation returns a null pointer.
-         *
-         * \return a copy of the LearningEnvironment if it is copyable,
-         * otherwise this method returns a NULL pointer.
-         */
-        virtual LearningEnvironment* clone() const;
-
-        /**
-         * \brief Can the LearningEnvironment be copy constructed to evaluate
-         * several LearningAgent in parallel.
-         *
-         * \return true if the LearningEnvironment can be copied and run in
-         * parallel. Default implementation returns false.
-         */
-        virtual bool isCopyable() const;
-
-        /**
-         * \brief Is the LearningEnvrionment using a utility in addition to the
-         * reward. Information needed for the logs.
-         *
-         * \return true if the LearningEnvironment is using utility. Default
-         * implementation returns false.
-         */
-        virtual bool isUsingUtility() const;
-
-        /**
-         * \brief Get the outputHandler of actions available for this
-         * LearningEnvironment.
-         *
-         * \return the integer value of the nbAction attribute.
-         */
-        std::shared_ptr<Output::OutputHandler> getActions() const
-        {
-            return this->actions;
-        };
+        ReinforcementEnvironment(Output::OutputHandler actions)
+            : LearningEnvironment(actions) {};
 
         /**
          * \brief Execute an action on the LearningEnvironment.
@@ -206,43 +132,6 @@ namespace Learn {
                            LearningMode mode = LearningMode::TRAINING,
                            uint16_t iterationNumber = 0,
                            uint64_t generationNumber = 0) = 0;
-
-        /**
-         * \brief Get the data sources for this LearningEnvironment.
-         *
-         * This method returns a vector of reference to the DataHandler that
-         * will be given to the LearningAgent, and to its Program to learn how
-         * to interact with the LearningEnvironment. Throughout the existence
-         * of the LearningEnvironment, data contained in the data will be
-         * modified, but never the number, nature or size of the dataHandlers.
-         * Since this methods return references to the DataHandler, the
-         * LearningAgent will assume that the referenced dataHandler are
-         * automatically updated each time the doAction, or reset methods
-         * are called on the LearningEnvironment.
-         *
-         * \return a vector of references to the DataHandler.
-         */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-        getDataSources() = 0;
-
-        /**
-         * \brief Returns the current score of the Environment.
-         *
-         * The returned score will be used as a reward during the learning
-         * phase of a LearningAgent.
-         *
-         * \return the current score for the LearningEnvironment.
-         */
-        virtual double getScore() const = 0;
-
-        /**
-         * \brief Returns the current utility of the Environment.
-         *
-         * The returned utility is only an information to be used for logs.
-         *
-         * \return the current utility for the LearningEnvironment.
-         */
-        virtual double getUtility() const;
 
         /**
          * \brief Method for checking if the LearningEnvironment has reached a

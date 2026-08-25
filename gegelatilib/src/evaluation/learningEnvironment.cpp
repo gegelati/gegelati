@@ -1,10 +1,8 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
- * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2025)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,38 +34,17 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "evaluation/evaluationAgent.h"
+#include <iostream>
+#include <stdexcept>
 
-void Evaluation::EvaluationAgent::addRequestedMetric(const EvaluationMetric& metric)
+#include "evaluation/learningEnvironment.h"
+
+Evaluation::LearningEnvironment* Evaluation::LearningEnvironment::clone() const
 {
-    this->requestedMetrics.push_back(std::move(metric.cloneEmptyUniquePtr()));
+    return NULL;
 }
 
-std::unique_ptr<Evaluation::EvaluationRun> Evaluation::EvaluationAgent::createEvaluationRun() const
+bool Evaluation::LearningEnvironment::isCopyable() const
 {
-    std::unique_ptr<EvaluationRun> evalRun = std::make_unique<EvaluationRun>();
-    for(const auto& metric: this->requestedMetrics) {
-        evalRun->addMetric(metric->cloneEmptyUniquePtr());
-    }
-    return std::move(evalRun);
+    return false;
 }
-
-
-std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::EvaluationAgent::getDimensionsDataSources() const
-{
-    return this->learningEnvironment.getDataSources();
-}
-
-
-void Evaluation::EvaluationAgent::evaluateIndividuals(
-    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-    const Evolution::Representation& representation,
-    uint64_t generationNumber,
-    LearningMode mode) const
-{
-    // Evaluate the individuals and insert the results
-    for(const Evolution::Individual& indiv: individuals){
-        this->evaluateIndividual(indiv, representation, generationNumber, mode);        
-    }
-}
-

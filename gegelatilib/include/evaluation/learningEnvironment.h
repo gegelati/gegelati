@@ -34,15 +34,15 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef R_LEARNING_ENVIRONMENT_H
-#define R_LEARNING_ENVIRONMENT_H
+#ifndef LEARNING_ENVIRONMENT_H
+#define LEARNING_ENVIRONMENT_H
 
 #include "data/dataHandler.h"
 #include "outputInfo.h"
 #include <cstdint>
 #include <vector>
 
-namespace Learn {
+namespace Evaluation {
 
     /**
      * \brief Different modes in which the LearningEnvironment can be reset.
@@ -125,15 +125,6 @@ namespace Learn {
         virtual bool isCopyable() const;
 
         /**
-         * \brief Is the LearningEnvrionment using a utility in addition to the
-         * reward. Information needed for the logs.
-         *
-         * \return true if the LearningEnvironment is using utility. Default
-         * implementation returns false.
-         */
-        virtual bool isUsingUtility() const;
-
-        /**
          * \brief Get the outputHandler of actions available for this
          * LearningEnvironment.
          *
@@ -143,69 +134,6 @@ namespace Learn {
         {
             return this->actions;
         };
-
-        /**
-         * \brief Execute an action on the LearningEnvironment.
-         *
-         * The purpose of this method is to execute an action, represented by
-         * an actionId comprised between 0 and nbActions - 1.
-         * The LearningEnvironment implementation only checks that the given
-         * actionID is comprised between 0 and nbActions - 1.
-         * It is the responsibility of this method to call the updateHash
-         * method on dataSources whose content have been affected by the action.
-         *
-         * \param[in] actionID the double value representing the action to
-         * execute.
-         * \throw std::runtime_error if the actionID exceeds nbActions - 1.
-         */
-        virtual void doAction(double actionID);
-
-        /**
-         * \brief Execute actions on the LearningEnvironment.
-         *
-         * The purpose of this method is to execute actions, represented by
-         * a vector of actionId comprised, for actionId i between 0 and
-         * vectActions[i] - 1. The LearningEnvironment implementation only
-         * checks that the given actionID is comprised, for actionId i between 0
-         * and vectActions[i] - 1. It is the responsibility of this method to
-         * call the updateHash method on dataSources whose content have been
-         * affected by the action.
-         *
-         * If the size of the vector is one, this method launches the method
-         * doAction(double actionID), the actionID being the only integer in
-         * the vector.
-         *
-         * \param[in] vectActionID the vector integer numbers of each actions to
-         * execute.
-         * \throw std::runtime_error if the actionsID[i] exceeds vectActions[i]
-         * - 1.
-         */
-        virtual void doActions(std::vector<double> vectActionID);
-
-        /**
-         * \brief Reset the LearningEnvironment.
-         *
-         * Resetting a learning environment is needed to train an agent.
-         * Optionally seed can be given to this function to control the
-         * randomness of a LearningEnvironment (if any). When available, this
-         * feature will be used:
-         * - for comparing the performance of several agents with the same
-         * random starting conditions.
-         * - for training each agent with diverse starting conditions.
-         *
-         * \param[in] seed the integer value for controlling the randomness of
-         * the LearningEnvironment.
-         * \param[in] mode LearningMode in which the Environment should be
-         * reset for the next set of actions.
-         * \param[in] iterationNumber the integer value to indicate the current
-         * iteration number when parameter nbIterationsPerPolicyEvaluation > 1
-         * \param[in] generationNumber the integer value to indicate the
-         * current generation number
-         */
-        virtual void reset(size_t seed = 0,
-                           LearningMode mode = LearningMode::TRAINING,
-                           uint16_t iterationNumber = 0,
-                           uint64_t generationNumber = 0) = 0;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.
@@ -223,7 +151,7 @@ namespace Learn {
          * \return a vector of references to the DataHandler.
          */
         virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-        getDataSources() = 0;
+        getDataSources() const = 0;
 
         /**
          * \brief Returns the current score of the Environment.
@@ -234,31 +162,6 @@ namespace Learn {
          * \return the current score for the LearningEnvironment.
          */
         virtual double getScore() const = 0;
-
-        /**
-         * \brief Returns the current utility of the Environment.
-         *
-         * The returned utility is only an information to be used for logs.
-         *
-         * \return the current utility for the LearningEnvironment.
-         */
-        virtual double getUtility() const;
-
-        /**
-         * \brief Method for checking if the LearningEnvironment has reached a
-         * terminal state.
-         *
-         * The boolean value returned by this method, when equal to true,
-         * indicates that the LearningEnvironment has reached a terminal state.
-         * A terminal state is a state in which further calls to the doAction
-         * method will have no effects on the dataSources of the
-         * LearningEnvironment, or on its score. For example, this terminal
-         * state may be reached for a Game Over state within a game, or in case
-         * the objective of the learning agent has been successfuly reached.
-         *
-         * \return a boolean indicating termination.
-         */
-        virtual bool isTerminal() const = 0;
     };
 }; // namespace Learn
 

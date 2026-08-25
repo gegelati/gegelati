@@ -112,7 +112,7 @@ TEST_F(ReinforcementAgentTest, Constructor)
 TEST_F(ReinforcementAgentTest, evaluateIndividual)
 {
     Evaluation::ReinforcementAgent rlAgent(le, std::move(params));
-    Learn::LearningMode mode = Learn::LearningMode::TRAINING;
+    Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING;
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();

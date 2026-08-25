@@ -52,7 +52,7 @@
 #include "mutator/rng.h"
 
 #include "learn/classificationLearningEnvironment.h"
-#include "learn/learningEnvironment.h"
+#include "evaluation/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
 #include "evaluation/evaluationResult.h"
@@ -69,14 +69,30 @@ namespace Evaluation {
     class EvaluationAgent
     {
       protected:
+        /// LearningEnvironment with which the EvaluationAgent will interact.
+        Evaluation::LearningEnvironment& learningEnvironment;
+
         /// Vector of requested metric to measure during evaluation
         std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
+
+        /// Parameters for the learning process
+        std::unique_ptr<Learn::LearningParameters> params;
+
+        /// Seed for deterministic randomizer of evaluation.
+        size_t seed;
 
       public:
         /**
          * \brief Constructor for EvaluationAgent.
+         * 
+         * \param[in] le The LearningEnvironment to optimize (which should correspond to the evaluationAgent)
+         * \param[in] parameters The LearningParameters for the EvaluationAgent.
+         * \param[in] seed Seed for deterministic randomizer of evaluation.
          */
-        EvaluationAgent() {};
+        EvaluationAgent(
+          Evaluation::LearningEnvironment& le,
+          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), size_t seed = 0)
+            : learningEnvironment{le}, params{std::move(std::make_unique<Learn::LearningParameters>(*parameters))}, seed{seed} {};
 
         /// Default destructor for polymorphism
         virtual ~EvaluationAgent() = default;
@@ -84,7 +100,7 @@ namespace Evaluation {
         /**
          * \brief return the current dataSources to obtain the dimensions of the task. TODO maybe better to do.
          */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const = 0;
+        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
         
         /**
          * \brief Add a metric requested to be measured during an evaluation run.
@@ -99,7 +115,7 @@ namespace Evaluation {
          * A copy of each requested metric is added to the evaluationRun.
          */
         std::unique_ptr<EvaluationRun> createEvaluationRun() const;
-
+        
         /**
          * \brief Evaluates policy starting from the given root.
          *
@@ -121,7 +137,7 @@ namespace Evaluation {
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const = 0;
+            LearningMode mode) const = 0;
 
 
         /**
@@ -142,7 +158,7 @@ namespace Evaluation {
             const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const = 0;
+            LearningMode mode) const;
     };
 }; // namespace Learn
 

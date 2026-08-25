@@ -39,6 +39,7 @@
 #ifndef REINFORCEMENT_AGENT_H
 #define REINFORCEMENT_AGENT_H
 
+#include "evaluation/reinforcementEnvironment.h"
 #include "evaluation/evaluationAgent.h"
 
 namespace Evaluation {
@@ -50,36 +51,20 @@ namespace Evaluation {
     class ReinforcementAgent : public EvaluationAgent
     {
       protected:
-        /// LearningEnvironment with which the EvaluationAgent will interact.
-        Learn::LearningEnvironment& learningEnvironment;
-
-        /// Parameters for the learning process
-        std::unique_ptr<Learn::LearningParameters> params;
-
-        /// Control the maximum number of threads when running in parallel.
-        uint64_t maxNbThreads = 1;
-
-        /// Seed for deterministic randomizer of evaluation.
-        size_t seed;
 
       public:
         /**
-         * \brief Constructor for EvaluationAgent.
+         * \brief Constructor for ReinforcementAgent.
          *
-         * \param[in] le The LearningEnvironment to optimize
+         * \param[in] le The ReinforcementEnvironment to optimize
          * \param[in] parameters The LearningParameters for the EvaluationAgent.
          * \param[in] seed Seed for deterministic randomizer of evaluation.
          */
         ReinforcementAgent(
-          Learn::LearningEnvironment& le, 
+          Evaluation::ReinforcementEnvironment& le,
           std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), size_t seed = 0)
-            : EvaluationAgent(), learningEnvironment{le},
-              params{std::make_unique<Learn::LearningParameters>(*parameters)}, seed{seed} {};
+            : EvaluationAgent(le, std::move(std::make_unique<Learn::LearningParameters>(*parameters)), seed) {};
 
-        /**
-         * \brief Return the dataSources of the LearningEnvironment
-         */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
 
         /**
          * \brief Get the number of evaluation to perform for a given individual.
@@ -91,7 +76,7 @@ namespace Evaluation {
          * \param[in] mode the LearningMode to use during the policy evaluation.
          */
         virtual size_t getNbEvaluationIndiv(
-            std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const;
+            std::shared_ptr<Evaluation::EvaluationResult> previousEval, LearningMode mode) const;
 
         /**
          * \brief Evaluates policy starting from the given root.
@@ -114,28 +99,7 @@ namespace Evaluation {
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const override;
-
-
-        /**
-         * \brief Evaluate all individual of the representations.
-         *
-         * This method calls the evaluateIndividual method for every individual
-         * of the representations. The method returns a sorted map associating each
-         * individual to its average score.
-         *
-         * \param[in] individuals The individuals whose genotypes are evaluted.
-         * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
-         * \param[in] generationNumber the integer number of the current
-         * generation.
-         * \param[in] mode the LearningMode to use during the policy
-         * evaluation.
-         */
-        virtual void evaluateIndividuals(
-            const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-            const Evolution::Representation& representation,
-            uint64_t generationNumber,
-            Learn::LearningMode mode) const override;
+            LearningMode mode) const override;
     };
 }; // namespace Evaluation
 

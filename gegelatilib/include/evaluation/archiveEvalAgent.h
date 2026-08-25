@@ -39,29 +39,10 @@
 #ifndef ARCHIVE_EVAL_AGENT_H
 #define ARCHIVE_EVAL_AGENT_H
 
-
+#include "evaluation/archiveEnvironment.h"
 #include "evaluation/evaluationAgent.h"
-#include "evaluation/scoreMetric.h"
-#include "evaluation/archiveMetric.h"
 
 namespace Evaluation {
-
-
-    /**
-     * \brief Class used to store one recording of an Archive.
-     *
-     * A recording in the archive is a tuple consisting of:
-     * - An ID to an individual
-     * - A double resulting from the execution of the individual on the DataHandler.
-     */
-    typedef struct ArchiveRecording
-    {
-        /// ID of the individual.
-        size_t individualID;
-
-        /// Value returned by the individual for the DataHandler.
-        const double result;
-    } ArchiveRecording;
 
     /**
      * \brief Class used to control the learning steps of a Graph within
@@ -71,46 +52,21 @@ namespace Evaluation {
     {
       protected:
 
-        /// @brief Input used to give the input dimension of the archive.
-        std::vector<std::reference_wrapper<const Data::DataHandler>> inputDimensions;
-
-        /// @brief Number of input sampled stored in the archive.
-        size_t archiveSize;
-
-        /// @brief Random number generator for selecting archive inputs
-        RNG::RNG rng;
-
-        /// Vector of requested metric to measure during evaluation
-        std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
-
-        /// map of input and output pair values stored in the archive.
-        std::vector<std::pair<std::vector<std::reference_wrapper<const Data::DataHandler>>, std::vector<ArchiveRecording>>> archive;
-
-        /**
-         * \brief set the dimension of data source by creating a copy of the given one
-         * 
-         * \param[in] dHandler given dataSource.
-         */
-        void setDimensionDataSource(std::vector<std::reference_wrapper<const Data::DataHandler>> dHandler);
 
       public:
         /**
          * \brief Constructor for EvaluationAgent.
          *
-         * \param[in] inputDimensions example inputs given as an example of dimension.
-         * \param[in] archiveSize size of the archive
+         * \param[in] le the archiveEnvironment used to evaluate the population.
+         * \param[in] parameters The LearningParameters for the EvaluationAgent.
          * \param[in] seed Seed for deterministic randomizer of archive selection.
          */
-        ArchiveEvalAgent(std::vector<std::reference_wrapper<const Data::DataHandler>> inputDimensions, size_t archiveSize, size_t seed = 0)
-            : EvaluationAgent(), archiveSize{archiveSize} {
-              rng.setSeed(seed);
-              this->setDimensionDataSource(inputDimensions);
-            };
+        ArchiveEvalAgent(
+          Evaluation::ArchiveEnvironment& le, 
+          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), 
+          size_t seed = 0)
+            :  EvaluationAgent(le, std::move(std::make_unique<Learn::LearningParameters>(*parameters)), seed) {};
 
-        /**
-         * \brief Return the dataSources of the LearningEnvironment
-         */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
 
         /**
          * \brief Evaluates policy starting from the given root.
@@ -133,7 +89,7 @@ namespace Evaluation {
             const Evolution::Individual& individual, 
             const Evolution::Representation& representation,
             uint64_t generationNumber,
-            Learn::LearningMode mode) const override;
+            LearningMode mode) const override;
 
 
         /**
@@ -154,31 +110,7 @@ namespace Evaluation {
           const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
           const Evolution::Representation& representation,
           uint64_t generationNumber,
-          Learn::LearningMode mode) const override;
-
-        /**
-         * \brief Update the input used in the archive map based on the map given.
-         * 
-         * The map should belong to the evaluationAgent on which the archiveAgent is connected.
-         * Only the EvaluationResults are used, which should contain archiveMetric.
-         * 
-         * Some archiveMetric are randomly sampled from the list.
-         * 
-         * \param[in] teamIndividuals the map considered
-         */
-        virtual void updateArchiveInputs(std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals);
-
-        /**
-         * \brief Update the output used in the archive based on the individuals given.
-         * 
-         * Each individual is executed on each input, the output is saved in the archive.
-         * 
-         * \param[in] memberIndividuals the list of individuals evaluated.
-         * \param[in] memberRepresentation the representation used to execute the individuals.
-         */
-        virtual void updateArchiveOutputs(
-            const std::set<std::reference_wrapper<const Evolution::Individual>>& memberIndividuals, 
-            const Evolution::Representation& memberRepresentation);
+          LearningMode mode) const override;
     };
 }; // namespace Evaluation
 

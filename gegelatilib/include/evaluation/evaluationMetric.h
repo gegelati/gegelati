@@ -3,7 +3,7 @@
 #ifndef EVALUATION_METRICS_H
 #define EVALUATION_METRICS_H
 
-#include "learn/learningEnvironment.h"
+#include "evaluation/learningEnvironment.h"
 
 
 namespace Evolution {
@@ -42,7 +42,7 @@ namespace Evaluation {
          */
         virtual void initMetrics(
             const Evolution::Individual& individual,
-            const Learn::LearningEnvironment& learningEnvironment,
+            const Evaluation::LearningEnvironment& learningEnvironment,
             size_t seed) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -59,7 +59,7 @@ namespace Evaluation {
          */
         virtual void extractMetricsStep(
             const Evolution::Individual& individual, std::vector<double> actionValues,
-            const Learn::LearningEnvironment& learningEnvironment) {
+            const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -77,7 +77,7 @@ namespace Evaluation {
          */
         virtual void extractMetricsRun(
             const Evolution::Individual& individual, size_t nbStepsExecuted,
-            const Learn::LearningEnvironment& learningEnvironment) {
+            const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
     };

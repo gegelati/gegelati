@@ -1,13 +1,9 @@
 #include "evaluation/reinforcementAgent.h"
 
 
-std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::ReinforcementAgent::getDimensionsDataSources() const
-{
-    return this->learningEnvironment.getDataSources();
-}
 
 
-size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Evaluation::EvaluationResult> previousEval, Learn::LearningMode mode) const
+size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Evaluation::EvaluationResult> previousEval, LearningMode mode) const
 {
     /*if (mode != Learn::LearningMode::TRAINING) {
         return this->params->nbIterationsPerPolicyValidation;
@@ -31,11 +27,13 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
-    Learn::LearningMode mode) const
+    LearningMode mode) const
 {
     if(!representation.isValid(individual)){
         throw std::runtime_error("Evaluation::ReinforcementAgent::evaluateIndividual: Individual not valid for the representation");
     }
+
+    ReinforcementEnvironment& reinforcementEnvironment = dynamic_cast<ReinforcementEnvironment&>(this->learningEnvironment);
 
     // Skip the individual evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
@@ -48,13 +46,13 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(iterationNumber) ^ hasher(static_cast<int>(mode)) ^ hasher(this->seed);
-        if(mode == Learn::LearningMode::TRAINING) { 
+        if(mode == LearningMode::TRAINING) { 
             // In training, hash should take into consideration the generation number, else not (we don't want validation to change between generations).
             hash = hasher(generationNumber) ^ hash;
         }
 
         // Reset the learning Environment
-        learningEnvironment.reset(hash, mode, iterationNumber, generationNumber);
+        reinforcementEnvironment.reset(hash, mode, iterationNumber, generationNumber);
 
         // create Evaluation run for this episode with default metric for now.
         std::unique_ptr<EvaluationRun> evaluationRun = std::move(this->createEvaluationRun());
@@ -65,13 +63,13 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         }
 
         uint64_t nbActions = 0;
-        while (!learningEnvironment.isTerminal() &&
+        while (!reinforcementEnvironment.isTerminal() &&
                nbActions < this->params->maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
                 representation.executeIndividual(individual, learningEnvironment.getDataSources());
             // Do it
-            learningEnvironment.doActions(actionsID);
+            reinforcementEnvironment.doActions(actionsID);
             // Count actions
             nbActions++;
 
@@ -92,15 +90,3 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
 }
 
 
-
-void Evaluation::ReinforcementAgent::evaluateIndividuals(
-    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-    const Evolution::Representation& representation,
-    uint64_t generationNumber,
-    Learn::LearningMode mode) const
-{
-    // Evaluate the individuals and insert the results
-    for(const Evolution::Individual& indiv: individuals){
-        this->evaluateIndividual(indiv, representation, generationNumber, mode);        
-    }
-}

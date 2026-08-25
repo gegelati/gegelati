@@ -1,53 +1,36 @@
 #include "evaluation/archiveEvalAgent.h"
 
-void Evaluation::ArchiveEvalAgent::setDimensionDataSource(std::vector<std::reference_wrapper<const Data::DataHandler>> dHandler)
-{
-    // Store a copy of data handlers.
-    this->inputDimensions.clear();
-    for (std::reference_wrapper<const Data::DataHandler> dh :
-            dHandler) {
-        Data::DataHandler* dhCopy = dh.get().clone();
-        this->inputDimensions.push_back(*dhCopy);
-    }
-}
-
-std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::ArchiveEvalAgent::getDimensionsDataSources() const
-{
-    return this->inputDimensions;
-}
-
 
 void Evaluation::ArchiveEvalAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
-    Learn::LearningMode mode) const
+    LearningMode mode) const
 {
     if(!representation.isValid(individual)){
         throw std::runtime_error("Evaluation::ArchiveEvalAgent::evaluateIndividual: Individual not valid for the representation");
     }
 
 
+    Evaluation::ArchiveEnvironment& archive = dynamic_cast<Evaluation::ArchiveEnvironment&>(this->learningEnvironment);
     // Create a list with all individual IDs.
-    std::set<size_t> currentIndenticalIndivID;
-    for(const ArchiveRecording& record : this->archive.begin()->second) {
-        currentIndenticalIndivID.emplace(record.individualID);
-    }
+    std::set<size_t> currentIndenticalIndivID = archive.getCurrentIDs();
 
 
     // For each pair input/outputs in the archive, compare the current individual output to the outputs of every individuals recorded.
-    for (const auto& pair : this->archive) {
+    for (size_t idx = 0; idx < archive.getCurrentSize(); idx++) {
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>& input = archive.getInput(idx);
         // Get the outputs
         double outputs =
-            representation.executeIndividual(individual, pair.first).at(0);
+            representation.executeIndividual(individual, input).at(0);
 
-        for (const ArchiveRecording& recording: pair.second) {
-            // Execute only if the id is still in the set of possible identical IDs.
-            auto it = currentIndenticalIndivID.find(recording.individualID);
-            if(it != currentIndenticalIndivID.end()) {    
-                if(outputs != recording.result) {
-                    currentIndenticalIndivID.erase(it);
-                }
+        
+        // Execute only if the id is still in the set of possible identical IDs.
+        for (auto it=currentIndenticalIndivID.begin(); it!=currentIndenticalIndivID.end();) {
+            if(outputs != archive.getOutput(idx, *it)) {
+                it = currentIndenticalIndivID.erase(it);
+            } else {
+                it++;
             }
         }
 
@@ -69,22 +52,17 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividual(
 
 
 
+
+
 void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
     const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
     const Evolution::Representation& representation,
     uint64_t generationNumber,
-    Learn::LearningMode mode) const
+    LearningMode mode) const
 {
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>>
-        results;
-
-    // Check that all input are recorded the same amout.
-    size_t nbRecording = this->archive.begin()->second.size();
-    for(const auto& pair: this->archive) {
-        if(pair.second.size() != nbRecording) {
-            throw std::runtime_error("Evaluation::ArchiveEvalAgent::evaluateIndividuals: Number of output recording per input is not constant");
-        }
-    }
+    Evaluation::ArchiveEnvironment& archive = dynamic_cast<Evaluation::ArchiveEnvironment&>(this->learningEnvironment);
+    archive.updateArchiveInputs();
+    archive.updateArchiveOutputs(representation);
 
     // Evaluate the individuals
     for(const Evolution::Individual& indiv: individuals){
@@ -94,69 +72,3 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
     }
 }
 
-void Evaluation::ArchiveEvalAgent::updateArchiveInputs(std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals)
-{
-    std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> inputsExtracted;
-
-    // First get all archiveMetric input measured.
-    // Disgusting code!
-    for(const Evolution::Individual& teams: teamIndividuals) {
-        for(const auto& pairRun: teams.getEvaluationResult().getEvaluationRuns()) {
-            for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: pairRun.second->getMetrics()) {
-                if(dynamic_cast<const Evaluation::ArchiveMetric*>(metric.get()) != nullptr) {
-                    const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>& localInputs = 
-                        (dynamic_cast<const Evaluation::ArchiveMetric*>(metric.get()))->getInputsExtracted();
-
-                    inputsExtracted.insert(localInputs.begin(), localInputs.end());
-                }
-            }
-        }
-    }
-    // Clear archive //TODO: for now it removes everything at each generation.
-    this->archive.clear();
-
-    for(size_t idx = 0; idx < this->archiveSize && !inputsExtracted.empty(); idx++) {
-        // Select random inputs.
-        auto it = inputsExtracted.begin();
-        std::advance(it, rng.getUnsignedInt64(0, inputsExtracted.size() - 1));
-        
-        // Store a copy of data handlers.
-        std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dHandlersCpy;
-        for (std::reference_wrapper<const Data::DataHandler> dh :
-                it->second) {
-            Data::DataHandler* dhCopy = dh.get().clone();
-            dHandlersCpy.push_back(*dhCopy);
-        }
-
-
-        std::vector<Evaluation::ArchiveRecording> emptyRecord;
-        this->archive.push_back({std::move(dHandlersCpy), std::move(emptyRecord)});
-        inputsExtracted.erase(it);
-    }
-}
-
-void Evaluation::ArchiveEvalAgent::updateArchiveOutputs(
-    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-    const Evolution::Representation& representation)
-{
-    for(const Evolution::Individual& individual: individuals) {
-        if(!representation.isValid(individual)){
-            throw std::runtime_error("Evaluation::ArchiveEvalAgent::updateArchiveOutputs: Individual not valid for the representation");
-        }
-    }
-
-    for(auto& pair: this->archive) {
-
-        // Clear the current result
-        pair.second.clear();
-
-        // Execute each individual (could be optimized)
-        for(const Evolution::Individual& individual: individuals) {
-            pair.second.push_back(ArchiveRecording{
-                individual.getIndividualID(),
-                representation.executeIndividual(individual, pair.first).at(0)
-            });
-        };
-    }
-}

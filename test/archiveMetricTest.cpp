@@ -46,14 +46,13 @@
 #include "evolution/individual.h"
 
 // Create a fake LearningEnvironment for testing purpose.
-class FakeLearningEnvironment : public Learn::LearningEnvironment
+class FakeLearningEnvironment : public Evaluation::LearningEnvironment
 {
     Data::PrimitiveTypeArray<int> dataInt;
     Data::PrimitiveTypeArray<double> dataDouble;
 
   public:
     FakeLearningEnvironment() : LearningEnvironment(1), dataInt(1), dataDouble(1) {};
-    void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber, uint64_t generationNumber) override{};
     
     std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() const override
     {
@@ -70,7 +69,6 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
     }
 
     double getScore() const override {return 0.0;}
-    bool isTerminal() const override {return false;}
 };
 
 

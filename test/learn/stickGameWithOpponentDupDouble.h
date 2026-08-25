@@ -40,13 +40,13 @@
 #include <random>
 
 #include "data/primitiveTypeArray.h"
-#include "learn/learningEnvironment.h"
+#include "evaluation/reinforcementEnvironment.h"
 #include "mutator/rng.h"
 
 /**
  * Play the stick game against a random player
  */
-class StickGameWithOpponentD : public Learn::LearningEnvironment
+class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
@@ -71,7 +71,7 @@ class StickGameWithOpponentD : public Learn::LearningEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false}
+        : Evaluation::ReinforcementEnvironment(3), remainingSticks(1), hints(3), win{false}
     {
         this->reset(0);
         // Set hints
@@ -94,7 +94,7 @@ class StickGameWithOpponentD : public Learn::LearningEnvironment
 
     // Inherited via LearningEnvironment
     virtual void reset(size_t seed = 0,
-                       Learn::LearningMode mode = Learn::LearningMode::TRAINING,
+                       Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING,
                        uint16_t iterationNumber = 0,
                        uint64_t generationNumber = 0) override;
 

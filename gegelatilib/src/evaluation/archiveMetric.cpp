@@ -37,14 +37,14 @@ const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandle
 
 void Evaluation::ArchiveMetric::initMetrics(
     const Evolution::Individual& individual,
-    const Learn::LearningEnvironment& learningEnvironment,
+    const Evaluation::LearningEnvironment& learningEnvironment,
     size_t seed) {
     rng.setSeed(seed);
 };
 
 void Evaluation::ArchiveMetric::extractMetricsStep(
     const Evolution::Individual& individual, std::vector<double> actionValues,
-    const Learn::LearningEnvironment& learningEnvironment)
+    const Evaluation::LearningEnvironment& learningEnvironment)
 {
     
     if(this->rng.getDouble(0.0, 1.0) < this->extractionProbability) {

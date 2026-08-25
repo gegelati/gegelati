@@ -75,7 +75,7 @@ namespace Evaluation {
          */
         virtual void initMetrics(
             const Evolution::Individual& individual,
-            const Learn::LearningEnvironment& learningEnvironment,
+            const Evaluation::LearningEnvironment& learningEnvironment,
             size_t seed) override;
 
         /**
@@ -92,7 +92,7 @@ namespace Evaluation {
          */
         virtual void extractMetricsStep(
             const Evolution::Individual& individual, std::vector<double> actionValues,
-            const Learn::LearningEnvironment& learningEnvironment) override;
+            const Evaluation::LearningEnvironment& learningEnvironment) override;
     };
 
 
