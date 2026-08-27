@@ -205,6 +205,11 @@ namespace Data {
                                            const size_t address) const override;
 
         /// Inherited from DataHandler
+        virtual void setDataAt(const std::type_info& type,
+                       const size_t address,
+                       const UntypedSharedPtr& value) override;
+
+        /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
 
@@ -359,8 +364,35 @@ namespace Data {
 
         // Create the UntypedSharedPtr
         UntypedSharedPtr result{
-            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
+            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array),
+            DataShape{arraySize}};
         return result;
+    }
+
+    template <class T>
+    inline void ArrayWrapper<T>::setDataAt(
+        const std::type_info& type, const size_t address,
+        const UntypedSharedPtr& value)
+    {
+        if (this->containerPtr == nullptr) {
+            throw std::runtime_error("Null pointer access.");
+        }
+
+        this->checkAddressAndType(type, address);
+        if (type == typeid(T)) {
+            this->containerPtr->at(address) =
+                *value.getSharedPointer<const T>();
+        }
+        else {
+            const size_t arraySize =
+                this->nbElements - this->getAddressSpace(type) + 1;
+            const auto source = value.getSharedPointer<const T[]>();
+            for (size_t idx = 0; idx < arraySize; idx++) {
+                this->containerPtr->at(address + idx) = source.get()[idx];
+            }
+        }
+
+        this->invalidateCachedHash();
     }
 
     template <class T> size_t ArrayWrapper<T>::getLargestAddressSpace() const

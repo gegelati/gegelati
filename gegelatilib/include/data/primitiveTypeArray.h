@@ -60,6 +60,8 @@ namespace Data {
         std::vector<T> data;
 
       public:
+                using ArrayWrapper<T>::setDataAt;
+
         /**
          *  \brief Constructor for the PrimitiveTypeArray class.
          *

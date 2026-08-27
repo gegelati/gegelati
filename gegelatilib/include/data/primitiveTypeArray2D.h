@@ -74,6 +74,8 @@ namespace Data {
         std::vector<T> data;
 
       public:
+            using Array2DWrapper<T>::setDataAt;
+
         /**
          * \brief Constructor for the 2D array.
          *
@@ -120,6 +122,12 @@ namespace Data {
          */
         void setDataAt(const std::type_info& type, const size_t address,
                        const T& value);
+
+        void setDataAt(const std::type_info& type, const size_t address,
+                       const UntypedSharedPtr& value)
+        {
+            Array2DWrapper<T>::setDataAt(type, address, value);
+        }
         /**
          * \brief Assignement Operator for PrimitiveTypeArray2D<T>
          *

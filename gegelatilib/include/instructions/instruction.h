@@ -196,6 +196,21 @@ namespace Instructions {
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
+        /**
+         * Execute the instruction and return a typed, possibly shaped result.
+         *
+         * Existing instructions that implement the legacy double-returning
+         * execute() method are adapted to a scalar double result. New
+         * instructions can override this method to return an int, float,
+         * double, or shaped array through Data::UntypedSharedPtr.
+         */
+        virtual Data::UntypedSharedPtr executeResult(
+          const std::vector<Data::UntypedSharedPtr>& args) const
+        {
+          const double result = this->execute(args);
+            return Data::UntypedSharedPtr{new double(result)};
+        }
+
       protected:
 #ifndef CODE_GENERATION
         /**

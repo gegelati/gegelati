@@ -36,6 +36,7 @@
  */
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "data/dataHandler.h"
 
@@ -56,6 +57,13 @@ size_t Data::DataHandler::getHash() const
     }
 
     return this->cachedHash;
+}
+
+void Data::DataHandler::setDataAt(const std::type_info&,
+                                  const size_t,
+                                  const Data::UntypedSharedPtr&)
+{
+    throw std::runtime_error("This DataHandler is read-only.");
 }
 
 uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,

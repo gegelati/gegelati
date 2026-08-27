@@ -1,45 +1,9 @@
-/**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
- *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
- * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
- *
- * GEGELATI is an open-source reinforcement learning framework for training
- * artificial intelligence based on Tangled Program Graphs (TPGs).
- *
- * This software is governed by the CeCILL-C license under French law and
- * abiding by the rules of distribution of free software. You can use,
- * modify and/ or redistribute the software under the terms of the CeCILL-C
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty and the software's author, the holder of the
- * economic rights, and the successive licensors have only limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading, using, modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean that it is complicated to manipulate, and that also
- * therefore means that it is reserved for developers and experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and, more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-C license and that you accept its terms.
- */
-
 #ifndef LAMBDA_INSTRUCTION_H
 #define LAMBDA_INSTRUCTION_H
 
 #include <functional>
+#include <stdexcept>
+#include <type_traits>
 #include <typeinfo>
 
 #include "data/untypedSharedPtr.h"
@@ -47,178 +11,189 @@
 
 namespace Instructions {
 
-    /**
-     * \brief Template instruction for simplifying the creation of an
-     * Instruction from a c++ lambda function.
-     *
-     * Template parameters First and Rest can be any primitive type, class or
-     * const c-style 1D and 2D array.
-     *
-     * Each template parameter corresponds to an argument of the function given
-     * to the LambdaInstruction constructor, specifying its type.
-     */
     template <typename First, typename... Rest>
-    class LambdaInstruction : public Instructions::Instruction
+    class LambdaInstruction : public Instruction
     {
+      protected:
+        const std::function<double(const First, const Rest...)> func;
+        std::function<Data::UntypedSharedPtr(const First, const Rest...)>
+            resultFunc;
+
+      public:
+        LambdaInstruction() = delete;
 
 #ifdef CODE_GENERATION
-      public:
-        /**
-         * \brief Constructor of the class LambdaInstruction to create a
-         * printable Instruction.
-         *
-         * \param[in] printTemplate std::string use at the generation. Check
-         * Instructions::Instruction for more details.
-         * \param[in] function the c++ std::function that will be executed for
-         * this Instruction. Check the constructor with only the function as
-         * parameter for more details.
-         */
         LambdaInstruction(std::function<double(First, Rest...)> function,
                           const std::string& printTemplate = "")
-            : Instructions::Instruction(printTemplate), func{function}
+            : Instruction(printTemplate), func{function}
         {
             setUpOperand();
-        };
-
-#endif // CODE_GENERATION
-      protected:
-        /**
-         * \brief Function executed for this Instruction.
-         */
-        const std::function<double(const First, const Rest...)> func;
-
-      public:
-        /**
-         * \brief delete the default constructor.
-         */
-        LambdaInstruction() = delete;
-#ifndef CODE_GENERATION
-        /**
-         * \brief Constructor for the LambdaInstruction.
-         *
-         * \param[in] function the c++ std::function that will be executed for
-         * this Instruction. The function must have the same types in its
-         * argument list as specified by the template parameters. (checked at
-         * compile time)
-         */
+        }
+#else
         LambdaInstruction(std::function<double(First, Rest...)> function)
-            : Instructions::Instruction(), func{function}
+            : Instruction(), func{function}
         {
             setUpOperand();
-        };
-#endif // CODE_GENERATION
-       /// Inherited from Instruction
-        virtual bool checkOperandTypes(
+        }
+#endif
+
+        template <typename Function,
+                  typename = std::enable_if_t<
+                      std::is_invocable_v<Function, First, Rest...>>>
+        LambdaInstruction(Function function)
+#ifdef CODE_GENERATION
+            : Instruction(""),
+#else
+            : Instruction(),
+#endif
+              func{[function](const First first, const Rest... rest) {
+                  using Return = std::invoke_result_t<Function, First, Rest...>;
+                  if constexpr (std::is_convertible_v<Return, double>) {
+                      return static_cast<double>(function(first, rest...));
+                  }
+                  return 0.0;
+              }},
+              resultFunc{[function](const First first, const Rest... rest) {
+                  using Return = std::invoke_result_t<Function, First, Rest...>;
+                  if constexpr (std::is_same_v<std::decay_t<Return>,
+                                               Data::UntypedSharedPtr>) {
+                      return function(first, rest...);
+                  }
+                  else {
+                      using StoredReturn = std::decay_t<Return>;
+                      return Data::UntypedSharedPtr{
+                          new StoredReturn(function(first, rest...))};
+                  }
+              }}
+        {
+            setUpOperand();
+        }
+
+        bool checkOperandTypes(
             const std::vector<Data::UntypedSharedPtr>& arguments) const override
         {
             if (arguments.size() != this->operandTypes.size()) {
                 return false;
             }
-
-            // List of expected types
             const std::vector<std::reference_wrapper<const std::type_info>>
                 expectedTypes{
-                    // First
                     (!std::is_array<First>::value)
                         ? typeid(First)
                         : typeid(std::remove_all_extents_t<First>[]),
                     (!std::is_array<Rest>::value)
                         ? typeid(Rest)
                         : typeid(std::remove_all_extents_t<Rest>[])...};
-
-            for (auto idx = 0; idx < arguments.size(); idx++) {
-                // Argument Type
-                const std::type_info& argType = arguments.at(idx).getType();
-                if (argType != expectedTypes.at(idx).get()) {
+            for (size_t index = 0; index < arguments.size(); index++) {
+                if (arguments.at(index).getType() !=
+                    expectedTypes.at(index).get()) {
                     return false;
                 }
             }
-
             return true;
-        };
+        }
 
-        /// Inherited from Instruction
-        virtual double execute(
+        double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override
         {
-
 #ifndef NDEBUG
-            if (Instruction::execute(args) != 1.0) {
+            if (!this->checkOperandTypes(args)) {
                 return 0.0;
             }
 #endif
-            double result =
-                doExecution(args, std::index_sequence_for<Rest...>{});
-
-            return result;
-        };
-
-      private:
-        /**
-         * \brief Template function to handle variadic parameter pack expansion.
-         *
-         * In order to call the LambdaInstruction::func function, the arguments
-         * given as a std::vector to the execute method must be expanded using
-         * the template parameter expansion pack. In order to index arguments in
-         * args, a second layer of template function is needed to expand an
-         * std::index_sequence making it possible to index args at compile time.
-         * This is the purpose of this method.
-         *
-         * \param[in] args The argument for the func execution, stored in an
-         * std::vector.
-         * \tparam I the std::index_sequence used to access args.
-         */
-        template <size_t... I>
-        double doExecution(const std::vector<Data::UntypedSharedPtr>& args,
-                           std::index_sequence<I...>) const
-        {
-            return this->func(
-                getDataFromUntypedSharedPtr<First>(args, 0),
-                getDataFromUntypedSharedPtr<Rest>(args, I + 1)...);
+            return doExecution(args, std::index_sequence_for<Rest...>{});
         }
 
-        /**
-         * \brief Function to retrieve the shared pointer from any datatype in
-         * the execute method.
-         *
-         * An inline lambda expression could be used in the execute method, with
-         * a variadic parameter pack expansion. Unfortunately not supported by
-         * GCC7.5
-         *
-         * Template parameter T is the Type of the retrieved argument.
-         *
-         * \param[in] args the UntypedSharedPtr of all arguments.
-         * \param[in] idx the current index in the args list.
-         * \return the appropriate argument for this->func.
-         */
+        Data::UntypedSharedPtr executeResult(
+            const std::vector<Data::UntypedSharedPtr>& args) const override
+        {
+#ifndef NDEBUG
+            if (!this->checkOperandTypes(args)) {
+                return Data::UntypedSharedPtr{new double(0.0)};
+            }
+#endif
+            return doResultExecution(args,
+                                     std::index_sequence_for<Rest...>{});
+        }
+
+      private:
+        template <size_t... Index>
+        double doExecution(const std::vector<Data::UntypedSharedPtr>& args,
+                           std::index_sequence<Index...>) const
+        {
+            return this->func(
+                getData<First>(args, 0), getData<Rest>(args, Index + 1)...);
+        }
+
+        template <size_t... Index>
+        Data::UntypedSharedPtr doResultExecution(
+            const std::vector<Data::UntypedSharedPtr>& args,
+            std::index_sequence<Index...>) const
+        {
+            return this->resultFunc(
+                getData<First>(args, 0), getData<Rest>(args, Index + 1)...);
+        }
+
         template <typename T,
                   typename MINUS_EXTENT = typename std::remove_extent<T>::type,
                   typename RETURN_TYPE = typename std::conditional<
                       !std::is_array<MINUS_EXTENT>::value,
                       typename std::remove_all_extents<T>::type*,
                       MINUS_EXTENT*>::type>
-        constexpr auto getDataFromUntypedSharedPtr(
-            const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const
+        static auto getData(const std::vector<Data::UntypedSharedPtr>& args,
+                            size_t index)
         {
-            if constexpr (!std::is_array<T>::value) {
-                return *(args.at(idx).getSharedPointer<const T>());
+            if constexpr (std::is_array<T>::value) {
+                auto returnedPtr = args.at(index)
+                    .template getSharedPointer<
+                        const std::remove_all_extents_t<T>[]>();
+                return (RETURN_TYPE)returnedPtr.get();
             }
             else {
-                auto returnedPtr =
-                    args.at(idx)
-                        .getSharedPointer<
-                            const std::remove_all_extents_t<T>[]>();
-                return (RETURN_TYPE)returnedPtr.get();
-            };
-        };
+                return *args.at(index).template getSharedPointer<const T>();
+            }
+        }
 
         void setUpOperand()
         {
             this->operandTypes.push_back(typeid(First));
-            // Fold expression to push all other types
             (this->operandTypes.push_back(typeid(Rest)), ...);
         }
     };
-}; // namespace Instructions
+
+    /** LambdaInstruction variant with an explicitly declared output type. */
+    template <typename Output, typename First, typename... Rest>
+    class TypedLambdaInstruction : public LambdaInstruction<First, Rest...>
+    {
+        static_assert(
+            std::is_fundamental<std::remove_all_extents_t<Output>>::value,
+            "TypedLambdaInstruction output must contain a fundamental type.");
+
+      public:
+        template <typename Function>
+        explicit TypedLambdaInstruction(Function function)
+            : LambdaInstruction<First, Rest...>(function)
+        {
+        }
+
+        Data::UntypedSharedPtr executeResult(
+            const std::vector<Data::UntypedSharedPtr>& args) const override
+        {
+            Data::UntypedSharedPtr result =
+                LambdaInstruction<First, Rest...>::executeResult(args);
+            if constexpr (!std::is_array<Output>::value) {
+                if (result.getType() != typeid(Output)) {
+                    throw std::invalid_argument(
+                        "Lambda result type does not match declared output.");
+                }
+            }
+            else if (result.getRank() == 0) {
+                throw std::invalid_argument(
+                    "Lambda array result has no declared shape.");
+            }
+            return result;
+        }
+    };
+
+} // namespace Instructions
 
 #endif

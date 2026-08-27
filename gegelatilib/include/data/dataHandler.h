@@ -218,6 +218,16 @@ namespace Data {
                                            const size_t address) const = 0;
 
         /**
+         * \brief Write a type-erased value at the given address.
+         *
+         * The default implementation keeps custom read-only DataHandlers
+         * source-compatible. Writable handlers override this method.
+         */
+        virtual void setDataAt(const std::type_info& type,
+                   const size_t address,
+                   const UntypedSharedPtr& value);
+
+        /**
          * \brief Get the set of addresses actually used when getting the given
          * type of data, at the given address.
          *

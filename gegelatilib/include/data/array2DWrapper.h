@@ -146,6 +146,11 @@ namespace Data {
         virtual UntypedSharedPtr getDataAt(const std::type_info& type,
                                            const size_t address) const override;
 
+        /// Inherited from DataHandler
+        virtual void setDataAt(const std::type_info& type,
+                       const size_t address,
+                       const UntypedSharedPtr& value) override;
+
 #ifdef CODE_GENERATION
         /// Inherited from DataHandler
         virtual std::vector<size_t> getDimensionsSize() const override;
@@ -324,8 +329,46 @@ namespace Data {
 
         // Create the UntypedSharedPtr
         UntypedSharedPtr result{
-            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
+            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array),
+            arrayHeight == 1 ? DataShape{arrayWidth}
+                             : DataShape{arrayHeight, arrayWidth}};
         return result;
+    }
+
+    template <typename T>
+    void Array2DWrapper<T>::setDataAt(const std::type_info& type,
+                                      const size_t address,
+                                      const UntypedSharedPtr& value)
+    {
+        if (this->containerPtr == nullptr) {
+            throw std::runtime_error("Null pointer access.");
+        }
+
+        this->checkAddressAndType(type, address);
+        if (type == typeid(T)) {
+            this->containerPtr->at(address) =
+                *value.getSharedPointer<const T>();
+        }
+        else {
+            size_t arrayHeight = 0;
+            size_t arrayWidth = 0;
+            this->getAddressSpace(type, &arrayHeight, &arrayWidth);
+            const auto source = value.getSharedPointer<const T[]>();
+            const size_t addressH =
+                address / (this->width - arrayWidth + 1);
+            const size_t addressW =
+                address % (this->width - arrayWidth + 1);
+            const size_t addressSrc = addressH * this->width + addressW;
+            size_t sourceIndex = 0;
+            for (size_t row = 0; row < arrayHeight; row++) {
+                for (size_t column = 0; column < arrayWidth; column++) {
+                    this->containerPtr->at(addressSrc + row * this->width +
+                                           column) = source.get()[sourceIndex++];
+                }
+            }
+        }
+
+        this->invalidateCachedHash();
     }
 
 #ifdef CODE_GENERATION
