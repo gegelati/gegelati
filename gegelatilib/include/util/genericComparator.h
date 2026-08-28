@@ -72,6 +72,14 @@ struct UniqueLess
     {
         return *a < *b;
     }
+
+    /**
+     * \brief Compare two raw pointers by comparing pointed to values.
+     */
+    bool operator()(const T* a, const T* b) const
+    {
+        return *a < *b;
+    }
 };
 
 #endif

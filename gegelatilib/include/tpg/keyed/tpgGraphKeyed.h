@@ -96,9 +96,13 @@ namespace TPG {
          * edges. If not provided, an empty set is used, meaning that only keys
          * collected during traversal will be considered.
          * @return a Pair of sets containing the TPGTeamKeyed and TPGEdgeKeyed
-         * of the subtree.
+         * of the subtree. The sets use UniqueLess comparators
+         * (based on vertex/edge ID) rather than the default pointer comparator,
+         * to ensure a deterministic iteration order across runs, regardless of
+         * memory allocation addresses.
          */
-        std::pair<std::set<const TPGTeamKeyed*>, std::set<const TPGEdgeKeyed*>>
+        std::pair<std::set<const TPGTeamKeyed*, UniqueLess<TPG::TPGTeamKeyed>>,
+                  std::set<const TPGEdgeKeyed*, UniqueLess<TPG::TPGEdgeKeyed>>>
         getSubtree(const TPGVertex& root, std::set<uint64_t> keys = {}) const;
 
       protected:

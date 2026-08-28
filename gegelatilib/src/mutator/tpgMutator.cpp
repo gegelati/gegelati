@@ -992,8 +992,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                     *context->teamsClonable.at(clonedRootIndex));
 
             // Get subtree of the cloned root
-            std::pair<std::set<const TPG::TPGTeamKeyed*>,
-                      std::set<const TPG::TPGEdgeKeyed*>>
+            std::pair<std::set<const TPG::TPGTeamKeyed*,
+                               UniqueLess<TPG::TPGTeamKeyed>>,
+                      std::set<const TPG::TPGEdgeKeyed*,
+                               UniqueLess<TPG::TPGEdgeKeyed>>>
                 subtree =
                     dynamic_cast<const TPG::TPGGraphKeyed&>(graph).getSubtree(
                         newRoot);

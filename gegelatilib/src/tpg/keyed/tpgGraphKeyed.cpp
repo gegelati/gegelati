@@ -188,14 +188,16 @@ void TPG::TPGGraphKeyed::addNewEdgeLock(const TPG::TPGEdgeKeyed& edge,
     rawPtr->addLock(newLock);
 }
 
-std::pair<std::set<const TPG::TPGTeamKeyed*>,
-          std::set<const TPG::TPGEdgeKeyed*>>
+std::pair<std::set<const TPG::TPGTeamKeyed*, UniqueLess<TPG::TPGTeamKeyed>>,
+          std::set<const TPG::TPGEdgeKeyed*, UniqueLess<TPG::TPGEdgeKeyed>>>
 TPG::TPGGraphKeyed::getSubtree(const TPGVertex& root,
                                std::set<uint64_t> keys) const
 {
     // Create the ordered sets to store the teams and edges of the subtree
-    std::set<const TPG::TPGTeamKeyed*> subtreeTeams;
-    std::set<const TPG::TPGEdgeKeyed*> subtreeEdges;
+    std::set<const TPG::TPGTeamKeyed*, UniqueLess<TPG::TPGTeamKeyed>>
+        subtreeTeams;
+    std::set<const TPG::TPGEdgeKeyed*, UniqueLess<TPG::TPGEdgeKeyed>>
+        subtreeEdges;
 
     using Keys = std::set<uint64_t>;
     // Stack for DFS: pair of vertex pointer and keys available on the path to
