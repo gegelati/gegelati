@@ -100,6 +100,8 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
     }
     std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals = this->archiveInputPopulation.value().get().getIndividuals();
 
+    
+
     std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> inputsExtracted;
 
     // First get all archiveMetric input measured.
@@ -115,6 +117,7 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
                 }
             }
         }
+
     }
     // Clear archive //TODO: for now it removes everything at each generation.
     this->archive.clear();
@@ -143,7 +146,7 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
 void Evaluation::ArchiveEnvironment::updateArchiveOutputs(
     const Evolution::Representation& representation)
 {
-    if(!this->archiveInputPopulation.has_value()) {
+    if(!this->archiveOutputPopulation.has_value()) {
         throw std::runtime_error("Evaluation::ArchiveEvalAgent::updateArchiveOutputs: A population to get the archive output should be set when trying to update the outputs.");
     }
     std::set<std::reference_wrapper<const Evolution::Individual>> individuals(this->archiveOutputPopulation.value().get().getProtectedIndividuals());
@@ -164,7 +167,6 @@ void Evaluation::ArchiveEnvironment::updateArchiveOutputs(
             pair.second.insert({
                 individual.getIndividualID(),
                 representation.executeIndividual(individual, pair.first).at(0)
-
             });
         };
     }

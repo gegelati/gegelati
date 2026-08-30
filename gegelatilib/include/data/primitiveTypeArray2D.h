@@ -124,7 +124,7 @@ namespace Data {
                        const T& value);
 
         void setDataAt(const std::type_info& type, const size_t address,
-                       const UntypedSharedPtr& value)
+                       const DataView& value)
         {
             Array2DWrapper<T>::setDataAt(type, address, value);
         }

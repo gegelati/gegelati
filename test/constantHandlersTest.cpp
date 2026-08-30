@@ -69,7 +69,7 @@ TEST(ConstantHandlersTest, ConstantHandlerCanProvideTemplateType)
         << "ConstantHandler wrongfully say it can not provide "
            "\"Data::Constant\" "
            "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+    ASSERT_FALSE(d->canHandle(typeid(Data::DataView)))
         << "ConstantHandler wrongfully say it can provide "
            "UntypedSharedPtr data.";
     ASSERT_FALSE(d->canHandle(typeid(float)))

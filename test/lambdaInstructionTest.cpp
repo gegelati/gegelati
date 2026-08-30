@@ -1,302 +1,100 @@
-/**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
- *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
- * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
- *
- * GEGELATI is an open-source reinforcement learning framework for training
- * artificial intelligence based on Tangled Program Graphs (TPGs).
- *
- * This software is governed by the CeCILL-C license under French law and
- * abiding by the rules of distribution of free software. You can use,
- * modify and/ or redistribute the software under the terms of the CeCILL-C
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty and the software's author, the holder of the
- * economic rights, and the successive licensors have only limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading, using, modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean that it is complicated to manipulate, and that also
- * therefore means that it is reserved for developers and experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and, more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-C license and that you accept its terms.
- */
-
 #include <gtest/gtest.h>
 
 #include <array>
+#include <functional>
 
 #include "data/constant.h"
-#include "data/dataHandler.h"
-#include "data/untypedSharedPtr.h"
-#include "instructions/addPrimitiveType.h"
+#include "data/dataValue.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/set.h"
+
+#include <chrono>
+#include <cmath>
+#include <iostream>
 
 TEST(LambdaInstructionsTest, ExecutePrimitiveType)
 {
-    double a{2.6};
+    double a = 2.6;
     double b = 5.5;
-    int c = 3;
+    Instructions::LambdaInstruction<double, double> instruction(
+        [](double left, double right) { return left - right; });
 
-    std::vector<Data::UntypedSharedPtr> vect;
-    vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
-    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-
-    auto minus = [](double a, double b) { return a - b; };
-
-    Instructions::LambdaInstruction<double, double>* instruction;
-    ASSERT_NO_THROW(
-        (instruction =
-             new Instructions::LambdaInstruction<double, double>(minus)))
-        << "Constructing a new lambdaInstruction failed.";
-
-    ASSERT_EQ(instruction->execute(vect), -2.9)
-        << "Result returned by the instruction is not as expected.";
-
-    // Execute with wrong types of operands.
-    vect.pop_back();
-    vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
-#ifndef NDEBUG
-    ASSERT_EQ(instruction->execute(vect), 0.0)
-        << "Instructions executed with wrong types of operands should return "
-           "0.0";
-#else
-    ASSERT_THROW(instruction->execute(vect), std::runtime_error)
-        << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
-           "argument types should fail.";
-#endif
-
-    ASSERT_NO_THROW(delete instruction)
-        << "Destruction of the LambdaInstruction failed.";
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(a), Data::DataView::scalar(b)});
+    ASSERT_DOUBLE_EQ(result.getScalar<double>(), -2.9);
 }
 
 TEST(LambdaInstructionsTest, ExecuteConstant)
 {
-    Data::Constant a{4};
-    double b{2.6};
+    Data::Constant constant{4};
+    double value = 2.6;
+    Instructions::LambdaInstruction<Data::Constant, double> instruction(
+        [](Data::Constant lhs, double rhs) { return double(lhs) * rhs; });
 
-    int c = 3;
-
-    std::vector<Data::UntypedSharedPtr> vect;
-    vect.emplace_back(
-        &a, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
-    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-
-    auto multByConst = [](Data::Constant a, double b) { return (double)a * b; };
-
-    Instructions::LambdaInstruction<Data::Constant, double>* instruction;
-    ASSERT_NO_THROW(
-        (instruction =
-             new Instructions::LambdaInstruction<Data::Constant, double>(
-                 multByConst)))
-        << "Constructing a new lambdaInstruction failed.";
-
-    ASSERT_EQ(instruction->execute(vect), 4.0 * 2.6)
-        << "Result returned by the instruction is not as expected.";
-
-    // Execute with wrong types of operands.
-    vect.pop_back();
-    vect.pop_back();
-    vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
-    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-#ifndef NDEBUG
-    ASSERT_EQ(instruction->execute(vect), 0.0)
-        << "Instructions executed with wrong types of operands should return "
-           "0.0";
-#else
-    ASSERT_THROW(instruction->execute(vect), std::runtime_error)
-        << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
-           "argument types should fail.";
-#endif
-
-    ASSERT_NO_THROW(delete instruction)
-        << "Destruction of the LambdaInstruction failed.";
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(constant), Data::DataView::scalar(value)});
+    ASSERT_DOUBLE_EQ(result.getScalar<double>(), 4.0 * 2.6);
 }
 
-#define arrayA 1.1, 2.2, 3.3
-#define arrayB 6.5, 4.3, 2.1
 TEST(LambdaInstructionsTest, ExecuteArray)
 {
-    double arrA[3]{arrayA};
-    double arrB[3]{arrayB};
+    const double first[] = {1.1, 2.2, 3.3};
+    const double second[] = {6.5, 4.3, 2.1};
+    Instructions::LambdaInstruction<const double[3], const double[3]>
+        instruction([](const double left[3], const double right[3]) {
+            return left[0] * right[0] + left[1] * right[1] +
+                   left[2] * right[2];
+        });
 
-    std::function<double(const double[3], const double[3])> mac =
-        [](const double a[3], const double b[3]) {
-            return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-        };
-
-    // Build the instruction
-    Instructions::LambdaInstruction<const double[3], const double[3]>*
-        instruction;
-    ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<
-                         const double[3], const double[3]>(mac)));
-    ASSERT_NE(instruction, nullptr);
-
-    // Test execution
-    std::vector<Data::UntypedSharedPtr> arguments;
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[3]{arrayA}));
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[3]{arrayB}));
-    ASSERT_DOUBLE_EQ(instruction->execute(arguments), 23.54)
-        << "Result returned by the instruction is not as expected.";
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::array(first, Data::DataShape{3}),
+         Data::DataView::array(second, Data::DataShape{3})});
+    ASSERT_DOUBLE_EQ(result.getScalar<double>(), 23.54);
 }
 
-#define arrayAL1 1.1, 2.2, 3.3
-#define arrayAL2 4.4, 5.5, 6.6
-#define arrayBL1 6.5, 4.3, 2.1
-#define arrayBL2 9.8, 7.6, 5.4
 TEST(LambdaInstructionsTest, ExecuteArray2D)
 {
-    double arrA[2][3]{{arrayAL1}, {arrayAL2}};
-    double arrB[2][3]{{arrayBL1}, {arrayBL2}};
-
-    std::function<double(const double[2][3], const double[2][3])> mac =
-        [](const double a[2][3], const double b[2][3]) {
-            double res = 0.0;
-            for (auto h = 0; h < 2; h++) {
-                for (auto w = 0; w < 3; w++) {
-                    res += a[h][w] * b[h][w];
+    const double first[] = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
+    const double second[] = {6.5, 4.3, 2.1, 9.8, 7.6, 5.4};
+    Instructions::LambdaInstruction<const double[2][3], const double[2][3]>
+        instruction([](const double left[2][3], const double right[2][3]) {
+            double result = 0.0;
+            for (size_t row = 0; row < 2; ++row) {
+                for (size_t column = 0; column < 3; ++column) {
+                    result += left[row][column] * right[row][column];
                 }
             }
-            return res;
-        };
+            return result;
+        });
 
-    // Build the instruction
-    Instructions::LambdaInstruction<const double[2][3], const double[2][3]>*
-        instruction;
-    ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<
-                         const double[2][3], const double[2][3]>(mac)));
-    ASSERT_NE(instruction, nullptr);
-
-    // Test execution
-    std::vector<Data::UntypedSharedPtr> arguments;
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[6]{arrayAL1, arrayAL2}));
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[6]{arrayBL1, arrayBL2}));
-    ASSERT_EQ(instruction->execute(arguments), 144.1)
-        << "Result returned by the instruction is not as expected.";
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::array(first, Data::DataShape{2, 3}),
+         Data::DataView::array(second, Data::DataShape{2, 3})});
+    ASSERT_DOUBLE_EQ(result.getScalar<double>(), 144.1);
 }
 
 TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
 {
+    Instructions::LambdaInstruction<double, double, int> instruction(
+        [](double first, double second, int multiplier) {
+            return (first + second) * multiplier;
+        });
+    double first = 1.0;
+    double second = 1.1;
+    int multiplier = 2;
 
-    // Test with mixed primitive types
-    std::function<double(double, double, int)> func1 =
-        [](double d, double e, int i) { return (d + e) * i; };
-    Instructions::LambdaInstruction<double, double, int> instruction1(func1);
-
-    std::vector<Data::UntypedSharedPtr> vect;
-    double a = 1.0;
-    double b = 1.1;
-    int c = 2;
-
-    vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
-    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-    vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
-    ASSERT_EQ(instruction1.execute(vect), 4.2)
-        << "Result of the LambdaInstruction with heterogeneous primitive "
-           "argument types is incorrect.";
-
-    // Test with mixed primitive types and c-style array
-    std::function<double(const double[2], double, const int[1])> func2 =
-        [](const double d[2], double e, const int i[1]) {
-            return (d[1] + d[0] + e) * *i;
-        };
-    Instructions::LambdaInstruction<const double[2], double, const int[]>
-        instruction2(func2);
-
-    std::vector<Data::UntypedSharedPtr> vect2;
-    vect2.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[2]{1.0, 2.0}));
-    vect2.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-    vect2.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const int[]>>(
-            new int[1]{2}));
-
-    ASSERT_EQ(instruction2.execute(vect2), 8.2)
-        << "Result of the LambdaInstruction with heterogeneous argument types "
-           "is incorrect.";
-
-    // Test wrong number of argument detection.
-    vect2.pop_back();
-#ifndef NDEBUG
-    ASSERT_EQ(instruction2.execute(vect2), 0.0)
-        << "Result of the LambdaInstruction with wrong number of arguments "
-           "should be 0.";
-#else
-    ASSERT_THROW(instruction2.execute(vect2), std::out_of_range)
-        << "In NDEBUG mode, execution of a LambdaInstruction with wrong number "
-           "of arguments should fail.";
-#endif
-
-    // Test wrong argument type
-    vect2.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
-#ifndef NDEBUG
-    ASSERT_EQ(instruction2.execute(vect2), 0.0)
-        << "Result of the LambdaInstruction with wrong argument types should "
-           "be 0.";
-#else
-    ASSERT_THROW(instruction2.execute(vect2), std::runtime_error)
-        << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
-           "argument types should fail.";
-#endif
-}
-
-class Dummy
-{
-  public:
-    size_t val;
-    Dummy(size_t v) : val{v} {};
-};
-
-TEST(LambdaInstructionsTest, ExecuteNonPrimitiveTypes)
-{
-    // Create the instruction
-    Instructions::LambdaInstruction<Dummy> instruction(
-        [](Dummy a) -> double { return (double)a.val; });
-
-    // Prepare arguments
-    std::vector<Data::UntypedSharedPtr> arguments;
-    Dummy aVal(42);
-    arguments.emplace_back(&aVal,
-                           Data::UntypedSharedPtr::emptyDestructor<Dummy>());
-
-    // Execute it
-    ASSERT_EQ(instruction.execute(arguments), 42.0);
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(first), Data::DataView::scalar(second),
+         Data::DataView::scalar(multiplier)});
+    ASSERT_DOUBLE_EQ(result.getScalar<double>(), 4.2);
 }
 
 #ifdef CODE_GENERATION
 TEST(LambdaInstructionsTest, PrintConstructor)
 {
-    auto minus = [](double a, double b) { return a - b; };
-
-    Instructions::LambdaInstruction<double, double>* instruction;
-    ASSERT_NO_THROW(
-        (instruction = new Instructions::LambdaInstruction<double, double>(
-             minus, "$0 = $1 - $2;")))
-        << "Constructing a new lambdaInstruction with a printTemplate failed.";
-
-    delete instruction;
+    std::function<double(double, double)> minus =
+        [](double left, double right) { return left - right; };
+    Instructions::LambdaInstruction<double, double> instruction(
+        minus, "$0 = $1 - $2;");
+    SUCCEED();
 }
-#endif // CODE_GENERATION
+#endif

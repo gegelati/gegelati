@@ -16,6 +16,7 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividual(
     // Create a list with all individual IDs.
     std::set<size_t> currentIndenticalIndivID = archive.getCurrentIDs();
 
+    double tau = 1e-4;
 
     // For each pair input/outputs in the archive, compare the current individual output to the outputs of every individuals recorded.
     for (size_t idx = 0; idx < archive.getCurrentSize(); idx++) {
@@ -27,7 +28,7 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividual(
         
         // Execute only if the id is still in the set of possible identical IDs.
         for (auto it=currentIndenticalIndivID.begin(); it!=currentIndenticalIndivID.end();) {
-            if(outputs != archive.getOutput(idx, *it)) {
+            if(std::abs(outputs - archive.getOutput(idx, *it)) > tau) {
                 it = currentIndenticalIndivID.erase(it);
             } else {
                 it++;

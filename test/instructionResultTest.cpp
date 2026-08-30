@@ -1,141 +1,116 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <functional>
 #include <initializer_list>
+#include <memory>
 #include <vector>
 
-#include "data/primitiveTypeArray.h"
-#include "data/primitiveTypeArray2D.h"
+#include "data/dataValue.h"
 #include "instructions/lambdaInstruction.h"
 
 namespace {
-template <typename T>
-Data::UntypedSharedPtr makeScalar(T value)
-{
-    return Data::UntypedSharedPtr{new T(value)};
 }
 
 template <typename T>
-Data::UntypedSharedPtr makeArray(std::initializer_list<T> values,
-                                 Data::DataShape shape = Data::DataShape{1})
+Data::DataValue makeValueArray(std::initializer_list<T> values)
 {
-    T* data = new T[values.size()];
-    std::copy(values.begin(), values.end(), data);
-    return Data::UntypedSharedPtr{
-        std::make_shared<Data::UntypedSharedPtr::Model<const T[]>>(data),
-        shape};
-}
-
+    std::unique_ptr<T[]> data(new T[values.size()]);
+    std::copy(values.begin(), values.end(), data.get());
+    return Data::DataValue::array(std::move(data), values.size());
 }
 
 TEST(InstructionResultTest, InstructionCanProduceAnInteger)
 {
     Instructions::TypedLambdaInstruction<int, int, int> instruction(
         [](int left, int right) { return left * right; });
-    const std::vector<Data::UntypedSharedPtr> args{
-        makeScalar(4), makeScalar(3)};
-    const Data::UntypedSharedPtr result =
-        instruction.executeResult(args);
+    int left = 4;
+    int right = 3;
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(left), Data::DataView::scalar(right)});
 
-    EXPECT_EQ(result.getType(), typeid(int));
-    EXPECT_EQ(result.getShape(), Data::DataShape({1}));
-    EXPECT_EQ(*result.getSharedPointer<const int>(), 12);
+    EXPECT_EQ(result.type(), typeid(int));
+    EXPECT_EQ(result.shape(), Data::DataShape({1}));
+    EXPECT_EQ(result.getScalar<int>(), 12);
 }
 
-TEST(InstructionResultTest, DoubleAdditionWritesDoubleRegister)
+TEST(InstructionResultTest, TypedLambdaUsesBorrowedInputs)
 {
-    Instructions::TypedLambdaInstruction<double, double, double> instruction(
-        [](double left, double right) { return left + right; });
-    const std::vector<Data::UntypedSharedPtr> args{
-        makeScalar(1.25), makeScalar(2.75)};
-    const Data::UntypedSharedPtr result =
-        instruction.executeResult(args);
-    Data::PrimitiveTypeArray<double> registers(4);
-
-    registers.setDataAt(typeid(double), 2, result);
-
-    EXPECT_DOUBLE_EQ(
-        *registers.getDataAt(typeid(double), 2)
-             .getSharedPointer<const double>(),
-        4.0);
+    Instructions::TypedLambdaInstruction<double, int, double> instruction(
+        [](int left, double right) { return left + right; });
+    int left = 3;
+    double right = 2.75;
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(left), Data::DataView::scalar(right)});
+    EXPECT_DOUBLE_EQ(result.getScalar<double>(), 5.75);
 }
 
-TEST(InstructionResultTest, IntegerMultiplicationWritesIntRegister)
+TEST(InstructionResultTest, IntegerLambdaProducesTypedResult)
 {
     Instructions::TypedLambdaInstruction<int, int, int> instruction(
         [](int left, int right) { return left * right; });
-    const std::vector<Data::UntypedSharedPtr> args{
-        makeScalar(6), makeScalar(7)};
-    const Data::UntypedSharedPtr result =
-        instruction.executeResult(args);
-    Data::PrimitiveTypeArray<int> registers(4);
-
-    registers.setDataAt(typeid(int), 1, result);
-
-    EXPECT_EQ(*registers.getDataAt(typeid(int), 1)
-                   .getSharedPointer<const int>(),
-              42);
+    int left = 6;
+    int right = 7;
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::scalar(left), Data::DataView::scalar(right)});
+    EXPECT_EQ(result.getScalar<int>(), 42);
 }
 
-TEST(InstructionResultTest, FloatVectorMultiplicationWritesVectorRegister)
+TEST(InstructionResultTest, TypedLambdaPreservesOwnedArrayResult)
 {
     Instructions::TypedLambdaInstruction<float[4], const float[4], float>
         instruction([](const float* vector, float factor) {
-            return makeArray<float>({vector[0] * factor, vector[1] * factor,
-                                     vector[2] * factor, vector[3] * factor},
-                                    {4});
+            return Data::DataValue::array<float>(
+                std::unique_ptr<float[]>(new float[4]{vector[0] * factor,
+                                                       vector[1] * factor,
+                                                       vector[2] * factor,
+                                                       vector[3] * factor}),
+                4);
         });
-    const std::vector<Data::UntypedSharedPtr> args{
-        makeArray<float>({1.0f, 2.0f, 3.0f, 4.0f}), makeScalar(2.0f)};
-    const Data::UntypedSharedPtr result =
-        instruction.executeResult(args);
-    Data::PrimitiveTypeArray2D<float> registers(4, 7);
-
-    registers.setDataAt(typeid(float[4]), 3, result);
-    EXPECT_EQ(result.getShape(), Data::DataShape({4}));
-
-    const auto written = registers.getDataAt(typeid(float[4]), 3)
-                             .getSharedPointer<const float[]>();
-    EXPECT_FLOAT_EQ(written.get()[0], 2.0f);
-    EXPECT_FLOAT_EQ(written.get()[1], 4.0f);
-    EXPECT_FLOAT_EQ(written.get()[2], 6.0f);
-    EXPECT_FLOAT_EQ(written.get()[3], 8.0f);
-
-    const auto untouched = registers.getDataAt(typeid(float[4]), 2)
-                               .getSharedPointer<const float[]>();
-    EXPECT_FLOAT_EQ(untouched.get()[0], 0.0f);
-    EXPECT_FLOAT_EQ(untouched.get()[3], 0.0f);
+    const float input[] = {1.0f, 2.0f, 3.0f, 4.0f};
+    float factor = 2.0f;
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::array(input, Data::DataShape{4}),
+         Data::DataView::scalar(factor)});
+    const float* values = result.getArray<float>();
+    EXPECT_EQ(result.type(), typeid(float[]));
+    EXPECT_EQ(result.shape(), Data::DataShape({4}));
+    EXPECT_FLOAT_EQ(values[0], 2.0f);
+    EXPECT_FLOAT_EQ(values[3], 8.0f);
 }
 
-TEST(InstructionResultTest, UntypedSharedPtrCarriesTypeAndShape)
-{
-    Data::UntypedSharedPtr result = makeArray<double>(
-        {1.0, 2.0, 3.0, 4.0}, {2, 2});
 
-    EXPECT_EQ(result.getType(), typeid(double[]));
-    EXPECT_EQ(result.getShape(), Data::DataShape({2, 2}));
+TEST(InstructionResultTest, TypedLambdaPreservesOwnedArrayResult2)
+{
+    Instructions::TypedLambdaInstruction<int[4], const float[4], float>
+        instruction([](const float* vector, float factor) {
+            return Data::DataValue::array<int>(
+                std::unique_ptr<int[]>(new int[4]{int(vector[0] * factor),
+                                                    int(vector[1] * factor),
+                                                    int(vector[2] * factor),
+                                                    int(vector[3] * factor)}),
+                4);
+        });
+    const float input[] = {1.0f, 2.0f, 3.0f, 4.0f};
+    float factor = 2.0f;
+    const Data::DataValue result = instruction.execute(
+        {Data::DataView::array(input, Data::DataShape{4}),
+         Data::DataView::scalar(factor)});
+    const int* values = result.getArray<int>();
+    EXPECT_EQ(result.type(), typeid(int[]));
+    EXPECT_EQ(result.shape(), Data::DataShape({4}));
+    EXPECT_EQ(values[0], 2);
+    EXPECT_EQ(values[3], 8);
+
+
+    ASSERT_THROW(const float* values2 = result.getArray<float>(), std::runtime_error) << "Crash ?";
 }
 
-TEST(InstructionResultTest, ScalarRegisterTypeIsFixedByOwningArray)
+TEST(InstructionResultTest, TypedLambdaRejectsWrongScalarResultType)
 {
-    Data::PrimitiveTypeArray<double> doubleRegisters(8);
-    Data::PrimitiveTypeArray<int> intRegisters(6);
+    Instructions::TypedLambdaInstruction<int, int> instruction(
+        [](int value) { return static_cast<double>(value); });
+    int value = 3;
 
-    EXPECT_EQ(doubleRegisters.getAddressSpace(typeid(double)), 8);
-    EXPECT_EQ(doubleRegisters.getAddressSpace(typeid(int)), 0);
-    EXPECT_EQ(intRegisters.getAddressSpace(typeid(int)), 6);
-    EXPECT_EQ(intRegisters.getAddressSpace(typeid(double)), 0);
-}
-
-TEST(InstructionResultTest, VectorRegisterTypeAndShapeAreFixedByTwoDArray)
-{
-    constexpr size_t vectorLength = 4;
-    constexpr size_t registerCount = 7;
-    Data::PrimitiveTypeArray2D<float> registers(vectorLength, registerCount);
-
-    EXPECT_EQ(registers.getAddressSpace(typeid(float[vectorLength])),
-              registerCount);
-    EXPECT_EQ(registers.getAddressSpace(typeid(float[3])), registerCount * 2);
-    EXPECT_EQ(registers.getAddressSpace(typeid(double[vectorLength])), 0);
+    EXPECT_THROW(instruction.execute({Data::DataView::scalar(value)}),
+                 std::invalid_argument);
 }

@@ -65,30 +65,17 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType)
     d->resetData();
     for (int i = 0; i < size; i++) {
         const float a =
-            *(d->getDataAt(typeid(float), i).getSharedPointer<const float>());
+            d->getDataAt(typeid(float), i).getScalar<float>();
         ASSERT_EQ((float)a, 0.0f)
             << "Data at valid address and type can not be accessed.";
     }
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(float), size), std::out_of_range)
         << "Address exceeding the addressSpace should cause an exception.";
-#else
-    // No alternative test to put here.. out of range access to memory _may_
-    // happen without being detected.
-#endif
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(double), 0), std::invalid_argument)
         << "Requesting a non-handled type, even at a valid location, should "
            "cause an exception.";
-#else
-    ASSERT_THROW(
-        d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
-        std::out_of_range)
-        << "In NDEBUG mode, a pointer with invalid type will be returned when "
-           "requesting a non-handled type, even at a valid location.";
-#endif
 
     delete d;
 }
@@ -106,10 +93,9 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
 
     // Get data as arrays
     for (int i = 0; i < size - sizeArray + 1; i++) {
-        std::shared_ptr<const int> sptr =
+        const int* a =
             d->getDataAt(typeid(int[sizeArray]), i)
-                .getSharedPointer<const int[]>();
-        const int* a = (sptr.get());
+                .getArray<int>();
         ASSERT_NE(a, nullptr) << "Retrieved data is a null_ptr";
         for (int idx = 0; idx < sizeArray; idx++) {
             ASSERT_EQ(a[idx], i + idx)
@@ -118,27 +104,14 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
         }
     }
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(int[sizeArray]), size - 1),
                  std::out_of_range)
         << "Address exceeding the addressSpace should cause an exception.";
-#else
-    // No alternative test to put here.. out of range access to memory _may_
-    // happen without being detected.
-#endif
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0),
                  std::invalid_argument)
         << "Requesting a non-handled type, even at a valid location, should "
            "cause an exception.";
-#else
-    ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0)
-                     .getSharedPointer<const long[sizeArray]>(),
-                 std::out_of_range)
-        << "In NDEBUG mode, a pointer with invalid type will be returned when "
-           "requesting a non-handled type, even at a valid location.";
-#endif
 
     delete d;
 }
@@ -157,8 +130,8 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt)
         << "Setting data with valid Address and type failed.";
 
     // Check that data was indeed updated.
-    ASSERT_EQ((double)*(d->getDataAt(typeid(double), address)
-                            .getSharedPointer<const double>()),
+    ASSERT_EQ(d->getDataAt(typeid(double), address)
+                            .getScalar<double>(),
               doubleValue)
         << "Previously set data did not persist.";
 
@@ -252,8 +225,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayAssignmentOperator)
     // Check that data was successfully copied.
     for (auto idx = 0; idx < size; idx++) {
         ASSERT_EQ(
-            (int)*(
-                d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()),
+                d2->getDataAt(typeid(int), idx).getScalar<int>(),
             idx)
             << "Previously set data did not persist.";
     }

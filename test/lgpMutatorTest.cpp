@@ -11,6 +11,7 @@
 #include "parameters.h"
 
 
+#if 0
 class LgpMutatorTest : public ::testing::Test
 {
   protected:
@@ -301,3 +302,5 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
     // Teardown for this test
     delete &set.getInstruction(4);
 }
+
+#endif

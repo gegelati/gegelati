@@ -39,7 +39,7 @@
 
 void Representation::LGP::LGPExecutionEngine::executeCurrentLine()
 {
-    std::vector<Data::UntypedSharedPtr> operands;
+    std::vector<Data::DataView> operands;
 
     // Get everything needed (may throw)
     const LGPLine& line = this->getCurrentLine();
@@ -47,10 +47,9 @@ void Representation::LGP::LGPExecutionEngine::executeCurrentLine()
         this->getCurrentInstruction();
     this->fetchCurrentOperands(operands);
 
-    double result = instruction.execute(operands);
 
     this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
-                              result);
+                              instruction.execute(operands).view());
 }
 
 std::vector<double> Representation::LGP::LGPExecutionEngine::execute()
@@ -65,8 +64,8 @@ std::vector<double> Representation::LGP::LGPExecutionEngine::execute()
     std::vector<double> result;
     for(size_t idx = 0; idx < outputIndices.size(); idx++){
         // cast to primitiveType<double> to enable cast to double.
-        result.push_back(*(this->registers.getDataAt(typeid(double), outputIndices[idx])
-                 .getSharedPointer<const double>()));
+        result.push_back(this->registers.getDataAt(typeid(double), outputIndices[idx])
+                 .getScalar<double>());
     }
 
     if(this->outputs.sizeContinuous() == 0){

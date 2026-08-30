@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include "data/untypedSharedPtr.h"
+#include "data/dataValue.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -15,9 +15,7 @@ namespace Instructions {
     class LambdaInstruction : public Instruction
     {
       protected:
-        const std::function<double(const First, const Rest...)> func;
-        std::function<Data::UntypedSharedPtr(const First, const Rest...)>
-            resultFunc;
+        std::function<Data::DataValue(const First, const Rest...)> function;
 
       public:
         LambdaInstruction() = delete;
@@ -25,13 +23,19 @@ namespace Instructions {
 #ifdef CODE_GENERATION
         LambdaInstruction(std::function<double(First, Rest...)> function,
                           const std::string& printTemplate = "")
-            : Instruction(printTemplate), func{function}
+            : Instruction(printTemplate),
+              function{[function](const First first, const Rest... rest) {
+                  return Data::DataValue::scalar(function(first, rest...));
+              }}
         {
             setUpOperand();
         }
 #else
         LambdaInstruction(std::function<double(First, Rest...)> function)
-            : Instruction(), func{function}
+            : Instruction(),
+              function{[function](const First first, const Rest... rest) {
+                  return Data::DataValue::scalar(function(first, rest...));
+              }}
         {
             setUpOperand();
         }
@@ -46,23 +50,14 @@ namespace Instructions {
 #else
             : Instruction(),
 #endif
-              func{[function](const First first, const Rest... rest) {
-                  using Return = std::invoke_result_t<Function, First, Rest...>;
-                  if constexpr (std::is_convertible_v<Return, double>) {
-                      return static_cast<double>(function(first, rest...));
-                  }
-                  return 0.0;
-              }},
-              resultFunc{[function](const First first, const Rest... rest) {
-                  using Return = std::invoke_result_t<Function, First, Rest...>;
-                  if constexpr (std::is_same_v<std::decay_t<Return>,
-                                               Data::UntypedSharedPtr>) {
+              function{[function](const First first, const Rest... rest) {
+                  using Return =
+                      std::decay_t<std::invoke_result_t<Function, First, Rest...>>;
+                  if constexpr (std::is_same_v<Return, Data::DataValue>) {
                       return function(first, rest...);
                   }
                   else {
-                      using StoredReturn = std::decay_t<Return>;
-                      return Data::UntypedSharedPtr{
-                          new StoredReturn(function(first, rest...))};
+                      return Data::DataValue::scalar(function(first, rest...));
                   }
               }}
         {
@@ -70,97 +65,70 @@ namespace Instructions {
         }
 
         bool checkOperandTypes(
-            const std::vector<Data::UntypedSharedPtr>& arguments) const override
+            const std::vector<Data::DataView>& arguments) const override
         {
             if (arguments.size() != this->operandTypes.size()) {
                 return false;
             }
-            const std::vector<std::reference_wrapper<const std::type_info>>
-                expectedTypes{
-                    (!std::is_array<First>::value)
-                        ? typeid(First)
-                        : typeid(std::remove_all_extents_t<First>[]),
-                    (!std::is_array<Rest>::value)
-                        ? typeid(Rest)
-                        : typeid(std::remove_all_extents_t<Rest>[])...};
             for (size_t index = 0; index < arguments.size(); index++) {
-                if (arguments.at(index).getType() !=
-                    expectedTypes.at(index).get()) {
+                if (arguments.at(index).type() !=
+                    this->operandTypes.at(index).get()) {
                     return false;
                 }
             }
             return true;
         }
 
-        double execute(
-            const std::vector<Data::UntypedSharedPtr>& args) const override
+        Data::DataValue execute(
+            const std::vector<Data::DataView>& args) const override
         {
-#ifndef NDEBUG
             if (!this->checkOperandTypes(args)) {
-                return 0.0;
+                throw std::invalid_argument("Instruction operand type mismatch.");
             }
-#endif
             return doExecution(args, std::index_sequence_for<Rest...>{});
-        }
-
-        Data::UntypedSharedPtr executeResult(
-            const std::vector<Data::UntypedSharedPtr>& args) const override
-        {
-#ifndef NDEBUG
-            if (!this->checkOperandTypes(args)) {
-                return Data::UntypedSharedPtr{new double(0.0)};
-            }
-#endif
-            return doResultExecution(args,
-                                     std::index_sequence_for<Rest...>{});
         }
 
       private:
         template <size_t... Index>
-        double doExecution(const std::vector<Data::UntypedSharedPtr>& args,
-                           std::index_sequence<Index...>) const
-        {
-            return this->func(
-                getData<First>(args, 0), getData<Rest>(args, Index + 1)...);
-        }
-
-        template <size_t... Index>
-        Data::UntypedSharedPtr doResultExecution(
-            const std::vector<Data::UntypedSharedPtr>& args,
+        Data::DataValue doExecution(
+            const std::vector<Data::DataView>& args,
             std::index_sequence<Index...>) const
         {
-            return this->resultFunc(
-                getData<First>(args, 0), getData<Rest>(args, Index + 1)...);
+            return this->function(getData<First>(args, 0),
+                                  getData<Rest>(args, Index + 1)...);
         }
 
-        template <typename T,
-                  typename MINUS_EXTENT = typename std::remove_extent<T>::type,
-                  typename RETURN_TYPE = typename std::conditional<
-                      !std::is_array<MINUS_EXTENT>::value,
-                      typename std::remove_all_extents<T>::type*,
-                      MINUS_EXTENT*>::type>
-        static auto getData(const std::vector<Data::UntypedSharedPtr>& args,
+        template <typename T>
+        static auto getData(const std::vector<Data::DataView>& args,
                             size_t index)
         {
             if constexpr (std::is_array<T>::value) {
-                auto returnedPtr = args.at(index)
-                    .template getSharedPointer<
-                        const std::remove_all_extents_t<T>[]>();
-                return (RETURN_TYPE)returnedPtr.get();
+                using RowType = std::remove_extent_t<T>;
+                return reinterpret_cast<const RowType*>(args.at(index).data());
             }
             else {
-                return *args.at(index).template getSharedPointer<const T>();
+                return args.at(index).template getScalar<
+                    std::remove_const_t<T>>();
+            }
+        }
+
+        template <typename T> static const std::type_info& operandType()
+        {
+            if constexpr (std::is_array<T>::value) {
+                return typeid(std::remove_all_extents_t<T>[]);
+            }
+            else {
+                return typeid(T);
             }
         }
 
         void setUpOperand()
         {
-            this->operandTypes.push_back(typeid(First));
-            (this->operandTypes.push_back(typeid(Rest)), ...);
+            this->operandTypes.push_back(operandType<First>());
+            (this->operandTypes.push_back(operandType<Rest>()), ...);
         }
     };
 
-    /** LambdaInstruction variant with an explicitly declared output type. */
     template <typename Output, typename First, typename... Rest>
     class TypedLambdaInstruction : public LambdaInstruction<First, Rest...>
     {
@@ -175,18 +143,18 @@ namespace Instructions {
         {
         }
 
-        Data::UntypedSharedPtr executeResult(
-            const std::vector<Data::UntypedSharedPtr>& args) const override
+        Data::DataValue execute(
+            const std::vector<Data::DataView>& args) const override
         {
-            Data::UntypedSharedPtr result =
-                LambdaInstruction<First, Rest...>::executeResult(args);
+            Data::DataValue result =
+                LambdaInstruction<First, Rest...>::execute(args);
             if constexpr (!std::is_array<Output>::value) {
-                if (result.getType() != typeid(Output)) {
+                if (result.type() != typeid(Output)) {
                     throw std::invalid_argument(
                         "Lambda result type does not match declared output.");
                 }
             }
-            else if (result.getRank() == 0) {
+            else if (result.shape().rank == 0) {
                 throw std::invalid_argument(
                     "Lambda array result has no declared shape.");
             }

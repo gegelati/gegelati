@@ -65,33 +65,27 @@ unsigned int Instructions::Instruction::getNbOperands() const
 }
 
 bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
+    const std::vector<Data::DataView>& arguments) const
 {
     if (arguments.size() != this->operandTypes.size()) {
         return false;
     }
 
     for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
+        if (arguments.at(i).type() != this->operandTypes.at(i).get()) {
             return false;
         }
     }
     return true;
 }
 
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
+Data::DataValue Instruction::execute(
+    const std::vector<Data::DataView>& arguments) const
 {
-#ifndef NDEBUG
     if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
+        throw std::invalid_argument("Instruction operand type mismatch.");
     }
-    else {
-        return 1.0;
-    }
-#else
-    return 1.0;
-#endif
+    throw std::logic_error("Instruction::execute must be overridden.");
 }
 
 #ifdef CODE_GENERATION

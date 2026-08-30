@@ -44,7 +44,6 @@
 
 #include "data/constant.h"
 #include "data/primitiveTypeArray.h"
-#include "data/untypedSharedPtr.h"
 
 namespace Data {
 

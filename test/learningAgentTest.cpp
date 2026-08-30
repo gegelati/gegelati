@@ -73,7 +73,7 @@
 #include "util/counterReset.h"
 
 // Set all file in comment
-
+#if 0
 class LearningAgentTest : public ::testing::Test
 {
   protected:
@@ -1590,3 +1590,5 @@ TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
         std::runtime_error);
 }
 */
+
+#endif

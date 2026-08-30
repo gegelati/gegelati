@@ -66,7 +66,7 @@ TEST(PointerWrapperTest, CanProvideTemplateType)
     ASSERT_FALSE(d->canHandle(typeid(int)))
         << "PointerWrapper<double>() wrongfully say it can provide int "
            "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+    ASSERT_FALSE(d->canHandle(typeid(Data::DataView)))
         << "PointerWrapper<double>() wrongfully say it can provide "
            "UntypedSharedPtr data.";
     delete d;
@@ -115,9 +115,8 @@ TEST(PointerWrapperTest, GetDataAtNativeType)
     float val = 1.2f;
     Data::PointerWrapper<float>* d = new Data::PointerWrapper<float>(&val);
 
-    const float a =
-        *(d->getDataAt(typeid(float), 0).getSharedPointer<const float>());
-    ASSERT_EQ((float)a, val)
+    float a = d->getDataAt(typeid(float), 0).getScalar<float>();
+    ASSERT_EQ(a, val)
         << "Data at valid address and type can not be accessed.";
 
 #ifndef NDEBUG
@@ -134,7 +133,7 @@ TEST(PointerWrapperTest, GetDataAtNativeType)
            "cause an exception.";
 #else
     ASSERT_THROW(
-        d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
+        d->getDataAt(typeid(double), 0).getScalar<double>(),
         std::runtime_error)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
@@ -142,7 +141,7 @@ TEST(PointerWrapperTest, GetDataAtNativeType)
 
     // test null ptr container
     d->setPointer(nullptr);
-    ASSERT_THROW(d->getDataAt(typeid(float), 0).getSharedPointer<const float>(),
+    ASSERT_THROW(d->getDataAt(typeid(float), 0).getScalar<float>(),
                  std::runtime_error)
         << "Accessing data within a PointerWrapper associated to a nullptr "
            "should fail.";

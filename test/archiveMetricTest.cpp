@@ -194,8 +194,8 @@ TEST_F(ArchiveMetricTest, getInputs)
     auto it = inputs.begin();
     for (int i = 0; i < 5; i++) {
         ASSERT_EQ(it->second.size(), 2) << "Input should have two datasources";
-        ASSERT_EQ(*it->second.at(0).get().getDataAt(typeid(int), 0).getSharedPointer<const int>(), i) << "Input should have two datasources";
-        ASSERT_EQ(*it->second.at(1).get().getDataAt(typeid(double), 0).getSharedPointer<const double>(), 2.0) << "Input should have two datasources";
+        ASSERT_EQ(it->second.at(0).get().getDataAt(typeid(int), 0).getScalar<int>(), i) << "Input should have two datasources";
+        ASSERT_EQ(it->second.at(1).get().getDataAt(typeid(double), 0).getScalar<double>(), 2.0) << "Input should have two datasources";
         it++;
     }
 }

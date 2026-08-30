@@ -42,10 +42,11 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
 
-#include "data/untypedSharedPtr.h"
+#include "data/dataValue.h"
 
 namespace Instructions {
     /**
@@ -178,7 +179,7 @@ namespace Instructions {
          * object. (not doable at compile time)
          */
         virtual bool checkOperandTypes(
-            const std::vector<Data::UntypedSharedPtr>& arguments) const;
+          const std::vector<Data::DataView>& arguments) const;
 
         /**
          * \brief Execute the Instruction for the given arguments.
@@ -187,29 +188,11 @@ namespace Instructions {
          * case of invalid arguments, for type or number or value
          * reason, this method should always return 0.0.
          *
-         * \param[in] args the vector of UntypedSharedPtr passed to the
-         * Instruction.
-         * \return the default implementation of the Instruction
-         * class returns 0.0 if the given params or arguments are not valid.
-         * Otherwise, 1.0 is returned.
+         * \param[in] args the vector of typed, borrowed DataView operands.
+         * \return an owning typed DataValue result.
          */
-        virtual double execute(
-            const std::vector<Data::UntypedSharedPtr>& args) const = 0;
-
-        /**
-         * Execute the instruction and return a typed, possibly shaped result.
-         *
-         * Existing instructions that implement the legacy double-returning
-         * execute() method are adapted to a scalar double result. New
-         * instructions can override this method to return an int, float,
-         * double, or shaped array through Data::UntypedSharedPtr.
-         */
-        virtual Data::UntypedSharedPtr executeResult(
-          const std::vector<Data::UntypedSharedPtr>& args) const
-        {
-          const double result = this->execute(args);
-            return Data::UntypedSharedPtr{new double(result)};
-        }
+        virtual Data::DataValue execute(
+            const std::vector<Data::DataView>& args) const = 0;
 
       protected:
 #ifndef CODE_GENERATION

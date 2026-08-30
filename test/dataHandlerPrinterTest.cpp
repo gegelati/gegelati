@@ -40,6 +40,13 @@
 #include "data/primitiveTypeArray.h"
 #include "data/primitiveTypeArray2D.h"
 
+TEST(DataHandlerPrinterTest, test) 
+{
+    ASSERT_FALSE(true) <<"Code gen handler needs update";
+}
+
+#if 0
+
 class DataHandlerPrinterTest : public ::testing::Test
 {
     class Fake3DDataHandler : public Data::Array2DWrapper<double>
@@ -137,6 +144,7 @@ TEST_F(DataHandlerPrinterTest, print2DArray)
 
 TEST_F(DataHandlerPrinterTest, printDataAt)
 {
+    ASSERT_FALSE(true);
     std::string print;
     size_t start = 3;
 
@@ -203,4 +211,5 @@ TEST_F(DataHandlerPrinterTest, getOperandSizes)
     size = {2, 3};
     ASSERT_EQ(Data::DataHandlerPrinter::getOperandSizes(operandArray2D), size);
 }
+#endif // 0
 #endif // CODE_GENERATION

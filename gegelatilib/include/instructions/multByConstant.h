@@ -44,7 +44,7 @@
 #include <typeinfo>
 
 #include "data/constantHandler.h"
-#include "data/untypedSharedPtr.h"
+#include "data/dataValue.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -90,8 +90,8 @@ namespace Instructions {
 #endif // CODE_GENERATION
 
         /// Inherited from Instruction
-        double execute(
-            const std::vector<Data::UntypedSharedPtr>& args) const override;
+        Data::DataValue execute(
+            const std::vector<Data::DataView>& args) const override;
 
       private:
         /**
@@ -118,17 +118,16 @@ namespace Instructions {
     }
 #endif // CODE_GENERATION
     template <class T>
-    inline double MultByConstant<T>::execute(
-        const std::vector<Data::UntypedSharedPtr>& args) const
+    inline Data::DataValue MultByConstant<T>::execute(
+        const std::vector<Data::DataView>& args) const
     {
-#ifndef NDEBUG
-        if (Instruction::execute(args) != 1.0)
-            return 0;
-#endif
-        const Data::Constant constantValue = (const Data::Constant&)*(
-            args.at(1).getSharedPointer<const Data::Constant>());
-        return *(args.at(0).getSharedPointer<const T>()) *
-               (double)constantValue;
+        if (!this->checkOperandTypes(args)) {
+            throw std::invalid_argument("Instruction operand type mismatch.");
+        }
+        const Data::Constant constantValue =
+            args.at(1).template getScalar<Data::Constant>();
+        return Data::DataValue::scalar(
+            args.at(0).template getScalar<T>() * static_cast<T>(constantValue));
     }
 
     template <class T> void MultByConstant<T>::setUpOperand()

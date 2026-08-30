@@ -112,7 +112,7 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
         size_t functionIndex = std::get<size_t>(node.getValue(1));
 
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
-        std::vector<Data::UntypedSharedPtr> operands;
+        std::vector<Data::DataView> operands;
 
         size_t nbOperands = instruction.getNbOperands();
         for(size_t idxOp = 0; idxOp < nbOperands; idxOp++){
@@ -125,16 +125,14 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
             const Data::DataHandler& dataSource = (inputType==0) ? registers : inputSources[inputType - 1];
 
             uint64_t operandLocation = dataSource.scaleLocation(inputIndex, operandType);
-            Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
+            operands.push_back(dataSource.getDataAt(operandType, operandLocation));
 
-            operands.push_back(data);
         }
 
-        double result = instruction.execute(operands);
-        registers.setDataAt(typeid(double), outputIndex, result);
+        registers.setDataAt(typeid(double), outputIndex, instruction.execute(operands).view());
     }
 
-    double value = *(registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
+    double value = registers.getDataAt(typeid(double), 0).getScalar<double>();
     if(value > 2.0) {
         value = 2.0;
     } else if (value < 0.0) {

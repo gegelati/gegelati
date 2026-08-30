@@ -114,10 +114,8 @@ TEST(LearningEnvironmentTest, getDataSource)
     ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 
     // Check initial number of sticks
-    int initNr = (const int)*(dataSrc.at(1)
-                                  .get()
-                                  .getDataAt(typeid(int), 0)
-                                  .getSharedPointer<const int>());
+    int initNr = dataSrc.at(1).get().getDataAt(typeid(int), 0)
+                                  .getScalar<int>();
     ASSERT_EQ(initNr, 21) << "Initial number of stick is incorrect";
 }
 
@@ -127,13 +125,13 @@ TEST(LearningEnvironmentTest, doAction)
 
     ASSERT_NO_THROW(le.doAction(1))
         << "Remove 2 stick after game init should not fail.";
-    std::shared_ptr<const int> nbSticks =
-        (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
-            .getSharedPointer<const int>();
+    int nbSticks =
+        le.getDataSources().at(1).get().getDataAt(typeid(int), 0)
+            .getScalar<int>();
     // Remove 2 sticks brings us to 19 sticks
     // Other player removes between 1 and 3 sticks
     // thus, number of remaining sticks is within 18 and 16
-    ASSERT_TRUE(*nbSticks <= 18 && *nbSticks >= 16)
+    ASSERT_TRUE(nbSticks <= 18 && nbSticks >= 16)
         << "Number of stick remaining after one action is not within expected "
            "range.";
 

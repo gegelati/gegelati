@@ -126,7 +126,7 @@ namespace Data {
         void setPointer(T* ptr);
 
         /// Inherited from DataHandler
-        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
+        virtual DataView getDataAt(const std::type_info& type,
                                            const size_t address) const override;
 
         /// Inherited from DataHandler
@@ -216,14 +216,14 @@ namespace Data {
     }
 
     template <class T>
-    inline UntypedSharedPtr PointerWrapper<T>::getDataAt(
+    inline DataView PointerWrapper<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");
         }
 
-#ifndef NDEBUG
+    #ifndef NDEBUG
         // Throw exception in case of invalid arguments.
         if (!this->canHandle(type)) {
             std::stringstream message;
@@ -240,11 +240,16 @@ namespace Data {
                     << ", address space size is 1.";
             throw std::out_of_range(message.str());
         }
-#endif
+    #endif
 
-        UntypedSharedPtr result(this->containerPtr,
-                                UntypedSharedPtr::emptyDestructor<const T>());
-        return result;
+        // OLD (broken):
+        // UntypedSharedPtr result(this->containerPtr,
+        //                 UntypedSharedPtr::emptyDestructor<const T>());
+        // DataView(this->containerPtr, type, DataShape shape)
+        // return result;
+
+        // NEW: Use DataView::scalar factory method
+        return DataView::scalar(*this->containerPtr);
     }
 
     template <class T>

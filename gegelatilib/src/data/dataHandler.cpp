@@ -59,11 +59,17 @@ size_t Data::DataHandler::getHash() const
     return this->cachedHash;
 }
 
-void Data::DataHandler::setDataAt(const std::type_info&,
-                                  const size_t,
-                                  const Data::UntypedSharedPtr&)
+void Data::DataHandler::setDataAt(const std::type_info& type,
+                                  const size_t address,
+                                  const DataView& value)
 {
     throw std::runtime_error("This DataHandler is read-only.");
+}
+void Data::DataHandler::setDataAt(const std::type_info& type,
+                                  const size_t address,
+                                  const DataValue& value)
+{
+    this->setDataAt(type, address, value.view());
 }
 
 uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,

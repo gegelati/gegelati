@@ -131,7 +131,7 @@ const Instructions::Instruction& Representation::LGP::LGPEngine::getCurrentInstr
 }
 
 const void Representation::LGP::LGPEngine::fetchCurrentOperands(
-    std::vector<Data::UntypedSharedPtr>& operands) const
+    std::vector<Data::DataView>& operands) const
 {
     const LGPLine& line = this->getCurrentLine(); // throw std::out_of_range
     const Instructions::Instruction& instruction =
@@ -148,7 +148,7 @@ const void Representation::LGP::LGPEngine::fetchCurrentOperands(
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             line.getOperand(i).first); // Throws std::out_of_range
         const uint64_t operandLocation = getOperandLocation(i);
-        Data::UntypedSharedPtr data =
+        Data::DataView data =
             dataSource.getDataAt(operandType, operandLocation);
         operands.push_back(data);
     }
@@ -205,8 +205,8 @@ std::vector<double> Representation::LGP::LGPEngine::getRegisterValues(
     std::vector<double> registerValues;
     // Return the register + 1 to keep the first one for bids.
     for (int i = 0; i < nbRegisters; i++) {
-        registerValues.push_back(*(this->registers.getDataAt(typeid(double), i)
-                                       .getSharedPointer<const double>()));
+        registerValues.push_back(this->registers.getDataAt(typeid(double), i)
+                                       .getScalar<double>());
     }
     return registerValues;
 }

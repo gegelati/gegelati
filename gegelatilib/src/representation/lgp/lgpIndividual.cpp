@@ -140,11 +140,9 @@ const Data::ConstantHandler& Representation::LGP::LgpIndividual::cGetConstantHan
 }
 
 const Data::Constant Representation::LGP::LgpIndividual::getConstantAt(size_t index) const
-{
-    std::shared_ptr<const Data::Constant> value =
-        this->constants.getDataAt(typeid(Data::Constant), index)
-            .getSharedPointer<const Data::Constant>();
-    return *value;
+{        
+    return this->constants.getDataAt(typeid(Data::Constant), index)
+            .getScalar<Data::Constant>();
 }
 
 const std::vector<size_t>& Representation::LGP::LgpIndividual::getOutputIndices() const

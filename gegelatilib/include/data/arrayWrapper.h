@@ -200,14 +200,23 @@ namespace Data {
          */
         void setPointer(std::vector<T>* ptr);
 
-        /// Inherited from DataHandler
-        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
-                                           const size_t address) const override;
+        /**
+         * \brief Get a non-owning view of the data at the given address.
+         *
+         * For a scalar, the view references a single element. For an array type,
+         * the view references the corresponding contiguous elements.
+         */
+        virtual DataView getDataAt(const std::type_info& type,
+                                const size_t address) const override;
 
-        /// Inherited from DataHandler
+        /**
+         * \brief Set the value at the given address.
+         *
+         * The data is copied from the provided DataValue into the wrapped array.
+         */
         virtual void setDataAt(const std::type_info& type,
-                       const size_t address,
-                       const UntypedSharedPtr& value) override;
+                            const size_t address,
+                            const DataView& value) override;
 
         /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
@@ -333,62 +342,52 @@ namespace Data {
     }
 
     template <class T>
-    inline UntypedSharedPtr ArrayWrapper<T>::getDataAt(
+    inline DataView ArrayWrapper<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");
         }
-#ifndef NDEBUG
-        // Throw exception in case of invalid arguments.
+
         checkAddressAndType(type, address);
-#endif
 
         if (type == typeid(T)) {
-            UntypedSharedPtr result(
-                &(this->containerPtr->at(address)),
-                UntypedSharedPtr::emptyDestructor<const T>());
-            return result;
+            return DataView::scalar(this->containerPtr->at(address));
         }
 
-        // Else, the only other supported type is cstyle array.
+        // The only other supported type is a C-style array.
+        const size_t arraySize =
+            this->nbElements - this->getAddressSpace(type) + 1;
 
-        // Allocate the array
-        size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
-        T* array = new T[arraySize];
-
-        // Copy its content
-        for (size_t idx = 0; idx < arraySize; idx++) {
-            array[idx] = this->containerPtr->at(address + idx);
-        }
-
-        // Create the UntypedSharedPtr
-        UntypedSharedPtr result{
-            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array),
-            DataShape{arraySize}};
-        return result;
+        return DataView::array(
+            this->containerPtr->data() + address,
+            DataShape{arraySize});
     }
 
     template <class T>
     inline void ArrayWrapper<T>::setDataAt(
-        const std::type_info& type, const size_t address,
-        const UntypedSharedPtr& value)
+        const std::type_info& type,
+        const size_t address,
+        const DataView& value)
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");
         }
 
         this->checkAddressAndType(type, address);
+
         if (type == typeid(T)) {
             this->containerPtr->at(address) =
-                *value.getSharedPointer<const T>();
+                value.getScalar<T>();
         }
         else {
             const size_t arraySize =
                 this->nbElements - this->getAddressSpace(type) + 1;
-            const auto source = value.getSharedPointer<const T[]>();
+
+            const T* source = value.getArray<T>();
+
             for (size_t idx = 0; idx < arraySize; idx++) {
-                this->containerPtr->at(address + idx) = source.get()[idx];
+                this->containerPtr->at(address + idx) = source[idx];
             }
         }
 

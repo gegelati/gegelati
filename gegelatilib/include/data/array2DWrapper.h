@@ -142,14 +142,23 @@ namespace Data {
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
 
-        /// Inherited from DataHandler
-        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
-                                           const size_t address) const override;
+        /**
+         * \brief Get a view of the data at the given address.
+         *
+         * Scalar values are returned as a direct view of the underlying data.
+         * Array values are returned as a contiguous view of the requested data.
+         */
+        virtual DataView getDataAt(const std::type_info& type,
+                                const size_t address) const override;
 
-        /// Inherited from DataHandler
+        /**
+         * \brief Set the value at the given address.
+         *
+         * The value is copied into the corresponding elements of the wrapped array.
+         */
         virtual void setDataAt(const std::type_info& type,
-                       const size_t address,
-                       const UntypedSharedPtr& value) override;
+                            const size_t address,
+                            const DataView& value) override;
 
 #ifdef CODE_GENERATION
         /// Inherited from DataHandler
@@ -287,58 +296,60 @@ namespace Data {
     }
 
     template <typename T>
-    UntypedSharedPtr Array2DWrapper<T>::getDataAt(const std::type_info& type,
-                                                  const size_t address) const
+    DataView Array2DWrapper<T>::getDataAt(const std::type_info& type,
+                                        const size_t address) const
     {
-#ifndef NDEBUG
-        // Throw exception in case of invalid arguments.
-        ArrayWrapper<T>::checkAddressAndType(type, address);
-#endif
-
-        if (type == typeid(T)) {
-            UntypedSharedPtr result(
-                &(this->containerPtr->at(address)),
-                UntypedSharedPtr::emptyDestructor<const T>());
-            return result;
+        if (this->containerPtr == nullptr) {
+            throw std::runtime_error("Null pointer access.");
         }
 
-        // Else, the only other supported type is cstyle array (1D or 2D).
-        // Because 2D arrays are array with the second dimension set to 1,
-        // all the following code is generic
+        this->checkAddressAndType(type, address);
 
+        if (type == typeid(T)) {
+            return DataView::scalar(this->containerPtr->at(address));
+        }
+
+        // The requested array must fit within a single row.
         size_t arrayHeight = 0;
         size_t arrayWidth = 0;
-        size_t addressableSpace =
-            this->getAddressSpace(type, &arrayHeight, &arrayWidth);
+        this->getAddressSpace(type, &arrayHeight, &arrayWidth);
 
-        // Types was checked before trying to produce
-        // a return value
-        auto array = new T[arrayHeight * arrayWidth];
+        const size_t addressH =
+            address / (this->width - arrayWidth + 1);
+        const size_t addressW =
+            address % (this->width - arrayWidth + 1);
 
-        // Copy its content
-        size_t addressH = address / (this->width - arrayWidth + 1);
-        size_t addressW = address % (this->width - arrayWidth + 1);
-        size_t addressSrc = (addressH * this->width) + addressW;
-        size_t idxDst = 0;
-        for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
-            for (size_t idxWidth = 0; idxWidth < arrayWidth; idxWidth++) {
-                size_t idxSrc = (idxHeight * this->width) + idxWidth;
-                array[idxDst++] = this->containerPtr->at(addressSrc + idxSrc);
+        const size_t addressSrc =
+            addressH * this->width + addressW;
+
+        /*
+        * A 2D array cannot be represented directly by DataView::array()
+        * when width != arrayWidth because the rows are separated by the
+        * remaining elements of the underlying array.
+        *
+        * A contiguous temporary representation is therefore required.
+        */
+        T* array = new T[arrayHeight * arrayWidth];
+
+        size_t index = 0;
+        for (size_t row = 0; row < arrayHeight; row++) {
+            for (size_t column = 0; column < arrayWidth; column++) {
+                array[index++] =
+                    this->containerPtr->at(addressSrc + row * this->width + column);
             }
         }
 
-        // Create the UntypedSharedPtr
-        UntypedSharedPtr result{
-            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array),
-            arrayHeight == 1 ? DataShape{arrayWidth}
-                             : DataShape{arrayHeight, arrayWidth}};
-        return result;
+        return DataView::array(
+            array,
+            arrayHeight == 1
+                ? DataShape{arrayWidth}
+                : DataShape{arrayHeight, arrayWidth});
     }
 
     template <typename T>
     void Array2DWrapper<T>::setDataAt(const std::type_info& type,
                                       const size_t address,
-                                      const UntypedSharedPtr& value)
+                                      const DataView& value)
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");
@@ -347,13 +358,13 @@ namespace Data {
         this->checkAddressAndType(type, address);
         if (type == typeid(T)) {
             this->containerPtr->at(address) =
-                *value.getSharedPointer<const T>();
+                value.getScalar<T>();
         }
         else {
             size_t arrayHeight = 0;
             size_t arrayWidth = 0;
             this->getAddressSpace(type, &arrayHeight, &arrayWidth);
-            const auto source = value.getSharedPointer<const T[]>();
+            const T* source = value.getArray<T>();
             const size_t addressH =
                 address / (this->width - arrayWidth + 1);
             const size_t addressW =
@@ -363,7 +374,7 @@ namespace Data {
             for (size_t row = 0; row < arrayHeight; row++) {
                 for (size_t column = 0; column < arrayWidth; column++) {
                     this->containerPtr->at(addressSrc + row * this->width +
-                                           column) = source.get()[sourceIndex++];
+                                           column) = source[sourceIndex++];
                 }
             }
         }

@@ -44,7 +44,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include "data/untypedSharedPtr.h"
+#include "data/dataValue.h"
 
 namespace Data {
     /**
@@ -214,8 +214,8 @@ namespace Data {
          * given data type.
          * \return a shared pointer to the requested const data.
          */
-        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
-                                           const size_t address) const = 0;
+        virtual DataView getDataAt(const std::type_info& type,
+                                  const size_t address) const = 0;
 
         /**
          * \brief Write a type-erased value at the given address.
@@ -224,8 +224,18 @@ namespace Data {
          * source-compatible. Writable handlers override this method.
          */
         virtual void setDataAt(const std::type_info& type,
-                   const size_t address,
-                   const UntypedSharedPtr& value);
+                              const size_t address,
+                              const DataView& value);
+
+        /**
+         * \brief Write a type-erased value at the given address.
+         *
+         * The default implementation keeps custom read-only DataHandlers
+         * source-compatible. Writable handlers override this method.
+         */
+        virtual void setDataAt(const std::type_info& type,
+                              const size_t address,
+                              const DataValue& value);
 
         /**
          * \brief Get the set of addresses actually used when getting the given

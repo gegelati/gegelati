@@ -56,8 +56,8 @@ void StickGameWithOpponentD::doAction(double actionID)
         // Execute the action
         // Get current state
         int currentState =
-            (int)*(((this->remainingSticks.getDataAt(typeid(double), 0.0))
-                        .getSharedPointer<const double>()));
+            (int)(((this->remainingSticks.getDataAt(typeid(double), 0.0))
+                        .getScalar<double>()));
         if ((actionID + 1) > currentState) {
             // Illegal move
             this->forbiddenMove = true;
@@ -124,5 +124,5 @@ double StickGameWithOpponentD::getScore() const
 
 bool StickGameWithOpponentD::isTerminal() const
 {
-    return (int)*((this->remainingSticks.getDataAt(typeid(double), 0)).getSharedPointer<const double>()) == 0;
+    return (int)((this->remainingSticks.getDataAt(typeid(double), 0)).getScalar<double>()) == 0;
 }

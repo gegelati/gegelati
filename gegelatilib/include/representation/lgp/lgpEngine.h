@@ -254,7 +254,7 @@ namespace Representation::LGP {
          *         DataHandler does not exist.
          */
         const void fetchCurrentOperands(
-            std::vector<Data::UntypedSharedPtr>& operands) const;
+            std::vector<Data::DataView>& operands) const;
 
         /**
          * \brief Get the location for the current Instruction.

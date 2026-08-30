@@ -121,16 +121,13 @@ TEST(PrimitiveTypeArray2DTest, getDataAt)
 
     // Check primitive type provided by 1D array
     for (auto idx = 0; idx < h * w; idx++) {
-        const int val =
-            *((a.getDataAt(typeid(int), idx)).getSharedPointer<const int>());
+        const int val = (a.getDataAt(typeid(int), idx)).getScalar<int>();
         ASSERT_EQ(val, idx) << "Value with primitive type is not as expected.";
     }
 
     // Check 1D array
     for (auto idx = 0; idx < a.getAddressSpace(typeid(int[3])); idx++) {
-        std::shared_ptr<const int> valSPtr =
-            (a.getDataAt(typeid(int[3]), idx)).getSharedPointer<const int[]>();
-        const int* valPtr = valSPtr.get();
+        const int* valPtr = a.getDataAt(typeid(int[3]), idx).getArray<int>();
         for (auto subIdx = 0; subIdx < 3; subIdx++) {
             const int val = valPtr[subIdx];
             ASSERT_EQ(val, (idx / (w - 3 + 1) * w + idx % (w - 3 + 1)) + subIdx)
@@ -140,10 +137,10 @@ TEST(PrimitiveTypeArray2DTest, getDataAt)
 
     // Check 2D array (returned as a 1D array)
     for (auto idx = 0; idx < a.getAddressSpace(typeid(int[3][2])); idx++) {
-        std::shared_ptr<const int> valSPtr =
-            (a.getDataAt(typeid(int[2][3]), idx))
-                .getSharedPointer<const int[]>();
-        const int(*valPtr)[3] = (int(*)[3])valSPtr.get();
+        const int* valSPtr =
+            a.getDataAt(typeid(int[2][3]), idx)
+                .getArray<int>();
+        const int(*valPtr)[3] = (int(*)[3])valSPtr;
         size_t srcIdx = idx / (w - 3 + 1) * w + idx % (w - 3 + 1);
         for (auto subH = 0; subH < 2; subH++) {
             for (auto subW = 0; subW < 3; subW++) {
@@ -190,10 +187,7 @@ TEST(PrimitiveTypeArray2DTest, PrimitiveDataArray2DAssignmentOperator)
 
     // Check that data was successfully copied.
     for (auto idx = 0; idx < size * size; idx++) {
-        ASSERT_EQ(
-            (int)*(
-                d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()),
-            idx)
+        ASSERT_EQ(d2->getDataAt(typeid(int), idx).getScalar<int>(), idx)
             << "Previously set data did not persist.";
     }
 

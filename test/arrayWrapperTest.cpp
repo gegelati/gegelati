@@ -72,9 +72,9 @@ TEST(ArrayWrapperTest, CanProvideTemplateType)
     ASSERT_FALSE(d->canHandle(typeid(int)))
         << "ArrayWrapper<double>() wrongfully say it can provide int "
            "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+    ASSERT_FALSE(d->canHandle(typeid(Data::DataView)))
         << "ArrayWrapper<double>() wrongfully say it can provide "
-           "UntypedSharedPtr data.";
+           "DataView data.";
     delete d;
 }
 
@@ -172,34 +172,21 @@ TEST(ArrayWrapperTest, GetDataAtNativeType)
 
     for (int i = 0; i < size; i++) {
         const float a =
-            *(d->getDataAt(typeid(float), i).getSharedPointer<const float>());
+            d->getDataAt(typeid(float), i).getScalar<float>();
         ASSERT_EQ((float)a, values.at(i))
             << "Data at valid address and type can not be accessed.";
     }
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(float), size), std::out_of_range)
         << "Address exceeding the addressSpace should cause an exception.";
-#else
-    // No alternative test to put here.. out of range access to memory _may_
-    // happen without being detected.
-#endif
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(double), 0), std::invalid_argument)
         << "Requesting a non-handled type, even at a valid location, should "
            "cause an exception.";
-#else
-    ASSERT_THROW(
-        d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
-        std::out_of_range)
-        << "In NDEBUG mode, a pointer with invalid type will be returned when "
-           "requesting a non-handled type, even at a valid location.";
-#endif
 
     // test null ptr container
     d->setPointer(nullptr);
-    ASSERT_THROW(d->getDataAt(typeid(float), 0).getSharedPointer<const float>(),
+    ASSERT_THROW(d->getDataAt(typeid(float), 0).getScalar<float>(),
                  std::runtime_error)
         << "Accessing data within a ArrayWrapper associated to a nullptr "
            "should fail.";
@@ -216,10 +203,9 @@ TEST(ArrayWrapperTest, GetDataAtArray)
 
     // Get data as arrays
     for (int i = 0; i < size - sizeArray + 1; i++) {
-        std::shared_ptr<const int> sptr =
+        const int* a =
             d->getDataAt(typeid(int[sizeArray]), i)
-                .getSharedPointer<const int[]>();
-        const int* a = (sptr.get());
+                .getArray<int>();
         ASSERT_NE(a, nullptr) << "Retrieved data is a null_ptr";
         for (int idx = 0; idx < sizeArray; idx++) {
             ASSERT_EQ(a[idx], i + idx)
@@ -228,27 +214,14 @@ TEST(ArrayWrapperTest, GetDataAtArray)
         }
     }
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(int[sizeArray]), size - 1),
                  std::out_of_range)
         << "Address exceeding the addressSpace should cause an exception.";
-#else
-    // No alternative test to put here.. out of range access to memory _may_
-    // happen without being detected.
-#endif
 
-#ifndef NDEBUG
     ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0),
                  std::invalid_argument)
         << "Requesting a non-handled type, even at a valid location, should "
            "cause an exception.";
-#else
-    ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0)
-                     .getSharedPointer<const long[sizeArray]>(),
-                 std::out_of_range)
-        << "In NDEBUG mode, a pointer with invalid type will be returned when "
-           "requesting a non-handled type, even at a valid location.";
-#endif
 
     delete d;
 }
@@ -391,6 +364,7 @@ TEST(ArrayWrapperTest, getNativeType)
 
 TEST(ArrayWrapperTest, getDimensionSize)
 {
+    ASSERT_FALSE(true) <<"Code gen handler needs update";
     size_t size = 4;
     Data::DataHandler* d = new Data::ArrayWrapper<double>(size);
 

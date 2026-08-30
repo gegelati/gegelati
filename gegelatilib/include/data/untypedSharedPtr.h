@@ -37,8 +37,6 @@
 #ifndef UNTYPED_SHARED_PTR_H
 #define UNTYPED_SHARED_PTR_H
 
-#include <array>
-#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <initializer_list>
@@ -47,37 +45,9 @@
 #include <string>
 #include <type_traits>
 
+#include "data/dataShape.h"
+
 namespace Data {
-
-    /** Lightweight inline shape descriptor for scalar, 1D, and 2D values. */
-    struct DataShape
-    {
-        uint8_t rank = 0;
-        std::array<size_t, 2> dimensions{0, 0};
-
-        DataShape() = default;
-
-        DataShape(std::initializer_list<size_t> values)
-        {
-            if (values.size() == 0 || values.size() > dimensions.size()) {
-                throw std::invalid_argument(
-                    "DataShape must contain one or two dimensions.");
-            }
-            this->rank = static_cast<uint8_t>(values.size());
-            std::copy(values.begin(), values.end(), this->dimensions.begin());
-        }
-
-        bool operator==(const DataShape& other) const
-        {
-            return this->rank == other.rank &&
-                   this->dimensions == other.dimensions;
-        }
-
-        bool operator!=(const DataShape& other) const
-        {
-            return !(*this == other);
-        }
-    };
 
     /**
      * \brief Class behaving as a std::shared_ptr whose type is not templated.
