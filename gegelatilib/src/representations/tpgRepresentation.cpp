@@ -17,7 +17,7 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     return std::move(clone);
 }
 
-void Representations::TPGRepresentation::setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
+void Representations::TPGRepresentation::setInputDimensions(const std::vector<Data::DataView>& inputSources)
 {
     Evolution::Representation::setInputDimensions(inputSources);
 }
@@ -118,7 +118,7 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
 
 
 std::vector<double> Representations::TPGRepresentation::executeIndividual(
-    const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const
+    const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();

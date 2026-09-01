@@ -36,6 +36,7 @@
 
 #ifndef ARCHIVE_ENVIRONMENT_H
 #define ARCHIVE_ENVIRONMENT_H
+#if 0
 
 #include <optional>
 
@@ -198,3 +199,4 @@ namespace Evaluation {
 }; // namespace Learn
 
 #endif // ARCHIVE_ENVIRONMENT_H
+#endif

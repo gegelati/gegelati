@@ -1,7 +1,7 @@
 
 #include "evaluation/archiveMetric.h"
 
-
+#if 0
 Evaluation::ArchiveMetric::~ArchiveMetric()
 {
     for (const auto& pairHashInputs : this->inputsExtracted) {
@@ -72,3 +72,5 @@ void Evaluation::ArchiveMetric::extractMetricsStep(
         this->inputsExtracted.emplace(hash, std::move(dHandlersCpy));
     }
 }
+
+#endif

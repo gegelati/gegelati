@@ -148,7 +148,7 @@ namespace Data {
          * Scalar values are returned as a direct view of the underlying data.
          * Array values are returned as a contiguous view of the requested data.
          */
-        virtual DataView getDataAt(const std::type_info& type,
+        virtual DataViewOld getDataAt(const std::type_info& type,
                                 const size_t address) const override;
 
         /**
@@ -158,7 +158,7 @@ namespace Data {
          */
         virtual void setDataAt(const std::type_info& type,
                             const size_t address,
-                            const DataView& value) override;
+                            const DataViewOld& value) override;
 
 #ifdef CODE_GENERATION
         /// Inherited from DataHandler
@@ -296,7 +296,7 @@ namespace Data {
     }
 
     template <typename T>
-    DataView Array2DWrapper<T>::getDataAt(const std::type_info& type,
+    DataViewOld Array2DWrapper<T>::getDataAt(const std::type_info& type,
                                         const size_t address) const
     {
         if (this->containerPtr == nullptr) {
@@ -306,7 +306,7 @@ namespace Data {
         this->checkAddressAndType(type, address);
 
         if (type == typeid(T)) {
-            return DataView::scalar(this->containerPtr->at(address));
+            return DataViewOld::scalar(this->containerPtr->at(address));
         }
 
         // The requested array must fit within a single row.
@@ -323,7 +323,7 @@ namespace Data {
             addressH * this->width + addressW;
 
         /*
-        * A 2D array cannot be represented directly by DataView::array()
+        * A 2D array cannot be represented directly by DataViewOld::array()
         * when width != arrayWidth because the rows are separated by the
         * remaining elements of the underlying array.
         *
@@ -339,7 +339,7 @@ namespace Data {
             }
         }
 
-        return DataView::array(
+        return DataViewOld::array(
             array,
             arrayHeight == 1
                 ? DataShape{arrayWidth}
@@ -349,7 +349,7 @@ namespace Data {
     template <typename T>
     void Array2DWrapper<T>::setDataAt(const std::type_info& type,
                                       const size_t address,
-                                      const DataView& value)
+                                      const DataViewOld& value)
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");

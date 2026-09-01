@@ -73,8 +73,8 @@ Instructions::Set Representation::LGP::LGPEnvironment::filterInstructionSet(
         bool allOperandsHandled = true;
         for (uint64_t idxOperand = 0; idxOperand < instruction.getNbOperands();
              idxOperand++) {
-            const std::type_info& type =
-                instruction.getOperandTypes().at(idxOperand).get();
+            const std::type_info& type = typeid(double);
+                //instruction.getOperandTypes().at(idxOperand).get();
             // Check DataHandlers for this type until one is found
             bool isHandled = false;
             // Check registers double first

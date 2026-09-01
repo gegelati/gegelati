@@ -37,7 +37,7 @@
 #ifndef LEARNING_ENVIRONMENT_H
 #define LEARNING_ENVIRONMENT_H
 
-#include "data/dataHandler.h"
+#include "newData/dataView.h"
 #include "outputInfo.h"
 #include <cstdint>
 #include <vector>
@@ -150,7 +150,7 @@ namespace Evaluation {
          *
          * \return a vector of references to the DataHandler.
          */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
+        virtual std::vector<Data::DataView>
         getDataSources() const = 0;
 
         /**

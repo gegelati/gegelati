@@ -13,7 +13,7 @@
 #include "evolution/population.h"
 #include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
-#include "data/primitiveTypeArray.h"
+#include "newData/dataValue.h"
 
 using RepParam = Representation::RepresentationParameters;
 
@@ -105,7 +105,7 @@ namespace Evolution {
          * 
          * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
          */
-        virtual void setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources);
+        virtual void setInputDimensions(const std::vector<Data::DataView>& inputSources);
 
         /**
          * \brief get the number of input sources
@@ -165,7 +165,7 @@ namespace Evolution {
          * \param[in] inputSources input sources on which the individual is executed.
          */
         virtual std::vector<double> executeIndividual(
-            const Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const  = 0;
+            const Individual& indiv, const std::vector<Data::DataView>& inputSources) const  = 0;
     };
 }; // namespace Representation
 

@@ -171,8 +171,8 @@ void Representation::LGP::LGPCodeGenerationEngine::initOperandCurrentLine()
     const Instructions::Instruction& instruction = getCurrentInstruction();
     for (unsigned int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
-        const std::type_info& operandType =
-            instruction.getOperandTypes().at(i).get();
+        const std::type_info& operandType = typeid(double);
+            //instruction.getOperandTypes().at(i).get();
 
         opIdx = this->getOperandLocation(i);
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(

@@ -50,11 +50,11 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
-    Data::PrimitiveTypeArray<double> remainingSticks;
+    double remainingSticks;
 
     /// This source of data give useful numbers for helping undertanding the
     /// game.
-    Data::PrimitiveTypeArray<double> hints;
+    std::vector<double> hints;
 
     /// Did the player win or lose
     bool win;
@@ -71,13 +71,11 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : Evaluation::ReinforcementEnvironment(3), remainingSticks(1), hints(3), win{false}
+        : Evaluation::ReinforcementEnvironment(3), win{false}
     {
         this->reset(0);
         // Set hints
-        this->hints.setDataAt(typeid(double), 0, 1.0);
-        this->hints.setDataAt(typeid(double), 1, 2.0);
-        this->hints.setDataAt(typeid(double), 2, 3.0);
+        this->hints = {1.0, 2.0, 3.0};
     };
 
     /// Destructor
@@ -99,8 +97,8 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
                        uint64_t generationNumber = 0) override;
 
     // Inherited via LearningEnvironment
-    virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() const override;
+    virtual std::vector<Data::DataView>
+      getDataSources() const override;
 
     /**
      * Returns 1.0 when the player won, 0.0 otherwise.

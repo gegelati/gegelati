@@ -53,7 +53,7 @@ Instruction::Instruction() : operandTypes()
 }
 #endif // CODE_GENERATION
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
+const std::vector<Data::DataType>& Instruction::
     getOperandTypes() const
 {
     return this->operandTypes;
@@ -72,7 +72,7 @@ bool Instruction::checkOperandTypes(
     }
 
     for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).type() != this->operandTypes.at(i).get()) {
+        if (arguments.at(i).getType() != this->operandTypes.at(i)) {
             return false;
         }
     }
@@ -83,7 +83,7 @@ Data::DataValue Instruction::execute(
     const std::vector<Data::DataView>& arguments) const
 {
     if (!this->checkOperandTypes(arguments)) {
-        throw std::invalid_argument("Instruction operand type mismatch.");
+        throw std::invalid_argument("Instruction::execute: Instruction operand type mismatch.");
     }
     throw std::logic_error("Instruction::execute must be overridden.");
 }
@@ -109,7 +109,7 @@ std::string Instruction::getPrintablePrimitiveOperandType(
     const uint64_t& opIdx) const
 {
     std::string typeName =
-        DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
+        DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).elementType->name());
     std::regex arrayType(GET_PRINT_PRIMITIVE_OPERAND_TYPE);
     std::cmatch cm;
     std::string type;

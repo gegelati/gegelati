@@ -53,7 +53,7 @@ std::unique_ptr<Evaluation::EvaluationRun> Evaluation::EvaluationAgent::createEv
 }
 
 
-std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::EvaluationAgent::getDimensionsDataSources() const
+std::vector<Data::DataView> Evaluation::EvaluationAgent::getDimensionsDataSources() const
 {
     return this->learningEnvironment.getDataSources();
 }

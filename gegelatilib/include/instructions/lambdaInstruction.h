@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <typeinfo>
+#include <iostream>
 
-#include "data/dataValue.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -68,11 +68,13 @@ namespace Instructions {
             const std::vector<Data::DataView>& arguments) const override
         {
             if (arguments.size() != this->operandTypes.size()) {
+                std::cout<<"here"<<std::endl;
                 return false;
             }
             for (size_t index = 0; index < arguments.size(); index++) {
-                if (arguments.at(index).type() !=
-                    this->operandTypes.at(index).get()) {
+                if (arguments.at(index).getType() !=
+                    this->operandTypes.at(index)) {
+                        std::cout<<"here2 "<<index<<" "<<arguments.at(index).getElementType().name()<<" " <<this->operandTypes.at(index).elementType->name()<<std::endl;
                     return false;
                 }
             }
@@ -83,7 +85,7 @@ namespace Instructions {
             const std::vector<Data::DataView>& args) const override
         {
             if (!this->checkOperandTypes(args)) {
-                throw std::invalid_argument("Instruction operand type mismatch.");
+                throw std::invalid_argument("LambdaInstruction::execute: Instruction operand type mismatch.");
             }
             return doExecution(args, std::index_sequence_for<Rest...>{});
         }
@@ -99,26 +101,45 @@ namespace Instructions {
         }
 
         template <typename T>
-        static auto getData(const std::vector<Data::DataView>& args,
-                            size_t index)
-        {
+        static auto getData(const std::vector<Data::DataView>& args, size_t index) {
+            const Data::DataView& view = args.at(index);
             if constexpr (std::is_array<T>::value) {
-                using RowType = std::remove_extent_t<T>;
-                return reinterpret_cast<const RowType*>(args.at(index).data());
-            }
-            else {
-                return args.at(index).template getScalar<
-                    std::remove_const_t<T>>();
+                if constexpr (std::rank_v<T> == 1) {
+                    return view.template getArray<std::remove_extent_t<T>>(); // Returns const T*
+                } else if constexpr (std::rank_v<T> >= 2) {
+                    using Element = std::remove_const_t<std::remove_all_extents_t<T>>;
+
+                    constexpr size_t Cols = std::extent_v<T, 1>;
+                    const Element* data = view.template getArray<Element>();
+
+                    return reinterpret_cast<const Element (*)[Cols]>(data);
+                }
+            } else {
+                return view.template getScalar<std::remove_const_t<T>>(); // Returns const T&
             }
         }
 
-        template <typename T> static const std::type_info& operandType()
+        template <typename T> static const Data::DataType operandType()
         {
             if constexpr (std::is_array<T>::value) {
-                return typeid(std::remove_all_extents_t<T>[]);
+                constexpr size_t first_dim = std::extent<T>::value;
+                using ElementType = std::remove_extent_t<T>;
+
+                if constexpr (std::is_array<ElementType>::value) {
+                    // 2D array: T[first_dim][second_dim]
+                    constexpr size_t second_dim = std::extent<ElementType>::value;
+                    return Data::DataType::array2d<std::remove_all_extents_t<T>>(
+                        first_dim, second_dim
+                    );
+                } else {
+                    // 1D array: T[first_dim]
+                    return Data::DataType::array1d<std::remove_all_extents_t<T>>(
+                        first_dim
+                    );
+                }
             }
             else {
-                return typeid(T);
+                return Data::DataType::scalar<T>();
             }
         }
 
@@ -149,14 +170,14 @@ namespace Instructions {
             Data::DataValue result =
                 LambdaInstruction<First, Rest...>::execute(args);
             if constexpr (!std::is_array<Output>::value) {
-                if (result.type() != typeid(Output)) {
+                if (*result.getType().elementType != typeid(Output)) {
                     throw std::invalid_argument(
-                        "Lambda result type does not match declared output.");
+                        "TypedLambdaInstruction:Execute: Lambda result type does not match declared output.");
                 }
             }
-            else if (result.shape().rank == 0) {
+            else if (result.getType().dimensions[0] == 0) {
                 throw std::invalid_argument(
-                    "Lambda array result has no declared shape.");
+                    "TypedLambdaInstruction:Execute: Lambda array result has no declared type.");
             }
             return result;
         }

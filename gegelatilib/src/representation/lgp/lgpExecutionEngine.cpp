@@ -48,8 +48,8 @@ void Representation::LGP::LGPExecutionEngine::executeCurrentLine()
     this->fetchCurrentOperands(operands);
 
 
-    this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
-                              instruction.execute(operands).view());
+    //this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
+    //                          instruction.execute(operands).view());
 }
 
 std::vector<double> Representation::LGP::LGPExecutionEngine::execute()

@@ -61,13 +61,13 @@ size_t Data::DataHandler::getHash() const
 
 void Data::DataHandler::setDataAt(const std::type_info& type,
                                   const size_t address,
-                                  const DataView& value)
+                                  const DataViewOld& value)
 {
     throw std::runtime_error("This DataHandler is read-only.");
 }
 void Data::DataHandler::setDataAt(const std::type_info& type,
                                   const size_t address,
-                                  const DataValue& value)
+                                  const DataValueOld& value)
 {
     this->setDataAt(type, address, value.view());
 }

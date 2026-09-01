@@ -44,7 +44,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include "data/dataValue.h"
+#include "data/DataValue.h"
 
 namespace Data {
     /**
@@ -214,7 +214,7 @@ namespace Data {
          * given data type.
          * \return a shared pointer to the requested const data.
          */
-        virtual DataView getDataAt(const std::type_info& type,
+        virtual DataViewOld getDataAt(const std::type_info& type,
                                   const size_t address) const = 0;
 
         /**
@@ -225,7 +225,7 @@ namespace Data {
          */
         virtual void setDataAt(const std::type_info& type,
                               const size_t address,
-                              const DataView& value);
+                              const DataViewOld& value);
 
         /**
          * \brief Write a type-erased value at the given address.
@@ -235,7 +235,7 @@ namespace Data {
          */
         virtual void setDataAt(const std::type_info& type,
                               const size_t address,
-                              const DataValue& value);
+                              const DataValueOld& value);
 
         /**
          * \brief Get the set of addresses actually used when getting the given

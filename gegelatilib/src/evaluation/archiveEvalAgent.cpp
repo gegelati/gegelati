@@ -1,5 +1,5 @@
 #include "evaluation/archiveEvalAgent.h"
-
+#if 0
 
 void Evaluation::ArchiveEvalAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
@@ -73,3 +73,4 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
     }
 }
 
+#endif

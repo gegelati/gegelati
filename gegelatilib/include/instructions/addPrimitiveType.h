@@ -17,7 +17,7 @@
  *
  * As a counterpart to the access to the source code and rights to copy,
  * modify and redistribute granted by the license, users are provided only
- * with a limited warranty and the software's author, the holder of the
+ * with a limited warranty and the software's author, the her of the
  * economic rights, and the successive licensors have only limited
  * liability.
  *
@@ -43,7 +43,6 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include "data/dataValue.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -117,8 +116,8 @@ namespace Instructions {
 
     template <class T> void AddPrimitiveType<T>::setUpOperand()
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(Data::DataType::scalar<T>());
+        this->operandTypes.push_back(Data::DataType::scalar<T>());
     }
 } // namespace Instructions
 

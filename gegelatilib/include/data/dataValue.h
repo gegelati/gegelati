@@ -1,5 +1,5 @@
-#ifndef DATA_VALUE_H
-#define DATA_VALUE_H
+#ifndef R_DATA_VALUE_H
+#define R_DATA_VALUE_H
 
 #include <algorithm>
 #include <cstddef>
@@ -16,7 +16,7 @@ namespace Data {
     /**
     * Non-owning, read-only view passed to an instruction.
      *
-     * DataView is the input-side half of the instruction data boundary. It
+     * DataViewOld is the input-side half of the instruction data boundary. It
      * contains only a pointer, runtime type information, and a DataShape. It
     * never deletes or copies the pointed-to object. The caller must keep the
     * source object alive and unchanged for as long as the view is used.
@@ -25,14 +25,14 @@ namespace Data {
     * typed accessors validate the stored type before returning a reference or
     * pointer. A null view or a type mismatch throws std::runtime_error.
     *
-    * DataView is cheap to copy because it copies only a pointer and metadata.
+    * DataViewOld is cheap to copy because it copies only a pointer and metadata.
     * Copying a view never extends the lifetime of its source.
      */
-    class DataView
+    class DataViewOld
     {
       public:
             /** Construct an invalid view with no storage. */
-        DataView() = default;
+        DataViewOld() = default;
 
         /**
          * Create a view of one scalar without copying it.
@@ -40,9 +40,9 @@ namespace Data {
          * The referenced object must outlive every use of the returned view.
          * Its recorded type and shape are typeid(T) and {1}.
          */
-        template <typename T> static DataView scalar(const T& value)
+        template <typename T> static DataViewOld scalar(const T& value)
         {
-            return DataView{&value, typeid(T), DataShape{1}};
+            return DataViewOld{&value, typeid(T), DataShape{1}};
         }
 
         /**
@@ -52,9 +52,9 @@ namespace Data {
          * treated as flat contiguous storage, including for rank-2 shapes.
          */
         template <typename T>
-        static DataView array(const T* values, DataShape shape)
+        static DataViewOld array(const T* values, DataShape shape)
         {
-            return DataView{values, typeid(T[]), std::move(shape)};
+            return DataViewOld{values, typeid(T[]), std::move(shape)};
         }
 
         /** Return the raw borrowed pointer. */
@@ -77,18 +77,18 @@ namespace Data {
         template <typename T> const T* getArray() const
         {
             if (pointer == nullptr || *typeInfo != typeid(T[])) {
-                throw std::runtime_error("DataView type mismatch.");
+                throw std::runtime_error("DataViewOld type mismatch.");
             }
             return static_cast<const T*>(pointer);
         }
         
 
       private:
-            /** Only DataValue can create a view of its owned storage directly. */
-        friend class DataValue;
+            /** Only DataValueOld can create a view of its owned storage directly. */
+        friend class DataValueOld;
 
             /** Store borrowed storage and its runtime metadata. */
-        DataView(const void* pointer, const std::type_info& typeInfo,
+        DataViewOld(const void* pointer, const std::type_info& typeInfo,
                  DataShape shape)
             : pointer(pointer), typeInfo(&typeInfo),
               valueShape(std::move(shape))
@@ -101,7 +101,7 @@ namespace Data {
         {
             if (pointer == nullptr || *typeInfo != expected ||
                 valueShape != expectedShape) {
-                throw std::runtime_error("DataView type or shape mismatch.");
+                throw std::runtime_error("DataViewOld type or shape mismatch.");
             }
         }
 
@@ -118,13 +118,13 @@ namespace Data {
     /**
      * Owning, type-erased result produced by an instruction.
      *
-     * DataValue is the output-side half of the instruction data boundary. It
+     * DataValueOld is the output-side half of the instruction data boundary. It
      * owns either one scalar object or a dynamically allocated contiguous
      * array. Copies perform deep copies; moves transfer ownership. The class
      * stores runtime type information and a DataShape so a runtime dispatcher
      * can validate a result without knowing its C++ type at compile time.
      *
-     * DataValue is intentionally separate from DataView: an instruction may
+     * DataValueOld is intentionally separate from DataViewOld: an instruction may
      * borrow its inputs, but its result must remain valid after the input
      * objects or the instruction call have gone out of scope.
      *
@@ -135,10 +135,10 @@ namespace Data {
      *
      * Scalar values report typeid(T) and shape {1}. Array values report
      * typeid(T[]) and currently use a rank-1 shape containing their element
-     * count. A rank-2 shape can be carried by DataView, but this DataValue
+     * count. A rank-2 shape can be carried by DataViewOld, but this DataValueOld
      * factory currently creates only rank-1 array results.
      */
-    class DataValue
+    class DataValueOld
     {
         struct Concept
         {
@@ -241,12 +241,12 @@ namespace Data {
 
       public:
         /// A result must contain a scalar or array, so an empty value is not allowed.
-        DataValue() = delete;
+        DataValueOld() = delete;
 
         /** Create an owning scalar result by moving or copying `value`. */
-        template <typename T> static DataValue scalar(T value)
+        template <typename T> static DataValueOld scalar(T value)
         {
-            return DataValue(
+            return DataValueOld(
                 std::unique_ptr<Concept>(new ScalarModel<T>(std::move(value))),
                 typeid(T), DataShape{1});
         }
@@ -254,14 +254,14 @@ namespace Data {
         /**
          * Create an owning contiguous 1D array result.
          *
-         * The input pointer becomes owned by the returned DataValue and must
+         * The input pointer becomes owned by the returned DataValueOld and must
          * point to at least `count` elements. The caller must not delete it
          * afterwards. `count` is used for shape reporting and deep copies.
          */
         template <typename T>
-        static DataValue array(std::unique_ptr<T[]> values, size_t count)
+        static DataValueOld array(std::unique_ptr<T[]> values, size_t count)
         {
-            return DataValue(
+            return DataValueOld(
                 std::unique_ptr<Concept>(
                     new ArrayModel<T>(std::move(values), count)),
                 typeid(T[]), DataShape{count});
@@ -270,30 +270,30 @@ namespace Data {
         /**
          * Create an owning contiguous 2D array result.
          *
-         * The input pointer becomes owned by the returned DataValue and must
+         * The input pointer becomes owned by the returned DataValueOld and must
          * point to at least `rows * cols` elements. The caller must not delete it
          * afterwards. `rows` and `cols` are used for shape reporting and deep copies.
          */
         template <typename T>
-        static DataValue array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols)
+        static DataValueOld array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols)
         {
-            return DataValue(
+            return DataValueOld(
                 std::unique_ptr<Concept>(
                     new Array2dModel<T>(std::move(values), rows, cols)),
                 typeid(T[]), DataShape{rows, cols});
         }
 
         /** Deep-copy an owned result. */
-        DataValue(const DataValue& other)
+        DataValueOld(const DataValueOld& other)
             : storage(other.storage->clone()), typeInfo(other.typeInfo),
               valueShape(other.valueShape)
         {
         }
 
         /** Transfer ownership without copying the stored object. */
-        DataValue(DataValue&&) noexcept = default;
+        DataValueOld(DataValueOld&&) noexcept = default;
         /** Deep-copy assignment of an owned result. */
-        DataValue& operator=(const DataValue& other)
+        DataValueOld& operator=(const DataValueOld& other)
         {
             if (this != &other) {
                 storage = other.storage->clone();
@@ -303,7 +303,7 @@ namespace Data {
             return *this;
         }
         /** Move assignment transfers the owned storage. */
-        DataValue& operator=(DataValue&&) noexcept = default;
+        DataValueOld& operator=(DataValueOld&&) noexcept = default;
 
         /** Return the runtime type of the stored scalar or array elements. */
         const std::type_info& type() const noexcept { return *typeInfo; }
@@ -312,9 +312,9 @@ namespace Data {
         const DataShape& shape() const noexcept { return valueShape; }
 
         /** Borrow the owned result as a read-only view. */
-        DataView view() const noexcept
+        DataViewOld view() const noexcept
         {
-            return DataView{storage->data(), *typeInfo, valueShape};
+            return DataViewOld{storage->data(), *typeInfo, valueShape};
         }
 
         /** Return a checked reference to an owned scalar T. */
@@ -332,7 +332,7 @@ namespace Data {
 
       private:
             /** Construct a result from erased storage and its metadata. */
-        DataValue(std::unique_ptr<Concept> storage,
+        DataValueOld(std::unique_ptr<Concept> storage,
                   const std::type_info& typeInfo, DataShape shape)
             : storage(std::move(storage)), typeInfo(&typeInfo),
               valueShape(std::move(shape))

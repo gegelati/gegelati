@@ -100,7 +100,7 @@ namespace Evaluation {
         /**
          * \brief return the current dataSources to obtain the dimensions of the task. TODO maybe better to do.
          */
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDimensionsDataSources() const;
+        virtual std::vector<Data::DataView> getDimensionsDataSources() const;
         
         /**
          * \brief Add a metric requested to be measured during an evaluation run.

@@ -7,7 +7,7 @@
 
 #include "evaluation/evaluationMetric.h"
 #include "mutator/rng.h"
-
+#if 0
 namespace Evaluation {
     /**
      * \brief Class to extract archive metrics from the environment.
@@ -99,3 +99,4 @@ namespace Evaluation {
 }; // namespace Evaluation
 
 #endif // ARCHIVE_METRICS_H
+#endif

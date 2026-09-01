@@ -18,8 +18,8 @@ namespace Data {
      * represented by {1}, rather than by an empty shape.
      *
      * DataShape does not own or point to the data. It only describes how the
-     * data should be interpreted; ownership is handled by DataValue and
-     * lifetime is handled by the caller for DataView.
+     * data should be interpreted; ownership is handled by DataValueOld and
+     * lifetime is handled by the caller for DataViewOld.
      */
     struct DataShape
     {

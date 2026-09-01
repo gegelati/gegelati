@@ -1,5 +1,5 @@
 #include "evaluation/archiveEnvironment.h"
-
+#if 0
 
 
 void Evaluation::ArchiveEnvironment::setDimensionDataSource(std::vector<std::reference_wrapper<const Data::DataHandler>> dHandler)
@@ -171,3 +171,4 @@ void Evaluation::ArchiveEnvironment::updateArchiveOutputs(
         };
     }
 }
+#endif

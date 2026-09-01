@@ -126,7 +126,7 @@ namespace Data {
         void setPointer(T* ptr);
 
         /// Inherited from DataHandler
-        virtual DataView getDataAt(const std::type_info& type,
+        virtual DataViewOld getDataAt(const std::type_info& type,
                                            const size_t address) const override;
 
         /// Inherited from DataHandler
@@ -216,7 +216,7 @@ namespace Data {
     }
 
     template <class T>
-    inline DataView PointerWrapper<T>::getDataAt(
+    inline DataViewOld PointerWrapper<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
         if (this->containerPtr == nullptr) {
@@ -245,11 +245,11 @@ namespace Data {
         // OLD (broken):
         // UntypedSharedPtr result(this->containerPtr,
         //                 UntypedSharedPtr::emptyDestructor<const T>());
-        // DataView(this->containerPtr, type, DataShape shape)
+        // DataViewOld(this->containerPtr, type, DataShape shape)
         // return result;
 
-        // NEW: Use DataView::scalar factory method
-        return DataView::scalar(*this->containerPtr);
+        // NEW: Use DataViewOld::scalar factory method
+        return DataViewOld::scalar(*this->containerPtr);
     }
 
     template <class T>

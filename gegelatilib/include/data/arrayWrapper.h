@@ -206,17 +206,17 @@ namespace Data {
          * For a scalar, the view references a single element. For an array type,
          * the view references the corresponding contiguous elements.
          */
-        virtual DataView getDataAt(const std::type_info& type,
+        virtual DataViewOld getDataAt(const std::type_info& type,
                                 const size_t address) const override;
 
         /**
          * \brief Set the value at the given address.
          *
-         * The data is copied from the provided DataValue into the wrapped array.
+         * The data is copied from the provided DataValueOld into the wrapped array.
          */
         virtual void setDataAt(const std::type_info& type,
                             const size_t address,
-                            const DataView& value) override;
+                            const DataViewOld& value) override;
 
         /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
@@ -342,7 +342,7 @@ namespace Data {
     }
 
     template <class T>
-    inline DataView ArrayWrapper<T>::getDataAt(
+    inline DataViewOld ArrayWrapper<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
         if (this->containerPtr == nullptr) {
@@ -352,14 +352,14 @@ namespace Data {
         checkAddressAndType(type, address);
 
         if (type == typeid(T)) {
-            return DataView::scalar(this->containerPtr->at(address));
+            return DataViewOld::scalar(this->containerPtr->at(address));
         }
 
         // The only other supported type is a C-style array.
         const size_t arraySize =
             this->nbElements - this->getAddressSpace(type) + 1;
 
-        return DataView::array(
+        return DataViewOld::array(
             this->containerPtr->data() + address,
             DataShape{arraySize});
     }
@@ -368,7 +368,7 @@ namespace Data {
     inline void ArrayWrapper<T>::setDataAt(
         const std::type_info& type,
         const size_t address,
-        const DataView& value)
+        const DataViewOld& value)
     {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");

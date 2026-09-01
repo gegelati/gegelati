@@ -55,21 +55,19 @@ void StickGameWithOpponentD::doAction(double actionID)
     if (!this->isTerminal()) {
         // Execute the action
         // Get current state
-        int currentState =
-            (int)(((this->remainingSticks.getDataAt(typeid(double), 0.0))
-                        .getScalar<double>()));
+        int currentState = this->remainingSticks;
         if ((actionID + 1) > currentState) {
             // Illegal move
             this->forbiddenMove = true;
             // and game over
-            this->remainingSticks.setDataAt(typeid(double), 0, 0.0);
+            this->remainingSticks = 0.0;
             // stop there
             return;
         }
         else {
             // update state
             currentState -= ((int)actionID + 1);
-            this->remainingSticks.setDataAt(typeid(double), 0, double(currentState));
+            this->remainingSticks = currentState;
             // if current state is now zero, the player lost
         }
 
@@ -77,7 +75,7 @@ void StickGameWithOpponentD::doAction(double actionID)
         if (currentState > 0) {
             currentState -=
                 (int)this->rng.getUnsignedInt64(1, std::min(currentState, 3));
-            this->remainingSticks.setDataAt(typeid(double), 0, double(currentState));
+            this->remainingSticks = currentState;
             if (currentState == 0) {
                 this->win = true;
             }
@@ -93,16 +91,19 @@ void StickGameWithOpponentD::reset(size_t seed, Evaluation::LearningMode mode,
     size_t hash_seed =
         Data::Hash<size_t>()(seed) ^ Data::Hash<Evaluation::LearningMode>()(mode);
     this->rng.setSeed(hash_seed);
-    this->remainingSticks.setDataAt(typeid(double), 0, 21.0);
+    this->remainingSticks = 21;
     this->win = false;
     this->forbiddenMove = false;
 }
 
-std::vector<std::reference_wrapper<const Data::DataHandler>>
+std::vector<Data::DataView>
 StickGameWithOpponentD::getDataSources() const
 {
-    std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
-        this->hints, this->remainingSticks};
+    Data::DataView hintsView(hints.data(), Data::DataType::array1d<double>(3));
+    Data::DataView remainingSticksView(&remainingSticks, Data::DataType::array1d<double>(1));
+    std::vector<Data::DataView> res = {
+        hintsView, remainingSticksView
+    };
 
     return res;
 }
@@ -124,5 +125,5 @@ double StickGameWithOpponentD::getScore() const
 
 bool StickGameWithOpponentD::isTerminal() const
 {
-    return (int)((this->remainingSticks.getDataAt(typeid(double), 0)).getScalar<double>()) == 0;
+    return this->remainingSticks == 0;
 }

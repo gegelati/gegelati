@@ -41,7 +41,7 @@
 
 #include "evaluation/archiveEnvironment.h"
 #include "evaluation/evaluationAgent.h"
-
+#if 0
 namespace Evaluation {
 
     /**
@@ -115,3 +115,4 @@ namespace Evaluation {
 }; // namespace Evaluation
 
 #endif // ARCHIVE_EVAL_AGENT_H
+#endif

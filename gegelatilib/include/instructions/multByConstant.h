@@ -44,7 +44,6 @@
 #include <typeinfo>
 
 #include "data/constantHandler.h"
-#include "data/dataValue.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -132,8 +131,8 @@ namespace Instructions {
 
     template <class T> void MultByConstant<T>::setUpOperand()
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(Data::Constant));
+        this->operandTypes.push_back(Data::DataType::scalar<T>());
+        this->operandTypes.push_back(Data::DataType::scalar<Data::Constant>());
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

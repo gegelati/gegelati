@@ -12,7 +12,7 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
     );
 }
 
-void Representations::LGPRepresentation::setInputDimensions(const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources)
+void Representations::LGPRepresentation::setInputDimensions(const std::vector<Data::DataView>& inputSources)
 {
     Evolution::Representation::setInputDimensions(inputSources);
     this->nbInputSources++;
@@ -98,13 +98,16 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
 
 
 std::vector<double> Representations::LGPRepresentation::executeIndividual(
-    const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const
+    const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 
     /// Registers used as internal memory. TODO AAAAAAAA not sure creating register here is the most efficient..
-    Data::PrimitiveTypeArray<double> registers(this->nbRegisters);
+    //Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
+    //Data::DataView registerView = registers.view();
+    std::vector<double> registers(this->nbRegisters, 0);
+    const Data::DataView registerView = Data::DataView(registers.data(), Data::DataType::array1d<double>(8));
 
     for(const Node::GPNode& node: effectiveNodes.at(0)) {
 
@@ -121,18 +124,20 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
             size_t inputType = std::get<size_t>(node.getValue(nodeIndex));
             size_t inputIndex = std::get<size_t>(node.getValue(nodeIndex + 1));
 
-            const std::type_info& operandType = instruction.getOperandTypes().at(0).get();
-            const Data::DataHandler& dataSource = (inputType==0) ? registers : inputSources[inputType - 1];
+            const Data::DataType& operandType = instruction.getOperandTypes().at(idxOp);
+            const Data::DataView& dataSource = (inputType==0) ? registerView : inputSources.at(inputType - 1);
 
             uint64_t operandLocation = dataSource.scaleLocation(inputIndex, operandType);
-            operands.push_back(dataSource.getDataAt(operandType, operandLocation));
+            operands.push_back(dataSource.getSubView(operandType, operandLocation));
 
         }
 
-        registers.setDataAt(typeid(double), outputIndex, instruction.execute(operands).view());
+        registers[outputIndex] = instruction.execute(operands).getScalar<double>();
+        //registers.setDataAt(typeid(double), outputIndex, instruction.execute(operands).view());
     }
 
-    double value = registers.getDataAt(typeid(double), 0).getScalar<double>();
+    //double value = registers.getDataAt(typeid(double), 0).getScalar<double>();
+    double value = registers.at(0);
     if(value > 2.0) {
         value = 2.0;
     } else if (value < 0.0) {

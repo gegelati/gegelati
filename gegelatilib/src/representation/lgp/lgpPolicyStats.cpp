@@ -52,8 +52,8 @@ void Representation::LGP::LGPPolicyStats::analyzeLine(const LGPLine& line)
          operandIdx++) {
         const std::pair<size_t, size_t>& rawOperand =
             line.getOperand(operandIdx);
-        const std::type_info& operandType =
-            instruction.getOperandTypes().at(operandIdx).get();
+        const std::type_info& operandType = typeid(double);
+            //instruction.getOperandTypes().at(operandIdx).get();
         const Data::DataHandler& dHandler =
             dataSourcesAndRegisters.at(rawOperand.first).get();
         size_t scaledLocation =

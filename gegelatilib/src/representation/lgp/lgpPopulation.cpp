@@ -151,8 +151,8 @@ uint64_t Representation::LGP::LGPPopulation::identifyIntrons(const Individual& i
                 if (currentLine.getOperand(idxOperand).first == 0) {
                     // The operand is a register, add the accessed register to
                     // the list of useful registers.
-                    const std::type_info& operandType =
-                        instruction.getOperandTypes().at(idxOperand);
+                    const std::type_info& operandType =typeid(double);
+                //instruction.getOperandTypes().at(idxOperand);
                     uint64_t location =
                         currentLine.getOperand(idxOperand).second;
                     uint64_t registerIdx =

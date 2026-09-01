@@ -46,7 +46,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include "data/dataValue.h"
+#include "newData/dataValue.h"
 
 namespace Instructions {
     /**
@@ -159,8 +159,8 @@ namespace Instructions {
          * \return a const reference on the list of operand type_info of the
          * Instruction.
          */
-        const std::vector<std::reference_wrapper<const std::type_info>>&
-        getOperandTypes() const;
+        const std::vector<Data::DataType>&
+          getOperandTypes() const;
 
         /**
          * \brief Get the number of operands required to execute the
@@ -208,7 +208,7 @@ namespace Instructions {
          * \brief List of the types of the operands needed to execute the
          * instruction.
          */
-        std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
+        std::vector<Data::DataType> operandTypes;
     };
 
 } // namespace Instructions

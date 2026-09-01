@@ -142,15 +142,15 @@ const void Representation::LGP::LGPEngine::fetchCurrentOperands(
     // Get as many operands as required by the instruction.
     for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 
-        const std::type_info& operandType =
-            instruction.getOperandTypes().at(i).get();
+        const std::type_info& operandType =typeid(double);
+                //instruction.getOperandTypes().at(i).get();
 
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             line.getOperand(i).first); // Throws std::out_of_range
         const uint64_t operandLocation = getOperandLocation(i);
-        Data::DataView data =
-            dataSource.getDataAt(operandType, operandLocation);
-        operands.push_back(data);
+        //Data::DataView data =
+        //    dataSource.getDataAt(operandType, operandLocation);
+        //operands.push_back(data);
     }
 }
 
@@ -164,8 +164,8 @@ uint64_t Representation::LGP::LGPEngine::getOperandLocation(uint64_t idxOp) cons
         line.getOperand(idxOp);
     const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
         operandIndexes.first); // Throws std::out_of_range
-    const std::type_info& operandType =
-        instruction.getOperandTypes().at(idxOp).get();
+    const std::type_info& operandType =typeid(double);
+                //instruction.getOperandTypes().at(idxOp).get();
     uint64_t operandLocation =
         dataSource.scaleLocation(operandIndexes.second, operandType);
 
