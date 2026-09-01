@@ -68,6 +68,51 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     ASSERT_NO_THROW(oneDView.getScalar<int>());
 }
 
+TEST(DataViewTest, ConstructorFromScalarInfersType)
+{
+    int scalarValue = 42;
+    Data::DataView scalarView(scalarValue);
+
+    EXPECT_EQ(scalarView.getRank(), 0u);
+    EXPECT_EQ(scalarView.getDimensions()[0], 1u);
+    EXPECT_EQ(scalarView.getDimensions()[1], 0u);
+    EXPECT_EQ(scalarView.getElementType(), typeid(int));
+
+    EXPECT_EQ(scalarView.getScalar<int>(), 42);
+
+    int oneDValues[4] = {10, 20, 30, 40};
+    Data::DataView oneDView(oneDValues);
+
+    EXPECT_EQ(oneDView.getRank(), 1u);
+    EXPECT_EQ(oneDView.getDimensions()[0], 4u);
+    EXPECT_EQ(oneDView.getDimensions()[1], 0u);
+    EXPECT_EQ(oneDView.getElementType(), typeid(int));
+
+    const int* oneDPtr = oneDView.getArray<int>();
+    ASSERT_NE(oneDPtr, nullptr);
+    EXPECT_EQ(oneDPtr[0], 10);
+    EXPECT_EQ(oneDPtr[1], 20);
+    EXPECT_EQ(oneDPtr[2], 30);
+    EXPECT_EQ(oneDPtr[3], 40);
+
+    int twoDValues[2][3] = {{1, 2, 3}, {4, 5, 6}};
+    Data::DataView twoDView(twoDValues);
+
+    EXPECT_EQ(twoDView.getRank(), 2u);
+    EXPECT_EQ(twoDView.getDimensions()[0], 2u);
+    EXPECT_EQ(twoDView.getDimensions()[1], 3u);
+    EXPECT_EQ(twoDView.getElementType(), typeid(int));
+
+    const int* twoDPtr = twoDView.getArray<int>();
+    ASSERT_NE(twoDPtr, nullptr);
+    EXPECT_EQ(twoDPtr[0], 1);
+    EXPECT_EQ(twoDPtr[1], 2);
+    EXPECT_EQ(twoDPtr[2], 3);
+    EXPECT_EQ(twoDPtr[3], 4);
+    EXPECT_EQ(twoDPtr[4], 5);
+    EXPECT_EQ(twoDPtr[5], 6);
+}
+
 TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
 {
     int source[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
@@ -205,6 +250,7 @@ TEST(DataViewTest, BinaryCompatibilityAndTypeMismatchAreRejected)
     ASSERT_THROW(intView.getSubView(Data::DataType::array2d<int>(1, 2), 0), std::out_of_range);
 }
 
+
 TEST(DataViewTest, ToStringContainsViewAndTypeInformation)
 {
     int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};
@@ -216,5 +262,6 @@ TEST(DataViewTest, ToStringContainsViewAndTypeInformation)
     EXPECT_NE(text.find("rank=2"), std::string::npos);
     EXPECT_NE(text.find("dimensions=[2, 3]"), std::string::npos);
     EXPECT_NE(text.find("sourceRank=2"), std::string::npos);
+    ASSERT_NO_THROW(std::cout<<view<<std::endl);
 }
 

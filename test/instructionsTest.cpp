@@ -8,6 +8,7 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
+
 TEST(InstructionsTest, ConstructorDestructorCall)
 {
     ASSERT_NO_THROW({
@@ -21,23 +22,24 @@ TEST(InstructionsTest, OperandListAndNbParam)
 {
     Instructions::AddPrimitiveType<double> instruction;
     ASSERT_EQ(instruction.getNbOperands(), 2);
-    ASSERT_EQ(instruction.getOperandTypes().at(0).get(), typeid(double));
-    ASSERT_EQ(instruction.getOperandTypes().at(1).get(), typeid(double));
+    ASSERT_EQ(instruction.getOperandTypes().at(0).elementType, &typeid(double));
+    ASSERT_EQ(instruction.getOperandTypes().at(1).elementType, &typeid(double));
 }
 
 TEST(InstructionsTest, CheckArgumentTypes)
 {
     Instructions::AddPrimitiveType<double> instruction;
-    double first = 2.5;
-    double second = 5.6;
-    int wrong = 5;
+
+    Data::DataView dvFirst(2.5);
+    Data::DataView dvSecond(5.6);
+    Data::DataView dvWrong(5);
 
     EXPECT_TRUE(instruction.checkOperandTypes(
-        {Data::DataView::scalar(first), Data::DataView::scalar(second)}));
+        {dvFirst, dvSecond}));
     EXPECT_FALSE(instruction.checkOperandTypes(
-        {Data::DataView::scalar(first)}));
+        {dvFirst}));
     EXPECT_FALSE(instruction.checkOperandTypes(
-        {Data::DataView::scalar(first), Data::DataView::scalar(wrong)}));
+        {dvFirst, dvWrong}));
 }
 
 TEST(InstructionsTest, Execute)
@@ -48,11 +50,11 @@ TEST(InstructionsTest, Execute)
     int wrong = 3;
 
     const Data::DataValue result = instruction.execute(
-        {Data::DataView::scalar(first), Data::DataView::scalar(second)});
+        {Data::DataView(first), Data::DataView(second)});
     EXPECT_DOUBLE_EQ(result.getScalar<double>(), 8.1);
     EXPECT_THROW(instruction.execute(
-                     {Data::DataView::scalar(first),
-                      Data::DataView::scalar(wrong)}),
+                     {Data::DataView(first),
+                      Data::DataView(wrong)}),
                  std::invalid_argument);
 }
 
@@ -73,7 +75,7 @@ TEST(InstructionsTest, ConstructorsWithPrintTemplates)
 {
     Instructions::AddPrimitiveType<double> add("$0 = $1 + $2;");
     Instructions::MultByConstant<int> multiply("$0 = $1 * $2;");
-    Instructions::LambdaInstruction<double, double> lambda(
+    Instructions::LambdaInstruction<double, double, double> lambda(
         std::function<double(double, double)>{
             [](double first, double second) { return first - second; }},
         "$0 = $1 - $2;");

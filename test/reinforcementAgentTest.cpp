@@ -70,10 +70,10 @@ class ReinforcementAgentTest : public ::testing::Test
         auto times = [](double a, double b) -> double { return a * b; };
         auto div = [](double a, double b) -> double { return a / b; };
         
-        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
     
         representation = new Representations::LGPRepresentation(set, 8, 5, 10);
         

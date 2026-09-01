@@ -11,9 +11,13 @@
 
 namespace Instructions {
 
-    template <typename First, typename... Rest>
+    template <typename Output, typename First, typename... Rest>
     class LambdaInstruction : public Instruction
     {
+        static_assert(
+            std::is_fundamental<std::remove_all_extents_t<Output>>::value,
+            "LambdaInstruction output must contain a fundamental type.");
+
       protected:
         std::function<Data::DataValue(const First, const Rest...)> function;
 
@@ -68,13 +72,17 @@ namespace Instructions {
             const std::vector<Data::DataView>& arguments) const override
         {
             if (arguments.size() != this->operandTypes.size()) {
-                std::cout<<"here"<<std::endl;
+                std::cout << "here" << std::endl;
                 return false;
             }
             for (size_t index = 0; index < arguments.size(); index++) {
                 if (arguments.at(index).getType() !=
                     this->operandTypes.at(index)) {
-                        std::cout<<"here2 "<<index<<" "<<arguments.at(index).getElementType().name()<<" " <<this->operandTypes.at(index).elementType->name()<<std::endl;
+                    std::cout << "here2\n " << index << " "
+                              << arguments 
+                              << "\n"
+                              << this->operandTypes.at(index)
+                              << std::endl;
                     return false;
                 }
             }
@@ -85,9 +93,25 @@ namespace Instructions {
             const std::vector<Data::DataView>& args) const override
         {
             if (!this->checkOperandTypes(args)) {
-                throw std::invalid_argument("LambdaInstruction::execute: Instruction operand type mismatch.");
+                throw std::invalid_argument(
+                    "LambdaInstruction::execute: Instruction operand type mismatch.");
             }
-            return doExecution(args, std::index_sequence_for<Rest...>{});
+
+            Data::DataValue result =
+                doExecution(args, std::index_sequence_for<Rest...>{});
+
+            if constexpr (!std::is_array<Output>::value) {
+                if (*result.getType().elementType != typeid(Output)) {
+                    throw std::invalid_argument(
+                        "LambdaInstruction::execute: Lambda result type does not match declared output.");
+                }
+            }
+            else if (result.getType().dimensions[0] == 0) {
+                throw std::invalid_argument(
+                    "LambdaInstruction::execute: Lambda array result has no declared type.");
+            }
+
+            return result;
         }
 
       private:
@@ -147,39 +171,6 @@ namespace Instructions {
         {
             this->operandTypes.push_back(operandType<First>());
             (this->operandTypes.push_back(operandType<Rest>()), ...);
-        }
-    };
-
-    template <typename Output, typename First, typename... Rest>
-    class TypedLambdaInstruction : public LambdaInstruction<First, Rest...>
-    {
-        static_assert(
-            std::is_fundamental<std::remove_all_extents_t<Output>>::value,
-            "TypedLambdaInstruction output must contain a fundamental type.");
-
-      public:
-        template <typename Function>
-        explicit TypedLambdaInstruction(Function function)
-            : LambdaInstruction<First, Rest...>(function)
-        {
-        }
-
-        Data::DataValue execute(
-            const std::vector<Data::DataView>& args) const override
-        {
-            Data::DataValue result =
-                LambdaInstruction<First, Rest...>::execute(args);
-            if constexpr (!std::is_array<Output>::value) {
-                if (*result.getType().elementType != typeid(Output)) {
-                    throw std::invalid_argument(
-                        "TypedLambdaInstruction:Execute: Lambda result type does not match declared output.");
-                }
-            }
-            else if (result.getType().dimensions[0] == 0) {
-                throw std::invalid_argument(
-                    "TypedLambdaInstruction:Execute: Lambda array result has no declared type.");
-            }
-            return result;
         }
     };
 

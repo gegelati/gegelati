@@ -21,7 +21,7 @@ class FakedLearningEnvironment : public Evaluation::LearningEnvironment
     {
     }
 
-    virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
+    virtual std::vector<Data::DataView>
     getDataSources() const override
     {
         return {};

@@ -127,7 +127,7 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
             const Data::DataType& operandType = instruction.getOperandTypes().at(idxOp);
             const Data::DataView& dataSource = (inputType==0) ? registerView : inputSources.at(inputType - 1);
 
-            uint64_t operandLocation = dataSource.scaleLocation(inputIndex, operandType);
+            uint64_t operandLocation = dataSource.scaleLocation(operandType, inputIndex);
             operands.push_back(dataSource.getSubView(operandType, operandLocation));
 
         }

@@ -11,9 +11,9 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     Instructions::MultByConstant<int> instruction;
 
     const Data::DataValue result = instruction.execute(
-        {Data::DataView::scalar(value), Data::DataView::scalar(constant)});
+        {Data::DataView(value), Data::DataView(constant)});
 
-    ASSERT_EQ(result.type(), typeid(int));
+    ASSERT_EQ(result.getElementType(), typeid(int));
     ASSERT_EQ(result.getScalar<int>(), 10);
 }
 
@@ -24,8 +24,8 @@ TEST(MultByConstParamTest, RejectsWrongOperandTypes)
     Instructions::MultByConstant<int> instruction;
 
     EXPECT_THROW(instruction.execute(
-                     {Data::DataView::scalar(value),
-                      Data::DataView::scalar(constant)}),
+                     {Data::DataView(value),
+                      Data::DataView(constant)}),
                  std::invalid_argument);
 }
 
@@ -36,3 +36,4 @@ TEST(MultByConstParamTest, PrintConstructor)
     SUCCEED();
 }
 #endif
+

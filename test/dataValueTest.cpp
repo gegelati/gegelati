@@ -200,4 +200,7 @@ TEST(DataValueTest, arrayRangeFactoriesAndStringOutputRemainReliable)
     EXPECT_NE(text.find("DataType{"), std::string::npos);
     EXPECT_NE(text.find("rank=2"), std::string::npos);
     EXPECT_NE(text.find("[1, 2"), std::string::npos);
+
+    ASSERT_NO_THROW(std::cout<<value<<std::endl);
+    
 }
