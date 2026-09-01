@@ -21,27 +21,52 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <initializer_list>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <typeinfo>
 
 namespace Data {
 
     /**
-     * @brief Describes the shape, type, and source context of data.
+     * @brief Descriptor of a typed view or value, including shape and source context.
      *
-     * A DataType is a **complete descriptor** for data, including:
-     * - **Shape**: Rank (0=scalar, 1=1D, 2=2D) and dimensions.
-     * - **Type**: `std::type_info` of the element type and its size in bytes.
-     * - **Source Context**: For sub-views, the original source's shape and offset.
+     * `DataType` is the metadata object carried by `DataView` and `DataValue`.
+     * It answers three questions about the memory it describes:
      *
-     * @note
-     * - For **top-level data** (e.g., a DataValue), the source fields match the view's shape,
-     *   and `sourceOffset = 0`.
-     * - For **sub-views**, the source fields point to the **original source**, enabling correct
-     *   address space calculations (e.g., `double[4]` from `double[8]` at address 1 → indices 1-4).
-     * - `sourceOffset` is a **linear offset in elements** (not bytes). For 2D arrays, it is
-     *   linearized in **row-major order** (offset = row * width + col).
+     * 1. What is the logical shape of the view? (`rank`, `dimensions`)
+     * 2. What element type does the memory store? (`elementType`, `elementSize`)
+     * 3. If this is a sub-view, where does it come from in the original source?
+     *    (`sourceRank`, `sourceDimensions`, `sourceOffset`)
+     *
+     * The class is intentionally lightweight and type-erased: it stores runtime type
+     * information and dimensional metadata, but it does not own the underlying buffer.
+     * This allows consumers to validate operations such as typed reads, sub-view creation,
+     * and row-major indexing without having to duplicate the full data layout in every class.
+     *
+     * ### Shape model
+     * - Rank 0: scalar
+     * - Rank 1: 1D array
+     * - Rank 2: 2D array
+     *
+     * For 1D arrays, `dimensions = {size, 0}`. For 2D arrays, `dimensions = {rows, cols}`.
+     * All linear indexing is done in row-major order.
+     *
+     * ### Source context
+     * For top-level objects, `sourceRank`, `sourceDimensions`, and `sourceOffset` match the
+     * same data as the current view. For sub-views, they still point to the original buffer,
+     * which allows algorithms to compute a valid window inside the source without losing the
+     * original coordinate system.
+     *
+     * A typical example:
+     * - source: `double[8]`
+     * - view: `double[4]` at offset 1
+     * - the view describes a window covering elements 1, 2, 3, 4 of the source.
+     *
+     * @note `sourceOffset` is expressed in elements, not bytes, and for 2D arrays it follows
+     * row-major linearization: offset = row * width + col.
      */
     struct DataType {
         // --- Shape of THIS view ---
@@ -78,9 +103,14 @@ namespace Data {
 
 
         /**
-         * @brief Constructs a DataType for a scalar.
+         * @brief Builds a descriptor for a scalar value.
          *
-         * @tparam T The type of the scalar.
+         * A scalar is represented as a rank-0 object whose logical size is one element.
+         * The `dimensions` field is normalized to `{1, 0}` so that downstream code can
+         * treat scalar and array metadata uniformly when needed.
+         *
+         * @tparam T The scalar element type.
+         * @return A DataType describing a single value of type T.
          */
         template <typename T>
         static DataType scalar() {
@@ -96,10 +126,15 @@ namespace Data {
         }
 
         /**
-         * @brief Constructs a DataType for a 1D array.
+         * @brief Builds a descriptor for a 1D array.
+         *
+         * The view shape is stored as `{size, 0}` because the implementation uses a fixed
+         * two-element dimension array: the first slot is the primary extent and the second is
+         * unused for rank-1 data.
          *
          * @tparam T The element type of the array.
-         * @param size The size of the array.
+         * @param size Number of elements in the array.
+         * @return A DataType describing a contiguous 1D view of T.
          */
         template <typename T>
         static DataType array1d(size_t size) {
@@ -115,11 +150,15 @@ namespace Data {
         }
 
         /**
-         * @brief Constructs a DataType for a 2D array (row-major).
+         * @brief Builds a descriptor for a 2D array in row-major layout.
+         *
+         * The element ordering is assumed to be row-major: for a 2D matrix with dimension
+         * `rows x cols`, the linear index of `(row, col)` is `row * cols + col`.
          *
          * @tparam T The element type of the array.
-         * @param rows The height (number of rows).
-         * @param cols The width (number of columns).
+         * @param rows Number of rows.
+         * @param cols Number of columns.
+         * @return A DataType describing a 2D view of T.
          */
         template <typename T>
         static DataType array2d(size_t rows, size_t cols) {
@@ -134,27 +173,50 @@ namespace Data {
             return dt;
         }
 
+        /**
+         * @brief Deduce the DataType of a scalar object.
+         *
+         * This overload is intended to be used with a single object value, such as:
+         * `DataType::from(value)`.
+         */
         template <typename T>
         static DataType from(const T (&)) {
             return scalar<T>();
         }
 
+        /**
+         * @brief Deduce the DataType of a 1D C array.
+         *
+         * Example: `int values[4]; DataType::from(values)` creates an array1d<int>(4).
+         */
         template <typename T, size_t N>
         static DataType from(const T (&)[N]) {
             return array1d<T>(N);
         }
 
+        /**
+         * @brief Deduce the DataType of a 2D C array.
+         *
+         * Example: `double matrix[2][3]; DataType::from(matrix)` creates an array2d<double>(2, 3).
+         */
         template <typename T, size_t Rows, size_t Cols>
         static DataType from(const T (&)[Rows][Cols]) {
             return array2d<T>(Rows, Cols);
         }
 
         /**
-         * @brief Constructs a DataType for a sub-view.
+         * @brief Creates a descriptor for a sub-view extracted from a larger source.
          *
-         * @param viewShape The shape of the sub-view (e.g., [4] for a sub-array of [8]).
-         * @param source The DataType of the source.
-         * @param offset The linear offset (in elements) from the start of the source.
+         * The sub-view keeps the requested shape in `dimensions`, but also preserves the
+         * metadata of the original source in `sourceRank`, `sourceDimensions`, and
+         * `sourceOffset`. This lets code reconstruct valid pointer arithmetic when a window
+         * is extracted from a larger 1D or 2D buffer.
+         *
+         * @param viewShape Shape of the sub-view being extracted.
+         * @param source Metadata of the original source buffer.
+         * @param offset Linear offset to the beginning of the sub-view inside the source,
+         * expressed in elements.
+         * @return A DataType descriptor for the sub-view.
          */
         static DataType subView(DataType viewShape, const DataType& source, size_t offset) {
             DataType dt;
@@ -171,77 +233,75 @@ namespace Data {
         // --- Helpers ---
 
         /**
-         * @brief Returns the total number of elements in THIS view.
+         * @brief Returns the number of elements in the current view.
+         *
+         * For scalar views this is 1. For rank-1 arrays, it is the array length.
+         * For rank-2 arrays, it is `rows * cols`.
          */
         size_t totalElements() const noexcept {
             return dimensions[0] * (rank >= 2 ? dimensions[1] : 1);
         }
 
         /**
-         * @brief Returns the total number of elements in the SOURCE.
+         * @brief Returns the number of elements in the original source buffer.
          */
         size_t sourceTotalElements() const noexcept {
             return sourceDimensions[0] * (sourceRank >= 2 ? sourceDimensions[1] : 1);
         }
 
         /**
-         * @brief Checks if this shape can fit in the source at a given offset.
+         * @brief Checks whether a requested descriptor can fit inside this descriptor.
          *
-         * @param offset The linear offset (in elements) from the start of the source.
-         * @return true if the shape fits at the given offset.
+         * This is the descriptor-level compatibility check: it verifies whether a requested
+         * view can be placed at a given linear offset inside the current view's own memory
+         * layout, without crossing the current view boundaries and without mixing element types.
+         *
+         * The check is intentionally self-contained and does not depend on any external source
+         * provenance. The source metadata is preserved for bookkeeping, but the validity test is
+         * performed against the current descriptor itself.
+         *
+         * @param requested The descriptor to be placed inside this descriptor.
+         * @param offset Linear offset, in elements, relative to the start of this descriptor.
+         * @return `true` if the requested view fits in the current descriptor, otherwise `false`.
          */
-        bool canFitIn(size_t offset) const noexcept {
-            if (this->rank > this->sourceRank) {
+        bool canFitIn(const DataType& requested, size_t offset = 0) const noexcept {
+            if (this->rank == 0) {
+                return requested.rank == 0 && offset == 0;
+            }
+
+            if (this->rank == 1) {
+                if (requested.rank == 0) {
+                    return offset < this->dimensions[0];
+                }
+                if (requested.rank == 1) {
+                    return offset + requested.dimensions[0] <= this->dimensions[0];
+                }
                 return false;
             }
 
-            size_t start = sourceOffset + offset;
+            if (requested.rank == 0) {
+                return offset < this->totalElements();
+            }
+            if (requested.rank == 1) {
+                return ((offset % this->dimensions[1]) + requested.dimensions[0] <= this->dimensions[1]) &&
+                       (offset + requested.dimensions[0] <= this->totalElements());
+            }
+            if (requested.rank == 2) {
+                const size_t startRow = offset / this->dimensions[1];
+                const size_t startCol = offset % this->dimensions[1];
+                return (startRow + requested.dimensions[0] <= this->dimensions[0]) &&
+                       (startCol + requested.dimensions[1] <= this->dimensions[1]);
+            }
 
-            if (rank == 0) {
-                // Scalar: just check if the offset is within the source's total elements.
-                return start < sourceTotalElements();
-            }
-            else if (rank == 1) {
-                // 1D sub-view: must fit in the linearized source.
-                return (start + dimensions[0]) <= sourceTotalElements();
-            }
-            else { // rank == 2
-                // Convert linear start to (row, col) in the source.
-                size_t startRow = start / sourceDimensions[1];
-                size_t startCol = start % sourceDimensions[1];
-                return (startRow + dimensions[0] <= sourceDimensions[0]) &&
-                    (startCol + dimensions[1] <= sourceDimensions[1]);
-            }
+            return false;
         }
 
         /**
-         * @brief Computes the number of valid starting addresses for THIS shape in the source.
+         * @brief Compares two descriptors while ignoring source context.
          *
-         * @return The number of valid starting addresses, or 0 if the shape cannot be extracted.
-         */
-        size_t getAddressSpace() const noexcept {
-            if (rank == 0) {
-                return sourceTotalElements();
-            }
-            if (rank == 1) {
-                if (sourceRank < 1) return 0;
-                size_t available = sourceDimensions[0] - dimensions[0] + 1;
-                return (available > sourceOffset) ? (available - sourceOffset) : 0;
-            }
-            if (rank == 2) {
-                if (sourceRank < 2) return 0;
-                size_t availableRows = sourceDimensions[0] - dimensions[0] + 1;
-                size_t availableCols = sourceDimensions[1] - dimensions[1] + 1;
-                return availableRows * availableCols;
-            }
-            return 0;
-        }
-
-        /**
-         * @brief Compares two DataType objects for equality (ignores source context).
-         *
-         * Two DataTypes are equal if they have the same shape and type.
-         * Source context is **not** compared (use compareWithSource() for that).
+         * Two DataTypes are considered identical if they describe the same view shape and
+         * the same element type/size. The provenance of the underlying source is intentionally
+         * not part of this comparison.
          */
         bool operator==(const DataType& other) const noexcept {
             return rank == other.rank &&
@@ -251,14 +311,17 @@ namespace Data {
         }
 
         /**
-         * @brief Compares two DataType objects for inequality (ignores source context).
+         * @brief Compares two descriptors while ignoring source context.
          */
         bool operator!=(const DataType& other) const noexcept {
             return !(*this == other);
         }
 
         /**
-         * @brief Compares two DataType objects, including source context.
+         * @brief Compares two descriptors including the source provenance metadata.
+         *
+         * This is stricter than `operator==`: two views with the same logical shape and type but
+         * different source origins are not considered equal in this comparison.
          */
         bool equalsWithSource(const DataType& other) const noexcept {
             return *this == other &&
@@ -267,7 +330,12 @@ namespace Data {
                    sourceOffset == other.sourceOffset;
         }
 
-        
+        /**
+         * @brief Renders the descriptor as a debug-friendly string.
+         *
+         * The output is primarily intended for diagnostics and testing; it prints both the
+         * local view metadata and the preserved source metadata.
+         */
         std::string toString() const {
             std::ostringstream oss;
 

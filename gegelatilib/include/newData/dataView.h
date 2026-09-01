@@ -101,37 +101,27 @@ namespace Data {
          */
         size_t getSourceOffset() const noexcept { return type.sourceOffset; }
 
-        // --- Address Space ---
-
-        /**
-         * @brief Computes the number of valid starting addresses for THIS view's shape.
-         *
-         * @return The number of valid starting addresses, or 0 if the shape cannot be extracted.
-         */
-        size_t getAddressSpace() const noexcept {
-            return this->type.getAddressSpace();
-        }
-
         // --- Sub-View Extraction ---
 
         /**
-         * @brief Checks if a requested shape can fit in the source at a given address.
+         * @brief Checks whether a requested sub-view can be created from this view at a given address.
          *
-         * @param requested The DataType of the requested sub-view (only shape is used).
-         * @param address The starting address in the address space.
-         * @return true if the requested shape fits at the given address.
+         * This is the high-level compatibility check for `DataView`: it validates that the
+         * requested descriptor fits into the current view's own layout at the provided offset,
+         * while requiring the same element type.
+         *
+         * @param requested The DataType of the requested sub-view (shape + element type).
+         * @param address The starting address in the current view's address space.
+         * @return `true` if the sub-view can be safely created, otherwise `false`.
          */
         bool canFit(const DataType& requested, size_t address) const noexcept {
-            // Never fit with different types.
+            if (requested.elementType == nullptr || this->type.elementType == nullptr) {
+                return false;
+            }
             if (requested.elementType != this->type.elementType) {
                 return false;
             }
-            // Temporarily create a DataType for the requested shape with this view's source context
-            DataType temp = requested;
-            temp.sourceRank = this->type.sourceRank;
-            temp.sourceDimensions = this->type.sourceDimensions;
-            temp.sourceOffset = this->type.sourceOffset + address;
-            return temp.canFitIn(0);
+            return this->type.canFitIn(requested, address);
         }
 
         /**
@@ -150,10 +140,9 @@ namespace Data {
         DataView getSubView(DataType requested, size_t address) const {
             if (!this->canFit(requested, address)) {
                 throw std::out_of_range(
-                    "DataView getSubView: Requested shape does not fit in source at the given address or type is wrong."
+                    "DataView getSubView: Requested shape does not fit in the current view at the given address or type is wrong."
                 );
             }
-
             // Compute the new linear offset in the source (in elements)
             size_t newOffset = this->type.sourceOffset;
             if (this->type.sourceRank >= 2 && requested.rank >= 2) {
@@ -171,18 +160,14 @@ namespace Data {
             if(this->type.sourceRank >= 2) {
                 newPtrOffset += (this->type.sourceDimensions[0] - this->type.dimensions[0]) * (address / this->type.dimensions[1]);
             }
+            const size_t byteOffset = newPtrOffset * this->type.elementSize;
 
-            // Compute the byte offset
-            size_t byteOffset = newPtrOffset * this->type.elementSize;
-
-            // Create the new DataType for the sub-view
             DataType subType = DataType::subView(
                 requested,
-                this->type,  // Preserve the original source context
-                newOffset
+                this->type,
+                this->type.sourceOffset + newPtrOffset
             );
 
-            // Return the new DataView
             return DataView(
                 static_cast<const char*>(this->ptr) + byteOffset,
                 std::move(subType)

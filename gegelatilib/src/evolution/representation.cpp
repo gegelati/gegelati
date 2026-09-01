@@ -16,7 +16,7 @@ void Evolution::Representation::setInputDimensions(const std::vector<Data::DataV
     this->nbInputSources = inputSources.size();
     this->maxInputSourceIdx = 0;
     for (const Data::DataView& dHandler : inputSources) {
-        size_t addressSpace = dHandler.getAddressSpace();
+        size_t addressSpace = dHandler.getType().totalElements();
         this->maxInputSourceIdx = (addressSpace > this->maxInputSourceIdx) ? addressSpace : this->maxInputSourceIdx;
     }
 }
