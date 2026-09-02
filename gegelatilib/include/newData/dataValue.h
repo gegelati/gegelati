@@ -314,6 +314,11 @@ namespace Data {
          * \brief Renders the owned value and its metadata as a debugging string.
          */
         std::string toString() const;
+
+        /**
+         * \brief return the view corresponding to the value.
+         */
+        Data::DataView view() const;
     };
 
 } // namespace Data

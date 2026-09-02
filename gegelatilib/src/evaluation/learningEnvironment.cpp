@@ -48,3 +48,14 @@ bool Evaluation::LearningEnvironment::isCopyable() const
 {
     return false;
 }
+
+
+const std::vector<Data::DataType>& Evaluation::LearningEnvironment::getInputDimensions() const
+{
+    return this->inputDimensions;
+}
+
+const Data::DataType& Evaluation::LearningEnvironment::getOutputDimension() const
+{
+    return this->outputDimension;
+}

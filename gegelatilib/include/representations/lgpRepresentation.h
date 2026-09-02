@@ -47,15 +47,6 @@ namespace Representations {
              */
             LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {};
-        
-
-        /**
-         * \brief set the number of input sources. 
-         * LGP representation adds register dataHandler as input.
-         * 
-         * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
-         */
-        virtual void setInputDimensions(const std::vector<Data::DataView>& inputSources) override;
 
         /**
          * \brief return the genotype template an individual.
@@ -83,7 +74,7 @@ namespace Representations {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual std::vector<double> executeIndividual(
+        virtual Data::DataValue executeIndividual(
             const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
     };

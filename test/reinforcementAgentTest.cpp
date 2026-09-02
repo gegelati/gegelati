@@ -118,7 +118,7 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
     
-    representation->setInputDimensions(le.getDataSources());
+    representation->setDimensions(le.getInputDimensions(), le.getOutputDimension());
 
     ASSERT_THROW(rlAgent.evaluateIndividual(indiv, *representation, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 

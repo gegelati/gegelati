@@ -204,3 +204,22 @@ TEST(DataValueTest, arrayRangeFactoriesAndStringOutputRemainReliable)
     ASSERT_NO_THROW(std::cout<<value<<std::endl);
     
 }
+
+
+
+TEST(DataValueTest, DataViewCreation)
+{
+    Data::DataValue value = Data::DataValue::array1d<int[3]>({1, 2, 3});
+    Data::DataView view = value.view();
+    ASSERT_TRUE(view.getType() == value.getType());
+
+    const int* data = view.getArray<int>();
+    ASSERT_EQ(data[0], 1);
+    ASSERT_EQ(data[1], 2);
+    ASSERT_EQ(data[2], 3);
+
+    value.setSubValue(Data::DataValue::scalar<int>(4), 0);
+    ASSERT_EQ(data[0], 4);
+    ASSERT_EQ(data[1], 2);
+    ASSERT_EQ(data[2], 3);
+}

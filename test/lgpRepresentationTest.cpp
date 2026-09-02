@@ -46,12 +46,12 @@
 
 #include "instructions/lambdaInstruction.h"
 
-
 class LGPRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Data::PrimitiveTypeArray<double>* inputSource;
+    Data::DataType inputType;
+    Data::DataType outputType;
 
     virtual void SetUp()
     {   
@@ -60,17 +60,17 @@ class LGPRepresentationTest : public ::testing::Test
         auto times = [](double a, double b) -> double { return a * b; };
         auto div = [](double a, double b) -> double { return a / b; };
         
-        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputSource = new Data::PrimitiveTypeArray<double>(4);
+        inputType = Data::DataType::array1d<double>(4);
+        outputType = Data::DataType::scalar<double>();
     }
 
     virtual void TearDown()
     {
-        delete inputSource;
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
@@ -89,41 +89,14 @@ TEST_F(LGPRepresentationTest, Constructor)
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
-
-TEST_F(LGPRepresentationTest, setInputDimensions)
-{
-    
-    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources;
-    inputSources.push_back(*inputSource);
-    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(8)));
-    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(6)));
-    
-    Representations::LGPRepresentation representation(set, 4, 5, 10);
-
-    ASSERT_NO_THROW(representation.setInputDimensions(inputSources)) << "Setting input dimensions failed";
-
-    ASSERT_EQ(representation.getNbInputSources(), 4) << "Number of input sources set is wrong";
-    ASSERT_EQ(representation.getMaxInputSourceIdx(), 8) << "max index of input source set is wrong";
-    
-    Representations::LGPRepresentation representation2(set, 16, 5, 10);
-
-    ASSERT_NO_THROW(representation2.setInputDimensions(inputSources)) << "Setting input dimensions failed";
-
-    ASSERT_EQ(representation2.getNbInputSources(), 4) << "Number of input sources set is wrong";
-    ASSERT_EQ(representation2.getMaxInputSourceIdx(), 16) << "max index of input source set is wrong";
-    
-    delete (&(inputSources.at(1).get()));
-    delete (&(inputSources.at(2).get()));
-}
-
 TEST_F(LGPRepresentationTest, getGenotypeTemplate)
 {
     Representations::LGPRepresentation representation(set, 8, 5, 10);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
-    representation.setInputDimensions({*inputSource});
-
+    representation.setDimensions({inputType}, outputType);
+    
     ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
     
     ASSERT_EQ(genotypeTemplate->size(), 1) << "Template should have a single nodeTemplate";
@@ -159,7 +132,7 @@ TEST_F(LGPRepresentationTest, isValid)
     Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
 
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
-    representation.setInputDimensions({*inputSource});
+    representation.setDimensions({inputType}, outputType);
 
     for(size_t i = 0; i < 4; i++) {
         group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
@@ -194,14 +167,10 @@ TEST_F(LGPRepresentationTest, isValid)
 
 TEST_F(LGPRepresentationTest, executeIndividual)
 {
-    inputSource->setDataAt(typeid(double), 0, 1.0);
-    inputSource->setDataAt(typeid(double), 1, 1.5);
-    inputSource->setDataAt(typeid(double), 2, 2.0);
-    inputSource->setDataAt(typeid(double), 3, -1.0);
-    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources{*inputSource};
+    Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
     Representations::LGPRepresentation representation(set, 8, 5, 10);
-    representation.setInputDimensions(inputSources);
+    representation.setDimensions({inputSource.getType()}, outputType);
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
@@ -216,12 +185,12 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid";
 
-    double output;
-    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, 1.5) << "Value is not correct.";
+    ASSERT_NO_THROW(representation.executeIndividual(indiv, {inputSource.view()})) << "Execution of individual failed.";
+    Data::DataValue output = representation.executeIndividual(indiv, {inputSource.view()});
+    ASSERT_EQ(output.getScalar<double>(), 1.5) << "Value is not correct.";
 
     // R[0] = R[0] + R[0] = -1, but set as intron
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}, true));
-    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, 1.5) << "Value is not correct.";
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, {inputSource.view()})) << "Execution of individual failed.";
+    ASSERT_EQ(output.getScalar<double>(), 1.5) << "Value is not correct.";
 }

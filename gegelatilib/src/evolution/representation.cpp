@@ -11,24 +11,20 @@ size_t Evolution::Representation::getMaxNbNodes() const
     return this->nbNodesMax;
 }
 
-void Evolution::Representation::setInputDimensions(const std::vector<Data::DataView>& inputSources)
+void Evolution::Representation::setDimensions(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension)
 {
-    this->nbInputSources = inputSources.size();
-    this->maxInputSourceIdx = 0;
-    for (const Data::DataView& dHandler : inputSources) {
-        size_t addressSpace = dHandler.getType().totalElements();
-        this->maxInputSourceIdx = (addressSpace > this->maxInputSourceIdx) ? addressSpace : this->maxInputSourceIdx;
-    }
+    this->inputDimensions = std::move(inputDimensions);
+    this->outputDimension = outputDimension;
 }
 
-size_t Evolution::Representation::getNbInputSources() const
+const std::vector<Data::DataType>& Evolution::Representation::getInputDimensions() const
 {
-    return this->nbInputSources;
+    return this->inputDimensions;
 }
 
-size_t Evolution::Representation::getMaxInputSourceIdx() const
+const Data::DataType& Evolution::Representation::getOutputDimension() const
 {
-    return this->maxInputSourceIdx;
+    return this->outputDimension;
 }
 
 void Evolution::Representation::setTangled(bool tangled)

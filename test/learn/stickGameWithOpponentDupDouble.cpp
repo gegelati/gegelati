@@ -47,16 +47,17 @@ Evaluation::LearningEnvironment* StickGameWithOpponentD::clone() const
     return (Evaluation::LearningEnvironment*)new StickGameWithOpponentD(*this);
 }
 
-void StickGameWithOpponentD::doAction(double actionID)
+void StickGameWithOpponentD::doAction(const Data::DataView& action)
 {
-    ReinforcementEnvironment::doAction(actionID);
+    ReinforcementEnvironment::doAction(action);
+    int actionInt = action.getScalar<int>();
 
     // if the game is not over
     if (!this->isTerminal()) {
         // Execute the action
         // Get current state
         int currentState = this->remainingSticks;
-        if ((actionID + 1) > currentState) {
+        if ((actionInt + 1) > currentState) {
             // Illegal move
             this->forbiddenMove = true;
             // and game over
@@ -66,7 +67,7 @@ void StickGameWithOpponentD::doAction(double actionID)
         }
         else {
             // update state
-            currentState -= ((int)actionID + 1);
+            currentState -= (actionInt + 1);
             this->remainingSticks = currentState;
             // if current state is now zero, the player lost
         }

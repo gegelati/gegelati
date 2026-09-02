@@ -64,49 +64,20 @@ namespace Evaluation {
         /**
          * \brief Constructor for LearningEnviroment.
          *
-         * \param[in] actions that will be usable for
-         * interacting with this LearningEnviromnent.
+         * \param[in] inputDimensions the dimensions of the input sources.
+         * \param[in] outputDimension the dimensions of the output source.
          */
-        ReinforcementEnvironment(Output::OutputHandler actions)
-            : LearningEnvironment(actions) {};
+        ReinforcementEnvironment(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension)
+            : LearningEnvironment(inputDimensions, outputDimension) {};
 
         /**
          * \brief Execute an action on the LearningEnvironment.
          *
-         * The purpose of this method is to execute an action, represented by
-         * an actionId comprised between 0 and nbActions - 1.
-         * The LearningEnvironment implementation only checks that the given
-         * actionID is comprised between 0 and nbActions - 1.
-         * It is the responsibility of this method to call the updateHash
-         * method on dataSources whose content have been affected by the action.
-         *
-         * \param[in] actionID the double value representing the action to
+         * \param[in] action the view representing the action to
          * execute.
-         * \throw std::runtime_error if the actionID exceeds nbActions - 1.
+         * \throw std::runtime_error if the action does not correspond to the output dimension.
          */
-        virtual void doAction(double actionID);
-
-        /**
-         * \brief Execute actions on the LearningEnvironment.
-         *
-         * The purpose of this method is to execute actions, represented by
-         * a vector of actionId comprised, for actionId i between 0 and
-         * vectActions[i] - 1. The LearningEnvironment implementation only
-         * checks that the given actionID is comprised, for actionId i between 0
-         * and vectActions[i] - 1. It is the responsibility of this method to
-         * call the updateHash method on dataSources whose content have been
-         * affected by the action.
-         *
-         * If the size of the vector is one, this method launches the method
-         * doAction(double actionID), the actionID being the only integer in
-         * the vector.
-         *
-         * \param[in] vectActionID the vector integer numbers of each actions to
-         * execute.
-         * \throw std::runtime_error if the actionsID[i] exceeds vectActions[i]
-         * - 1.
-         */
-        virtual void doActions(std::vector<double> vectActionID);
+        virtual void doAction(const Data::DataView& action);
 
         /**
          * \brief Reset the LearningEnvironment.

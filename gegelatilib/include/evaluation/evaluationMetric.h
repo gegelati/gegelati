@@ -53,12 +53,12 @@ namespace Evaluation {
          * This method is called at every step of the environment evaluation.
          *
          * \param[in] individual the individual performing a step.
-         * \param[in] actionValues the action values taken by the individual.
+         * \param[in] action the action taken by the individual.
          * \param[in] learningEnvironment the learning environment in which the
          * individual is evaluated.
          */
         virtual void extractMetricsStep(
-            const Evolution::Individual& individual, std::vector<double> actionValues,
+            const Evolution::Individual& individual, const Data::DataView& action,
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };

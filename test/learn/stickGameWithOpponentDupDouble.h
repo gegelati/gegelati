@@ -71,7 +71,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : Evaluation::ReinforcementEnvironment(3), win{false}
+        : Evaluation::ReinforcementEnvironment({Data::DataType::array1d<double>(3), Data::DataType::array1d<double>(1)}, Data::DataType::scalar<int>()), win{false}
     {
         this->reset(0);
         // Set hints
@@ -88,7 +88,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     virtual LearningEnvironment* clone() const override;
 
     // Inherited via LearningEnvironment
-    virtual void doAction(double actionID) override;
+    virtual void doAction(const Data::DataView& action) override;
 
     // Inherited via LearningEnvironment
     virtual void reset(size_t seed = 0,

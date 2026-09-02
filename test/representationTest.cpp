@@ -44,7 +44,6 @@
 #include "evolution/representation.h"
 #include "evolution/population.h"
 
-
 // Set all file in comment
 
 class RepresentationTest : public ::testing::Test
@@ -77,9 +76,9 @@ class FakeRepresentation : public Evolution::Representation
             return true;
         }
 
-        std::vector<double> executeIndividual(
-            const Evolution::Individual& indiv, const std::vector<std::reference_wrapper<const Data::DataHandler>>& inputSources) const {
-            return {0.0};
+        Data::DataValue executeIndividual(
+            const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const {
+            return Data::DataValue::scalar<double>(0.0);
         }
 };
 
@@ -116,19 +115,18 @@ TEST_F(RepresentationTest, setInputDimensions)
 {
     FakeRepresentation representation(10);
 
-    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources;
-    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(4)));
-    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(8)));
-    inputSources.push_back(*(new Data::PrimitiveTypeArray<double>(6)));
+    std::vector<Data::DataType> inputSources {
+        Data::DataType::array1d<double>(4),
+        Data::DataType::array1d<double>(8),
+    };
+    Data::DataType outputSource = Data::DataType::scalar<double>();
 
-    ASSERT_NO_THROW(representation.setInputDimensions(inputSources)) << "Setting input dimensions failed";
+    ASSERT_NO_THROW(representation.setDimensions(inputSources, outputSource)) << "Setting input dimensions failed";
 
-    ASSERT_EQ(representation.getNbInputSources(), 3) << "Number of input sources set is wrong";
-    ASSERT_EQ(representation.getMaxInputSourceIdx(), 8) << "max index of input source set is wrong";
-    
-    delete (&(inputSources.at(0).get()));
-    delete (&(inputSources.at(1).get()));
-    delete (&(inputSources.at(2).get()));
+    ASSERT_EQ(representation.getInputDimensions().size(), 2) << "Number of input sources set is wrong";
+    ASSERT_TRUE(representation.getInputDimensions().at(0) == inputSources.at(0)) << "source is wrong";
+    ASSERT_TRUE(representation.getInputDimensions().at(1) == inputSources.at(1)) << "source is wrong";
+    ASSERT_EQ(representation.getOutputDimension(), outputSource) << "source is wrong";
 }
 
 TEST_F(RepresentationTest, tangledRep)

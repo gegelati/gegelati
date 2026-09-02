@@ -33,11 +33,11 @@ namespace Evolution {
         /// Maximum number of nodes in the representation.
         size_t nbNodesMax = 0;
 
-        /// Number of input sources
-        size_t nbInputSources = 0;
+        /// Input dimensions
+        std::vector<Data::DataType> inputDimensions;
 
-        /// Maximum index of input source
-        size_t maxInputSourceIdx = 0;
+        /// Output dimension
+        Data::DataType outputDimension;
 
         /// Name of the representation.
         std::string representationName = "";
@@ -101,21 +101,22 @@ namespace Evolution {
         virtual size_t getMaxNbNodes() const;
 
         /**
-         * \brief set the number of input sources
+         * \brief set the dimensions
          * 
-         * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
+         * \param[in] inputDimensions the dimensions of the input sources.
+         * \param[in] outputDimension the dimensions of the output source.
          */
-        virtual void setInputDimensions(const std::vector<Data::DataView>& inputSources);
+        virtual void setDimensions(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension);
 
         /**
-         * \brief get the number of input sources
+         * \brief get the input dimensions of the representation.
          */
-        virtual size_t getNbInputSources() const;
+        virtual const std::vector<Data::DataType>& getInputDimensions() const;
 
         /**
-         * \brief get the maximum index of input source
+         * \brief get the output dimension of the representation.
          */
-        virtual size_t getMaxInputSourceIdx() const;
+        virtual const Data::DataType& getOutputDimension() const;
 
         /**
          * \brief return the genotype template an individual.
@@ -164,7 +165,7 @@ namespace Evolution {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual std::vector<double> executeIndividual(
+        virtual Data::DataValue executeIndividual(
             const Individual& indiv, const std::vector<Data::DataView>& inputSources) const  = 0;
     };
 }; // namespace Representation

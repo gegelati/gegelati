@@ -43,15 +43,7 @@ namespace Representations {
                 : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
                     this->setTangled(true);
                 };
-        
-
-        /**
-         * \brief set the number of input sources. 
-         * 
-         * \param[in] inputSources get the dimensions of the input sources. The inputSources is not copied to allow dupplication of sources, for example with parallelism.
-         */
-        virtual void setInputDimensions(const std::vector<Data::DataView>& inputSources) override;
-
+    
         /**
          * \brief return the genotype template an individual.
          */
@@ -78,7 +70,7 @@ namespace Representations {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual std::vector<double> executeIndividual(
+        virtual Data::DataValue executeIndividual(
             const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
         };

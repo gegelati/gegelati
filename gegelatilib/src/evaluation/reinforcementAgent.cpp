@@ -66,16 +66,16 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         while (!reinforcementEnvironment.isTerminal() &&
                nbActions < this->params->maxNbActionsPerEval) {
             // Get the actions
-            std::vector<double> actionsID =
-                representation.executeIndividual(individual, learningEnvironment.getDataSources());
+            Data::DataValue action =
+                std::move(representation.executeIndividual(individual, learningEnvironment.getDataSources()));
             // Do it
-            reinforcementEnvironment.doActions(actionsID);
+            reinforcementEnvironment.doAction(action);
             // Count actions
             nbActions++;
 
             // Extract the metrics of current stpe.
             for(const auto& metric: evaluationRun->getMetrics()) {
-                metric->extractMetricsStep(individual, actionsID, learningEnvironment);
+                metric->extractMetricsStep(individual, action, learningEnvironment);
             }
         }
 

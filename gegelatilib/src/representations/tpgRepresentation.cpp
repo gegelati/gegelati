@@ -17,16 +17,11 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     return std::move(clone);
 }
 
-void Representations::TPGRepresentation::setInputDimensions(const std::vector<Data::DataView>& inputSources)
-{
-    Evolution::Representation::setInputDimensions(inputSources);
-}
-
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
-    if(this->nbInputSources == 0) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
+    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
     }
     if(!this->tangled || !this->tangledPopulation.has_value()) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
@@ -66,8 +61,8 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->nbInputSources == 0) {
-        throw std::runtime_error("Representations::TPGRepresentation::isValid: cannot define if an individual is valid without input dimensions set.");
+    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+        throw std::runtime_error("Representations::TPGRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
     }
     if(!this->tangled || !this->tangledPopulation.has_value()) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
@@ -117,7 +112,7 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
 }
 
 
-std::vector<double> Representations::TPGRepresentation::executeIndividual(
+Data::DataValue Representations::TPGRepresentation::executeIndividual(
     const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
@@ -128,7 +123,7 @@ std::vector<double> Representations::TPGRepresentation::executeIndividual(
 
     for(const Node::GPNode& node: effectiveNodes.at(0)) {
         const std::shared_ptr<const Evolution::Individual>& member = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(0));
-        double bid = this->contextMemberRep.executeIndividual(*member, inputSources).at(0);
+        double bid = this->contextMemberRep.executeIndividual(*member, inputSources).getScalar<double>();
 
         if(bid > maxBid) {
             maxBid = bid;
@@ -138,7 +133,7 @@ std::vector<double> Representations::TPGRepresentation::executeIndividual(
 
     if (std::holds_alternative<size_t>(winner)) {
         // Return action
-        return {double(std::get<size_t>(winner))};
+        return Data::DataValue::scalar<size_t>(std::get<size_t>(winner));
     } else {
         // Return action of tangled individual
         return this->executeIndividual(*std::get<std::shared_ptr<const Evolution::Individual>>(winner), inputSources);

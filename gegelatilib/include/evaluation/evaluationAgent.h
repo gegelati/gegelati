@@ -98,9 +98,14 @@ namespace Evaluation {
         virtual ~EvaluationAgent() = default;
 
         /**
-         * \brief return the current dataSources to obtain the dimensions of the task. TODO maybe better to do.
+         * \brief get the input dimensions of the EvaluationAgent.
          */
-        virtual std::vector<Data::DataView> getDimensionsDataSources() const;
+        virtual const std::vector<Data::DataType>& getInputDimensions() const;
+
+        /**
+         * \brief get the output dimension of the EvaluationAgent.
+         */
+        virtual const Data::DataType& getOutputDimension() const;
         
         /**
          * \brief Add a metric requested to be measured during an evaluation run.

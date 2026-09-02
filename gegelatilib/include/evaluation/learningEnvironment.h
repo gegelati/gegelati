@@ -63,6 +63,7 @@ namespace Evaluation {
         TESTING
     };
 
+
     /**
      * \brief Interface for creating a Learning Environment.
      *
@@ -81,8 +82,12 @@ namespace Evaluation {
     class LearningEnvironment
     {
       protected:
-        /// Handler storing the action
-        std::shared_ptr<Output::OutputHandler> actions;
+
+        /// Input dimensions
+        std::vector<Data::DataType> inputDimensions;
+
+        /// Output dimension
+        Data::DataType outputDimension;
 
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
@@ -98,12 +103,11 @@ namespace Evaluation {
 
         /**
          * \brief Constructor for LearningEnviroment.
-         *
-         * \param[in] actions that will be usable for
-         * interacting with this LearningEnviromnent.
+         * 
+         * \param[in] inputDimensions the dimensions of the input sources.
+         * \param[in] outputDimension the dimensions of the output source.
          */
-        LearningEnvironment(Output::OutputHandler actions)
-            : actions{std::make_shared<Output::OutputHandler>(actions)} {};
+        LearningEnvironment(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -124,16 +128,16 @@ namespace Evaluation {
          */
         virtual bool isCopyable() const;
 
+
         /**
-         * \brief Get the outputHandler of actions available for this
-         * LearningEnvironment.
-         *
-         * \return the integer value of the nbAction attribute.
+         * \brief get the input dimensions of the LearningEnvironment.
          */
-        std::shared_ptr<Output::OutputHandler> getActions() const
-        {
-            return this->actions;
-        };
+        virtual const std::vector<Data::DataType>& getInputDimensions() const;
+
+        /**
+         * \brief get the output dimension of the LearningEnvironment.
+         */
+        virtual const Data::DataType& getOutputDimension() const;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.
@@ -150,8 +154,7 @@ namespace Evaluation {
          *
          * \return a vector of references to the DataHandler.
          */
-        virtual std::vector<Data::DataView>
-        getDataSources() const = 0;
+        virtual std::vector<Data::DataView>  getDataSources() const = 0;
 
         /**
          * \brief Returns the current score of the Environment.

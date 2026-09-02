@@ -17,7 +17,7 @@ class FakedLearningEnvironment : public Evaluation::LearningEnvironment
 
   public:
     FakedLearningEnvironment(double score)
-        : Evaluation::LearningEnvironment(1), m_score(score)
+        : Evaluation::LearningEnvironment({}, Data::DataType()), m_score(score)
     {
     }
 

@@ -61,7 +61,7 @@ namespace Evolution {
           survivingSelection(std::make_unique<SurvivingSelection>()), 
           evaluation(evaluation){
             rng.setSeed(seed);
-            this->representation->setInputDimensions(evaluation.getDimensionsDataSources());
+            this->representation->setDimensions(evaluation.getInputDimensions(), evaluation.getOutputDimension());
           };
 
         /// @brief Return the population of the EA

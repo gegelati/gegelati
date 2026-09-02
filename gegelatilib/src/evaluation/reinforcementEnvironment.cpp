@@ -40,28 +40,9 @@
 
 #include "evaluation/reinforcementEnvironment.h"
 
-void Evaluation::ReinforcementEnvironment::doAction(double actionID)
+void Evaluation::ReinforcementEnvironment::doAction(const Data::DataView& action)
 {
-    if (this->actions->size() > 1) {
-        throw std::runtime_error(
-            "With more than one continuous action, doAction() "
-            "method should not be called. Use doActions() instead.");
-    } else if (actionID < 0 || actionID >= this->actions->front().getNbValues()) {
-        throw std::runtime_error("Action ID " + std::to_string(actionID) + " is out of range.");
-    }
-}
-
-void Evaluation::ReinforcementEnvironment::doActions(std::vector<double> vectActionID)
-{
-
-    // If vectActionID contain only one action, the doAction method is called
-    // instead
-    if (vectActionID.size() == 1) {
-        this->doAction(vectActionID[0]);
-    }
-    if (vectActionID.size() != this->actions->size()) {
-        throw std::runtime_error(
-            "Vector of action ID given is not the same "
-            "size as the number of actions wanted");
+    if (action.getType() != this->outputDimension) {
+        throw std::runtime_error("DataType of action is wrong.\nExpected: " + this->outputDimension.toString() + "\nRecieved:" + action.getType().toString());
     }
 }

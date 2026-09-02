@@ -12,21 +12,15 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
     );
 }
 
-void Representations::LGPRepresentation::setInputDimensions(const std::vector<Data::DataView>& inputSources)
-{
-    Evolution::Representation::setInputDimensions(inputSources);
-    this->nbInputSources++;
-    if(this->nbRegisters > this->maxInputSourceIdx) {
-        this->maxInputSourceIdx = this->nbRegisters;
-    }
-}
-
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
-    if(this->nbInputSources == 0) {
-        throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without input dimensions set.");
+    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+        std::cout<<this->inputDimensions.empty()<<" "<<(this->outputDimension.elementType == nullptr)<<std::endl;
+        throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
     }
+
+    size_t maxInputSourceIdx = 8;
 
     // Instruction node template is fixed during evolution, so created only once.
     if(this->instructionNodesTemplate->size() == 0) {
@@ -43,9 +37,9 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
     
         // Value templates for input type and index
         std::shared_ptr<Node::NodeValueConfiguration> configNbInput(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbInputSources)));
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->inputDimensions.size() + 1)));
         std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->maxInputSourceIdx)));
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxInputSourceIdx)));
         for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
             this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configNbInput));
             this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMaxInput));
@@ -60,20 +54,21 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->nbInputSources == 0) {
-        throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without input dimensions set.");
+    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+        throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
     }
 
     // Return false if genotype length is out of bounds.
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;
     }
+    size_t maxInputSourceIdx = 8;
 
     // Ranges should look like {nbRegister, NbInstr, NbTypeInput, MaxInput, NbTypeInput, MaxInput...}.
     std::vector<size_t> ranges = {this->nbRegisters, this->iSet.getNbInstructions()};
     for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        ranges.push_back(this->nbInputSources);
-        ranges.push_back(this->maxInputSourceIdx);
+        ranges.push_back(this->inputDimensions.size() + 1);
+        ranges.push_back(maxInputSourceIdx);
     }
 
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
@@ -97,17 +92,15 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
 }
 
 
-std::vector<double> Representations::LGPRepresentation::executeIndividual(
+Data::DataValue Representations::LGPRepresentation::executeIndividual(
     const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 
     /// Registers used as internal memory. TODO AAAAAAAA not sure creating register here is the most efficient..
-    //Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
-    //Data::DataView registerView = registers.view();
-    std::vector<double> registers(this->nbRegisters, 0);
-    const Data::DataView registerView = Data::DataView(registers.data(), Data::DataType::array1d<double>(8));
+    Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
+    Data::DataView registerView = registers.view();
 
     for(const Node::GPNode& node: effectiveNodes.at(0)) {
 
@@ -132,18 +125,21 @@ std::vector<double> Representations::LGPRepresentation::executeIndividual(
 
         }
 
-        registers[outputIndex] = instruction.execute(operands).getScalar<double>();
-        //registers.setDataAt(typeid(double), outputIndex, instruction.execute(operands).view());
+        registers.setSubValue(instruction.execute(operands), outputIndex);
     }
 
-    //double value = registers.getDataAt(typeid(double), 0).getScalar<double>();
-    double value = registers.at(0);
+    // TODO temporary scaling
+    double value = registers.getScalarAt<double>(0);
     if(value > 2.0) {
         value = 2.0;
     } else if (value < 0.0) {
         value = 0.0;
     }
+    registers.setSubValue(Data::DataValue::scalar<double>(value), 0);
+    if(*outputDimension.elementType == typeid(int)) {
+        return Data::DataValue::scalar<int>((int)value);
+    }
 
     // Return value of first register
-    return {value};
+    return registers.getSubValue<double>(Data::DataType::scalar<double>(), 0);
 }

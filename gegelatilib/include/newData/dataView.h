@@ -27,6 +27,8 @@ namespace Data {
      *   enabling correct address space calculations.
      */
     class DataView {
+
+    protected:
         /// Pointer to the first byte of the viewed data.
         const void* ptr = nullptr;
 
