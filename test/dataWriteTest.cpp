@@ -13,11 +13,11 @@ TEST(DataWriteTest, WritesDifferentScalarTypes)
     Data::PrimitiveTypeArray<float> floats(1);
     Data::PrimitiveTypeArray<double> doubles(1);
 
-    ints.setDataAt(typeid(int), 0, Data::DataView::scalar(int(7)));
+    ints.setDataAt(typeid(int), 0, Data::DataViewOld::scalar(int(7)));
     floats.setDataAt(typeid(float), 0,
-                     Data::DataView::scalar(float(1.5f)));
+                     Data::DataViewOld::scalar(float(1.5f)));
     doubles.setDataAt(typeid(double), 0,
-                      Data::DataView::scalar(double(2.5)));
+                      Data::DataViewOld::scalar(double(2.5)));
 
     EXPECT_EQ(ints.getDataAt(typeid(int), 0).getScalar<int>(),
               7);
@@ -35,7 +35,7 @@ TEST(DataWriteTest, WritesOneDimensionalArray)
     Data::PrimitiveTypeArray<double> values(5);
     const double data[] = {10.0, 20.0, 30.0};
 
-    values.setDataAt(typeid(double[3]), 1, Data::DataView::array(data, Data::DataShape{3}));
+    values.setDataAt(typeid(double[3]), 1, Data::DataViewOld::array(data, Data::DataShape{3}));
 
     for (size_t index = 0; index < 5; index++) {
         const double expected = index == 0 ? 0.0 : index == 1 ? 10.0
@@ -53,7 +53,7 @@ TEST(DataWriteTest, WritesTwoDimensionalWindow)
     Data::PrimitiveTypeArray2D<int> values(4, 3);
     int data[2 * 2] = {1, 2, 3, 4};
     values.setDataAt(typeid(int[2][2]), 2,
-                     Data::DataView::array(data, Data::DataShape{2, 2}));
+                     Data::DataViewOld::array(data, Data::DataShape{2, 2}));
 
     const int expected[] = {0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0};
     for (size_t index = 0; index < 12; index++) {

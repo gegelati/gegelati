@@ -47,10 +47,16 @@ Evaluation::LearningEnvironment* StickGameWithOpponentD::clone() const
     return (Evaluation::LearningEnvironment*)new StickGameWithOpponentD(*this);
 }
 
-void StickGameWithOpponentD::doAction(const Data::DataView& action)
+void StickGameWithOpponentD::doAction(const Data::DataValue& action)
 {
-    ReinforcementEnvironment::doAction(action);
-    int actionInt = action.getScalar<size_t>();
+    int actionInt = 0;
+
+    if (!this->outputDimension.accepts(action)) {
+        actionInt = action.convert<size_t>(&this->outputDimension.getConstraint()).getScalar<size_t>();
+    } else {
+        actionInt = action.getScalar<size_t>();
+    }
+
 
     // if the game is not over
     if (!this->isTerminal()) {

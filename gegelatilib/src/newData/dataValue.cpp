@@ -13,6 +13,16 @@ namespace Data {
         return Data::DataView(this->storage->data(), this->type);
     }
 
+    DataValue DataValue::clone() const
+    {
+        return DataValue(this->storage->clone(), this->type);
+    }
+
+    std::unique_ptr<DataValue> UnconstrainedData::convert(const DataValue& value) const
+    {
+        return std::make_unique<DataValue>(value.clone());
+    }
+
     void DataValue::setSubValue(const DataValue& value, size_t address) {
         if (*type.elementType != *value.type.elementType) {
             throw std::runtime_error(

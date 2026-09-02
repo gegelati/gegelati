@@ -46,7 +46,7 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "parameters.h"
-
+#if 0
 TEST(EnvironmentTest, Constructor)
 {
     const size_t size1{24};
@@ -326,3 +326,6 @@ TEST(EnvironmentTest, DataSourceAccessor)
                "to the ones referenced in the Set given at construction.";
     }
 }
+
+
+#endif

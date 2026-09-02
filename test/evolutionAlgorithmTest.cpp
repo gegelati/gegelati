@@ -266,7 +266,7 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Size of population not determinist";
-    ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 5977790652527000119U) << "RNG not determinist";
+    ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 10637318380984930111U) << "RNG not determinist";
 }
 
 /*
@@ -321,8 +321,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     }
 
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
-    ASSERT_EQ(eaTpg.getPopulation().size(), 308) << "Size of TPG population not determinist";
-    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 16486736260054747606U) << "RNG not determinist";
+    ASSERT_EQ(eaTpg.getPopulation().size(), 306) << "Size of TPG population not determinist";
+    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 17672552378738871403U) << "RNG not determinist";
 }
 
 

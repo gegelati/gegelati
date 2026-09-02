@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "newData/dataValue.h"
+#include "newData/numericRange.h"
 
 TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
 {
@@ -69,6 +70,101 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
     Data::DataType unsupported;
     unsupported.rank = 3;
     ASSERT_THROW(Data::DataValue::zeros<int>(unsupported), std::invalid_argument);
+}
+
+TEST(DataValueTest, convertChangesNumericTypeAndPreservesShape)
+{
+    auto scalar = Data::DataValue::scalar(42);
+    auto scalarConstraint = Data::NumericRange<double>::unbounded();
+    auto convertedScalar = scalar.convert<double>(&scalarConstraint);
+    EXPECT_EQ(convertedScalar.getType().rank, 0u);
+    EXPECT_DOUBLE_EQ(convertedScalar.getScalar<double>(), 42.0);
+
+    auto oneD = Data::DataValue::array1d(std::vector<int>{1, 2, 3});
+    auto oneDConstraint = Data::NumericRange<float>::unbounded();
+    auto convertedOneD = oneD.convert<float>(&oneDConstraint);
+    EXPECT_EQ(convertedOneD.getType().rank, 1u);
+    EXPECT_EQ(convertedOneD.getType().dimensions[0], 3u);
+    const float* oneDValues = convertedOneD.getArray<float>();
+    EXPECT_FLOAT_EQ(oneDValues[0], 1.0f);
+    EXPECT_FLOAT_EQ(oneDValues[1], 2.0f);
+    EXPECT_FLOAT_EQ(oneDValues[2], 3.0f);
+
+    auto twoD = Data::DataValue::array2d(std::vector<std::vector<double>>{{1.5, 2.5}, {3.5, 4.5}});
+    auto twoDConstraint = Data::NumericRange<int>::unbounded();
+    auto convertedTwoD = twoD.convert<int>(&twoDConstraint);
+    EXPECT_EQ(convertedTwoD.getType().rank, 2u);
+    EXPECT_EQ(convertedTwoD.getType().dimensions[0], 2u);
+    EXPECT_EQ(convertedTwoD.getType().dimensions[1], 2u);
+    const int* twoDValues = convertedTwoD.getArray<int>();
+    EXPECT_EQ(twoDValues[0], 1);
+    EXPECT_EQ(twoDValues[1], 2);
+    EXPECT_EQ(twoDValues[2], 3);
+    EXPECT_EQ(twoDValues[3], 4);
+}
+
+TEST(DataValueTest, convertRejectsNonNumericSources)
+{
+    auto text = Data::DataValue::scalar(std::string("42"));
+    auto textConstraint = Data::NumericRange<int>::unbounded();
+    ASSERT_THROW(text.convert<int>(&textConstraint), std::invalid_argument);
+}
+
+TEST(DataValueTest, constraintDrivesConversionAndValidatesResult)
+{
+    const auto range = Data::NumericRange<float>::between(0.0f, 100.0f);
+    auto value = Data::DataValue::scalar(42);
+
+    auto converted = value.convert<float>(&range);
+    EXPECT_FLOAT_EQ(converted.getScalar<float>(), 42.0f);
+
+    auto outsideRange = Data::DataValue::scalar(101);
+    auto clamped = outsideRange.convert<float>(&range);
+    EXPECT_FLOAT_EQ(clamped.getScalar<float>(), 100.0f);
+}
+
+TEST(DataValueTest, convertWithoutConstraintOnlyChangesNumericType)
+{
+    auto source = Data::DataValue::scalar(42.75f);
+
+    auto converted = source.convert<double>();
+
+    EXPECT_EQ(converted.getType().rank, 0u);
+    EXPECT_DOUBLE_EQ(converted.getScalar<double>(), 42.75);
+}
+
+TEST(DataValueTest, convertClampsOneDimensionalValuesToBothBounds)
+{
+    auto source = Data::DataValue::array1d(std::vector<int>{-5, 0, 3, 10});
+    const auto range = Data::NumericRange<double>::between(-1.5, 2.5);
+
+    auto converted = source.convert<double>(&range);
+
+    ASSERT_EQ(converted.getType().rank, 1u);
+    ASSERT_EQ(converted.getType().dimensions[0], 4u);
+    const double* values = converted.getArray<double>();
+    EXPECT_DOUBLE_EQ(values[0], -1.5);
+    EXPECT_DOUBLE_EQ(values[1], 0.0);
+    EXPECT_DOUBLE_EQ(values[2], 2.5);
+    EXPECT_DOUBLE_EQ(values[3], 2.5);
+}
+
+TEST(DataValueTest, convertClampsTwoDimensionalValuesAfterTypeConversion)
+{
+    auto source = Data::DataValue::array2d(
+        std::vector<std::vector<double>>{{-2.8, 3.9}, {12.1, 5.0}});
+    const auto range = Data::NumericRange<int>::between(0, 10);
+
+    auto converted = source.convert<int>(&range);
+
+    ASSERT_EQ(converted.getType().rank, 2u);
+    ASSERT_EQ(converted.getType().dimensions[0], 2u);
+    ASSERT_EQ(converted.getType().dimensions[1], 2u);
+    const int* values = converted.getArray<int>();
+    EXPECT_EQ(values[0], 0);
+    EXPECT_EQ(values[1], 3);
+    EXPECT_EQ(values[2], 10);
+    EXPECT_EQ(values[3], 5);
 }
 
 TEST(DataValueTest, getSubValueCoversAllRankCombinations)

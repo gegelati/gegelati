@@ -13,6 +13,8 @@
 
 namespace Data {
 
+    class DataValue;
+
     /**
      * \brief Inclusive numeric bounds for one element type.
      *
@@ -29,6 +31,15 @@ namespace Data {
          * \return `true` when the view is accepted.
          */
         virtual bool accepts(const DataView& view) const = 0;
+        /**
+         * \brief Converts a value to the type represented by this constraint.
+         *
+         * \param[in] value Value to convert.
+         * \return A newly allocated converted value.
+         * \throws std::invalid_argument If conversion is unsupported or the value
+         * cannot be repaired by this constraint.
+         */
+        virtual std::unique_ptr<DataValue> convert(const DataValue& value) const = 0;
         /** \brief Compares this constraint with another constraint.
          * \param[in] other Constraint to compare with.
          * \return `true` when both constraints have the same semantics.
@@ -45,6 +56,14 @@ namespace Data {
         bool accepts(const DataView&) const override {
             return true;
         }
+
+        /**
+         * \brief Returns an unchanged deep copy of the supplied value.
+         *
+         * \param[in] value Value to copy.
+         * \return A newly allocated value with equivalent data and metadata.
+         */
+        std::unique_ptr<DataValue> convert(const DataValue& value) const override;
 
         /** \brief Compares this unconstrained marker with another constraint.
          * \param[in] other Constraint to compare with.

@@ -9,8 +9,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "newData/dataView.h"
-#include "newData/dataRequirement.h"
+#include "newData/dataValue.h"
 
 namespace Data {
 
@@ -99,6 +98,60 @@ namespace Data {
                 }
             }
             return true;
+        }
+
+        /**
+         * \brief Clamps a value to this range.
+         *
+         * The input must already have element type `T`; `DataValue::convert<T>`
+         * performs the type conversion before this method is called.
+         *
+         * \param[in] value Value whose elements are clamped.
+         * \return A newly allocated value with the same rank and dimensions.
+         * \throws std::invalid_argument If the value has another element type or rank.
+         */
+        std::unique_ptr<DataValue> convert(const DataValue& value) const override {
+            if (!value || value.getElementType() != typeid(T)) {
+                throw std::invalid_argument(
+                    "NumericRange::convert failed: value has an incompatible element type."
+                );
+            }
+
+            auto clamp = [this](T current) {
+                if (minimum && current < *minimum) {
+                    return *minimum;
+                }
+                if (maximum && current > *maximum) {
+                    return *maximum;
+                }
+                return current;
+            };
+
+            if (value.getRank() == 0) {
+                return std::make_unique<DataValue>(
+                    DataValue::scalar<T>(clamp(value.getScalar<T>())));
+            }
+
+            const size_t count = value.getType().totalElements();
+            const T* source = value.getArray<T>();
+            auto values = std::make_unique<T[]>(count);
+            for (size_t index = 0; index < count; ++index) {
+                values[index] = clamp(source[index]);
+            }
+
+            if (value.getRank() == 1) {
+                return std::make_unique<DataValue>(
+                    DataValue::array1d<T>(std::move(values), value.getDimensions()[0]));
+            }
+            if (value.getRank() == 2) {
+                return std::make_unique<DataValue>(
+                    DataValue::array2d<T>(std::move(values), value.getDimensions()[0],
+                                          value.getDimensions()[1]));
+            }
+
+            throw std::invalid_argument(
+                "NumericRange::convert failed: unsupported value rank."
+            );
         }
 
         /** \brief Compares this range with another constraint.

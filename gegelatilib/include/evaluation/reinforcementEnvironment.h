@@ -77,7 +77,7 @@ namespace Evaluation {
          * execute.
          * \throw std::runtime_error if the action does not correspond to the output dimension.
          */
-        virtual void doAction(const Data::DataView& action);
+        virtual void doAction(const Data::DataValue& action);
 
         /**
          * \brief Reset the LearningEnvironment.

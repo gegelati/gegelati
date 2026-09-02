@@ -37,7 +37,7 @@
 #ifndef LEARNING_ENVIRONMENT_H
 #define LEARNING_ENVIRONMENT_H
 
-#include "newData/dataView.h"
+#include "newData/dataValue.h"
 #include "newData/dataRequirement.h"
 #include <cstdint>
 #include <vector>

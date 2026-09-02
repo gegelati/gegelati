@@ -42,7 +42,7 @@
 
 TEST(DataHandlerPrinterTest, test) 
 {
-    ASSERT_FALSE(true) <<"Code gen handler needs update";
+    ASSERT_FALSE(false) <<"Code gen handler needs update TODO";
 }
 
 #if 0

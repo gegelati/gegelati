@@ -40,9 +40,9 @@
 
 #include "evaluation/reinforcementEnvironment.h"
 
-void Evaluation::ReinforcementEnvironment::doAction(const Data::DataView& action)
+void Evaluation::ReinforcementEnvironment::doAction(const Data::DataValue& action)
 {
-    if (!this->outputDimension.accepts(action)) {
+    if (!this->outputDimension.accepts(action.view())) {
         throw std::runtime_error("Action has wrong requirement.\nExpected: " + this->outputDimension.toString() + "\nRecieved:" + action.getType().toString() + ". If the types corresponds, its probably the range that failed.");
     }
 }

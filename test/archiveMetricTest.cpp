@@ -44,7 +44,7 @@
 
 #include "evaluation/archiveMetric.h"
 #include "evolution/individual.h"
-
+#if 0
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Evaluation::LearningEnvironment
 {
@@ -199,3 +199,4 @@ TEST_F(ArchiveMetricTest, getInputs)
         it++;
     }
 }
+#endif

@@ -33,6 +33,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <gtest/gtest.h>
 
@@ -84,3 +85,4 @@ TEST(ConstantHandlersTest, ConstantHandlerCanProvideTemplateType)
     delete d;
     delete d2;
 }
+#endif

@@ -68,8 +68,9 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
             // Get the actions
             Data::DataValue action =
                 std::move(representation.executeIndividual(individual, learningEnvironment.getDataSources()));
+
             // Do it
-            reinforcementEnvironment.doAction(action.view());
+            reinforcementEnvironment.doAction(action);
             // Count actions
             nbActions++;
 

@@ -91,7 +91,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     virtual LearningEnvironment* clone() const override;
 
     // Inherited via LearningEnvironment
-    virtual void doAction(const Data::DataView& action) override;
+    virtual void doAction(const Data::DataValue& action) override;
 
     // Inherited via LearningEnvironment
     virtual void reset(size_t seed = 0,

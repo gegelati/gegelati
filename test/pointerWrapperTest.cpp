@@ -66,7 +66,7 @@ TEST(PointerWrapperTest, CanProvideTemplateType)
     ASSERT_FALSE(d->canHandle(typeid(int)))
         << "PointerWrapper<double>() wrongfully say it can provide int "
            "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::DataView)))
+    ASSERT_FALSE(d->canHandle(typeid(Data::DataViewOld)))
         << "PointerWrapper<double>() wrongfully say it can provide "
            "UntypedSharedPtr data.";
     delete d;

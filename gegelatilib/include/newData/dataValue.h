@@ -5,10 +5,12 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #include "newData/dataConcept.h"
 #include "newData/dataView.h"
+#include "newData/dataRequirement.h"
 
 namespace Data {
 
@@ -56,6 +58,80 @@ namespace Data {
 
         /// \brief Default destructor.
         ~DataValue() = default;
+
+        /**
+         * \brief Converts numeric elements and optionally repairs them with a constraint.
+         *
+         * Conversion is performed first. If `constraint` is supplied and does not
+         * accept the converted value, its virtual conversion method repairs the value.
+         *
+         * \tparam T Arithmetic destination type.
+         * \param[in] constraint Optional constraint used to repair the converted value.
+         * \return A new owning value with the same rank and dimensions.
+         * \throws std::invalid_argument If the source or destination is nonnumeric,
+         * the rank is unsupported, or the constraint returns no value.
+         */
+        template <typename T>
+        DataValue convert(const DataConstraint* constraint = nullptr) const {
+            static_assert(std::is_arithmetic_v<T>,
+                          "DataValue::convert requires an arithmetic destination type");
+
+            if (!storage->isNumeric()) {
+                throw std::invalid_argument(
+                    "DataValue::convert failed: source element type is not numeric.\n" +
+                    this->toString()
+                );
+            }
+
+            DataValue result = [&]() {
+                if (type.rank == 0) {
+                    return DataValue::scalar<T>(
+                        static_cast<T>(storage->numericValue(0)));
+                }
+
+                if (type.rank == 1) {
+                    const size_t count = type.dimensions[0];
+                    auto values = std::make_unique<T[]>(count);
+                    for (size_t index = 0; index < count; ++index) {
+                        values[index] = static_cast<T>(storage->numericValue(index));
+                    }
+                    return DataValue::array1d<T>(std::move(values), count);
+                }
+
+                if (type.rank == 2) {
+                    const size_t rows = type.dimensions[0];
+                    const size_t cols = type.dimensions[1];
+                    auto values = std::make_unique<T[]>(rows * cols);
+                    for (size_t index = 0; index < rows * cols; ++index) {
+                        values[index] = static_cast<T>(storage->numericValue(index));
+                    }
+                    return DataValue::array2d<T>(std::move(values), rows, cols);
+                }
+
+                throw std::invalid_argument(
+                    "DataValue::convert failed: unsupported source rank.\n" + this->toString()
+                );
+            }();
+
+            if (constraint != nullptr && !constraint->accepts(result.view())) {
+                auto constrained = constraint->convert(result);
+                if (!constrained) {
+                    throw std::invalid_argument(
+                        "DataValue::convert failed: constraint returned no value."
+                    );
+                }
+                result = std::move(*constrained);
+            }
+
+            return result;
+        }
+
+        /**
+         * \brief Creates a deep copy of this owning value.
+         *
+         * \return A new owning value with equivalent data and metadata.
+         */
+        DataValue clone() const;
 
         // --- Factory Methods ---
 
