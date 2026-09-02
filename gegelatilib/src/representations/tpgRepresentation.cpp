@@ -20,7 +20,7 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
     }
     if(!this->tangled || !this->tangledPopulation.has_value()) {
@@ -61,7 +61,7 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
         throw std::runtime_error("Representations::TPGRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
     }
     if(!this->tangled || !this->tangledPopulation.has_value()) {

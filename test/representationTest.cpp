@@ -115,11 +115,11 @@ TEST_F(RepresentationTest, setInputDimensions)
 {
     FakeRepresentation representation(10);
 
-    std::vector<Data::DataType> inputSources {
-        Data::DataType::array1d<double>(4),
-        Data::DataType::array1d<double>(8),
+    std::vector<Data::DataRequirement> inputSources {
+        Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::atLeast(1)),
+        Data::DataRequirement::array1d<double>(8),
     };
-    Data::DataType outputSource = Data::DataType::scalar<double>();
+    Data::DataRequirement outputSource = Data::DataRequirement::scalar<double>(Data::NumericRange<double>::between(-1, 1));
 
     ASSERT_NO_THROW(representation.setDimensions(inputSources, outputSource)) << "Setting input dimensions failed";
 

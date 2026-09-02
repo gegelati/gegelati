@@ -42,7 +42,7 @@
 
 void Evaluation::ReinforcementEnvironment::doAction(const Data::DataView& action)
 {
-    if (action.getType() != this->outputDimension) {
-        throw std::runtime_error("DataType of action is wrong.\nExpected: " + this->outputDimension.toString() + "\nRecieved:" + action.getType().toString());
+    if (!this->outputDimension.accepts(action)) {
+        throw std::runtime_error("Action has wrong requirement.\nExpected: " + this->outputDimension.toString() + "\nRecieved:" + action.getType().toString() + ". If the types corresponds, its probably the range that failed.");
     }
 }

@@ -297,6 +297,9 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
+
+    eaLgp.getRepresentation().setDimensions(le.getInputDimensions(), Data::DataRequirement::scalar<double>());
+
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 

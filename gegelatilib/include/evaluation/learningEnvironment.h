@@ -38,7 +38,7 @@
 #define LEARNING_ENVIRONMENT_H
 
 #include "newData/dataView.h"
-#include "outputInfo.h"
+#include "newData/dataRequirement.h"
 #include <cstdint>
 #include <vector>
 
@@ -84,10 +84,10 @@ namespace Evaluation {
       protected:
 
         /// Input dimensions
-        std::vector<Data::DataType> inputDimensions;
+        std::vector<Data::DataRequirement> inputDimensions;
 
         /// Output dimension
-        Data::DataType outputDimension;
+        Data::DataRequirement outputDimension;
 
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
@@ -107,7 +107,7 @@ namespace Evaluation {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          */
-        LearningEnvironment(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
+        LearningEnvironment(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -132,12 +132,12 @@ namespace Evaluation {
         /**
          * \brief get the input dimensions of the LearningEnvironment.
          */
-        virtual const std::vector<Data::DataType>& getInputDimensions() const;
+        virtual const std::vector<Data::DataRequirement>& getInputDimensions() const;
 
         /**
          * \brief get the output dimension of the LearningEnvironment.
          */
-        virtual const Data::DataType& getOutputDimension() const;
+        virtual const Data::DataRequirement& getOutputDimension() const;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.

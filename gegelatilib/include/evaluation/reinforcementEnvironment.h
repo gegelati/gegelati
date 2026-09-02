@@ -67,7 +67,7 @@ namespace Evaluation {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          */
-        ReinforcementEnvironment(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension)
+        ReinforcementEnvironment(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension)
             : LearningEnvironment(inputDimensions, outputDimension) {};
 
         /**

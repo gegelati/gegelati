@@ -15,8 +15,7 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
-        std::cout<<this->inputDimensions.empty()<<" "<<(this->outputDimension.elementType == nullptr)<<std::endl;
+    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
         throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
     }
 
@@ -54,7 +53,7 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.elementType == nullptr) {
+    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
         throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
     }
 
@@ -130,14 +129,17 @@ Data::DataValue Representations::LGPRepresentation::executeIndividual(
 
     // TODO temporary scaling
     double value = registers.getScalarAt<double>(0);
+    // Filter NaN results: replace with -inf
+    value = (std::isnan(value)) ? -std::numeric_limits<double>::infinity()
+                                  : value;
     if(value > 2.0) {
         value = 2.0;
     } else if (value < 0.0) {
         value = 0.0;
     }
     registers.setSubValue(Data::DataValue::scalar<double>(value), 0);
-    if(*outputDimension.elementType == typeid(int)) {
-        return Data::DataValue::scalar<int>((int)value);
+    if(*outputDimension.getDataType().elementType == typeid(size_t)) {
+        return Data::DataValue::scalar<size_t>((size_t)value);
     }
 
     // Return value of first register

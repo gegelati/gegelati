@@ -54,12 +54,12 @@ std::unique_ptr<Evaluation::EvaluationRun> Evaluation::EvaluationAgent::createEv
 
 
 
-const std::vector<Data::DataType>& Evaluation::EvaluationAgent::getInputDimensions() const
+const std::vector<Data::DataRequirement>& Evaluation::EvaluationAgent::getInputDimensions() const
 {
     return this->learningEnvironment.getInputDimensions();
 }
 
-const Data::DataType& Evaluation::EvaluationAgent::getOutputDimension() const
+const Data::DataRequirement& Evaluation::EvaluationAgent::getOutputDimension() const
 {
     return this->learningEnvironment.getOutputDimension();
 }

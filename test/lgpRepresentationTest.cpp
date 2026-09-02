@@ -50,8 +50,8 @@ class LGPRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Data::DataType inputType;
-    Data::DataType outputType;
+    Data::DataRequirement inputType;
+    Data::DataRequirement outputType;
 
     virtual void SetUp()
     {   
@@ -65,8 +65,8 @@ class LGPRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputType = Data::DataType::array1d<double>(4);
-        outputType = Data::DataType::scalar<double>();
+        inputType = Data::DataRequirement::array1d<double>(4);
+        outputType = Data::DataRequirement::scalar<double>();
     }
 
     virtual void TearDown()
@@ -170,7 +170,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
     Representations::LGPRepresentation representation(set, 8, 5, 10);
-    representation.setDimensions({inputSource.getType()}, outputType);
+    representation.setDimensions({inputType}, outputType);
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();

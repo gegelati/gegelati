@@ -1,5 +1,4 @@
 #include "newData/dataType.h"
-
 namespace Data {
 
     DataType DataType::subView(DataType viewShape, const DataType& source, size_t offset) {

@@ -50,12 +50,12 @@ bool Evaluation::LearningEnvironment::isCopyable() const
 }
 
 
-const std::vector<Data::DataType>& Evaluation::LearningEnvironment::getInputDimensions() const
+const std::vector<Data::DataRequirement>& Evaluation::LearningEnvironment::getInputDimensions() const
 {
     return this->inputDimensions;
 }
 
-const Data::DataType& Evaluation::LearningEnvironment::getOutputDimension() const
+const Data::DataRequirement& Evaluation::LearningEnvironment::getOutputDimension() const
 {
     return this->outputDimension;
 }

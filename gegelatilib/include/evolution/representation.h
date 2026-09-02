@@ -34,10 +34,10 @@ namespace Evolution {
         size_t nbNodesMax = 0;
 
         /// Input dimensions
-        std::vector<Data::DataType> inputDimensions;
+        std::vector<Data::DataRequirement> inputDimensions;
 
         /// Output dimension
-        Data::DataType outputDimension;
+        Data::DataRequirement outputDimension;
 
         /// Name of the representation.
         std::string representationName = "";
@@ -106,17 +106,17 @@ namespace Evolution {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          */
-        virtual void setDimensions(const std::vector<Data::DataType>& inputDimensions, const Data::DataType& outputDimension);
+        virtual void setDimensions(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension);
 
         /**
          * \brief get the input dimensions of the representation.
          */
-        virtual const std::vector<Data::DataType>& getInputDimensions() const;
+        virtual const std::vector<Data::DataRequirement>& getInputDimensions() const;
 
         /**
          * \brief get the output dimension of the representation.
          */
-        virtual const Data::DataType& getOutputDimension() const;
+        virtual const Data::DataRequirement& getOutputDimension() const;
 
         /**
          * \brief return the genotype template an individual.

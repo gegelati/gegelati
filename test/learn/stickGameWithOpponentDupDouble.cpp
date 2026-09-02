@@ -50,7 +50,7 @@ Evaluation::LearningEnvironment* StickGameWithOpponentD::clone() const
 void StickGameWithOpponentD::doAction(const Data::DataView& action)
 {
     ReinforcementEnvironment::doAction(action);
-    int actionInt = action.getScalar<int>();
+    int actionInt = action.getScalar<size_t>();
 
     // if the game is not over
     if (!this->isTerminal()) {

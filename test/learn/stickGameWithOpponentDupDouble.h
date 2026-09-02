@@ -39,7 +39,7 @@
 
 #include <random>
 
-#include "data/primitiveTypeArray.h"
+#include "data/hash.h"
 #include "evaluation/reinforcementEnvironment.h"
 #include "mutator/rng.h"
 
@@ -71,7 +71,9 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : Evaluation::ReinforcementEnvironment({Data::DataType::array1d<double>(3), Data::DataType::array1d<double>(1)}, Data::DataType::scalar<int>()), win{false}
+        : Evaluation::ReinforcementEnvironment(
+            {Data::DataRequirement::array1d<double>(3), Data::DataRequirement::array1d<double>(1)}, 
+             Data::DataRequirement::scalar(Data::NumericRange<size_t>::atMost(2))), win{false}
     {
         this->reset(0);
         // Set hints
