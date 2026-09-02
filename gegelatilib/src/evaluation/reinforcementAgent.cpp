@@ -69,13 +69,13 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
             Data::DataValue action =
                 std::move(representation.executeIndividual(individual, learningEnvironment.getDataSources()));
             // Do it
-            reinforcementEnvironment.doAction(action);
+            reinforcementEnvironment.doAction(action.view());
             // Count actions
             nbActions++;
 
             // Extract the metrics of current stpe.
             for(const auto& metric: evaluationRun->getMetrics()) {
-                metric->extractMetricsStep(individual, action, learningEnvironment);
+                metric->extractMetricsStep(individual, action.view(), learningEnvironment);
             }
         }
 

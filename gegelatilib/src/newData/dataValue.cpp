@@ -15,15 +15,24 @@ namespace Data {
 
     void DataValue::setSubValue(const DataValue& value, size_t address) {
         if (*type.elementType != *value.type.elementType) {
-            throw std::runtime_error("Type mismatch in setSubValue");
+            throw std::runtime_error(
+                "DataValue::setSubValue failed: source and destination element types differ.\n"
+                "Destination:\n" + this->toString() + "\n"
+                "Source:\n" + value.toString()
+            );
         }
 
         const DataType& requested = value.type;
 
         if (!this->canFit(requested, address)) {
-            throw std::out_of_range("Requested shape does not fit at the given address");
+            throw std::out_of_range(
+                "DataValue::setSubValue failed at address " + std::to_string(address) + ".\n"
+                "Destination:\n" + this->toString() + "\n"
+                "Source:\n" + value.toString()
+            );
         }
 
+        // Copy the source value into the destination while respecting 2D row strides.
         size_t offset = type.sourceOffset + address;
 
         const char* src = static_cast<const char*>(value.storage->data());
@@ -62,7 +71,11 @@ namespace Data {
             }
         }
         else {
-            throw std::invalid_argument("Unsupported rank");
+            throw std::invalid_argument(
+                "DataValue::setSubValue failed: unsupported source rank.\n"
+                "Destination:\n" + this->toString() + "\n"
+                "Source:\n" + value.toString()
+            );
         }
     }
 

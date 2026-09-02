@@ -19,7 +19,7 @@ namespace Data {
      * keeps a DataType descriptor that explains the logical shape, runtime element type,
      * and original source layout for subviews.
      *
-     * The implementation deliberately separates the public API from the type-erased
+    * The implementation deliberately separates the public API from the type-erased
      * storage model:
      * - the public class exposes factories and typed accessors,
      * - the storage logic lives in DataConcept and concrete models (scalar, 1D, 2D),
@@ -30,10 +30,12 @@ namespace Data {
         using Concept = detail::ValueConcept;
 
     private:
-        /// Type-erased storage for the owned data.
+        /// \brief Type-erased storage for the owned data.
         std::unique_ptr<Concept> storage;
 
         /// \brief Private constructor used by factory methods.
+        /// \param[in] storage Type-erased storage that transfers ownership to this value.
+        /// \param[in] type Metadata describing the stored data.
         DataValue(std::unique_ptr<Concept> storage, DataType type);
 
     public:
@@ -150,7 +152,7 @@ namespace Data {
          * \param[in] rows Number of rows.
          * \param[in] cols Number of columns.
          * \return A DataValue owning the 2D array.
-         * @throws std::invalid_argument If `range.size() != rows * cols`.
+         * \throws std::invalid_argument If `range.size() != rows * cols`.
          */
         template <typename Range>
         static DataValue array2d(const Range& range, size_t rows, size_t cols) {
@@ -158,9 +160,10 @@ namespace Data {
             size_t total = rows * cols;
             if (std::distance(std::begin(range), std::end(range)) != total) {
                 throw std::invalid_argument(
-                    "DataValue::array2d: Range size (" +
+                    "DataValue::array2d failed: range size (" +
                     std::to_string(std::distance(std::begin(range), std::end(range))) +
-                    ") must equal rows * cols (" + std::to_string(total) + ")."
+                    ") must equal rows * cols (" + std::to_string(total) + "). Requested type: " +
+                    DataType::array2d<T>(rows, cols).toString()
                 );
             }
             auto ptr = std::make_unique<T[]>(total);
@@ -177,7 +180,7 @@ namespace Data {
          * @tparam RangeOfRanges The nested range type (e.g., std::vector<std::vector<T>>).
          * \param[in] rows_range The nested range (each inner range is a row).
          * \return A DataValue owning the 2D array.
-         * @throws std::invalid_argument If inner ranges have inconsistent sizes or the outer range is empty.
+         * \throws std::invalid_argument If inner ranges have inconsistent sizes or the outer range is empty.
          */
         template <typename RangeOfRanges>
         static DataValue array2d(const RangeOfRanges& rows_range) {
@@ -185,7 +188,9 @@ namespace Data {
             auto outer_end = std::end(rows_range);
 
             if (outer_begin == outer_end) {
-                throw std::invalid_argument("DataValue::array2dFromRows: Empty outer range.");
+                throw std::invalid_argument(
+                    "DataValue::array2dFromRows failed: outer range is empty; no DataValue was created."
+                );
             }
 
             // Deduce element type from the first inner range
@@ -201,7 +206,7 @@ namespace Data {
                 size_t current_cols = std::distance(std::begin(*it), std::end(*it));
                 if (current_cols != cols) {
                     throw std::invalid_argument(
-                        "DataValue::array2dFromRows: All inner ranges must have the same size. "
+                        "DataValue::array2dFromRows failed: all inner ranges must have the same size. "
                         "Expected " + std::to_string(cols) + ", got " + std::to_string(current_cols) + "."
                     );
                 }
@@ -222,6 +227,13 @@ namespace Data {
         }
 
         template <typename T>
+        /**
+         * \brief Creates a zero-initialized value with the requested shape and element type.
+         * \tparam T Element type used for storage.
+         * \param[in] type Requested shape and runtime type metadata.
+         * \return A zero-initialized owning value.
+         * \throws std::invalid_argument If the requested rank is unsupported.
+         */
         static DataValue zeros(const DataType& type)
         {
             if (type.rank == 0) {
@@ -248,7 +260,9 @@ namespace Data {
                 );
             }
 
-            throw std::invalid_argument("Unsupported rank");
+            throw std::invalid_argument(
+                "DataValue::zeros failed: unsupported requested type.\n" + type.toString()
+            );
         }
 
         /**
@@ -261,16 +275,24 @@ namespace Data {
          * \param[in] requested The DataType of the requested sub-region (only shape is used).
          * \param[in] address The starting address (in elements) within this DataValue.
          * \return A new DataValue owning the copied sub-region.
-         * @throws std::out_of_range If the requested shape does not fit at the given address.
-         * @throws std::bad_alloc If memory allocation fails.
+         * \throws std::out_of_range If the requested shape does not fit at the given address.
+         * \throws std::bad_alloc If memory allocation fails.
          */
         template <typename T>
         DataValue getSubValue(DataType requested, size_t address) const {
             if (*getType().elementType != typeid(T)) {
-                throw std::runtime_error("Type mismatch in getSubValue");
+                throw std::runtime_error(
+                    "DataValue::getSubValue failed: requested element type does not match the value.\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + requested.toString()
+                );
             }
             if (!this->canFit(requested, address)) {
-                throw std::out_of_range("Requested shape does not fit at the given address");
+                throw std::out_of_range(
+                    "DataValue::getSubValue failed at address " + std::to_string(address) + ".\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + requested.toString()
+                );
             }
 
             const T* src = static_cast<const T*>(storage->data());
@@ -303,11 +325,16 @@ namespace Data {
             }
         }
 
+        /**
+         * \brief Copies a source value into a sub-region of this value.
+         * \param[in] value Source value to copy.
+         * \param[in] address Starting element address in this value.
+         * \throws std::runtime_error If the element types differ.
+         * \throws std::out_of_range If the source shape does not fit.
+         */
         void setSubValue(const DataValue& value, size_t address);
 
-        /**
-         * \brief Checks whether the owned buffer is valid.
-         */
+        /** \brief Checks whether the owned buffer and view pointer are valid. */
         explicit operator bool() const noexcept;
 
         /**
@@ -315,9 +342,7 @@ namespace Data {
          */
         std::string toString() const;
 
-        /**
-         * \brief return the view corresponding to the value.
-         */
+        /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;
     };
 

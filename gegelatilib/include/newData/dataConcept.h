@@ -70,7 +70,7 @@ namespace Data {
             /**
              * \brief Constructs a scalar storage model.
              *
-             * \param v Value stored by the model.
+             * \param[in] v Value stored by the model.
              */
             explicit ScalarModel(T v) : value(std::move(v)) {}
 
@@ -125,8 +125,8 @@ namespace Data {
             /**
              * \brief Constructs a 1D array storage model.
              *
-             * \param v Buffer owning the array elements.
-             * \param c Number of elements in the buffer.
+             * \param[in] v Buffer owning the array elements.
+             * \param[in] c Number of elements in the buffer.
              */
             ArrayModel(std::unique_ptr<T[]> v, size_t c) : values(std::move(v)), count(c) {}
 
@@ -197,9 +197,9 @@ namespace Data {
             /**
              * \brief Constructs a 2D array storage model.
              *
-             * \param v Buffer owning the row-major array data.
-             * \param r Number of rows.
-             * \param c Number of columns.
+             * \param[in] v Buffer owning the row-major array data.
+             * \param[in] r Number of rows.
+             * \param[in] c Number of columns.
              */
             Array2dModel(std::unique_ptr<T[]> v, size_t r, size_t c)
                 : values(std::move(v)), rows(r), cols(c) {}

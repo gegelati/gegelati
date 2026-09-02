@@ -2,6 +2,7 @@
 namespace Data {
 
     DataType DataType::subView(DataType viewShape, const DataType& source, size_t offset) {
+        // Keep the requested logical shape while carrying the original source layout forward.
         DataType dt;
         dt.rank = viewShape.rank;
         dt.dimensions = viewShape.dimensions;
@@ -22,6 +23,7 @@ namespace Data {
     }
 
     bool DataType::canFitIn(const DataType& requested, size_t offset) const noexcept {
+        // Validate the requested shape against this descriptor's logical boundaries.
         if (this->rank == 0) {
             return requested.rank == 0 && offset == 0;
         }

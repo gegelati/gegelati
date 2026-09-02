@@ -70,27 +70,27 @@ namespace Data {
      */
     struct DataType {
         // --- Shape of THIS view ---
-        /// Number of dimensions (0=scalar, 1=1D array, 2=2D array).
+        /// \brief Number of dimensions (0=scalar, 1=1D array, 2=2D array).
         uint8_t rank = 0;
 
-        /// Extent of each dimension. For 1D: [size, 0]. For 2D: [height, width].
+        /// \brief Extent of each dimension. For 1D: [size, 0]. For 2D: [height, width].
         std::array<size_t, 2> dimensions{0, 0};
 
         // --- Type information ---
-        /// Runtime type of the elements (e.g., `typeid(double)`).
+        /// \brief Runtime type of the elements (e.g., `typeid(double)`).
         const std::type_info* elementType = nullptr;
 
-        /// Size of each element in bytes (e.g., `sizeof(double)`).
+        /// \brief Size of each element in bytes (e.g., `sizeof(double)`).
         size_t elementSize = 0;
 
         // --- Source context (for sub-views) ---
-        /// Rank of the original source (for top-level, equals `rank`).
+        /// \brief Rank of the original source (for top-level, equals `rank`).
         uint8_t sourceRank = 0;
 
-        /// Dimensions of the original source (for top-level, equals `dimensions`).
+        /// \brief Dimensions of the original source (for top-level, equals `dimensions`).
         std::array<size_t, 2> sourceDimensions{0, 0};
 
-        /// Linear offset (in **elements**) from the start of the source.
+        /// \brief Linear offset (in **elements**) from the start of the source.
         /// For top-level, this is 0. For sub-views, this is the starting index in the source.
         size_t sourceOffset = 0;
 
@@ -205,34 +205,22 @@ namespace Data {
         }
 
         /**
-         * \brief Creates a descriptor for a sub-view extracted from a larger source.
+         * \brief Creates metadata for a sub-view while preserving source provenance.
          *
-         * The sub-view keeps the requested shape in `dimensions`, but also preserves the
-         * metadata of the original source in `sourceRank`, `sourceDimensions`, and
-         * `sourceOffset`. This lets code reconstruct valid pointer arithmetic when a window
-         * is extracted from a larger 1D or 2D buffer.
-         *
-         * \param[in] viewShape Shape of the sub-view being extracted.
-         * \param[in] source Metadata of the original source buffer.
-         * \param[in] offset Linear offset to the beginning of the sub-view inside the source,
-         * expressed in elements.
-         * \return A DataType descriptor for the sub-view.
+         * The source shape and offset are retained so pointer arithmetic can be reconstructed.
+         * \param[in] viewShape Shape and element type of the sub-view.
+         * \param[in] source Metadata of the original source.
+         * \param[in] offset Linear source offset in elements.
+         * \return Metadata describing the sub-view.
          */
         static DataType subView(DataType viewShape, const DataType& source, size_t offset);
 
         // --- Helpers ---
 
-        /**
-         * \brief Returns the number of elements in the current view.
-         *
-         * For scalar views this is 1. For rank-1 arrays, it is the array length.
-         * For rank-2 arrays, it is `rows * cols`.
-         */
+        /** \brief Returns the number of elements in this descriptor. */
         size_t totalElements() const noexcept;
 
-        /**
-         * \brief Returns the number of elements in the original source buffer.
-         */
+        /** \brief Returns the number of elements in the original source. */
         size_t sourceTotalElements() const noexcept;
 
         /**
@@ -255,6 +243,9 @@ namespace Data {
         /**
          * \brief Compares two descriptors while ignoring source context.
          *
+         * \param[in] other Descriptor to compare with.
+         * \return `true` when shape, element type, and element size match.
+         *
          * Two DataTypes are considered identical if they describe the same view shape and
          * the same element type/size. The provenance of the underlying source is intentionally
          * not part of this comparison.
@@ -263,6 +254,9 @@ namespace Data {
 
         /**
          * \brief Compares two descriptors while ignoring source context.
+         *
+         * \param[in] other Descriptor to compare with.
+         * \return `true` when the descriptors differ.
          */
         bool operator!=(const DataType& other) const noexcept;
 
@@ -271,6 +265,9 @@ namespace Data {
          *
          * This is stricter than `operator==`: two views with the same logical shape and type but
          * different source origins are not considered equal in this comparison.
+         *
+         * \param[in] other Descriptor to compare with.
+         * \return `true` when logical metadata and source metadata match.
          */
         bool equalsWithSource(const DataType& other) const noexcept;
 

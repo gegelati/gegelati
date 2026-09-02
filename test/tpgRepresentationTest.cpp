@@ -44,22 +44,25 @@
 
 #include "representations/tpgRepresentation.h"
 #include "representations/lgpRepresentation.h"
+#include "newData/numericRange.h"
 
 #include "evolution/individual.h"
 
 #include "instructions/lambdaInstruction.h"
 
-
 class TPGRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Data::PrimitiveTypeArray<double>* inputSource;
 
     Evolution::Representation* memberRepresentation;
     Evolution::Population* memberPopulation;
 
     Evolution::Population* tpgPopulation;
+
+    Data::DataRequirement inputType;
+    Data::DataRequirement outputType;
+    Data::DataRequirement outputMemberType;
 
     virtual void SetUp()
     {   
@@ -68,15 +71,17 @@ class TPGRepresentationTest : public ::testing::Test
         auto times = [](double a, double b) -> double { return a * b; };
         auto div = [](double a, double b) -> double { return a / b; };
         
-        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(times)));
-        set.add(*(new Instructions::LambdaInstruction<double, double>(div)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputSource = new Data::PrimitiveTypeArray<double>(4);
+        inputType = Data::DataRequirement::array1d<double>(4);
+        outputType = Data::DataRequirement::scalar<size_t>(Data::NumericRange<size_t>::atMost(2));
+        outputMemberType = Data::DataRequirement::scalar<double>();
 
         memberRepresentation = new Representations::LGPRepresentation(set, 8, 1, 10);
-        memberRepresentation->setInputDimensions({*inputSource});
+        memberRepresentation->setDimensions({inputType}, outputMemberType);
         memberPopulation = new Evolution::Population();
         tpgPopulation = new Evolution::Population();
         for(size_t idx = 0; idx < 100; idx++) {
@@ -87,7 +92,6 @@ class TPGRepresentationTest : public ::testing::Test
 
     virtual void TearDown()
     {
-        delete inputSource;
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
@@ -136,7 +140,7 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
-    representation.setInputDimensions({*inputSource});
+    representation.setDimensions({inputType}, outputType);
     representation.setTangled(false);
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with not define as tangled";
     representation.setTangled(true);
@@ -211,7 +215,7 @@ TEST_F(TPGRepresentationTest, isValid)
     }
     
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
-    representation.setInputDimensions({*inputSource});
+    representation.setDimensions({inputType}, outputType);
 
     representation.setTangled(false);
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with not define as tangled";
@@ -285,11 +289,7 @@ TEST_F(TPGRepresentationTest, isValid)
 
 TEST_F(TPGRepresentationTest, executeIndividual)
 {
-    inputSource->setDataAt(typeid(double), 0, 1.0);
-    inputSource->setDataAt(typeid(double), 1, 1.5);
-    inputSource->setDataAt(typeid(double), 2, 2.0);
-    inputSource->setDataAt(typeid(double), 3, -1.0);
-    std::vector<std::reference_wrapper<const Data::DataHandler>> inputSources{*inputSource};
+    Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
     std::set<std::reference_wrapper<const Evolution::Individual>> memberPop = memberPopulation->getIndividuals();
     auto itMember = memberPop.begin();
@@ -325,7 +325,7 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
     representation.setTangledPopulation(*tpgPopulation);
-    representation.setInputDimensions(inputSources);
+    representation.setDimensions({inputType}, outputType);
 
     // Tangled Individual
     std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>();
@@ -346,9 +346,9 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid";
 
-    double output;
-    ASSERT_NO_THROW(output = representation.executeIndividual(*tangledIndiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, 1.0) << "Value is not correct.";
-    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, inputSources).at(0)) << "Execution of individual failed.";
-    ASSERT_EQ(output, 1.0) << "Value is not correct.";
+    size_t output;
+    ASSERT_NO_THROW(output = representation.executeIndividual(*tangledIndiv, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
+    ASSERT_EQ(output, 1) << "Value is not correct.";
+    ASSERT_NO_THROW(output = representation.executeIndividual(indiv, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
+    ASSERT_EQ(output, 1) << "Value is not correct.";
 }

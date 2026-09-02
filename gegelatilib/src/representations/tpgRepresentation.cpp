@@ -27,7 +27,11 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
     }
 
-    size_t nbActions = 3;
+    const auto* outputRange = dynamic_cast<const Data::NumericRange<size_t>*>(&this->outputDimension.getConstraint());
+    if (outputRange == nullptr || !outputRange->maximum || *outputRange->maximum == std::numeric_limits<size_t>::max()) {
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: output requirement must have a finite size_t maximum.");
+    }
+    size_t nbActions = *outputRange->maximum + 1;
     std::shared_ptr<Node::NodeTemplate> bidNodesTemplate = std::make_shared<Node::NodeTemplate>();
 
 
@@ -72,7 +76,11 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;
     }
-    size_t nbActions = 3;
+    const auto* outputRange = dynamic_cast<const Data::NumericRange<size_t>*>(&this->outputDimension.getConstraint());
+    if (outputRange == nullptr || !outputRange->maximum || *outputRange->maximum == std::numeric_limits<size_t>::max()) {
+        throw std::runtime_error("Representations::TPGRepresentation::isValid: output requirement must have a finite size_t maximum.");
+    }
+    size_t nbActions = *outputRange->maximum + 1;
 
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <type_traits>
 
 #include "newData/dataType.h"
 
@@ -29,10 +30,10 @@ namespace Data {
     class DataView {
 
     protected:
-        /// Pointer to the first byte of the viewed data.
+        /// \brief Pointer to the first byte of the viewed data.
         const void* ptr = nullptr;
 
-        /// Complete metadata for the viewed data (shape, type, source context).
+        /// \brief Complete metadata for the viewed data (shape, type, source context).
         DataType type;
 
     public:
@@ -74,6 +75,20 @@ namespace Data {
         DataView(const T (&data)[N])
             : ptr(data),
               type(DataType::from(data)) {}
+
+        /**
+         * \brief Prevents implicit construction from another DataView-derived type.
+         *
+         * DataValue exposes `view()` as its explicit conversion API. This deleted
+         * overload rejects expressions such as `DataView view = dataValue` while
+         * preserving DataView's public inheritance and accessors.
+         *
+         * \tparam T A type derived from DataView other than DataView itself.
+         * \param[in] data Derived view object that cannot be converted implicitly.
+         */
+        template <typename T, std::enable_if_t<std::is_base_of_v<DataView, T> &&
+                                                                !std::is_same_v<DataView, T>, int> = 0>
+        DataView(const T& data) = delete;
 
         // --- Accessors ---
 
@@ -155,21 +170,20 @@ namespace Data {
         // --- Typed Accessors ---
 
         /**
-         * controls a required rank and a type.
-         * 
-         * Throw if the method does not correspond to the requirement:
-         * - ptr is not empty.
-         * - rank is equal to requiredRank (0 for scalar, 1 for 1d array, 2 for 2d array)
-         * - type is equivalent to register type T
+         * \brief Validates that this view can be accessed with a requested type and rank.
+         *
+         * \param[in] type Required element type.
+         * \param[in] requiredRank Minimum rank required by the accessor.
+         * \throws std::runtime_error If the view is null, has insufficient rank, or has a different element type.
          */
         void canBeAccess(const std::type_info& type, size_t requiredRank) const;
 
         /**
          * \brief Returns a reference to a scalar value of type T.
          *
-         * @tparam T The type of the scalar.
+         * \tparam T The type of the scalar.
          * \return A const reference to the scalar.
-         * @throws std::runtime_error If the view is not a scalar or the type does not match.
+         * \throws std::runtime_error If the view is null or the type does not match.
          */
         template <typename T>
         const T& getScalar() const {
@@ -180,9 +194,11 @@ namespace Data {
         /**
          * \brief Returns a reference to a scalar value of type T at address specified.
          *
-         * @tparam T The type of the scalar.
+         * \tparam T The type of the scalar.
+         * \param[in] address Starting element address in this view.
          * \return A const reference to the scalar.
-         * @throws std::runtime_error If the view is not a scalar or the type does not match.
+         * \throws std::runtime_error If the view is null or the type does not match.
+         * \throws std::out_of_range If the address is outside this view.
          */
         template <typename T>
         const T& getScalarAt(size_t address) const {
@@ -195,9 +211,9 @@ namespace Data {
          *
          * if its a non-contiguous 2D array, the pointer is copied.
          * 
-         * @tparam T The element type of the array.
+         * \tparam T The element type of the array.
          * \return A const pointer to the first element of the array.
-         * @throws std::runtime_error If the view is a scalar or the type does not match.
+         * \throws std::runtime_error If the view is null or the type does not match.
          */
         template <typename T>
         const T* getArray() const {
@@ -230,22 +246,19 @@ namespace Data {
             return contiguous;
         }
 
-        /**
-         * \brief Checks if this view is valid (non-null).
-         */
+        /** \brief Checks if this view has a non-null data pointer. */
         explicit operator bool() const noexcept;
 
         /**
          * \brief Scale the location of the given address based on the required type
          * 
-         * \param[in] required dataType requiring to be scaled
-         * \param[in] address accessed in the current view
+         * \param[in] required DataType requiring the address to be scaled.
+         * \param[in] address Address in the current view.
+         * \return The corresponding address in the source view.
          */
         virtual size_t scaleLocation(const Data::DataType& required, const size_t address) const;
 
-        /**
-         * \brief override of toString method
-         */
+        /** \brief Returns a diagnostic string containing the pointer and DataType. */
         virtual std::string toString() const;
     };
 

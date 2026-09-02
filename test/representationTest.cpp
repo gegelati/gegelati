@@ -43,6 +43,7 @@
 
 #include "evolution/representation.h"
 #include "evolution/population.h"
+#include "newData/numericRange.h"
 
 // Set all file in comment
 
