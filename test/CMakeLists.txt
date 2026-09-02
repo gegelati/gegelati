@@ -1,21 +1,25 @@
 set(TEST_TARGET_NAME runTests)
 
+# Option to control GoogleTest download/build
+option(DOWNLOAD_GOOGLETEST "Download and build GoogleTest at configure time" ON)
+
 # Download and unpack googletest at configure time
 # from https://github.com/google/googletest/tree/master/googletest#incorporating-into-an-existing-cmake-project
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+if(DOWNLOAD_GOOGLETEST)
+  configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  endif()
 endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-
 
 if(CODE_GEN)
   add_definitions(-DBIN_DIR_PATH="${CMAKE_BINARY_DIR}")
@@ -33,10 +37,10 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL)
 
 file(
-	GLOB_RECURSE
-	${TEST_TARGET_NAME}_SRC
-	*.cpp
-	*.h
+    GLOB_RECURSE
+    ${TEST_TARGET_NAME}_SRC
+    *.cpp
+    *.h
 )
 
 # Add definition for relative path into project
@@ -45,15 +49,15 @@ add_definitions( -DTESTS_DAT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/dat/")
 
 # Build for coverage when in debug
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
 endif()
 
 add_executable(${TEST_TARGET_NAME} ${${TEST_TARGET_NAME}_SRC})
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_link_libraries(${TEST_TARGET_NAME} gtest_main ${PROJECT_NAME}::${PROJECT_NAME} -latomic)
+    target_link_libraries(${TEST_TARGET_NAME} gtest_main ${PROJECT_NAME}::${PROJECT_NAME} -latomic)
 else()
-	target_link_libraries(${TEST_TARGET_NAME} gtest_main ${PROJECT_NAME}::${PROJECT_NAME})
+    target_link_libraries(${TEST_TARGET_NAME} gtest_main ${PROJECT_NAME}::${PROJECT_NAME})
 endif()
 
 # Add a test to the project to be run by ctest.
