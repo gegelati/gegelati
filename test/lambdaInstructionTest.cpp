@@ -91,6 +91,7 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
         {Data::DataView(&first, Data::DataType::scalar<double>()), Data::DataView(&second, Data::DataType::scalar<double>()),
          Data::DataView(&multiplier, Data::DataType::scalar<int>())});
     ASSERT_DOUBLE_EQ(result.getScalar<double>(), 4.2);
+    
 }
 
 

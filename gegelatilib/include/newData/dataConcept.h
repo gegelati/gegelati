@@ -48,26 +48,6 @@ namespace Data {
             virtual void* data() noexcept = 0;
 
             /**
-             * \brief Reports whether the stored element type is arithmetic.
-             *
-             * \return `true` when the model stores an arithmetic type.
-             */
-            virtual bool isNumeric() const noexcept = 0;
-
-            /**
-             * \brief Returns an arithmetic element as a common conversion value.
-             *
-             * \param[in] index Linear element index. Scalar models accept index zero.
-             * \return The requested element represented as a `long double`.
-             * \throws std::out_of_range If index is outside the model.
-             * \throws std::invalid_argument If the stored type is not arithmetic.
-             *
-             * \note The common representation can lose precision for sufficiently large
-             * integer values.
-             */
-            virtual long double numericValue(size_t index) const = 0;
-
-            /**
              * \brief Creates a deep copy of the current storage model.
              *
              * \return A newly allocated clone of the concrete storage instance.
@@ -110,22 +90,6 @@ namespace Data {
              * \return Pointer to the scalar storage for modification.
              */
             void* data() noexcept override { return &value; }
-
-            bool isNumeric() const noexcept override {
-                return std::is_arithmetic_v<T>;
-            }
-
-            long double numericValue(size_t index) const override {
-                if constexpr (std::is_arithmetic_v<T>) {
-                    if (index != 0) {
-                        throw std::out_of_range("ScalarModel index is out of range");
-                    }
-                    return static_cast<long double>(value);
-                }
-                else {
-                    throw std::invalid_argument("Stored value is not numeric");
-                }
-            }
 
             /**
              * \brief Creates a copy of the scalar model.
@@ -182,22 +146,6 @@ namespace Data {
              * \return Pointer to the first element of the array for modification.
              */
             void* data() noexcept override { return values.get(); }
-
-            bool isNumeric() const noexcept override {
-                return std::is_arithmetic_v<T>;
-            }
-
-            long double numericValue(size_t index) const override {
-                if (index >= count) {
-                    throw std::out_of_range("ArrayModel index is out of range");
-                }
-                if constexpr (std::is_arithmetic_v<T>) {
-                    return static_cast<long double>(values[index]);
-                }
-                else {
-                    throw std::invalid_argument("Stored value is not numeric");
-                }
-            }
 
             /**
              * \brief Creates a deep copy of the array model.
@@ -272,22 +220,6 @@ namespace Data {
              * \return Pointer to the first element of the row-major storage.
              */
             void* data() noexcept override { return values.get(); }
-
-            bool isNumeric() const noexcept override {
-                return std::is_arithmetic_v<T>;
-            }
-
-            long double numericValue(size_t index) const override {
-                if (index >= rows * cols) {
-                    throw std::out_of_range("Array2dModel index is out of range");
-                }
-                if constexpr (std::is_arithmetic_v<T>) {
-                    return static_cast<long double>(values[index]);
-                }
-                else {
-                    throw std::invalid_argument("Stored value is not numeric");
-                }
-            }
 
             /**
              * \brief Creates a deep copy of the 2D array model.

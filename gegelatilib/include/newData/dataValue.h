@@ -60,73 +60,6 @@ namespace Data {
         ~DataValue() = default;
 
         /**
-         * \brief Converts numeric elements and optionally repairs them with a constraint.
-         *
-         * Conversion is performed first. If `constraint` is supplied and does not
-         * accept the converted value, its virtual conversion method repairs the value.
-         *
-         * \tparam T Arithmetic destination type.
-         * \param[in] constraint Optional constraint used to repair the converted value.
-         * \return A new owning value with the same rank and dimensions.
-         * \throws std::invalid_argument If the source or destination is nonnumeric,
-         * the rank is unsupported, or the constraint returns no value.
-         */
-        template <typename T>
-        DataValue convert(const DataConstraint* constraint = nullptr) const {
-            static_assert(std::is_arithmetic_v<T>,
-                          "DataValue::convert requires an arithmetic destination type");
-
-            if (!storage->isNumeric()) {
-                throw std::invalid_argument(
-                    "DataValue::convert failed: source element type is not numeric.\n" +
-                    this->toString()
-                );
-            }
-
-            DataValue result = [&]() {
-                if (type.rank == 0) {
-                    return DataValue::scalar<T>(
-                        static_cast<T>(storage->numericValue(0)));
-                }
-
-                if (type.rank == 1) {
-                    const size_t count = type.dimensions[0];
-                    auto values = std::make_unique<T[]>(count);
-                    for (size_t index = 0; index < count; ++index) {
-                        values[index] = static_cast<T>(storage->numericValue(index));
-                    }
-                    return DataValue::array1d<T>(std::move(values), count);
-                }
-
-                if (type.rank == 2) {
-                    const size_t rows = type.dimensions[0];
-                    const size_t cols = type.dimensions[1];
-                    auto values = std::make_unique<T[]>(rows * cols);
-                    for (size_t index = 0; index < rows * cols; ++index) {
-                        values[index] = static_cast<T>(storage->numericValue(index));
-                    }
-                    return DataValue::array2d<T>(std::move(values), rows, cols);
-                }
-
-                throw std::invalid_argument(
-                    "DataValue::convert failed: unsupported source rank.\n" + this->toString()
-                );
-            }();
-
-            if (constraint != nullptr && !constraint->accepts(result.view())) {
-                auto constrained = constraint->convert(result);
-                if (!constrained) {
-                    throw std::invalid_argument(
-                        "DataValue::convert failed: constraint returned no value."
-                    );
-                }
-                result = std::move(*constrained);
-            }
-
-            return result;
-        }
-
-        /**
          * \brief Creates a deep copy of this owning value.
          *
          * \return A new owning value with equivalent data and metadata.
@@ -420,6 +353,61 @@ namespace Data {
 
         /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;
+
+        
+
+        /**
+         * \brief Converts numeric elements and optionally repairs them with a constraint.
+         *
+         * Conversion is performed first. If `constraint` is supplied and does not
+         * accept the converted value, its virtual conversion method repairs the value.
+         *
+         * \tparam S Numeric source type.
+         * \tparam D Numeric destination type.
+         * \param[in] source Source value to convert.
+         * \return A new owning value with the same rank and dimensions.
+         * \throws std::invalid_argument If the source or destination is nonnumeric,
+         * the rank is unsupported, or the constraint returns no value.
+         */
+        template <typename S, typename D>
+        static DataValue convertNumericValue(const DataValue& source) {
+            static_assert(std::is_arithmetic_v<S>,
+                          "DataValue::convert requires an arithmetic source type");
+            static_assert(std::is_arithmetic_v<D>,
+                          "DataValue::convert requires an arithmetic destination type");
+
+            if (source.getRank() == 0) {
+                S data = source.getScalar<S>();
+                return DataValue::scalar<D>(static_cast<D>(data));
+            }
+
+            if (source.getRank() == 1) {
+                const size_t count = source.getDimensions()[0];
+                const S* data = source.getArray<S>();
+                auto values = std::make_unique<D[]>(count);
+            
+                for (size_t idx = 0; idx < count; ++idx) {
+                    values[idx] = static_cast<D>(data[idx]);
+                }
+                return DataValue::array1d<D>(std::move(values), count);
+            }
+
+            if (source.getRank() == 2) {
+                const size_t rows = source.getDimensions()[0];
+                const size_t cols = source.getDimensions()[1];
+                const S* data = source.getArray<S>();
+                auto values = std::make_unique<D[]>(rows * cols);
+            
+                for (size_t idx = 0; idx < rows * cols; ++idx) {
+                    values[idx] = static_cast<D>(data[idx]);
+                }
+                return DataValue::array2d<D>(std::move(values), rows, cols);
+            }
+
+            throw std::invalid_argument(
+                "DataValue::convert failed: unsupported source rank.\n" + source.toString()
+            );
+        }
     };
 
 } // namespace Data
