@@ -36,7 +36,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
+#include "oldData/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"

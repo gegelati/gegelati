@@ -35,9 +35,9 @@
 
 #include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
-#include "data/pointerWrapper.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandler.h"
+#include "oldData/pointerWrapper.h"
+#include "oldData/primitiveTypeArray.h"
 
 TEST(PointerWrapperTest, Constructor)
 {

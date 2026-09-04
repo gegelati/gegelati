@@ -40,9 +40,9 @@
 
 #include <type_traits>
 
-#include "data/primitiveTypeArray.h"
-#include "data/untypedSharedPtr.h"
-#include "util/activationFunctions.h"
+#include "oldData/primitiveTypeArray.h"
+#include "oldData/untypedSharedPtr.h"
+#include "dimensions/activationFunctions.h"
 #include "representation/lgp/lgpEngine.h"
 
 namespace Representation::LGP {

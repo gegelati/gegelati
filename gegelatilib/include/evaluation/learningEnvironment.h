@@ -37,8 +37,8 @@
 #ifndef LEARNING_ENVIRONMENT_H
 #define LEARNING_ENVIRONMENT_H
 
-#include "newData/dataValue.h"
-#include "newData/dataRequirement.h"
+#include "data/dataValue.h"
+#include "dimensions/requirement.h"
 #include <cstdint>
 #include <vector>
 
@@ -84,10 +84,10 @@ namespace Evaluation {
       protected:
 
         /// Input dimensions
-        std::vector<Data::DataRequirement> inputDimensions;
+        std::vector<Dimensions::Requirement> inputDimensions;
 
         /// Output dimension
-        Data::DataRequirement outputDimension;
+        Dimensions::Requirement outputDimension;
 
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
@@ -107,7 +107,7 @@ namespace Evaluation {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          */
-        LearningEnvironment(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
+        LearningEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -132,12 +132,12 @@ namespace Evaluation {
         /**
          * \brief get the input dimensions of the LearningEnvironment.
          */
-        virtual const std::vector<Data::DataRequirement>& getInputDimensions() const;
+        virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
          * \brief get the output dimension of the LearningEnvironment.
          */
-        virtual const Data::DataRequirement& getOutputDimension() const;
+        virtual const Dimensions::Requirement& getOutputDimension() const;
 
         virtual std::string summary() const;
 

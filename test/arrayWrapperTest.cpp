@@ -36,9 +36,9 @@
 
 #include <gtest/gtest.h>
 
-#include "data/arrayWrapper.h"
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/arrayWrapper.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 #if 0
 TEST(ArrayWrapperTest, Constructor)
 {

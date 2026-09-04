@@ -37,8 +37,8 @@
 #ifndef ARRAY_2D_WRAPPER_H
 #define ARRAY_2D_WRAPPER_H
 
-#include "data/arrayWrapper.h"
-#include "data/dataHandler.h"
+#include "oldData/arrayWrapper.h"
+#include "oldData/dataHandler.h"
 #include "data/demangle.h"
 
 namespace Data {
@@ -394,4 +394,4 @@ namespace Data {
 #endif // !ARRAY_2D_WRAPPER_H
 
 // Include PrimitiveTypeArray2D to ensure availability of the used clone method.
-#include "data/primitiveTypeArray2D.h"
+#include "oldData/primitiveTypeArray2D.h"

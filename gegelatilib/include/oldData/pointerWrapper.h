@@ -37,9 +37,9 @@
 #define POINTER_WRAPPER_H
 
 #include "data/constant.h"
-#include "data/dataHandler.h"
+#include "oldData/dataHandler.h"
 #include "data/hash.h"
-#include "demangle.h"
+#include "data/demangle.h"
 
 namespace Data {
 

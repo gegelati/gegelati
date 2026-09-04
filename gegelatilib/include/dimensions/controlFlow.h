@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-#include "newData/dataRequirement.h"
+#include "dimensions/requirement.h"
 
-namespace Evolution {
+namespace Dimensions {
 
     /**
      * \brief Describes the data requirements through an ordered execution pipeline.
@@ -18,25 +18,25 @@ namespace Evolution {
       private:
         struct Transition {
             std::string name;
-            std::vector<Data::DataRequirement> inputs;
-            Data::DataRequirement output;
+            std::vector<Requirement> inputs;
+            Requirement output;
             bool compatible;
         };
 
-        std::vector<Data::DataRequirement> inputDimensions;
+        std::vector<Requirement> inputDimensions;
         std::vector<Transition> transitions;
-        Data::DataRequirement currentOutput;
+        Requirement currentOutput;
         bool hasOutput = false;
         bool valid = true;
 
 
       public:
-        explicit ControlFlow(std::vector<Data::DataRequirement> inputDimensions)
+        explicit ControlFlow(std::vector<Requirement> inputDimensions)
             : inputDimensions(std::move(inputDimensions)) {
                 if(this->inputDimensions.empty()) {
                     throw std::runtime_error("ControlFlow::Constructor: Dimensions are invalid.");
                 }
-                for (const Data::DataRequirement& input: this->inputDimensions) {
+                for (const Requirement& input: this->inputDimensions) {
                     if (input.getDataType().elementType == nullptr) {
                         throw std::runtime_error("ControlFlow::Constructor: Dimensions are invalid.");
                     } 
@@ -51,8 +51,8 @@ namespace Evolution {
          */
         bool addLayer(
             std::string name,
-            const std::vector<Data::DataRequirement>& layerInputs,
-            Data::DataRequirement output) {
+            const std::vector<Requirement>& layerInputs,
+            Requirement output) {
             const bool compatible = hasOutput
                 ? acceptsRequirements({currentOutput}, layerInputs)
                 : acceptsRequirements(inputDimensions, layerInputs);
@@ -69,19 +69,19 @@ namespace Evolution {
         }
 
         /** \brief Checks whether the final flow output satisfies a consumer requirement. */
-        bool isCompatibleWith(const Data::DataRequirement& consumer) const noexcept {
+        bool isCompatibleWith(const Requirement& consumer) const noexcept {
             return hasOutput && currentOutput.isCompatibleWith(consumer);
         }
 
         bool isValid() const noexcept { return valid; }
 
-        const Data::DataRequirement& getOutputDimension() const {
+        const Requirement& getOutputDimension() const {
             if (!hasOutput) {
                 throw std::logic_error("ControlFlow has no output layer.");
             }
             return currentOutput;
         }        
-        const std::vector<Data::DataRequirement>& getInputDimensions() const {
+        const std::vector<Requirement>& getInputDimensions() const {
             return inputDimensions;
         }
 
@@ -132,8 +132,8 @@ namespace Evolution {
             return result.str();
         }
         static bool acceptsRequirements(
-            const std::vector<Data::DataRequirement>& provided,
-            const std::vector<Data::DataRequirement>& required) {
+            const std::vector<Requirement>& provided,
+            const std::vector<Requirement>& required) {
             if (provided.size() != required.size()) {
                 return false;
             }

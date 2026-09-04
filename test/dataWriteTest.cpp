@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <initializer_list>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
-#include "data/primitiveTypeArray2D.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray2D.h"
 
 TEST(DataWriteTest, WritesDifferentScalarTypes)
 {

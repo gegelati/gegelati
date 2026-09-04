@@ -1,354 +1,435 @@
-#ifndef R_DATA_VALUE_H
-#define R_DATA_VALUE_H
+#ifndef DATA_VALUE_H
+#define DATA_VALUE_H
 
 #include <algorithm>
-#include <cstddef>
-#include <initializer_list>
 #include <memory>
 #include <stdexcept>
-#include <typeinfo>
+#include <string>
+#include <type_traits>
 #include <utility>
 
-#include "data/dataShape.h"
+#include "data/dataConcept.h"
+#include "data/dataView.h"
 
 namespace Data {
 
     /**
-    * Non-owning, read-only view passed to an instruction.
+     * \brief Owning data container with type-erased storage and full metadata.
      *
-     * DataViewOld is the input-side half of the instruction data boundary. It
-     * contains only a pointer, runtime type information, and a DataShape. It
-    * never deletes or copies the pointed-to object. The caller must keep the
-    * source object alive and unchanged for as long as the view is used.
+     * DataValue is the ownership-aware counterpart of DataView. It owns its buffer and
+     * keeps a DataType descriptor that explains the logical shape, runtime element type,
+     * and original source layout for subviews.
      *
-    * Use scalar() for a single T and array() for contiguous storage. The
-    * typed accessors validate the stored type before returning a reference or
-    * pointer. A null view or a type mismatch throws std::runtime_error.
-    *
-    * DataViewOld is cheap to copy because it copies only a pointer and metadata.
-    * Copying a view never extends the lifetime of its source.
+    * The implementation deliberately separates the public API from the type-erased
+     * storage model:
+     * - the public class exposes factories and typed accessors,
+     * - the storage logic lives in DataConcept and concrete models (scalar, 1D, 2D),
+     * - non-template behavior is kept in the .cpp companion when needed.
      */
-    class DataViewOld
-    {
-      public:
-            /** Construct an invalid view with no storage. */
-        DataViewOld() = default;
+    class DataValue : public DataView {
+    public:
+        using Concept = detail::ValueConcept;
 
-        /**
-         * Create a view of one scalar without copying it.
-         *
-         * The referenced object must outlive every use of the returned view.
-         * Its recorded type and shape are typeid(T) and {1}.
-         */
-        template <typename T> static DataViewOld scalar(const T& value)
-        {
-            return DataViewOld{&value, typeid(T), DataShape{1}};
-        }
-
-        /**
-         * Create a view of contiguous array storage without copying it.
-         *
-         * Array extents are stored in the supplied DataShape. The pointer is
-         * treated as flat contiguous storage, including for rank-2 shapes.
-         */
-        template <typename T>
-        static DataViewOld array(const T* values, DataShape shape)
-        {
-            return DataViewOld{values, typeid(T[]), std::move(shape)};
-        }
-
-        /** Return the raw borrowed pointer. */
-        const void* data() const noexcept { return pointer; }
-
-        /** Return the runtime type recorded when the view was created. */
-        const std::type_info& type() const noexcept { return *typeInfo; }
-
-        /** Return the logical shape recorded when the view was created. */
-        const DataShape& shape() const noexcept { return valueShape; }
-
-        /** Return a checked reference to a scalar T. */
-        template <typename T> const T& getScalar() const
-        {
-            check(typeid(T), DataShape{1});
-            return *static_cast<const T*>(pointer);
-        }
-
-        /** Return a checked pointer to contiguous array elements of type T. */
-        template <typename T> const T* getArray() const
-        {
-            if (pointer == nullptr || *typeInfo != typeid(T[])) {
-                throw std::runtime_error("DataViewOld type mismatch.");
-            }
-            return static_cast<const T*>(pointer);
-        }
-        
-
-      private:
-            /** Only DataValueOld can create a view of its owned storage directly. */
-        friend class DataValueOld;
-
-            /** Store borrowed storage and its runtime metadata. */
-        DataViewOld(const void* pointer, const std::type_info& typeInfo,
-                 DataShape shape)
-            : pointer(pointer), typeInfo(&typeInfo),
-              valueShape(std::move(shape))
-        {
-        }
-
-        /** Validate storage, type, and shape before typed access. */
-        void check(const std::type_info& expected,
-                   const DataShape& expectedShape) const
-        {
-            if (pointer == nullptr || *typeInfo != expected ||
-                valueShape != expectedShape) {
-                throw std::runtime_error("DataViewOld type or shape mismatch.");
-            }
-        }
-
-        /// Borrowed address of the first byte of the viewed value.
-        const void* pointer = nullptr;
-
-        /// Runtime type recorded for the viewed scalar or array elements.
-        const std::type_info* typeInfo = &typeid(void);
-
-        /// Logical interpretation of the borrowed storage.
-        DataShape valueShape;
-    };
-
-    /**
-     * Owning, type-erased result produced by an instruction.
-     *
-     * DataValueOld is the output-side half of the instruction data boundary. It
-     * owns either one scalar object or a dynamically allocated contiguous
-     * array. Copies perform deep copies; moves transfer ownership. The class
-     * stores runtime type information and a DataShape so a runtime dispatcher
-     * can validate a result without knowing its C++ type at compile time.
-     *
-     * DataValueOld is intentionally separate from DataViewOld: an instruction may
-     * borrow its inputs, but its result must remain valid after the input
-     * objects or the instruction call have gone out of scope.
-     *
-     * The class uses type erasure internally: Concept defines the operations
-     * required by the erased storage, while ScalarModel<T> and ArrayModel<T>
-     * provide the concrete storage for each T. Users normally do not need to
-     * interact with those implementation types.
-     *
-     * Scalar values report typeid(T) and shape {1}. Array values report
-     * typeid(T[]) and currently use a rank-1 shape containing their element
-     * count. A rank-2 shape can be carried by DataViewOld, but this DataValueOld
-     * factory currently creates only rank-1 array results.
-     */
-    class DataValueOld
-    {
-        struct Concept
-        {
-            /// Enable destruction through the erased base type.
-            virtual ~Concept() = default;
-
-            /// Return the address of the owned value's storage.
-            virtual const void* data() const noexcept = 0;
-
-            /// Create an independent deep copy of the concrete model.
-            virtual std::unique_ptr<Concept> clone() const = 0;
-        };
-
-        template <typename T> struct ScalarModel final : Concept
-        {
-            /// Construct the concrete scalar storage.
-            explicit ScalarModel(T value) : value(std::move(value)) {}
-
-            /// Return the address of the scalar object.
-            const void* data() const noexcept override { return &value; }
-
-            /// Copy the scalar into another erased model.
-            std::unique_ptr<Concept> clone() const override
-            {
-                return std::unique_ptr<Concept>(new ScalarModel<T>(value));
-            }
-
-            /// The actual owned scalar.
-            T value;
-        };
-
-        template <typename T> struct ArrayModel final : Concept
-        {
-            /** Take ownership of `values` and remember its logical length. */
-            ArrayModel(std::unique_ptr<T[]> values, size_t count)
-                : values(std::move(values)), count(count)
-            {
-            }
-
-            /// Return the address of the first element of the owned array.
-            const void* data() const noexcept override { return values.get(); }
-
-            /// Deep-copy the array and its element count.
-            std::unique_ptr<Concept> clone() const override
-            {
-                return std::unique_ptr<Concept>(
-                    new ArrayModel<T>(copyValues(values.get()), count));
-            }
-
-            /// Allocate and copy the array used by a cloned model.
-            std::unique_ptr<T[]> copyValues(const T* source) const
-            {
-                std::unique_ptr<T[]> copy(new T[count]);
-                std::copy(source, source + count, copy.get());
-                return copy;
-            }
-
-            /// Contiguous array storage owned by this model.
-            std::unique_ptr<T[]> values;
-
-            /// Number of elements; unique_ptr<T[]> does not carry a length.
-            size_t count;
-        };
-
-        template <typename T> struct Array2dModel final : Concept
-        {
-            /** Take ownership of `values` and remember its logical dimensions. */
-            Array2dModel(std::unique_ptr<T[]> values, size_t rows, size_t cols)
-                : values(std::move(values)), rows(rows), cols(cols)
-            {
-            }
-
-            /// Return the address of the first element of the owned array.
-            const void* data() const noexcept override { return values.get(); }
-
-            /// Deep-copy the array and its dimensions.
-            std::unique_ptr<Concept> clone() const override
-            {
-                return std::unique_ptr<Concept>(
-                    new Array2dModel<T>(copyValues(values.get()), rows, cols));
-            }
-
-            /// Allocate and copy the array used by a cloned model.
-            std::unique_ptr<T[]> copyValues(const T* source) const
-            {
-                std::unique_ptr<T[]> copy(new T[rows * cols]);
-                std::copy(source, source + rows * cols, copy.get());
-                return copy;
-            }
-
-            /// Contiguous array storage owned by this model.
-            std::unique_ptr<T[]> values;
-
-            /// Number of rows.
-            size_t rows;
-
-            /// Number of columns.
-            size_t cols;
-        };
-
-      public:
-        /// A result must contain a scalar or array, so an empty value is not allowed.
-        DataValueOld() = delete;
-
-        /** Create an owning scalar result by moving or copying `value`. */
-        template <typename T> static DataValueOld scalar(T value)
-        {
-            return DataValueOld(
-                std::unique_ptr<Concept>(new ScalarModel<T>(std::move(value))),
-                typeid(T), DataShape{1});
-        }
-
-        /**
-         * Create an owning contiguous 1D array result.
-         *
-         * The input pointer becomes owned by the returned DataValueOld and must
-         * point to at least `count` elements. The caller must not delete it
-         * afterwards. `count` is used for shape reporting and deep copies.
-         */
-        template <typename T>
-        static DataValueOld array(std::unique_ptr<T[]> values, size_t count)
-        {
-            return DataValueOld(
-                std::unique_ptr<Concept>(
-                    new ArrayModel<T>(std::move(values), count)),
-                typeid(T[]), DataShape{count});
-        }
-
-        /**
-         * Create an owning contiguous 2D array result.
-         *
-         * The input pointer becomes owned by the returned DataValueOld and must
-         * point to at least `rows * cols` elements. The caller must not delete it
-         * afterwards. `rows` and `cols` are used for shape reporting and deep copies.
-         */
-        template <typename T>
-        static DataValueOld array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols)
-        {
-            return DataValueOld(
-                std::unique_ptr<Concept>(
-                    new Array2dModel<T>(std::move(values), rows, cols)),
-                typeid(T[]), DataShape{rows, cols});
-        }
-
-        /** Deep-copy an owned result. */
-        DataValueOld(const DataValueOld& other)
-            : storage(other.storage->clone()), typeInfo(other.typeInfo),
-              valueShape(other.valueShape)
-        {
-        }
-
-        /** Transfer ownership without copying the stored object. */
-        DataValueOld(DataValueOld&&) noexcept = default;
-        /** Deep-copy assignment of an owned result. */
-        DataValueOld& operator=(const DataValueOld& other)
-        {
-            if (this != &other) {
-                storage = other.storage->clone();
-                typeInfo = other.typeInfo;
-                valueShape = other.valueShape;
-            }
-            return *this;
-        }
-        /** Move assignment transfers the owned storage. */
-        DataValueOld& operator=(DataValueOld&&) noexcept = default;
-
-        /** Return the runtime type of the stored scalar or array elements. */
-        const std::type_info& type() const noexcept { return *typeInfo; }
-
-        /** Return the logical shape of the stored result. */
-        const DataShape& shape() const noexcept { return valueShape; }
-
-        /** Borrow the owned result as a read-only view. */
-        DataViewOld view() const noexcept
-        {
-            return DataViewOld{storage->data(), *typeInfo, valueShape};
-        }
-
-        /** Return a checked reference to an owned scalar T. */
-        template <typename T> const T& getScalar() const
-        {
-            return view().getScalar<T>();
-        }
-
-        /** Return a checked pointer to owned contiguous array elements. */
-        template <typename T> const T* getArray() const
-        {
-            return view().getArray<T>();
-        }
-
-
-      private:
-            /** Construct a result from erased storage and its metadata. */
-        DataValueOld(std::unique_ptr<Concept> storage,
-                  const std::type_info& typeInfo, DataShape shape)
-            : storage(std::move(storage)), typeInfo(&typeInfo),
-              valueShape(std::move(shape))
-        {
-        }
-
-        /// Concrete scalar or array model owning the result memory.
+    private:
+        /// \brief Type-erased storage for the owned data.
         std::unique_ptr<Concept> storage;
 
-        /// Runtime type recorded for the owned value.
-        const std::type_info* typeInfo;
+        /// \brief Private constructor used by factory methods.
+        /// \param[in] storage Type-erased storage that transfers ownership to this value.
+        /// \param[in] type Metadata describing the stored data.
+        DataValue(std::unique_ptr<Concept> storage, DataType type);
 
-        /// Logical interpretation of the owned storage.
-        DataShape valueShape;
+    public:
+        /// \brief Deleted default constructor (DataValue must own its data).
+        DataValue() = delete;
+
+        /// \brief Deleted copy constructor (use deep-copy factory logic instead).
+        DataValue(const DataValue&) = delete;
+
+        /// \brief Move constructor.
+        DataValue(DataValue&&) noexcept = default;
+
+        /// \brief Deleted copy assignment.
+        DataValue& operator=(const DataValue&) = delete;
+
+        /// \brief Move assignment.
+        DataValue& operator=(DataValue&&) noexcept = default;
+
+        /// \brief Default destructor.
+        ~DataValue() = default;
+
+        /**
+         * \brief Creates a deep copy of this owning value.
+         *
+         * \return A new owning value with equivalent data and metadata.
+         */
+        DataValue clone() const;
+
+        // --- Factory Methods ---
+
+        /**
+         * \brief Creates a DataValue owning a scalar value.
+         *
+         * @tparam T The type of the scalar.
+         * \param[in] value The scalar value to store.
+         * \return A DataValue owning the scalar.
+         */
+        template <typename T>
+        static DataValue scalar(T value) {
+            return DataValue(
+                std::make_unique<detail::ScalarModel<T>>(std::move(value)),
+                DataType::scalar<T>()
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning a 1D array.
+         *
+         * @tparam T The element type of the array.
+         * \param[in] values A unique_ptr to the array data (takes ownership).
+         * \param[in] count The number of elements in the array.
+         * \return A DataValue owning the array.
+         */
+        template <typename T>
+        static DataValue array1d(std::unique_ptr<T[]> values, size_t count) {
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), count),
+                DataType::array1d<T>(count)
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning a 1D array from **any iterable range**.
+         *
+         * Works with:
+         * - std::vector<T>
+         * - std::list<T>
+         * - std::array<T, N>
+         * - Raw arrays (T[])
+         * - Any type with std::begin() and std::end()
+         *
+         * @tparam Range The container type (e.g., std::vector<T>, std::list<T>).
+         * \param[in] range The iterable range to copy.
+         * \return A DataValue owning a copy of the range's elements.
+         */
+        template <typename Range>
+        static DataValue array1d(const Range& range) {
+            // Extract the element type from the range's iterator
+            using T = typename std::iterator_traits<
+                decltype(std::begin(range))
+            >::value_type;
+
+            // Compute size and allocate
+            auto begin = std::begin(range);
+            auto end = std::end(range);
+            size_t count = std::distance(begin, end);
+            auto ptr = std::make_unique<T[]>(count);
+
+            // Copy elements
+            std::copy(begin, end, ptr.get());
+
+            // Return as DataValue
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), count),
+                DataType::array1d<T>(count)
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning a 2D array (row-major).
+         *
+         * @tparam T The element type of the array.
+         * \param[in] values A unique_ptr to the array data (takes ownership).
+         * \param[in] rows The number of rows.
+         * \param[in] cols The number of columns.
+         * \return A DataValue owning the 2D array.
+         */
+        template <typename T>
+        static DataValue array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols) {
+            return DataValue(
+                std::make_unique<detail::Array2dModel<T>>(std::move(values), rows, cols),
+                DataType::array2d<T>(rows, cols)
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning a 2D array from a **flat 1D range** (row-major).
+         *
+         * @tparam Range The 1D range type (e.g., std::vector<T>, T[]).
+         * \param[in] range The flat data to interpret as 2D.
+         * \param[in] rows Number of rows.
+         * \param[in] cols Number of columns.
+         * \return A DataValue owning the 2D array.
+         * \throws std::invalid_argument If `range.size() != rows * cols`.
+         */
+        template <typename Range>
+        static DataValue array2d(const Range& range, size_t rows, size_t cols) {
+            using T = typename std::iterator_traits<decltype(std::begin(range))>::value_type;
+            size_t total = rows * cols;
+            if (std::distance(std::begin(range), std::end(range)) != total) {
+                throw std::invalid_argument(
+                    "DataValue::array2d failed: range size (" +
+                    std::to_string(std::distance(std::begin(range), std::end(range))) +
+                    ") must equal rows * cols (" + std::to_string(total) + "). Requested type: " +
+                    DataType::array2d<T>(rows, cols).toString()
+                );
+            }
+            auto ptr = std::make_unique<T[]>(total);
+            std::copy(std::begin(range), std::end(range), ptr.get());
+            return DataValue(
+                std::make_unique<detail::Array2dModel<T>>(std::move(ptr), rows, cols),
+                DataType::array2d<T>(rows, cols)
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning a 2D array from a **nested range** (e.g., vector<vector<T>>).
+         *
+         * @tparam RangeOfRanges The nested range type (e.g., std::vector<std::vector<T>>).
+         * \param[in] rows_range The nested range (each inner range is a row).
+         * \return A DataValue owning the 2D array.
+         * \throws std::invalid_argument If inner ranges have inconsistent sizes or the outer range is empty.
+         */
+        template <typename RangeOfRanges>
+        static DataValue array2d(const RangeOfRanges& rows_range) {
+            auto outer_begin = std::begin(rows_range);
+            auto outer_end = std::end(rows_range);
+
+            if (outer_begin == outer_end) {
+                throw std::invalid_argument(
+                    "DataValue::array2dFromRows failed: outer range is empty; no DataValue was created."
+                );
+            }
+
+            // Deduce element type from the first inner range
+            using InnerIter = decltype(std::begin(*outer_begin));
+            using T = typename std::iterator_traits<InnerIter>::value_type;
+
+            // Get cols from the first inner range
+            size_t cols = std::distance(std::begin(*outer_begin), std::end(*outer_begin));
+            size_t rows = std::distance(outer_begin, outer_end);
+
+            // Validate all inner ranges have the same size
+            for (auto it = outer_begin; it != outer_end; ++it) {
+                size_t current_cols = std::distance(std::begin(*it), std::end(*it));
+                if (current_cols != cols) {
+                    throw std::invalid_argument(
+                        "DataValue::array2dFromRows failed: all inner ranges must have the same size. "
+                        "Expected " + std::to_string(cols) + ", got " + std::to_string(current_cols) + "."
+                    );
+                }
+            }
+
+            // Allocate and copy row-by-row
+            size_t total = rows * cols;
+            auto ptr = std::make_unique<T[]>(total);
+            size_t row_idx = 0;
+            for (auto it = outer_begin; it != outer_end; ++it, ++row_idx) {
+                std::copy(std::begin(*it), std::end(*it), ptr.get() + row_idx * cols);
+            }
+
+            return DataValue(
+                std::make_unique<detail::Array2dModel<T>>(std::move(ptr), rows, cols),
+                DataType::array2d<T>(rows, cols)
+            );
+        }
+
+        template <typename T>
+        /**
+         * \brief Creates a zero-initialized value with the requested shape and element type.
+         * \tparam T Element type used for storage.
+         * \param[in] type Requested shape and runtime type metadata.
+         * \return A zero-initialized owning value.
+         * \throws std::invalid_argument If the requested rank is unsupported.
+         */
+        static DataValue zeros(const DataType& type)
+        {
+            if (type.rank == 0) {
+                return DataValue::scalar<T>(T{});
+            }
+
+            if (type.rank == 1) {
+                size_t count = type.dimensions[0];
+                auto values = std::make_unique<T[]>(count);
+
+                return DataValue::array1d<T>(
+                    std::move(values),
+                    count
+                );
+            }
+
+            if (type.rank == 2) {
+                auto values = std::make_unique<T[]>(type.dimensions[0] * type.dimensions[1]);
+
+                return DataValue::array2d<T>(
+                    std::move(values),
+                    type.dimensions[0],
+                    type.dimensions[1]
+                );
+            }
+
+            throw std::invalid_argument(
+                "DataValue::zeros failed: unsupported requested type.\n" + type.toString()
+            );
+        }
+
+        /**
+         * \brief Creates a **deep copy** of a sub-region of this DataValue.
+         *
+         * Unlike `DataView::getSubView`, this method:
+         * - Allocates new memory and copies the data.
+         * - Returns a **new DataValue** with no source context (owns its data).
+         *
+         * \param[in] requested The DataType of the requested sub-region (only shape is used).
+         * \param[in] address The starting address (in elements) within this DataValue.
+         * \return A new DataValue owning the copied sub-region.
+         * \throws std::out_of_range If the requested shape does not fit at the given address.
+         * \throws std::bad_alloc If memory allocation fails.
+         */
+        template <typename T>
+        DataValue getSubValue(DataType requested, size_t address) const {
+            if (*getType().elementType != typeid(T)) {
+                throw std::runtime_error(
+                    "DataValue::getSubValue failed: requested element type does not match the value.\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + requested.toString()
+                );
+            }
+            if (!this->canFit(requested, address)) {
+                throw std::out_of_range(
+                    "DataValue::getSubValue failed at address " + std::to_string(address) + ".\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + requested.toString()
+                );
+            }
+
+            const T* src = static_cast<const T*>(storage->data());
+            size_t absOffset = getType().sourceOffset + address;
+            size_t srcStride = (getType().sourceRank >= 2) ? getType().sourceDimensions[1] : 0;
+
+            if (requested.rank == 0) {
+                return DataValue::scalar<T>(src[absOffset]);
+            }
+            else if (requested.rank == 1) {
+                size_t count = requested.dimensions[0];
+                auto buffer = std::make_unique<T[]>(count);
+                std::copy(src + absOffset, src + absOffset + count, buffer.get());
+                return DataValue::array1d<T>(std::move(buffer), count);
+            }
+            else { // rank == 2
+                size_t rows = requested.dimensions[0];
+                size_t cols = requested.dimensions[1];
+                auto buffer = std::make_unique<T[]>(rows * cols);
+
+                size_t srcRowStart = absOffset / srcStride;
+                size_t srcColStart = absOffset % srcStride;
+
+                for (size_t i = 0; i < rows; ++i) {
+                    size_t srcIndex = (srcRowStart + i) * srcStride + srcColStart;
+                    std::copy(src + srcIndex, src + srcIndex + cols, buffer.get() + i * cols);
+                }
+
+                return DataValue::array2d<T>(std::move(buffer), rows, cols);
+            }
+        }
+
+        /**
+         * \brief Copies a source value into a sub-region of this value.
+         * \param[in] value Source value to copy.
+         * \param[in] address Starting element address in this value.
+         * \throws std::runtime_error If the element types differ.
+         * \throws std::out_of_range If the source shape does not fit.
+         */
+        void setSubValue(const DataValue& value, size_t address);
+
+        /**
+         * \brief Sets a scalar value at a specific address in this DataValue.
+         * 
+         * \param[in] value The scalar value to set.
+         * \param[in] address Element address in this value.
+         */
+        template <typename T>
+        void setScalarAt(T value, size_t address) {
+            if (!this->canFit(DataType::scalar<T>(), address)) {
+                throw std::out_of_range(
+                    "DataValue::setScalarAt failed at address " + std::to_string(address) + ".\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + DataType::scalar<T>().toString()
+                );
+            }
+
+            T* dst = static_cast<T*>(storage->data());
+            size_t absOffset = getType().sourceOffset + address;
+            dst[absOffset] = value;
+        }
+
+        /** \brief Checks whether the owned buffer and view pointer are valid. */
+        explicit operator bool() const noexcept;
+
+        /**
+         * \brief Renders the owned value and its metadata as a debugging string.
+         */
+        std::string toString() const;
+
+        /** \brief Returns a non-owning view over the owned data. */
+        Data::DataView view() const;
+
+        
+
+        /**
+         * \brief Converts numeric elements and optionally repairs them with a constraint.
+         *
+         * Conversion is performed first. If `constraint` is supplied and does not
+         * accept the converted value, its virtual conversion method repairs the value.
+         *
+         * \tparam S Numeric source type.
+         * \tparam D Numeric destination type.
+         * \param[in] source Source value to convert.
+         * \return A new owning value with the same rank and dimensions.
+         * \throws std::invalid_argument If the source or destination is nonnumeric,
+         * the rank is unsupported, or the constraint returns no value.
+         */
+        template <typename S, typename D>
+        static DataValue convertNumericValue(const DataValue& source) {
+            static_assert(std::is_arithmetic_v<S>,
+                          "DataValue::convert requires an arithmetic source type");
+            static_assert(std::is_arithmetic_v<D>,
+                          "DataValue::convert requires an arithmetic destination type");
+
+            if (source.getRank() == 0) {
+                S data = source.getScalar<S>();
+                return DataValue::scalar<D>(static_cast<D>(data));
+            }
+
+            if (source.getRank() == 1) {
+                const size_t count = source.getDimensions()[0];
+                const S* data = source.getData<S>();
+                auto values = std::make_unique<D[]>(count);
+            
+                for (size_t idx = 0; idx < count; ++idx) {
+                    values[idx] = static_cast<D>(data[idx]);
+                }
+                return DataValue::array1d<D>(std::move(values), count);
+            }
+
+            if (source.getRank() == 2) {
+                const size_t rows = source.getDimensions()[0];
+                const size_t cols = source.getDimensions()[1];
+                const S* data = source.getData<S>();
+                auto values = std::make_unique<D[]>(rows * cols);
+            
+                for (size_t idx = 0; idx < rows * cols; ++idx) {
+                    values[idx] = static_cast<D>(data[idx]);
+                }
+                return DataValue::array2d<D>(std::move(values), rows, cols);
+            }
+
+            throw std::invalid_argument(
+                "DataValue::convert failed: unsupported source rank.\n" + source.toString()
+            );
+        }
     };
 
 } // namespace Data
 
-#endif
+#endif // DATA_VALUE_H

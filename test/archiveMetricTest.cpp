@@ -39,8 +39,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 
 #include "evaluation/archiveMetric.h"
 #include "evolution/individual.h"

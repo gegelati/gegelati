@@ -39,7 +39,7 @@
 
 #include <random>
 
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"
 #include "learn/learningEnvironment.h"
 #include "mutator/rng.h"
 

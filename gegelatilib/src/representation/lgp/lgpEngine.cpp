@@ -37,7 +37,7 @@
  */
 
 #include "representation/lgp/lgpEngine.h"
-#include "data/constantHandler.h"
+#include "oldData/constantHandler.h"
 #include "instructions/multByConstant.h"
 
 void Representation::LGP::LGPEngine::setExecutedIndividual(const Individual& newExecutedIndividual)

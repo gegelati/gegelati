@@ -37,8 +37,8 @@
 
 #include <gtest/gtest.h>
 
-#include "data/constantHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/constantHandler.h"
+#include "oldData/primitiveTypeArray.h"
 
 TEST(ConstantHandlersTest, Constructor)
 {

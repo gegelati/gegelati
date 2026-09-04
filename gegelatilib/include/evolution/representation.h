@@ -14,9 +14,9 @@
 #include "evolution/population.h"
 #include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
-#include "newData/dataValue.h"
-#include "evolution/controlFlow.h"
-#include "util/activationFunctions.h"
+#include "data/dataValue.h"
+#include "dimensions/controlFlow.h"
+#include "dimensions/activationFunctions.h"
 
 using RepParam = Representation::RepresentationParameters;
 
@@ -47,9 +47,9 @@ namespace Evolution {
         /// Tangled population
         std::optional<std::reference_wrapper<const Population>> tangledPopulation;
 
-        std::vector<std::unique_ptr<Utils::ActivationFunctions::Function>> outputFunctions;
+        std::vector<std::unique_ptr<Dimensions::ActivationFunctions::Function>> outputFunctions;
 
-        Evolution::ControlFlow dimensionFlow;
+        Dimensions::ControlFlow dimensionFlow;
 
         virtual Data::DataValue executeIndividualRaw(
           const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
@@ -74,7 +74,7 @@ namespace Evolution {
          * \param[in] representationColor color of the representation used (during .dot files).
          */
         Representation(
-            const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension,
+            const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension,
             size_t nbNodesMin, size_t nbNodesMax=0,
             std::string representationName = "Representation", 
             std::string representationColor = "#000000")
@@ -114,9 +114,9 @@ namespace Evolution {
         virtual size_t getMaxNbNodes() const;
 
         /** \brief Adds a typed post-processing function to the representation output. */
-        virtual void addOutputFunction(std::unique_ptr<Utils::ActivationFunctions::Function> function);
+        virtual void addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function);
 
-        virtual ControlFlow getControlFlow() const;
+        virtual Dimensions::ControlFlow getControlFlow() const;
         virtual std::string summary() const;
 
         /**

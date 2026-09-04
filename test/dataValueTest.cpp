@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "newData/dataValue.h"
-#include "newData/numericRange.h"
+#include "data/dataValue.h"
+#include "dimensions/numericRange.h"
 
 TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
 {

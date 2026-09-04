@@ -42,9 +42,9 @@
 #include <iostream>
 
 #include "representation/lgp/lgpParameters.h"
-#include "data/constantHandler.h"
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/constantHandler.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
 #include "learn/learningParameters.h"

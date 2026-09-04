@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "newData/dataType.h"
+#include "data/dataType.h"
 
 TEST(DataTypeTest, DefaultConstructorCreatesInvalidDescriptor)
 {

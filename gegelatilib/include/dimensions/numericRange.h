@@ -9,12 +9,12 @@
 #include <type_traits>
 #include <utility>
 
-#include "newData/dataValue.h"
+#include "dimensions/constraint.h"
 
-namespace Data {
+namespace Dimensions {
 
     template <typename T>
-    struct NumericRange final : DataConstraint {
+    struct NumericRange final : Constraint {
         /// \brief Numeric type constrained by this range.
         static_assert(std::is_arithmetic_v<T>, "NumericRange requires an arithmetic type.");
 
@@ -81,7 +81,7 @@ namespace Data {
          * \param[in] view View whose elements are checked.
          * \return `true` when the view has type T and all values are accepted.
          */
-        bool accepts(const DataView& view) const override {
+        bool accepts(const Data::DataView& view) const override {
             if (!view || !view.getType().elementType ||
                 *view.getType().elementType != typeid(T)) {
                 return false;
@@ -101,7 +101,7 @@ namespace Data {
         }
 
         /** \brief Checks whether this producer range is contained by a consumer range. */
-        bool isCompatibleWith(const DataConstraint& consumer) const override {
+        bool isCompatibleWith(const Constraint& consumer) const override {
             const auto* numeric = dynamic_cast<const NumericRange*>(&consumer);
             if (!numeric) {
                 return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
@@ -114,72 +114,18 @@ namespace Data {
             return minimumCompatible && maximumCompatible;
         }
 
-        /**
-         * \brief Clamps a value to this range.
-         *
-         * The input must already have element type `T`; `DataValue::convert<T>`
-         * performs the type conversion before this method is called.
-         *
-         * \param[in] value Value whose elements are clamped.
-         * \return A newly allocated value with the same rank and dimensions.
-         * \throws std::invalid_argument If the value has another element type or rank.
-         */
-        std::unique_ptr<DataValue> convert(const DataValue& value) const override {
-            if (!value || value.getElementType() != typeid(T)) {
-                throw std::invalid_argument(
-                    "NumericRange::convert failed: value has an incompatible element type."
-                );
-            }
-
-            auto clamp = [this](T current) {
-                if (minimum && current < *minimum) {
-                    return *minimum;
-                }
-                if (maximum && current > *maximum) {
-                    return *maximum;
-                }
-                return current;
-            };
-
-            if (value.getRank() == 0) {
-                return std::make_unique<DataValue>(
-                    DataValue::scalar<T>(clamp(value.getScalar<T>())));
-            }
-
-            const size_t count = value.getType().totalElements();
-            const T* source = value.getData<T>();
-            auto values = std::make_unique<T[]>(count);
-            for (size_t index = 0; index < count; ++index) {
-                values[index] = clamp(source[index]);
-            }
-
-            if (value.getRank() == 1) {
-                return std::make_unique<DataValue>(
-                    DataValue::array1d<T>(std::move(values), value.getDimensions()[0]));
-            }
-            if (value.getRank() == 2) {
-                return std::make_unique<DataValue>(
-                    DataValue::array2d<T>(std::move(values), value.getDimensions()[0],
-                                          value.getDimensions()[1]));
-            }
-
-            throw std::invalid_argument(
-                "NumericRange::convert failed: unsupported value rank."
-            );
-        }
-
         /** \brief Compares this range with another constraint.
          * \param[in] other Constraint to compare with.
          * \return `true` when the other constraint has equal bounds and type.
          */
-        bool equals(const DataConstraint& other) const override {
+        bool equals(const Constraint& other) const override {
             const auto* numeric = dynamic_cast<const NumericRange*>(&other);
             return numeric != nullptr && minimum == numeric->minimum &&
                    maximum == numeric->maximum;
         }
 
         /// \brief Returns a shared deep copy of this range.
-        std::shared_ptr<const DataConstraint> cloneSharedPtr() const override {
+        std::shared_ptr<const Constraint> cloneSharedPtr() const override {
             return std::make_shared<const NumericRange<T>>(*this);
         }
 

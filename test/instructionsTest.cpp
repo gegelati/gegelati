@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "data/dataValue.h"
+#include "oldData/dataValue.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"

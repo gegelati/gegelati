@@ -43,7 +43,7 @@
 
 #include "evolution/representation.h"
 #include "evolution/population.h"
-#include "newData/numericRange.h"
+#include "dimensions/numericRange.h"
 
 // Set all file in comment
 
@@ -51,12 +51,12 @@ class RepresentationTest : public ::testing::Test
 {
   protected:
 
-    Data::DataRequirement inputType;
-    Data::DataRequirement outputType;
+    Dimensions::Requirement inputType;
+    Dimensions::Requirement outputType;
     virtual void SetUp()
     {
-        inputType = Data::DataRequirement::array1d<double>(4);
-        outputType = Data::DataRequirement::scalar<double>();
+        inputType = Dimensions::Requirement::array1d<double>(4);
+        outputType = Dimensions::Requirement::scalar<double>();
     }
 
     virtual void TearDown()
@@ -73,7 +73,7 @@ class FakeRepresentation : public Evolution::Representation
             );
         }
         
-        FakeRepresentation(const std::vector<Data::DataRequirement> &inputs, const Data::DataRequirement& output, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(inputs, output, nbNodesMin, nbNodesMax, representationName, representationColor) {};
+        FakeRepresentation(const std::vector<Dimensions::Requirement> &inputs, const Dimensions::Requirement& output, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(inputs, output, nbNodesMin, nbNodesMax, representationName, representationColor) {};
 
         std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override { return nullptr;}; 
 
@@ -119,11 +119,11 @@ TEST_F(RepresentationTest, getSet)
 TEST_F(RepresentationTest, setInputDimensions)
 {
 
-    std::vector<Data::DataRequirement> inputSources {
-        Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::atLeast(1)),
-        Data::DataRequirement::array1d<double>(8),
+    std::vector<Dimensions::Requirement> inputSources {
+        Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::atLeast(1)),
+        Dimensions::Requirement::array1d<double>(8),
     };
-    Data::DataRequirement outputSource = Data::DataRequirement::scalar<double>(Data::NumericRange<double>::between(-1, 1));
+    Dimensions::Requirement outputSource = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1, 1));
 
     FakeRepresentation representation(inputSources, outputSource, 10);
 

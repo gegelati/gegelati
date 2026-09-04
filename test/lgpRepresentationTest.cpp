@@ -50,8 +50,8 @@ class LGPRepresentationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Data::DataRequirement inputType;
-    Data::DataRequirement outputType;
+    Dimensions::Requirement inputType;
+    Dimensions::Requirement outputType;
 
     virtual void SetUp()
     {   
@@ -65,8 +65,8 @@ class LGPRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputType = Data::DataRequirement::array1d<double>(4);
-        outputType = Data::DataRequirement::scalar<double>();
+        inputType = Dimensions::Requirement::array1d<double>(4);
+        outputType = Dimensions::Requirement::scalar<double>();
     }
 
     virtual void TearDown()
@@ -191,7 +191,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
 TEST_F(LGPRepresentationTest, compatibilityCheck) 
 {
-    Data::DataRequirement inputType = Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::between(-3.0, 3.0));
+    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
     Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
@@ -210,13 +210,13 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     std::cout<<representation.summary()<<std::endl;
 
     
-    Data::DataRequirement inputTypeEnv = Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::between(-1.0, 1.0));
-    Data::DataRequirement outputTypeEnv = Data::DataRequirement::scalar<double>(Data::NumericRange<double>::between(-1.0, 1.0));
+    Dimensions::Requirement inputTypeEnv = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-1.0, 1.0));
+    Dimensions::Requirement outputTypeEnv = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1.0, 1.0));
     std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
     std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
     std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 
-    representation.addOutputFunction(std::make_unique<Utils::ActivationFunctions::Tanh<double>>(representation.getControlFlow().getOutputDimension()));
+    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(representation.getControlFlow().getOutputDimension()));
     std::cout<<representation.summary()<<std::endl;
 
     
@@ -224,7 +224,7 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
     std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 
-    representation.addOutputFunction(std::make_unique<Utils::ActivationFunctions::ArgMax<double>>(representation.getControlFlow().getOutputDimension()));
+    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getControlFlow().getOutputDimension()));
     std::cout<<representation.summary()<<std::endl;
 
     

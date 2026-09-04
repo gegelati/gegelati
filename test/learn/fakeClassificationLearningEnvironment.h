@@ -38,7 +38,7 @@
 #ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
 #define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
 
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"
 #include "learn/classificationLearningEnvironment.h"
 
 /**

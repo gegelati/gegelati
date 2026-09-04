@@ -43,7 +43,7 @@
 #include <vector>
 
 #include "data/constant.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"
 
 namespace Data {
 

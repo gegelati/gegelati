@@ -11,7 +11,7 @@ size_t Evolution::Representation::getMaxNbNodes() const
     return this->nbNodesMax;
 }
 
-void Evolution::Representation::addOutputFunction(std::unique_ptr<Utils::ActivationFunctions::Function> function)
+void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function)
 {
     this->dimensionFlow.addLayer(function->name(), function->inputDimensions(), function->outputDimension());
     if(!this->dimensionFlow.isValid()) {
@@ -21,7 +21,7 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Utils::Activat
     
 }
 
-Evolution::ControlFlow Evolution::Representation::getControlFlow() const
+Dimensions::ControlFlow Evolution::Representation::getControlFlow() const
 {
     return this->dimensionFlow;
 }

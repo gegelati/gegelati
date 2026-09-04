@@ -38,8 +38,8 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 #include "representation/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"

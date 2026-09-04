@@ -110,7 +110,7 @@ std::vector<double> Representation::TPG::TPGExecutionEngine::execute()
     } else {
         
         return {(double)dynamic_cast<const EvoGraph::Action*>(&currentVertex.get())->getActionID()};
-        //return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        //return Dimensions::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Dimensions::ActivationFunction::TANH);
     }
 }
 

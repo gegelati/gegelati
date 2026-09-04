@@ -38,10 +38,10 @@
 
 #include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
-#include "data/primitiveTypeArray2D.h"
-#include "data/untypedSharedPtr.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray2D.h"
+#include "oldData/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"

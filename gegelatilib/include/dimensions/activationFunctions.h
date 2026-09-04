@@ -3,10 +3,13 @@
 #define ACTIVATION_FUNCTIONS_H
 
 #include <cmath>
-#include "newData/dataValue.h"
-#include "newData/numericRange.h"
+#include <vector>
 
-namespace Utils
+#include "data/dataValue.h"
+#include "dimensions/requirement.h"
+#include "dimensions/numericRange.h"
+
+namespace Dimensions
 {
 
     
@@ -17,16 +20,16 @@ namespace Utils
             /// \brief Destroys the constraint through its polymorphic interface.
             virtual ~Function() = default;
 
-            Data::DataRequirement output;
-            std::vector<Data::DataRequirement> inputs;
+            Requirement output;
+            std::vector<Requirement> inputs;
 
-            Function(const std::vector<Data::DataRequirement>& inputs, const Data::DataRequirement& output): inputs{inputs}, output{output} {}
+            Function(const std::vector<Requirement>& inputs, const Requirement& output): inputs{inputs}, output{output} {}
 
             virtual Data::DataValue execute(const Data::DataValue& value) const = 0;
 
-            virtual const Data::DataRequirement& outputDimension() const {return output;}
+            virtual const Requirement& outputDimension() const {return output;}
 
-            virtual const std::vector<Data::DataRequirement>& inputDimensions() const {return inputs;}
+            virtual const std::vector<Requirement>& inputDimensions() const {return inputs;}
             virtual std::string name() const  = 0;
         };
 
@@ -38,8 +41,8 @@ namespace Utils
             );
 
 
-            Tanh(const Data::DataRequirement& input)
-            : Function({input}, Data::DataRequirement(input.getDataType(), Data::NumericRange<T>::between(static_cast<T>(-1.0), static_cast<T>(1.0)))) {}
+            Tanh(const Requirement& input)
+            : Function({input}, Requirement(input.getDataType(), Dimensions::NumericRange<T>::between(static_cast<T>(-1.0), static_cast<T>(1.0)))) {}
 
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Apply tanh transformation
@@ -79,8 +82,8 @@ namespace Utils
             );
 
 
-            ArgMax(const Data::DataRequirement& input)
-            : Function({input}, Data::DataRequirement(Data::DataRequirement::scalar<size_t>(Data::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1)))) {}
+            ArgMax(const Requirement& input)
+            : Function({input}, Requirement(Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1)))) {}
 
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Find argmax index

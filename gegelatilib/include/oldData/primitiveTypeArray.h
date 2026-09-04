@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
  * Cedric Leonard <cleonard@insa-rennes.fr> (2021)
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -35,63 +36,51 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef PRIMITIVE_TYPE_ARRAY_2D_H
-#define PRIMITIVE_TYPE_ARRAY_2D_H
+#ifndef PRIMITIVE_TYPE_ARRAY_H
+#define PRIMITIVE_TYPE_ARRAY_H
 
-#include <tuple>
-
-#include "data/array2DWrapper.h"
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/arrayWrapper.h"
+#include "oldData/dataHandler.h"
+#include "oldData/pointerWrapper.h"
 
 namespace Data {
-
     /**
-     * \brief DataHandler for 2D arrays of primitive types.
+     * DataHandler for manipulating arrays of a primitive data type.
      *
-     * This specialization of the Array2DWrapper template class provides the
-     * possibility to get data with the type:
-     * - T: The primitive type.
-     * - T[n][m]: with $n <= height$ and $m <= width$ of the
-     * PrimitiveTypeArray2D.
-     * - T[n]: with $n <= width$ of the PrimitiveTypeArray2D.
-     *
-     * It is important to note that only spatially coherent values will be
-     * returned when arrays are requested. For example, when requesting a 1D
-     * array of N pixels, the returned pixels will always be taken from a single
-     * line of pixels, and will never comprise the last pixel from a line i, and
-     * the first pixels from line i+1.
-     * This means that the addressable space for arrays will be less than a 1D
-     * PrimitiveDataArray with the same number of nbElements.
-     *
+     * In addition to native data types T, this DataHandler can
+     * also provide the following composite data type:
+     * - T[n]: with $n <=$ to the size of the PrimitiveTypeArray.
      */
-    template <typename T> class PrimitiveTypeArray2D : public Array2DWrapper<T>
+    template <class T> class PrimitiveTypeArray : public ArrayWrapper<T>
     {
       protected:
         /**
-         * \brief Array storing the data of the PrimitiveTypeArray2D.
+         * \brief Array storing the data of the PrimitiveTypeArray.
          */
         std::vector<T> data;
 
       public:
-            using Array2DWrapper<T>::setDataAt;
+                using ArrayWrapper<T>::setDataAt;
 
         /**
-         * \brief Constructor for the 2D array.
+         *  \brief Constructor for the PrimitiveTypeArray class.
          *
-         * The size of the underlying PrimitiveTypeArray will be $nbElements =
-         * h*w$.
-         *
-         * \param[in] w The width of the 2D array.
-         * \param[in] h The height of the 2D array.
+         * \param[in] size the fixed number of elements of primitive type T
+         * contained in the PrimitiveTypeArray.
          */
-        PrimitiveTypeArray2D(const size_t w = 2, const size_t h = 4);
+        PrimitiveTypeArray(size_t size = 8);
 
-        /// Copy constructor.
-        PrimitiveTypeArray2D(const PrimitiveTypeArray2D<T>& other);
+        /// Copy constructor (deep copy).
+        PrimitiveTypeArray(const PrimitiveTypeArray<T>& other);
 
-        /// Copy content from an Array2DWrapper
-        PrimitiveTypeArray2D(const Array2DWrapper<T>& other);
+        /// Copy content from an ArrayWrapper
+        PrimitiveTypeArray(const ArrayWrapper<T>& other);
+
+        /// Copy content from a PointerWrapper
+        PrimitiveTypeArray(const PointerWrapper<T>& other);
+
+        /// Default destructor.
+        virtual ~PrimitiveTypeArray() = default;
 
         /// Inherited from DataHandler
         virtual DataHandler* clone() const override;
@@ -122,14 +111,8 @@ namespace Data {
          */
         void setDataAt(const std::type_info& type, const size_t address,
                        const T& value);
-
-        void setDataAt(const std::type_info& type, const size_t address,
-                       const DataViewOld& value)
-        {
-            Array2DWrapper<T>::setDataAt(type, address, value);
-        }
         /**
-         * \brief Assignement Operator for PrimitiveTypeArray2D<T>
+         * \brief Assignement Operator for PrimitiveTypeArray<T>
          *
          * Copy nbElements and data from the right side argument to the
          * left side argument
@@ -137,37 +120,33 @@ namespace Data {
          * \param[in] other the left side argument, to be assigned to the right
          * side argument.
          *
-         * \return the assigned PrimitiveTypeArray2D
+         * \return the assigned PrimitiveTypeArray
          *
          * \throws std::domain_error if both arguents do not have the same size,
          * which implies that assignement cannot be successfull.
          */
-        PrimitiveTypeArray2D<T>& operator=(
-            const PrimitiveTypeArray2D<T>& other);
+        PrimitiveTypeArray<T>& operator=(const PrimitiveTypeArray<T>& other);
     };
 
-    template <typename T>
-    inline PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(const size_t w,
-                                                         const size_t h)
-        : Array2DWrapper<T>(w, h, nullptr), data(h * w)
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size)
+        : ArrayWrapper<T>(size, nullptr), data(size)
     {
-        // Set the pointer to the right data
         this->setPointer(&(this->data));
     }
 
-    template <typename T>
-    inline PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
-        const PrimitiveTypeArray2D<T>& other)
-        : Array2DWrapper<T>(other), data(other.data)
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(
+        const PrimitiveTypeArray<T>& other)
+        : ArrayWrapper<T>(other), data(other.data)
     {
         // Set the pointer to the right data
         this->setPointer(&(this->data));
     }
 
     template <class T>
-    PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
-        const Array2DWrapper<T>& other)
-        : Array2DWrapper<T>(other), data(this->nbElements)
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(const ArrayWrapper<T>& other)
+        : ArrayWrapper<T>(other), data(this->nbElements)
     {
         if (this->containerPtr != NULL) {
             // Copy the data from the given ArrayWrapper
@@ -185,16 +164,31 @@ namespace Data {
         this->setPointer(&(this->data));
     }
 
-    template <typename T>
-    inline DataHandler* PrimitiveTypeArray2D<T>::clone() const
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(const PointerWrapper<T>& other)
+        : ArrayWrapper<T>(other, 1), data(1)
     {
-        // Copy construtor should do the deep copy.
-        DataHandler* result = new PrimitiveTypeArray2D<T>(*this);
+        if (other.containerPtr != NULL) {
+            // Copy the data from the given PointerWrapper
+            this->data[0] = *other.containerPtr;
+        }
+        else {
+            this->resetData();
+        }
+
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
+    }
+
+    template <class T> inline DataHandler* PrimitiveTypeArray<T>::clone() const
+    {
+        // Default copy construtor does the deep copy.
+        PrimitiveTypeArray<T>* result = new PrimitiveTypeArray<T>(*this);
 
         return result;
     }
 
-    template <class T> void PrimitiveTypeArray2D<T>::resetData()
+    template <class T> void PrimitiveTypeArray<T>::resetData()
     {
         for (T& elt : this->data) {
             elt = T{0};
@@ -205,9 +199,8 @@ namespace Data {
     }
 
     template <class T>
-    void PrimitiveTypeArray2D<T>::setDataAt(const std::type_info& type,
-                                            const size_t address,
-                                            const T& value)
+    void PrimitiveTypeArray<T>::setDataAt(const std::type_info& type,
+                                          const size_t address, const T& value)
     {
 #ifndef NDEBUG
         // Throw exception in case of invalid arguments.
@@ -219,16 +212,15 @@ namespace Data {
         // Invalidate the cached hash.
         this->invalidCachedHash = true;
     }
-
     template <class T>
-    PrimitiveTypeArray2D<T>& PrimitiveTypeArray2D<T>::operator=(
-        const PrimitiveTypeArray2D<T>& other)
+    PrimitiveTypeArray<T>& PrimitiveTypeArray<T>::operator=(
+        const PrimitiveTypeArray<T>& other)
     {
         // Guard self assignment
         if (this != &other) {
             if (this->nbElements != other.nbElements) {
                 std::stringstream message;
-                message << "Assigned PrimitiveTypeArray2D do not have the same "
+                message << "Assigned PrimitiveTypeArray do not have the same "
                            "size : "
                         << this->nbElements << " / " << other.nbElements << ".";
                 throw std::domain_error(message.str());
@@ -241,5 +233,6 @@ namespace Data {
         }
         return *this;
     }
-}; // namespace Data
+} // namespace Data
+
 #endif

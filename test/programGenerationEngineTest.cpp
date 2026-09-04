@@ -45,7 +45,7 @@
 #endif
 
 #include "codeGen/programGenerationEngine.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"
 #include "goldenReferenceComparison.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"

@@ -11,7 +11,7 @@
 
 #include "representation/individual.h"
 #include "representation/job.h"
-#include "data/dataHandler.h"
+#include "oldData/dataHandler.h"
 #include "outputInfo.h"
 
 namespace Representation {

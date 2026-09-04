@@ -38,8 +38,8 @@
 
 #include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
 #include "evoGraph/action.h"

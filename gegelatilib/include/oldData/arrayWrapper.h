@@ -46,7 +46,7 @@
 #include <typeinfo>
 
 #include "data/constant.h"
-#include "data/dataHandler.h"
+#include "oldData/dataHandler.h"
 #include "data/demangle.h"
 #include "data/hash.h"
 
@@ -481,4 +481,4 @@ namespace Data {
 #endif // !ARRAY_WRAPPER_H
 
 // Include PrimitiveTypeArray to ensure availability of the used clone method.
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"

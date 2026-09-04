@@ -40,7 +40,7 @@ std::vector<double> Representation::ATPG::ATPGExecutionEngine::execute()
         return this->actionValues;
     } else {
         /// TODO SET ACTIVATION FUNCTION
-        //return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        //return Dimensions::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Dimensions::ActivationFunction::TANH);
         return {};
     }
 }

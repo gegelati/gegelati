@@ -9,7 +9,7 @@
 #include <iostream>
 #include <type_traits>
 
-#include "newData/dataType.h"
+#include "data/dataType.h"
 
 namespace Data {
 

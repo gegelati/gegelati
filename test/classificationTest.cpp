@@ -38,7 +38,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/set.h"

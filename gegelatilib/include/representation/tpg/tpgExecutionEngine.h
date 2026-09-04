@@ -9,7 +9,7 @@
 #include "evoGraph/team.h"
 #include "representation/tpg/archive.h"
 
-#include "util/activationFunctions.h"
+#include "dimensions/activationFunctions.h"
 
 namespace Representation::TPG {
     /**

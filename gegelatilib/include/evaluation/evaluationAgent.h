@@ -100,12 +100,12 @@ namespace Evaluation {
         /**
          * \brief get the input dimensions of the EvaluationAgent.
          */
-        virtual const std::vector<Data::DataRequirement>& getInputDimensions() const;
+        virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
          * \brief get the output dimension of the EvaluationAgent.
          */
-        virtual const Data::DataRequirement& getOutputDimension() const;
+        virtual const Dimensions::Requirement& getOutputDimension() const;
 
         virtual std::string summary() const;
         

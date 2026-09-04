@@ -41,8 +41,8 @@
 
 #include <memory>
 
-#include "data/primitiveTypeArray.h"
-#include "data/untypedSharedPtr.h"
+#include "oldData/primitiveTypeArray.h"
+#include "oldData/untypedSharedPtr.h"
 #include "representation/lgp/lgpIndividual.h"
 #include "representation/executionEngine.h"
 

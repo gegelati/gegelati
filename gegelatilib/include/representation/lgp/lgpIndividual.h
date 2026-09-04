@@ -7,7 +7,7 @@
 #include "evoGraph/vertex.h"
 #include "representation/lgp/lgpLine.h"
 #include "representation/lgp/environment.h"
-#include "data/constantHandler.h"
+#include "oldData/constantHandler.h"
 #include "outputInfo.h"
 
 namespace Representation::LGP {

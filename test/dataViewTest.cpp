@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "newData/dataView.h"
+#include "data/dataView.h"
 
 TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
 {

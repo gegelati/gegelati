@@ -38,7 +38,7 @@
 #include <stdexcept>
 
 #include "evaluation/learningEnvironment.h"
-#include "evolution/controlFlow.h"
+#include "dimensions/controlFlow.h"
 
 Evaluation::LearningEnvironment* Evaluation::LearningEnvironment::clone() const
 {
@@ -51,19 +51,19 @@ bool Evaluation::LearningEnvironment::isCopyable() const
 }
 
 
-const std::vector<Data::DataRequirement>& Evaluation::LearningEnvironment::getInputDimensions() const
+const std::vector<Dimensions::Requirement>& Evaluation::LearningEnvironment::getInputDimensions() const
 {
     return this->inputDimensions;
 }
 
-const Data::DataRequirement& Evaluation::LearningEnvironment::getOutputDimension() const
+const Dimensions::Requirement& Evaluation::LearningEnvironment::getOutputDimension() const
 {
     return this->outputDimension;
 }
 
 std::string Evaluation::LearningEnvironment::summary() const
 {
-    Evolution::ControlFlow flow(this->inputDimensions);
+    Dimensions::ControlFlow flow(this->inputDimensions);
     flow.addLayer("Environment output", this->inputDimensions, this->outputDimension);
     return flow.summary();
 }

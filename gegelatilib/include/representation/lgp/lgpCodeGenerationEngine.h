@@ -41,8 +41,8 @@
 #define LGP_CODE_GENERATION_ENGINE_H
 #include <fstream>
 
-#include "data/dataHandlerPrinter.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandlerPrinter.h"
+#include "oldData/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "representation/lgp/lgpEngine.h"
 

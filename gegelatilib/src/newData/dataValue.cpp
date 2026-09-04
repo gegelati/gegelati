@@ -1,4 +1,4 @@
-#include "newData/dataValue.h"
+#include "data/dataValue.h"
 
 namespace Data {
 
@@ -18,10 +18,6 @@ namespace Data {
         return DataValue(this->storage->clone(), this->type);
     }
 
-    std::unique_ptr<DataValue> UnconstrainedData::convert(const DataValue& value) const
-    {
-        return std::make_unique<DataValue>(value.clone());
-    }
 
     void DataValue::setSubValue(const DataValue& value, size_t address) {
         if (*type.elementType != *value.type.elementType) {

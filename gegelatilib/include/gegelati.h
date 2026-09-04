@@ -95,16 +95,16 @@
 #include <representation/tpg/tpgExecutionEngine.h>
 
 
-#include <data/array2DWrapper.h>
-#include <data/arrayWrapper.h>
+#include <oldData/array2DWrapper.h>
+#include <oldData/arrayWrapper.h>
 #include <data/constant.h>
-#include <data/constantHandler.h>
-#include <data/dataHandler.h>
+#include <oldData/constantHandler.h>
+#include <oldData/dataHandler.h>
 #include <data/hash.h>
-#include <data/pointerWrapper.h>
-#include <data/primitiveTypeArray.h>
-#include <data/primitiveTypeArray2D.h>
-#include <data/untypedSharedPtr.h>
+#include <oldData/pointerWrapper.h>
+#include <oldData/primitiveTypeArray.h>
+#include <oldData/primitiveTypeArray2D.h>
+#include <oldData/untypedSharedPtr.h>
 
 
 #include <evoGraph/abstractEngine.h>
@@ -172,7 +172,7 @@
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 
-#include <util/activationFunctions.h>
+#include <dimensions/activationFunctions.h>
 #include <util/counterReset.h>
 #include <util/genericComparator.h>
 #include <util/timestamp.h>

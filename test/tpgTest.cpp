@@ -40,8 +40,8 @@
 
 #include "representation/lgp/lgpIndividual.h"
 
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
+#include "oldData/dataHandler.h"
+#include "oldData/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 

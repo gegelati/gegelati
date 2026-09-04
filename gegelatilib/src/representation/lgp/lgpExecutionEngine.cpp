@@ -90,11 +90,11 @@ std::vector<double> Representation::LGP::LGPExecutionEngine::execute()
         if(outputIndices.front() == 20000) {
 
             std::string str = "Output of " + std::to_string(outputIndices.front()) + " R: " + std::to_string(result.front());
-            //result = Utils::ActivationFunctions::scaleOutputValues(result, this->outputs, Utils::ActivationFunction::TANH);
+            //result = Dimensions::ActivationFunctions::scaleOutputValues(result, this->outputs, Dimensions::ActivationFunction::TANH);
             str = str + "  -- A: " + std::to_string(result.front());
             std::cout<<str<<std::endl;
         } else {
-            //result = Utils::ActivationFunctions::scaleOutputValues(result, this->outputs, Utils::ActivationFunction::TANH);
+            //result = Dimensions::ActivationFunctions::scaleOutputValues(result, this->outputs, Dimensions::ActivationFunction::TANH);
 
         }
         return result;

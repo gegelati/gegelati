@@ -37,7 +37,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data/primitiveTypeArray2D.h"
+#include "oldData/primitiveTypeArray2D.h"
 
 TEST(PrimitiveTypeArray2DTest, Constructors)
 {

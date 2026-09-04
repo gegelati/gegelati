@@ -44,7 +44,7 @@
 
 #include "representations/tpgRepresentation.h"
 #include "representations/lgpRepresentation.h"
-#include "newData/numericRange.h"
+#include "dimensions/numericRange.h"
 
 #include "evolution/individual.h"
 
@@ -60,7 +60,7 @@ class TPGRepresentationTest : public ::testing::Test
 
     Evolution::Population* tpgPopulation;
 
-    Data::DataRequirement inputType;
+    Dimensions::Requirement inputType;
 
     virtual void SetUp()
     {   
@@ -74,7 +74,7 @@ class TPGRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputType = Data::DataRequirement::array1d<double>(4);
+        inputType = Dimensions::Requirement::array1d<double>(4);
 
         memberRepresentation = new Representations::LGPRepresentation({inputType}, 1, set, 8, 1, 10);
 

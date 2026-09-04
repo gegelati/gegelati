@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data/untypedSharedPtr.h"
+#include "oldData/untypedSharedPtr.h"
 
 class UntypedSharedPtrTest : public ::testing::Test
 {

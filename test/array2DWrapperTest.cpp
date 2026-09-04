@@ -36,8 +36,8 @@
 
 #include <gtest/gtest.h>
 
-#include "data/array2DWrapper.h"
-#include "data/dataHandler.h"
+#include "oldData/array2DWrapper.h"
+#include "oldData/dataHandler.h"
 
 TEST(Array2DWrapperTest, Constructor)
 {

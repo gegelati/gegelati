@@ -48,9 +48,9 @@ namespace Representations {
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            LGPRepresentation(std::vector<Data::DataRequirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
+            LGPRepresentation(std::vector<Dimensions::Requirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Evolution::Representation(
-                    inputDimensions, Data::DataRequirement::array1d<double>(nbOutputRegisters, Data::NumericRange<double>::unbounded()), 
+                    inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
                     nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
                     nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {
                 if(nbOutputRegisters > nbRegisters) {

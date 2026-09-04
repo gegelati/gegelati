@@ -8,7 +8,7 @@
 
 #include "evolution/representation.h"
 #include "evolution/population.h"
-#include "newData/numericRange.h"
+#include "dimensions/numericRange.h"
 
 namespace Representations {
 
@@ -45,16 +45,16 @@ namespace Representations {
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            TPGRepresentation(std::vector<Data::DataRequirement> inputDimensions, size_t nbActions, const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
+            TPGRepresentation(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
                 : Evolution::Representation(
-                    inputDimensions, Data::DataRequirement::scalar<size_t>(Data::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
+                    inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
                     nbActions{nbActions}, contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
                     this->setTangled(true);
 
-                    if(!Evolution::ControlFlow::acceptsRequirements(inputDimensions, contextMemberRep.getControlFlow().getInputDimensions())) {
+                    if(!Dimensions::ControlFlow::acceptsRequirements(inputDimensions, contextMemberRep.getControlFlow().getInputDimensions())) {
                         throw std::runtime_error("TPGRepresentation:Constructor: Input Dimensions set is not compatible with the context member representation input dimensions");
                     }
-                    if(contextMemberRep.getControlFlow().getOutputDimension().isCompatibleWith(Data::DataRequirement::scalar<double>(Data::NumericRange<double>::unbounded())) == false) {
+                    if(contextMemberRep.getControlFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::unbounded())) == false) {
                         throw std::runtime_error("TPGRepresentation:Constructor: Context member representation output dimension is not compatible with the required scalar<double> output dimension");
                     }
                 };

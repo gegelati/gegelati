@@ -36,9 +36,9 @@
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
-#include "data/dataHandlerPrinter.h"
-#include "data/primitiveTypeArray.h"
-#include "data/primitiveTypeArray2D.h"
+#include "oldData/dataHandlerPrinter.h"
+#include "oldData/primitiveTypeArray.h"
+#include "oldData/primitiveTypeArray2D.h"
 
 TEST(DataHandlerPrinterTest, test) 
 {
