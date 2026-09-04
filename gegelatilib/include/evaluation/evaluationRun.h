@@ -111,7 +111,15 @@ namespace Evaluation {
              */
             virtual const EvaluationMetric& getMetricAt(size_t index) const;
 
+        /**
+         * \brief Print all the metric saved for the run.
+         */
+        virtual std::string toString(std::string prefix="") const;
     };
+        
+    inline std::ostream& operator<<(std::ostream& os, const EvaluationRun& metric) {
+        return os << metric.toString();
+    }
 }; // namespace Learn
 
 #endif

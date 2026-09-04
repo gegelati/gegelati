@@ -58,6 +58,16 @@ namespace Evaluation {
         virtual void extractMetricsRun(
             const Evolution::Individual& individual, size_t nbStepsExecuted,
             const Evaluation::LearningEnvironment& learningEnvironment) override;
+
+        /**
+         * \brief Print the score of the metric.
+         */
+        virtual std::string toString(std::string prefix = "") const ;
+
+        /**
+         * \brief return true if other is a ScoreMetric.
+         */
+        virtual bool sameMetricMethod(const EvaluationMetric& other) const;
     };
 
 

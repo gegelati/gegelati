@@ -52,7 +52,14 @@ void StickGameWithOpponentD::doAction(const Data::DataValue& action)
     int actionInt = 0;
 
     if (!this->outputDimension.accepts(action)) {
-        actionInt = Data::DataValue::convertNumericValue<double, size_t>(action).getScalar<size_t>();
+        double actionDouble = action.getScalar<double>();
+        if(actionDouble >= 2){
+            actionInt = 2;
+        } else  if(actionDouble <= 0) {
+            actionInt = 0;
+        } else {
+            actionInt = int(actionDouble);
+        }
     } else {
         actionInt = action.getScalar<size_t>();
     }

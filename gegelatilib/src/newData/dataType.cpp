@@ -91,7 +91,7 @@ namespace Data {
             << ", elementType=";
 
         if (this->elementType) {
-            oss << this->elementType->name();
+            oss << DEMANGLE_TYPEID_NAME(this->elementType->name());
         } else {
             oss << "null";
         }
@@ -111,6 +111,26 @@ namespace Data {
             << ", sourceOffset=" << this->sourceOffset
             << "}";
 
+        return oss.str();
+    }
+
+    std::string DataType::summary() const {
+        std::ostringstream oss;
+        if (!this->elementType) {
+            oss << "'unknown";
+        } else {
+            oss << "'" << DEMANGLE_TYPEID_NAME(this->elementType->name());
+        }
+
+        if (this->rank == 0) {
+            oss << " scalar'";
+        } else {
+            oss << "[" << this->dimensions[0];
+            if (this->rank == 2) {
+                oss << ", " << this->dimensions[1];
+            }
+            oss << "]'";
+        }
         return oss.str();
     }
 

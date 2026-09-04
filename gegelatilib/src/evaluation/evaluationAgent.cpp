@@ -40,6 +40,12 @@
 
 void Evaluation::EvaluationAgent::addRequestedMetric(const EvaluationMetric& metric)
 {
+    // Don't add twice the same metric :)
+    for(const auto& currentMetric: this->requestedMetrics){
+        if(currentMetric->sameMetricMethod(metric)) {
+            return;
+        }
+    }
     this->requestedMetrics.push_back(std::move(metric.cloneEmptyUniquePtr()));
 }
 
@@ -62,6 +68,11 @@ const std::vector<Data::DataRequirement>& Evaluation::EvaluationAgent::getInputD
 const Data::DataRequirement& Evaluation::EvaluationAgent::getOutputDimension() const
 {
     return this->learningEnvironment.getOutputDimension();
+}
+
+std::string Evaluation::EvaluationAgent::summary() const
+{
+    return this->learningEnvironment.summary();
 }
 
 

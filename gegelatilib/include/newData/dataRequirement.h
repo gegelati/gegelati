@@ -31,6 +31,8 @@ namespace Data {
          * \return `true` when the view is accepted.
          */
         virtual bool accepts(const DataView& view) const = 0;
+        /** \brief Checks whether this producer constraint satisfies a consumer constraint. */
+        virtual bool isCompatibleWith(const DataConstraint& consumer) const =0;
         /**
          * \brief Converts a value to the type represented by this constraint.
          *
@@ -55,6 +57,10 @@ namespace Data {
         /// \brief Accepts every view.
         bool accepts(const DataView&) const override {
             return true;
+        }
+
+        bool isCompatibleWith(const DataConstraint& consumer) const override {
+            return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
         }
 
         /**
@@ -198,6 +204,12 @@ namespace Data {
             return view.getType() == dataType && constraint->accepts(view);
         }
 
+        /** \brief Checks whether this producer requirement satisfies a consumer requirement. */
+        bool isCompatibleWith(const DataRequirement& consumer) const noexcept {
+            return dataType.canFitIn(consumer.dataType, 0) &&
+                   constraint->isCompatibleWith(*consumer.constraint);
+        }
+
         /** \brief Compares both structural type and value constraint.
          * \param[in] other Requirement to compare with.
          * \return `true` when both requirements are equivalent.
@@ -221,12 +233,20 @@ namespace Data {
 
         /** \brief Returns a diagnostic string containing the type and constraint. */
         std::string toString() const {
-            return "DataRequirement{\n\t" + dataType.toString() + ",\n\tRequirement: " +constraint->toString() + "\n}";
+            return "DataRequirement{\n\t" + dataType.toString() + ",\n\tRequirement: " + constraint->toString() + "\n}";
+        }
+
+        /** \brief Renders the requirement in a compact model-summary format. */
+        std::string summary() const {
+            return dataType.summary() + " in " + constraint->toString();
         }
     };
 
     inline std::ostream& operator<<(std::ostream& os, const DataRequirement& requirement) {
         return os << requirement.toString();
+    }
+    inline std::ostream& operator<<(std::ostream& os, const DataConstraint& cosntraint) {
+        return os << cosntraint.toString();
     }
 
 } // namespace Data

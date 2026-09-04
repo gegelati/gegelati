@@ -61,8 +61,6 @@ class TPGRepresentationTest : public ::testing::Test
     Evolution::Population* tpgPopulation;
 
     Data::DataRequirement inputType;
-    Data::DataRequirement outputType;
-    Data::DataRequirement outputMemberType;
 
     virtual void SetUp()
     {   
@@ -77,11 +75,9 @@ class TPGRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
         inputType = Data::DataRequirement::array1d<double>(4);
-        outputType = Data::DataRequirement::scalar<size_t>(Data::NumericRange<size_t>::atMost(2));
-        outputMemberType = Data::DataRequirement::scalar<double>();
 
-        memberRepresentation = new Representations::LGPRepresentation(set, 8, 1, 10);
-        memberRepresentation->setDimensions({inputType}, outputMemberType);
+        memberRepresentation = new Representations::LGPRepresentation({inputType}, 1, set, 8, 1, 10);
+
         memberPopulation = new Evolution::Population();
         tpgPopulation = new Evolution::Population();
         for(size_t idx = 0; idx < 100; idx++) {
@@ -105,7 +101,7 @@ TEST_F(TPGRepresentationTest, Constructor)
 {
     Representations::TPGRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation(*memberRepresentation, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new Representations::TPGRepresentation({inputType}, 3, *memberRepresentation, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
@@ -115,7 +111,7 @@ TEST_F(TPGRepresentationTest, Constructor)
 
 TEST_F(TPGRepresentationTest, Cloning)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
+    Representations::TPGRepresentation representation({inputType}, 3, *memberRepresentation, *memberPopulation, 2, 10);
 
     std::unique_ptr<Evolution::Representation> clone1;
     ASSERT_NO_THROW(clone1 = std::move(representation.cloneUniquePtr())) << "Cloning should not fail";
@@ -136,11 +132,9 @@ TEST_F(TPGRepresentationTest, setInputDimensions)
 
 TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    Representations::TPGRepresentation representation({inputType}, 3, *memberRepresentation, *memberPopulation, 5, 10);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
-    ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
-    representation.setDimensions({inputType}, outputType);
     representation.setTangled(false);
     ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with not define as tangled";
     representation.setTangled(true);
@@ -197,7 +191,7 @@ TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 
 TEST_F(TPGRepresentationTest, isValid)
 {
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 5, 10);
+    Representations::TPGRepresentation representation({inputType}, 3, *memberRepresentation, *memberPopulation, 5, 10);
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
@@ -213,9 +207,6 @@ TEST_F(TPGRepresentationTest, isValid)
     for(size_t i = 0; i < 8; i++) {
         goodMemberGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
     }
-    
-    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
-    representation.setDimensions({inputType}, outputType);
 
     representation.setTangled(false);
     ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with not define as tangled";
@@ -323,9 +314,9 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(memberRepresentation->isValid(member2)) << "Member should be equal";
 
 
-    Representations::TPGRepresentation representation(*memberRepresentation, *memberPopulation, 2, 10);
+    Representations::TPGRepresentation representation({inputType}, 3, *memberRepresentation, *memberPopulation, 2, 10);
     representation.setTangledPopulation(*tpgPopulation);
-    representation.setDimensions({inputType}, outputType);
+
 
     // Tangled Individual
     std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>();
@@ -351,4 +342,6 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_EQ(output, 1) << "Value is not correct.";
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
     ASSERT_EQ(output, 1) << "Value is not correct.";
+
+    std::cout<<representation.summary()<<std::endl;
 }

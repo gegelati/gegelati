@@ -91,13 +91,27 @@ namespace Data {
                 return contains(view.getScalar<T>());
             }
 
-            const T* values = view.getArray<T>();
+            const T* values = view.getData<T>();
             for (size_t index = 0; index < view.getType().totalElements(); ++index) {
                 if (!contains(values[index])) {
                     return false;
                 }
             }
             return true;
+        }
+
+        /** \brief Checks whether this producer range is contained by a consumer range. */
+        bool isCompatibleWith(const DataConstraint& consumer) const override {
+            const auto* numeric = dynamic_cast<const NumericRange*>(&consumer);
+            if (!numeric) {
+                return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
+            }
+
+            const bool minimumCompatible = !numeric->minimum ||
+                (minimum && *minimum >= *numeric->minimum);
+            const bool maximumCompatible = !numeric->maximum ||
+                (maximum && *maximum <= *numeric->maximum);
+            return minimumCompatible && maximumCompatible;
         }
 
         /**
@@ -133,7 +147,7 @@ namespace Data {
             }
 
             const size_t count = value.getType().totalElements();
-            const T* source = value.getArray<T>();
+            const T* source = value.getData<T>();
             auto values = std::make_unique<T[]>(count);
             for (size_t index = 0; index < count; ++index) {
                 values[index] = clamp(source[index]);

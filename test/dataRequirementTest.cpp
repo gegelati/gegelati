@@ -8,6 +8,7 @@
 #include "newData/dataRequirement.h"
 #include "newData/dataValue.h"
 #include "newData/numericRange.h"
+#include "evolution/controlFlow.h"
 
 TEST(DataRequirementTest, UnconstrainedRequirementChecksShapeAndType)
 {
@@ -141,6 +142,43 @@ TEST(DataRequirementTest, SupportsOneSidedAndUnboundedRanges)
     EXPECT_FALSE(atLeast.accepts(Data::DataValue::scalar(-1).view()));
     EXPECT_TRUE(unbounded.accepts(Data::DataValue::scalar(-1000.0).view()));
     EXPECT_TRUE(unbounded.accepts(Data::DataValue::scalar(1000.0).view()));
+}
+
+TEST(DataRequirementTest, CompatibilityUsesRangeContainment)
+{
+    const auto producer = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-0.5, 0.5));
+    const auto consumer = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-1.0, 1.0));
+    const auto narrowerConsumer = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-0.25, 0.25));
+    const auto unconstrained = Data::DataRequirement::scalar<double>();
+
+    EXPECT_TRUE(producer.isCompatibleWith(consumer));
+    EXPECT_FALSE(producer.isCompatibleWith(narrowerConsumer));
+    EXPECT_TRUE(producer.isCompatibleWith(unconstrained));
+    EXPECT_FALSE(unconstrained.isCompatibleWith(consumer));
+}
+
+TEST(DataRequirementTest, ControlFlowChecksFinalProducerOutput)
+{
+    const auto input = Data::DataRequirement::array1d<double>(4);
+    const auto producerOutput = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-1.0, 1.0));
+    const auto consumerOutput = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-2.0, 2.0));
+    const auto incompatibleOutput = Data::DataRequirement::scalar<double>(
+        Data::NumericRange<double>::between(-0.5, 0.5));
+
+    Evolution::ControlFlow producer({input});
+    producer.addLayer("producer", {input}, producerOutput);
+    Evolution::ControlFlow consumer({input});
+    consumer.addLayer("consumer", {input}, consumerOutput);
+    Evolution::ControlFlow incompatible({input});
+    incompatible.addLayer("incompatible", {input}, incompatibleOutput);
+
+    EXPECT_TRUE(producer.isCompatibleWith(consumer.getOutputDimension()));
+    EXPECT_FALSE(producer.isCompatibleWith(incompatible.getOutputDimension()));
 }
 
 TEST(DataRequirementTest, ToStringDescribesTypeAndConstraint)

@@ -33,7 +33,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_TRUE(oneDView);
 
     const int* oneDPtr = nullptr;
-    ASSERT_NO_THROW(oneDPtr = oneDView.getArray<int>());
+    ASSERT_NO_THROW(oneDPtr = oneDView.getData<int>());
     ASSERT_NE(oneDPtr, nullptr);
     for (size_t i = 0; i < values.size(); ++i) {
         EXPECT_EQ(oneDPtr[i], values[i]);
@@ -50,7 +50,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_EQ(twoDView.getSourceDimensions()[1], 3u);
 
     const int* twoDPtr = nullptr;
-    ASSERT_NO_THROW(twoDPtr = twoDView.getArray<int>());
+    ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 1);
     EXPECT_EQ(twoDPtr[1], 2);
@@ -63,8 +63,8 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     ASSERT_THROW(nullScalar.getScalar<int>(), std::runtime_error);
 
     ASSERT_THROW(scalarView.getScalar<double>(), std::runtime_error);
-    ASSERT_THROW(oneDView.getArray<double>(), std::runtime_error);
-    ASSERT_THROW(scalarView.getArray<int>(), std::runtime_error);
+    ASSERT_THROW(oneDView.getData<double>(), std::runtime_error);
+    ASSERT_THROW(scalarView.getData<int>(), std::runtime_error);
     ASSERT_NO_THROW(oneDView.getScalar<int>());
 }
 
@@ -88,7 +88,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
     EXPECT_EQ(oneDView.getDimensions()[1], 0u);
     EXPECT_EQ(oneDView.getElementType(), typeid(int));
 
-    const int* oneDPtr = oneDView.getArray<int>();
+    const int* oneDPtr = oneDView.getData<int>();
     ASSERT_NE(oneDPtr, nullptr);
     EXPECT_EQ(oneDPtr[0], 10);
     EXPECT_EQ(oneDPtr[1], 20);
@@ -103,7 +103,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
     EXPECT_EQ(twoDView.getDimensions()[1], 3u);
     EXPECT_EQ(twoDView.getElementType(), typeid(int));
 
-    const int* twoDPtr = twoDView.getArray<int>();
+    const int* twoDPtr = twoDView.getData<int>();
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 1);
     EXPECT_EQ(twoDPtr[1], 2);
@@ -129,7 +129,7 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     Data::DataView validOneDSubView;
     ASSERT_NO_THROW(validOneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(2), 1));
     const int* validOneDSubPtr = nullptr;
-    ASSERT_NO_THROW(validOneDSubPtr = validOneDSubView.getArray<int>());
+    ASSERT_NO_THROW(validOneDSubPtr = validOneDSubView.getData<int>());
     ASSERT_NE(validOneDSubPtr, nullptr);
     EXPECT_EQ(validOneDSubPtr[0], 1);
     EXPECT_EQ(validOneDSubPtr[1], 2);
@@ -139,7 +139,7 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     Data::DataView validTwoDSubView;
     ASSERT_NO_THROW(validTwoDSubView = view.getSubView(Data::DataType::array2d<int>(2, 2), 1));
     const int* validTwoDSubPtr = nullptr;
-    ASSERT_NO_THROW(validTwoDSubPtr = validTwoDSubView.getArray<int>());
+    ASSERT_NO_THROW(validTwoDSubPtr = validTwoDSubView.getData<int>());
     ASSERT_NE(validTwoDSubPtr, nullptr);
     EXPECT_EQ(validTwoDSubPtr[0], 1);
     EXPECT_EQ(validTwoDSubPtr[1], 2);
@@ -185,13 +185,13 @@ TEST(DataViewTest, CanFitCoversEveryRankAndTypeCombination)
     EXPECT_FALSE(twoDView.canFit(Data::DataType::array2d<double>(1, 2), 0));
 }
 
-TEST(DataViewTest, GetArrayAndSubViewPreserveExactElementValuesAcrossRanks)
+TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
 {
     std::vector<int> oneD{11, 22, 33, 44, 55};
     Data::DataView oneDView(oneD.data(), Data::DataType::array1d<int>(oneD.size()));
 
     const int* oneDPtr = nullptr;
-    ASSERT_NO_THROW(oneDPtr = oneDView.getArray<int>());
+    ASSERT_NO_THROW(oneDPtr = oneDView.getData<int>());
     ASSERT_NE(oneDPtr, nullptr);
     EXPECT_EQ(oneDPtr[0], 11);
     EXPECT_EQ(oneDPtr[2], 33);
@@ -200,7 +200,7 @@ TEST(DataViewTest, GetArrayAndSubViewPreserveExactElementValuesAcrossRanks)
     Data::DataView oneDSubView;
     ASSERT_NO_THROW(oneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(3), 1));
     const int* oneDSubPtr = nullptr;
-    ASSERT_NO_THROW(oneDSubPtr = oneDSubView.getArray<int>());
+    ASSERT_NO_THROW(oneDSubPtr = oneDSubView.getData<int>());
     ASSERT_NE(oneDSubPtr, nullptr);
     EXPECT_EQ(oneDSubPtr[0], 22);
     EXPECT_EQ(oneDSubPtr[1], 33);
@@ -210,7 +210,7 @@ TEST(DataViewTest, GetArrayAndSubViewPreserveExactElementValuesAcrossRanks)
     Data::DataView twoDView(matrix, Data::DataType::array2d<int>(3, 4));
 
     const int* twoDPtr = nullptr;
-    ASSERT_NO_THROW(twoDPtr = twoDView.getArray<int>());
+    ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 0);
     EXPECT_EQ(twoDPtr[1], 1);
@@ -221,7 +221,7 @@ TEST(DataViewTest, GetArrayAndSubViewPreserveExactElementValuesAcrossRanks)
     Data::DataView twoDSubView;
     ASSERT_NO_THROW(twoDSubView = twoDView.getSubView(Data::DataType::array2d<int>(2, 3), 5));
     const int* twoDSubPtr = nullptr;
-    ASSERT_NO_THROW(twoDSubPtr = twoDSubView.getArray<int>());
+    ASSERT_NO_THROW(twoDSubPtr = twoDSubView.getData<int>());
     ASSERT_NE(twoDSubPtr, nullptr);
     EXPECT_EQ(twoDSubPtr[0], 5);
     EXPECT_EQ(twoDSubPtr[1], 6);

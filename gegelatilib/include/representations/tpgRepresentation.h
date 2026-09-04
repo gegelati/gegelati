@@ -3,6 +3,7 @@
 #define TPG_REPRESENTATION_H
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "evolution/representation.h"
@@ -17,6 +18,9 @@ namespace Representations {
     class TPGRepresentation : public Evolution::Representation
     {
         protected:
+
+            /// @brief The number of actions in the TPGRepresentation.
+            const size_t nbActions;
 
             /// @brief Representation of the context members
             const Evolution::Representation& contextMemberRep;
@@ -33,6 +37,7 @@ namespace Representations {
             /**
              * \brief Main Representation constructor.
              * 
+             * \param[in] nbActions The number of actions in the TPGRepresentation.
              * \param[in] contextMemberRep Representation of the context members
              * \param[in] contextMemberPop Context Member population
              * \param[in] nbNodesMin the minimum number of nodes in the representation.
@@ -40,11 +45,20 @@ namespace Representations {
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            TPGRepresentation(const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
+            TPGRepresentation(std::vector<Data::DataRequirement> inputDimensions, size_t nbActions, const Evolution::Representation& contextMemberRep, const Evolution::Population& contextMemberPop, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
+                : Evolution::Representation(
+                    inputDimensions, Data::DataRequirement::scalar<size_t>(Data::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
+                    nbActions{nbActions}, contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
                     this->setTangled(true);
+
+                    if(!Evolution::ControlFlow::acceptsRequirements(inputDimensions, contextMemberRep.getControlFlow().getInputDimensions())) {
+                        throw std::runtime_error("TPGRepresentation:Constructor: Input Dimensions set is not compatible with the context member representation input dimensions");
+                    }
+                    if(contextMemberRep.getControlFlow().getOutputDimension().isCompatibleWith(Data::DataRequirement::scalar<double>(Data::NumericRange<double>::unbounded())) == false) {
+                        throw std::runtime_error("TPGRepresentation:Constructor: Context member representation output dimension is not compatible with the required scalar<double> output dimension");
+                    }
                 };
-    
+
         /**
          * \brief return the genotype template an individual.
          */
@@ -71,7 +85,7 @@ namespace Representations {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual Data::DataValue executeIndividual(
+        virtual Data::DataValue executeIndividualRaw(
             const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
         };

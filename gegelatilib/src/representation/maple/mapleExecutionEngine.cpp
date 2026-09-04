@@ -46,6 +46,7 @@ std::vector<double> Representation::Maple::MapleExecutionEngine::execute()
         }
     } else {
         /// TODO SET ACTIVATION FUNCTION
-        return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        //return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        return {};
     }
 }

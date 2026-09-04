@@ -343,6 +343,27 @@ namespace Data {
          */
         void setSubValue(const DataValue& value, size_t address);
 
+        /**
+         * \brief Sets a scalar value at a specific address in this DataValue.
+         * 
+         * \param[in] value The scalar value to set.
+         * \param[in] address Element address in this value.
+         */
+        template <typename T>
+        void setScalarAt(T value, size_t address) {
+            if (!this->canFit(DataType::scalar<T>(), address)) {
+                throw std::out_of_range(
+                    "DataValue::setScalarAt failed at address " + std::to_string(address) + ".\n"
+                    "Value:\n" + this->toString() + "\n"
+                    "Requested type:\n" + DataType::scalar<T>().toString()
+                );
+            }
+
+            T* dst = static_cast<T*>(storage->data());
+            size_t absOffset = getType().sourceOffset + address;
+            dst[absOffset] = value;
+        }
+
         /** \brief Checks whether the owned buffer and view pointer are valid. */
         explicit operator bool() const noexcept;
 
@@ -383,7 +404,7 @@ namespace Data {
 
             if (source.getRank() == 1) {
                 const size_t count = source.getDimensions()[0];
-                const S* data = source.getArray<S>();
+                const S* data = source.getData<S>();
                 auto values = std::make_unique<D[]>(count);
             
                 for (size_t idx = 0; idx < count; ++idx) {
@@ -395,7 +416,7 @@ namespace Data {
             if (source.getRank() == 2) {
                 const size_t rows = source.getDimensions()[0];
                 const size_t cols = source.getDimensions()[1];
-                const S* data = source.getArray<S>();
+                const S* data = source.getData<S>();
                 auto values = std::make_unique<D[]>(rows * cols);
             
                 for (size_t idx = 0; idx < rows * cols; ++idx) {

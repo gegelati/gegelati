@@ -82,7 +82,7 @@ TEST_F(LGPRepresentationTest, Constructor)
 {
     Representations::LGPRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::LGPRepresentation(set, 8, 5, 10)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new Representations::LGPRepresentation({inputType}, 1, set, 8, 5, 10)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
@@ -91,11 +91,9 @@ TEST_F(LGPRepresentationTest, Constructor)
 
 TEST_F(LGPRepresentationTest, getGenotypeTemplate)
 {
-    Representations::LGPRepresentation representation(set, 8, 5, 10);
+    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
     std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
 
-    ASSERT_THROW(representation.getGenotypeTemplate(), std::runtime_error) << "Should throw with unset input sources";
-    representation.setDimensions({inputType}, outputType);
     
     ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
     
@@ -124,15 +122,12 @@ TEST_F(LGPRepresentationTest, getGenotypeTemplate)
 
 TEST_F(LGPRepresentationTest, isValid)
 {
-    Representations::LGPRepresentation representation(set, 8, 5, 10);
+    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
     Evolution::Individual indiv;
 
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     genotype.addNodeGroup();
     Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
-
-    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with unset input sources";
-    representation.setDimensions({inputType}, outputType);
 
     for(size_t i = 0; i < 4; i++) {
         group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
@@ -169,8 +164,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 {
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
-    Representations::LGPRepresentation representation(set, 8, 5, 10);
-    representation.setDimensions({inputType}, outputType);
+    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
@@ -193,4 +187,49 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}, true));
     ASSERT_NO_THROW(output = representation.executeIndividual(indiv, {inputSource.view()})) << "Execution of individual failed.";
     ASSERT_EQ(output.getScalar<double>(), 1.5) << "Value is not correct.";
+}
+
+TEST_F(LGPRepresentationTest, compatibilityCheck) 
+{
+    Data::DataRequirement inputType = Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::between(-3.0, 3.0));
+    Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
+
+    Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
+
+    Evolution::Individual indiv;
+    Evolution::Genotype& genotype = indiv.getMutableGenotype();
+    genotype.addNodeGroup();
+    Node::NodeGroup& group = genotype.getMutableNodeGroup(0);
+    
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
+
+    std::cout<<representation.summary()<<std::endl;
+
+    
+    Data::DataRequirement inputTypeEnv = Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::between(-1.0, 1.0));
+    Data::DataRequirement outputTypeEnv = Data::DataRequirement::scalar<double>(Data::NumericRange<double>::between(-1.0, 1.0));
+    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
+    std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
+
+    representation.addOutputFunction(std::make_unique<Utils::ActivationFunctions::Tanh<double>>(representation.getControlFlow().getOutputDimension()));
+    std::cout<<representation.summary()<<std::endl;
+
+    
+    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
+    std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
+
+    representation.addOutputFunction(std::make_unique<Utils::ActivationFunctions::ArgMax<double>>(representation.getControlFlow().getOutputDimension()));
+    std::cout<<representation.summary()<<std::endl;
+
+    
+    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
+
+    std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 }

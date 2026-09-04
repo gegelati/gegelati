@@ -20,6 +20,9 @@ namespace Representations {
             /// Instruction Set used by the LGPRepresentation
             const Instructions::Set& iSet;
 
+            /// The number of registers required to output a value.
+            size_t nbOutputRegisters;
+
             /// The number of registers used by the LGPs
             size_t nbRegisters;
 
@@ -45,8 +48,15 @@ namespace Representations {
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            LGPRepresentation(const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
-                : Evolution::Representation(nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {};
+            LGPRepresentation(std::vector<Data::DataRequirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
+                : Evolution::Representation(
+                    inputDimensions, Data::DataRequirement::array1d<double>(nbOutputRegisters, Data::NumericRange<double>::unbounded()), 
+                    nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
+                    nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {
+                if(nbOutputRegisters > nbRegisters) {
+                    throw std::runtime_error("LGPRepresentation::Constructor: Number of outputRegisters cannot be higher than the number of registers");
+                }
+            };
 
         /**
          * \brief return the genotype template an individual.
@@ -74,7 +84,7 @@ namespace Representations {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual Data::DataValue executeIndividual(
+        virtual Data::DataValue executeIndividualRaw(
             const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
     };

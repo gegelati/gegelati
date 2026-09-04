@@ -51,8 +51,12 @@ class RepresentationTest : public ::testing::Test
 {
   protected:
 
+    Data::DataRequirement inputType;
+    Data::DataRequirement outputType;
     virtual void SetUp()
     {
+        inputType = Data::DataRequirement::array1d<double>(4);
+        outputType = Data::DataRequirement::scalar<double>();
     }
 
     virtual void TearDown()
@@ -65,11 +69,11 @@ class FakeRepresentation : public Evolution::Representation
     public: 
         std::unique_ptr<Evolution::Representation> cloneUniquePtr() const {
             return std::make_unique<FakeRepresentation>(
-                nbNodesMin, nbNodesMax, representationName, representationColor
+                this->dimensionFlow.getInputDimensions(), this->dimensionFlow.getOutputDimension(), nbNodesMin, nbNodesMax, representationName, representationColor
             );
         }
         
-        FakeRepresentation(size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(nbNodesMin, nbNodesMax, representationName, representationColor) {};
+        FakeRepresentation(const std::vector<Data::DataRequirement> &inputs, const Data::DataRequirement& output, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "FakeRepresentation", std::string representationColor = "#000000"): Representation(inputs, output, nbNodesMin, nbNodesMax, representationName, representationColor) {};
 
         std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override { return nullptr;}; 
 
@@ -77,7 +81,7 @@ class FakeRepresentation : public Evolution::Representation
             return true;
         }
 
-        Data::DataValue executeIndividual(
+        Data::DataValue executeIndividualRaw(
             const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const {
             return Data::DataValue::scalar<double>(0.0);
         }
@@ -88,7 +92,7 @@ TEST_F(RepresentationTest, Constructor)
 {
     FakeRepresentation* representation;
 
-    ASSERT_NO_THROW(representation = new FakeRepresentation(1, 5)) << "Constructor of Representation failed.";
+    ASSERT_NO_THROW(representation = new FakeRepresentation({inputType}, outputType, 1, 5)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
@@ -97,14 +101,14 @@ TEST_F(RepresentationTest, Constructor)
 
 TEST_F(RepresentationTest, getSet)
 {
-    FakeRepresentation representation(10);
+    FakeRepresentation representation({inputType}, outputType, 10);
 
     ASSERT_EQ(representation.getMinNbNodes(), 10) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(representation.getMaxNbNodes(), 10) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(representation.getRepresentationName(), "FakeRepresentation") << "Param value got unexpected value";
     ASSERT_EQ(representation.getRepresentationColor(), "#000000") << "Param value got unexpected value";
 
-    FakeRepresentation customRep(1, 5, "CustomRep", "#123456");
+    FakeRepresentation customRep({inputType}, outputType, 1, 5, "CustomRep", "#123456");
     
     ASSERT_EQ(customRep.getMinNbNodes(), 1) << "MinNbNodes value got unexpected value";
     ASSERT_EQ(customRep.getMaxNbNodes(), 5) << "MinNbNodes value got unexpected value";
@@ -114,7 +118,6 @@ TEST_F(RepresentationTest, getSet)
 
 TEST_F(RepresentationTest, setInputDimensions)
 {
-    FakeRepresentation representation(10);
 
     std::vector<Data::DataRequirement> inputSources {
         Data::DataRequirement::array1d<double>(4, Data::NumericRange<double>::atLeast(1)),
@@ -122,17 +125,17 @@ TEST_F(RepresentationTest, setInputDimensions)
     };
     Data::DataRequirement outputSource = Data::DataRequirement::scalar<double>(Data::NumericRange<double>::between(-1, 1));
 
-    ASSERT_NO_THROW(representation.setDimensions(inputSources, outputSource)) << "Setting input dimensions failed";
+    FakeRepresentation representation(inputSources, outputSource, 10);
 
-    ASSERT_EQ(representation.getInputDimensions().size(), 2) << "Number of input sources set is wrong";
-    ASSERT_TRUE(representation.getInputDimensions().at(0) == inputSources.at(0)) << "source is wrong";
-    ASSERT_TRUE(representation.getInputDimensions().at(1) == inputSources.at(1)) << "source is wrong";
-    ASSERT_EQ(representation.getOutputDimension(), outputSource) << "source is wrong";
+    ASSERT_EQ(representation.getControlFlow().getInputDimensions().size(), 2) << "Number of input sources set is wrong";
+    ASSERT_TRUE(representation.getControlFlow().getInputDimensions().at(0) == inputSources.at(0)) << "source is wrong";
+    ASSERT_TRUE(representation.getControlFlow().getInputDimensions().at(1) == inputSources.at(1)) << "source is wrong";
+    ASSERT_EQ(representation.getControlFlow().getOutputDimension(), outputSource) << "source is wrong";
 }
 
 TEST_F(RepresentationTest, tangledRep)
 {
-    FakeRepresentation representation(10);
+    FakeRepresentation representation({inputType}, outputType, 10);
     Evolution::Population population;
 
     ASSERT_FALSE(representation.isTangled()) << "Should return false";

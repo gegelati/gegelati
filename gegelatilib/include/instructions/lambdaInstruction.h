@@ -129,12 +129,12 @@ namespace Instructions {
             const Data::DataView& view = args.at(index);
             if constexpr (std::is_array<T>::value) {
                 if constexpr (std::rank_v<T> == 1) {
-                    return view.template getArray<std::remove_extent_t<T>>(); // Returns const T*
+                    return view.template getData<std::remove_extent_t<T>>(); // Returns const T*
                 } else if constexpr (std::rank_v<T> >= 2) {
                     using Element = std::remove_const_t<std::remove_all_extents_t<T>>;
 
                     constexpr size_t Cols = std::extent_v<T, 1>;
-                    const Element* data = view.template getArray<Element>();
+                    const Element* data = view.template getData<Element>();
 
                     return reinterpret_cast<const Element (*)[Cols]>(data);
                 }

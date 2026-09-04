@@ -108,8 +108,9 @@ std::vector<double> Representation::TPG::TPGExecutionEngine::execute()
     if(this->outputs.sizeContinuous() == 0){
         return {(double)dynamic_cast<const EvoGraph::Action*>(&currentVertex.get())->getActionID()};
     } else {
-        /// TODO SET ACTIVATION FUNCTION
-        return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        
+        return {(double)dynamic_cast<const EvoGraph::Action*>(&currentVertex.get())->getActionID()};
+        //return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);
     }
 }
 

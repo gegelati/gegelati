@@ -18,3 +18,17 @@ void Evaluation::ScoreMetric::extractMetricsRun(
     // Update score
     this->score = learningEnvironment.getScore();
 }
+
+
+std::string Evaluation::ScoreMetric::toString(std::string prefix) const
+{
+    std::ostringstream oss;
+    oss << prefix << "Score: " << score;
+
+    return oss.str();
+}
+
+bool Evaluation::ScoreMetric::sameMetricMethod(const EvaluationMetric& other) const
+{
+    return dynamic_cast<const ScoreMetric*>(&other) != nullptr;
+}

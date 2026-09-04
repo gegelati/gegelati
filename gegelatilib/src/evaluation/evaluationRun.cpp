@@ -25,3 +25,20 @@ const Evaluation::EvaluationMetric& Evaluation::EvaluationRun::getMetricAt(size_
     }
     return *this->metrics.at(index);
 }
+
+std::string Evaluation::EvaluationRun::toString(std::string prefix) const
+{
+    std::ostringstream oss;
+    if(this->metrics.size() > 1) {
+        oss << "EvaluationRun{\n";
+        for(size_t idx = 0; idx < this->metrics.size(); idx++) {
+            oss << prefix << "\t(" << idx << ") " << this->metrics.at(idx)->toString() << ",\n";
+        }
+        oss << prefix <<"}";
+    } else {
+        oss << "EvaluationRun{" << this->metrics.at(0)->toString() << "}";
+    }
+
+    return oss.str();
+
+}

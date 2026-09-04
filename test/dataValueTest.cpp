@@ -20,7 +20,7 @@ TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
     auto oneDValue = Data::DataValue::array1d(oneD);
     EXPECT_EQ(oneDValue.getType().rank, 1u);
     EXPECT_EQ(oneDValue.getType().dimensions[0], 4u);
-    const int* oneDPtr = oneDValue.getArray<int>();
+    const int* oneDPtr = oneDValue.getData<int>();
     ASSERT_NE(oneDPtr, nullptr);
     EXPECT_EQ(oneDPtr[0], 10);
     EXPECT_EQ(oneDPtr[1], 20);
@@ -33,7 +33,7 @@ TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
     EXPECT_EQ(twoDValue.getType().rank, 2u);
     EXPECT_EQ(twoDValue.getType().dimensions[0], 2u);
     EXPECT_EQ(twoDValue.getType().dimensions[1], 3u);
-    const int* twoDPtr = twoDValue.getArray<int>();
+    const int* twoDPtr = twoDValue.getData<int>();
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 1);
     EXPECT_EQ(twoDPtr[1], 2);
@@ -50,7 +50,7 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
     EXPECT_DOUBLE_EQ(scalarZero.getScalar<double>(), 0.0);
 
     auto oneDZero = Data::DataValue::zeros<int>(Data::DataType::array1d<int>(4));
-    const int* oneDZeroPtr = oneDZero.getArray<int>();
+    const int* oneDZeroPtr = oneDZero.getData<int>();
     ASSERT_NE(oneDZeroPtr, nullptr);
     EXPECT_EQ(oneDZeroPtr[0], 0);
     EXPECT_EQ(oneDZeroPtr[1], 0);
@@ -58,7 +58,7 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
     EXPECT_EQ(oneDZeroPtr[3], 0);
 
     auto twoDZero = Data::DataValue::zeros<int>(Data::DataType::array2d<int>(2, 3));
-    const int* twoDZeroPtr = twoDZero.getArray<int>();
+    const int* twoDZeroPtr = twoDZero.getData<int>();
     ASSERT_NE(twoDZeroPtr, nullptr);
     EXPECT_EQ(twoDZeroPtr[0], 0);
     EXPECT_EQ(twoDZeroPtr[1], 0);
@@ -74,7 +74,7 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
 
 TEST(DataValueTest, convertNumericValue)
 {
-    Data::DataValue scalar = Data::DataValue::scalar(42);
+    Data::DataValue scalar = Data::DataValue::scalar<int>(42);
     auto convertedScalar = Data::DataValue::convertNumericValue<int, double>(scalar);
     EXPECT_EQ(convertedScalar.getType().rank, 0u);
     EXPECT_DOUBLE_EQ(convertedScalar.getScalar<double>(), 42.0);
@@ -83,17 +83,17 @@ TEST(DataValueTest, convertNumericValue)
     auto convertedOneD = Data::DataValue::convertNumericValue<int, float>(oneD);
     EXPECT_EQ(convertedOneD.getType().rank, 1u);
     EXPECT_EQ(convertedOneD.getType().dimensions[0], 3u);
-    const float* oneDValues = convertedOneD.getArray<float>();
+    const float* oneDValues = convertedOneD.getData<float>();
     EXPECT_FLOAT_EQ(oneDValues[0], 1.0f);
     EXPECT_FLOAT_EQ(oneDValues[1], 2.0f);
     EXPECT_FLOAT_EQ(oneDValues[2], 3.0f);
 
-    auto twoD = Data::DataValue::array2d(std::vector<std::vector<double>>{{1.5, 2.5}, {3.5, 4.5}});
+    Data::DataValue twoD = Data::DataValue::array2d(std::vector<std::vector<double>>{{1.5, 2.5}, {3.5, 4.5}});
     auto convertedTwoD = Data::DataValue::convertNumericValue<double, int>(twoD);
     EXPECT_EQ(convertedTwoD.getType().rank, 2u);
     EXPECT_EQ(convertedTwoD.getType().dimensions[0], 2u);
     EXPECT_EQ(convertedTwoD.getType().dimensions[1], 2u);
-    const int* twoDValues = convertedTwoD.getArray<int>();
+    const int* twoDValues = convertedTwoD.getData<int>();
     EXPECT_EQ(twoDValues[0], 1);
     EXPECT_EQ(twoDValues[1], 2);
     EXPECT_EQ(twoDValues[2], 3);
@@ -118,7 +118,7 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
 
     ASSERT_NO_THROW(oneDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 1));
     auto arrayFrom1D = oneDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 1);
-    const int* fromOneDPtr = arrayFrom1D.getArray<int>();
+    const int* fromOneDPtr = arrayFrom1D.getData<int>();
     ASSERT_NE(fromOneDPtr, nullptr);
     EXPECT_EQ(fromOneDPtr[0], 20);
     EXPECT_EQ(fromOneDPtr[1], 30);
@@ -131,7 +131,7 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
 
     ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 3));
     auto array1DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 3);
-    const int* from2D1D = array1DFrom2D.getArray<int>();
+    const int* from2D1D = array1DFrom2D.getData<int>();
     ASSERT_NE(from2D1D, nullptr);
     EXPECT_EQ(from2D1D[0], 3);
     EXPECT_EQ(from2D1D[1], 4);
@@ -139,7 +139,7 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
 
     ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::array2d<int>(2, 2), 1));
     auto array2DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::array2d<int>(2, 2), 1);
-    const int* from2D2D = array2DFrom2D.getArray<int>();
+    const int* from2D2D = array2DFrom2D.getData<int>();
     ASSERT_NE(from2D2D, nullptr);
     EXPECT_EQ(from2D2D[0], 1);
     EXPECT_EQ(from2D2D[1], 2);
@@ -164,7 +164,7 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
     auto oneDSource = Data::DataValue::array1d(std::vector<int>{1, 2, 3});
     auto scalarSourceInt = Data::DataValue::scalar<int>(7);
     ASSERT_NO_THROW(oneDTarget.setSubValue(oneDSource, 1));
-    const int* oneDPtr = oneDTarget.getArray<int>();
+    const int* oneDPtr = oneDTarget.getData<int>();
     EXPECT_EQ(oneDPtr[0], 0);
     EXPECT_EQ(oneDPtr[1], 1);
     EXPECT_EQ(oneDPtr[2], 2);
@@ -177,7 +177,7 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
     auto twoDTarget = Data::DataValue::zeros<int>(Data::DataType::array2d<int>(3, 3));
     auto twoDSource = Data::DataValue::array2d(std::vector<std::vector<int>>{{9, 8}, {7, 6}});
     ASSERT_NO_THROW(twoDTarget.setSubValue(twoDSource, 1));
-    const int* twoDPtr = twoDTarget.getArray<int>();
+    const int* twoDPtr = twoDTarget.getData<int>();
     EXPECT_EQ(twoDPtr[0], 0);
     EXPECT_EQ(twoDPtr[1], 9);
     EXPECT_EQ(twoDPtr[2], 8);
@@ -189,7 +189,7 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
     EXPECT_EQ(twoDPtr[8], 0);
 
     ASSERT_NO_THROW(twoDTarget.setSubValue(oneDSource, 3));
-    const int* twoDPtr2 = twoDTarget.getArray<int>();
+    const int* twoDPtr2 = twoDTarget.getData<int>();
     EXPECT_EQ(twoDPtr2[0], 0);
     EXPECT_EQ(twoDPtr2[1], 9);
     EXPECT_EQ(twoDPtr2[2], 8);
@@ -246,7 +246,7 @@ TEST(DataValueTest, DataViewCreation)
     Data::DataView view = value.view();
     ASSERT_TRUE(view.getType() == value.getType());
 
-    const int* data = view.getArray<int>();
+    const int* data = view.getData<int>();
     ASSERT_EQ(data[0], 1);
     ASSERT_EQ(data[1], 2);
     ASSERT_EQ(data[2], 3);

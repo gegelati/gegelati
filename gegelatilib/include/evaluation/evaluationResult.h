@@ -93,7 +93,16 @@ namespace Evaluation {
          * \brief Method to get the map of evaluationRun
          */
         virtual const std::map<size_t, std::unique_ptr<EvaluationRun>>& getEvaluationRuns() const;
+
+        /**
+         * \brief Print all the evaluation run evaluated.
+         */
+        virtual std::string toString(std::string prefix = "") const;
     };
+        
+    inline std::ostream& operator<<(std::ostream& os, const EvaluationResult& res) {
+        return os << res.toString();
+    }
 } // namespace Learn
 
 #endif

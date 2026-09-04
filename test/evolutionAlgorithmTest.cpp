@@ -78,7 +78,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
     
-        representation = new Representations::LGPRepresentation(set, 8, 10);
+        representation = new Representations::LGPRepresentation(le.getInputDimensions(), 1, set, 8, 10);
 
         evalAgent = new Evaluation::ReinforcementAgent(le);
     }
@@ -293,12 +293,9 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
     eaLgp.initializePopulation();
 
-    Representations::TPGRepresentation tpgRep(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), le.getOutputDimension().getDataType().totalElements(), eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
-
-
-    eaLgp.getRepresentation().setDimensions(le.getInputDimensions(), Data::DataRequirement::scalar<double>());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -317,12 +314,18 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             eaTpg.mutateOffspring(offspring);
             eaTpg.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
             eaTpg.selectSurvivors(offspring);
+
+            const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
+            std::cout<<best.getEvaluationResult()<<std::endl;
         }
     }
 
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
     ASSERT_EQ(eaTpg.getPopulation().size(), 306) << "Size of TPG population not determinist";
     ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 17672552378738871403U) << "RNG not determinist";
+
+    std::cout<<eaLgp.getRepresentation().summary()<<std::endl;
+    std::cout<<eaTpg.getRepresentation().summary()<<std::endl;
 }
 
 

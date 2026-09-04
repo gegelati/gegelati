@@ -55,7 +55,6 @@ class ReinforcementAgentTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Evolution::Representation* representation;
 
     std::unique_ptr<Learn::LearningParameters> params;
 
@@ -75,7 +74,6 @@ class ReinforcementAgentTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
     
-        representation = new Representations::LGPRepresentation(set, 8, 5, 10);
         
 
         selector = new Selector::TruncationSelector();
@@ -89,7 +87,6 @@ class ReinforcementAgentTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
-        delete representation;
         delete selector;
     }
 };
@@ -118,7 +115,8 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
     Node::NodeGroup& group = genotype.addNodeGroup();
     
-    representation->setDimensions(le.getInputDimensions(), le.getOutputDimension());
+    Evolution::Representation* representation;
+    representation = new Representations::LGPRepresentation(le.getInputDimensions(), 1, set, 8, 5, 10);
 
     ASSERT_THROW(rlAgent.evaluateIndividual(indiv, *representation, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 

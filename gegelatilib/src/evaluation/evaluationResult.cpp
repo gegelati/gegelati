@@ -51,3 +51,15 @@ const std::map<size_t, std::unique_ptr<Evaluation::EvaluationRun>>& Evaluation::
 {
     return this->evaluationRuns;
 }
+
+std::string Evaluation::EvaluationResult::toString(std::string prefix) const
+{
+    std::ostringstream oss;
+    oss << prefix <<"EvaluationResult{\n";
+    for(auto it = this->evaluationRuns.begin(); it != this->evaluationRuns.end(); it++) {
+        oss << prefix << "\tSeed " << it->first << ": " << it->second->toString(prefix + "\t") << ",\n";
+    }
+    oss << prefix <<"}";
+
+    return oss.str();
+}

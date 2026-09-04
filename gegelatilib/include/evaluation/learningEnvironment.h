@@ -139,6 +139,8 @@ namespace Evaluation {
          */
         virtual const Data::DataRequirement& getOutputDimension() const;
 
+        virtual std::string summary() const;
+
         /**
          * \brief Get the data sources for this LearningEnvironment.
          *

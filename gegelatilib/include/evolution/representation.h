@@ -7,6 +7,7 @@
 #include <string>
 #include <regex>
 #include <optional>
+#include <functional>
 #include "iostream"
 
 #include "evolution/individual.h"
@@ -14,6 +15,8 @@
 #include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
 #include "newData/dataValue.h"
+#include "evolution/controlFlow.h"
+#include "util/activationFunctions.h"
 
 using RepParam = Representation::RepresentationParameters;
 
@@ -33,12 +36,6 @@ namespace Evolution {
         /// Maximum number of nodes in the representation.
         size_t nbNodesMax = 0;
 
-        /// Input dimensions
-        std::vector<Data::DataRequirement> inputDimensions;
-
-        /// Output dimension
-        Data::DataRequirement outputDimension;
-
         /// Name of the representation.
         std::string representationName = "";
         /// Color of the representation.
@@ -49,6 +46,13 @@ namespace Evolution {
 
         /// Tangled population
         std::optional<std::reference_wrapper<const Population>> tangledPopulation;
+
+        std::vector<std::unique_ptr<Utils::ActivationFunctions::Function>> outputFunctions;
+
+        Evolution::ControlFlow dimensionFlow;
+
+        virtual Data::DataValue executeIndividualRaw(
+          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
 
       public:
 
@@ -62,18 +66,27 @@ namespace Evolution {
         /**
          * \brief Main Representation constructor.
          * 
+         * \param[in] inputDimensions the dimensions of the input sources.
+         * \param[in] outputDimension the dimension of the output.
          * \param[in] nbNodesMin the minimum number of nodes in the representation.
          * \param[in] nbNodesMax the maximum number of nodes in the representation.
          * \param[in] representationName name of the representation used.
          * \param[in] representationColor color of the representation used (during .dot files).
          */
         Representation(
+            const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension,
             size_t nbNodesMin, size_t nbNodesMax=0,
             std::string representationName = "Representation", 
             std::string representationColor = "#000000")
-               : nbNodesMin{nbNodesMin}, nbNodesMax{nbNodesMax}, representationName(representationName), representationColor(representationColor) {
+               : nbNodesMin{nbNodesMin}, nbNodesMax{nbNodesMax}, representationName(representationName), representationColor(representationColor), dimensionFlow{inputDimensions} {
                 if(this->nbNodesMax == 0) {
                     this->nbNodesMax = this->nbNodesMin;
+                }
+
+                // Check dimensions
+                dimensionFlow.addLayer(representationName, inputDimensions, outputDimension);
+                if(!dimensionFlow.isValid()) {
+                    throw std::runtime_error("Representation:Constructor: Output Dimension set: "+ outputDimension.toString() + " is not valid.");
                 }
             };   
 
@@ -100,23 +113,11 @@ namespace Evolution {
          */
         virtual size_t getMaxNbNodes() const;
 
-        /**
-         * \brief set the dimensions
-         * 
-         * \param[in] inputDimensions the dimensions of the input sources.
-         * \param[in] outputDimension the dimensions of the output source.
-         */
-        virtual void setDimensions(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension);
+        /** \brief Adds a typed post-processing function to the representation output. */
+        virtual void addOutputFunction(std::unique_ptr<Utils::ActivationFunctions::Function> function);
 
-        /**
-         * \brief get the input dimensions of the representation.
-         */
-        virtual const std::vector<Data::DataRequirement>& getInputDimensions() const;
-
-        /**
-         * \brief get the output dimension of the representation.
-         */
-        virtual const Data::DataRequirement& getOutputDimension() const;
+        virtual ControlFlow getControlFlow() const;
+        virtual std::string summary() const;
 
         /**
          * \brief return the genotype template an individual.
@@ -165,8 +166,8 @@ namespace Evolution {
          * \param[in] indiv Individual executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        virtual Data::DataValue executeIndividual(
-            const Individual& indiv, const std::vector<Data::DataView>& inputSources) const  = 0;
+        Data::DataValue executeIndividual(
+          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const;
     };
 }; // namespace Representation
 

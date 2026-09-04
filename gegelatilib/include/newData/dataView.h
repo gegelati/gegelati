@@ -21,7 +21,7 @@ namespace Data {
      * 2. A **DataType** describing the shape, type, and source context of the data.
      *
      * This design ensures that:
-     * - **Type safety**: Typed accessors (getScalar<T>, getArray<T>) validate types at runtime.
+     * - **Type safety**: Typed accessors (getScalar<T>, getData<T>) validate types at runtime.
      * - **Bounds safety**: Sub-array extraction (getSubView) validates that the requested
      *   shape fits in the source.
      * - **Source context**: The DataType carries the original source's shape and offset,
@@ -173,10 +173,9 @@ namespace Data {
          * \brief Validates that this view can be accessed with a requested type and rank.
          *
          * \param[in] type Required element type.
-         * \param[in] requiredRank Minimum rank required by the accessor.
          * \throws std::runtime_error If the view is null, has insufficient rank, or has a different element type.
          */
-        void canBeAccess(const std::type_info& type, size_t requiredRank) const;
+        void canBeAccess(const std::type_info& type) const;
 
         /**
          * \brief Returns a reference to a scalar value of type T.
@@ -187,7 +186,6 @@ namespace Data {
          */
         template <typename T>
         const T& getScalar() const {
-            this->canBeAccess(typeid(T), 0);
             return *static_cast<const T*>(this->ptr);
         }
 
@@ -207,19 +205,17 @@ namespace Data {
         }
 
         /**
-         * \brief Returns a pointer to the first element of a 1D or 2D array of type T.
+         * \brief Returns a pointer to the first element of a 1D or 2D array of type T, or to a scalar value.
          *
          * if its a non-contiguous 2D array, the pointer is copied.
          * 
-         * \tparam T The element type of the array.
+         * \tparam T The element type of the data.
          * \return A const pointer to the first element of the array.
          * \throws std::runtime_error If the view is null or the type does not match.
          */
         template <typename T>
-        const T* getArray() const {
+        const T* getData() const {
             using ValueType = std::remove_const_t<T>;
-
-            this->canBeAccess(typeid(ValueType), 1);
 
             const ValueType* source =
                 static_cast<const ValueType*>(this->ptr);
@@ -229,7 +225,7 @@ namespace Data {
             const size_t stride = this->type.sourceDimensions[1];
 
             // Already contiguous: return the original memory.
-            if (stride == cols || cols == 0) {
+            if (rows == 0 || stride == cols || cols == 0) {
                 return source;
             }
 

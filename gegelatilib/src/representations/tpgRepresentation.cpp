@@ -1,9 +1,13 @@
 #include "representations/tpgRepresentation.h"
+
+#include <sstream>
 #include <limits>
 
 std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneUniquePtr() const
 {
-    std::unique_ptr<Evolution::Representation> clone = std::make_unique<Representations::TPGRepresentation>(
+    auto clone = std::make_unique<Representations::TPGRepresentation>(
+                                                        this->dimensionFlow.getInputDimensions(),
+                                                        this->nbActions,
                                                         this->contextMemberRep,
                                                         this->contextMemberPop,
                                                         this->nbNodesMin,
@@ -14,24 +18,17 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     if(this->tangledPopulation.has_value()) {
         clone->setTangledPopulation(this->tangledPopulation.value());
     }
-    return std::move(clone);
+    return clone;
 }
 
 
 std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
-    }
+
     if(!this->tangled || !this->tangledPopulation.has_value()) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
     }
 
-    const auto* outputRange = dynamic_cast<const Data::NumericRange<size_t>*>(&this->outputDimension.getConstraint());
-    if (outputRange == nullptr || !outputRange->maximum || *outputRange->maximum == std::numeric_limits<size_t>::max()) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: output requirement must have a finite size_t maximum.");
-    }
-    size_t nbActions = *outputRange->maximum + 1;
     std::shared_ptr<Node::NodeTemplate> bidNodesTemplate = std::make_shared<Node::NodeTemplate>();
 
 
@@ -65,9 +62,7 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
-        throw std::runtime_error("Representations::TPGRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
-    }
+
     if(!this->tangled || !this->tangledPopulation.has_value()) {
         throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
     }
@@ -76,11 +71,7 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;
     }
-    const auto* outputRange = dynamic_cast<const Data::NumericRange<size_t>*>(&this->outputDimension.getConstraint());
-    if (outputRange == nullptr || !outputRange->maximum || *outputRange->maximum == std::numeric_limits<size_t>::max()) {
-        throw std::runtime_error("Representations::TPGRepresentation::isValid: output requirement must have a finite size_t maximum.");
-    }
-    size_t nbActions = *outputRange->maximum + 1;
+
 
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 
@@ -120,7 +111,7 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
 }
 
 
-Data::DataValue Representations::TPGRepresentation::executeIndividual(
+Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
     const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
@@ -144,6 +135,7 @@ Data::DataValue Representations::TPGRepresentation::executeIndividual(
         return Data::DataValue::scalar<size_t>(std::get<size_t>(winner));
     } else {
         // Return action of tangled individual
-        return this->executeIndividual(*std::get<std::shared_ptr<const Evolution::Individual>>(winner), inputSources);
+        return this->executeIndividualRaw(*std::get<std::shared_ptr<const Evolution::Individual>>(winner), inputSources);
     }
 }
+

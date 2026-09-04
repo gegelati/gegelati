@@ -80,7 +80,21 @@ namespace Evaluation {
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
+
+        /**
+         * \brief Print the content of the metric.
+         */
+        virtual std::string toString(std::string prefix = "") const = 0;
+
+        /**
+         * \brief compare two metrics and return true if they do the same thing.
+         */
+        virtual bool sameMetricMethod(const EvaluationMetric& other) const = 0;
     };
+        
+    inline std::ostream& operator<<(std::ostream& os, const EvaluationMetric& metric) {
+        return os << metric.toString();
+    }
 
 
 }; // namespace Evaluation

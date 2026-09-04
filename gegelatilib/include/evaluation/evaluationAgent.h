@@ -106,6 +106,8 @@ namespace Evaluation {
          * \brief get the output dimension of the EvaluationAgent.
          */
         virtual const Data::DataRequirement& getOutputDimension() const;
+
+        virtual std::string summary() const;
         
         /**
          * \brief Add a metric requested to be measured during an evaluation run.

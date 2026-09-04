@@ -2,7 +2,9 @@
 
 std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneUniquePtr() const
 {
-    return std::make_unique<Representations::LGPRepresentation>(
+    auto clone = std::make_unique<Representations::LGPRepresentation>(
+        this->dimensionFlow.getInputDimensions(),
+        this->nbOutputRegisters,
         this->iSet,
         this->nbRegisters,
         this->nbNodesMin,
@@ -10,14 +12,12 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
         this->representationName,
         this->representationColor
     );
+    //this->copyOutputFunctionsTo(*clone);
+    return clone;
 }
-
-
 std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
-        throw std::runtime_error("Representations::LGPRepresentation::getGenotypeTemplate: cannot define if an individual is valid without dimensions set.");
-    }
+
 
     size_t maxInputSourceIdx = 8;
 
@@ -36,7 +36,7 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
     
         // Value templates for input type and index
         std::shared_ptr<Node::NodeValueConfiguration> configNbInput(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->inputDimensions.size() + 1)));
+            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->dimensionFlow.getInputDimensions().size() + 1)));
         std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(
             std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxInputSourceIdx)));
         for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
@@ -53,9 +53,6 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-    if(this->inputDimensions.empty() || this->outputDimension.getDataType().elementType == nullptr) {
-        throw std::runtime_error("Representations::LGPRepresentation::isValid: cannot define if an individual is valid without dimensions set.");
-    }
 
     // Return false if genotype length is out of bounds.
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
@@ -66,7 +63,7 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
     // Ranges should look like {nbRegister, NbInstr, NbTypeInput, MaxInput, NbTypeInput, MaxInput...}.
     std::vector<size_t> ranges = {this->nbRegisters, this->iSet.getNbInstructions()};
     for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        ranges.push_back(this->inputDimensions.size() + 1);
+        ranges.push_back(this->dimensionFlow.getInputDimensions().size() + 1);
         ranges.push_back(maxInputSourceIdx);
     }
 
@@ -91,7 +88,7 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
 }
 
 
-Data::DataValue Representations::LGPRepresentation::executeIndividual(
+Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
     const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
@@ -127,21 +124,17 @@ Data::DataValue Representations::LGPRepresentation::executeIndividual(
         registers.setSubValue(instruction.execute(operands), outputIndex);
     }
 
-    // TODO temporary scaling
-    double value = registers.getScalarAt<double>(0);
-    // Filter NaN results: replace with -inf
-    value = (std::isnan(value)) ? -std::numeric_limits<double>::infinity()
-                                  : value;
-    if(value > 2.0) {
-        value = 2.0;
-    } else if (value < 0.0) {
-        value = 0.0;
-    }
-    registers.setSubValue(Data::DataValue::scalar<double>(value), 0);
-    if(*outputDimension.getDataType().elementType == typeid(size_t)) {
-        return Data::DataValue::scalar<size_t>((size_t)value);
+    // GetOutput
+    Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);
+
+    // Replace Nan values by -inf.
+    const double* values = output.getData<double>();
+    for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
+        if(std::isnan(values[idx])) {
+            output.setScalarAt<double>(-std::numeric_limits<double>::infinity(), idx);
+        }
     }
 
     // Return value of first register
-    return registers.getSubValue<double>(Data::DataType::scalar<double>(), 0);
+    return output;
 }

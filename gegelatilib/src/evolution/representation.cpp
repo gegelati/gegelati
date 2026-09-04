@@ -11,20 +11,24 @@ size_t Evolution::Representation::getMaxNbNodes() const
     return this->nbNodesMax;
 }
 
-void Evolution::Representation::setDimensions(const std::vector<Data::DataRequirement>& inputDimensions, const Data::DataRequirement& outputDimension)
+void Evolution::Representation::addOutputFunction(std::unique_ptr<Utils::ActivationFunctions::Function> function)
 {
-    this->inputDimensions = inputDimensions;
-    this->outputDimension = outputDimension;
+    this->dimensionFlow.addLayer(function->name(), function->inputDimensions(), function->outputDimension());
+    if(!this->dimensionFlow.isValid()) {
+        throw std::runtime_error("Evolution::Representation::addOutputFunction: Function " + function->name() +" cannot be add to current flow: " + this->dimensionFlow.summary());
+    }
+    this->outputFunctions.push_back(std::move(function));
+    
 }
 
-const std::vector<Data::DataRequirement>& Evolution::Representation::getInputDimensions() const
+Evolution::ControlFlow Evolution::Representation::getControlFlow() const
 {
-    return this->inputDimensions;
+    return this->dimensionFlow;
 }
 
-const Data::DataRequirement& Evolution::Representation::getOutputDimension() const
+std::string Evolution::Representation::summary() const
 {
-    return this->outputDimension;
+    return this->dimensionFlow.summary();
 }
 
 void Evolution::Representation::setTangled(bool tangled)
@@ -54,4 +58,14 @@ bool Evolution::Representation::hasTangledPopulation()
 const std::optional<std::reference_wrapper<const Evolution::Population>>& Evolution::Representation::getTangledPopulation()
 {
     return this->tangledPopulation;
+}
+
+Data::DataValue Evolution::Representation::executeIndividual(
+          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const
+{
+    Data::DataValue resultIndiv = this->executeIndividualRaw(indiv, inputSources);
+    for(const auto& function: this->outputFunctions) {
+        resultIndiv = function->execute(resultIndiv);
+    }
+    return resultIndiv;
 }

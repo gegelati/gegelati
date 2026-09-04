@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+#include "data/demangle.h"
 
 namespace Data {
 
@@ -278,6 +279,9 @@ namespace Data {
          * local view metadata and the preserved source metadata.
          */
         std::string toString() const;
+
+        /** \brief Renders the descriptor in a compact model-summary format. */
+        std::string summary() const;
 
     };
 

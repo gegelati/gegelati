@@ -52,17 +52,10 @@ namespace Data {
         );
     }
 
-    void DataView::canBeAccess(const std::type_info& type, size_t requiredRank) const {
+    void DataView::canBeAccess(const std::type_info& type) const {
         if (!this->ptr) {
             throw std::runtime_error(
                 "DataView access failed: the view has no data pointer.\n" + this->toString()
-            );
-        }
-        if (this->type.rank < requiredRank) {
-            throw std::runtime_error(
-                "DataView access failed: requested rank " + std::to_string(requiredRank) +
-                " is incompatible with current rank " + std::to_string(this->type.rank) + ".\n" +
-                this->toString()
             );
         }
         if (*this->type.elementType != type) {
