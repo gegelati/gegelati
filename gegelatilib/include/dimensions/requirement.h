@@ -161,12 +161,14 @@ namespace Dimensions {
         }
     };
 
+
+    /**
+     * \brief operator for printing
+     */
     inline std::ostream& operator<<(std::ostream& os, const Requirement& requirement) {
         return os << requirement.toString();
     }
-    inline std::ostream& operator<<(std::ostream& os, const Constraint& cosntraint) {
-        return os << cosntraint.toString();
-    }
+
 
 } // namespace Data
 

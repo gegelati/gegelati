@@ -41,6 +41,8 @@ namespace Representations {
             /**
              * \brief Main Representation constructor.
              * 
+             * \param[in] inputDimensions for the representation
+             * \param[in] nbOutputRegisters number of output registers to create the outputDimension
              * \param[in] iSet the Instruction Set used by the LGPRepresentation.
              * \param[in] nbRegisters the number of registers used by the LGPs
              * \param[in] nbNodesMin the minimum number of nodes in the representation.

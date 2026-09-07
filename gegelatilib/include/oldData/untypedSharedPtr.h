@@ -424,6 +424,8 @@ namespace Data {
          * actual std::shared_ptr.
          */
         std::shared_ptr<const Concept> sharedPtrContainer;
+
+        /// @brief some shape
         DataShape shape;
     };
 } // namespace Data

@@ -277,6 +277,10 @@ namespace Data {
         bool operator!=(const DataView& other) const noexcept;
     };
 
+
+    /**
+     * \brief operator for printing
+     */
     inline std::ostream& operator<<(std::ostream& os, const DataView& view) {
         return os << view.toString();
     }

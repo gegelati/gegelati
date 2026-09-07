@@ -92,6 +92,9 @@ namespace Evaluation {
         virtual bool sameMetricMethod(const EvaluationMetric& other) const = 0;
     };
         
+    /**
+     * \brief operator for printing
+     */
     inline std::ostream& operator<<(std::ostream& os, const EvaluationMetric& metric) {
         return os << metric.toString();
     }

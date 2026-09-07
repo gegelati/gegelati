@@ -37,6 +37,7 @@ namespace Representations {
             /**
              * \brief Main Representation constructor.
              * 
+             * \param[in] inputDimensions the dimensions of the input sources.
              * \param[in] nbActions The number of actions in the TPGRepresentation.
              * \param[in] contextMemberRep Representation of the context members
              * \param[in] contextMemberPop Context Member population

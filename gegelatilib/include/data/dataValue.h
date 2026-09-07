@@ -27,17 +27,14 @@ namespace Data {
      * - non-template behavior is kept in the .cpp companion when needed.
      */
     class DataValue : public DataView {
-    public:
-        using Concept = detail::ValueConcept;
-
     private:
         /// \brief Type-erased storage for the owned data.
-        std::unique_ptr<Concept> storage;
+        std::unique_ptr<detail::ValueConcept> storage;
 
         /// \brief Private constructor used by factory methods.
         /// \param[in] storage Type-erased storage that transfers ownership to this value.
         /// \param[in] type Metadata describing the stored data.
-        DataValue(std::unique_ptr<Concept> storage, DataType type);
+        DataValue(std::unique_ptr<detail::ValueConcept> storage, DataType type);
 
     public:
         /// \brief Deleted default constructor (DataValue must own its data).
@@ -271,7 +268,8 @@ namespace Data {
         /**
          * \brief Creates a zero-initialized value with the requested shape and element type.
          * \tparam T Element type used for storage.
-         * \param[in] type Requested shape and runtime type metadata.
+         * \param[in] dimension0 Size of dimension0: 0 for scalar.
+         * \param[in] dimension1 Size of dimension1: 0 for scalar/array1d. 
          * \return A zero-initialized owning value.
          * \throws std::invalid_argument If the requested rank is unsupported.
          */

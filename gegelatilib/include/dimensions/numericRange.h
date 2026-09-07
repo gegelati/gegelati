@@ -13,6 +13,9 @@
 
 namespace Dimensions {
 
+    /**
+     * \brief Constraint structure for numeric types storing ranges of accepted numbers
+     */
     template <typename T>
     struct NumericRange final : Constraint {
         /// \brief Numeric type constrained by this range.

@@ -100,6 +100,9 @@ namespace Evaluation {
         virtual std::string toString(std::string prefix = "") const;
     };
         
+    /**
+     * \brief operator for printing
+     */
     inline std::ostream& operator<<(std::ostream& os, const EvaluationResult& res) {
         return os << res.toString();
     }

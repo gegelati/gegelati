@@ -47,10 +47,15 @@ namespace Evolution {
         /// Tangled population
         std::optional<std::reference_wrapper<const Population>> tangledPopulation;
 
+        /// @brief Vector of output functions
         std::vector<std::unique_ptr<Dimensions::ActivationFunctions::Function>> outputFunctions;
 
+        /// @brief Dimension flow
         Dimensions::DimensionFlow dimensionFlow;
 
+        /**
+         * \brief private method for executing individual
+         */
         virtual Data::DataValue executeIndividualRaw(
           const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
 
@@ -114,7 +119,14 @@ namespace Evolution {
         /** \brief Adds a typed post-processing function to the representation output. */
         virtual void addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function);
 
+        /**
+         * \brief Return the current dimension flow
+         */
         virtual Dimensions::DimensionFlow getDimensionFlow() const;
+
+        /**
+         * \brief print the summary of the dimension flow
+         */
         virtual std::string summary() const;
 
         /**

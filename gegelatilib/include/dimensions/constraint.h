@@ -47,6 +47,9 @@ namespace Dimensions {
         virtual std::string toString() const = 0;
     };
 
+    /**
+     * \brief Default Unconstrained data
+     */
     struct UnconstrainedData final : Constraint {
         /// \brief Accepts every view.
         bool accepts(const Data::DataView&) const override {
@@ -58,7 +61,7 @@ namespace Dimensions {
          * 
          * For Unconstrainted, return true only if the consumer is unconstrained too.
          * 
-         * \param[in] consumer
+         * \param[in] consumer the constraint checked
          */
         bool isCompatibleWith(const Constraint& consumer) const override {
             return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
@@ -83,6 +86,12 @@ namespace Dimensions {
             return "unconstrained";
         }
     };
+    /**
+     * \brief operator for printing
+     */
+    inline std::ostream& operator<<(std::ostream& os, const Constraint& cosntraint) {
+        return os << cosntraint.toString();
+    }
 };
 
 #endif

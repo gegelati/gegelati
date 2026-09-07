@@ -285,6 +285,9 @@ namespace Data {
 
     };
 
+    /**
+     * \brief operator for printing
+     */
     inline std::ostream& operator<<(std::ostream& os, const DataType type) {
         return os << type.toString();
     }

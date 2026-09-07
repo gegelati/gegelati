@@ -107,6 +107,9 @@ namespace Evaluation {
          */
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
+        /**
+         * \brief return string of dimension summary
+         */
         virtual std::string summary() const;
         
         /**

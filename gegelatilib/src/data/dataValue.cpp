@@ -1,7 +1,7 @@
 #include "data/dataValue.h"
 
 
-Data::DataValue::DataValue(std::unique_ptr<Concept> storage, DataType type)
+Data::DataValue::DataValue(std::unique_ptr<detail::ValueConcept> storage, DataType type)
     : DataView(storage->data(), type),
         storage(std::move(storage)) { }
 
