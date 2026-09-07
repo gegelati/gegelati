@@ -43,6 +43,60 @@ TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
     EXPECT_EQ(twoDPtr[5], 6);
 }
 
+TEST(DataValueTest, equality) {
+    
+    auto scalarValue1 = Data::DataValue::scalar(42.5);
+    auto oneDValue1 = Data::DataValue::array1d<int[5]>({0, 1, 2, 3, 4});
+    auto twoDValue1 = Data::DataValue::array2d<int[2][3]>({{1, 2, 3}, {4, 5, 6}});
+
+    auto scalarValue2 = Data::DataValue::scalar(42.5);
+    auto oneDValue2 = Data::DataValue::array1d<int[5]>({0, 1, 2, 3, 4});
+    auto twoDValue2 = Data::DataValue::array2d<int[2][3]>({{1, 2, 3}, {4, 5, 6}});
+
+    ASSERT_TRUE(scalarValue1 == scalarValue2) << "Values should be equal";
+    ASSERT_TRUE(oneDValue1 == oneDValue2) << "Values should be equal";
+    ASSERT_TRUE(twoDValue1 == twoDValue2) << "Values should be equal";
+
+
+    auto scalarValue3 = Data::DataValue::scalar(42);
+    auto scalarValue4 = Data::DataValue::scalar(42.6);
+    ASSERT_TRUE(scalarValue1 != oneDValue1) << "Value should not be equal";
+    ASSERT_TRUE(scalarValue1 != scalarValue3) << "Value should not be equal";
+    ASSERT_TRUE(scalarValue1 != scalarValue3) << "Value should not be equal";
+
+    auto oneDValue3 = Data::DataValue::array1d<size_t[5]>({0, 1, 2, 3, 4});
+    auto oneDValue4 = Data::DataValue::array1d<int[4]>({0, 1, 2, 3});
+    auto oneDValue5 = Data::DataValue::array1d<int[5]>({0, 1, 2, 3, 6});
+    ASSERT_TRUE(oneDValue1 != scalarValue1) << "Value should not be equal";
+    ASSERT_TRUE(oneDValue1 != oneDValue3) << "Value should not be equal";
+    ASSERT_TRUE(oneDValue1 != oneDValue4) << "Value should not be equal";
+    ASSERT_TRUE(oneDValue1 != oneDValue5) << "Value should not be equal";
+    
+    auto twoDValue3 = Data::DataValue::array2d<size_t[2][3]>({{1, 2, 3}, {4, 5, 6}});
+    auto twoDValue4 = Data::DataValue::array2d<int[2][2]>({{1, 2}, {4, 5}});
+    auto twoDValue5 = Data::DataValue::array2d<int[1][3]>({{1, 2, 3}});
+    auto twoDValue6 = Data::DataValue::array2d<int[2][3]>({{1, 2, 3}, {4, 5, 7}});
+    ASSERT_TRUE(twoDValue1 != scalarValue1) << "Value should not be equal";
+    ASSERT_TRUE(twoDValue1 != twoDValue3) << "Value should not be equal";
+    ASSERT_TRUE(twoDValue1 != twoDValue4) << "Value should not be equal";
+    ASSERT_TRUE(twoDValue1 != twoDValue5) << "Value should not be equal";
+    ASSERT_TRUE(twoDValue1 != twoDValue6) << "Value should not be equal";
+}
+
+TEST(DataValueTest, clone)
+{   
+    auto scalarValue = Data::DataValue::scalar(42.5);
+    auto oneDValue = Data::DataValue::array1d<int[5]>({0, 1, 2, 3, 4});
+    auto twoDValue = Data::DataValue::array2d<int[2][3]>({{1, 2, 3}, {4, 5, 6}});
+
+    auto scalarValueCopy = scalarValue.clone();
+    auto oneDValueCopy = oneDValue.clone();
+    auto twoDValueCopy = twoDValue.clone();
+    ASSERT_TRUE(scalarValue == scalarValueCopy)<< "cloned value should be equal";
+    ASSERT_TRUE(oneDValue == oneDValueCopy)<< "cloned value should be equal";
+    ASSERT_TRUE(twoDValue == twoDValueCopy)<< "cloned value should be equal";
+}
+
 TEST(DataValueTest, zerosInitialisesEverySupportedRank)
 {
     ASSERT_NO_THROW(Data::DataValue::zeros<double>(Data::DataType::scalar<double>()));
@@ -153,7 +207,7 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
     ASSERT_THROW(twoDTarget.getSubValue<float>(Data::DataType::array2d<float>(2, 2), 1), std::runtime_error);
 }
 
-TEST(DataValueTest, setSubValueCoversAllRankCombinations)
+TEST(DataValueTest, setSubValue)
 {
     auto scalarTarget = Data::DataValue::scalar(0.0);
     auto scalarSource = Data::DataValue::scalar(7.5);
@@ -174,7 +228,7 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
     ASSERT_NO_THROW(oneDTarget.setSubValue(scalarSourceInt, 2));
     ASSERT_EQ(oneDTarget.getScalarAt<int>(2), 7);
 
-    auto twoDTarget = Data::DataValue::zeros<int>(Data::DataType::array2d<int>(3, 3));
+    auto twoDTarget = Data::DataValue::zeros<int>(3, 3);
     auto twoDSource = Data::DataValue::array2d(std::vector<std::vector<int>>{{9, 8}, {7, 6}});
     ASSERT_NO_THROW(twoDTarget.setSubValue(twoDSource, 1));
     const int* twoDPtr = twoDTarget.getData<int>();
@@ -202,7 +256,7 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
 
 
 
-    auto target2D = Data::DataValue::zeros<double>(Data::DataType::array2d<double>(3, 3));
+    auto target2D = Data::DataValue::zeros<double>(3, 3);
     auto scalarInsert = Data::DataValue::scalar(5.5);
     ASSERT_NO_THROW(target2D.setSubValue(scalarInsert, 4));
     EXPECT_DOUBLE_EQ(target2D.getScalarAt<double>(4), 5.5);
@@ -212,6 +266,25 @@ TEST(DataValueTest, setSubValueCoversAllRankCombinations)
     ASSERT_THROW(twoDTarget.setSubValue(oneDSource, 1), std::out_of_range);
     ASSERT_THROW(target2D.setSubValue(Data::DataValue::scalar(1.0), 9), std::out_of_range);
     ASSERT_THROW(target2D.setSubValue(Data::DataValue::scalar(1), 0), std::runtime_error);
+}
+
+TEST(DataValueTest, setScalarAt) 
+{
+    auto scalarTarget = Data::DataValue::zeros<int>(0);
+    auto oneDTarget = Data::DataValue::zeros<int>(4);
+    auto twoDTarget = Data::DataValue::zeros<int>(3, 3);
+    
+    ASSERT_NO_THROW(scalarTarget.setScalarAt<int>(8, 0)) << "Setting value failed";
+    ASSERT_NO_THROW(oneDTarget.setScalarAt<int>(8, 2)) << "Setting value failed";
+    ASSERT_NO_THROW(twoDTarget.setScalarAt<int>(8, 5)) << "Setting value failed";
+    
+    ASSERT_EQ(scalarTarget.getScalarAt<int>(0), 8) << "Value is not rightfully set";
+    ASSERT_EQ(oneDTarget.getScalarAt<int>(2), 8) << "Value is not rightfully set";
+    ASSERT_EQ(twoDTarget.getScalarAt<int>(5), 8) << "Value is not rightfully set";
+
+    ASSERT_THROW(twoDTarget.setScalarAt<int>(1, 10), std::out_of_range) << "Should have throw with out of bounds";
+    ASSERT_THROW(twoDTarget.setScalarAt<double>(1, 1), std::out_of_range) << "Should have throw with wrong type";
+    
 }
 
 TEST(DataValueTest, arrayRangeFactoriesAndStringOutputRemainReliable)
@@ -224,6 +297,7 @@ TEST(DataValueTest, arrayRangeFactoriesAndStringOutputRemainReliable)
 
     std::vector<std::vector<int>> invalidRows = {{1, 2}, {3}};
     ASSERT_THROW(Data::DataValue::array2d(invalidRows), std::invalid_argument);
+    ASSERT_THROW(Data::DataValue::array2d(flat, 2, 6), std::invalid_argument);
     ASSERT_THROW(Data::DataValue::array2d(std::vector<std::vector<int>>{}), std::invalid_argument);
 
     auto value = Data::DataValue::array2d(std::vector<int>{1, 2, 3, 4}, 2, 2);

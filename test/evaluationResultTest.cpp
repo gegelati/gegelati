@@ -130,6 +130,8 @@ TEST(EvaluationResultTest, addEvaluationRun)
     const Evaluation::ScoreMetric* scoreMetric = dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(2)->getMetricAt(0));
     ASSERT_EQ(scoreMetric->getScore(), 28.0) << "Wrong size";
 
+    ASSERT_NO_THROW(result.toString()) << "For coverage";
+
     std::unique_ptr<Evaluation::EvaluationMetric> metric2 = std::make_unique<Evaluation::ScoreMetric>(32.0);
     std::unique_ptr<Evaluation::EvaluationRun> run2 = std::make_unique<Evaluation::EvaluationRun>(std::move(metric2));
 
@@ -140,4 +142,5 @@ TEST(EvaluationResultTest, addEvaluationRun)
     ASSERT_TRUE(dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(12)->getMetricAt(0)) != nullptr) << "Metric should be scoreMetric";
     const Evaluation::ScoreMetric* scoreMetric2 = dynamic_cast<const Evaluation::ScoreMetric*>(&result.getEvaluationRuns().at(12)->getMetricAt(0));
     ASSERT_EQ(scoreMetric2->getScore(), 32.0) << "Wrong size";
+    ASSERT_NO_THROW(result.toString()) << "For coverage";
 }

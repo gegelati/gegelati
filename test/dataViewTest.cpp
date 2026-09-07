@@ -64,7 +64,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
 
     ASSERT_THROW(scalarView.getScalar<double>(), std::runtime_error);
     ASSERT_THROW(oneDView.getData<double>(), std::runtime_error);
-    ASSERT_THROW(scalarView.getData<int>(), std::runtime_error);
+    ASSERT_THROW(scalarView.getData<double>(), std::runtime_error);
     ASSERT_NO_THROW(oneDView.getScalar<int>());
 }
 
@@ -149,6 +149,50 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     ASSERT_THROW(view.getSubView(Data::DataType::array2d<int>(2, 3), 2), std::out_of_range);
 }
 
+TEST(DataViewTest, equality) {
+    int source[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
+    Data::DataView view(source, Data::DataType::array2d<int>(3, 4));
+    ASSERT_TRUE(view == view) << "Same view should be equal";
+
+    Data::DataView view2(source, Data::DataType::array2d<int>(3, 4));
+    ASSERT_TRUE(view == view2) << "views should be equal";
+
+    Data::DataView view3(source, Data::DataType::array2d<double>(3, 4));
+    ASSERT_TRUE(view != view3) << "views should not be equal";
+
+    int source2[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
+    Data::DataView view4(source2, Data::DataType::array2d<int>(3, 4));
+    ASSERT_TRUE(view != view4) << "views should not be equal";
+}
+
+TEST(DataViewTest, multiSubView) 
+{
+    int source[28][28];
+    
+    for (size_t idx0 = 0; idx0 < 28; idx0 ++){
+        for (size_t idx1 = 0; idx1 < 28; idx1 ++){
+            source[idx0][idx1] = idx0 * 28 + idx1;
+        }
+    }
+    Data::DataView view(source);
+    Data::DataView subView = view.getSubView(Data::DataType::array2d<int>(14, 14), 28 * 7 + 7);
+    const int* subViewData = subView.getData<int>();
+    for (size_t idx0 = 0; idx0 < 14; idx0 ++){
+        for (size_t idx1 = 0; idx1 < 14; idx1 ++){
+            EXPECT_EQ(subViewData[idx0 * 14 + idx1], (idx0 + 7) * 28 + (idx1 + 7));
+        }
+    }
+
+    
+    Data::DataView subSubView = subView.getSubView(Data::DataType::array2d<int>(3, 3), 30);
+    const int* subSubViewData = subSubView.getData<int>();
+    for (size_t idx0 = 0; idx0 < 3; idx0 ++){
+        for (size_t idx1 = 0; idx1 < 3; idx1 ++){
+            EXPECT_EQ(subSubViewData[idx0 * 3 + idx1], (idx0 + 9) * 28 + (idx1 + 9));
+        }
+    }
+}
+
 TEST(DataViewTest, CanFitCoversEveryRankAndTypeCombination)
 {
     int scalarValue = 42;
@@ -183,6 +227,11 @@ TEST(DataViewTest, CanFitCoversEveryRankAndTypeCombination)
     EXPECT_TRUE(twoDView.canFit(Data::DataType::array2d<int>(2, 2), 0));
     EXPECT_FALSE(twoDView.canFit(Data::DataType::array2d<int>(2, 2), 2));
     EXPECT_FALSE(twoDView.canFit(Data::DataType::array2d<double>(1, 2), 0));
+
+    Data::DataView wrongView(nullptr, Data::DataType());
+    Data::DataType wrongType;
+    EXPECT_FALSE(scalarView.canFit(wrongType, 0));
+    EXPECT_FALSE(wrongView.canFit(Data::DataType::scalar<int>(), 0));
 }
 
 TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)

@@ -83,6 +83,7 @@ TEST_F(LGPRepresentationTest, Constructor)
     Representations::LGPRepresentation* representation;
 
     ASSERT_NO_THROW(representation = new Representations::LGPRepresentation({inputType}, 1, set, 8, 5, 10)) << "Constructor of Representation failed.";
+    ASSERT_THROW(Representations::LGPRepresentation({inputType}, 10, set, 8, 5, 10), std::runtime_error) << "Constructor of Representation should fail.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
@@ -191,10 +192,6 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
 TEST_F(LGPRepresentationTest, compatibilityCheck) 
 {
-    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
-    Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
-
-    Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
 
     Evolution::Individual indiv;
     Evolution::Genotype& genotype = indiv.getMutableGenotype();
@@ -207,29 +204,34 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
     group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
+    
+    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
+    Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
+
+    Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
+
     std::cout<<representation.summary()<<std::endl;
 
     
     Dimensions::Requirement inputTypeEnv = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-1.0, 1.0));
     Dimensions::Requirement outputTypeEnv = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1.0, 1.0));
-    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
+    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
     std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 
-    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(representation.getControlFlow().getOutputDimension()));
+    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(representation.getDimensionFlow().getOutputDimension()));
     std::cout<<representation.summary()<<std::endl;
 
     
-    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
+    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
     std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 
-    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getControlFlow().getOutputDimension()));
+    representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getDimensionFlow().getOutputDimension()));
     std::cout<<representation.summary()<<std::endl;
 
     
-    std::cout<<inputTypeEnv.isCompatibleWith(representation.getControlFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<representation.getControlFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
-
+    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
+    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
     std::cout<<representation.executeIndividual(indiv, {inputSource.view()})<<std::endl;
 }

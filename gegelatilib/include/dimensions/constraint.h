@@ -53,6 +53,13 @@ namespace Dimensions {
             return true;
         }
 
+        /**
+         * \brief Return true if the consumer is compatible with the current constraint.
+         * 
+         * For Unconstrainted, return true only if the consumer is unconstrained too.
+         * 
+         * \param[in] consumer
+         */
         bool isCompatibleWith(const Constraint& consumer) const override {
             return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
         }

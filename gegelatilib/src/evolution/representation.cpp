@@ -21,7 +21,7 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::Ac
     
 }
 
-Dimensions::ControlFlow Evolution::Representation::getControlFlow() const
+Dimensions::DimensionFlow Evolution::Representation::getDimensionFlow() const
 {
     return this->dimensionFlow;
 }

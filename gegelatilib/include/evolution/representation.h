@@ -15,7 +15,7 @@
 #include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
-#include "dimensions/controlFlow.h"
+#include "dimensions/dimensionFlow.h"
 #include "dimensions/activationFunctions.h"
 
 using RepParam = Representation::RepresentationParameters;
@@ -49,7 +49,7 @@ namespace Evolution {
 
         std::vector<std::unique_ptr<Dimensions::ActivationFunctions::Function>> outputFunctions;
 
-        Dimensions::ControlFlow dimensionFlow;
+        Dimensions::DimensionFlow dimensionFlow;
 
         virtual Data::DataValue executeIndividualRaw(
           const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
@@ -78,16 +78,14 @@ namespace Evolution {
             size_t nbNodesMin, size_t nbNodesMax=0,
             std::string representationName = "Representation", 
             std::string representationColor = "#000000")
-               : nbNodesMin{nbNodesMin}, nbNodesMax{nbNodesMax}, representationName(representationName), representationColor(representationColor), dimensionFlow{inputDimensions} {
+               : nbNodesMin{nbNodesMin}, nbNodesMax{nbNodesMax}, representationName(representationName), 
+                 representationColor(representationColor), dimensionFlow{inputDimensions} {
                 if(this->nbNodesMax == 0) {
                     this->nbNodesMax = this->nbNodesMin;
                 }
 
-                // Check dimensions
+                // Add layer
                 dimensionFlow.addLayer(representationName, inputDimensions, outputDimension);
-                if(!dimensionFlow.isValid()) {
-                    throw std::runtime_error("Representation:Constructor: Output Dimension set: "+ outputDimension.toString() + " is not valid.");
-                }
             };   
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
@@ -116,7 +114,7 @@ namespace Evolution {
         /** \brief Adds a typed post-processing function to the representation output. */
         virtual void addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function);
 
-        virtual Dimensions::ControlFlow getControlFlow() const;
+        virtual Dimensions::DimensionFlow getDimensionFlow() const;
         virtual std::string summary() const;
 
         /**

@@ -34,13 +34,6 @@ namespace Data {
             virtual ~ValueConcept() = default;
 
             /**
-             * \brief Returns a pointer to the raw stored data.
-             *
-             * \return Pointer to the underlying value storage in a type-erased form.
-             */
-            virtual const void* data() const noexcept = 0;
-
-            /**
              * \brief Returns a mutable pointer to the raw stored data.
              *
              * \return Mutable pointer to the underlying value storage.
@@ -60,6 +53,14 @@ namespace Data {
              * \return A debug-friendly representation of the contained value.
              */
             virtual std::string toString() const = 0;
+            
+            /**
+             * \brief Compares this value with another type-erased value.
+             *
+             * \return true if both values have the same concrete model and
+             *         represent equal values.
+             */
+            virtual bool equals(const ValueConcept& other) const = 0;
         };
 
         /// \brief Storage model for a scalar value.
@@ -76,13 +77,6 @@ namespace Data {
              * \param[in] v Value stored by the model.
              */
             explicit ScalarModel(T v) : value(std::move(v)) {}
-
-            /**
-             * \brief Returns the address of the scalar value.
-             *
-             * \return Pointer to the scalar storage.
-             */
-            const void* data() const noexcept override { return &value; }
 
             /**
              * \brief Returns the mutable address of the scalar value.
@@ -110,6 +104,17 @@ namespace Data {
                 oss << value;
                 return oss.str();
             }
+
+            /**
+             * \brief scalar equality check
+             */
+            bool equals(const ValueConcept& other) const override {
+                const auto* otherPtr = dynamic_cast<const ScalarModel<T>*>(&other);
+    
+                if (otherPtr == nullptr) { return false; }
+
+                return this->value == otherPtr->value;
+            }
         };
 
         /// \brief Storage model for a contiguous 1D array.
@@ -132,13 +137,6 @@ namespace Data {
              * \param[in] c Number of elements in the buffer.
              */
             ArrayModel(std::unique_ptr<T[]> v, size_t c) : values(std::move(v)), count(c) {}
-
-            /**
-             * \brief Returns the address of the array buffer.
-             *
-             * \return Pointer to the first element of the array.
-             */
-            const void* data() const noexcept override { return values.get(); }
 
             /**
              * \brief Returns the mutable address of the array buffer.
@@ -177,6 +175,19 @@ namespace Data {
                 oss << "]";
                 return oss.str();
             }
+
+            /**
+             * \brief array1d equality check
+             */
+            bool equals(const ValueConcept& other) const override {
+                const auto* otherPtr = dynamic_cast<const ArrayModel<T>*>(&other);
+
+                if (otherPtr == nullptr || this->count != otherPtr->count) {
+                    return false;
+                }
+
+                return std::equal(this->values.get(), this->values.get() + count, otherPtr->values.get());
+            }
         };
 
         /// \brief Storage model for a row-major 2D array.
@@ -206,13 +217,6 @@ namespace Data {
              */
             Array2dModel(std::unique_ptr<T[]> v, size_t r, size_t c)
                 : values(std::move(v)), rows(r), cols(c) {}
-
-            /**
-             * \brief Returns the address of the 2D array buffer.
-             *
-             * \return Pointer to the first element of the row-major storage.
-             */
-            const void* data() const noexcept override { return values.get(); }
 
             /**
              * \brief Returns the mutable address of the 2D array buffer.
@@ -259,6 +263,19 @@ namespace Data {
 
                 oss << "]";
                 return oss.str();
+            }
+
+            /**
+             * \brief array2d equality check
+             */
+            bool equals(const ValueConcept& other) const override {
+                const auto* otherPtr = dynamic_cast<const Array2dModel<T>*>(&other);
+
+                if (otherPtr == nullptr || this->rows != otherPtr->rows || this->cols != otherPtr->cols) {
+                    return false;
+                }
+
+                return std::equal(this->values.get(), this->values.get() + this->rows * this->cols, otherPtr->values.get());
             }
         };
 

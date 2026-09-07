@@ -72,7 +72,13 @@ const Dimensions::Requirement& Evaluation::EvaluationAgent::getOutputDimension()
 
 std::string Evaluation::EvaluationAgent::summary() const
 {
-    return this->learningEnvironment.summary();
+    std::ostringstream result;            
+    result << "Inputs (" << this->learningEnvironment.getInputDimensions().size() << "):\n";
+    for (const auto& input : this->learningEnvironment.getInputDimensions()) {
+        result << "  * " << input.summary() << "\n";
+    }
+    result << "\nOutput: " << this->learningEnvironment.getOutputDimension() << "\n";
+    return result.str();
 }
 
 

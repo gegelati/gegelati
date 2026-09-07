@@ -100,7 +100,7 @@ namespace Data {
         /**
          * \brief Returns a pointer to the first byte of the viewed data.
          */
-        const void* getData() const noexcept { return ptr; }
+        const void* getPtr() const noexcept { return ptr; }
 
         /**
          * \brief Returns the shape of THIS view (rank + dimensions).
@@ -186,6 +186,7 @@ namespace Data {
          */
         template <typename T>
         const T& getScalar() const {
+            this->canBeAccess(typeid(T));
             return *static_cast<const T*>(this->ptr);
         }
 
@@ -215,6 +216,8 @@ namespace Data {
          */
         template <typename T>
         const T* getData() const {
+
+            this->canBeAccess(typeid(T));
             using ValueType = std::remove_const_t<T>;
 
             const ValueType* source =
@@ -256,6 +259,22 @@ namespace Data {
 
         /** \brief Returns a diagnostic string containing the pointer and DataType. */
         virtual std::string toString() const;
+
+        /**
+         * \brief Compares two DataView while ignoring source context.
+         *
+         * \param[in] other DataView to compare with.
+         * \return `true` when pointer and dataType is identical.
+         */
+        bool operator==(const DataView& other) const noexcept;
+
+        /**
+         * \brief Compares two DataView.
+         *
+         * \param[in] other DataView to compare with.
+         * \return `true` when the DataView differ.
+         */
+        bool operator!=(const DataView& other) const noexcept;
     };
 
     inline std::ostream& operator<<(std::ostream& os, const DataView& view) {

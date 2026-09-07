@@ -38,7 +38,7 @@
 #include <stdexcept>
 
 #include "evaluation/learningEnvironment.h"
-#include "dimensions/controlFlow.h"
+#include "dimensions/dimensionFlow.h"
 
 Evaluation::LearningEnvironment* Evaluation::LearningEnvironment::clone() const
 {
@@ -59,11 +59,4 @@ const std::vector<Dimensions::Requirement>& Evaluation::LearningEnvironment::get
 const Dimensions::Requirement& Evaluation::LearningEnvironment::getOutputDimension() const
 {
     return this->outputDimension;
-}
-
-std::string Evaluation::LearningEnvironment::summary() const
-{
-    Dimensions::ControlFlow flow(this->inputDimensions);
-    flow.addLayer("Environment output", this->inputDimensions, this->outputDimension);
-    return flow.summary();
 }

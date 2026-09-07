@@ -100,14 +100,22 @@ class TPGRepresentationTest : public ::testing::Test
 TEST_F(TPGRepresentationTest, Constructor)
 {
     Representations::TPGRepresentation* representation;
+    Representations::TPGRepresentation* representation2;
 
     ASSERT_NO_THROW(representation = new Representations::TPGRepresentation({inputType}, 3, *memberRepresentation, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
+    Representations::LGPRepresentation wrongMemberRep1({Dimensions::Requirement::array1d<int>(4)}, 1, set, 8, 1, 10);
+    Representations::LGPRepresentation smallMemberRep({Dimensions::Requirement::array1d<double>(2)}, 1, set, 8, 1, 10);
+
+    ASSERT_THROW(Representations::TPGRepresentation({inputType}, 3, wrongMemberRep1, *memberPopulation, 2, 10), std::runtime_error) << "Should throw with wrong inputs of member";
+    ASSERT_NO_THROW(representation2 = new Representations::TPGRepresentation({inputType}, 3, smallMemberRep, *memberPopulation, 2, 10)) << "Constructor of Representation failed.";
+
+    ASSERT_THROW(Representations::TPGRepresentation({inputType}, 3, *representation, *tpgPopulation, 2, 10), std::runtime_error) << "Should have throw with uncompatible output";
+
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
-
 
 TEST_F(TPGRepresentationTest, Cloning)
 {

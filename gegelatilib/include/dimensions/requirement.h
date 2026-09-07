@@ -50,14 +50,7 @@ namespace Dimensions {
          * \throws std::invalid_argument If the constraint cannot be cloned.
          */
         Requirement(Data::DataType dataType, const Constraint& constraint)
-            : dataType(std::move(dataType)), constraint(constraint.cloneSharedPtr()) {
-            if (!this->constraint) {
-                throw std::invalid_argument(
-                    "Requirement construction failed: constraint clone is null.\n"
-                    "Requirement type:\n" + this->dataType.toString()
-                );
-            }
-        }
+            : dataType(std::move(dataType)), constraint(constraint.cloneSharedPtr()) {}
 
         template <typename T>
         /** \brief Creates an unconstrained scalar requirement of type T. */
@@ -131,7 +124,8 @@ namespace Dimensions {
 
         /** \brief Checks whether this producer requirement satisfies a consumer requirement. */
         bool isCompatibleWith(const Requirement& consumer) const noexcept {
-            return dataType.canFitIn(consumer.dataType, 0) &&
+            return dataType.elementType == consumer.getDataType().elementType && 
+                   dataType.canFitIn(consumer.dataType, 0) &&
                    constraint->isCompatibleWith(*consumer.constraint);
         }
 

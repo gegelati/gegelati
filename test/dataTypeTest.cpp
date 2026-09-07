@@ -150,6 +150,8 @@ TEST(DataTypeTest, CanFitInHandlesScalar1DAnd2DCases)
     const auto scalar = Data::DataType::scalar<int>();
     const auto oneD = Data::DataType::array1d<int>(5);
     const auto twoD = Data::DataType::array2d<int>(3, 4);
+    Data::DataType wrong;
+    wrong.rank = 3;
 
     EXPECT_TRUE(scalar.canFitIn(Data::DataType::scalar<int>(), 0)) << "Scalar into scalar should fit.";
     EXPECT_FALSE(scalar.canFitIn(Data::DataType::array1d<int>(1), 0)) << "Scalar should not accept a 1D shape.";
@@ -164,6 +166,8 @@ TEST(DataTypeTest, CanFitInHandlesScalar1DAnd2DCases)
     EXPECT_TRUE(twoD.canFitIn(Data::DataType::array1d<int>(2), 1)) << "A valid 1D window in a 2D descriptor should fit.";
     EXPECT_TRUE(twoD.canFitIn(Data::DataType::array2d<int>(1, 2), 1)) << "A valid 2D window should fit.";
     EXPECT_FALSE(twoD.canFitIn(Data::DataType::array2d<int>(2, 3), 2)) << "An out-of-bounds 2D window should fail.";
+
+    EXPECT_FALSE(twoD.canFitIn(wrong)) << "Should be false with a rank 3 type";
 }
 
 TEST(DataTypeTest, CanFitInUsesLinearOffsetRelativeToCurrentDescriptor)
@@ -190,7 +194,7 @@ TEST(DataTypeTest, EqualityAndSourceAwareComparisonBehaveAsExpected)
     EXPECT_TRUE(a == c) << "Equality intentionally ignores source context.";
 }
 
-TEST(DataTypeTest, ToStringContainsShapeAndSourceMetadata)
+TEST(DataTypeTest, ToString)
 {
     const auto descriptor = Data::DataType::subView(
         Data::DataType::array2d<double>(2, 2),
@@ -198,12 +202,18 @@ TEST(DataTypeTest, ToStringContainsShapeAndSourceMetadata)
         5);
 
     const std::string text = descriptor.toString();
+    const std::string expect = "DataType{rank=2, dimensions=[2, 2], elementType=double, elementSize=8, sourceRank=2, sourceDimensions=[3, 4], sourceOffset=5}";
 
-    EXPECT_NE(text.find("DataType{"), std::string::npos) << "String should contain the type header.";
-    EXPECT_NE(text.find("rank=2"), std::string::npos) << "Rank should be included in the string.";
-    EXPECT_NE(text.find("dimensions=[2, 2]"), std::string::npos) << "Requested dimensions should be included.";
-    EXPECT_NE(text.find("sourceRank=2"), std::string::npos) << "Source rank should be included.";
-    EXPECT_NE(text.find("sourceDimensions=[3, 4]"), std::string::npos) << "Source dimensions should be included.";
-    EXPECT_NE(text.find("sourceOffset=5"), std::string::npos) << "Source offset should be included.";
+    ASSERT_EQ(text, expect) << "Text should be equal";
+
+    std::ostringstream oss;
+    oss << descriptor;
+    ASSERT_EQ(expect, oss.str()) << "Text should be equal";
+
+    Data::DataType scalarType = Data::DataType::scalar<double>();
+    Data::DataType wrongType;
+    ASSERT_NO_THROW(scalarType.summary());
+    ASSERT_NO_THROW(wrongType.summary());
+    ASSERT_NO_THROW(descriptor.summary());
 }
 

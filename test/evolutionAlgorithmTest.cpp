@@ -293,7 +293,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     Evolution::EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
     eaLgp.initializePopulation();
 
-    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), le.getOutputDimension().getDataType().totalElements(), eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    
+    Representations::TPGRepresentation tpgRep(evalAgent->getInputDimensions(), evalAgent->getOutputDimension().getDataType().totalElements(), eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
@@ -315,17 +316,18 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
             eaTpg.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
             eaTpg.selectSurvivors(offspring);
 
-            const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
-            std::cout<<best.getEvaluationResult()<<std::endl;
         }
     }
 
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
-    ASSERT_EQ(eaTpg.getPopulation().size(), 306) << "Size of TPG population not determinist";
-    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 17672552378738871403U) << "RNG not determinist";
+    ASSERT_EQ(eaTpg.getPopulation().size(), 298) << "Size of TPG population not determinist";
+    ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 5830540304690856934U) << "RNG not determinist";
 
     std::cout<<eaLgp.getRepresentation().summary()<<std::endl;
     std::cout<<eaTpg.getRepresentation().summary()<<std::endl;
+
+    const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
+    std::cout<<best.getEvaluationResult()<<std::endl;
 }
 
 

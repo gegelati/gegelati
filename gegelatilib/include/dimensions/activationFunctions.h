@@ -57,12 +57,8 @@ namespace Dimensions
                     return Data::DataValue::scalar<T>(values[0]);
                 } else if (value.getRank() == 1) {
                     return Data::DataValue::array1d(values);
-                } else if (value.getRank() == 2) {
-                    return Data::DataValue::array2d(values, value.getType().dimensions[0], value.getType().dimensions[1]);
                 } else {
-                    throw std::invalid_argument(
-                        "ActivationFunctions::Tanh failed: unsupported value rank."
-                    );
+                    return Data::DataValue::array2d(values, value.getType().dimensions[0], value.getType().dimensions[1]);
                 }
 
             }
@@ -83,7 +79,7 @@ namespace Dimensions
 
 
             ArgMax(const Requirement& input)
-            : Function({input}, Requirement(Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1)))) {}
+            : Function({input}, Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1))) {}
 
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Find argmax index

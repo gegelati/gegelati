@@ -94,7 +94,7 @@ Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
     // Get effective nodes
     std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
 
-    /// Registers used as internal memory. TODO AAAAAAAA not sure creating register here is the most efficient..
+    /// Registers used as internal memory.
     Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
     Data::DataView registerView = registers.view();
 
@@ -123,6 +123,7 @@ Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
 
         registers.setSubValue(instruction.execute(operands), outputIndex);
     }
+
 
     // GetOutput
     Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);

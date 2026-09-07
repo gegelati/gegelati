@@ -27,7 +27,7 @@ namespace Representations {
             size_t nbRegisters;
 
             /**
-             *  @brief instruction nodes template
+             * @brief instruction nodes template
              * 
              * This node templates gives template for instruction nodes.
              */

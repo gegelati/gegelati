@@ -8,7 +8,7 @@
 #include "dimensions/requirement.h"
 #include "data/dataValue.h"
 #include "dimensions/numericRange.h"
-#include "dimensions/controlFlow.h"
+#include "dimensions/dimensionFlow.h"
 
 TEST(DataRequirementTest, UnconstrainedRequirementChecksShapeAndType)
 {
@@ -152,7 +152,7 @@ TEST(DataRequirementTest, CompatibilityUsesRangeContainment)
         Dimensions::NumericRange<double>::between(-1.0, 1.0));
     const auto narrowerConsumer = Dimensions::Requirement::scalar<double>(
         Dimensions::NumericRange<double>::between(-0.25, 0.25));
-    const auto unconstrained = Dimensions::Requirement::scalar<double>();
+    const auto unconstrained = Dimensions::Requirement::scalar<double>(Dimensions::UnconstrainedData());
 
     EXPECT_TRUE(producer.isCompatibleWith(consumer));
     EXPECT_FALSE(producer.isCompatibleWith(narrowerConsumer));
@@ -160,7 +160,7 @@ TEST(DataRequirementTest, CompatibilityUsesRangeContainment)
     EXPECT_FALSE(unconstrained.isCompatibleWith(consumer));
 }
 
-TEST(DataRequirementTest, ControlFlowChecksFinalProducerOutput)
+TEST(DataRequirementTest, DimensionFlowChecksFinalProducerOutput)
 {
     const auto input = Dimensions::Requirement::array1d<double>(4);
     const auto producerOutput = Dimensions::Requirement::scalar<double>(
@@ -170,11 +170,11 @@ TEST(DataRequirementTest, ControlFlowChecksFinalProducerOutput)
     const auto incompatibleOutput = Dimensions::Requirement::scalar<double>(
         Dimensions::NumericRange<double>::between(-0.5, 0.5));
 
-    Dimensions::ControlFlow producer({input});
+    Dimensions::DimensionFlow producer({input});
     producer.addLayer("producer", {input}, producerOutput);
-    Dimensions::ControlFlow consumer({input});
+    Dimensions::DimensionFlow consumer({input});
     consumer.addLayer("consumer", {input}, consumerOutput);
-    Dimensions::ControlFlow incompatible({input});
+    Dimensions::DimensionFlow incompatible({input});
     incompatible.addLayer("incompatible", {input}, incompatibleOutput);
 
     EXPECT_TRUE(producer.isCompatibleWith(consumer.getOutputDimension()));
@@ -188,8 +188,8 @@ TEST(DataRequirementTest, ToStringDescribesTypeAndConstraint)
     const auto numeric = Dimensions::Requirement::scalar<double>(
         Dimensions::NumericRange<double>::between(-0.4, 0.4));
 
-    std::string strUnconstrained = "Requirement{\n\tDataType{rank=1, dimensions=[3], elementType=i, elementSize=4, sourceRank=1, sourceDimensions=[3], sourceOffset=0},\n\tRequirement: unconstrained\n}";
-    std::string strNumeric = "Requirement{\n\tDataType{rank=0, dimensions=[], elementType=d, elementSize=8, sourceRank=0, sourceDimensions=[], sourceOffset=0},\n\tRequirement: Numeric Range: [-0.4, 0.4]\n}";
+    std::string strUnconstrained = "Requirement{\n\tDataType{rank=1, dimensions=[3], elementType=int, elementSize=4, sourceRank=1, sourceDimensions=[3], sourceOffset=0},\n\tRequirement: unconstrained\n}";
+    std::string strNumeric = "Requirement{\n\tDataType{rank=0, dimensions=[], elementType=double, elementSize=8, sourceRank=0, sourceDimensions=[], sourceOffset=0},\n\tRequirement: Numeric Range: [-0.4, 0.4]\n}";
     
     EXPECT_EQ(unconstrained.toString(), strUnconstrained);
     EXPECT_EQ(numeric.toString(), strNumeric);

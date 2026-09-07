@@ -244,33 +244,45 @@ namespace Data {
          */
         static DataValue zeros(const DataType& type)
         {
+            static_assert(std::is_arithmetic_v<T>,
+                "ActivationFunctions::ArgMax requires a numeric type.");
+
             if (type.rank == 0) {
                 return DataValue::scalar<T>(T{});
             }
 
             if (type.rank == 1) {
-                size_t count = type.dimensions[0];
-                auto values = std::make_unique<T[]>(count);
-
-                return DataValue::array1d<T>(
-                    std::move(values),
-                    count
-                );
+                std::vector<T> values(type.dimensions[0]);
+                return DataValue::array1d(values);
             }
 
             if (type.rank == 2) {
-                auto values = std::make_unique<T[]>(type.dimensions[0] * type.dimensions[1]);
-
-                return DataValue::array2d<T>(
-                    std::move(values),
-                    type.dimensions[0],
-                    type.dimensions[1]
-                );
+                std::vector<T> values(type.dimensions[0] * type.dimensions[1]);
+                return DataValue::array2d(values, type.dimensions[0], type.dimensions[1]);
             }
 
             throw std::invalid_argument(
                 "DataValue::zeros failed: unsupported requested type.\n" + type.toString()
             );
+        }
+
+        
+        template <typename T>
+        /**
+         * \brief Creates a zero-initialized value with the requested shape and element type.
+         * \tparam T Element type used for storage.
+         * \param[in] type Requested shape and runtime type metadata.
+         * \return A zero-initialized owning value.
+         * \throws std::invalid_argument If the requested rank is unsupported.
+         */
+        static DataValue zeros(const size_t dimension0 = 0, const size_t dimension1 = 0) {
+            if(dimension0 == 0) {
+                return DataValue::zeros<T>(Data::DataType::scalar<T>());
+            } else if (dimension1 == 0) {
+                return DataValue::zeros<T>(Data::DataType::array1d<T>(dimension0));
+            } else {
+                return DataValue::zeros<T>(Data::DataType::array2d<T>(dimension0, dimension1));
+            }
         }
 
         /**
@@ -374,8 +386,6 @@ namespace Data {
         /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;
 
-        
-
         /**
          * \brief Converts numeric elements and optionally repairs them with a constraint.
          *
@@ -396,38 +406,41 @@ namespace Data {
             static_assert(std::is_arithmetic_v<D>,
                           "DataValue::convert requires an arithmetic destination type");
 
+
+
+            // Apply conversion
+            size_t count = source.getType().totalElements();
+            const S* data = source.getData<S>();
+            std::vector<D> values(count);
+            for (size_t idx = 0; idx < count; ++idx) {
+                values[idx] = static_cast<D>(data[idx]);
+            }
+
             if (source.getRank() == 0) {
-                S data = source.getScalar<S>();
-                return DataValue::scalar<D>(static_cast<D>(data));
+                return DataValue::scalar<D>(values[0]);
+            } else if (source.getRank() == 1) {
+                return DataValue::array1d(values);
+            } else { // A dataValue can never be build with a rank higher than 2 with current implementation.
+                return DataValue::array2d(values, source.getType().dimensions[0], source.getType().dimensions[1]);
             }
-
-            if (source.getRank() == 1) {
-                const size_t count = source.getDimensions()[0];
-                const S* data = source.getData<S>();
-                auto values = std::make_unique<D[]>(count);
-            
-                for (size_t idx = 0; idx < count; ++idx) {
-                    values[idx] = static_cast<D>(data[idx]);
-                }
-                return DataValue::array1d<D>(std::move(values), count);
-            }
-
-            if (source.getRank() == 2) {
-                const size_t rows = source.getDimensions()[0];
-                const size_t cols = source.getDimensions()[1];
-                const S* data = source.getData<S>();
-                auto values = std::make_unique<D[]>(rows * cols);
-            
-                for (size_t idx = 0; idx < rows * cols; ++idx) {
-                    values[idx] = static_cast<D>(data[idx]);
-                }
-                return DataValue::array2d<D>(std::move(values), rows, cols);
-            }
-
-            throw std::invalid_argument(
-                "DataValue::convert failed: unsupported source rank.\n" + source.toString()
-            );
         }
+
+        
+        /**
+         * \brief Compares two DataValue.
+         *
+         * \param[in] other DataValue to compare with.
+         * \return `true` when Storage and dataType is identical.
+         */
+        bool operator==(const DataValue& other) const noexcept;
+
+        /**
+         * \brief Compares two DataValue.
+         *
+         * \param[in] other DataValue to compare with.
+         * \return `true` when the DataValue differ.
+         */
+        bool operator!=(const DataValue& other) const noexcept;
     };
 
 } // namespace Data

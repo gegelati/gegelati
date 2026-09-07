@@ -51,10 +51,10 @@ namespace Representations {
                     nbActions{nbActions}, contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
                     this->setTangled(true);
 
-                    if(!Dimensions::ControlFlow::acceptsRequirements(inputDimensions, contextMemberRep.getControlFlow().getInputDimensions())) {
+                    if(!Dimensions::DimensionFlow::acceptsRequirements(inputDimensions, contextMemberRep.getDimensionFlow().getInputDimensions())) {
                         throw std::runtime_error("TPGRepresentation:Constructor: Input Dimensions set is not compatible with the context member representation input dimensions");
                     }
-                    if(contextMemberRep.getControlFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::unbounded())) == false) {
+                    if(contextMemberRep.getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::unbounded())) == false) {
                         throw std::runtime_error("TPGRepresentation:Constructor: Context member representation output dimension is not compatible with the required scalar<double> output dimension");
                     }
                 };

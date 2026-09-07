@@ -106,6 +106,21 @@ TEST_F(ReinforcementAgentTest, Constructor)
     ASSERT_NO_THROW(delete rlAgent2) << "Destructor of rlAgent failed.";
 }
 
+TEST_F(ReinforcementAgentTest, Dimensions)
+{
+    Evaluation::ReinforcementAgent rlAgent(le, std::move(params));
+
+    const std::vector<Dimensions::Requirement>& inputs = rlAgent.getInputDimensions();
+    const Dimensions::Requirement& output = rlAgent.getOutputDimension();
+
+    ASSERT_EQ(inputs.size(), 2) << "Should have two inputs";
+    ASSERT_TRUE(inputs.at(0) == Dimensions::Requirement::array1d<double>(3)) << "Types should be equals";
+    ASSERT_TRUE(inputs.at(1) == Dimensions::Requirement::array1d<double>(1)) << "Types should be equals";
+    ASSERT_TRUE(output == Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))) << "Types should be equals";
+
+    ASSERT_NO_THROW(rlAgent.summary());
+}
+
 TEST_F(ReinforcementAgentTest, evaluateIndividual)
 {
     Evaluation::ReinforcementAgent rlAgent(le, std::move(params));

@@ -127,10 +127,10 @@ TEST_F(RepresentationTest, setInputDimensions)
 
     FakeRepresentation representation(inputSources, outputSource, 10);
 
-    ASSERT_EQ(representation.getControlFlow().getInputDimensions().size(), 2) << "Number of input sources set is wrong";
-    ASSERT_TRUE(representation.getControlFlow().getInputDimensions().at(0) == inputSources.at(0)) << "source is wrong";
-    ASSERT_TRUE(representation.getControlFlow().getInputDimensions().at(1) == inputSources.at(1)) << "source is wrong";
-    ASSERT_EQ(representation.getControlFlow().getOutputDimension(), outputSource) << "source is wrong";
+    ASSERT_EQ(representation.getDimensionFlow().getInputDimensions().size(), 2) << "Number of input sources set is wrong";
+    ASSERT_TRUE(representation.getDimensionFlow().getInputDimensions().at(0) == inputSources.at(0)) << "source is wrong";
+    ASSERT_TRUE(representation.getDimensionFlow().getInputDimensions().at(1) == inputSources.at(1)) << "source is wrong";
+    ASSERT_EQ(representation.getDimensionFlow().getOutputDimension(), outputSource) << "source is wrong";
 }
 
 TEST_F(RepresentationTest, tangledRep)
@@ -149,4 +149,13 @@ TEST_F(RepresentationTest, tangledRep)
     ASSERT_TRUE(representation.hasTangledPopulation()) << "Should return true";
     ASSERT_TRUE(representation.getTangledPopulation().has_value()) << "Should be true";
     ASSERT_TRUE(representation.getTangledPopulation().value().get() == population) << "Should be true";
+}
+
+TEST_F(RepresentationTest, addOutputFunction) 
+{
+    FakeRepresentation representation({inputType}, outputType, 10);
+
+    ASSERT_NO_THROW(representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getDimensionFlow().getOutputDimension()))) << "Should not fail to add function";
+    ASSERT_THROW(representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(inputType)), std::runtime_error) << "Should not fail to add function";
+
 }
