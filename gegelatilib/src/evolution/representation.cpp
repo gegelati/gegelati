@@ -22,13 +22,9 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::Ac
 }
 
 
-
-const Node::GenotypeRequirements& Evolution::Representation::getGenotypeRequirements() const
+bool Evolution::Representation::isValid(const Individual& indiv) const 
 {
-    if(this->genotypeRequirements.size() == 0) {
-        throw std::runtime_error("Evolution::Representation::getGenotypeRequirements: value is empty.");
-    }
-    return this->genotypeRequirements;
+    return true;
 }
 
 Dimensions::DimensionFlow Evolution::Representation::getDimensionFlow() const

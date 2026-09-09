@@ -3,106 +3,50 @@
 #include "evolution/individual.h"
 
 
-
-Data::DataValue Evolution::Mutation::sampleNodeValue(const Node::NodeValueRequirement& nodeValueRequirements, RNG::RNG& rng)
+std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng)
 {
-    /*
-    if(nodeValueRequirements.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::sampleNodeValue: NodeRequirements is empty :(.");
-    }
-    // Default select first requirements
-    size_t idxRequirements = 0;
-
-    // Sample a random requirements if more than one proposed
-    if(nodeValueRequirements.size() > 1) {
-        idxRequirements = rng.getUnsignedInt64(0, nodeValueRequirements.size() - 1);
-    }
-
-    const Node::NodeValueConfiguration& valueRequirements = *nodeValueRequirements.getconfigurationAt(idxRequirements);
-    Node::NodeValue value;
-
-    if(std::holds_alternative<Node::NodeValueRange>(valueRequirements)) {
-        // Value should be selected in a specified range
-        const Node::NodeValueRange& nodeValueRange = std::get<Node::NodeValueRange>(valueRequirements);
-
-        if(std::holds_alternative<std::pair<size_t, size_t>>(nodeValueRange)) {
-            // Range of unsigned int
-            const std::pair<size_t, size_t>& uintPair = std::get<std::pair<size_t, size_t>>(nodeValueRange);
-            value = rng.getUnsignedInt64(uintPair.first, uintPair.second - 1);
-
-        } else { //if (std::holds_alternative<std::pair<double, double>>(nodeValueRange)) { commented because in the idea its important, but impossible to cover with current configuration
-            // Range of double
-            const std::pair<double, double>& doublePair = std::get<std::pair<double, double>>(nodeValueRange);
-            value = rng.getDouble(doublePair.first, doublePair.second);
-        }
-
-    } else  if (std::holds_alternative<std::vector<Node::NodeValue>>(valueRequirements)) { 
-
-        // List of node values.
-        const std::vector<Node::NodeValue>& nodeValues = std::get<std::vector<Node::NodeValue>>(valueRequirements);
-
-        // Sample a random value.
-        value = nodeValues.at(rng.getUnsignedInt64(0, nodeValues.size() - 1));
-
-    } else { //std::holds_alternative<std::vector<std::weak_ptr<const Evolution::Individual>>>(valueRequirements)
-
-        // List of weark ptr of const individuals.
-        const std::vector<std::weak_ptr<const Evolution::Individual>>& nodeValues = std::get<std::vector<std::weak_ptr<const Evolution::Individual>>>(valueRequirements);
-
-        // Sample a random individual and get its shared_ptr
-        value = nodeValues.at(rng.getUnsignedInt64(0, nodeValues.size() - 1)).lock();
-
-    }
-
-    return value;*/
-    return Data::DataValue::scalar<size_t>(0);
-}
-
-
-std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(const Node::NodeRequirements& nodeRequirements, RNG::RNG& rng)
-{
-    if(nodeRequirements.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::createRandomNode: NodeRequirements is empty.");
+    if(nodeTemplate.size() == 0) {
+        throw std::runtime_error("Evolution::Mutation::createRandomNode: NodeTemplate is empty.");
     }
 
     std::vector<Data::DataValue> values;
-    for(size_t idxValue = 0; idxValue < nodeRequirements.size(); idxValue++) {
-        values.push_back(this->sampleNodeValue(nodeRequirements.getValueRequirementsAt(idxValue), rng));
+    for(size_t idxValue = 0; idxValue < nodeTemplate.size(); idxValue++) {
+        values.push_back(nodeTemplate.getGeneratorAt(idxValue).cloneUniquePtr()->sample(rng));
     }
     return std::make_unique<Node::GPNode>(values);
 }
 
 
 
-void Evolution::Mutation::initRandomGenotype(Genotype& genotype, const Node::GenotypeRequirements& genotypeRequirements, RNG::RNG& rng)
+void Evolution::Mutation::initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng)
 {
-    if(genotypeRequirements.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::initRandomGenotype: genotypeRequirements is empty.");
+    if(genotypeTemplate->size() == 0) {
+        throw std::runtime_error("Evolution::Mutation::initRandomGenotype: genotypeTemplate is empty.");
     }
 
-    for(size_t idxRequirements = 0; idxRequirements < genotypeRequirements.size(); idxRequirements++) {
+    for(size_t idxTemplate = 0; idxTemplate < genotypeTemplate->size(); idxTemplate++) {
         Node::NodeGroup& nodeGroup = genotype.addNodeGroup();
         
-        const std::pair<size_t, size_t>& range = genotypeRequirements.getRangeAt(idxRequirements);
-        size_t nbNodesOfRequirements = rng.getUnsignedInt64(range.first, range.second);
+        const std::pair<size_t, size_t>& range = genotypeTemplate->getRangeAt(idxTemplate);
+        size_t nbNodesOfTemplate = rng.getUnsignedInt64(range.first, range.second);
 
-        for(size_t idxNode = 0; idxNode < nbNodesOfRequirements; idxNode++) {
-            nodeGroup.addNode(this->createRandomNode(genotypeRequirements.getNodeRequirementsAt(idxRequirements), rng));
+        for(size_t idxNode = 0; idxNode < nbNodesOfTemplate; idxNode++) {
+            nodeGroup.addNode(this->createRandomNode(genotypeTemplate->getNodeTemplateAt(idxTemplate), rng));
         }
     }
 }
 
-void Evolution::Mutation::mutateNode(Node::GPNode& node, const Node::NodeRequirements& nodeRequirements, RNG::RNG& rng)
+void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng)
 {
-    if(nodeRequirements.size() != node.getSize()) {
-        throw std::runtime_error("Evolution::Mutation::mutateNode: NodeRequirements size does not correspond to the genotypeidual.");
+    if(nodeTemplate.size() != node.getSize()) {
+        throw std::runtime_error("Evolution::Mutation::mutateNode: NodeTemplate size does not correspond to the genotypeidual.");
     }
     size_t idxValueMutated;
     /*Data::DataValue newValue;
     // Simple loop to ensure one value is mutated.
     do {
         idxValueMutated = rng.getUnsignedInt64(0, node.getSize() - 1);
-        newValue = this->sampleNodeValue(*nodeRequirements.getValueRequirementsAt(idxValueMutated), rng);
+        newValue = this->sampleNodeValue(*nodeTemplate.getValueTemplateAt(idxValueMutated), rng);
     } while (node.getValue(idxValueMutated) == newValue);
 
 
@@ -112,21 +56,21 @@ void Evolution::Mutation::mutateNode(Node::GPNode& node, const Node::NodeRequire
 }
 
 
-void Evolution::Mutation::mutateGenotype(Genotype& genotype, const Node::GenotypeRequirements& genotypeRequirements, RNG::RNG& rng)
+void Evolution::Mutation::mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng)
 {
-    if(genotypeRequirements.size() == 0) {
-        throw std::runtime_error("Evolution::Mutation::mutateGenotype: genotypeRequirements is empty.");
+    if(genotypeTemplate->size() == 0) {
+        throw std::runtime_error("Evolution::Mutation::mutateGenotype: genotypeTemplate is empty.");
     }
 
     double pMutateNode = 0.5;
 
-    const Node::NodeRequirements& nodeRequirements = genotypeRequirements.getNodeRequirementsAt(0);
+    Node::NodeTemplate& nodeTemplate = genotypeTemplate->getNodeTemplateAt(0);
     for(size_t idxNodeGroup = 0; idxNodeGroup < genotype.getSize(); idxNodeGroup++) {
         Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(idxNodeGroup);
 
         for(size_t idxNode = 0; idxNode < nodeGroup.getSize(); idxNode++) {
             if(rng.getDouble(0, 1) < pMutateNode) {
-                this->mutateNode(nodeGroup.getMutableNode(idxNode), nodeRequirements, rng);
+                this->mutateNode(nodeGroup.getMutableNode(idxNode), nodeTemplate, rng);
             }
         }
     }

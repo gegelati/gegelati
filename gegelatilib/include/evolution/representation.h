@@ -12,7 +12,7 @@
 
 #include "evolution/individual.h"
 #include "evolution/population.h"
-#include "node/genotypeRequirements.h"
+#include "node/genotypeTemplate.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
@@ -58,19 +58,6 @@ namespace Evolution {
          */
         virtual Data::DataValue executeIndividualRaw(
           const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
-
-
-        /**
-         * @brief instruction nodes requirements
-         * 
-         * This node requirements gives requirements for instruction nodes.
-         */
-        Node::GenotypeRequirements genotypeRequirements;
-
-        /**
-         * \brief Create the genotype requirements grammar
-         */
-        virtual void setGenotypeRequirements() = 0;
 
       public:
 
@@ -145,7 +132,7 @@ namespace Evolution {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual const Node::GenotypeRequirements& getGenotypeRequirements() const;
+        virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const = 0;
 
         /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.

@@ -21,6 +21,7 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     return clone;
 }
 
+/*
 
 void Representations::TPGRepresentation::setGenotypeRequirements()
 {
@@ -30,7 +31,6 @@ void Representations::TPGRepresentation::setGenotypeRequirements()
     }
 
     Node::NodeRequirements bidNodesRequirements;
-/*
 
     // Value Requirements for members
     std::shared_ptr<Node::NodeValueConfiguration> configMember(
@@ -54,60 +54,10 @@ void Representations::TPGRepresentation::setGenotypeRequirements()
     // Vector of both configs if tangled population is not empty
     bidNodesRequirements->addValueRequirements(std::make_shared<Node::NodeValueRequirements>(configs));
 
-     */
+     
 
     this->genotypeRequirements.addNodeRequirements(bidNodesRequirements, this->nbNodesMin, this->nbNodesMax);
-}
-
-bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
-{
-    /* 
-    if(!this->tangled || !this->tangledPopulation.has_value()) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeRequirements: cannot define if a tangled population is not set.");
-    }
-
-    // Return false if genotype length is out of bounds.
-    if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
-        return false;
-    }
-
-
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
-
-    // Verify each (effective) node corresponds to the required specifications.
-    for(const Node::GPNode& node: effectiveNodes.at(0)) {
-        if(node.getSize() != 2) {
-            return false;
-        }
-
-        // Check member individual
-        if(!std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(0))){
-            return false;
-        }
-        const std::shared_ptr<const Evolution::Individual>& member = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(0));
-        if(!this->contextMemberRep.isValid(*member)) {
-            return false;
-        }
-
-        // Check Action/tangled individual
-        bool isAction = false;
-        if(std::holds_alternative<size_t>(node.getValue(1)) && std::get<size_t>(node.getValue(1)) < nbActions) {
-            isAction = true;
-        }
-
-        bool isTangled = false;
-        if(std::holds_alternative<std::shared_ptr<const Evolution::Individual>>(node.getValue(1))){
-            const std::shared_ptr<const Evolution::Individual>& tangledIndiv = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(1));
-            if(indiv != *tangledIndiv && this->isValid(*tangledIndiv)) {
-                isTangled = true;
-            }
-        }
-        if(!isAction && !isTangled) {
-            return false;
-        }
-    }*/
-    return true;
-}
+}*/
 
 
 Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
@@ -140,3 +90,7 @@ Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
     }
 }
 
+std::unique_ptr<Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
+{
+    return nullptr;
+}

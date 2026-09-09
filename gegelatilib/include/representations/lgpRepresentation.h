@@ -45,10 +45,13 @@ namespace Representations {
             virtual Data::DataValue executeIndividualRaw(
                 const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
+            /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
+            std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;
+
             /**
-             * \brief Create the genotype requirements grammar
+             * \brief Create the genotype template grammar
              */
-            virtual void setGenotypeRequirements() override;
+            virtual void setGenotypeTemplate();
 
         public:
 
@@ -75,14 +78,20 @@ namespace Representations {
                 if(nbOutputRegisters > nbRegisters) {
                     throw std::runtime_error("LGPRepresentation::Constructor: Number of outputRegisters cannot be higher than the number of registers");
                 }
+                this->setGenotypeTemplate();
             };
 
-        /**
-         * \brief individual nodes should have six values, with limited ranges.
-         * 
-         * \param[in] indiv Individual controlled.
-         */
-        virtual bool isValid(const Evolution::Individual& indiv) const override;
+            /**
+             * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
+             */
+            virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const;
+
+            /**
+             * \brief individual nodes should have six values, with limited ranges.
+             * 
+             * \param[in] indiv Individual controlled.
+             */
+            virtual bool isValid(const Evolution::Individual& indiv) const override;
 
     };
 }; // namespace LGP_Representation

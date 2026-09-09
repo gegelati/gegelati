@@ -10,14 +10,19 @@
 #include <utility>
 
 #include "dimensions/constraint.h"
-
+#include "mutator/rng.h"
 namespace Dimensions {
+
+    /**
+     * \brief intermediate class for cast detection with any type T
+     */
+    struct NumericRangeBase : Constraint {};
 
     /**
      * \brief Constraint structure for numeric types storing ranges of accepted numbers
      */
     template <typename T>
-    struct NumericRange final : Constraint {
+    struct NumericRange final : NumericRangeBase {
         /// \brief Numeric type constrained by this range.
         static_assert(std::is_arithmetic_v<T>, "NumericRange requires an arithmetic type.");
 
@@ -105,7 +110,7 @@ namespace Dimensions {
 
         /** \brief Checks whether this producer range is contained by a consumer range. */
         bool isCompatibleWith(const Constraint& consumer) const override {
-            const auto* numeric = dynamic_cast<const NumericRange*>(&consumer);
+            const auto* numeric = dynamic_cast<const NumericRange<T>*>(&consumer);
             if (!numeric) {
                 return dynamic_cast<const UnconstrainedData*>(&consumer) != nullptr;
             }

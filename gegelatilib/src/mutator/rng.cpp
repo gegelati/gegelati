@@ -34,7 +34,6 @@
  */
 
 #include "mutator/rng.h"
-#include "mutator/deterministicRandom.h"
 
 void RNG::RNG::setSeed(uint64_t seed)
 {

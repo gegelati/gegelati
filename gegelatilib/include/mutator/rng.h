@@ -38,6 +38,7 @@
 
 #include <memory>
 #include <random>
+#include "mutator/deterministicRandom.h"
 
 namespace RNG {
 
@@ -109,6 +110,28 @@ namespace RNG {
          * \return an uniformely selected value between min and max includes.
          */
         double getDouble(double min, double max);
+
+        /**
+         * \brief Get a pseudo random number between two bounds (included).
+         * 
+         * \tparam T the type of the random number to generate. Must be an arithmetic type.
+         * \param[in] min the lower bound.
+         * \param[in] max the upper bound.
+         * \return an uniformely selected value between min and max includes.
+         */
+        template <typename T>
+        T uniformSample(const T& min, const T& max) {
+          static_assert(std::is_arithmetic_v<T>, "RNG::uniformSample requires an arithmetic type.");
+
+          // If type is float, use uniform real, else uniform int
+          if constexpr (std::is_floating_point_v<T>) {
+              Mutator::uniform_real_distribution<T> distribution(min, max);
+              return distribution(*engine);
+          } else {
+              Mutator::uniform_int_distribution<T> distribution(min, max);
+              return distribution(*engine);
+          }
+        }
     };
 }; // namespace Mutator
 

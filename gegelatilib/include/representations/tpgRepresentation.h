@@ -42,10 +42,6 @@ namespace Representations {
             virtual Data::DataValue executeIndividualRaw(
                 const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
     
-            /**
-             * \brief Create the genotype requirements grammar
-             */
-            virtual void setGenotypeRequirements() override;
         public:
 
             /// @brief clone pattern 
@@ -77,17 +73,11 @@ namespace Representations {
                     }
                 };
 
-        /**
-         * \brief individual nodes should have two values, one individual and one integer or individual.
-         * 
-         * The first individual must be valid regarding the member representation, the second (if there is) must be valid regarding the tangled representation.
-         * Additionnally, this second must not be the same individual as the tested one.
-         * Important: This method do not check for cycles of tangled individuals.
-         * 
-         * \param[in] indiv Individual controlled.
-         */
-        virtual bool isValid(const Evolution::Individual& indiv) const override;
-
+        
+                /**
+                 * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
+                 */
+                virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const;
 
         };
 }; // namespace LGP_Representation
