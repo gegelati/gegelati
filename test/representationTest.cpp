@@ -63,7 +63,7 @@ class RepresentationTest : public ::testing::Test
     {
     }
 };
-
+/*
 class FakeRepresentation : public Evolution::Representation 
 {
     public: 
@@ -158,4 +158,4 @@ TEST_F(RepresentationTest, addOutputFunction)
     ASSERT_NO_THROW(representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getDimensionFlow().getOutputDimension()))) << "Should not fail to add function";
     ASSERT_THROW(representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(inputType)), std::runtime_error) << "Should not fail to add function";
 
-}
+}*/

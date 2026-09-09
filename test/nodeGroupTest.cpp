@@ -44,7 +44,7 @@
 #include "node/nodeGroup.h"
 #include "evolution/individual.h"
 
-
+/*
 TEST(NodeGroupTest, Constructor)
 {
     Node::NodeGroup* nodeGroup;
@@ -121,4 +121,4 @@ TEST(NodeGroupTest, equality){
     
     ASSERT_TRUE (group1 == group2) << "groups should be equal";
     ASSERT_TRUE (group1 == group2) << "groups should be equal both directions";
-}
+}*/

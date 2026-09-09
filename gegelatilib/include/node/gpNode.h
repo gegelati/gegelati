@@ -8,20 +8,11 @@
 #include <functional>
 #include <memory>
 
+#include "data/dataValue.h"
+
 struct CounterReset;
 
-
-namespace Evolution {
-    class Individual;
-};
-
 namespace Node {
-
-    using NodeValue = std::variant<
-        double,
-        std::size_t,
-        std::shared_ptr<const Evolution::Individual>
-    >;
 
     /**
      * \brief Class representing a GPNode
@@ -50,7 +41,7 @@ namespace Node {
             friend struct ::CounterReset;
 
             /// \brief Values of the GPNode.
-            std::vector<NodeValue> values;
+            std::vector<Data::DataValue> values;
 
             /// @brief Indicate wether the node is intron or not, default value is false.
             bool isIntron;
@@ -67,38 +58,28 @@ namespace Node {
             /**
              * \brief GPNode constructor.
              *  
-             * \param[in] values the values of the GPNode.
+             * \param[in] valuesRaw the values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<NodeValue>& values, bool isIntron = false)
-            : values(values), isIntron{isIntron}, gpNodeID(incrementeCounter()) {};
+            GPNode(const std::vector<Data::DataValue>& valuesRaw, bool isIntron = false)
+            : isIntron{isIntron}, gpNodeID(incrementeCounter()) {
+                for(const Data::DataValue& valueRaw: valuesRaw) {
+                    this->values.push_back(valueRaw.clone());
+                }};
 
             /**
              * \brief GPNode size_t constructor.
-             * 
-             * \param[in] values the integer values of the GPNode.
+             * \tparam T Element type used the node values.
+             * \param[in] valuesTyped the integer values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
-            GPNode(const std::vector<size_t>& values, bool isIntron = false)
-            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
-            
-            /**
-             * \brief GPNode double constructor.
-             * 
-             * \param[in] values the double values of the GPNode.
-             * \param[in] isIntron wether the node is intron or not, default value is false.
-             */
-            GPNode(const std::vector<double>& values, bool isIntron = false)
-            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
-            
-            /**
-             * \brief GPNode reference constructor.
-             * 
-             * \param[in] values the reference values of the GPNode.
-             * \param[in] isIntron wether the node is intron or not, default value is false.
-             */
-            GPNode(const std::vector<std::shared_ptr<const Evolution::Individual>>& values, bool isIntron = false)
-            : GPNode(std::vector<NodeValue>(values.begin(), values.end()), isIntron) {};
+            template <typename T>
+            GPNode(const std::vector<T>& valuesTyped, bool isIntron = false)
+            : isIntron{isIntron} {
+                for(const T& valueTyped: valuesTyped) {
+                    this->values.push_back(Data::DataValue::scalar<T>(valueTyped));
+                }
+            };
 
             /**
              * \brief return the ID of the GPNode.
@@ -120,19 +101,31 @@ namespace Node {
             virtual void setGPNodeID(size_t newID);
 
             /**
-             * \brief GPNode constructor.
+             * \brief Set a DataValue at specified index
              * 
              * \param[in] index the index of the value to get.
              * \param[in] value the value to set.
              */
-            void setValue(size_t index, NodeValue value);
+            void setValue(size_t index, const Data::DataValue& value);
+
+            /**
+             * \brief Set a scalar value of type T at specified index
+             * 
+             * \tparam T Element type used the node values.
+             * \param[in] index the index of the value to get.
+             * \param[in] value the value to set.
+             */
+            template <typename T>
+            void setValue(size_t index, const T& value) {
+                this->setValue(index, Data::DataValue::scalar<T>(value));
+            }
 
             /**
              * \brief Get the value of the GPNode at the given index.
              * 
              * \param[in] index the index of the value to get.
              */
-            const NodeValue& getValue(size_t index) const;
+            const Data::DataValue& getValue(size_t index) const;
 
             /**
              * \brief set if the node is intron or not.
@@ -154,7 +147,7 @@ namespace Node {
             /**
              * \brief Get the values of the GPNode.
              */
-            const std::vector<NodeValue>& getValues() const;
+            const std::vector<Data::DataValue>& getValues() const;
     };
 
     

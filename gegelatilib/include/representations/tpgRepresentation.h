@@ -29,6 +29,23 @@ namespace Representations {
             const Evolution::Population& contextMemberPop;
 
 
+            /**
+             * \brief execute each node as a bidding component. 
+             * 
+             * A node is of shape: {a, b}.
+             *  - "a" is a context member individual.
+             *  - "b" is the destination action index.
+             * 
+             * \param[in] indiv Individual executed
+             * \param[in] inputSources input sources on which the individual is executed.
+             */
+            virtual Data::DataValue executeIndividualRaw(
+                const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
+    
+            /**
+             * \brief Create the genotype requirements grammar
+             */
+            virtual void setGenotypeRequirements() override;
         public:
 
             /// @brief clone pattern 
@@ -61,11 +78,6 @@ namespace Representations {
                 };
 
         /**
-         * \brief return the genotype template an individual.
-         */
-        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override;
-
-        /**
          * \brief individual nodes should have two values, one individual and one integer or individual.
          * 
          * The first individual must be valid regarding the member representation, the second (if there is) must be valid regarding the tangled representation.
@@ -76,18 +88,6 @@ namespace Representations {
          */
         virtual bool isValid(const Evolution::Individual& indiv) const override;
 
-        /**
-         * \brief execute each node as a bidding component. 
-         * 
-         * A node is of shape: {a, b}.
-         *  - "a" is a context member individual.
-         *  - "b" is the destination action index.
-         * 
-         * \param[in] indiv Individual executed
-         * \param[in] inputSources input sources on which the individual is executed.
-         */
-        virtual Data::DataValue executeIndividualRaw(
-            const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
         };
 }; // namespace LGP_Representation

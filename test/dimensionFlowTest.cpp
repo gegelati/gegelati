@@ -842,7 +842,7 @@ EXPECT_FALSE(
 
 }
 
-TEST(DimensionFlowTest, AcceptsRequirementsSupportsMultipleCompatibleRequirements)
+TEST(DimensionFlowTest, AcceptsRequirementsupportsMultipleCompatibleRequirements)
 {
 const auto first =
 Dimensions::Requirement::array1d<double>(4);

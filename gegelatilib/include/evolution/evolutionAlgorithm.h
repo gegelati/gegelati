@@ -103,7 +103,7 @@ namespace Evolution {
         );
 
         /**
-         * \brief mutate the specified offspring based on the genotypeTemplate of the representation.
+         * \brief mutate the specified offspring based on the genotypeRequirements of the representation.
          * 
          * \param[in] offspring the set of offspring to mutate
          */

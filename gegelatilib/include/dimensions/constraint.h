@@ -8,11 +8,8 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-#include "data/dataView.h"
+#include "data/dataValue.h"
 
-namespace Data {
-    class DataValue;
-};
 
 namespace Dimensions {
 

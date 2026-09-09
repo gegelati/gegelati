@@ -50,16 +50,16 @@ bool Node::operator!=(const Node::GPNode& a, const Node::GPNode& b)
     return a.getGPNodeID() != b.getGPNodeID();
 }
 
-void Node::GPNode::setValue(size_t index, NodeValue value)
+void Node::GPNode::setValue(size_t index, const Data::DataValue& value)
 {
     if(index >= this->getSize()){
         throw std::runtime_error("Node::GPNode::setValue: index out of range.");
     }
-    this->values[index] = value;
+    this->values[index] = value.clone();
 }
 
 
-const Node::NodeValue& Node::GPNode::getValue(size_t index) const
+const Data::DataValue& Node::GPNode::getValue(size_t index) const
 {
     if(index >= this->getSize()){
         throw std::runtime_error("Node::GPNode::getValue: index out of range.");
@@ -83,7 +83,7 @@ size_t Node::GPNode::getSize() const
 }
 
 
-const std::vector<Node::NodeValue>& Node::GPNode::getValues() const
+const std::vector<Data::DataValue>& Node::GPNode::getValues() const
 {
     return this->values;
 }

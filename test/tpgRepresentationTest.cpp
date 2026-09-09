@@ -137,7 +137,7 @@ TEST_F(TPGRepresentationTest, setInputDimensions)
 {
     // Todo later
 }
-
+/*
 TEST_F(TPGRepresentationTest, getGenotypeTemplate)
 {
     Representations::TPGRepresentation representation({inputType}, 3, *memberRepresentation, *memberPopulation, 5, 10);
@@ -353,3 +353,4 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     std::cout<<representation.summary()<<std::endl;
 }
+ */

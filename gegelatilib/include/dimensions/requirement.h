@@ -52,6 +52,14 @@ namespace Dimensions {
         Requirement(Data::DataType dataType, const Constraint& constraint)
             : dataType(std::move(dataType)), constraint(constraint.cloneSharedPtr()) {}
 
+        /**
+         * \brief Creates a requirement with a value constraint.
+         * \param[in] dataType Required shape and element type.
+         * \param[in] constraint Constraint that values must satisfy as sharedPtr.
+         */
+        Requirement(Data::DataType dataType, const std::shared_ptr<const Constraint>& constraint)
+            : dataType(std::move(dataType)), constraint(constraint) {}
+
         template <typename T>
         /** \brief Creates an unconstrained scalar requirement of type T. */
         static Requirement scalar() {

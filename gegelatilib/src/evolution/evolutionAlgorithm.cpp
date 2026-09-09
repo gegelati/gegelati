@@ -43,12 +43,11 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
         this->evaluation.addRequestedMetric(*metric);
     }
 
-    std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
         Individual& indiv = this->population->getMutableIndividual(this->population->addIndividual());
-        this->mutation->initRandomGenotype(indiv.getMutableGenotype(), *genotypeTemplate, this->rng);
+        this->mutation->initRandomGenotype(indiv.getMutableGenotype(), this->representation->getGenotypeRequirements(), this->rng);
     }
 }
 
@@ -79,9 +78,8 @@ std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individua
 
 void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
 {
-    std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate(std::move(this->representation->getGenotypeTemplate()));
     for(const std::unique_ptr<Individual>& indiv: offspring) {
-        this->mutation->mutateGenotype(indiv->getMutableGenotype(), *genotypeTemplate, rng);
+        this->mutation->mutateGenotype(indiv->getMutableGenotype(), this->representation->getGenotypeRequirements(), rng);
     }
 }
 

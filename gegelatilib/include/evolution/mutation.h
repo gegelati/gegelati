@@ -7,7 +7,7 @@
 #include <array>
 
 #include "evolution/genotype.h"
-#include "node/genotypeTemplate.h"
+#include "node/genotypeRequirements.h"
 #include "mutator/rng.h"
 
 
@@ -34,52 +34,52 @@ namespace Evolution {
         Mutation() {};
 
         /**
-         * \brief Sample a node value based on nodeValueTemplate.
+         * \brief Sample a node value based on nodeValueRequirements.
          * 
          * If multiple configuration are proposed, a configuration is sampled uniformaly.
          * A nodeValue is then sampled based on the configuration.
          *
-         * \param[in] nodeValueTemplate node value template of the sample value
+         * \param[in] nodeValueRequirements node value requirements of the sample value
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual Node::NodeValue sampleNodeValue(const Node::NodeValueTemplate& nodeValueTemplate, RNG::RNG& rng);
+        virtual Data::DataValue sampleNodeValue(const Node::NodeValueRequirement& nodeValueRequirements, RNG::RNG& rng);
 
         /**
          * \brief Create a random GPNode.
          *
-         * \param[in] nodeTemplate node template of the created node
+         * \param[in] nodeRequirements node requirements of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Node::GPNode> createRandomNode(const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
+        virtual std::unique_ptr<Node::GPNode> createRandomNode(const Node::NodeRequirements& nodeRequirements, RNG::RNG& rng);
         
 
         /**
          * \brief Initialize a random Genotype.
          *
          * \param[in,out] genotype the genotype initialized.
-         * \param[in] genotypeTemplate genotype template of the genotype
+         * \param[in] genotypeRequirements genotype requirements of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+        virtual void initRandomGenotype(Genotype& genotype, const Node::GenotypeRequirements& genotypeRequirements, RNG::RNG& rng);
 
 
         /**
          * \brief mutate a GPNode.
          *
          * \param[in] node the node to mutate.
-         * \param[in] nodeTemplate node template of the node
+         * \param[in] nodeRequirements node requirements of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(Node::GPNode& node, const Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
+        virtual void mutateNode(Node::GPNode& node, const Node::NodeRequirements& nodeRequirements, RNG::RNG& rng);
 
         /**
          * \brief Mutate a Genotype.
          *
          * \param[in,out] genotype the genotype mutated.
-         * \param[in] genotypeTemplate genotype template of the genotype
+         * \param[in] genotypeRequirements genotype requirements of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateGenotype(Genotype& genotype, const Node::GenotypeTemplate& genotypeTemplate, RNG::RNG& rng);
+        virtual void mutateGenotype(Genotype& genotype, const Node::GenotypeRequirements& genotypeRequirements, RNG::RNG& rng);
 
 
     };

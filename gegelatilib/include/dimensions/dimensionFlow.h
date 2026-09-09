@@ -66,11 +66,12 @@ namespace Dimensions {
          * \brief Adds a transition and updates the current output requirement.
          *
          * The first transition consumes the flow inputs. Later transitions consume
-         * the output of the preceding transition.          *
+         * the output of the preceding transition.          
           * \param name The name of the transition.
           * \param layerInputs The input requirements consumed by the transition.
           * \param output The output requirement produced by the transition.
-          * \return True if the transition inputs are compatible with the current output.         */
+          * \return True if the transition inputs are compatible with the current output.         
+         */
         bool addLayer(
             std::string name,
             const std::vector<Requirement>& layerInputs,

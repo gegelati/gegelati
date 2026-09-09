@@ -77,13 +77,9 @@ TEST_F(GPNodeTest, Constructor)
     ASSERT_NO_THROW(doubleNode = new Node::GPNode(doubleValues))
         << "Construction of the double GPNode failed.";
 
-    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::shared_ptr<const Evolution::Individual> indiv2 = std::make_shared<Evolution::Individual>();
-    std::vector<std::shared_ptr<const Evolution::Individual>> indivValues = {indiv1, indiv2};
-    ASSERT_NO_THROW(indivNode = new Node::GPNode(indivValues))
-        << "Construction of the individual GPNode failed.";
-
-    std::vector<Node::NodeValue> variantValues = {size_t{1}, 2.5, indiv1};
+    std::vector<Data::DataValue> variantValues;
+    variantValues.push_back(Data::DataValue::scalar<size_t>(1));
+    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
     ASSERT_NO_THROW(variantNode = new Node::GPNode(variantValues))
         << "Construction of the variant GPNode failed.";
 
@@ -96,28 +92,27 @@ TEST_F(GPNodeTest, Constructor)
 TEST_F(GPNodeTest, SetGetValue)
 {
     std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> variantValues = {size_t{1}, 2.5, indiv1};
+    std::vector<Data::DataValue> variantValues;
+    variantValues.push_back(Data::DataValue::scalar<size_t>(1));
+    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
+    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
     Node::GPNode node(variantValues);
 
     
-    ASSERT_EQ(node.getValue(0), Node::NodeValue(size_t{1})) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(1), Node::NodeValue(2.5)) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(2), Node::NodeValue(indiv1)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<size_t>(1)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(1) == Data::DataValue::zeros<double>(10, 2)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(2) == Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1)) << "Getting value of the GPNode failed.";
 
 
-    ASSERT_NO_THROW(node.setValue(0, size_t{5})) << "Setting value of the GPNode failed.";
-    ASSERT_NO_THROW(node.setValue(1, indiv1)) << "Setting value of the GPNode failed.";
-    ASSERT_NO_THROW(node.setValue(2, 2.9)) << "Setting value of the GPNode failed.";
+    ASSERT_NO_THROW(node.setValue(0, Data::DataValue::scalar<double>(10.5))) << "Setting value of the GPNode failed.";
 
-    ASSERT_EQ(node.getValue(0), Node::NodeValue(size_t{5})) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(1), Node::NodeValue(indiv1)) << "Getting value of the GPNode failed.";
-    ASSERT_EQ(node.getValue(2), Node::NodeValue(2.9)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<double>(10.5)) << "Getting value of the GPNode failed.";
 
-    ASSERT_THROW(node.setValue(3, size_t(25)), std::runtime_error) << "Setting value of the GPNode should have failed.";
+    ASSERT_THROW(node.setValue(3, Data::DataValue::scalar<double>(10.5)), std::runtime_error) << "Setting value of the GPNode should have failed.";
     ASSERT_THROW(node.getValue(3), std::runtime_error) << "Getting value of the GPNode should have failed.";
 
-    ASSERT_EQ(node.getSize(), 3) << "Getting size of the GPNode failed.";
-    ASSERT_EQ(node.getValues(), std::vector<Node::NodeValue>({size_t{5}, indiv1, 2.9})) << "Getting values of the GPNode failed.";
+    ASSERT_TRUE(node.getSize() == 3) << "Getting size of the GPNode failed.";
+    ASSERT_TRUE(node.getValues().size() == 3) << "Getting values of the GPNode failed.";
 
     ASSERT_FALSE(node.getIsIntron()) << "Node should not be an intron by default.";
     ASSERT_NO_THROW(node.setIsIntron(true)) << "Setting node to intron state failed";

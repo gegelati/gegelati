@@ -12,7 +12,7 @@
 
 #include "evolution/individual.h"
 #include "evolution/population.h"
-#include "node/genotypeTemplate.h"
+#include "node/genotypeRequirements.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
@@ -58,6 +58,19 @@ namespace Evolution {
          */
         virtual Data::DataValue executeIndividualRaw(
           const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
+
+
+        /**
+         * @brief instruction nodes requirements
+         * 
+         * This node requirements gives requirements for instruction nodes.
+         */
+        Node::GenotypeRequirements genotypeRequirements;
+
+        /**
+         * \brief Create the genotype requirements grammar
+         */
+        virtual void setGenotypeRequirements() = 0;
 
       public:
 
@@ -132,14 +145,14 @@ namespace Evolution {
         /**
          * \brief return the genotype template an individual.
          */
-        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const = 0;
+        virtual const Node::GenotypeRequirements& getGenotypeRequirements() const;
 
         /**
          * \brief identified wether the individual is valid faced to the expected node structure of the representation.
          * 
          * \param[in] indiv individual controlled.
          */
-        virtual bool isValid(const Individual& indiv) const = 0;
+        virtual bool isValid(const Individual& indiv) const;
 
         /**
          * \brief set the statue of the tangled property

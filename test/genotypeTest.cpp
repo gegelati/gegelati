@@ -123,8 +123,8 @@ TEST(GenotypeTest, getEffectiveNodes)
     ASSERT_EQ(effectiveNodes.size(), 2) << "Should be same shape as genotype with no introns";
     ASSERT_EQ(effectiveNodes.at(0).size(), 3) << "Should be same shape as genotype with no introns";
     ASSERT_EQ(effectiveNodes.at(1).size(), 2) << "Should be same shape as genotype with no introns";
-    ASSERT_EQ(effectiveNodes.at(0).at(1).get().getValue(1), Node::NodeValue(double(3.0))) << "Should be same value as genotype with no introns";
-    ASSERT_EQ(effectiveNodes.at(1).at(1).get().getValue(2), Node::NodeValue(size_t(4))) << "Should be same value as genotype with no introns";
+    ASSERT_TRUE(effectiveNodes.at(0).at(1).get().getValue(1) == Data::DataValue::scalar<double>(3.0)) << "Should be same value as genotype with no introns";
+    ASSERT_TRUE(effectiveNodes.at(1).at(1).get().getValue(2) == Data::DataValue::scalar<size_t>(4)) << "Should be same value as genotype with no introns";
 
     genotype.getMutableNodeGroup(0).getMutableNode(1).setIsIntron(true);
     genotype.getMutableNodeGroup(1).getMutableNode(0).setIsIntron(true);
@@ -133,8 +133,8 @@ TEST(GenotypeTest, getEffectiveNodes)
     ASSERT_EQ(effectiveNodes.size(), 2) << "Should be same shape";
     ASSERT_EQ(effectiveNodes.at(0).size(), 2) << "Should be different size as genotype with introns";
     ASSERT_EQ(effectiveNodes.at(1).size(), 1) << "Should be different size as genotype with introns";
-    ASSERT_EQ(effectiveNodes.at(0).at(1).get().getValue(1), Node::NodeValue(double(4.0))) << "Should be same value as genotype with no introns";
-    ASSERT_EQ(effectiveNodes.at(1).at(0).get().getValue(2), Node::NodeValue(size_t(4))) << "Should be same value as genotype with no introns";
+    ASSERT_TRUE(effectiveNodes.at(0).at(1).get().getValue(1) == Data::DataValue::scalar<double>(4.0)) << "Should be same value as genotype with no introns";
+    ASSERT_TRUE(effectiveNodes.at(1).at(0).get().getValue(2) == Data::DataValue::scalar<size_t>(4)) << "Should be same value as genotype with no introns";
 }
 
 

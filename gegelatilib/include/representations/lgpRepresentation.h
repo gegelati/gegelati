@@ -26,12 +26,29 @@ namespace Representations {
             /// The number of registers used by the LGPs
             size_t nbRegisters;
 
+
+
             /**
-             * @brief instruction nodes template
+             * \brief execute each node as an instruction line. 
              * 
-             * This node templates gives template for instruction nodes.
+             * A node is of shape: {a, b, c, d, e, f}.
+             *  - "a" is the index of the output register.
+             *  - "b" is the index of the executed function.
+             *  - "c" is indicates the first input type (register, state value, weight...).
+             *  - "d" is the index of the first input.
+             *  - "e" is indicates the second input type (register, state value, weight...).
+             *  - "f" is the index of the second input.
+             * 
+             * \param[in] indiv Individual executed
+             * \param[in] inputSources input sources on which the individual is executed.
              */
-            std::shared_ptr<Node::NodeTemplate> instructionNodesTemplate;
+            virtual Data::DataValue executeIndividualRaw(
+                const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
+
+            /**
+             * \brief Create the genotype requirements grammar
+             */
+            virtual void setGenotypeRequirements() override;
 
         public:
 
@@ -54,16 +71,11 @@ namespace Representations {
                 : Evolution::Representation(
                     inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
                     nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
-                    nbRegisters{nbRegisters}, instructionNodesTemplate(std::make_shared<Node::NodeTemplate>()) {
+                    nbRegisters{nbRegisters}{
                 if(nbOutputRegisters > nbRegisters) {
                     throw std::runtime_error("LGPRepresentation::Constructor: Number of outputRegisters cannot be higher than the number of registers");
                 }
             };
-
-        /**
-         * \brief return the genotype template an individual.
-         */
-        virtual std::unique_ptr<const Node::GenotypeTemplate> getGenotypeTemplate() const override;
 
         /**
          * \brief individual nodes should have six values, with limited ranges.
@@ -71,23 +83,6 @@ namespace Representations {
          * \param[in] indiv Individual controlled.
          */
         virtual bool isValid(const Evolution::Individual& indiv) const override;
-
-        /**
-         * \brief execute each node as an instruction line. 
-         * 
-         * A node is of shape: {a, b, c, d, e, f}.
-         *  - "a" is the index of the output register.
-         *  - "b" is the index of the executed function.
-         *  - "c" is indicates the first input type (register, state value, weight...).
-         *  - "d" is the index of the first input.
-         *  - "e" is indicates the second input type (register, state value, weight...).
-         *  - "f" is the index of the second input.
-         * 
-         * \param[in] indiv Individual executed
-         * \param[in] inputSources input sources on which the individual is executed.
-         */
-        virtual Data::DataValue executeIndividualRaw(
-            const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
 
     };
 }; // namespace LGP_Representation

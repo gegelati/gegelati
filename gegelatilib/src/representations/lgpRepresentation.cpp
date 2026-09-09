@@ -15,45 +15,37 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
     //this->copyOutputFunctionsTo(*clone);
     return clone;
 }
-std::unique_ptr<const Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
+
+void Representations::LGPRepresentation::setGenotypeRequirements() 
 {
 
-
     size_t maxInputSourceIdx = 8;
+    Node::NodeRequirements instructionNodes;
 
-    // Instruction node template is fixed during evolution, so created only once.
-    if(this->instructionNodesTemplate->size() == 0) {
-
-        // Value Template for register
-        std::shared_ptr<Node::NodeValueConfiguration> configRegister(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->nbRegisters)));
-        this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configRegister));
-        
-        // Value template for instruction
-        std::shared_ptr<Node::NodeValueConfiguration> configFunction(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), size_t(this->iSet.getNbInstructions()))));
-        this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configFunction));
+    // Value Requirements for register
+    instructionNodes.addValueRequirements(
+        Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(this->nbRegisters - 1))
+    );
     
-        // Value templates for input type and index
-        std::shared_ptr<Node::NodeValueConfiguration> configNbInput(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), this->dimensionFlow.getInputDimensions().size() + 1)));
-        std::shared_ptr<Node::NodeValueConfiguration> configMaxInput(
-            std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(0), maxInputSourceIdx)));
-        for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-            this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configNbInput));
-            this->instructionNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMaxInput));
-        }
+    // Value requirements for instruction
+    instructionNodes.addValueRequirements(
+        Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(this->iSet.getNbInstructions() - 1))
+    );
+
+    // Value requirements for input type and index
+    Dimensions::Requirement nbInputReq = Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(this->dimensionFlow.getInputDimensions().size() + 1 - 1));
+    Dimensions::Requirement maxInputReq = Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(maxInputSourceIdx - 1));
+    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
+        instructionNodes.addValueRequirements(Node::NodeValueRequirement(nbInputReq));
+        instructionNodes.addValueRequirements(Node::NodeValueRequirement(maxInputReq));
     }
 
-    return std::make_unique<Node::GenotypeTemplate>(
-        this->instructionNodesTemplate,
-        std::make_pair(this->nbNodesMin, this->nbNodesMax)
-    );
+    this->genotypeRequirements.addNodeRequirements(instructionNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
 bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-
+    /*
     // Return false if genotype length is out of bounds.
     if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
         return false;
@@ -83,7 +75,7 @@ bool Representations::LGPRepresentation::isValid(const Evolution::Individual& in
                 return false;
             }
         }
-    }
+    }*/
     return true;
 }
 
@@ -100,8 +92,8 @@ Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
 
     for(const Node::GPNode& node: effectiveNodes.at(0)) {
 
-        size_t outputIndex = std::get<size_t>(node.getValue(0));
-        size_t functionIndex = std::get<size_t>(node.getValue(1));
+        size_t outputIndex = node.getValue(0).getScalar<size_t>();
+        size_t functionIndex = node.getValue(1).getScalar<size_t>();
 
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
         std::vector<Data::DataView> operands;
@@ -110,8 +102,8 @@ Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
         for(size_t idxOp = 0; idxOp < nbOperands; idxOp++){
             size_t nodeIndex = idxOp * 2 + 2; // +2 is to ignore output and function index, then times too for both type and index
     
-            size_t inputType = std::get<size_t>(node.getValue(nodeIndex));
-            size_t inputIndex = std::get<size_t>(node.getValue(nodeIndex + 1));
+            size_t inputType = node.getValue(nodeIndex).getScalar<size_t>();
+            size_t inputIndex = node.getValue(nodeIndex + 1).getScalar<size_t>();
 
             const Data::DataType& operandType = instruction.getOperandTypes().at(idxOp);
             const Data::DataView& dataSource = (inputType==0) ? registerView : inputSources.at(inputType - 1);

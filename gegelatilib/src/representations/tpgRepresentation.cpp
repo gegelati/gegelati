@@ -22,22 +22,22 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
 }
 
 
-std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
+void Representations::TPGRepresentation::setGenotypeRequirements()
 {
 
     if(!this->tangled || !this->tangledPopulation.has_value()) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeRequirements: cannot define if a tangled population is not set.");
     }
 
-    std::shared_ptr<Node::NodeTemplate> bidNodesTemplate = std::make_shared<Node::NodeTemplate>();
+    Node::NodeRequirements bidNodesRequirements;
+/*
 
-
-    // Value Template for members
+    // Value Requirements for members
     std::shared_ptr<Node::NodeValueConfiguration> configMember(
         std::make_shared<Node::NodeValueConfiguration>(this->contextMemberPop.getIndividualPtrs()));
-    bidNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configMember));
+    bidNodesRequirements->addValueRequirements(std::make_shared<Node::NodeValueRequirements>(configMember));
     
-    // Value template for actions/Tangled connections
+    // Value requirements for actions/Tangled connections
 
     // Action config
     std::vector<std::shared_ptr<const Node::NodeValueConfiguration>> configs;
@@ -52,19 +52,18 @@ std::unique_ptr<const Node::GenotypeTemplate> Representations::TPGRepresentation
 
 
     // Vector of both configs if tangled population is not empty
-    bidNodesTemplate->addValueTemplate(std::make_shared<Node::NodeValueTemplate>(configs));
+    bidNodesRequirements->addValueRequirements(std::make_shared<Node::NodeValueRequirements>(configs));
 
-    return std::make_unique<Node::GenotypeTemplate>(
-        bidNodesTemplate,
-        std::make_pair(this->nbNodesMin, this->nbNodesMax)
-    );
+     */
+
+    this->genotypeRequirements.addNodeRequirements(bidNodesRequirements, this->nbNodesMin, this->nbNodesMax);
 }
 
 bool Representations::TPGRepresentation::isValid(const Evolution::Individual& indiv) const
 {
-
+    /* 
     if(!this->tangled || !this->tangledPopulation.has_value()) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: cannot define if a tangled population is not set.");
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeRequirements: cannot define if a tangled population is not set.");
     }
 
     // Return false if genotype length is out of bounds.
@@ -106,7 +105,7 @@ bool Representations::TPGRepresentation::isValid(const Evolution::Individual& in
         if(!isAction && !isTangled) {
             return false;
         }
-    }
+    }*/
     return true;
 }
 
@@ -115,27 +114,29 @@ Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
     const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
+    std::vector<std::reference_wrapper<const Node::GPNode>> effectiveNodes = indiv.getGenotype().getEffectiveNodes().at(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
-    Node::NodeValue winner;
+    size_t winnerIdx;
 
-    for(const Node::GPNode& node: effectiveNodes.at(0)) {
-        const std::shared_ptr<const Evolution::Individual>& member = std::get<std::shared_ptr<const Evolution::Individual>>(node.getValue(0));
+    for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
+        const Node::GPNode& node = effectiveNodes.at(idx);
+        const std::shared_ptr<const Evolution::Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Evolution::Individual>>();
         double bid = this->contextMemberRep.executeIndividual(*member, inputSources).getScalar<double>();
 
         if(bid > maxBid) {
             maxBid = bid;
-            winner = node.getValue(1);
+            winnerIdx = idx;
         }
     }
 
-    if (std::holds_alternative<size_t>(winner)) {
+    if (typeid(size_t) == effectiveNodes.at(winnerIdx).get().getValue(1).getElementType()) {
         // Return action
-        return Data::DataValue::scalar<size_t>(std::get<size_t>(winner));
+        return effectiveNodes.at(winnerIdx).get().getValue(1).clone();
     } else {
         // Return action of tangled individual
-        return this->executeIndividualRaw(*std::get<std::shared_ptr<const Evolution::Individual>>(winner), inputSources);
+        return this->executeIndividualRaw(
+            *effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Evolution::Individual>>(), inputSources);
     }
 }
 
