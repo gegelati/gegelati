@@ -86,13 +86,6 @@ namespace Representations {
              */
             virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const;
 
-            /**
-             * \brief individual nodes should have six values, with limited ranges.
-             * 
-             * \param[in] indiv Individual controlled.
-             */
-            virtual bool isValid(const Evolution::Individual& indiv) const override;
-
     };
 }; // namespace LGP_Representation
 

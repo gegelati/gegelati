@@ -262,11 +262,14 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
         ea.mutateOffspring(offspring);
         ea.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
         ea.selectSurvivors(offspring);
+
+        
     }
-    
+    std::cout<<ea.getSelector().getBest(ea.getPopulation().getIndividuals()).getEvaluationResult()<<std::endl;
+
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Size of population not determinist";
-    ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 10637318380984930111U) << "RNG not determinist";
+    ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 3098313116838862914U) << "RNG not determinist";
 }
 
 /*

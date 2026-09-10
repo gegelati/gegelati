@@ -55,41 +55,6 @@ std::unique_ptr<Node::GenotypeTemplate> Representations::LGPRepresentation::getG
     return std::move(this->genotypeTemplate->cloneUniquePtr());
 }
 
-bool Representations::LGPRepresentation::isValid(const Evolution::Individual& indiv) const
-{
-    /*
-    // Return false if genotype length is out of bounds.
-    if(indiv.getSize() > this->nbNodesMax || indiv.getSize() < this->nbNodesMin) {
-        return false;
-    }
-    size_t maxInputSourceIdx = 8;
-
-    // Ranges should look like {nbRegister, NbInstr, NbTypeInput, MaxInput, NbTypeInput, MaxInput...}.
-    std::vector<size_t> ranges = {this->nbRegisters, this->iSet.getNbInstructions()};
-    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        ranges.push_back(this->dimensionFlow.getInputDimensions().size() + 1);
-        ranges.push_back(maxInputSourceIdx);
-    }
-
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
-
-    // Verify each (effective) node corresponds to the required specifications.
-    for(const Node::GPNode& node: effectiveNodes.at(0)) {
-        if(node.getSize() != ranges.size()) {
-            return false;
-        }
-
-        for(size_t idxNode = 0; idxNode < ranges.size(); idxNode++) {
-            if(!std::holds_alternative<size_t>(node.getValue(idxNode))) {
-                return false;
-            }
-            if(node.getValue(idxNode) >= Node::NodeValue(ranges.at(idxNode))){
-                return false;
-            }
-        }
-    }*/
-    return true;
-}
 
 
 Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(

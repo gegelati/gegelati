@@ -41,18 +41,14 @@ void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeTemplate& nod
     if(nodeTemplate.size() != node.getSize()) {
         throw std::runtime_error("Evolution::Mutation::mutateNode: NodeTemplate size does not correspond to the genotypeidual.");
     }
-    size_t idxValueMutated;
-    /*Data::DataValue newValue;
-    // Simple loop to ensure one value is mutated.
-    do {
-        idxValueMutated = rng.getUnsignedInt64(0, node.getSize() - 1);
-        newValue = this->sampleNodeValue(*nodeTemplate.getValueTemplateAt(idxValueMutated), rng);
-    } while (node.getValue(idxValueMutated) == newValue);
+    // Sample random index
+    size_t idxValueMutated = rng.getUnsignedInt64(0, node.getSize() - 1);
 
+    // Sample random value for index
+    Data::DataValue newValue = nodeTemplate.getGeneratorAt(idxValueMutated).sample(rng);
 
+    // Assign
     node.setValue(idxValueMutated, newValue);
-    
-    */
 }
 
 
