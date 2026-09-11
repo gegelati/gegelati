@@ -39,11 +39,11 @@ namespace Representations {
              *  - "e" is indicates the second input type (register, state value, weight...).
              *  - "f" is the index of the second input.
              * 
-             * \param[in] indiv Individual executed
+             * \param[in] genotype genotype executed
              * \param[in] inputSources input sources on which the individual is executed.
              */
-            virtual Data::DataValue executeIndividualRaw(
-                const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
+            virtual Data::DataValue executeGenotype(
+                const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
             /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
             std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;

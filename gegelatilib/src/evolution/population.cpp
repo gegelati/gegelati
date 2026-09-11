@@ -120,11 +120,6 @@ const Evolution::Individual& Evolution::Population::addIndividual(std::unique_pt
     return **this->individuals.rbegin();
 }
 
-const Evolution::Individual& Evolution::Population::addIndividual()
-{
-    return this->addIndividual(std::make_unique<Individual>());
-}
-
 void Evolution::Population::emptyIndividual(const Individual& individual)
 {
     auto it = this->getIndividualFromCst(individual);

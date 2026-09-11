@@ -57,11 +57,11 @@ std::unique_ptr<Node::GenotypeTemplate> Representations::LGPRepresentation::getG
 
 
 
-Data::DataValue Representations::LGPRepresentation::executeIndividualRaw(
-    const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
+Data::DataValue Representations::LGPRepresentation::executeGenotype(
+    const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = indiv.getGenotype().getEffectiveNodes();
+    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
 
     /// Registers used as internal memory.
     Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));

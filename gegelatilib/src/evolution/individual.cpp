@@ -41,6 +41,11 @@ size_t Evolution::Individual::getSize() const
     return this->genotype->getFullSize();
 }
 
+const Evolution::Representation& Evolution::Individual::getRepresentation() const
+{
+    return this->representation;
+}
+
 const Evolution::Genotype& Evolution::Individual::getGenotype() const
 {
     return *this->genotype;
@@ -54,7 +59,7 @@ Evolution::Genotype& Evolution::Individual::getMutableGenotype()
 
 std::unique_ptr<Evolution::Individual> Evolution::Individual::cloneUniquePtr() const
 {
-    std::unique_ptr<Individual> newIndividual = std::make_unique<Individual>();
+    std::unique_ptr<Individual> newIndividual = std::make_unique<Individual>(this->representation);
 
     for(const Node::NodeGroup& group: this->genotype->getNodeGroups()) {
         Node::NodeGroup& newNodeGroup = newIndividual->genotype->addNodeGroup();
@@ -77,6 +82,15 @@ const Evaluation::EvaluationResult& Evolution::Individual::getEvaluationResult()
     return *this->result;
 }
 
+bool Evolution::Individual::isValid() const
+{
+    return this->representation.isValid(*this->genotype);
+}
+
+Data::DataValue Evolution::Individual::execute(const std::vector<Data::DataView>& inputSources) const
+{
+    return this->representation.execute(*this->genotype, inputSources);
+}
 
 bool Evolution::operator<(const Evolution::Individual& a, const Evolution::Individual& b)
 {

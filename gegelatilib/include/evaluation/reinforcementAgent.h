@@ -89,7 +89,6 @@ namespace Evaluation {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] individual The individual whose genotype is evaluted.
-         * \param[in] representation The representation of the individual evaluated, used to map the individual genotype to phenotype
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -97,7 +96,6 @@ namespace Evaluation {
          */
         virtual void evaluateIndividual(
             const Evolution::Individual& individual, 
-            const Evolution::Representation& representation,
             uint64_t generationNumber,
             LearningMode mode) const override;
     };

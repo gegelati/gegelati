@@ -24,7 +24,7 @@ namespace Evolution {
       protected: 
 
         /// Representation of the EA
-        std::unique_ptr<Representation> representation;
+        const Representation& representation;
 
         /// Population of the EA
         std::unique_ptr<Population> population;
@@ -55,7 +55,7 @@ namespace Evolution {
           const Representation& representation, 
           Evaluation::EvaluationAgent& evaluation, 
           size_t seed = 0)
-        : representation(std::move(representation.cloneUniquePtr())), 
+        : representation(representation), 
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
           survivingSelection(std::make_unique<SurvivingSelection>()), 
@@ -67,7 +67,7 @@ namespace Evolution {
         Population& getPopulation();
 
         /// @brief Return the representation of the EA
-        Representation& getRepresentation();
+        const Representation& getRepresentation() const;
 
         /// @brief Return the mutation agent of the EA
         Mutation& getMutation();
@@ -103,7 +103,7 @@ namespace Evolution {
         );
 
         /**
-         * \brief mutate the specified offspring based on the genotypeRequirements of the representation.
+         * \brief mutate the specified offspring based on the genotypeTemplate of the representation.
          * 
          * \param[in] offspring the set of offspring to mutate
          */

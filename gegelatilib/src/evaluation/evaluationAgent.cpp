@@ -84,13 +84,12 @@ std::string Evaluation::EvaluationAgent::summary() const
 
 void Evaluation::EvaluationAgent::evaluateIndividuals(
     const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-    const Evolution::Representation& representation,
     uint64_t generationNumber,
     LearningMode mode) const
 {
     // Evaluate the individuals and insert the results
     for(const Evolution::Individual& indiv: individuals){
-        this->evaluateIndividual(indiv, representation, generationNumber, mode);        
+        this->evaluateIndividual(indiv, generationNumber, mode);        
     }
 }
 

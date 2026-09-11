@@ -15,9 +15,9 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
                                                         this->representationName,
                                                         this->representationColor
                                                     );
-    if(this->tangledPopulation.has_value()) {
+    /*if(this->tangledPopulation.has_value()) {
         clone->setTangledPopulation(this->tangledPopulation.value());
-    }
+    }*/
     return clone;
 }
 
@@ -60,11 +60,11 @@ void Representations::TPGRepresentation::setGenotypeRequirements()
 }*/
 
 
-Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
-    const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const
+Data::DataValue Representations::TPGRepresentation::executeGenotype(
+    const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
-    std::vector<std::reference_wrapper<const Node::GPNode>> effectiveNodes = indiv.getGenotype().getEffectiveNodes().at(0);
+    std::vector<std::reference_wrapper<const Node::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
     size_t winnerIdx;
@@ -72,7 +72,7 @@ Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
     for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
         const Node::GPNode& node = effectiveNodes.at(idx);
         const std::shared_ptr<const Evolution::Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Evolution::Individual>>();
-        double bid = this->contextMemberRep.executeIndividual(*member, inputSources).getScalar<double>();
+        double bid = member->execute(inputSources).getScalar<double>();
 
         if(bid > maxBid) {
             maxBid = bid;
@@ -85,8 +85,7 @@ Data::DataValue Representations::TPGRepresentation::executeIndividualRaw(
         return effectiveNodes.at(winnerIdx).get().getValue(1).clone();
     } else {
         // Return action of tangled individual
-        return this->executeIndividualRaw(
-            *effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Evolution::Individual>>(), inputSources);
+        return effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Evolution::Individual>>()->execute(inputSources);
     }
 }
 

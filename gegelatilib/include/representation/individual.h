@@ -1,5 +1,5 @@
-#ifndef INDIVIDUAL_H
-#define INDIVIDUAL_H
+#ifndef R_INDIVIDUAL_H
+#define R_INDIVIDUAL_H
 
 #include <cstdint>
 #include <string>

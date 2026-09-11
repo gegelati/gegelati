@@ -44,6 +44,7 @@
 #include "evolution/individual.h"
 #include "node/gpNode.h"
 #include "util/counterReset.h"
+#include "representations/lgpRepresentation.h"
 
 
 // Set all file in comment
@@ -51,6 +52,9 @@
 class GPNodeTest : public ::testing::Test
 {
   protected:
+
+    Evolution::Representation* rep = nullptr;
+
     virtual void SetUp()
     {
         CounterReset::counterReset();
@@ -66,7 +70,6 @@ TEST_F(GPNodeTest, Constructor)
 {
     Node::GPNode* intNode;
     Node::GPNode* doubleNode;
-    Node::GPNode* indivNode;
     Node::GPNode* variantNode;
 
     std::vector<size_t> intValues = {1,2,3};
@@ -85,13 +88,12 @@ TEST_F(GPNodeTest, Constructor)
 
     ASSERT_NO_THROW(delete intNode) << "Destruction of the int GPNode failed.";
     ASSERT_NO_THROW(delete doubleNode) << "Destruction of the double GPNode failed.";
-    ASSERT_NO_THROW(delete indivNode) << "Destruction of the individual GPNode failed.";
     ASSERT_NO_THROW(delete variantNode) << "Destruction of the variant GPNode failed.";
 }
 
 TEST_F(GPNodeTest, SetGetValue)
 {
-    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(*rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));

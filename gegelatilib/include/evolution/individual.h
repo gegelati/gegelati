@@ -1,5 +1,5 @@
-#ifndef INDIVIDUAL_H_TEMPABCDE
-#define INDIVIDUAL_H_TEMPABCDE
+#ifndef INDIVIDUAL_H
+#define INDIVIDUAL_H
 
 #include <cstdint>
 #include <string>
@@ -8,6 +8,7 @@
  
 #include "evolution/genotype.h"
 #include "evaluation/evaluationResult.h"
+#include "evolution/representation.h"
 
 struct CounterReset;
 namespace Evolution {
@@ -22,6 +23,9 @@ namespace Evolution {
 
         /// \brief Genotype of the individual.
         std::unique_ptr<Genotype> genotype;
+
+        /// @brief Representation of the individual.
+        const Representation& representation;
 
         /// \brief Evaluation result of the individual.
         std::unique_ptr<Evaluation::EvaluationResult> result;
@@ -55,8 +59,10 @@ namespace Evolution {
 
         /**
          * \brief Constructor for the Individual.
+         * 
+         * \param[in] representation characterizing the individual
          */
-        Individual() : genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {};
+        Individual(const Representation& representation) : representation{representation}, genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {};
 
         /**
          * \brief return the ID of the individual.
@@ -80,6 +86,11 @@ namespace Evolution {
         // Disable copying to avoid accidental copies (use references or pointers instead).
         Individual(const Individual&) = delete;
         Individual& operator=(const Individual&) = delete;
+
+        /**
+         * \brief Get the representation characterizing the individual
+         */
+        virtual const Representation& getRepresentation() const;
 
         /**
          * \brief Get the size of the Genotype.
@@ -110,6 +121,18 @@ namespace Evolution {
          * \brief return the current evaluation result of the individual.
          */
         const Evaluation::EvaluationResult& getEvaluationResult() const;
+
+        /**
+         * \brief Return true if the current genotype is valid regarding the current representation
+         */
+        virtual bool isValid() const;
+
+        /**
+         * \brief execute based on the representation
+         * 
+         * \param[in] inputSources input sources on which the individual is executed.
+         */
+        virtual Data::DataValue execute(const std::vector<Data::DataView>& inputSources) const;
     };
     
     /**

@@ -25,11 +25,10 @@ size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Eval
 
 void Evaluation::ReinforcementAgent::evaluateIndividual(
     const Evolution::Individual& individual, 
-    const Evolution::Representation& representation,
     uint64_t generationNumber,
     LearningMode mode) const
 {
-    if(!representation.isValid(individual)){
+    if(!individual.isValid()){
         throw std::runtime_error("Evaluation::ReinforcementAgent::evaluateIndividual: Individual not valid for the representation");
     }
 
@@ -67,7 +66,7 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
                nbActions < this->params->maxNbActionsPerEval) {
             // Get the actions
             Data::DataValue action =
-                std::move(representation.executeIndividual(individual, learningEnvironment.getDataSources()));
+                std::move(individual.execute(learningEnvironment.getDataSources()));
 
             // Do it
             reinforcementEnvironment.doAction(action);

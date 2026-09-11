@@ -36,11 +36,11 @@ namespace Representations {
              *  - "a" is a context member individual.
              *  - "b" is the destination action index.
              * 
-             * \param[in] indiv Individual executed
+             * \param[in] genotype genotype executed
              * \param[in] inputSources input sources on which the individual is executed.
              */
-            virtual Data::DataValue executeIndividualRaw(
-                const Evolution::Individual& indiv, const std::vector<Data::DataView>& inputSources) const override;
+            virtual Data::DataValue executeGenotype(
+                const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
     
         public:
 
@@ -63,7 +63,6 @@ namespace Representations {
                 : Evolution::Representation(
                     inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
                     nbActions{nbActions}, contextMemberRep{contextMemberRep}, contextMemberPop{contextMemberPop} {
-                    this->setTangled(true);
 
                     if(!Dimensions::DimensionFlow::acceptsRequirements(inputDimensions, contextMemberRep.getDimensionFlow().getInputDimensions())) {
                         throw std::runtime_error("TPGRepresentation:Constructor: Input Dimensions set is not compatible with the context member representation input dimensions");

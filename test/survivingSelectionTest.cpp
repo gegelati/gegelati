@@ -8,6 +8,8 @@ class SurvivingSelectionTest : public ::testing::Test
 {
   protected:
 
+    Evolution::Representation* rep = nullptr;
+
     virtual void SetUp()
     {
         CounterReset::counterReset();
@@ -35,7 +37,7 @@ TEST_F(SurvivingSelectionTest, select)
     std::vector<Evolution::Individual*> indivs;
     std::set<std::reference_wrapper<const Evolution::Individual>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
-        indivs.push_back(new Evolution::Individual());
+        indivs.push_back(new Evolution::Individual(*rep));
         
         const Evolution::Individual& refIndiv = *indivs.back();
         refIndiv.addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
@@ -70,7 +72,7 @@ TEST_F(SurvivingSelectionTest, getBest)
     std::vector<Evolution::Individual*> indivs;
     std::set<std::reference_wrapper<const Evolution::Individual>> scores;
     for(size_t idx = 0; idx < 200; idx++) {
-        indivs.push_back(new Evolution::Individual());
+        indivs.push_back(new Evolution::Individual(*rep));
         
         const Evolution::Individual& refIndiv = *indivs.back();
         refIndiv.addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(

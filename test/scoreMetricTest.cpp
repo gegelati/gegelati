@@ -54,7 +54,8 @@ TEST(ScoreMetricTest, ExtractMetricsEpisode)
     FakedLearningEnvironment env(3.0);
 
     // Call extraction
-    Evolution::Individual indiv;
+    Evolution::Representation* rep = nullptr;
+    Evolution::Individual indiv(*rep);
     metric.extractMetricsRun(indiv, 0, env);
 
     // score should be set

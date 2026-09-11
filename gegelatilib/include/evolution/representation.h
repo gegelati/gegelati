@@ -10,9 +10,8 @@
 #include <functional>
 #include "iostream"
 
-#include "evolution/individual.h"
-#include "evolution/population.h"
 #include "node/genotypeTemplate.h"
+#include "evolution/genotype.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
@@ -41,12 +40,6 @@ namespace Evolution {
         /// Color of the representation.
         std::string representationColor = "";
 
-        /// True if represnetation allows tangled connections.
-        bool tangled = false;
-
-        /// Tangled population
-        std::optional<std::reference_wrapper<const Population>> tangledPopulation;
-
         /// @brief Vector of output functions
         std::vector<std::unique_ptr<Dimensions::ActivationFunctions::Function>> outputFunctions;
 
@@ -54,10 +47,10 @@ namespace Evolution {
         Dimensions::DimensionFlow dimensionFlow;
 
         /**
-         * \brief private method for executing individual
+         * \brief private method for executing genotype
          */
-        virtual Data::DataValue executeIndividualRaw(
-          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const = 0;
+        virtual Data::DataValue executeGenotype(
+          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const = 0;
 
       public:
 
@@ -130,54 +123,25 @@ namespace Evolution {
         virtual std::string summary() const;
 
         /**
-         * \brief return the genotype template an individual.
+         * \brief return the genotype template of the representation.
          */
         virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const = 0;
 
         /**
-         * \brief identified wether the individual is valid faced to the expected node structure of the representation.
+         * \brief identified wether the genotype is valid faced to the expected node structure of the representation.
          * 
-         * \param[in] indiv individual controlled.
+         * \param[in] genotype genotype controlled.
          */
-        virtual bool isValid(const Individual& indiv) const;
+        virtual bool isValid(const Genotype& genotype) const;
 
         /**
-         * \brief set the statue of the tangled property
+         * \brief execute the specified representation, executing the given genotype and the output functions based on the current dataSources
          * 
-         * \param[in] tangled statue of the tangled property
-         */
-        virtual void setTangled(bool tangled);
-
-        /**
-         * \brief get if the representation is tangled
-         */
-        virtual bool isTangled() const;
-
-        /**
-         * Set a tangled population
-         * 
-         * \param[in] tangledPop population set
-         */
-        virtual void setTangledPopulation(const Population& tangledPop);
-
-        /**
-         * \brief return if representation has a tangled population set.
-         */
-        virtual bool hasTangledPopulation();
-
-        /**
-         * \brief return the tangled population(can be null)
-         */
-        virtual const std::optional<std::reference_wrapper<const Population>>& getTangledPopulation();
-
-        /**
-         * \brief execute the specified individual based on the current dataSources
-         * 
-         * \param[in] indiv Individual executed
+         * \param[in] genotype Genotype executed
          * \param[in] inputSources input sources on which the individual is executed.
          */
-        Data::DataValue executeIndividual(
-          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const;
+        Data::DataValue execute(
+          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const;
     };
 }; // namespace Representation
 

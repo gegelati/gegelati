@@ -22,11 +22,9 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::Ac
 }
 
 
-bool Evolution::Representation::isValid(const Individual& indiv) const 
+bool Evolution::Representation::isValid(const Genotype& genotype) const 
 {
     std::unique_ptr<Node::GenotypeTemplate> genTemplate = std::move(this->getGenotypeTemplate());
-
-    const Genotype& genotype = indiv.getGenotype();
 
     if(genotype.getSize() != genTemplate->size()) {
         // Not the same number of node groups
@@ -81,39 +79,10 @@ std::string Evolution::Representation::summary() const
     return this->dimensionFlow.summary();
 }
 
-void Evolution::Representation::setTangled(bool tangled)
+Data::DataValue Evolution::Representation::execute(
+          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
-    this->tangled = tangled;
-}
-
-bool Evolution::Representation::isTangled() const
-{
-    return this->tangled;
-}
-
-void Evolution::Representation::setTangledPopulation(const Population& tangledPop)
-{
-    if(!this->tangled) {
-        throw std::runtime_error("Evolution::Representation::setTangledPopulation: cannot set a tangled population with representation is not tangled!");
-    }
-
-    this->tangledPopulation = tangledPop;
-}
-
-bool Evolution::Representation::hasTangledPopulation()
-{
-    return this->tangledPopulation.has_value();
-}
-
-const std::optional<std::reference_wrapper<const Evolution::Population>>& Evolution::Representation::getTangledPopulation()
-{
-    return this->tangledPopulation;
-}
-
-Data::DataValue Evolution::Representation::executeIndividual(
-          const Individual& indiv, const std::vector<Data::DataView>& inputSources) const
-{
-    Data::DataValue resultIndiv = this->executeIndividualRaw(indiv, inputSources);
+    Data::DataValue resultIndiv = this->executeGenotype(genotype, inputSources);
     for(const auto& function: this->outputFunctions) {
         resultIndiv = function->execute(resultIndiv);
     }

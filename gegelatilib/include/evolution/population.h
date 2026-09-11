@@ -125,11 +125,6 @@ namespace Evolution {
         virtual Individual& getMutableIndividual(const Individual& individual);
 
         /**
-         * \brief add a new empty Individual.
-         */
-        virtual const Individual& addIndividual();
-
-        /**
          * \brief add an existing Individual.
          * 
          * \param[in] individual unique_ptr of the individual added.

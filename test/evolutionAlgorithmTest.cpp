@@ -120,7 +120,7 @@ TEST_F(EvolutionAlgorithmTest, initializePopulation)
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
 
     for(const Evolution::Individual& indiv: ea.getPopulation().getIndividuals()) {
-        ASSERT_TRUE(ea.getRepresentation().isValid(indiv)) << "An individual is not valid after population initialization";
+        ASSERT_TRUE(indiv.isValid()) << "An individual is not valid after population initialization";
     }
 }
 

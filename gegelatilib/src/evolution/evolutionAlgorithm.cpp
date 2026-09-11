@@ -6,9 +6,9 @@ Evolution::Population& Evolution::EvolutionAlgorithm::getPopulation()
     return *this->population;
 }
 
-Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation()
+const Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation() const
 {
-    return *this->representation;
+    return this->representation;
 }
 
 
@@ -34,10 +34,6 @@ RNG::RNG& Evolution::EvolutionAlgorithm::getRNG()
 
 void Evolution::EvolutionAlgorithm::initializePopulation()
 {
-    if(representation->isTangled()) {
-        representation->setTangledPopulation(*population);
-    }
-
     std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = this->survivingSelection->getSelectionMetrics();
     for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
         this->evaluation.addRequestedMetric(*metric);
@@ -46,8 +42,9 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 
     size_t nbIndividuals = 100;
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
-        Individual& indiv = this->population->getMutableIndividual(this->population->addIndividual());
-        this->mutation->initRandomGenotype(indiv.getMutableGenotype(), std::move(this->representation->getGenotypeTemplate()), this->rng);
+        std::unique_ptr<Individual> individual = std::make_unique<Individual>(this->representation);
+        this->mutation->initRandomGenotype(individual->getMutableGenotype(), this->representation.getGenotypeTemplate(), this->rng);
+        this->population->addIndividual(std::move(individual));
     }
 }
 
@@ -79,7 +76,7 @@ std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individua
 void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
 {
     for(const std::unique_ptr<Individual>& indiv: offspring) {
-        this->mutation->mutateGenotype(indiv->getMutableGenotype(), std::move(this->representation->getGenotypeTemplate()), rng);
+        this->mutation->mutateGenotype(indiv->getMutableGenotype(), std::move(this->representation.getGenotypeTemplate()), rng);
     }
 }
 
@@ -94,7 +91,7 @@ void Evolution::EvolutionAlgorithm::evaluatePopulation(
     }
 
     this->evaluation.evaluateIndividuals(
-        evaluatedIndividuals, *this->representation, generationNumber, mode);
+        evaluatedIndividuals, generationNumber, mode);
 }
 
 void Evolution::EvolutionAlgorithm::selectSurvivors(
