@@ -23,12 +23,12 @@ namespace Node {
 
 
         protected:
+
             /// @brief The vector of node template.
             std::vector<std::unique_ptr<NodeTemplate>> nodeTemplates;
 
             /// @brief vector of Node ranges.
             std::vector<std::pair<size_t, size_t>> nodeRanges;
-
         public:
             /**
              * \brief Default Constructor.

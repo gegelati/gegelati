@@ -42,6 +42,7 @@ namespace Dimensions {
         virtual std::shared_ptr<const Constraint> cloneSharedPtr() const = 0;
         /// \brief Returns a diagnostic description of this constraint.
         virtual std::string toString() const = 0;
+
     };
 
     /**
@@ -88,6 +89,23 @@ namespace Dimensions {
      */
     inline std::ostream& operator<<(std::ostream& os, const Constraint& cosntraint) {
         return os << cosntraint.toString();
+    }
+
+    
+    /**
+     * \brief Comparison function to enable sorting of Individual with
+     * STL.
+     */
+    inline bool operator==(const Constraint& a, const Constraint& b) {
+        return a.equals(b);
+    }
+
+    /**
+     * \brief Comparison function to enable sorting of Individual with
+     * STL.
+     */
+    inline bool operator!=(const Constraint& a, const Constraint& b){
+        return !(a == b);
     }
 };
 

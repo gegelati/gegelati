@@ -50,6 +50,11 @@ bool Node::operator!=(const Node::GPNode& a, const Node::GPNode& b)
     return a.getGPNodeID() != b.getGPNodeID();
 }
 
+void Node::GPNode::addValue(const Data::DataValue& value)
+{
+    this->values.push_back(value.clone());
+}
+
 void Node::GPNode::setValue(size_t index, const Data::DataValue& value)
 {
     if(index >= this->getSize()){

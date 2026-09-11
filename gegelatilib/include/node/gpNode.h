@@ -17,8 +17,7 @@ namespace Node {
     /**
      * \brief Class representing a GPNode
      * 
-     * A hierarchical node used to represent a GP genotype.
-     * GPNode are composed of values of size_t type, as well as max ranges for each value (min is 0).
+     * A node used to represent a GP genotype.
      */
     class GPNode
     {
@@ -56,28 +55,37 @@ namespace Node {
             GPNode& operator=(const GPNode&) = delete;
 
             /**
+             * \brief Default empty constructor
+             * 
+             * \param[in] isIntron wether the node is intron or not, default value is false.
+             */
+            GPNode(bool isIntron = false):  isIntron{isIntron}, gpNodeID(incrementeCounter()) {};
+
+            /**
              * \brief GPNode constructor.
              *  
              * \param[in] valuesRaw the values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
             GPNode(const std::vector<Data::DataValue>& valuesRaw, bool isIntron = false)
-            : isIntron{isIntron}, gpNodeID(incrementeCounter()) {
+            : GPNode(isIntron) {
                 for(const Data::DataValue& valueRaw: valuesRaw) {
-                    this->values.push_back(valueRaw.clone());
+                    this->addValue(valueRaw.clone());
                 }};
 
             /**
-             * \brief GPNode size_t constructor.
+             * \brief GPNode typed constructor.
+             * Create a GPNode with uniform type T.
+             * 
              * \tparam T Element type used the node values.
              * \param[in] valuesTyped the integer values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
             template <typename T>
             GPNode(const std::vector<T>& valuesTyped, bool isIntron = false)
-            : isIntron{isIntron} {
+            : GPNode(isIntron) {
                 for(const T& valueTyped: valuesTyped) {
-                    this->values.push_back(Data::DataValue::scalar<T>(valueTyped));
+                    this->addValue(Data::DataValue::scalar<T>(valueTyped));
                 }
             };
 
@@ -99,6 +107,14 @@ namespace Node {
              * \param[in] newID the new integer ID to set to the GPNode.
              */
             virtual void setGPNodeID(size_t newID);
+
+
+            /**
+             * \brief add new DataValue at the end of the node
+             * 
+             * \param[in] value the value to set.
+             */
+            void addValue(const Data::DataValue& value);
 
             /**
              * \brief Set a DataValue at specified index

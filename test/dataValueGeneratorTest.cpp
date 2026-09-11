@@ -53,7 +53,7 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
     const std::string second = "second";
     const std::string third = "third";
 
-    const std::vector<std::reference_wrapper<const std::string>> values = {
+    const std::vector<std::string> values = {
         first,
         second,
         third
@@ -82,20 +82,20 @@ TEST(DataValueGeneratorTest, CanSampleFromSingleValueList)
 {
     const int expectedValue = 42;
 
-    const std::vector<std::reference_wrapper<const int>> values = {
-        expectedValue
+    const std::vector<std::shared_ptr<const int>> values = {
+        std::make_shared<const int>(expectedValue)
     };
 
-    Dimensions::ListUniformGenerator<int> generator(values);
+    Dimensions::ListUniformGenerator<std::shared_ptr<const int>> generator(values);
     RNG::RNG rng;
 
     for (size_t i = 0; i < 10; ++i) {
         Data::DataValue value = generator.sample(rng);
 
-        ASSERT_EQ(value.getElementType(), typeid(int))
+        ASSERT_EQ(value.getElementType(), typeid(std::shared_ptr<const int>))
             << "Generated value should have type int.";
 
-        EXPECT_EQ(value.getScalar<int>(), expectedValue)
+        EXPECT_EQ(*value.getScalar<std::shared_ptr<const int>>(), expectedValue)
             << "A list containing one value should always generate that value.";
     }
 }
@@ -160,7 +160,7 @@ TEST(DataValueGeneratorTest, AddGeneratorExtendsAvailableGenerators)
 
         const int sampledValue = value.getScalar<int>();
 
-        if (sampledValue == 1) {
+        if (sampledValue <= 10) {
             generatedFirstValue = true;
         } else if (sampledValue == 42) {
             generatedSecondValue = true;

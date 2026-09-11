@@ -5,7 +5,7 @@ bool Data::DataView::canFit(const DataType& requested, size_t address) const noe
     if (requested.elementType == nullptr || this->type.elementType == nullptr) {
         return false;
     }
-    if (requested.elementType != this->type.elementType) {
+    if (*requested.elementType != *this->type.elementType) {
         return false;
     }
     return this->type.canFitIn(requested, address);

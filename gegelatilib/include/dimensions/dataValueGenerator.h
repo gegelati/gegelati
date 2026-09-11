@@ -68,7 +68,7 @@ namespace Dimensions {
     class ListUniformGenerator : public DataValueGenerator {
         protected:
             /// \brief Possible values to sample
-            const std::vector<std::reference_wrapper<const T>>& values;
+            const std::vector<T>& values;
 
         public:
             /**
@@ -76,13 +76,13 @@ namespace Dimensions {
              * 
              * \param[in] values a vector of references to the possible values to sample from.
              */
-            ListUniformGenerator(const std::vector<std::reference_wrapper<const T>>& values) : values(values) {}
+            ListUniformGenerator(const std::vector<T>& values) : values(values) {}
 
             /**
              * \brief Sample method creating a DataValue of type T from the list of possible values.
              */
             virtual Data::DataValue sample(RNG::RNG& rng) override {
-                return Data::DataValue::scalar<T>(values[rng.uniformSample<size_t>(0, values.size() - 1)].get());
+                return Data::DataValue::scalar<T>(values[rng.uniformSample<size_t>(0, values.size() - 1)]);
             }
 
             /// @brief Inherrit from DataValueGenerator class 
@@ -153,7 +153,7 @@ namespace Dimensions {
                 for(;cumulativeWeight < randomValue; index++) {
                     cumulativeWeight += weights[index];
                 }
-                return generators.at(index)->sample(rng);
+                return generators.at(index - 1)->sample(rng);
             }
 
             

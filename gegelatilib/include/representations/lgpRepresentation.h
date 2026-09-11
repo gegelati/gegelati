@@ -84,7 +84,7 @@ namespace Representations {
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
              */
-            virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const;
+            virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const override;
 
     };
 }; // namespace LGP_Representation

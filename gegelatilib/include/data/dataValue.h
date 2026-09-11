@@ -259,7 +259,7 @@ namespace Data {
             }
 
             throw std::invalid_argument(
-                "DataValue::zeros failed: unsupported requested type.\n" + type.toString()
+                "DataValue::zeros failed: unsupported requested type.\n"
             );
         }
 

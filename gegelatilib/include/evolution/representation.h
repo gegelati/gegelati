@@ -115,7 +115,7 @@ namespace Evolution {
         /**
          * \brief Return the current dimension flow
          */
-        virtual Dimensions::DimensionFlow getDimensionFlow() const;
+        virtual const Dimensions::DimensionFlow&  getDimensionFlow() const;
 
         /**
          * \brief print the summary of the dimension flow

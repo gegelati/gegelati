@@ -1,6 +1,8 @@
 
 #include "evolution/representation.h"
 
+#include "evolution/individual.h"
+
 size_t Evolution::Representation::getMinNbNodes() const
 {
     return this->nbNodesMin;
@@ -57,8 +59,29 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
                 const Data::DataValue& value = node.getValue(idxValue);
                 const Dimensions::Constraint& constraint = nodeTemplate.getConstraintAt(idxValue);
                 if(!constraint.accepts(value)) {
-                    // Value is not accepted
-                    return false;
+                    // Value is not directly accepted, check if it is an individual, and if yes, if it is accepted.
+                    // For now it is forced shared_ptr of const individual... 
+                    if(value.getElementType() != typeid(std::shared_ptr<const Individual>)) {
+                        return false;
+                    } else {
+                        // Get individual
+                        const std::shared_ptr<const Evolution::Individual>& individualValue = value.getScalar<std::shared_ptr<const Individual>>();
+                        if(!individualValue->isValid()) {
+                            return false;
+                        }
+
+                        // Individual must support the current representation inputs
+                        const std::vector<Dimensions::Requirement>& inputDims = individualValue->getRepresentation().getDimensionFlow().getInputDimensions();
+                        if(!Dimensions::DimensionFlow::acceptsRequirements(inputDims, this->dimensionFlow.getInputDimensions())) {
+                            return false;
+                        }
+
+                        // Individual must output a scalar with the required constraint.
+                        const Dimensions::Requirement & outputDim = individualValue->getRepresentation().getDimensionFlow().getOutputDimension();
+                        if(!outputDim.getConstraint().isCompatibleWith(constraint)) {
+                            return false;
+                        }
+                    }
                 }
             }
         }
@@ -69,7 +92,7 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
     
 }
 
-Dimensions::DimensionFlow Evolution::Representation::getDimensionFlow() const
+const Dimensions::DimensionFlow& Evolution::Representation::getDimensionFlow() const
 {
     return this->dimensionFlow;
 }
@@ -82,6 +105,16 @@ std::string Evolution::Representation::summary() const
 Data::DataValue Evolution::Representation::execute(
           const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
+    const std::vector<Dimensions::Requirement>& inputDim = this->dimensionFlow.getInputDimensions();
+    if(inputSources.size() != inputDim.size()) {
+        throw std::runtime_error("Evolution::Representation::execute: Dimensions of the input sources are wrong");
+    }
+    for(size_t idx = 0; idx < inputSources.size(); idx++){
+        if(!inputDim.at(0).accepts(inputSources.at(0))) {
+            throw std::runtime_error("Evolution::Representation::execute: Dimensions of the input sources are wrong");
+        }
+    }
+
     Data::DataValue resultIndiv = this->executeGenotype(genotype, inputSources);
     for(const auto& function: this->outputFunctions) {
         resultIndiv = function->execute(resultIndiv);
