@@ -83,13 +83,13 @@ std::string Evaluation::EvaluationAgent::summary() const
 
 
 void Evaluation::EvaluationAgent::evaluateIndividuals(
-    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+    const std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>>& individuals, 
     uint64_t generationNumber,
     LearningMode mode) const
 {
     // Evaluate the individuals and insert the results
-    for(const Evolution::Individual& indiv: individuals){
-        this->evaluateIndividual(indiv, generationNumber, mode);        
+    for(const std::shared_ptr<const Evolution::Individual>& indiv: individuals){
+        this->evaluateIndividual(*indiv, generationNumber, mode);        
     }
 }
 

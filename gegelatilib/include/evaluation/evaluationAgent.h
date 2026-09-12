@@ -162,7 +162,7 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividuals(
-            const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
+            const std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>>& individuals, 
             uint64_t generationNumber,
             LearningMode mode) const;
     };

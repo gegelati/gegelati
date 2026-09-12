@@ -51,6 +51,9 @@
 #include "representations/lgpRepresentation.h"
 #include "representations/tpgRepresentation.h"
 
+#include "selectors/random.h"
+#include "selectors/truncation.h"
+
 #include "util/counterReset.h"
 // Set all file in comment
 
@@ -265,7 +268,7 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
 
         
     }
-    std::cout<<ea.getSelector().getBest(ea.getPopulation().getIndividuals()).getEvaluationResult()<<std::endl;
+    //std::cout<<ea.getSelector().getBest(ea.getPopulation().getIndividuals()).getEvaluationResult()<<std::endl;
 
     ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Size of population not determinist";
@@ -297,7 +300,7 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     eaLgp.initializePopulation();
 
     
-    Representations::TPGRepresentation tpgRep(evalAgent->getInputDimensions(), evalAgent->getOutputDimension().getDataType().totalElements(), eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    Representations::TPGRepresentation tpgRep(evalAgent->getInputDimensions(), evalAgent->getOutputDimension().getDataType().totalElements(), 5, 10);
     Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
@@ -329,8 +332,8 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     std::cout<<eaLgp.getRepresentation().summary()<<std::endl;
     std::cout<<eaTpg.getRepresentation().summary()<<std::endl;
 
-    const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
-    std::cout<<best.getEvaluationResult()<<std::endl;
+    /*const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
+    std::cout<<best.getEvaluationResult()<<std::endl;*/
 }
 
 
@@ -395,3 +398,67 @@ TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
     ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 16814013097088067763U) << "RNG not determinist";
 }
 */
+
+TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
+    RNG::RNG rng;
+    rng.setSeed(4);
+
+    // Create representation
+    Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
+
+    // Create Mutator
+    Evolution::Mutation mutator;
+
+    // Create selectors
+    Selectors::Random parentSelection(true);
+    Selectors::Truncation survivingSelection;
+    
+    // Create evaluationAgent
+    Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
+    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = survivingSelection.getSelectionMetrics();
+    for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
+        evaluation.addRequestedMetric(*metric);
+    }
+
+
+
+    // Initialize population
+    size_t sizePopulation = 100;
+    size_t nbOffspring = 100;
+    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> population;
+    for(size_t idx = 0; idx < sizePopulation; idx++) {
+        std::shared_ptr<Evolution::Individual> individual = std::make_shared<Evolution::Individual>(lgpRep);
+        mutator.initRandomGenotype(individual->getMutableGenotype(), lgpRep.getGenotypeTemplate(), rng);
+        population.insert(individual);
+    }
+    // Initial evaluation
+    evaluation.evaluateIndividuals(population, 0, Evaluation::LearningMode::TRAINING);
+
+    size_t nbGen = 20;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+
+        std::vector<std::shared_ptr<const Evolution::Individual>> parents = parentSelection.select(population, nbOffspring, rng);
+
+        // Reproduce the parents AND 
+        // Mutate the offspring (for now mixed for simplicity)
+        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> offspring;
+        for(size_t idx = 0; idx < parents.size(); idx++) {
+            std::shared_ptr<Evolution::Individual> os = parents.at(idx).get()->cloneSharedPtr();
+            mutator.mutateGenotype(os->getMutableGenotype(), lgpRep.getGenotypeTemplate(), rng);
+            offspring.insert(os);
+        }
+
+
+        // Evaluate the population
+        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividuals(population);
+        evaluatedIndividuals.insert(offspring.begin(), offspring.end());
+        evaluation.evaluateIndividuals(evaluatedIndividuals, 0, Evaluation::LearningMode::TRAINING);
+
+        // Do replacement
+        std::vector<std::shared_ptr<const Evolution::Individual>> survivors = survivingSelection.select(evaluatedIndividuals, sizePopulation, rng);
+        population.clear();
+        population.insert(survivors.begin(), survivors.end());
+
+        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
+    }
+}

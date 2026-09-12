@@ -9,6 +9,7 @@
 #include "evolution/genotype.h"
 #include "evaluation/evaluationResult.h"
 #include "evolution/representation.h"
+#include "util/genericComparator.h"
 
 struct CounterReset;
 namespace Evolution {
@@ -56,6 +57,11 @@ namespace Evolution {
          * \brief Copy an Individual and return a unique_ptr.
          */
         virtual std::unique_ptr<Individual> cloneUniquePtr() const;
+
+        /**
+         * \brief Copy an Individual and return a shared_ptr.
+         */
+        virtual std::shared_ptr<Individual> cloneSharedPtr() const;
 
         /**
          * \brief Constructor for the Individual.

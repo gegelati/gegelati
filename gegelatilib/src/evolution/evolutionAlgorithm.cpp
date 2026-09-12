@@ -22,7 +22,7 @@ Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
     return this->evaluation;
 }
 
-Evolution::SurvivingSelection& Evolution::EvolutionAlgorithm::getSelector()
+Evolution::Selection& Evolution::EvolutionAlgorithm::getSelector()
 {
     return *this->survivingSelection;
 }
@@ -90,19 +90,18 @@ void Evolution::EvolutionAlgorithm::evaluatePopulation(
         evaluatedIndividuals.insert(*os);
     }
 
-    this->evaluation.evaluateIndividuals(
-        evaluatedIndividuals, generationNumber, mode);
+    //this->evaluation.evaluateIndividuals(  evaluatedIndividuals, generationNumber, mode);
 }
 
 void Evolution::EvolutionAlgorithm::selectSurvivors(
     std::set<std::unique_ptr <Individual>, UniqueLess<Individual>>& offspring)
 {
 
-    std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    /*std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
     for (const std::unique_ptr<Individual>& os: offspring) {
         evaluatedIndividuals.insert(*os);
     }
-    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(evaluatedIndividuals);
+    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(evaluatedIndividuals, 0, this->rng);
 
 
     for (auto it = selectionResult.begin(); it != selectionResult.end();) {
@@ -125,5 +124,5 @@ void Evolution::EvolutionAlgorithm::selectSurvivors(
         }
 
         it = selectionResult.erase(it);   // clean the whole map as we go
-    }
+    }*/
 }

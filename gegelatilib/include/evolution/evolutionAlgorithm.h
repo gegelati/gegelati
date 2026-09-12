@@ -9,7 +9,7 @@
 #include "evolution/population.h"
 #include "evolution/representation.h"
 #include "evolution/mutation.h"
-#include "evolution/survivingSelection.h"
+#include "evolution/selection.h"
 
 #include "mutator/rng.h"
 
@@ -36,7 +36,7 @@ namespace Evolution {
         Evaluation::EvaluationAgent& evaluation;
 
         /// Surviving Selection agent of the EA
-        std::unique_ptr<SurvivingSelection> survivingSelection;
+        std::unique_ptr<Selection> survivingSelection;
 
         /// Random Number Generator for this EA
         RNG::RNG rng;
@@ -58,7 +58,7 @@ namespace Evolution {
         : representation(representation), 
           population(std::make_unique<Population>()), 
           mutation(std::make_unique<Mutation>()), 
-          survivingSelection(std::make_unique<SurvivingSelection>()), 
+          /*survivingSelection(std::make_unique<SurvivingSelection>()),*/
           evaluation(evaluation){
             rng.setSeed(seed);
           };
@@ -76,7 +76,7 @@ namespace Evolution {
         Evaluation::EvaluationAgent& getEvaluation();
 
         /// @brief Return the selector of the EA
-        SurvivingSelection& getSelector();
+        Selection& getSelector();
 
         /// @brief Return the Random Number Generator of the EA 
         RNG::RNG& getRNG();

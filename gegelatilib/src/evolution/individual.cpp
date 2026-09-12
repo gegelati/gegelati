@@ -72,6 +72,21 @@ std::unique_ptr<Evolution::Individual> Evolution::Individual::cloneUniquePtr() c
     return std::move(newIndividual);
 }
 
+std::shared_ptr<Evolution::Individual> Evolution::Individual::cloneSharedPtr() const
+{
+    std::shared_ptr<Individual> newIndividual = std::make_shared<Individual>(this->representation);
+
+    for(const Node::NodeGroup& group: this->genotype->getNodeGroups()) {
+        Node::NodeGroup& newNodeGroup = newIndividual->genotype->addNodeGroup();
+        
+        for(const Node::GPNode& node: group.getNodes()) {
+            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
+        }
+    }
+
+    return newIndividual;
+}
+
 void Evolution::Individual::addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const
 {
     this->result->addEvaluationRun(std::move(evaluationRun), seed);
