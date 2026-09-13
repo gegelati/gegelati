@@ -126,7 +126,8 @@ TEST_F(TPGRepresentationTest, getSetGenotypeTemplate)
         std::make_shared<const Evolution::Individual>(representation),
         std::make_shared<const Evolution::Individual>(representation)
     };
-    ASSERT_NO_THROW(representation.setGenotypeTemplate(members, tangled)) << "Setting the genotype failed";
+    representation.setAvailableMembers(members);
+    representation.setAvailableTangledIndiv(tangled);
     
     ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
     
@@ -272,7 +273,6 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 {
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
     Representations::TPGRepresentation representation({inputType}, 3, 2, 10);
-    representation.setGenotypeTemplate({}, {});
 
 
     // create lgp members.
@@ -336,6 +336,8 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     node2->addValue(Data::DataValue::scalar<size_t>(2));
     group.addNode(std::move(node2));
 
+    
+    representation.setAvailableMembers(memberPop);
     ASSERT_TRUE(tangledIndiv->isValid()) << "Individual should be valid";
     ASSERT_TRUE(indiv.isValid()) << "Individual should be valid";
 

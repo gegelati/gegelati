@@ -3,7 +3,7 @@
 #include "evolution/individual.h"
 
 
-std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng)
+std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const
 {
     if(nodeTemplate.size() == 0) {
         throw std::runtime_error("Evolution::Mutation::createRandomNode: NodeTemplate is empty.");
@@ -18,7 +18,7 @@ std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeTe
 
 
 
-void Evolution::Mutation::initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng)
+void Evolution::Mutation::initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const
 {
     if(genotypeTemplate->size() == 0) {
         throw std::runtime_error("Evolution::Mutation::initRandomGenotype: genotypeTemplate is empty.");
@@ -36,7 +36,19 @@ void Evolution::Mutation::initRandomGenotype(Genotype& genotype, std::unique_ptr
     }
 }
 
-void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng)
+std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> 
+    Evolution::Mutation::initIndividuals(const Evolution::Representation& representation, size_t nbIndividuals, RNG::RNG& rng) const
+{
+    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individuals;
+    for(size_t idx = 0; idx < nbIndividuals; idx++) {
+        std::shared_ptr<Evolution::Individual> indiv = std::make_shared<Evolution::Individual>(representation);
+        this->initRandomGenotype(indiv->getMutableGenotype(), representation.getGenotypeTemplate(), rng);
+        individuals.insert(indiv);
+    }
+    return individuals;
+}
+
+void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const
 {
     if(nodeTemplate.size() != node.getSize()) {
         throw std::runtime_error("Evolution::Mutation::mutateNode: NodeTemplate size does not correspond to the genotypeidual.");
@@ -52,7 +64,7 @@ void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeTemplate& nod
 }
 
 
-void Evolution::Mutation::mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng)
+void Evolution::Mutation::mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const
 {
     if(genotypeTemplate->size() == 0) {
         throw std::runtime_error("Evolution::Mutation::mutateGenotype: genotypeTemplate is empty.");
@@ -69,5 +81,12 @@ void Evolution::Mutation::mutateGenotype(Genotype& genotype, std::unique_ptr<Nod
                 this->mutateNode(nodeGroup.getMutableNode(idxNode), nodeTemplate, rng);
             }
         }
+    }
+}
+
+void Evolution::Mutation::mutateIndividuals(std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, RNG::RNG& rng) const
+{
+    for(const std::shared_ptr<Evolution::Individual>& indiv: individuals) {
+        this->mutateGenotype(indiv->getMutableGenotype(), indiv->getRepresentation().getGenotypeTemplate(), rng);
     }
 }

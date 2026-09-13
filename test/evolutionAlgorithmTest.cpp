@@ -51,6 +51,7 @@
 #include "representations/lgpRepresentation.h"
 #include "representations/tpgRepresentation.h"
 
+#include "evolution/reproduction.h"
 #include "selectors/random.h"
 #include "selectors/truncation.h"
 
@@ -406,7 +407,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     // Create representation
     Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
 
-    // Create Mutator
+    // Create Mutator and breeder
+    Evolution::Reproduction breeder;
     Evolution::Mutation mutator;
 
     // Create selectors
@@ -422,32 +424,28 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 
 
 
-    // Initialize population
     size_t sizePopulation = 100;
     size_t nbOffspring = 100;
-    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> population;
-    for(size_t idx = 0; idx < sizePopulation; idx++) {
-        std::shared_ptr<Evolution::Individual> individual = std::make_shared<Evolution::Individual>(lgpRep);
-        mutator.initRandomGenotype(individual->getMutableGenotype(), lgpRep.getGenotypeTemplate(), rng);
-        population.insert(individual);
-    }
+
+    // Initialize population
+    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individuals = mutator.initIndividuals(lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> population(individuals.begin(), individuals.end());
+    individuals.clear();
+
     // Initial evaluation
     evaluation.evaluateIndividuals(population, 0, Evaluation::LearningMode::TRAINING);
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
+        // Parent selection 
         std::vector<std::shared_ptr<const Evolution::Individual>> parents = parentSelection.select(population, nbOffspring, rng);
 
-        // Reproduce the parents AND 
-        // Mutate the offspring (for now mixed for simplicity)
-        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> offspring;
-        for(size_t idx = 0; idx < parents.size(); idx++) {
-            std::shared_ptr<Evolution::Individual> os = parents.at(idx).get()->cloneSharedPtr();
-            mutator.mutateGenotype(os->getMutableGenotype(), lgpRep.getGenotypeTemplate(), rng);
-            offspring.insert(os);
-        }
+        // Reproduce the parents
+        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
+        // Mutate the offspring
+        mutator.mutateIndividuals(offspring, rng);
 
         // Evaluate the population
         std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividuals(population);
@@ -459,6 +457,95 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         population.clear();
         population.insert(survivors.begin(), survivors.end());
 
+        // Print best individual
         std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
+    }
+}
+
+
+TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
+    RNG::RNG rng;
+    rng.setSeed(4);
+
+    // Create representations
+    Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
+    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), 3, 5, 10);
+
+    // Create Mutator and breeder
+    Evolution::Reproduction breeder;
+    Evolution::Mutation mutator;
+
+    // Create selectors
+    Selectors::Random parentSelection(true);
+    Selectors::Truncation survivingSelection;
+    
+    // Create evaluationAgent
+    Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
+    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = survivingSelection.getSelectionMetrics();
+    for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
+        evaluation.addRequestedMetric(*metric);
+    }
+
+
+
+    size_t sizePopulation = 100;
+    size_t nbOffspring = 100;
+
+    // Initialize LGP population
+    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individualsLGP = mutator.initIndividuals(lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
+    individualsLGP.clear();
+    evaluation.evaluateIndividuals(populationLGP, 0, Evaluation::LearningMode::TRAINING);
+
+    // Initialize TPG population
+    std::vector<std::shared_ptr<const Evolution::Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
+    tpgRep.setAvailableMembers(members);
+
+    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individualsTPG = mutator.initIndividuals(tpgRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
+    individualsTPG.clear();
+    evaluation.evaluateIndividuals(populationTPG, 0, Evaluation::LearningMode::TRAINING);
+
+
+    size_t nbGen = 20;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+
+        // LGP Evolution : variation
+        std::vector<std::shared_ptr<const Evolution::Individual>> parentsLGP = parentSelection.select(populationLGP, nbOffspring, rng);
+        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
+        mutator.mutateIndividuals(offspringLGP, rng);
+        // LGP Evolution : evaluation
+        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividualsLGP(populationLGP);
+        evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
+        evaluation.evaluateIndividuals(evaluatedIndividualsLGP, 0, Evaluation::LearningMode::TRAINING);
+        // LGP Evolution : replacement
+        std::vector<std::shared_ptr<const Evolution::Individual>> survivorsLGP = survivingSelection.select(evaluatedIndividualsLGP, sizePopulation, rng);
+        populationLGP.clear();
+        populationLGP.insert(survivorsLGP.begin(), survivorsLGP.end());
+
+
+        // TPG Evolution : variation
+        std::vector<std::shared_ptr<const Evolution::Individual>> parentsTPG = parentSelection.select(populationTPG, nbOffspring, rng);
+        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
+
+        
+        std::vector<std::shared_ptr<const Evolution::Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Evolution::Individual>> tangleds = parentSelection.select(populationTPG, nbOffspring, rng);
+        tpgRep.setAvailableMembers(members);
+        tpgRep.setAvailableTangledIndiv(tangleds);
+
+        mutator.mutateIndividuals(offspringTPG, rng);
+        // TPG Evolution : evaluation
+        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividualsTPG(populationTPG);
+        evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
+        evaluation.evaluateIndividuals(evaluatedIndividualsTPG, 0, Evaluation::LearningMode::TRAINING);
+        // TPG Evolution : replacement
+        std::vector<std::shared_ptr<const Evolution::Individual>> survivorsTPG = survivingSelection.select(evaluatedIndividualsTPG, sizePopulation, rng);
+        populationTPG.clear();
+        populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
+
+
+        // Print best individual
+        std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() <<" and score: "<<survivingSelection.getBest(populationTPG).getEvaluationResult()<< std::endl;
     }
 }

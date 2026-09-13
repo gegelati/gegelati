@@ -13,41 +13,67 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     return clone;
 }
 
-void Representations::TPGRepresentation::setGenotypeTemplate(
-    const std::vector<std::shared_ptr<const Evolution::Individual>>& members,
-    const std::vector<std::shared_ptr<const Evolution::Individual>>& tangledIndiv)
+void Representations::TPGRepresentation::setGenotypeTemplate()
 {
    Node::NodeTemplate bidNodes;
 
     
     /* === Value requirements for members === */
-
+    
     // Value Requirements for members
     bidNodes.addTemplate(
         Dimensions::NumericRange<double>::unbounded(),
-        Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>(members)
+        Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>(this->availableMembers)
     );
 
     /* === Value requirements for actions/Tangled connections === */
 
     // Action generator
     Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, this->nbActions - 1);
-    // Tangled generator
-    Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>> tangledGenerator(tangledIndiv);
+    
+    // Add the generator for tangled individuals only if it is not empty
+    if(this->availableForTangled.size() > 0) {
+        // Tangled generator
+        Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>> tangledGenerator(this->availableForTangled);
 
-    // Multi generator
-    Dimensions::MultiGenerator multi;
-    multi.addGenerator(actionGenerator, 0.5);
-    multi.addGenerator(tangledGenerator, 0.5);
+        // Multi generator
+        Dimensions::MultiGenerator multi;
+        multi.addGenerator(actionGenerator, 0.5);
+        multi.addGenerator(tangledGenerator, 0.5);
 
-    bidNodes.addTemplate(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1), multi);
+        bidNodes.addTemplate(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1), multi);
+    } else {
+        bidNodes.addTemplate(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1), actionGenerator);
+    }
 
     this->genotypeTemplate = std::make_unique<Node::GenotypeTemplate>();
     this->genotypeTemplate->addNodeTemplate(bidNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
+void Representations::TPGRepresentation::setAvailableMembers(const std::vector<std::shared_ptr<const Evolution::Individual>>& members)
+{
+    this->availableMembers.clear();
+    this->availableMembers.insert(this->availableMembers.begin(), members.begin(), members.end());
+}
+
+
+void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Evolution::Individual>>& tangledIndiv)
+{
+    bool isEmpty = this->availableForTangled.empty();
+    this->availableForTangled.clear();
+    this->availableForTangled.insert(this->availableForTangled.begin(), tangledIndiv.begin(), tangledIndiv.end());
+
+    // If the emptyness value changed, reset the template
+    if((isEmpty != this->availableForTangled.empty())) {
+        this->setGenotypeTemplate();
+    }
+}
+
 std::unique_ptr<Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
+    if(this->availableMembers.size() == 0) {
+        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: list of member individuals cannot be empty.");
+    }
     return std::move(this->genotypeTemplate->cloneUniquePtr());
 }
 

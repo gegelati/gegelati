@@ -38,6 +38,17 @@ namespace Representations {
 
             /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
             std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;
+
+            /// @brief Member available for the TPG individuals
+            std::vector<std::shared_ptr<const Evolution::Individual>> availableMembers;
+
+            /// \brief Individual available for tangled connexions
+            std::vector<std::shared_ptr<const Evolution::Individual>> availableForTangled;
+            
+            /**
+             * \brief Create the genotype template grammar
+             */
+            virtual void setGenotypeTemplate();
     
         public:
 
@@ -57,21 +68,27 @@ namespace Representations {
             TPGRepresentation(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
                 : Evolution::Representation(
                     inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
-                    nbActions{nbActions} {};
+                    nbActions{nbActions} {
+                this->setGenotypeTemplate();
+            };
 
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
              */
             virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const override;
 
+
             /**
-             * \brief Create the genotype template grammar
-             * 
-             * \param[in] members member individuals to set in the template
-             * \param[in] tangledIndiv tangled individuals to set in the template
+             * Set the current available members
              */
-            virtual void setGenotypeTemplate(const std::vector<std::shared_ptr<const Evolution::Individual>>& members,
-                                             const std::vector<std::shared_ptr<const Evolution::Individual>>& tangledIndiv);
+            virtual void setAvailableMembers(const std::vector<std::shared_ptr<const Evolution::Individual>>& members);
+
+            /**
+             * Set the current available individuals for tangled connection.
+             * 
+             * The genotype template is updated if the size of the current list was empty, or if the new one is. (to specify a use of multiGenerator)
+             */
+            virtual void setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Evolution::Individual>>& tangledIndiv);
 
         };
 }; // namespace LGP_Representation

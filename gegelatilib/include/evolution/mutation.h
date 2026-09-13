@@ -5,9 +5,9 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <set>
 
-#include "evolution/genotype.h"
-#include "node/genotypeTemplate.h"
+#include "evolution/individual.h"
 #include "mutator/rng.h"
 
 
@@ -39,7 +39,7 @@ namespace Evolution {
          * \param[in] nodeTemplate node Template of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Node::GPNode> createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
+        virtual std::unique_ptr<Node::GPNode> createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const;
         
 
         /**
@@ -49,8 +49,17 @@ namespace Evolution {
          * \param[in] genotypeTemplate genotype Template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng);
+        virtual void initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
 
+        /**
+         * \brief Initialize a set of individuals
+         * 
+         * \param[in] representation The representation from which individuals are created.
+         * \param[in] nbIndividuals The number of individuals created.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual std::set<std::shared_ptr<Individual>, SharedLess<Individual>> 
+            initIndividuals(const Representation& representation, size_t nbIndividuals, RNG::RNG& rng) const;
 
         /**
          * \brief mutate a GPNode.
@@ -59,7 +68,7 @@ namespace Evolution {
          * \param[in] nodeTemplate node Template of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng);
+        virtual void mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const;
 
         /**
          * \brief Mutate a Genotype.
@@ -68,8 +77,15 @@ namespace Evolution {
          * \param[in] genotypeTemplate genotype Template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng);
+        virtual void mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
 
+        /**
+         * \brief Mutate a set of individuals
+         * 
+         * \param[in] individuals set of individuals mutated.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void mutateIndividuals(std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, RNG::RNG& rng) const;
 
     };
 }; // namespace Mutation
