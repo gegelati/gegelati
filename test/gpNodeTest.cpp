@@ -45,6 +45,7 @@
 #include "node/gpNode.h"
 #include "util/counterReset.h"
 #include "representations/lgpRepresentation.h"
+#include "learn/fakeRepresentation.h"
 
 
 // Set all file in comment
@@ -53,7 +54,7 @@ class GPNodeTest : public ::testing::Test
 {
   protected:
 
-    Evolution::Representation* rep = nullptr;
+    Representations::FakeRepresentation rep;
 
     virtual void SetUp()
     {
@@ -68,9 +69,13 @@ class GPNodeTest : public ::testing::Test
 
 TEST_F(GPNodeTest, Constructor)
 {
+    Node::GPNode* emptyNode;
     Node::GPNode* intNode;
     Node::GPNode* doubleNode;
     Node::GPNode* variantNode;
+
+    ASSERT_NO_THROW(emptyNode = new Node::GPNode(true))
+        << "Construction of the empty GPNode failed.";
 
     std::vector<size_t> intValues = {1,2,3};
     ASSERT_NO_THROW(intNode = new Node::GPNode(intValues))
@@ -86,14 +91,36 @@ TEST_F(GPNodeTest, Constructor)
     ASSERT_NO_THROW(variantNode = new Node::GPNode(variantValues))
         << "Construction of the variant GPNode failed.";
 
+    ASSERT_NO_THROW(delete emptyNode) << "Destruction of the int GPNode failed.";
     ASSERT_NO_THROW(delete intNode) << "Destruction of the int GPNode failed.";
     ASSERT_NO_THROW(delete doubleNode) << "Destruction of the double GPNode failed.";
     ASSERT_NO_THROW(delete variantNode) << "Destruction of the variant GPNode failed.";
 }
 
+TEST_F(GPNodeTest, clone) 
+{
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(rep);
+    std::vector<Data::DataValue> variantValues;
+    variantValues.push_back(Data::DataValue::scalar<size_t>(1));
+    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
+    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
+    Node::GPNode node(variantValues);
+
+    std::unique_ptr<Node::GPNode> clone = node.cloneUniquePtr();
+    ASSERT_TRUE(node.getValue(0) == clone->getValue(0)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(1) == clone->getValue(1)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(2) == clone->getValue(2)) << "Getting value of the GPNode failed.";
+
+    ASSERT_TRUE(node.hasSameValues(*clone)) << "Nodes should have exactly the same values";
+    node.addValue<int>(2);
+    ASSERT_FALSE(node.hasSameValues(*clone)) << "Value should not be passed to the clone";
+    clone->addValue<double>(3.1);
+    ASSERT_FALSE(node.hasSameValues(*clone)) << "For coverage";
+}
+
 TEST_F(GPNodeTest, SetGetValue)
 {
-    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(*rep);
+    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
@@ -106,7 +133,7 @@ TEST_F(GPNodeTest, SetGetValue)
     ASSERT_TRUE(node.getValue(2) == Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1)) << "Getting value of the GPNode failed.";
 
 
-    ASSERT_NO_THROW(node.setValue(0, Data::DataValue::scalar<double>(10.5))) << "Setting value of the GPNode failed.";
+    ASSERT_NO_THROW(node.setValue<double>(0, 10.5)) << "Setting value of the GPNode failed.";
 
     ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<double>(10.5)) << "Getting value of the GPNode failed.";
 
@@ -119,6 +146,12 @@ TEST_F(GPNodeTest, SetGetValue)
     ASSERT_FALSE(node.getIsIntron()) << "Node should not be an intron by default.";
     ASSERT_NO_THROW(node.setIsIntron(true)) << "Setting node to intron state failed";
     ASSERT_TRUE(node.getIsIntron()) << "Node should now be an intron";
+
+    ASSERT_NO_THROW(node.addValue(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1))) << "Adding a value should not fail";
+    ASSERT_TRUE(node.getValue(3).getScalar<std::shared_ptr<const Evolution::Individual>>() == indiv1) << "Value should be indiv1.";
+    
+    ASSERT_NO_THROW(node.addValue<float>(10)) << "Adding a value should not fail";
+    ASSERT_TRUE(node.getValue(4) == Data::DataValue::scalar<float>(10)) << "Value should be a float of 10.";
 }
 
 TEST_F(GPNodeTest, IDCounter)

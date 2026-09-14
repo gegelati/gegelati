@@ -13,18 +13,28 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
     return clone;
 }
 
-void Representations::TPGRepresentation::setGenotypeTemplate()
+void Representations::TPGRepresentation::setGenotypeConstraint()
 {
-   Node::NodeTemplate bidNodes;
+   Node::NodeConstraint bidNodes;
+
+    // Value Requirements for members
+    bidNodes.addConstraint(Dimensions::NumericRange<double>::unbounded());
+
+    // Action constraint
+    bidNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1));
+
+    this->genotypeConstraint = std::make_unique<Node::GenotypeConstraint>(bidNodes, this->nbNodesMin, this->nbNodesMax);
+}
+
+void Representations::TPGRepresentation::setGenotypeGenerator()
+{
+   Node::NodeGenerator bidNodes;
 
     
     /* === Value requirements for members === */
     
     // Value Requirements for members
-    bidNodes.addTemplate(
-        Dimensions::NumericRange<double>::unbounded(),
-        Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>(this->availableMembers)
-    );
+    bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>(this->availableMembers));
 
     /* === Value requirements for actions/Tangled connections === */
 
@@ -41,13 +51,12 @@ void Representations::TPGRepresentation::setGenotypeTemplate()
         multi.addGenerator(actionGenerator, 0.5);
         multi.addGenerator(tangledGenerator, 0.5);
 
-        bidNodes.addTemplate(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1), multi);
+        bidNodes.addGenerator(multi);
     } else {
-        bidNodes.addTemplate(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1), actionGenerator);
+        bidNodes.addGenerator(actionGenerator);
     }
 
-    this->genotypeTemplate = std::make_unique<Node::GenotypeTemplate>();
-    this->genotypeTemplate->addNodeTemplate(bidNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeGenerator = std::make_unique<Node::GenotypeGenerator>(bidNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
 void Representations::TPGRepresentation::setAvailableMembers(const std::vector<std::shared_ptr<const Evolution::Individual>>& members)
@@ -65,13 +74,13 @@ void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vec
 
     // If the emptyness value changed, reset the template
     if((isEmpty != this->availableForTangled.empty())) {
-        this->setGenotypeTemplate();
+        this->setGenotypeGenerator();
     }
 }
 
-std::unique_ptr<Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
+std::unique_ptr<Node::GenotypeGenerator> Representations::TPGRepresentation::getGenotypeGenerator() const
 {
-    return std::move(this->genotypeTemplate->cloneUniquePtr());
+    return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
 

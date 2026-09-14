@@ -28,9 +28,6 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
     uint64_t generationNumber,
     LearningMode mode) const
 {
-    if(!individual.isValid()){
-        throw std::runtime_error("Evaluation::ReinforcementAgent::evaluateIndividual: Individual not valid for the representation");
-    }
 
     ReinforcementEnvironment& reinforcementEnvironment = dynamic_cast<ReinforcementEnvironment&>(this->learningEnvironment);
 

@@ -45,13 +45,19 @@ namespace Representations {
             virtual Data::DataValue executeGenotype(
                 const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
-            /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
-            std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;
+            /// @brief Unique pointer of the genotypeGenerator, as it is fixed during evolution
+            std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator;
 
             /**
-             * \brief Create the genotype template grammar
+             * \brief Create the genotype constraint grammar
              */
-            virtual void setGenotypeTemplate();
+            virtual void setGenotypeConstraint() override;
+
+            
+            /**
+             * \brief Create the genotype generator
+             */
+            virtual void setGenotypeGenerator();
 
         public:
 
@@ -59,7 +65,7 @@ namespace Representations {
             virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const override;
 
             /**
-             * \brief Main Representation constructor.
+             * \brief Main Representation constructor.x
              * 
              * \param[in] inputDimensions for the representation
              * \param[in] nbOutputRegisters number of output registers to create the outputDimension
@@ -78,13 +84,14 @@ namespace Representations {
                 if(nbOutputRegisters > nbRegisters) {
                     throw std::runtime_error("LGPRepresentation::Constructor: Number of outputRegisters cannot be higher than the number of registers");
                 }
-                this->setGenotypeTemplate();
+                this->setGenotypeConstraint();
+                this->setGenotypeGenerator();
             };
 
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
              */
-            virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const override;
+            virtual std::unique_ptr<Node::GenotypeGenerator> getGenotypeGenerator() const override;
 
     };
 }; // namespace LGP_Representation

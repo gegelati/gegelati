@@ -90,6 +90,10 @@ const Evaluation::EvaluationResult& Evolution::Individual::getEvaluationResult()
 
 Data::DataValue Evolution::Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {
+    // Individual need to be valid to be executed.
+    if(!valid){
+        throw std::runtime_error("Evolution::Individual::execute: Individual's genotype not valid for the representation");
+    }
     return this->representation.execute(*this->genotype, inputSources);
 }
 

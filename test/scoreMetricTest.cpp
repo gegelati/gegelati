@@ -7,6 +7,7 @@
 #include "evaluation/scoreMetric.h"
 #include "evolution/individual.h"
 
+#include "learn/fakeRepresentation.h"
 
 // Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode
 class FakedLearningEnvironment : public Evaluation::LearningEnvironment
@@ -54,8 +55,8 @@ TEST(ScoreMetricTest, ExtractMetricsEpisode)
     FakedLearningEnvironment env(3.0);
 
     // Call extraction
-    Evolution::Representation* rep = nullptr;
-    Evolution::Individual indiv(*rep);
+    Representations::FakeRepresentation rep;
+    Evolution::Individual indiv(rep);
     metric.extractMetricsRun(indiv, 0, env);
 
     // score should be set

@@ -36,19 +36,19 @@ namespace Evolution {
         /**
          * \brief Create a random GPNode.
          *
-         * \param[in] nodeTemplate node Template of the created node
+         * \param[in] nodeGenerator node Generator of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Node::GPNode> createRandomNode(Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Node::GPNode> createRandomNode(Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
         
 
         /**
          * \brief Initialize a random Genotype.
          *
-         * \param[in] genotypeTemplate genotype Template of the genotype
+         * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Genotype> initRandomGenotype(std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> initRandomGenotype(std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief Initialize an individual
@@ -73,19 +73,19 @@ namespace Evolution {
          * \brief return a mutated copy of a GPNode
          *
          * \param[in] node the node to mutate.
-         * \param[in] nodeTemplate node Template of the node
+         * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const;
+        virtual void mutateNode(Node::GPNode& node, Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief return a mutated copy of a Genotype.
          *
          * \param[in,out] genotype the genotype mutated.
-         * \param[in] genotypeTemplate genotype Template of the genotype
+         * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Genotype> mutateGenotype(const Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> mutateGenotype(const Genotype& genotype, std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief Mutate a set of individuals

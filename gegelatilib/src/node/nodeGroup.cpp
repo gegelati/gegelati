@@ -82,17 +82,8 @@ bool Node::operator==(const Node::NodeGroup& group1, const Node::NodeGroup& grou
     }
 
     for(size_t idxNode = 0; idxNode < group1.getSize(); idxNode++) {
-        const Node::GPNode& node1 = group1.getNode(idxNode);
-        const Node::GPNode& node2 = group2.getNode(idxNode);
-
-        if(node1.getSize() != node2.getSize()) {
+        if(!group1.getNode(idxNode).hasSameValues(group2.getNode(idxNode))) {
             return false;
-        }
-
-        for(size_t idxValue = 0; idxValue < node1.getSize(); idxValue++) {
-            if(node1.getValue(idxValue) != node2.getValue(idxValue)) {
-                return false;
-            }
         }
     }
     return true;

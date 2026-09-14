@@ -37,7 +37,7 @@ namespace Representations {
                 const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
             /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
-            std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;
+            std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator;
 
             /// @brief Member available for the TPG individuals
             std::vector<std::shared_ptr<const Evolution::Individual>> availableMembers;
@@ -46,9 +46,14 @@ namespace Representations {
             std::vector<std::shared_ptr<const Evolution::Individual>> availableForTangled;
             
             /**
+             * \brief Create the genotype constraint grammar
+             */
+            virtual void setGenotypeConstraint() override;
+
+            /**
              * \brief Create the genotype template grammar
              */
-            virtual void setGenotypeTemplate();
+            virtual void setGenotypeGenerator();
     
         public:
 
@@ -69,13 +74,14 @@ namespace Representations {
                 : Evolution::Representation(
                     inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), nbNodesMin, nbNodesMax, representationName, representationColor), 
                     nbActions{nbActions} {
-                this->setGenotypeTemplate();
-            };
+                        this->setGenotypeConstraint();
+                        this->setGenotypeGenerator();
+                    };
 
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
              */
-            virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const override;
+            virtual std::unique_ptr<Node::GenotypeGenerator> getGenotypeGenerator() const override;
 
 
             /**

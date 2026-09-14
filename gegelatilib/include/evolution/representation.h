@@ -10,7 +10,8 @@
 #include <functional>
 #include "iostream"
 
-#include "node/genotypeTemplate.h"
+#include "node/genotypeConstraint.h"
+#include "node/genotypeGenerator.h"
 #include "evolution/genotype.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
@@ -52,6 +53,16 @@ namespace Evolution {
         virtual Data::DataValue executeGenotype(
           const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const = 0;
 
+
+
+        /// @brief Constraint of the genotype
+        std::unique_ptr<Node::GenotypeConstraint> genotypeConstraint;
+
+        /**
+         * \brief define the constraints required of the genotype
+         */
+        virtual void setGenotypeConstraint() = 0;
+
       public:
 
       
@@ -83,7 +94,7 @@ namespace Evolution {
                 }
 
                 // Add layer
-                dimensionFlow.addLayer(representationName, inputDimensions, outputDimension);
+                this->dimensionFlow.addLayer(representationName, inputDimensions, outputDimension);
             };   
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
@@ -123,9 +134,14 @@ namespace Evolution {
         virtual std::string summary() const;
 
         /**
-         * \brief return the genotype template of the representation.
+         * \brief return the genotype constraint of the representation.
          */
-        virtual std::unique_ptr<Node::GenotypeTemplate> getGenotypeTemplate() const = 0;
+        virtual const Node::GenotypeConstraint& getGenotypeConstraint() const;
+
+        /**
+         * \brief return a unique genotype generator of the representation.
+         */
+        virtual std::unique_ptr<Node::GenotypeGenerator> getGenotypeGenerator() const = 0;
 
         /**
          * \brief identified wether the genotype is valid faced to the expected node structure of the representation.

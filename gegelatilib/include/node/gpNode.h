@@ -118,9 +118,20 @@ namespace Node {
             /**
              * \brief add new DataValue at the end of the node
              * 
-             * \param[in] value the value to set.
+             * \param[in] value the value to add.
              */
             void addValue(const Data::DataValue& value);
+
+            /**
+             * \brief add a scalar value of type T at the end of the node
+             * 
+             * \tparam T Element type used the node values.
+             * \param[in] value the value to add.
+             */
+            template <typename T>
+            void addValue(const T& value) {
+                this->addValue(Data::DataValue::scalar<T>(value));
+            }
 
             /**
              * \brief Set a DataValue at specified index
@@ -170,6 +181,11 @@ namespace Node {
              * \brief Get the values of the GPNode.
              */
             const std::vector<Data::DataValue>& getValues() const;
+
+            /**
+             * \brief Compare two nodes and return true if they have the same values
+             */
+            virtual bool hasSameValues(const GPNode& other) const;
     };
 
     

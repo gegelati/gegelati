@@ -23,12 +23,14 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::Ac
     
 }
 
+const Node::GenotypeConstraint& Evolution::Representation::getGenotypeConstraint() const
+{
+    return *this->genotypeConstraint;
+}
 
 bool Evolution::Representation::isValid(const Genotype& genotype) const 
 {
-    std::unique_ptr<Node::GenotypeTemplate> genTemplate = std::move(this->getGenotypeTemplate());
-
-    if(genotype.getSize() != genTemplate->size()) {
+    if(this->genotypeConstraint == nullptr || genotype.getSize() != this->genotypeConstraint->size()) {
         // Not the same number of node groups
         return false;
     }
@@ -39,17 +41,17 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
         const Node::NodeGroup& group = genotype.getNodeGroup(idxGroup);
 
         // Number of nodes in the group is wrong
-        if(group.getSize() < genTemplate->getRangeAt(idxGroup).first || group.getSize() > genTemplate->getRangeAt(idxGroup).second){
+        if(group.getSize() < this->genotypeConstraint->getRangeAt(idxGroup).first || group.getSize() > this->genotypeConstraint->getRangeAt(idxGroup).second){
             return false;
         }
 
-        const Node::NodeTemplate& nodeTemplate = genTemplate->getNodeTemplateAt(idxGroup);
+        const Node::NodeConstraint& nodeConstraint = this->genotypeConstraint->getNodeConstraintAt(idxGroup);
 
         // Check validity of each node
         for(size_t idxNode = 0; idxNode < group.getSize(); idxNode++) {
             const Node::GPNode& node = group.getNode(idxNode);
 
-            if(node.getSize() != nodeTemplate.size()) {
+            if(node.getSize() != nodeConstraint.size()) {
                 // One node has an unexpected number of values
                 return false;
             }
@@ -57,7 +59,7 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
             // Check validity of each value.
             for(size_t idxValue = 0; idxValue < node.getSize(); idxValue++) {
                 const Data::DataValue& value = node.getValue(idxValue);
-                const Dimensions::Constraint& constraint = nodeTemplate.getConstraintAt(idxValue);
+                const Dimensions::Constraint& constraint = nodeConstraint.getConstraintAt(idxValue);
                 if(!constraint.accepts(value)) {
                     // Value is not directly accepted, check if it is an individual, and if yes, if it is accepted.
                     // For now it is forced shared_ptr of const individual... 

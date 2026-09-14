@@ -39,7 +39,7 @@ void Node::GPNode::setGPNodeID(size_t newID)
 
 std::unique_ptr<Node::GPNode> Node::GPNode::cloneUniquePtr() const
 {
-    return std::make_unique<GPNode>(this->values);
+    return std::make_unique<GPNode>(this->values, this->isIntron);
 }
 
 bool Node::operator<(const Node::GPNode& a, const Node::GPNode& b)
@@ -97,4 +97,18 @@ size_t Node::GPNode::getSize() const
 const std::vector<Data::DataValue>& Node::GPNode::getValues() const
 {
     return this->values;
+}
+
+bool Node::GPNode::hasSameValues(const GPNode& other) const
+{
+    if(this->getSize() != other.getSize()) {
+        return false;
+    }
+
+    for(size_t idxValue = 0; idxValue < this->getSize(); idxValue++) {
+        if(this->getValue(idxValue) != other.getValue(idxValue)) {
+            return false;
+        }
+    }
+    return true;
 }

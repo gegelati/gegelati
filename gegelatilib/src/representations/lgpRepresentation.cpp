@@ -15,44 +15,51 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
     //this->copyOutputFunctionsTo(*clone);
     return clone;
 }
-
-void Representations::LGPRepresentation::setGenotypeTemplate() 
+void Representations::LGPRepresentation::setGenotypeConstraint()
 {
-
     size_t maxInputSourceIdx = 8;
-    Node::NodeTemplate instructionNodes;
+    Node::NodeConstraint instructionNodes;
 
     // Value Requirements for register
-    instructionNodes.addTemplate(
-        Dimensions::NumericRange<size_t>::between(0, this->nbRegisters - 1),
-        Dimensions::NumericUniformGenerator<size_t>(0, this->nbRegisters - 1)
-    );
+    instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbRegisters - 1));
     
     // Value requirements for instruction
-    instructionNodes.addTemplate(
-        Dimensions::NumericRange<size_t>::between(0, this->iSet.getNbInstructions() - 1),
-        Dimensions::NumericUniformGenerator<size_t>(0, this->iSet.getNbInstructions() - 1)
-    );
+    instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->iSet.getNbInstructions() - 1));
 
     // Value requirements for input type and index
     for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        instructionNodes.addTemplate(
-            Dimensions::NumericRange<size_t>::between(0, this->dimensionFlow.getInputDimensions().size() + 1 - 1),
-            Dimensions::NumericUniformGenerator<size_t>(0, this->dimensionFlow.getInputDimensions().size() + 1 - 1)
-        );
-        instructionNodes.addTemplate(
-            Dimensions::NumericRange<size_t>::between(0, maxInputSourceIdx - 1),
-            Dimensions::NumericUniformGenerator<size_t>(0, maxInputSourceIdx - 1)
-        );
+        instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->dimensionFlow.getInputDimensions().size() + 1 - 1));
+        instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, maxInputSourceIdx - 1));
     }
 
-    this->genotypeTemplate = std::make_unique<Node::GenotypeTemplate>();
-    this->genotypeTemplate->addNodeTemplate(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeConstraint = std::make_unique<Node::GenotypeConstraint>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
-std::unique_ptr<Node::GenotypeTemplate> Representations::LGPRepresentation::getGenotypeTemplate() const
+
+
+void Representations::LGPRepresentation::setGenotypeGenerator()
 {
-    return std::move(this->genotypeTemplate->cloneUniquePtr());
+    size_t maxInputSourceIdx = 8;
+    Node::NodeGenerator instructionNodes;
+
+    // Value Requirements for register
+    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->nbRegisters - 1));
+    
+    // Value requirements for instruction
+    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->iSet.getNbInstructions() - 1));
+
+    // Value requirements for input type and index
+    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
+        instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->dimensionFlow.getInputDimensions().size() + 1 - 1));
+        instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, maxInputSourceIdx - 1));
+    }
+
+    this->genotypeGenerator = std::make_unique<Node::GenotypeGenerator>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+}
+
+std::unique_ptr<Node::GenotypeGenerator> Representations::LGPRepresentation::getGenotypeGenerator() const
+{
+    return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
 

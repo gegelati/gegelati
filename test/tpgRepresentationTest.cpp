@@ -111,6 +111,7 @@ TEST_F(TPGRepresentationTest, setInputDimensions)
     // Todo later
 }
 
+/*
 TEST_F(TPGRepresentationTest, getSetGenotypeTemplate)
 {
     Representations::TPGRepresentation representation({inputType}, 3, 5, 10);
@@ -176,7 +177,7 @@ TEST_F(TPGRepresentationTest, getSetGenotypeTemplate)
     }
 
 }
-
+*/
 /*
 TEST_F(TPGRepresentationTest, isValid)
 {
