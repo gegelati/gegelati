@@ -81,4 +81,14 @@ TEST(GenotypeConstraintTest, addValue) {
 
     ASSERT_THROW(genotypeConstraint.getNodeConstraintAt(2), std::runtime_error) << "Should have failed with out of range.";
     ASSERT_THROW(genotypeConstraint.getRangeAt(2), std::runtime_error) << "Should have failed with out of range.";
+
+
+    auto clone = genotypeConstraint.cloneUniquePtr();
+    ASSERT_EQ(clone->size(), 2) << "Size of genotypeConstraint mismatch.";
+    
+    ASSERT_EQ(clone->getNodeConstraintAt(0).size(), 2) << "Size should be equal";
+    ASSERT_EQ(clone->getNodeConstraintAt(1).size(), 1) << "Size should be equal";
+    ASSERT_TRUE(clone->getNodeConstraintAt(0).getConstraintAt(0).accepts(value)) << "Value should be accepted";
+    ASSERT_FALSE(clone->getNodeConstraintAt(0).getConstraintAt(1).accepts(value)) << "Value should be accepted";
+    ASSERT_TRUE(clone->getNodeConstraintAt(1).getConstraintAt(0).accepts(value)) << "Value should be accepted";
 }

@@ -1,5 +1,7 @@
 #include "representations/lgpRepresentation.h"
 
+#include "evolution/individual.h"
+
 std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneUniquePtr() const
 {
     auto clone = std::make_unique<Representations::LGPRepresentation>(
@@ -62,8 +64,6 @@ std::unique_ptr<Node::GenotypeGenerator> Representations::LGPRepresentation::get
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
-
-
 Data::DataValue Representations::LGPRepresentation::executeGenotype(
     const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
@@ -94,7 +94,6 @@ Data::DataValue Representations::LGPRepresentation::executeGenotype(
 
             uint64_t operandLocation = dataSource.scaleLocation(operandType, inputIndex);
             operands.push_back(dataSource.getSubView(operandType, operandLocation));
-
         }
 
         registers.setSubValue(instruction.execute(operands), outputIndex);

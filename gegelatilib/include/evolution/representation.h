@@ -158,6 +158,7 @@ namespace Evolution {
          */
         Data::DataValue execute(
           const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const;
+
     };
 }; // namespace Representation
 

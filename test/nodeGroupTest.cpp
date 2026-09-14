@@ -67,6 +67,7 @@ TEST(NodeGroupTest, changeNodes)
     ASSERT_NO_THROW(nodeGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}), 0)) << "Adding GPNode to the NodeGroup failed.";
 
     ASSERT_EQ(nodeGroup.getSize(), 2) << "Getting size of the NodeGroup failed.";
+    ASSERT_EQ(nodeGroup.getNodes().size(), 2) << "Size not equal";
     ASSERT_EQ(nodeGroup.getNode(0).getValues().at(0).getScalar<size_t>(), size_t{4}) << "Getting values of the GPNode failed.";
     // for coverage of const method
     const Node::NodeGroup& cNodeGroup = nodeGroup ;
@@ -83,6 +84,7 @@ TEST(NodeGroupTest, changeNodes)
     
     ASSERT_THROW(nodeGroup.removeNode(1), std::runtime_error) << "Removing GPNode of the NodeGroup should have failed.";
     ASSERT_THROW(nodeGroup.setNode(std::make_unique<Node::GPNode>(std::vector<float>{1.6, 2.8, 3.9, 5.2}), 1), std::runtime_error) << "Set of GPNode of the NodeGroup should have failed.";
+
 }
 
 

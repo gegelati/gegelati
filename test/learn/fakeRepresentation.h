@@ -71,6 +71,10 @@ namespace Representations {
                 return std::make_unique<Node::GenotypeGenerator>(ng, 1, 1);
             };
 
+            std::unique_ptr<Node::GenotypeConstraint>& getGenotypeConstraintMut() {
+                return this->genotypeConstraint;
+            }
+
         };
 }; // namespace LGP_Representation
 

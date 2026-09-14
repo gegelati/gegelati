@@ -60,36 +60,35 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
             for(size_t idxValue = 0; idxValue < node.getSize(); idxValue++) {
                 const Data::DataValue& value = node.getValue(idxValue);
                 const Dimensions::Constraint& constraint = nodeConstraint.getConstraintAt(idxValue);
-                if(!constraint.accepts(value)) {
-                    // Value is not directly accepted, check if it is an individual, and if yes, if it is accepted.
-                    // For now it is forced shared_ptr of const individual... 
-                    if(value.getElementType() != typeid(std::shared_ptr<const Individual>)) {
+
+                // Value is not directly accepted, check if it is an individual, and if yes, if it is accepted.
+                // For now it is forced shared_ptr of const individual... 
+                if(value.getElementType() == typeid(std::shared_ptr<const Individual>)) {
+                    // Get individual
+                    const std::shared_ptr<const Evolution::Individual>& individualValue = value.getScalar<std::shared_ptr<const Individual>>();
+                    if(!individualValue->isValid()) {
                         return false;
-                    } else {
-                        // Get individual
-                        const std::shared_ptr<const Evolution::Individual>& individualValue = value.getScalar<std::shared_ptr<const Individual>>();
-                        if(!individualValue->isValid()) {
-                            return false;
-                        }
-
-                        // Individual must support the current representation inputs
-                        const std::vector<Dimensions::Requirement>& inputDims = individualValue->getRepresentation().getDimensionFlow().getInputDimensions();
-                        if(!Dimensions::DimensionFlow::acceptsRequirements(inputDims, this->dimensionFlow.getInputDimensions())) {
-                            return false;
-                        }
-
-                        // Individual must output a scalar with the required constraint.
-                        const Dimensions::Requirement & outputDim = individualValue->getRepresentation().getDimensionFlow().getOutputDimension();
-                        if(!outputDim.getConstraint().isCompatibleWith(constraint)) {
-                            return false;
-                        }
                     }
+
+                    // Individual must support the current representation inputs
+                    const std::vector<Dimensions::Requirement>& inputDims = individualValue->getRepresentation().getDimensionFlow().getInputDimensions();
+                    if(!Dimensions::DimensionFlow::acceptsRequirements(this->dimensionFlow.getInputDimensions(), inputDims)) {
+                        return false;
+                    }
+
+                    // Individual must output a scalar with the required constraint.
+                    const Dimensions::Requirement & outputDim = individualValue->getRepresentation().getDimensionFlow().getOutputDimension();
+                    if(!outputDim.getConstraint().isCompatibleWith(constraint)) {
+                        return false;
+                    }
+                } else if(!constraint.accepts(value)) {
+                    return false;
                 }
             }
         }
     }
 
-    // Individual has a valid genotype
+    // Genotype is valid
     return true;
     
 }
