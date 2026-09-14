@@ -34,6 +34,9 @@ namespace Evolution {
         /// Unique ID of the individual.
         size_t individualID;
 
+        /// \brief Define if the 
+        bool valid = false;
+
         /**
          * \brief Incremente the individual ID counter and return the new value.
          */
@@ -67,8 +70,13 @@ namespace Evolution {
          * \brief Constructor for the Individual.
          * 
          * \param[in] representation characterizing the individual
+         * \param[in] genotype the genotype set to the individual. Default is empty
          */
-        Individual(const Representation& representation) : representation{representation}, genotype(std::make_unique<Genotype>()), individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {};
+        Individual(const Representation& representation, std::unique_ptr<Genotype> genotype = std::make_unique<Genotype>()) 
+            : representation{representation}, genotype(std::move(genotype)), 
+              individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {
+                this->updateValidity();
+              };
 
         /**
          * \brief return the ID of the individual.
@@ -111,9 +119,11 @@ namespace Evolution {
         virtual const Genotype& getGenotype() const;
 
         /**
-         * \brief Get the mutable genotype of the Individual.
+         * \brief Set the a new genotype for the Individual.
+         * 
+         * \param[in] genotype unique pointer towards the genotype set.
          */
-        virtual Genotype& getMutableGenotype();
+        virtual void setGenotype(std::unique_ptr<Genotype> genotype);
 
         /**
          * \brief add an evaluationRun to the evaluationResult of the individual
@@ -132,6 +142,11 @@ namespace Evolution {
          * \brief Return true if the current genotype is valid regarding the current representation
          */
         virtual bool isValid() const;
+
+        /**
+         * \brief Update the validity attribute of the individual.
+         */
+        virtual void updateValidity();
 
         /**
          * \brief execute based on the representation

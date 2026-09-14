@@ -21,6 +21,12 @@ namespace Node {
             /// Default constructor
             NodeGroup() {};
 
+
+            /**
+             * \brief clone the current node group as a unique pointer.
+             */
+            virtual std::unique_ptr<NodeGroup> cloneUniquePtr() const;
+
             /**
              * \brief Add a Node to the NodeGroup.
              * 
@@ -51,11 +57,19 @@ namespace Node {
             virtual const GPNode& getNode(size_t index) const;
 
             /**
-             * \brief Get the mutable Node at the given index.
+             * \brief Get the Node at the given index.
              * 
              * \param[in] index the index of the Node to get.
              */
-            virtual GPNode& getMutableNode(size_t index);
+            virtual GPNode& getNode(size_t index);
+
+            /**
+             * \brief Get the mutable Node at the given index.
+             * 
+             * \param[in] node the Node to set.
+             * \param[in] index the index of the Node to get.
+             */
+            virtual void setNode(std::unique_ptr<GPNode> node, size_t index);
 
             /**
              * \brief Get the number of Node in the NodeGroup.

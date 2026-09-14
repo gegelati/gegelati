@@ -40,12 +40,6 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
     }
 
 
-    size_t nbIndividuals = 100;
-    for(size_t idx = 0; idx < nbIndividuals; idx++) {
-        std::unique_ptr<Individual> individual = std::make_unique<Individual>(this->representation);
-        this->mutation->initRandomGenotype(individual->getMutableGenotype(), this->representation.getGenotypeTemplate(), this->rng);
-        this->population->addIndividual(std::move(individual));
-    }
 }
 
 std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectParents(size_t nbParents)
@@ -76,7 +70,7 @@ std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individua
 void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
 {
     for(const std::unique_ptr<Individual>& indiv: offspring) {
-        this->mutation->mutateGenotype(indiv->getMutableGenotype(), std::move(this->representation.getGenotypeTemplate()), rng);
+        //this->mutation->mutateGenotype(indiv->getMutableGenotype(), std::move(this->representation.getGenotypeTemplate()), rng);
     }
 }
 

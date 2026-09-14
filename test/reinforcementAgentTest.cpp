@@ -130,17 +130,21 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     representation = new Representations::LGPRepresentation(le.getInputDimensions(), 1, set, 8, 5, 10);
 
     Evolution::Individual indiv(*representation);
-    Evolution::Genotype& genotype = indiv.getMutableGenotype();
-    Node::NodeGroup& group = genotype.addNodeGroup();
     
     ASSERT_THROW(rlAgent.evaluateIndividual(indiv, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 
     // Fill individual
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 - 1 = -0.5
+    std::unique_ptr<Evolution::Genotype> genotype = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
+    
+    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
+
+    genotype->addNodeGroup(std::move(group));
+    indiv.setGenotype(std::move(genotype));
 
     ASSERT_NO_THROW(rlAgent.evaluateIndividual(indiv, 0, mode)) << "Evaluation should not have fail";
 }

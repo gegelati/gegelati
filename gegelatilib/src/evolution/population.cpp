@@ -124,14 +124,6 @@ void Evolution::Population::emptyIndividual(const Individual& individual)
 {
     auto it = this->getIndividualFromCst(individual);
 
-    Genotype& genotype = it->get()->getMutableGenotype();
-    while (genotype.getSize() > 0) {
-        Node::NodeGroup& nodeGroup = genotype.getMutableNodeGroup(0);
-        while(nodeGroup.getSize() > 0) {
-            nodeGroup.removeNode(0);
-        }
-        genotype.removeNodeGroup(0);
-    } 
 }
 
 bool Evolution::Population::deleteIndividual(const Individual& individual)

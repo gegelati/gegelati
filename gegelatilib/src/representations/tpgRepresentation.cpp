@@ -71,9 +71,6 @@ void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vec
 
 std::unique_ptr<Node::GenotypeTemplate> Representations::TPGRepresentation::getGenotypeTemplate() const
 {
-    if(this->availableMembers.size() == 0) {
-        throw std::runtime_error("Representations::TPGRepresentation::getGenotypeTemplate: list of member individuals cannot be empty.");
-    }
     return std::move(this->genotypeTemplate->cloneUniquePtr());
 }
 

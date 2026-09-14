@@ -82,6 +82,9 @@ namespace Dimensions {
              * \brief Sample method creating a DataValue of type T from the list of possible values.
              */
             virtual Data::DataValue sample(RNG::RNG& rng) override {
+                if(this->values.size() == 0) {
+                    throw std::runtime_error("Dimensions::ListUniformGenerator::sample: Sampling value failed because the vector is empty.");
+                }
                 return Data::DataValue::scalar<T>(values[rng.uniformSample<size_t>(0, values.size() - 1)]);
             }
 

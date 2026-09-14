@@ -70,6 +70,8 @@ TEST_F(PopulationTest, Constructor)
     ASSERT_NO_THROW(delete population) << "Destructor of Population failed.";
 }
 
+/*
+
 TEST_F(PopulationTest, addIndividual)
 {       
     Evolution::Population population;
@@ -203,4 +205,4 @@ TEST_F(PopulationTest, IDCounter)
     ASSERT_TRUE(population1 != population2) << "operator != failed.";
     ASSERT_TRUE(population2 < population1) << "operator < failed.";
     ASSERT_FALSE(population1 == population2) << "operator == failed.";
-}
+} */

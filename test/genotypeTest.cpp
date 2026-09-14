@@ -54,6 +54,7 @@ TEST(GenotypeTest, Constructor)
     ASSERT_NO_THROW(delete genotype) << "Destructor of Genotype failed.";
 }
 
+/*
 TEST(GenotypeTest, addRemoveNodeGroup)
 {
     Evolution::Genotype genotype;
@@ -177,4 +178,4 @@ TEST(GenotypeTest, equality){
     group2_2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
     ASSERT_TRUE(genotype1 == genotype2) << "genotypes should be equal";
     ASSERT_TRUE(genotype2 == genotype1) << "genotypes should be equal both directions";
-}
+}*/

@@ -51,40 +51,30 @@ const Evolution::Genotype& Evolution::Individual::getGenotype() const
     return *this->genotype;
 }
 
-Evolution::Genotype& Evolution::Individual::getMutableGenotype()
+void Evolution::Individual::setGenotype(std::unique_ptr<Genotype> genotype)
 {
-    return *this->genotype;
+    this->genotype = std::move(genotype);
+    this->updateValidity();
 }
-        
+
+void Evolution::Individual::updateValidity()
+{
+    this->valid = this->representation.isValid(*this->genotype);
+}
+       
+bool Evolution::Individual::isValid() const
+{
+    return this->valid;
+}
 
 std::unique_ptr<Evolution::Individual> Evolution::Individual::cloneUniquePtr() const
 {
-    std::unique_ptr<Individual> newIndividual = std::make_unique<Individual>(this->representation);
-
-    for(const Node::NodeGroup& group: this->genotype->getNodeGroups()) {
-        Node::NodeGroup& newNodeGroup = newIndividual->genotype->addNodeGroup();
-        
-        for(const Node::GPNode& node: group.getNodes()) {
-            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
-        }
-    }
-
-    return std::move(newIndividual);
+    return std::make_unique<Individual>(this->representation, this->genotype->cloneUniquePtr());
 }
 
 std::shared_ptr<Evolution::Individual> Evolution::Individual::cloneSharedPtr() const
 {
-    std::shared_ptr<Individual> newIndividual = std::make_shared<Individual>(this->representation);
-
-    for(const Node::NodeGroup& group: this->genotype->getNodeGroups()) {
-        Node::NodeGroup& newNodeGroup = newIndividual->genotype->addNodeGroup();
-        
-        for(const Node::GPNode& node: group.getNodes()) {
-            newNodeGroup.addNode(std::make_unique<Node::GPNode>(node.getValues()));
-        }
-    }
-
-    return newIndividual;
+    return std::make_shared<Individual>(this->representation, this->genotype->cloneUniquePtr());
 }
 
 void Evolution::Individual::addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const
@@ -97,10 +87,6 @@ const Evaluation::EvaluationResult& Evolution::Individual::getEvaluationResult()
     return *this->result;
 }
 
-bool Evolution::Individual::isValid() const
-{
-    return this->representation.isValid(*this->genotype);
-}
 
 Data::DataValue Evolution::Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {

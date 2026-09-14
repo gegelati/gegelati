@@ -1,18 +1,27 @@
 #include "evolution/genotype.h"
 #include "evolution/individual.h"
 
-Node::NodeGroup& Evolution::Genotype::addNodeGroup(size_t index)
+
+std::unique_ptr<Evolution::Genotype> Evolution::Genotype::cloneUniquePtr() const
+{
+    std::unique_ptr<Genotype> clone = std::make_unique<Genotype>();
+    for(const std::unique_ptr<Node::NodeGroup>& nodeGroup : this->nodeGroups) {
+        clone->addNodeGroup(std::move(nodeGroup->cloneUniquePtr()));
+    }
+    return std::move(clone);
+}
+
+void Evolution::Genotype::addNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index)
 {
     if(index > this->nodeGroups.size()){
         throw std::runtime_error("Evolution::Genotype::addNodeGroup: index out of range.");
     }
-    this->nodeGroups.insert(this->nodeGroups.begin() + index, std::make_unique<Node::NodeGroup>());
-    return *this->nodeGroups.at(index);
+    this->nodeGroups.insert(this->nodeGroups.begin() + index, std::move(group));
 }
 
-Node::NodeGroup& Evolution::Genotype::addNodeGroup()
+void Evolution::Genotype::addNodeGroup(std::unique_ptr<Node::NodeGroup> group)
 {
-    return this->addNodeGroup(this->nodeGroups.size());
+    this->addNodeGroup(std::move(group), this->nodeGroups.size());
 }
 
 void Evolution::Genotype::removeNodeGroup(size_t index)
@@ -30,16 +39,22 @@ const Node::NodeGroup& Evolution::Genotype::getNodeGroup(size_t index) const
         throw std::runtime_error("Evolution::Individual::getNodeGroup: index out of range.");
     }
     return *this->nodeGroups[index];
-
 }
 
-Node::NodeGroup& Evolution::Genotype::getMutableNodeGroup(size_t index)
+Node::NodeGroup& Evolution::Genotype::getNodeGroup(size_t index)
+{
+    if(index >= this->nodeGroups.size()){
+        throw std::runtime_error("Evolution::Individual::getNodeGroup: index out of range.");
+    }
+    return *this->nodeGroups[index];
+}
+
+void Evolution::Genotype::setNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index)
 {
     if(index >= this->nodeGroups.size()){
         throw std::runtime_error("Evolution::Individual::getMutableNodeGroup: index out of range.");
     }
-    return *this->nodeGroups[index];
-
+    this->nodeGroups.at(index) = std::move(group);
 }
 
 size_t Evolution::Genotype::getSize() const

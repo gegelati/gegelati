@@ -32,16 +32,24 @@ namespace Evolution {
             Genotype() {};
 
             /**
+             * \brief clone the current genotype as a unique pointer.
+             */
+            virtual std::unique_ptr<Genotype> cloneUniquePtr() const;
+
+            /**
              * \brief Add a NodeGroup to the Genotype.
              * 
+             * \param[in] group the group added.
              * \param[in] index the index at which to add the NodeGroup.
              */
-            virtual Node::NodeGroup& addNodeGroup(size_t index);
+            virtual void addNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index);
 
             /**
              * \brief Add a NodeGroup at the end of the Genotype.
+             * 
+             * \param[in] group the group added.
              */
-            virtual Node::NodeGroup& addNodeGroup();
+            virtual void addNodeGroup(std::unique_ptr<Node::NodeGroup> group);
 
             /**
              * \brief Remove a NodeGroup from the Genotype.
@@ -58,13 +66,19 @@ namespace Evolution {
             virtual const Node::NodeGroup& getNodeGroup(size_t index) const;
 
             /**
-             * \brief Get the mutable NodeGroup at the given index.
+             * \brief Get the NodeGroup at the given index.
              * 
              * \param[in] index the index of the NodeGroup to get.
-             * 
-             * \return a reference to the NodeGroup at the given index.
              */
-            virtual Node::NodeGroup& getMutableNodeGroup(size_t index);
+            virtual Node::NodeGroup& getNodeGroup(size_t index);
+
+            /**
+             * \brief set a NodeGroup at the given index, replacing the former one.
+             * 
+             * \param[in] group the group set.
+             * \param[in] index the index of the NodeGroup to set.
+             */
+            virtual void setNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index);
 
             /**
              * \brief Get the number of NodeGroup in the Genotype.

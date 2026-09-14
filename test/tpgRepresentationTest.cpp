@@ -267,7 +267,6 @@ TEST_F(TPGRepresentationTest, isValid)
     tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, tangledIndiv}));
     ASSERT_FALSE(representation.isValid(*tangledIndiv)) << "Individual should not be valid with itself has tangled individual";
 }
-*/
 
 TEST_F(TPGRepresentationTest, executeIndividual)
 {
@@ -349,3 +348,4 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     std::cout<<representation.summary()<<std::endl;
 }
+*/

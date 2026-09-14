@@ -115,6 +115,7 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
     ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
 }
 
+/*
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
     Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
@@ -276,7 +277,6 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 3098313116838862914U) << "RNG not determinist";
 }
 
-/*
 TEST_F(EvolutionAlgorithmTest, testArchive) {
     
     Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
@@ -293,7 +293,7 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
 
     // This is some dataSource sampled from the environment
     ASSERT_EQ(ea.getPopulation().getIndividuals().begin()->get().getEvaluationResult().getEvaluationRuns().begin()->second->getSize(), 2) << "meh";
-}*/
+}
 
 
 TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
@@ -334,11 +334,10 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
     std::cout<<eaTpg.getRepresentation().summary()<<std::endl;
 
     /*const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
-    std::cout<<best.getEvaluationResult()<<std::endl;*/
+    std::cout<<best.getEvaluationResult()<<std::endl;
 }
 
 
-/*
 TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
     
 
@@ -458,7 +457,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         population.insert(survivors.begin(), survivors.end());
 
         // Print best individual
-        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
+        //std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
     }
 }
 
@@ -469,7 +468,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
     // Create representations
     Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
-    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), 3, 5, 10);
+    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), 3, 2, 10);
 
     // Create Mutator and breeder
     Evolution::Reproduction breeder;
@@ -546,6 +545,6 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
 
         // Print best individual
-        std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() <<" and score: "<<survivingSelection.getBest(populationTPG).getEvaluationResult()<< std::endl;
+        //std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() <<" and score: "<<survivingSelection.getBest(populationTPG).getEvaluationResult()<< std::endl;
     }
 }

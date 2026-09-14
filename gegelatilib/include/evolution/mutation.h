@@ -45,11 +45,19 @@ namespace Evolution {
         /**
          * \brief Initialize a random Genotype.
          *
-         * \param[in,out] genotype the genotype initialized.
          * \param[in] genotypeTemplate genotype Template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> initRandomGenotype(std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
+
+        /**
+         * \brief Initialize an individual
+         * 
+         * \param[in] representation The representation from which individual is created.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual std::shared_ptr<Individual>
+            initIndividual(const Representation& representation, RNG::RNG& rng) const;
 
         /**
          * \brief Initialize a set of individuals
@@ -62,7 +70,7 @@ namespace Evolution {
             initIndividuals(const Representation& representation, size_t nbIndividuals, RNG::RNG& rng) const;
 
         /**
-         * \brief mutate a GPNode.
+         * \brief return a mutated copy of a GPNode
          *
          * \param[in] node the node to mutate.
          * \param[in] nodeTemplate node Template of the node
@@ -71,13 +79,13 @@ namespace Evolution {
         virtual void mutateNode(Node::GPNode& node, Node::NodeTemplate& nodeTemplate, RNG::RNG& rng) const;
 
         /**
-         * \brief Mutate a Genotype.
+         * \brief return a mutated copy of a Genotype.
          *
          * \param[in,out] genotype the genotype mutated.
          * \param[in] genotypeTemplate genotype Template of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateGenotype(Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> mutateGenotype(const Genotype& genotype, std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate, RNG::RNG& rng) const;
 
         /**
          * \brief Mutate a set of individuals

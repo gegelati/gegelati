@@ -36,6 +36,12 @@ void Node::GPNode::setGPNodeID(size_t newID)
     }
 }
 
+
+std::unique_ptr<Node::GPNode> Node::GPNode::cloneUniquePtr() const
+{
+    return std::make_unique<GPNode>(this->values);
+}
+
 bool Node::operator<(const Node::GPNode& a, const Node::GPNode& b)
 {
     return a.getGPNodeID() < b.getGPNodeID();

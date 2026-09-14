@@ -54,6 +54,12 @@ namespace Node {
             GPNode(const GPNode&) = delete;
             GPNode& operator=(const GPNode&) = delete;
 
+
+            /**
+             * \brief clone the current node as a unique pointer.
+             */
+            virtual std::unique_ptr<GPNode> cloneUniquePtr() const;
+
             /**
              * \brief Default empty constructor
              * 

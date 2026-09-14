@@ -2,6 +2,17 @@
 #include "evolution/individual.h"
 
 
+
+std::unique_ptr<Node::NodeGroup> Node::NodeGroup::cloneUniquePtr() const
+{
+    std::unique_ptr<Node::NodeGroup> clone = std::make_unique<NodeGroup>();
+    for(const std::unique_ptr<Node::GPNode>& node : this->nodes) {
+        clone->addNode(std::move(node->cloneUniquePtr()));
+    }
+    return std::move(clone);
+}
+
+
 void Node::NodeGroup::addNode(std::unique_ptr<GPNode> node, size_t index)
 {
     if(index > this->nodes.size()){
@@ -23,15 +34,23 @@ void Node::NodeGroup::removeNode(size_t index)
     this->nodes.erase(this->nodes.begin() + index);
 }
 
-Node::GPNode& Node::NodeGroup::getMutableNode(size_t index)
+void Node::NodeGroup::setNode(std::unique_ptr<GPNode> node, size_t index)
 {
     if(index >= this->getSize()){
         throw std::runtime_error("Node::NodeGroup::getMutableNode: index out of range.");
     }
-    return *this->nodes[index];
+    this->nodes[index] = std::move(node);
 }
 
 const Node::GPNode& Node::NodeGroup::getNode(size_t index) const
+{
+    if(index >= this->getSize()){
+        throw std::runtime_error("Node::NodeGroup::getNode: index out of range.");
+    }
+    return *this->nodes[index];
+}
+
+Node::GPNode& Node::NodeGroup::getNode(size_t index)
 {
     if(index >= this->getSize()){
         throw std::runtime_error("Node::NodeGroup::getNode: index out of range.");

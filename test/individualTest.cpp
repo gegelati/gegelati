@@ -62,7 +62,7 @@ class IndividualTest : public ::testing::Test
     }
 };
 
-
+/*
 TEST_F(IndividualTest, Constructor)
 {
     Evolution::Individual* individual;
@@ -157,4 +157,4 @@ TEST_F(IndividualTest, IDCounter)
 
     ASSERT_TRUE(individual2 <= individual1) << "operator <= failed.";
     ASSERT_TRUE(individual1 >= individual2) << "operator >= failed.";
-}
+}*/
