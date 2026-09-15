@@ -36,6 +36,11 @@ namespace Dimensions
             Function(const std::vector<Requirement>& inputs, const Requirement& output): inputs{inputs}, output{output} {}
 
             /**
+             * \brief Clone current function
+             */
+            virtual std::unique_ptr<Function> cloneUniquePtr() const = 0;
+
+            /**
              * \brief Executes the activation function on the given value.
              * \param value The input DataValue to be transformed.
              * \return The resulting DataValue after applying the activation function.
@@ -81,6 +86,14 @@ namespace Dimensions
               */
             Tanh(const Requirement& input)
              : Function({input}, Requirement(input.getDataType(), Dimensions::NumericRange<T>::between(static_cast<T>(-1.0), static_cast<T>(1.0)))) {}
+
+            /**
+             * \brief Clone current function
+             */
+            std::unique_ptr<Function> cloneUniquePtr() const
+            {
+                return std::make_unique<Tanh<T>>(this->inputs.at(0));
+            }
 
              /**
               * \brief Applies the tanh transformation to the input value.
@@ -133,6 +146,13 @@ namespace Dimensions
               */
             ArgMax(const Requirement& input)
              : Function({input}, Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1))) {}
+            /**
+             * \brief Clone current function
+             */
+            std::unique_ptr<Function> cloneUniquePtr() const
+            {
+                return std::make_unique<ArgMax<T>>(this->inputs.at(0));
+            }
 
              /**
               * \brief Finds the index of the maximum element in the input value.

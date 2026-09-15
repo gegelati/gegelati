@@ -90,75 +90,51 @@ TEST_F(LGPRepresentationTest, Constructor)
     ASSERT_NO_THROW(delete representation) << "Destructor of Representation failed.";
 }
 
-TEST_F(LGPRepresentationTest, getGenotypeTemplate)
+TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 {
-    /**
+    size_t nbRegisters = 8;
     Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
-    std::unique_ptr<const Node::GenotypeTemplate> genotypeTemplate;
+    const Node::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
 
-    
-    ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
-    
-    ASSERT_EQ(genotypeTemplate->size(), 1) << "Template should have a single nodeTemplate";
-    ASSERT_EQ(genotypeTemplate->getRangeAt(0).first, 5) << "Minimal range of the template should be 5";
-    ASSERT_EQ(genotypeTemplate->getRangeAt(0).second, 10) << "Maximal range of the template should be 10";
+    ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
+    ASSERT_EQ(constraint.getRangeAt(0).first, 5) << "Low range should be 5";
+    ASSERT_EQ(constraint.getRangeAt(0).second, 10) << "Low range should be 5";
 
-    std::shared_ptr<const Node::NodeTemplate> nodeTemplate = genotypeTemplate->getNodeTemplateAt(0);
-    ASSERT_EQ(nodeTemplate->size(), 6) << "Node template should be of size 6 with current input sources";
-    std::vector<size_t> expectedRanges{8, 4, 2, 8, 2, 8};
+    const Node::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
+    ASSERT_EQ(nodeConstraint.size(), 6) << "Size should be 6";
 
-    for(size_t idx = 0; idx < nodeTemplate->size(); idx++) {
-        const std::shared_ptr<const Node::NodeValueTemplate>& nodeValueTemplate = nodeTemplate->getValueTemplateAt(idx);
-        ASSERT_EQ(nodeValueTemplate->size(), 1) << "Template should be of size 1";
-
-        ASSERT_TRUE(std::holds_alternative<Node::NodeValueRange>(*nodeValueTemplate->getconfigurationAt(0))) << "Configuration should be a valueRange";
-        const Node::NodeValueRange& range = std::get<Node::NodeValueRange>(*nodeValueTemplate->getconfigurationAt(0));
-        bool isSize_tPair = std::holds_alternative<std::pair<size_t, size_t>>(range);
-        ASSERT_TRUE(isSize_tPair) << "range should be a pair of size_t";
-
-        std::pair<size_t, size_t> pairRange = std::get<std::pair<size_t, size_t>>(range);
-        ASSERT_EQ(pairRange.first, 0) << "Lower range should always be 0";
-        ASSERT_EQ(pairRange.second, expectedRanges.at(idx)) << "Expected upper range is incorrect";
-    } */
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(0) == Dimensions::NumericRange<size_t>(0, nbRegisters - 1)) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(1) == Dimensions::NumericRange<size_t>(0, set.getNbInstructions() - 1)) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(2) == Dimensions::NumericRange<size_t>(0, 1)) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(3) == Dimensions::NumericRange<size_t>(0, nbRegisters - 1)) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(4) == Dimensions::NumericRange<size_t>(0, 1)) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(5) == Dimensions::NumericRange<size_t>(0, nbRegisters - 1)) << "Should be compatible";
 }
 
-/* 
-TEST_F(LGPRepresentationTest, isValid)
+TEST_F(LGPRepresentationTest, getGenotypeGenerator)
 {
     Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
+    RNG::RNG rng;
 
-    Evolution::Genotype genotype;
-    std::unique_ptr<Node::NodeGroup> group = std::make_unique();
-
-    for(size_t i = 0; i < 4; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
-    }
-
-    ASSERT_FALSE(representation.isValid(genotype)) << "Individual should not be valid with 4 nodes";
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{7, 3, 1, 7, 1, 7}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Individual should be valid with 5 nodes";
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1, 7}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Individual should not be valid with wrong node";
-    group.removeNode(genotype.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{8, 3, 1, 7, 1}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Individual should not be valid with wrong node";
-    group.removeNode(genotype.getSize() - 1);
+    std::unique_ptr<Node::GenotypeGenerator> generator = representation.getGenotypeGenerator();
     
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Individual should not be valid with wrong node";
-    group.removeNode(genotype.getSize() - 1);
+    ASSERT_EQ(generator->size(), 1) << "Size of generator should be 1";
+    ASSERT_EQ(generator->getRangeAt(0).first, 5) << "Low range should be 5";
+    ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 5";
 
+    Node::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    ASSERT_EQ(nodeGen.size(), 6) << "Size should be 6";
 
-    for(size_t i = 0; i < 6; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
+    size_t value;
+    for(size_t idx = 0; idx < 1000; idx++) {
+        ASSERT_TRUE(nodeGen.getGeneratorAt(0).sample(rng).getScalar<size_t>() < 8);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(1).sample(rng).getScalar<size_t>() < set.getNbInstructions());
+        ASSERT_TRUE(nodeGen.getGeneratorAt(2).sample(rng).getScalar<size_t>() < 2);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(3).sample(rng).getScalar<size_t>() < 8);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(4).sample(rng).getScalar<size_t>() < 2);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(5).sample(rng).getScalar<size_t>() < 8);
     }
-
-    ASSERT_EQ(group.getSize(), 11) << "Individual size should now be 11";
-    ASSERT_FALSE(representation.isValid(genotype)) << "Individual should not be valid with 11 nodes";
-}*/
+}
 
 
 TEST_F(LGPRepresentationTest, executeIndividual)
@@ -211,28 +187,37 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
 
     Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
 
-    std::cout<<representation.summary()<<std::endl;
+    std::string text = representation.summary();
+    
+    EXPECT_NE(text.find("Layer 1: LGP"), std::string::npos);
+    EXPECT_NE(text.find("Overall: VALID"), std::string::npos);
 
     
     Dimensions::Requirement inputTypeEnv = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-1.0, 1.0));
     Dimensions::Requirement outputTypeEnv = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1.0, 1.0));
-    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
-    std::cout<<representation.execute(genotype, {inputSource.view()})<<std::endl;
+    ASSERT_TRUE(inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))) << "Representation should be compatible with environment output";
+    ASSERT_FALSE(representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)) << "Representation should not be compatible with environment output";
+    ASSERT_TRUE(representation.execute(genotype, {inputSource.view()}) == Data::DataValue::array1d<double[5]>({1.5, 3.0, 1.0, 0.0, 0.0})) << "Values should be equal";
 
     representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(representation.getDimensionFlow().getOutputDimension()));
-    std::cout<<representation.summary()<<std::endl;
+    text = representation.summary();
+    EXPECT_NE(text.find("Layer 2: TanH"), std::string::npos);
+    EXPECT_NE(text.find("Overall: VALID"), std::string::npos);
 
-    
-    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
-    std::cout<<representation.execute(genotype, {inputSource.view()})<<std::endl;
+    ASSERT_TRUE(inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))) << "Representation should be compatible with environment output";
+    ASSERT_TRUE(representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)) << "Representation should now be compatible with environment output";
+    ASSERT_TRUE(representation.execute(genotype, {inputSource.view()}) == Data::DataValue::array1d<double[5]>({std::tanh(1.5), std::tanh(3.0), std::tanh(1.0), 0.0, 0.0})) << "Values should be equal";
 
     representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(representation.getDimensionFlow().getOutputDimension()));
-    std::cout<<representation.summary()<<std::endl;
-
+    text = representation.summary();
+    EXPECT_NE(text.find("Layer 3: ArgMax"), std::string::npos);
+    EXPECT_NE(text.find("Overall: VALID"), std::string::npos);
     
-    std::cout<<"LGP Compatible with environment input: " <<inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))<<std::endl;;
-    std::cout<<"LGP Compatible with environment output: " << representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)<<std::endl;;
-    std::cout<<representation.execute(genotype, {inputSource.view()})<<std::endl;
+    ASSERT_TRUE(inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))) << "Representation should be compatible with environment output";
+    ASSERT_FALSE(representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)) << "Representation should not be compatible with environment output";
+    ASSERT_TRUE(representation.execute(genotype, {inputSource.view()}) == Data::DataValue::scalar<size_t>(1u)) << "Values should be equal";
+
+    std::unique_ptr<Evolution::Representation> clone = representation.cloneUniquePtr();
+    ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
+    ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }

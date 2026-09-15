@@ -3,6 +3,15 @@
 
 #include "evolution/individual.h"
 
+std::unique_ptr<Evolution::Representation> Evolution::Representation::cloneUniquePtr() const
+{
+    std::unique_ptr<Evolution::Representation> clone = this->cloneOnlyRepresentation();
+    for(const std::unique_ptr<Dimensions::ActivationFunctions::Function>& function: this->outputFunctions) {
+        clone->addOutputFunction(function->cloneUniquePtr());
+    }
+    return std::move(clone);
+}
+
 size_t Evolution::Representation::getMinNbNodes() const
 {
     return this->nbNodesMin;

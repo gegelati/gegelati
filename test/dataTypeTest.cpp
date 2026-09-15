@@ -220,6 +220,7 @@ TEST(DataTypeTest, ToString)
     auto typeD =  Data::DataType::scalar<std::shared_ptr<const Evolution::Individual>>();
     typeD.elementType = nullptr;
     ASSERT_NO_THROW(typeD.summary()) << "For coverage";
+    ASSERT_NO_THROW(typeD.toString()) << "For coverage";
 
 }
 

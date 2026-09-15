@@ -189,7 +189,7 @@ TEST(DataRequirementTest, ToStringDescribesTypeAndConstraint)
         Dimensions::NumericRange<double>::between(-0.4, 0.4));
 
     std::string strUnconstrained = "Requirement{\n\tDataType{rank=1, dimensions=[3], elementType=int, elementSize=4, sourceRank=1, sourceDimensions=[3], sourceOffset=0},\n\tRequirement: unconstrained\n}";
-    std::string strNumeric = "Requirement{\n\tDataType{rank=0, dimensions=[], elementType=double, elementSize=8, sourceRank=0, sourceDimensions=[], sourceOffset=0},\n\tRequirement: Numeric Range: [-0.4, 0.4]\n}";
+    std::string strNumeric = "Requirement{\n\tDataType{rank=0, dimensions=[], elementType=double, elementSize=8, sourceRank=0, sourceDimensions=[], sourceOffset=0},\n\tRequirement: Numeric Range: [-0.4, 0.4] of type: double\n}";
     
     EXPECT_EQ(unconstrained.toString(), strUnconstrained);
     EXPECT_EQ(numeric.toString(), strNumeric);

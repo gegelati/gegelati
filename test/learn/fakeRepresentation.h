@@ -25,7 +25,7 @@ namespace Representations {
              */
             virtual Data::DataValue executeGenotype(
                 const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override {
-                    return Data::DataValue::scalar<int>(0);
+                    return Data::DataValue::scalar<double>(1);
                 }
 
             
@@ -38,7 +38,7 @@ namespace Representations {
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const override {
+            virtual std::unique_ptr<Evolution::Representation> cloneOnlyRepresentation() const override {
                 return std::make_unique<FakeRepresentation>();
             };
 

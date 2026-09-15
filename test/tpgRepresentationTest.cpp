@@ -49,6 +49,7 @@
 #include "evolution/individual.h"
 
 #include "instructions/lambdaInstruction.h"
+#include "util/counterReset.h"
 
 class TPGRepresentationTest : public ::testing::Test
 {
@@ -61,6 +62,7 @@ class TPGRepresentationTest : public ::testing::Test
 
     virtual void SetUp()
     {   
+        CounterReset::counterReset();
         auto add = [](double a, double b) -> double { return a + b; };
         auto minus = [](double a, double b) -> double { return a - b; };
         auto times = [](double a, double b) -> double { return a * b; };
@@ -106,168 +108,78 @@ TEST_F(TPGRepresentationTest, Cloning)
     ASSERT_NO_THROW(clone1 = std::move(representation.cloneUniquePtr())) << "Cloning should not fail";
 }
 
-TEST_F(TPGRepresentationTest, setInputDimensions)
+
+TEST_F(TPGRepresentationTest, getGenotypeConstraint)
 {
-    // Todo later
+    size_t nbActions = 3;
+    Representations::TPGRepresentation representation({inputType}, nbActions, 2, 10);
+    const Node::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
+
+    ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
+    ASSERT_EQ(constraint.getRangeAt(0).first, 2) << "Low range should be 2";
+    ASSERT_EQ(constraint.getRangeAt(0).second, 10) << "Low range should be 10";
+
+    const Node::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
+    ASSERT_EQ(nodeConstraint.size(), 2) << "Size should be 2";
+
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(0) == Dimensions::NumericRange<double>::unbounded()) << "Should be compatible";
+    ASSERT_TRUE(nodeConstraint.getConstraintAt(1) == Dimensions::NumericRange<size_t>::between(0, nbActions - 1)) << "Should be compatible";
 }
 
-/*
-TEST_F(TPGRepresentationTest, getSetGenotypeTemplate)
+
+TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 {
-    Representations::TPGRepresentation representation({inputType}, 3, 5, 10);
-    std::unique_ptr<Node::GenotypeTemplate> genotypeTemplate;
     RNG::RNG rng;
 
-    std::vector<std::shared_ptr<const Evolution::Individual>> members{
-        std::make_shared<const Evolution::Individual>(*memberRepresentation),
-        std::make_shared<const Evolution::Individual>(*memberRepresentation),
-        std::make_shared<const Evolution::Individual>(*memberRepresentation)
-    };
-    std::vector<std::shared_ptr<const Evolution::Individual>> tangled{
-        std::make_shared<const Evolution::Individual>(representation),
-        std::make_shared<const Evolution::Individual>(representation)
-    };
-    representation.setAvailableMembers(members);
-    representation.setAvailableTangledIndiv(tangled);
-    
-    ASSERT_NO_THROW(genotypeTemplate = std::move(representation.getGenotypeTemplate())) << "Getting genotypeTemplate should not have fail";
-    
-    ASSERT_EQ(genotypeTemplate->size(), 1) << "Template should have a single nodeTemplate";
-    ASSERT_EQ(genotypeTemplate->getRangeAt(0).first, 5) << "Minimal range of the template should be 5";
-    ASSERT_EQ(genotypeTemplate->getRangeAt(0).second, 10) << "Maximal range of the template should be 10";
+    size_t nbActions = 3;
+    Representations::TPGRepresentation representation({inputType}, nbActions, 2, 10);
+    std::unique_ptr<Node::GenotypeGenerator> generator = representation.getGenotypeGenerator();
 
-    Node::NodeTemplate& nodeTemplate = genotypeTemplate->getNodeTemplateAt(0);
-    ASSERT_EQ(nodeTemplate.size(), 2) << "Node template should be of size 2";
+    ASSERT_EQ(generator->size(), 1) << "Size of constraint should be 1";
+    ASSERT_EQ(generator->getRangeAt(0).first, 2) << "Low range should be 2";
+    ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 10";
 
-    /// CHECK MEMBER TEMPLATE
-    const Dimensions::Constraint& memberConstraint = nodeTemplate.getConstraintAt(0);
-    ASSERT_TRUE(memberConstraint == Dimensions::NumericRange<double>::unbounded()) << "Constraint should double unbounded";
+    Node::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    ASSERT_EQ(nodeGen.size(), 2) << "Size should be 2";
 
-    auto* memberGenerator = 
-        dynamic_cast<Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>*>(&nodeTemplate.getGeneratorAt(0));
-    ASSERT_TRUE(memberGenerator != nullptr) << "Generator should be a listUniformGenerator of shared individuals";
-    for (size_t idx = 0; idx < 100; idx++) {
-        std::shared_ptr<const Evolution::Individual> sampled = memberGenerator->sample(rng).getScalar<std::shared_ptr<const Evolution::Individual>>();
-        ASSERT_TRUE((*sampled == *members.at(0)) ||
-                    (*sampled == *members.at(1)) ||
-                    (*sampled == *members.at(2))) << "Representation of member should be good"; 
+    ASSERT_THROW(nodeGen.getGeneratorAt(0).sample(rng), std::runtime_error) << "Should throw since no individual is set";
+    for(size_t idx = 0; idx < 1000; idx++) {
+        ASSERT_TRUE(nodeGen.getGeneratorAt(1).sample(rng).getScalar<size_t>() < nbActions);
     }
 
+    
+    std::vector<std::shared_ptr<const Evolution::Individual>> members = {
+        std::make_shared<Evolution::Individual>(*memberRepresentation),
+        std::make_shared<Evolution::Individual>(*memberRepresentation),
+        std::make_shared<Evolution::Individual>(*memberRepresentation)
+    };
 
-    /// CHECK ACTION/TANGLED TEMPLATE
-    const Dimensions::Constraint& destinationConstraint = nodeTemplate.getConstraintAt(1);
-    ASSERT_TRUE(destinationConstraint == Dimensions::NumericRange<size_t>::between(0, 2)) << "Constraint should size_t in 0/nbActions";
+    std::vector<std::shared_ptr<const Evolution::Individual>> tangled = {
+        std::make_shared<Evolution::Individual>(representation),
+        std::make_shared<Evolution::Individual>(representation),
+    };
 
-    /// CHECK ACTION CONFIG
-    auto* destinationGenerator = 
-        dynamic_cast<Dimensions::MultiGenerator*>(&nodeTemplate.getGeneratorAt(1));
-    ASSERT_TRUE(destinationGenerator != nullptr) << "Generator should be a multiGenerator";
-    for (size_t idx = 0; idx < 100; idx++) {
-        Data::DataValue sampled = destinationGenerator->sample(rng);
-        if(sampled.getElementType() == typeid(size_t)) {
-            ASSERT_LT(sampled.getScalar<size_t>(), 3) << "Value should be stricly lower than 3";
-        } else if (sampled.getElementType() == typeid(std::shared_ptr<const Evolution::Individual>)) {
-            
-            std::shared_ptr<const Evolution::Individual> sampledIndiv = sampled.getScalar<std::shared_ptr<const Evolution::Individual>>();
-            ASSERT_TRUE((*sampledIndiv == *tangled.at(0)) ||
-                        (*sampledIndiv == *tangled.at(1))) << "Representation of member should be good"; 
+    representation.setAvailableMembers(members);
+
+    // Should update generator automatically
+    representation.setAvailableTangledIndiv(tangled);
+
+    std::unique_ptr<Node::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator();
+    Node::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
+    for(size_t idx = 0; idx < 1000; idx++) {
+        std::shared_ptr<const Evolution::Individual> member = nodeGenNew.getGeneratorAt(0).sample(rng).getScalar<std::shared_ptr<const Evolution::Individual>>();
+        ASSERT_TRUE(member->getIndividualID() < members.size()) << "ID should be 0, 1 or 2";
+
+        Data::DataValue destination = nodeGenNew.getGeneratorAt(1).sample(rng);
+        if(destination.getElementType() == typeid(size_t)) {
+            ASSERT_TRUE(destination.getScalar<size_t>() < nbActions);
         } else {
-            ASSERT_FALSE(true) << "Type is wrong";
+            std::shared_ptr<const Evolution::Individual> member = destination.getScalar<std::shared_ptr<const Evolution::Individual>>();
+            ASSERT_TRUE(member->getIndividualID() - members.size() < tangled.size()) << "ID should be 3 or 4";
         }
     }
-
 }
-*/
-/*
-TEST_F(TPGRepresentationTest, isValid)
-{
-    Representations::TPGRepresentation representation({inputType}, 3, 5, 10);
-    Evolution::Genotype genotype;
-    Node::NodeGroup& group = genotype.addNodeGroup();
 
-    
-    // Create member individuals
-    std::vector<std::shared_ptr<Evolution::Individual>> members{
-        std::make_shared<const Evolution::Individual>(*memberRepresentation),
-    };
-    const std::shared_ptr<const Evolution::Individual>& badRepMemberPtr = members.at(0).lock();
-    const std::shared_ptr<const Evolution::Individual>& goodMemberPtr = memberPopulation->getIndividualPtrs().at(1).lock();
-
-    Evolution::Individual& goodMemberMut = memberPopulation->getMutableIndividual(*goodMemberPtr);
-    Evolution::Genotype& goodMemberGenotype = goodMemberMut.getMutableGenotype();
-    Node::NodeGroup& goodMemberGroup = goodMemberGenotype.addNodeGroup();
-    for(size_t i = 0; i < 8; i++) {
-        goodMemberGroup.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}));
-    }
-
-    representation.setTangled(false);
-    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with not define as tangled";
-    representation.setTangled(true);
-    ASSERT_THROW(representation.isValid(indiv), std::runtime_error) << "Should throw with no tangled population set";
-    representation.setTangledPopulation(*tpgPopulation);
-
-    ASSERT_NO_THROW(representation.isValid(indiv)) << "Should not throw anymore";
-
-    for(size_t i = 0; i < 4; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<Data::DataValue>{Data::DataValue::scalar(goodMemberPtr), size_t(0)}));
-    }
-
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 4 nodes";
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
-    ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with 5 nodes";
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(6)}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{badRepMemberPtr, size_t(6)}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{size_t(6), size_t(6)}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, 0.0}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with wrong action node";
-    group.removeNode(indiv.getSize() - 1);
-
-    for(size_t i = 0; i < 6; i++) {
-        group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
-    }
-
-    ASSERT_EQ(indiv.getSize(), 11) << "Individual size should now be 11";
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with 11 nodes";
-    for(size_t i = 0; i < 6; i++) {
-        group.removeNode(indiv.getSize() - 1);
-    }
-
-    // Testing tangled connections.
-    std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>();
-    Evolution::Genotype& tangledGenotype = tangledIndiv->getMutableGenotype();
-    Node::NodeGroup& tangledGroup = tangledGenotype.addNodeGroup();
-    for(size_t i = 0; i < 6; i++) {
-        tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, size_t(0)}));
-    }
-    ASSERT_TRUE(representation.isValid(*tangledIndiv)) << "Individual should be valid";
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, tangledIndiv}));
-    ASSERT_TRUE(representation.isValid(indiv)) << "Individual should be valid with valid tangled individual";
-    group.removeNode(indiv.getSize() - 1);
-
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, goodMemberPtr}));
-    ASSERT_FALSE(representation.isValid(indiv)) << "Individual should not be valid with not valid tangled individual";
-    group.removeNode(indiv.getSize() - 1);
-
-    tangledGroup.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>{goodMemberPtr, tangledIndiv}));
-    ASSERT_FALSE(representation.isValid(*tangledIndiv)) << "Individual should not be valid with itself has tangled individual";
-}
 
 TEST_F(TPGRepresentationTest, executeIndividual)
 {
@@ -277,28 +189,34 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     // create lgp members.
     std::shared_ptr<Evolution::Individual> member0 = std::make_shared<Evolution::Individual>(*memberRepresentation);
-    Evolution::Genotype& memberGenotype0 = member0->getMutableGenotype();
-    Node::NodeGroup& memberGroup0 = memberGenotype0.addNodeGroup();
+    std::unique_ptr<Evolution::Genotype> memberGenotype0 = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<Node::NodeGroup> memberGroup0 = std::make_unique<Node::NodeGroup>();
     
-    memberGroup0.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    memberGroup0.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 3, 1, 0}));// R[0] = R[3] + S[0] = 1.0
+    memberGroup0->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    memberGroup0->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 3, 1, 0}));// R[0] = R[3] + S[0] = 1.0
+    memberGenotype0->addNodeGroup(std::move(memberGroup0));
+    member0->setGenotype(std::move(memberGenotype0));
     ASSERT_TRUE(member0->isValid()) << "Member should be valid";
 
     std::shared_ptr<Evolution::Individual> member1 = std::make_shared<Evolution::Individual>(*memberRepresentation);
-    Evolution::Genotype& memberGenotype1 = member1->getMutableGenotype();
-    Node::NodeGroup& memberGroup1 = memberGenotype1.addNodeGroup();
+    std::unique_ptr<Evolution::Genotype> memberGenotype1 = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<Node::NodeGroup> memberGroup1 = std::make_unique<Node::NodeGroup>();
     
-    memberGroup1.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 2, 1, 0, 1, 0}));// R[0] = S[0] * S[0] = 1.0
-    memberGroup1.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 1, 3}));// R[0] = R[0] - S[3] = 2.0
+    memberGroup1->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 2, 1, 0, 1, 0}));// R[0] = S[0] * S[0] = 1.0
+    memberGroup1->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 1, 3}));// R[0] = R[0] - S[3] = 2.0
+    memberGenotype1->addNodeGroup(std::move(memberGroup1));
+    member1->setGenotype(std::move(memberGenotype1));
     ASSERT_TRUE(member1->isValid()) << "Member should be valid";
 
 
     std::shared_ptr<Evolution::Individual> member2 = std::make_shared<Evolution::Individual>(*memberRepresentation);
-    Evolution::Genotype& memberGenotype2 = member2->getMutableGenotype();
-    Node::NodeGroup& memberGroup2 = memberGenotype2.addNodeGroup();
+    std::unique_ptr<Evolution::Genotype> memberGenotype2 = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<Node::NodeGroup> memberGroup2 = std::make_unique<Node::NodeGroup>();
     
-    memberGroup2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 1, 1, 2, 1, 0}));// R[4] = S[2] - S[0] = 1.0
-    memberGroup2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 4, 1, 3}));// R[0] = R[4] + S[3] = 0.0
+    memberGroup2->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 1, 1, 2, 1, 0}));// R[4] = S[2] - S[0] = 1.0
+    memberGroup2->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 4, 1, 3}));// R[0] = R[4] + S[3] = 0.0
+    memberGenotype2->addNodeGroup(std::move(memberGroup2));
+    member2->setGenotype(std::move(memberGenotype2));
     ASSERT_TRUE(member2->isValid()) << "Member should be valid";
 
     std::vector<std::shared_ptr<const Evolution::Individual>> memberPop{member0, member1, member2};
@@ -307,46 +225,50 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     // Tangled Individual
     std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>(representation);
-    Evolution::Genotype& tangledGenotype = tangledIndiv->getMutableGenotype();
-    Node::NodeGroup& tangledGroup = tangledGenotype.addNodeGroup();
+    std::unique_ptr<Evolution::Genotype> tangledGenotype = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<Node::NodeGroup> tangledGroup = std::make_unique<Node::NodeGroup>();
     
     for(size_t i = 0; i < 3; i++) {
         std::unique_ptr<Node::GPNode> node = std::make_unique<Node::GPNode>();
         node->addValue(Data::DataValue::scalar(memberPop.at(i)));
         node->addValue(Data::DataValue::scalar<size_t>(i));
-        tangledGroup.addNode(std::move(node));
+        tangledGroup->addNode(std::move(node));
     }
+    tangledGenotype->addNodeGroup(std::move(tangledGroup));
+    tangledIndiv->setGenotype(std::move(tangledGenotype));
+    ASSERT_TRUE(tangledIndiv->isValid()) << "tangledIndiv should be valid";
 
-    Evolution::Individual indiv(representation);
-    Evolution::Genotype& genotype = indiv.getMutableGenotype();
-    Node::NodeGroup& group = genotype.addNodeGroup();
+    Evolution::Genotype genotype;
+    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
     
     std::unique_ptr<Node::GPNode> node0 = std::make_unique<Node::GPNode>();
     node0->addValue(Data::DataValue::scalar(memberPop.at(1)));
     node0->addValue(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(tangledIndiv));
-    group.addNode(std::move(node0));
+    group->addNode(std::move(node0));
     
     std::unique_ptr<Node::GPNode> node1 = std::make_unique<Node::GPNode>();
     node1->addValue(Data::DataValue::scalar(memberPop.at(2)));
     node1->addValue(Data::DataValue::scalar<size_t>(0));
-    group.addNode(std::move(node1));
+    group->addNode(std::move(node1));
     
     std::unique_ptr<Node::GPNode> node2 = std::make_unique<Node::GPNode>();
     node2->addValue(Data::DataValue::scalar(memberPop.at(0)));
     node2->addValue(Data::DataValue::scalar<size_t>(2));
-    group.addNode(std::move(node2));
+    group->addNode(std::move(node2));
 
     
-    representation.setAvailableMembers(memberPop);
-    ASSERT_TRUE(tangledIndiv->isValid()) << "Individual should be valid";
-    ASSERT_TRUE(indiv.isValid()) << "Individual should be valid";
+    genotype.addNodeGroup(std::move(group));
+    ASSERT_TRUE(representation.isValid(genotype)) << "Individual should be valid";
 
     size_t output;
     ASSERT_NO_THROW(output = tangledIndiv->execute({inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
     ASSERT_EQ(output, 1) << "Value is not correct.";
-    ASSERT_NO_THROW(output = indiv.execute({inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
+    ASSERT_NO_THROW(output = representation.execute(genotype, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
     ASSERT_EQ(output, 1) << "Value is not correct.";
 
     std::cout<<representation.summary()<<std::endl;
+
+    std::unique_ptr<Evolution::Representation> clone = representation.cloneUniquePtr();
+    ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
+    ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }
-*/

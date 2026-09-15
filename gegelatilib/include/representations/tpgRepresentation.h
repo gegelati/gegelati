@@ -58,7 +58,7 @@ namespace Representations {
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneUniquePtr() const override;
+            virtual std::unique_ptr<Evolution::Representation> cloneOnlyRepresentation() const override;
 
             /**
              * \brief Main Representation constructor.

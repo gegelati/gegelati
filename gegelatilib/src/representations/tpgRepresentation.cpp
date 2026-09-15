@@ -3,7 +3,7 @@
 #include <sstream>
 #include <limits>
 
-std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneUniquePtr() const
+std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneOnlyRepresentation() const
 {
     auto clone = std::make_unique<Representations::TPGRepresentation>(
         this->dimensionFlow.getInputDimensions(), this->nbActions,

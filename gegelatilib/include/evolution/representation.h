@@ -69,7 +69,9 @@ namespace Evolution {
         /// Default polymorphic destructor
         virtual ~Representation() = default;
         /// @brief clone pattern 
-        virtual std::unique_ptr<Representation> cloneUniquePtr() const = 0;
+        virtual std::unique_ptr<Representation> cloneUniquePtr() const;
+        /// @brief clone pattern for the specific representation
+        virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const = 0;
 
 
         /**

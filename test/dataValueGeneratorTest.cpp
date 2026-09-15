@@ -53,7 +53,7 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
     const std::string second = "second";
     const std::string third = "third";
 
-    const std::vector<std::string> values = {
+    std::vector<std::string> values = {
         first,
         second,
         third
@@ -76,6 +76,9 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
             sampledValue == third)
             << "Generated value should be one of the configured values.";
     }
+
+    values.clear();
+    ASSERT_THROW(generator.sample(rng), std::runtime_error) << "should fail to sampled empty list";
 }
 
 TEST(DataValueGeneratorTest, CanSampleFromSingleValueList)

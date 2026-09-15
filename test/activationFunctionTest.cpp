@@ -123,6 +123,12 @@ EXPECT_NEAR(
     << "Tanh must calculate the mathematically correct hyperbolic tangent for a scalar.";
 
 
+    std::unique_ptr<Dimensions::ActivationFunctions::Function> clone = std::move(tanh.cloneUniquePtr());
+    EXPECT_NEAR(
+        clone->execute(Data::DataValue::scalar(0.5)).getData<double>()[0],
+        std::tanh(0.5),
+        kTolerance)
+        << "Tanh must calculate the mathematically correct hyperbolic tangent for a scalar.";
 }
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForZero)
@@ -550,6 +556,15 @@ EXPECT_EQ(
     result.getData<size_t>()[0],
     3u)
     << "ArgMax must return the index of the largest element.";
+
+    
+    std::unique_ptr<Dimensions::ActivationFunctions::Function> clone = std::move(argmax.cloneUniquePtr());
+    EXPECT_EQ(
+        argmax.execute(
+        Data::DataValue::array1d(
+            std::vector<double>{1.0, 5.0, 2.0, 9.0, 3.0})).getScalar<size_t>(),
+        3u)
+        << "ArgMax must return the index of the largest element.";
 
 
 }

@@ -152,7 +152,8 @@ namespace Dimensions {
             } else {
                 result << "+inf";
             }
-            result << "]";
+            result << "] of type: " << DEMANGLE_TYPEID_NAME(typeid(T).name());
+
             return result.str();
         }
     };

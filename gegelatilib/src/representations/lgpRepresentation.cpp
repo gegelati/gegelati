@@ -2,19 +2,14 @@
 
 #include "evolution/individual.h"
 
-std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneUniquePtr() const
+std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneOnlyRepresentation() const
 {
     auto clone = std::make_unique<Representations::LGPRepresentation>(
-        this->dimensionFlow.getInputDimensions(),
-        this->nbOutputRegisters,
-        this->iSet,
-        this->nbRegisters,
-        this->nbNodesMin,
-        this->nbNodesMax,
-        this->representationName,
-        this->representationColor
+        this->dimensionFlow.getInputDimensions(), this->nbOutputRegisters,
+        this->iSet, this->nbRegisters,
+        this->nbNodesMin, this->nbNodesMax,
+        this->representationName, this->representationColor
     );
-    //this->copyOutputFunctionsTo(*clone);
     return clone;
 }
 void Representations::LGPRepresentation::setGenotypeConstraint()
