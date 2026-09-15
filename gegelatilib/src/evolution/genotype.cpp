@@ -1,6 +1,21 @@
 #include "evolution/genotype.h"
 #include "evolution/individual.h"
 
+std::unique_ptr<Evolution::Genotype> Evolution::Genotype::singleGroupGenotype(std::unique_ptr<Node::NodeGroup> group)
+{
+    std::unique_ptr<Genotype> genotype = std::make_unique<Genotype>();
+    genotype->addNodeGroup(std::move(group));
+    return std::move(genotype);
+}
+
+std::unique_ptr<Evolution::Genotype> Evolution::Genotype::singleNodeGenotype(std::unique_ptr<Node::GPNode> node)
+{
+    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
+    group->addNode(std::move(node));
+    return singleGroupGenotype(std::move(group));
+}
+
+
 
 std::unique_ptr<Evolution::Genotype> Evolution::Genotype::cloneUniquePtr() const
 {

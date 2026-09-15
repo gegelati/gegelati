@@ -115,6 +115,9 @@ std::string Evolution::Representation::summary() const
 Data::DataValue Evolution::Representation::execute(
           const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
+    // No need to check if the dimension flow is valid, it is necessarily valid by construction for now.
+
+    // Check inputs are valid
     const std::vector<Dimensions::Requirement>& inputDim = this->dimensionFlow.getInputDimensions();
     if(inputSources.size() != inputDim.size()) {
         throw std::runtime_error("Evolution::Representation::execute: Dimensions of the input sources are wrong");

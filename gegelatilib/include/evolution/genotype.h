@@ -32,6 +32,20 @@ namespace Evolution {
             Genotype() {};
 
             /**
+             * \brief Method for fast construction of simple genotypes
+             * 
+             * \param[in] node single node of the genotype
+             */
+            static std::unique_ptr<Genotype> singleNodeGenotype(std::unique_ptr<Node::GPNode> node);
+
+            /**
+             * \brief Method for fast construction of simple genotypes
+             * 
+             * \param[in] group single group of the genotype
+             */
+            static std::unique_ptr<Genotype> singleGroupGenotype(std::unique_ptr<Node::NodeGroup> group);
+
+            /**
              * \brief clone the current genotype as a unique pointer.
              */
             virtual std::unique_ptr<Genotype> cloneUniquePtr() const;

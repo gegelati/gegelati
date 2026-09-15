@@ -150,6 +150,8 @@ TEST(DataValueGeneratorTest, AddGeneratorExtendsAvailableGenerators)
     multiGenerator.addGenerator(
         Dimensions::NumericUniformGenerator<int>(42, 42), 1.0);
 
+    ASSERT_THROW(multiGenerator.addGenerator(Dimensions::NumericUniformGenerator<int>(42, 42), -1.0), std::runtime_error) << "MultiGenerator should reject negative weights.";
+
     RNG::RNG rng;
 
     bool generatedFirstValue = false;
