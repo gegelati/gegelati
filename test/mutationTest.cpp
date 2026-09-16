@@ -75,14 +75,14 @@ TEST_F(MutationTest, Constructor)
 TEST_F(MutationTest, sampleNodeValue)
 {
     Evolution::Mutation mutation;
-    Node::NodeValue value;
+    GraphBased::NodeValue value;
 
-    Node::NodeValueTemplate emptyValueTemplate;
+    GraphBased::NodeValueTemplate emptyValueTemplate;
     ASSERT_THROW(value = mutation.sampleNodeValue(emptyValueTemplate, rng), std::runtime_error) << "Should fail with empty value";
 
     // Range of size_t
-    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
-    Node::NodeValueTemplate valueTemplate0(config0);
+    auto config0(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    GraphBased::NodeValueTemplate valueTemplate0(config0);
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate0, rng)) << "Should not have failed";
         ASSERT_TRUE(std::holds_alternative<size_t>(value)) << "Value should be a size_t";
@@ -91,8 +91,8 @@ TEST_F(MutationTest, sampleNodeValue)
     }
     
     // Range of double
-    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
-    Node::NodeValueTemplate valueTemplate1(config1);
+    auto config1(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    GraphBased::NodeValueTemplate valueTemplate1(config1);
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate1, rng)) << "Should not have failed";
         ASSERT_TRUE(std::holds_alternative<double>(value)) << "Value should be a double";
@@ -102,9 +102,9 @@ TEST_F(MutationTest, sampleNodeValue)
 
     // Vector of diverse accepted values.
     std::shared_ptr<const Evolution::Individual> indiv = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> vectValues = {size_t(0), size_t(1), 5.0, 5.5, indiv};
-    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
-    Node::NodeValueTemplate valueTemplate2(config2);
+    std::vector<GraphBased::NodeValue> vectValues = {size_t(0), size_t(1), 5.0, 5.5, indiv};
+    auto config2(std::make_shared<GraphBased::NodeValueConfiguration>(vectValues));
+    GraphBased::NodeValueTemplate valueTemplate2(config2);
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate2, rng)) << "Should not have failed";
         bool isValueContained = false;
@@ -115,7 +115,7 @@ TEST_F(MutationTest, sampleNodeValue)
     }
 
     // Vector of diverse accepted values AND range of doubles
-    Node::NodeValueTemplate valueTemplate3({config1, config2});
+    GraphBased::NodeValueTemplate valueTemplate3({config1, config2});
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         ASSERT_NO_THROW(value = mutation.sampleNodeValue(valueTemplate3, rng)) << "Should not have failed";
         bool isRange = false;
@@ -134,24 +134,24 @@ TEST_F(MutationTest, sampleNodeValue)
 TEST_F(MutationTest, createRandomNode)
 {
     Evolution::Mutation mutation;
-    std::unique_ptr<Node::GPNode> node;
+    std::unique_ptr<GraphBased::GPNode> node;
     
-    Node::NodeTemplate nodeEmptyTemplate;
+    GraphBased::NodeTemplate nodeEmptyTemplate;
     ASSERT_THROW(mutation.createRandomNode(nodeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
 
-    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
-    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+    auto config0(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<GraphBased::NodeValueTemplate>(config0));
 
-    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
-    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+    auto config1(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<GraphBased::NodeValueTemplate>(config1));
 
     std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
     std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
-    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
-    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+    std::vector<GraphBased::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<GraphBased::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<GraphBased::NodeValueTemplate>(config2));
 
-    Node::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
+    GraphBased::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
         ASSERT_NO_THROW(node = std::move(mutation.createRandomNode(nodeTemplate, rng))) << "Creation of random node failed.";
         
@@ -184,26 +184,26 @@ TEST_F(MutationTest, initRandomGenotype)
     Evolution::Mutation mutation;
 
     Evolution::Genotype emptyGenotype;
-    Node::GenotypeTemplate genotypeEmptyTemplate;
+    GraphBased::GenotypeTemplate genotypeEmptyTemplate;
     ASSERT_THROW(mutation.initRandomGenotype(emptyGenotype, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
 
-    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
-    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+    auto config0(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<GraphBased::NodeValueTemplate>(config0));
 
-    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
-    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+    auto config1(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<GraphBased::NodeValueTemplate>(config1));
 
     std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
     std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
-    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
-    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+    std::vector<GraphBased::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<GraphBased::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<GraphBased::NodeValueTemplate>(config2));
 
-    std::vector<std::shared_ptr<const Node::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
-    auto nodeTemplate0(std::make_shared<Node::NodeTemplate>(vect));
-    auto nodeTemplate1(std::make_shared<Node::NodeTemplate>(valueTemplate1));
+    std::vector<std::shared_ptr<const GraphBased::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
+    auto nodeTemplate0(std::make_shared<GraphBased::NodeTemplate>(vect));
+    auto nodeTemplate1(std::make_shared<GraphBased::NodeTemplate>(valueTemplate1));
 
-    Node::GenotypeTemplate genotypeTemplate;
+    GraphBased::GenotypeTemplate genotypeTemplate;
     genotypeTemplate.addNodeTemplate(nodeTemplate0, 5, 10);
     genotypeTemplate.addNodeTemplate(nodeTemplate1);
 
@@ -215,13 +215,13 @@ TEST_F(MutationTest, initRandomGenotype)
         ASSERT_GE(initGenotype.getFullSize(), 5 + 1) << "Genotype does not have enough nodes";
         ASSERT_LE(initGenotype.getFullSize(), 10 + 1) << "Genotype has too much nodes";
 
-        const Node::NodeGroup& group1 = initGenotype.getNodeGroup(0);
+        const GraphBased::NodeGroup& group1 = initGenotype.getNodeGroup(0);
         ASSERT_GE(group1.getSize(), 5) << "group node 0 does not have enough nodes";
         ASSERT_LE(group1.getSize(), 10) << "group node 0 has too much nodes";
 
         for(size_t idxNode = 0; idxNode < group1.getSize(); idxNode++) {
 
-            const Node::GPNode& node = group1.getNode(idxNode);
+            const GraphBased::GPNode& node = group1.getNode(idxNode);
             ASSERT_EQ(node.getSize(), 3) << "Node does not have the right size";
 
             // Node value 0
@@ -241,9 +241,9 @@ TEST_F(MutationTest, initRandomGenotype)
             
         }
 
-        const Node::NodeGroup& group2 = initGenotype.getNodeGroup(1);
+        const GraphBased::NodeGroup& group2 = initGenotype.getNodeGroup(1);
         ASSERT_EQ(group2.getSize(), 1) << "group node 1 should have a single node";
-        const Node::GPNode& node = group2.getNode(0);
+        const GraphBased::GPNode& node = group2.getNode(0);
 
         ASSERT_EQ(node.getSize(), 1) << "Node does not have the right size";
         // Node value 0
@@ -258,29 +258,29 @@ TEST_F(MutationTest, mutateNode)
 {
     Evolution::Mutation mutation;
 
-    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
-    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+    auto config0(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<GraphBased::NodeValueTemplate>(config0));
 
-    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
-    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+    auto config1(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<GraphBased::NodeValueTemplate>(config1));
 
     std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
     std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
-    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
-    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+    std::vector<GraphBased::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<GraphBased::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<GraphBased::NodeValueTemplate>(config2));
 
-    Node::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
+    GraphBased::NodeTemplate nodeTemplate({valueTemplate0, valueTemplate1, valueTemplate2, valueTemplate0});
 
 
-    std::vector<Node::NodeValue> vect{size_t(6), 1.0, indiv0, size_t(8)};
+    std::vector<GraphBased::NodeValue> vect{size_t(6), 1.0, indiv0, size_t(8)};
     for(size_t idxRepeat = 0; idxRepeat < nbRepeats; idxRepeat++) {
-        Node::GPNode node(vect);
+        GraphBased::GPNode node(vect);
         
         ASSERT_NO_THROW(mutation.mutateNode(node, nodeTemplate, rng)) << "Mutating a node failed";
         size_t nbValueChanged = 0;
         for(size_t idx = 0; idx < node.getSize(); idx++) {
-            const Node::NodeValue& value = node.getValue(idx);
+            const GraphBased::NodeValue& value = node.getValue(idx);
             if(value != vect.at(idx)) {
                 nbValueChanged++;
             }
@@ -289,7 +289,7 @@ TEST_F(MutationTest, mutateNode)
     }
 
     vect.pop_back();
-    Node::GPNode node(vect);
+    GraphBased::GPNode node(vect);
     ASSERT_THROW(mutation.mutateNode(node, nodeTemplate, rng), std::runtime_error) << "Mutating should fail with different sizes";
 }
 
@@ -298,51 +298,51 @@ TEST_F(MutationTest, mutateIndividual)
     Evolution::Mutation mutation;
 
     Evolution::Genotype emptyGenotype;
-    Node::GenotypeTemplate genotypeEmptyTemplate;
+    GraphBased::GenotypeTemplate genotypeEmptyTemplate;
     ASSERT_THROW(mutation.mutateGenotype(emptyGenotype, genotypeEmptyTemplate, rng), std::runtime_error) << "Should failed with empty template"; 
 
-    auto config0(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
-    auto valueTemplate0(std::make_shared<Node::NodeValueTemplate>(config0));
+    auto config0(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(size_t(5), size_t(10))));
+    auto valueTemplate0(std::make_shared<GraphBased::NodeValueTemplate>(config0));
 
-    auto config1(std::make_shared<Node::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
-    auto valueTemplate1(std::make_shared<Node::NodeValueTemplate>(config1));
+    auto config1(std::make_shared<GraphBased::NodeValueConfiguration>(std::make_pair(-2.0, 3.0)));
+    auto valueTemplate1(std::make_shared<GraphBased::NodeValueTemplate>(config1));
 
     std::shared_ptr<const Evolution::Individual> indiv0 = std::make_shared<Evolution::Individual>(); 
     std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>();
-    std::vector<Node::NodeValue> vectValues = {indiv0, indiv1};
-    auto config2(std::make_shared<Node::NodeValueConfiguration>(vectValues));
-    auto valueTemplate2(std::make_shared<Node::NodeValueTemplate>(config2));
+    std::vector<GraphBased::NodeValue> vectValues = {indiv0, indiv1};
+    auto config2(std::make_shared<GraphBased::NodeValueConfiguration>(vectValues));
+    auto valueTemplate2(std::make_shared<GraphBased::NodeValueTemplate>(config2));
 
-    std::vector<std::shared_ptr<const Node::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
-    auto nodeTemplate0(std::make_shared<Node::NodeTemplate>(vect));
-    auto nodeTemplate1(std::make_shared<Node::NodeTemplate>(valueTemplate1));
+    std::vector<std::shared_ptr<const GraphBased::NodeValueTemplate>> vect{valueTemplate0, valueTemplate1, valueTemplate2};
+    auto nodeTemplate0(std::make_shared<GraphBased::NodeTemplate>(vect));
+    auto nodeTemplate1(std::make_shared<GraphBased::NodeTemplate>(valueTemplate1));
 
-    Node::GenotypeTemplate genotypeTemplate;
+    GraphBased::GenotypeTemplate genotypeTemplate;
     genotypeTemplate.addNodeTemplate(nodeTemplate0, 5, 10);
     genotypeTemplate.addNodeTemplate(nodeTemplate1);
 
     Evolution::Genotype genotype;
-    Node::NodeGroup& group1 = genotype.addNodeGroup();
-    Node::NodeGroup& group2 = genotype.addNodeGroup();
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
+    GraphBased::NodeGroup& group1 = genotype.addNodeGroup();
+    GraphBased::NodeGroup& group2 = genotype.addNodeGroup();
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(5.0), double(0.5), indiv0})));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(6.0), double(0.5), indiv1})));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(7.0), double(1.5), indiv0})));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(8.0), double(1.5), indiv1})));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>(double(0.5))));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>(double(0.5))));
 
     // COPY GENOTYPE (Should need proper method)    
     Evolution::Genotype genotypeCopy;
-    Node::NodeGroup& groupCopy1 = genotypeCopy.addNodeGroup();
-    Node::NodeGroup& groupCopy2 = genotypeCopy.addNodeGroup();
-    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(5.0), double(0.5), indiv0})));
-    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(6.0), double(0.5), indiv1})));
-    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(7.0), double(1.5), indiv0})));
-    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(8.0), double(1.5), indiv1})));
-    groupCopy1.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
+    GraphBased::NodeGroup& groupCopy1 = genotypeCopy.addNodeGroup();
+    GraphBased::NodeGroup& groupCopy2 = genotypeCopy.addNodeGroup();
+    groupCopy1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(5.0), double(0.5), indiv0})));
+    groupCopy1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(6.0), double(0.5), indiv1})));
+    groupCopy1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(7.0), double(1.5), indiv0})));
+    groupCopy1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(8.0), double(1.5), indiv1})));
+    groupCopy1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>({size_t(9.0), double(-0.5), indiv0})));
 
-    groupCopy2.addNode(std::make_unique<Node::GPNode>(std::vector<Node::NodeValue>(double(0.5))));
+    groupCopy2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<GraphBased::NodeValue>(double(0.5))));
 
 
     ASSERT_TRUE(genotype == genotypeCopy) << "Genotypes should be equal before mutation";

@@ -12,7 +12,7 @@
 
 struct CounterReset;
 
-namespace Node {
+namespace  GraphBased {
 
     /**
      * \brief Class representing a GPNode
@@ -207,6 +207,6 @@ namespace Node {
      */
     bool operator!=(const GPNode& a, const GPNode& b);
 
-}; // namespace Node
+}; // namespace  GraphBased
 
 #endif // GP_NODE_H

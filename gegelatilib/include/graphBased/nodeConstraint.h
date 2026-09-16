@@ -5,7 +5,7 @@
 #include "dimensions/constraint.h"
 #include "dimensions/dataValueGenerator.h"
 
-namespace Node {
+namespace  GraphBased {
 
     /**
      * \brief class representation the constraint of a GPNode.

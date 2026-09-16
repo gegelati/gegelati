@@ -133,49 +133,49 @@ TEST_F(RepresentationTest, isValid)
     Dimensions::Requirement customOutput = Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(1, 1));
     Dimensions::Requirement customInput = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-10, 10));
     Representations::FakeRepresentation representation({customInput}, customOutput);
-    std::unique_ptr<Node::GenotypeConstraint>& genotypeConstraint = representation.getGenotypeConstraintMut();
+    std::unique_ptr<GraphBased::GenotypeConstraint>& genotypeConstraint = representation.getGenotypeConstraintMut();
     Evolution::Genotype genotype;
 
     genotypeConstraint = nullptr;
     ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
 
-    genotypeConstraint = std::make_unique<Node::GenotypeConstraint>();
+    genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>();
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid with empty genotypeConstraint";
 
-    Node::NodeConstraint constraint0;
+    GraphBased::NodeConstraint constraint0;
     constraint0.addConstraint(Dimensions::UnconstrainedData());
     genotypeConstraint->addNodeConstraint(constraint0, 2);
     ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
 
-    genotype.addNodeGroup(std::make_unique<Node::NodeGroup>());
-    Node::NodeGroup& group = genotype.getNodeGroup(0);
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1}));
+    genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
+    GraphBased::NodeGroup& group = genotype.getNodeGroup(0);
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.6}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6}));
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid";
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<float>{1.2f}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<float>{1.2f}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
 
     group.removeNode(2);
     group.removeNode(1);
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.6, 2.5}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6, 2.5}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
     
     group.removeNode(1);
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.6}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6}));
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
 
-    Node::NodeConstraint constraint1;
+    GraphBased::NodeConstraint constraint1;
     constraint1.addConstraint(Dimensions::NumericRange<size_t>::between(1, 1));
     genotypeConstraint->addNodeConstraint(constraint1, 1, 5);
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid anymore";
 
-    genotype.addNodeGroup(std::make_unique<Node::NodeGroup>());
-    Node::NodeGroup& group2 = genotype.getNodeGroup(1);
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1}));
+    genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
+    GraphBased::NodeGroup& group2 = genotype.getNodeGroup(1);
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1}));
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
     
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be valid again";
     group2.removeNode(1);
 
@@ -187,15 +187,15 @@ TEST_F(RepresentationTest, isValid)
 
     ASSERT_TRUE(individual->isValid()) << "Individual should be valid!!";
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual}));
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
     group2.removeNode(1);
 
 
     // Create boring genotype for wrong subIndividual
     std::unique_ptr<Evolution::Genotype> boringGenotype = std::make_unique<Evolution::Genotype>();
-    std::unique_ptr<Node::NodeGroup> boringGroup = std::make_unique<Node::NodeGroup>();
-    boringGroup->addNode(std::make_unique<Node::GPNode>(std::vector<double>{1}));
+    std::unique_ptr<GraphBased::NodeGroup> boringGroup = std::make_unique<GraphBased::NodeGroup>();
+    boringGroup->addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1}));
     boringGenotype->addNodeGroup(boringGroup->cloneUniquePtr());
 
     {
@@ -206,7 +206,7 @@ TEST_F(RepresentationTest, isValid)
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
         ASSERT_TRUE(individual2->isValid()) << "Individual should be valid!!";
     
-        group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual2}));
+        group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual2}));
         ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
         group2.removeNode(1);
     }
@@ -218,7 +218,7 @@ TEST_F(RepresentationTest, isValid)
         std::shared_ptr<Evolution::Individual> individual2 = std::make_shared<Evolution::Individual>(representation2);
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
         ASSERT_TRUE(individual2->isValid()) << "Individual should be valid!!";
-        group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual2}));
+        group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual2}));
         ASSERT_TRUE(representation.isValid(genotype)) << "Should be not valid";
         group2.removeNode(1);
     }
@@ -230,7 +230,7 @@ TEST_F(RepresentationTest, isValid)
     individual3->setGenotype(boringGenotype->cloneUniquePtr());
     ASSERT_TRUE(individual3->isValid()) << "Individual should be valid!!";
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual3}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual3}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
     group2.removeNode(1);
 
@@ -243,7 +243,7 @@ TEST_F(RepresentationTest, isValid)
     individual4->updateValidity();
     ASSERT_TRUE(individual4->isValid()) << "Individual should be valid!!";
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual4}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual4}));
     ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid";
     group2.removeNode(1);
 
@@ -255,7 +255,7 @@ TEST_F(RepresentationTest, isValid)
     individual5->updateValidity();
     ASSERT_TRUE(individual5->isValid()) << "Individual should be valid!!";
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual5}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual5}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should be valid";
     group2.removeNode(1);
 
@@ -263,7 +263,7 @@ TEST_F(RepresentationTest, isValid)
     individual4->setGenotype(boringGenotype->cloneUniquePtr());
     ASSERT_FALSE(individual4->isValid()) << "Individual should not be valid!!";
 
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual4}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Evolution::Individual>>{individual4}));
     ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
     group2.removeNode(1);
 }

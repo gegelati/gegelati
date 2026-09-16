@@ -41,7 +41,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "evolution/genotype.h"
+#include "graphBased/genotype.h"
 #include "evolution/individual.h"
 
 
@@ -60,16 +60,16 @@ TEST(GenotypeTest, addRemoveNodeGroup)
 
     ASSERT_EQ(genotype.getSize(), 0) << "Getting size of the Genotype failed.";
 
-    ASSERT_NO_THROW(genotype.addNodeGroup(std::make_unique<Node::NodeGroup>())) << "Adding NodeGroup to the Genotype failed.";
+    ASSERT_NO_THROW(genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>())) << "Adding NodeGroup to the Genotype failed.";
     ASSERT_EQ(genotype.getSize(), 1) << "Getting size of the Genotype failed.";
 
-    Node::NodeGroup* group;
+    GraphBased::NodeGroup* group;
     ASSERT_NO_THROW(group = &genotype.getNodeGroup(0)) << "Getting group failed";
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     ASSERT_EQ(group->getSize(), 1) << "Group should have size 1";
 
 
-    ASSERT_NO_THROW(genotype.addNodeGroup(std::make_unique<Node::NodeGroup>(), 0)) << "Adding NodeGroup to the Genotype failed.";
+    ASSERT_NO_THROW(genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>(), 0)) << "Adding NodeGroup to the Genotype failed.";
     ASSERT_EQ(genotype.getSize(), 2) << "Getting size of the Genotype failed.";
 
     ASSERT_EQ(genotype.getNodeGroup(0).getSize(), 0) << "Group should have size 0";
@@ -80,7 +80,7 @@ TEST(GenotypeTest, addRemoveNodeGroup)
     ASSERT_EQ(genotype.getSize(), 1) << "Getting size of the Genotype failed.";
     
     ASSERT_THROW(genotype.removeNodeGroup(1), std::runtime_error) << "Removing NodeGroup of the Genotype should have failed with wrong index.";
-    ASSERT_THROW(genotype.addNodeGroup(std::make_unique<Node::NodeGroup>(), 2), std::runtime_error) << "Adding NodeGroup of the Genotype should have failed with wrong index.";
+    ASSERT_THROW(genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>(), 2), std::runtime_error) << "Adding NodeGroup of the Genotype should have failed with wrong index.";
     ASSERT_THROW(genotype.getNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
     ASSERT_THROW(genotype.setNodeGroup(group->cloneUniquePtr(), 2), std::runtime_error) << "setting NodeGroup of the Genotype should have failed with wrong index.";
 
@@ -93,15 +93,15 @@ TEST(GenotypeTest, getSizes)
 {
     Evolution::Genotype genotype;
 
-    Node::NodeGroup group1;
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
+    GraphBased::NodeGroup group1;
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
     genotype.addNodeGroup(group1.cloneUniquePtr());
 
-    Node::NodeGroup group2;
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{6, 5, 4}));
+    GraphBased::NodeGroup group2;
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{6, 5, 4}));
     genotype.addNodeGroup(group2.cloneUniquePtr());
 
     ASSERT_EQ(genotype.getFullSize(), 5) << "Full genotype has 5 nodes";
@@ -114,18 +114,18 @@ TEST(GenotypeTest, getEffectiveNodes)
 {
     Evolution::Genotype genotype;
 
-    Node::NodeGroup group1;
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
-    group1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
+    GraphBased::NodeGroup group1;
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.0, 3.0, 4.0}));
+    group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{3.0, 4.0, 5.0}));
     genotype.addNodeGroup(group1.cloneUniquePtr());
 
-    Node::NodeGroup group2;
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
-    group2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{6, 5, 4}));
+    GraphBased::NodeGroup group2;
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
+    group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{6, 5, 4}));
     genotype.addNodeGroup(group2.cloneUniquePtr());
 
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
+    std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
     ASSERT_EQ(effectiveNodes.size(), 2) << "Should be same shape as genotype with no introns";
     ASSERT_EQ(effectiveNodes.at(0).size(), 3) << "Should be same shape as genotype with no introns";
     ASSERT_EQ(effectiveNodes.at(1).size(), 2) << "Should be same shape as genotype with no introns";
@@ -148,51 +148,51 @@ TEST(GenotypeTest, equalityAndClone){
 
     Evolution::Genotype genotype1;
     Evolution::Genotype genotype2;
-    genotype1.addNodeGroup(std::make_unique<Node::NodeGroup>());
-    genotype2.addNodeGroup(std::make_unique<Node::NodeGroup>());
+    genotype1.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
+    genotype2.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     ASSERT_TRUE(genotype1 == genotype2) << "Empty genotypes should be equal!";
 
-    Node::NodeGroup group1_1;
-    Node::NodeGroup group1_2;
+    GraphBased::NodeGroup group1_1;
+    GraphBased::NodeGroup group1_2;
 
-    Node::NodeGroup group2_1;
-    genotype1.addNodeGroup(std::make_unique<Node::NodeGroup>());
+    GraphBased::NodeGroup group2_1;
+    genotype1.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     ASSERT_TRUE(genotype1 != genotype2) << "Genotypes of different sizes should not be equal!";
-    genotype2.addNodeGroup(std::make_unique<Node::NodeGroup>());
+    genotype2.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
 
-    Node::NodeGroup group2_2;
+    GraphBased::NodeGroup group2_2;
 
 
 
-    group1_1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group1_1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
 
     genotype1.setNodeGroup(group1_1.cloneUniquePtr(), 0);
     ASSERT_TRUE(genotype1 != genotype2) << "Should not be equal with different number of nodes";
 
 
-    group2_1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0}));
+    group2_1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0}));
     genotype2.setNodeGroup(group2_1.cloneUniquePtr(), 0);
     ASSERT_TRUE(genotype1 != genotype2) << "Should not be equal with different sizes of nodes";
 
     group2_1.removeNode(0);
-    group2_1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 4.0}));
+    group2_1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 4.0}));
     genotype2.setNodeGroup(group2_1.cloneUniquePtr(), 0);
     ASSERT_TRUE(genotype1 != genotype2) << "Should not be equal with different values of nodes";
     
     group2_1.removeNode(0);
-    group2_1.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group2_1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     genotype2.setNodeGroup(group2_1.cloneUniquePtr(), 0);
     ASSERT_TRUE(genotype1 == genotype2) << "genotypes should be equal";
     
-    group1_2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    group1_2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     genotype1.setNodeGroup(group1_2.cloneUniquePtr(), 1);
-    group2_1.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    group2_1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     genotype2.setNodeGroup(group2_1.cloneUniquePtr(), 0);
     ASSERT_TRUE(genotype1 != genotype2) << "Should not be equal with nodes on different groups";
 
     group2_1.removeNode(1);
     genotype2.setNodeGroup(group2_1.cloneUniquePtr(), 0);
-    group2_2.addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    group2_2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     genotype2.setNodeGroup(group2_2.cloneUniquePtr(), 1);
     ASSERT_TRUE(genotype1 == genotype2) << "genotypes should be equal";
     ASSERT_TRUE(genotype2 == genotype1) << "genotypes should be equal both directions";

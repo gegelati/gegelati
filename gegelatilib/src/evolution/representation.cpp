@@ -32,7 +32,7 @@ void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::Ac
     
 }
 
-const Node::GenotypeConstraint& Evolution::Representation::getGenotypeConstraint() const
+const GraphBased::GenotypeConstraint& Evolution::Representation::getGenotypeConstraint() const
 {
     return *this->genotypeConstraint;
 }
@@ -47,18 +47,18 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
 
     // Check validity of each group
     for(size_t idxGroup = 0; idxGroup < genotype.getSize(); idxGroup++) {
-        const Node::NodeGroup& group = genotype.getNodeGroup(idxGroup);
+        const GraphBased::NodeGroup& group = genotype.getNodeGroup(idxGroup);
 
         // Number of nodes in the group is wrong
         if(group.getSize() < this->genotypeConstraint->getRangeAt(idxGroup).first || group.getSize() > this->genotypeConstraint->getRangeAt(idxGroup).second){
             return false;
         }
 
-        const Node::NodeConstraint& nodeConstraint = this->genotypeConstraint->getNodeConstraintAt(idxGroup);
+        const GraphBased::NodeConstraint& nodeConstraint = this->genotypeConstraint->getNodeConstraintAt(idxGroup);
 
         // Check validity of each node
         for(size_t idxNode = 0; idxNode < group.getSize(); idxNode++) {
-            const Node::GPNode& node = group.getNode(idxNode);
+            const GraphBased::GPNode& node = group.getNode(idxNode);
 
             if(node.getSize() != nodeConstraint.size()) {
                 // One node has an unexpected number of values

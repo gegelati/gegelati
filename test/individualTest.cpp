@@ -68,7 +68,7 @@ TEST_F(IndividualTest, Constructor)
 {
     Evolution::Individual* individual1;
     Evolution::Individual* individual2;
-    std::unique_ptr<Evolution::Genotype> genotype = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    std::unique_ptr<Evolution::Genotype> genotype = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
 
     ASSERT_NO_THROW(individual1 = new Evolution::Individual(fakeRep)) << "Constructor of Individual failed.";
     ASSERT_NO_THROW(individual2 = new Evolution::Individual(fakeRep, std::move(genotype))) << "Constructor of Individual failed.";
@@ -79,7 +79,7 @@ TEST_F(IndividualTest, Constructor)
 
 TEST_F(IndividualTest, SetGetGenotype)
 {
-    std::unique_ptr<Evolution::Genotype> genotypeInit = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    std::unique_ptr<Evolution::Genotype> genotypeInit = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
     Evolution::Individual individual(fakeRep, std::move(genotypeInit->cloneUniquePtr()));
     const Evolution::Genotype* genotype;
     ASSERT_NO_THROW(genotype = &individual.getGenotype()) << "Getting genotype failed";
@@ -88,7 +88,7 @@ TEST_F(IndividualTest, SetGetGenotype)
     ASSERT_EQ(individual.getSize(), genotype->getFullSize()) << "Individual size should be size of full genotype";
     ASSERT_TRUE(individual.getGenotype() == *genotypeInit) << "Genotypes should be equals";
 
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     ASSERT_NO_THROW(individual.setGenotype(std::move(genotypeSet->cloneUniquePtr()))) << "Should not throw";
     ASSERT_TRUE(individual.getGenotype() != *genotypeInit) << "Genotypes should not be equals anymore";
     ASSERT_TRUE(individual.getGenotype() == *genotypeSet) << "Genotypes should be equals";
@@ -96,7 +96,7 @@ TEST_F(IndividualTest, SetGetGenotype)
 
 TEST_F(IndividualTest, cloneIndividual)
 {       
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     Evolution::Individual individual(fakeRep);
 
     std::unique_ptr<Evolution::Individual> copyIndivUnique;
@@ -134,14 +134,14 @@ TEST_F(IndividualTest, results)
 
 TEST_F(IndividualTest, validAndExecute)
 {
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 5, 6}));
+    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     Evolution::Individual individual(fakeRep, std::move(genotypeSet));
 
     ASSERT_FALSE(individual.isValid()) << "Should not be valid";
     Data::DataValue source = Data::DataValue::scalar<int>(1);
     ASSERT_THROW(individual.execute({source.view()}), std::runtime_error) << "Should throw with invalid individual";
 
-    std::unique_ptr<Evolution::Genotype> genotypeSet2 = Evolution::Genotype::singleNodeGenotype(std::make_unique<Node::GPNode>(std::vector<size_t>{4}));
+    std::unique_ptr<Evolution::Genotype> genotypeSet2 = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4}));
     individual.setGenotype(std::move(genotypeSet2));
 
     ASSERT_TRUE(individual.isValid()) << "Should be valid now";

@@ -1,9 +1,9 @@
 #ifndef NODE_GROUP_H
 #define NODE_GROUP_H
 
-#include "node/gpNode.h"
+#include "graphBased/gpNode.h"
 
-namespace Node {
+namespace  GraphBased {
     /**
      * \brief class storing a vector of nodes.
      */
@@ -79,18 +79,18 @@ namespace Node {
             /**
              * \brief Get the nodes of the NodeGroup.
              */
-            virtual std::vector<std::reference_wrapper<const Node::GPNode>> getNodes() const;
+            virtual std::vector<std::reference_wrapper<const GraphBased::GPNode>> getNodes() const;
     };
 
     /**
      * Override of equality operator
      */
-    bool operator==(const Node::NodeGroup& group1, const Node::NodeGroup& group2);
+    bool operator==(const GraphBased::NodeGroup& group1, const GraphBased::NodeGroup& group2);
 
     /**
      * Override of inequality operator
      */
-    bool operator!=(const Node::NodeGroup& group1, const Node::NodeGroup& group2);
+    bool operator!=(const GraphBased::NodeGroup& group1, const GraphBased::NodeGroup& group2);
 };
 
 #endif // NODE_GROUP_H

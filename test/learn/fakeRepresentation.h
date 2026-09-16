@@ -30,9 +30,9 @@ namespace Representations {
 
             
             virtual void setGenotypeConstraint() override {
-                Node::NodeConstraint nc;
+                GraphBased::NodeConstraint nc;
                 nc.addConstraint(Dimensions::UnconstrainedData().cloneSharedPtr());
-                this->genotypeConstraint = std::make_unique<Node::GenotypeConstraint>(nc, 1, 1);
+                this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(nc, 1, 1);
             }
     
         public:
@@ -65,13 +65,13 @@ namespace Representations {
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
              */
-            virtual std::unique_ptr<Node::GenotypeGenerator> getGenotypeGenerator() const override{
-                Node::NodeGenerator ng;
+            virtual std::unique_ptr<GraphBased::GenotypeGenerator> getGenotypeGenerator() const override{
+                GraphBased::NodeGenerator ng;
                 ng.addGenerator(Dimensions::NumericUniformGenerator<int>(0, 0).cloneUniquePtr());
-                return std::make_unique<Node::GenotypeGenerator>(ng, 1, 1);
+                return std::make_unique<GraphBased::GenotypeGenerator>(ng, 1, 1);
             };
 
-            std::unique_ptr<Node::GenotypeConstraint>& getGenotypeConstraintMut() {
+            std::unique_ptr<GraphBased::GenotypeConstraint>& getGenotypeConstraintMut() {
                 return this->genotypeConstraint;
             }
 

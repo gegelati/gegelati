@@ -1,16 +1,16 @@
-#include "node/nodeGenerator.h"
+#include "graphBased/nodeGenerator.h"
             
             
-void Node::NodeGenerator::addGenerator(std::unique_ptr<Dimensions::DataValueGenerator> generator)
+void GraphBased::NodeGenerator::addGenerator(std::unique_ptr<Dimensions::DataValueGenerator> generator)
 {
     this->generators.push_back(std::move(generator));
 }
-void Node::NodeGenerator::addGenerator(const Dimensions::DataValueGenerator& generator)
+void GraphBased::NodeGenerator::addGenerator(const Dimensions::DataValueGenerator& generator)
 {
     this->addGenerator(std::move(generator.cloneUniquePtr()));
 }
 
-Dimensions::DataValueGenerator& Node::NodeGenerator::getGeneratorAt(size_t idxValue)
+Dimensions::DataValueGenerator& GraphBased::NodeGenerator::getGeneratorAt(size_t idxValue)
 {
     if(idxValue >= this->generators.size()) {
         throw std::runtime_error("Node:NodeRequirements:getRequirementAt: index out of bounds.");
@@ -18,12 +18,12 @@ Dimensions::DataValueGenerator& Node::NodeGenerator::getGeneratorAt(size_t idxVa
     return *this->generators.at(idxValue);
 }
 
-size_t Node::NodeGenerator::size() const 
+size_t GraphBased::NodeGenerator::size() const 
 {
     return this->generators.size();
 }
 
-std::unique_ptr<Node::NodeGenerator> Node::NodeGenerator::cloneUniquePtr() const
+std::unique_ptr<GraphBased::NodeGenerator> GraphBased::NodeGenerator::cloneUniquePtr() const
 {
     std::unique_ptr<NodeGenerator> clone = std::make_unique<NodeGenerator>();
     for(size_t idx = 0; idx < this->generators.size(); idx++) {

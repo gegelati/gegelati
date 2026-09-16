@@ -113,13 +113,13 @@ TEST_F(TPGRepresentationTest, getGenotypeConstraint)
 {
     size_t nbActions = 3;
     Representations::TPGRepresentation representation({inputType}, nbActions, 2, 10);
-    const Node::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
+    const GraphBased::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
 
     ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
     ASSERT_EQ(constraint.getRangeAt(0).first, 2) << "Low range should be 2";
     ASSERT_EQ(constraint.getRangeAt(0).second, 10) << "Low range should be 10";
 
-    const Node::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
+    const GraphBased::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
     ASSERT_EQ(nodeConstraint.size(), 2) << "Size should be 2";
 
     ASSERT_TRUE(nodeConstraint.getConstraintAt(0) == Dimensions::NumericRange<double>::unbounded()) << "Should be compatible";
@@ -133,13 +133,13 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 
     size_t nbActions = 3;
     Representations::TPGRepresentation representation({inputType}, nbActions, 2, 10);
-    std::unique_ptr<Node::GenotypeGenerator> generator = representation.getGenotypeGenerator();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator();
 
     ASSERT_EQ(generator->size(), 1) << "Size of constraint should be 1";
     ASSERT_EQ(generator->getRangeAt(0).first, 2) << "Low range should be 2";
     ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 10";
 
-    Node::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 2) << "Size should be 2";
 
     ASSERT_THROW(nodeGen.getGeneratorAt(0).sample(rng), std::runtime_error) << "Should throw since no individual is set";
@@ -164,8 +164,8 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
     // Should update generator automatically
     representation.setAvailableTangledIndiv(tangled);
 
-    std::unique_ptr<Node::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator();
-    Node::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
+    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator();
+    GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
     for(size_t idx = 0; idx < 1000; idx++) {
         std::shared_ptr<const Evolution::Individual> member = nodeGenNew.getGeneratorAt(0).sample(rng).getScalar<std::shared_ptr<const Evolution::Individual>>();
         ASSERT_TRUE(member->getIndividualID() < members.size()) << "ID should be 0, 1 or 2";
@@ -190,20 +190,20 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     // create lgp members.
     std::shared_ptr<Evolution::Individual> member0 = std::make_shared<Evolution::Individual>(*memberRepresentation);
     std::unique_ptr<Evolution::Genotype> memberGenotype0 = std::make_unique<Evolution::Genotype>();
-    std::unique_ptr<Node::NodeGroup> memberGroup0 = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> memberGroup0 = std::make_unique<GraphBased::NodeGroup>();
     
-    memberGroup0->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    memberGroup0->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 3, 1, 0}));// R[0] = R[3] + S[0] = 1.0
+    memberGroup0->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    memberGroup0->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 3, 1, 0}));// R[0] = R[3] + S[0] = 1.0
     memberGenotype0->addNodeGroup(std::move(memberGroup0));
     member0->setGenotype(std::move(memberGenotype0));
     ASSERT_TRUE(member0->isValid()) << "Member should be valid";
 
     std::shared_ptr<Evolution::Individual> member1 = std::make_shared<Evolution::Individual>(*memberRepresentation);
     std::unique_ptr<Evolution::Genotype> memberGenotype1 = std::make_unique<Evolution::Genotype>();
-    std::unique_ptr<Node::NodeGroup> memberGroup1 = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> memberGroup1 = std::make_unique<GraphBased::NodeGroup>();
     
-    memberGroup1->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 2, 1, 0, 1, 0}));// R[0] = S[0] * S[0] = 1.0
-    memberGroup1->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 0, 0, 1, 3}));// R[0] = R[0] - S[3] = 2.0
+    memberGroup1->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 2, 1, 0, 1, 0}));// R[0] = S[0] * S[0] = 1.0
+    memberGroup1->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 1, 0, 0, 1, 3}));// R[0] = R[0] - S[3] = 2.0
     memberGenotype1->addNodeGroup(std::move(memberGroup1));
     member1->setGenotype(std::move(memberGenotype1));
     ASSERT_TRUE(member1->isValid()) << "Member should be valid";
@@ -211,10 +211,10 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     std::shared_ptr<Evolution::Individual> member2 = std::make_shared<Evolution::Individual>(*memberRepresentation);
     std::unique_ptr<Evolution::Genotype> memberGenotype2 = std::make_unique<Evolution::Genotype>();
-    std::unique_ptr<Node::NodeGroup> memberGroup2 = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> memberGroup2 = std::make_unique<GraphBased::NodeGroup>();
     
-    memberGroup2->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{4, 1, 1, 2, 1, 0}));// R[4] = S[2] - S[0] = 1.0
-    memberGroup2->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 4, 1, 3}));// R[0] = R[4] + S[3] = 0.0
+    memberGroup2->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 1, 1, 2, 1, 0}));// R[4] = S[2] - S[0] = 1.0
+    memberGroup2->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 4, 1, 3}));// R[0] = R[4] + S[3] = 0.0
     memberGenotype2->addNodeGroup(std::move(memberGroup2));
     member2->setGenotype(std::move(memberGenotype2));
     ASSERT_TRUE(member2->isValid()) << "Member should be valid";
@@ -226,10 +226,10 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     // Tangled Individual
     std::shared_ptr<Evolution::Individual> tangledIndiv = std::make_shared<Evolution::Individual>(representation);
     std::unique_ptr<Evolution::Genotype> tangledGenotype = std::make_unique<Evolution::Genotype>();
-    std::unique_ptr<Node::NodeGroup> tangledGroup = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> tangledGroup = std::make_unique<GraphBased::NodeGroup>();
     
     for(size_t i = 0; i < 3; i++) {
-        std::unique_ptr<Node::GPNode> node = std::make_unique<Node::GPNode>();
+        std::unique_ptr<GraphBased::GPNode> node = std::make_unique<GraphBased::GPNode>();
         node->addValue(Data::DataValue::scalar(memberPop.at(i)));
         node->addValue(Data::DataValue::scalar<size_t>(i));
         tangledGroup->addNode(std::move(node));
@@ -239,19 +239,19 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(tangledIndiv->isValid()) << "tangledIndiv should be valid";
 
     Evolution::Genotype genotype;
-    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
-    std::unique_ptr<Node::GPNode> node0 = std::make_unique<Node::GPNode>();
+    std::unique_ptr<GraphBased::GPNode> node0 = std::make_unique<GraphBased::GPNode>();
     node0->addValue(Data::DataValue::scalar(memberPop.at(1)));
     node0->addValue(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(tangledIndiv));
     group->addNode(std::move(node0));
     
-    std::unique_ptr<Node::GPNode> node1 = std::make_unique<Node::GPNode>();
+    std::unique_ptr<GraphBased::GPNode> node1 = std::make_unique<GraphBased::GPNode>();
     node1->addValue(Data::DataValue::scalar(memberPop.at(2)));
     node1->addValue(Data::DataValue::scalar<size_t>(0));
     group->addNode(std::move(node1));
     
-    std::unique_ptr<Node::GPNode> node2 = std::make_unique<Node::GPNode>();
+    std::unique_ptr<GraphBased::GPNode> node2 = std::make_unique<GraphBased::GPNode>();
     node2->addValue(Data::DataValue::scalar(memberPop.at(0)));
     node2->addValue(Data::DataValue::scalar<size_t>(2));
     group->addNode(std::move(node2));

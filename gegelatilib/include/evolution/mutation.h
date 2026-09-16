@@ -39,7 +39,7 @@ namespace Evolution {
          * \param[in] nodeGenerator node Generator of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Node::GPNode> createRandomNode(Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
+        virtual std::unique_ptr<GraphBased::GPNode> createRandomNode(GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
         
 
         /**
@@ -48,7 +48,7 @@ namespace Evolution {
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Genotype> initRandomGenotype(std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> initRandomGenotype(std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief Initialize an individual
@@ -76,7 +76,7 @@ namespace Evolution {
          * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(Node::GPNode& node, Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
+        virtual void mutateNode(GraphBased::GPNode& node, GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief return a mutated copy of a Genotype.
@@ -85,7 +85,7 @@ namespace Evolution {
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<Genotype> mutateGenotype(const Genotype& genotype, std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
+        virtual std::unique_ptr<Genotype> mutateGenotype(const Genotype& genotype, std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief Mutate a set of individuals

@@ -1,13 +1,13 @@
-#include "node/genotypeConstraint.h"
+#include "graphBased/genotypeConstraint.h"
 
-size_t Node::GenotypeConstraint::size() const
+size_t GraphBased::GenotypeConstraint::size() const
 {
     // NodeConstraint and NodeRanges sizes should always be equal, no security check for lowering complexity.
     return this->nodeConstraints.size();
 }
 
 
-void Node::GenotypeConstraint::addNodeConstraint(std::unique_ptr<NodeConstraint> nodeConstraint, size_t minRange, size_t maxRange)
+void GraphBased::GenotypeConstraint::addNodeConstraint(std::unique_ptr<NodeConstraint> nodeConstraint, size_t minRange, size_t maxRange)
 {
     if(nodeConstraint->size() == 0) {
         throw std::runtime_error("Node:GenotypeConstraint:addNodeConstraint: nodeConstraints is empty.");
@@ -21,13 +21,13 @@ void Node::GenotypeConstraint::addNodeConstraint(std::unique_ptr<NodeConstraint>
     this->nodeRanges.push_back(std::make_pair(minRange, maxRange));
 }
 
-void Node::GenotypeConstraint::addNodeConstraint(const NodeConstraint& nodeConstraint, size_t minRange, size_t maxRange)
+void GraphBased::GenotypeConstraint::addNodeConstraint(const NodeConstraint& nodeConstraint, size_t minRange, size_t maxRange)
 {
     this->addNodeConstraint(std::move(nodeConstraint.cloneUniquePtr()), minRange, maxRange);
 }
 
 
-const Node::NodeConstraint& Node::GenotypeConstraint::getNodeConstraintAt(size_t idx) const
+const GraphBased::NodeConstraint& GraphBased::GenotypeConstraint::getNodeConstraintAt(size_t idx) const
 {
     if(idx >= this->nodeConstraints.size()) {
         throw std::runtime_error("Node:GenotypeConstraint:getNodeConstraintAt: index out of bounds.");
@@ -36,7 +36,7 @@ const Node::NodeConstraint& Node::GenotypeConstraint::getNodeConstraintAt(size_t
 }
 
 
-const std::pair<size_t, size_t>& Node::GenotypeConstraint::getRangeAt(size_t idx) const
+const std::pair<size_t, size_t>& GraphBased::GenotypeConstraint::getRangeAt(size_t idx) const
 {
     if(idx >= this->nodeRanges.size()) {
         throw std::runtime_error("Node:GenotypeConstraint:getNodeConstraintAt: index out of bounds.");
@@ -44,7 +44,7 @@ const std::pair<size_t, size_t>& Node::GenotypeConstraint::getRangeAt(size_t idx
     return this->nodeRanges.at(idx);
 }
 
-std::unique_ptr<Node::GenotypeConstraint> Node::GenotypeConstraint::cloneUniquePtr() const {
+std::unique_ptr<GraphBased::GenotypeConstraint> GraphBased::GenotypeConstraint::cloneUniquePtr() const {
     std::unique_ptr<GenotypeConstraint> clone = std::make_unique<GenotypeConstraint>();
     for(size_t idx = 0; idx < this->nodeConstraints.size(); idx++) {
         const std::pair<size_t, size_t>& pairRef = this->nodeRanges.at(idx);

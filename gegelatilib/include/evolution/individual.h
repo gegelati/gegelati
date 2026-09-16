@@ -6,7 +6,7 @@
 #include <memory>
 
  
-#include "evolution/genotype.h"
+#include "graphBased/genotype.h"
 #include "evaluation/evaluationResult.h"
 #include "evolution/representation.h"
 #include "util/genericComparator.h"

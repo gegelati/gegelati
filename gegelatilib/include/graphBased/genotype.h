@@ -1,7 +1,7 @@
 #ifndef GENOTYPE_H
 #define GENOTYPE_H
 
-#include "node/nodeGroup.h"
+#include "graphBased/nodeGroup.h"
 
 namespace Evolution {
 
@@ -20,7 +20,7 @@ namespace Evolution {
 
         protected:
             /// @brief Vector of node groups characterizing the genotype.
-            std::vector<std::unique_ptr<Node::NodeGroup>> nodeGroups;
+            std::vector<std::unique_ptr<GraphBased::NodeGroup>> nodeGroups;
 
         public:
 
@@ -36,14 +36,14 @@ namespace Evolution {
              * 
              * \param[in] node single node of the genotype
              */
-            static std::unique_ptr<Genotype> singleNodeGenotype(std::unique_ptr<Node::GPNode> node);
+            static std::unique_ptr<Genotype> singleNodeGenotype(std::unique_ptr<GraphBased::GPNode> node);
 
             /**
              * \brief Method for fast construction of simple genotypes
              * 
              * \param[in] group single group of the genotype
              */
-            static std::unique_ptr<Genotype> singleGroupGenotype(std::unique_ptr<Node::NodeGroup> group);
+            static std::unique_ptr<Genotype> singleGroupGenotype(std::unique_ptr<GraphBased::NodeGroup> group);
 
             /**
              * \brief clone the current genotype as a unique pointer.
@@ -56,14 +56,14 @@ namespace Evolution {
              * \param[in] group the group added.
              * \param[in] index the index at which to add the NodeGroup.
              */
-            virtual void addNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index);
+            virtual void addNodeGroup(std::unique_ptr<GraphBased::NodeGroup> group, size_t index);
 
             /**
              * \brief Add a NodeGroup at the end of the Genotype.
              * 
              * \param[in] group the group added.
              */
-            virtual void addNodeGroup(std::unique_ptr<Node::NodeGroup> group);
+            virtual void addNodeGroup(std::unique_ptr<GraphBased::NodeGroup> group);
 
             /**
              * \brief Remove a NodeGroup from the Genotype.
@@ -77,14 +77,14 @@ namespace Evolution {
              * 
              * \param[in] index the index of the NodeGroup to get.
              */
-            virtual const Node::NodeGroup& getNodeGroup(size_t index) const;
+            virtual const GraphBased::NodeGroup& getNodeGroup(size_t index) const;
 
             /**
              * \brief Get the NodeGroup at the given index.
              * 
              * \param[in] index the index of the NodeGroup to get.
              */
-            virtual Node::NodeGroup& getNodeGroup(size_t index);
+            virtual GraphBased::NodeGroup& getNodeGroup(size_t index);
 
             /**
              * \brief set a NodeGroup at the given index, replacing the former one.
@@ -92,7 +92,7 @@ namespace Evolution {
              * \param[in] group the group set.
              * \param[in] index the index of the NodeGroup to set.
              */
-            virtual void setNodeGroup(std::unique_ptr<Node::NodeGroup> group, size_t index);
+            virtual void setNodeGroup(std::unique_ptr<GraphBased::NodeGroup> group, size_t index);
 
             /**
              * \brief Get the number of NodeGroup in the Genotype.
@@ -116,14 +116,14 @@ namespace Evolution {
              * 
              * \return a reference to the vector of unique pointers to NodeGroup representing the genotype of the Individual.
              */
-            virtual std::vector<std::reference_wrapper<const Node::NodeGroup>> getNodeGroups() const;
+            virtual std::vector<std::reference_wrapper<const GraphBased::NodeGroup>> getNodeGroups() const;
 
             /**
              * \brief Get the effective genotype of the Individual: the non-intron GPNodes.
              * 
              * \return a vector of vector for each non-intron node of each node group of the genotype.
              */
-            virtual std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> getEffectiveNodes() const;
+            virtual std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> getEffectiveNodes() const;
 
     };
     

@@ -7,7 +7,7 @@ void CounterReset::counterReset()
     EvoGraph::Edge::resetEdgeIDCounter();
     Representation::Individual::resetIndividualIDCounter();
     Representation::Representation::resetRepresentationIDCounter();
-    Node::GPNode::resetGPNodeIDCounter();
+    GraphBased::GPNode::resetGPNodeIDCounter();
     Evolution::Individual::resetIndividualIDCounter();
     Evolution::Population::resetPopulationIDCounter();
 }

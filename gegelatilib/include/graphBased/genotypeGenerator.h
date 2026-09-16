@@ -2,9 +2,9 @@
 #ifndef GENOTYPE_GENERATOR_H
 #define GENOTYPE_GENERATOR_H
 
-#include "node/nodeGenerator.h"
+#include "graphBased/nodeGenerator.h"
 
-namespace Node {
+namespace  GraphBased {
 
 
     /**

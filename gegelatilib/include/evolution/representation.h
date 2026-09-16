@@ -10,9 +10,9 @@
 #include <functional>
 #include "iostream"
 
-#include "node/genotypeConstraint.h"
-#include "node/genotypeGenerator.h"
-#include "evolution/genotype.h"
+#include "graphBased/genotypeConstraint.h"
+#include "graphBased/genotypeGenerator.h"
+#include "graphBased/genotype.h"
 #include "representation/repParameters.h"
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
@@ -56,7 +56,7 @@ namespace Evolution {
 
 
         /// @brief Constraint of the genotype
-        std::unique_ptr<Node::GenotypeConstraint> genotypeConstraint;
+        std::unique_ptr<GraphBased::GenotypeConstraint> genotypeConstraint;
 
         /**
          * \brief define the constraints required of the genotype
@@ -138,12 +138,12 @@ namespace Evolution {
         /**
          * \brief return the genotype constraint of the representation.
          */
-        virtual const Node::GenotypeConstraint& getGenotypeConstraint() const;
+        virtual const GraphBased::GenotypeConstraint& getGenotypeConstraint() const;
 
         /**
          * \brief return a unique genotype generator of the representation.
          */
-        virtual std::unique_ptr<Node::GenotypeGenerator> getGenotypeGenerator() const = 0;
+        virtual std::unique_ptr<GraphBased::GenotypeGenerator> getGenotypeGenerator() const = 0;
 
         /**
          * \brief identified wether the genotype is valid faced to the expected node structure of the representation.

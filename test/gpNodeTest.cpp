@@ -42,7 +42,7 @@
 #include <numeric>
 
 #include "evolution/individual.h"
-#include "node/gpNode.h"
+#include "graphBased/gpNode.h"
 #include "util/counterReset.h"
 #include "representations/lgpRepresentation.h"
 #include "learn/fakeRepresentation.h"
@@ -69,26 +69,26 @@ class GPNodeTest : public ::testing::Test
 
 TEST_F(GPNodeTest, Constructor)
 {
-    Node::GPNode* emptyNode;
-    Node::GPNode* intNode;
-    Node::GPNode* doubleNode;
-    Node::GPNode* variantNode;
+    GraphBased::GPNode* emptyNode;
+    GraphBased::GPNode* intNode;
+    GraphBased::GPNode* doubleNode;
+    GraphBased::GPNode* variantNode;
 
-    ASSERT_NO_THROW(emptyNode = new Node::GPNode(true))
+    ASSERT_NO_THROW(emptyNode = new GraphBased::GPNode(true))
         << "Construction of the empty GPNode failed.";
 
     std::vector<size_t> intValues = {1,2,3};
-    ASSERT_NO_THROW(intNode = new Node::GPNode(intValues))
+    ASSERT_NO_THROW(intNode = new GraphBased::GPNode(intValues))
         << "Construction of the int GPNode failed.";
 
     std::vector<double> doubleValues = {1.0, 2.0, 3.0};
-    ASSERT_NO_THROW(doubleNode = new Node::GPNode(doubleValues))
+    ASSERT_NO_THROW(doubleNode = new GraphBased::GPNode(doubleValues))
         << "Construction of the double GPNode failed.";
 
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
-    ASSERT_NO_THROW(variantNode = new Node::GPNode(variantValues))
+    ASSERT_NO_THROW(variantNode = new GraphBased::GPNode(variantValues))
         << "Construction of the variant GPNode failed.";
 
     ASSERT_NO_THROW(delete emptyNode) << "Destruction of the int GPNode failed.";
@@ -104,9 +104,9 @@ TEST_F(GPNodeTest, clone)
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
     variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
-    Node::GPNode node(variantValues);
+    GraphBased::GPNode node(variantValues);
 
-    std::unique_ptr<Node::GPNode> clone = node.cloneUniquePtr();
+    std::unique_ptr<GraphBased::GPNode> clone = node.cloneUniquePtr();
     ASSERT_TRUE(node.getValue(0) == clone->getValue(0)) << "Getting value of the GPNode failed.";
     ASSERT_TRUE(node.getValue(1) == clone->getValue(1)) << "Getting value of the GPNode failed.";
     ASSERT_TRUE(node.getValue(2) == clone->getValue(2)) << "Getting value of the GPNode failed.";
@@ -125,7 +125,7 @@ TEST_F(GPNodeTest, SetGetValue)
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
     variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
-    Node::GPNode node(variantValues);
+    GraphBased::GPNode node(variantValues);
 
     
     ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<size_t>(1)) << "Getting value of the GPNode failed.";
@@ -156,22 +156,22 @@ TEST_F(GPNodeTest, SetGetValue)
 
 TEST_F(GPNodeTest, IDCounter)
 {
-    ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 0) << "GPNode ID counter should be 0 at the beginning.";
+    ASSERT_EQ(GraphBased::GPNode::getGPNodeIDCounter(), 0) << "GPNode ID counter should be 0 at the beginning.";
 
     std::vector<size_t> values = {1, 2, 3};
     std::vector<double> doubleValues = {1.1, 2.1, 3.1};
-    Node::GPNode node1(values);
-    Node::GPNode node2(doubleValues);
+    GraphBased::GPNode node1(values);
+    GraphBased::GPNode node2(doubleValues);
 
     ASSERT_EQ(node1.getGPNodeID(), 0) << "GPNode ID should be 0.";
     ASSERT_EQ(node2.getGPNodeID(), 1) << "GPNode ID should be 1.";
 
-    ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 2) << "GPNode ID counter should be 2 after creating two nodes.";
+    ASSERT_EQ(GraphBased::GPNode::getGPNodeIDCounter(), 2) << "GPNode ID counter should be 2 after creating two nodes.";
 
     node1.setGPNodeID(100);
     ASSERT_EQ(node1.getGPNodeID(), 100) << "Setting GPNode ID failed.";
 
-    ASSERT_EQ(Node::GPNode::getGPNodeIDCounter(), 101) << "GPNode ID counter should be 101 after setting the first node's ID.";
+    ASSERT_EQ(GraphBased::GPNode::getGPNodeIDCounter(), 101) << "GPNode ID counter should be 101 after setting the first node's ID.";
     
     // Check <, = and != operators
     ASSERT_TRUE(node1 != node2) << "operator != failed.";

@@ -155,7 +155,7 @@
 #include <mutator/mutationParameters.h>
 #include <mutator/rng.h>
 
-#include <node/gpNode.h>
+#include <graphBased/gpNode.h>
 
 #include <selector/classificationSelectionMetrics.h>
 #include <selector/classificationSelector.h>

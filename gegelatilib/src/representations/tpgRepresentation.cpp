@@ -15,7 +15,7 @@ std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::c
 
 void Representations::TPGRepresentation::setGenotypeConstraint()
 {
-   Node::NodeConstraint bidNodes;
+   GraphBased::NodeConstraint bidNodes;
 
     // Value Requirements for members
     bidNodes.addConstraint(Dimensions::NumericRange<double>::unbounded());
@@ -23,12 +23,12 @@ void Representations::TPGRepresentation::setGenotypeConstraint()
     // Action constraint
     bidNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1));
 
-    this->genotypeConstraint = std::make_unique<Node::GenotypeConstraint>(bidNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(bidNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
 void Representations::TPGRepresentation::setGenotypeGenerator()
 {
-   Node::NodeGenerator bidNodes;
+   GraphBased::NodeGenerator bidNodes;
 
     
     /* === Value requirements for members === */
@@ -56,7 +56,7 @@ void Representations::TPGRepresentation::setGenotypeGenerator()
         bidNodes.addGenerator(actionGenerator);
     }
 
-    this->genotypeGenerator = std::make_unique<Node::GenotypeGenerator>(bidNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
 void Representations::TPGRepresentation::setAvailableMembers(const std::vector<std::shared_ptr<const Evolution::Individual>>& members)
@@ -78,7 +78,7 @@ void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vec
     }
 }
 
-std::unique_ptr<Node::GenotypeGenerator> Representations::TPGRepresentation::getGenotypeGenerator() const
+std::unique_ptr<GraphBased::GenotypeGenerator> Representations::TPGRepresentation::getGenotypeGenerator() const
 {
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
@@ -88,13 +88,13 @@ Data::DataValue Representations::TPGRepresentation::executeGenotype(
     const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
-    std::vector<std::reference_wrapper<const Node::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
+    std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
     size_t winnerIdx;
 
     for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
-        const Node::GPNode& node = effectiveNodes.at(idx);
+        const GraphBased::GPNode& node = effectiveNodes.at(idx);
         const std::shared_ptr<const Evolution::Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Evolution::Individual>>();
         double bid = member->execute(inputSources).getScalar<double>();
 

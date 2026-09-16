@@ -15,7 +15,7 @@ std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::c
 void Representations::LGPRepresentation::setGenotypeConstraint()
 {
     size_t maxInputSourceIdx = 8;
-    Node::NodeConstraint instructionNodes;
+    GraphBased::NodeConstraint instructionNodes;
 
     // Value Requirements for register
     instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbRegisters - 1));
@@ -29,7 +29,7 @@ void Representations::LGPRepresentation::setGenotypeConstraint()
         instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, maxInputSourceIdx - 1));
     }
 
-    this->genotypeConstraint = std::make_unique<Node::GenotypeConstraint>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
 
@@ -37,7 +37,7 @@ void Representations::LGPRepresentation::setGenotypeConstraint()
 void Representations::LGPRepresentation::setGenotypeGenerator()
 {
     size_t maxInputSourceIdx = 8;
-    Node::NodeGenerator instructionNodes;
+    GraphBased::NodeGenerator instructionNodes;
 
     // Value Requirements for register
     instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->nbRegisters - 1));
@@ -51,10 +51,10 @@ void Representations::LGPRepresentation::setGenotypeGenerator()
         instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, maxInputSourceIdx - 1));
     }
 
-    this->genotypeGenerator = std::make_unique<Node::GenotypeGenerator>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
 }
 
-std::unique_ptr<Node::GenotypeGenerator> Representations::LGPRepresentation::getGenotypeGenerator() const
+std::unique_ptr<GraphBased::GenotypeGenerator> Representations::LGPRepresentation::getGenotypeGenerator() const
 {
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
@@ -63,13 +63,13 @@ Data::DataValue Representations::LGPRepresentation::executeGenotype(
     const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
-    std::vector<std::vector<std::reference_wrapper<const Node::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
+    std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
 
     /// Registers used as internal memory.
     Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
     Data::DataView registerView = registers.view();
 
-    for(const Node::GPNode& node: effectiveNodes.at(0)) {
+    for(const GraphBased::GPNode& node: effectiveNodes.at(0)) {
 
         size_t outputIndex = node.getValue(0).getScalar<size_t>();
         size_t functionIndex = node.getValue(1).getScalar<size_t>();

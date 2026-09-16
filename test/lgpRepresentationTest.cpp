@@ -94,13 +94,13 @@ TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 {
     size_t nbRegisters = 8;
     Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
-    const Node::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
+    const GraphBased::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
 
     ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
     ASSERT_EQ(constraint.getRangeAt(0).first, 5) << "Low range should be 5";
     ASSERT_EQ(constraint.getRangeAt(0).second, 10) << "Low range should be 5";
 
-    const Node::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
+    const GraphBased::NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(0);
     ASSERT_EQ(nodeConstraint.size(), 6) << "Size should be 6";
 
     ASSERT_TRUE(nodeConstraint.getConstraintAt(0) == Dimensions::NumericRange<size_t>(0, nbRegisters - 1)) << "Should be compatible";
@@ -116,13 +116,13 @@ TEST_F(LGPRepresentationTest, getGenotypeGenerator)
     Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
     RNG::RNG rng;
 
-    std::unique_ptr<Node::GenotypeGenerator> generator = representation.getGenotypeGenerator();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator();
     
     ASSERT_EQ(generator->size(), 1) << "Size of generator should be 1";
     ASSERT_EQ(generator->getRangeAt(0).first, 5) << "Low range should be 5";
     ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 5";
 
-    Node::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 6) << "Size should be 6";
 
     size_t value;
@@ -144,13 +144,13 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
 
     Evolution::Genotype genotype;
-    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
     genotype.addNodeGroup(group->cloneUniquePtr());
 
@@ -162,7 +162,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
     // R[0] = R[0] + R[0] = -1, but set as intron
 
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}, true));
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 0}, true));
     genotype.setNodeGroup(group->cloneUniquePtr(), 0);
     ASSERT_NO_THROW(output = representation.execute(genotype, {inputSource.view()})) << "Execution of individual failed.";
     ASSERT_EQ(output.getScalar<double>(), 1.5) << "Value is not correct.";
@@ -172,13 +172,13 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
 {
 
     Evolution::Genotype genotype;
-    std::unique_ptr<Node::NodeGroup> group = std::make_unique<Node::NodeGroup>();
+    std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
-    group->addNode(std::make_unique<Node::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 0, 0, 3, 1, 0}));// R[2] = R[3] + S[0] = 1.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 3, 0, 2, 0, 2}));// R[2] = R[2] / R[2] = 1.0 / 1.0 = 1.0
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 1, 1, 2, 1, 1}));// R[0] = S[2] - S[1] = 0.5
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 0, 0, 2}));// R[0] = R[0] - R[2] = 0.5 + 1 = 1.5
 
     genotype.addNodeGroup(std::move(group));
     

@@ -2,9 +2,9 @@
 #ifndef GENOTYPE_CONSTRAINT_H
 #define GENOTYPE_CONSTRAINT_H
 
-#include "node/nodeConstraint.h"
+#include "graphBased/nodeConstraint.h"
 
-namespace Node {
+namespace  GraphBased {
 
 
     /**

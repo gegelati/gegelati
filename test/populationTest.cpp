@@ -122,11 +122,11 @@ TEST_F(PopulationTest, emptyIndividual)
     Evolution::Individual& mutIndiv = population.getMutableIndividual(individual);
 
     Evolution::Genotype& genotype = mutIndiv.getMutableGenotype();
-    Node::NodeGroup& group = genotype.addNodeGroup();
+    GraphBased::NodeGroup& group = genotype.addNodeGroup();
 
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
-    group.addNode(std::make_unique<Node::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{4.0, 5.0, 6.0}));
+    group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{7.0, 8.0, 9.0}));
 
     ASSERT_NO_THROW(population.emptyIndividual(individual)) << "Emptying individual failed";
     ASSERT_EQ(individual.getSize(), 0) << "Size of the individual after empty should be 0.";

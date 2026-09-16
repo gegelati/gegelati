@@ -7,7 +7,7 @@
 #include "representation/representation.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
-#include "node/gpNode.h"
+#include "graphBased/gpNode.h"
 #include "evolution/individual.h"
 #include "evolution/population.h"
 

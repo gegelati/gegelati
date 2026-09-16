@@ -3,7 +3,7 @@
 #include "evolution/individual.h"
 
 
-std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const
+std::unique_ptr<GraphBased::GPNode> Evolution::Mutation::createRandomNode(GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const
 {
     if(nodeGenerator.size() == 0) {
         throw std::runtime_error("Evolution::Mutation::createRandomNode: NodeGenerator is empty.");
@@ -13,11 +13,11 @@ std::unique_ptr<Node::GPNode> Evolution::Mutation::createRandomNode(Node::NodeGe
     for(size_t idxValue = 0; idxValue < nodeGenerator.size(); idxValue++) {
         values.push_back(nodeGenerator.getGeneratorAt(idxValue).cloneUniquePtr()->sample(rng));
     }
-    return std::make_unique<Node::GPNode>(values);
+    return std::make_unique<GraphBased::GPNode>(values);
 }
 
 
-std::unique_ptr<Evolution::Genotype> Evolution::Mutation::initRandomGenotype(std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const
+std::unique_ptr<Evolution::Genotype> Evolution::Mutation::initRandomGenotype(std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const
 {
     if(genotypeGenerator->size() == 0) {
         throw std::runtime_error("Evolution::Mutation::initRandomGenotype: genotypeGenerator is empty.");
@@ -25,7 +25,7 @@ std::unique_ptr<Evolution::Genotype> Evolution::Mutation::initRandomGenotype(std
     std::unique_ptr<Genotype> genotype = std::make_unique<Genotype>();
 
     for(size_t idxGenerator = 0; idxGenerator < genotypeGenerator->size(); idxGenerator++) {
-        std::unique_ptr<Node::NodeGroup> nodeGroup = std::make_unique<Node::NodeGroup>();
+        std::unique_ptr<GraphBased::NodeGroup> nodeGroup = std::make_unique<GraphBased::NodeGroup>();
 
         const std::pair<size_t, size_t>& range = genotypeGenerator->getRangeAt(idxGenerator);
         size_t nbNodesOfGenerator = rng.getUnsignedInt64(range.first, range.second);
@@ -56,7 +56,7 @@ std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individua
     return individuals;
 }
 
-void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeGenerator& nodeGenerator, RNG::RNG& rng) const
+void Evolution::Mutation::mutateNode(GraphBased::GPNode& node, GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const
 {
     if(nodeGenerator.size() != node.getSize()) {
         throw std::runtime_error("Evolution::Mutation::mutateNode: NodeGenerator size does not correspond to the genotypeidual.");
@@ -72,7 +72,7 @@ void Evolution::Mutation::mutateNode(Node::GPNode& node, Node::NodeGenerator& no
 }
 
 
-std::unique_ptr<Evolution::Genotype> Evolution::Mutation::mutateGenotype(const Genotype& genotype, std::unique_ptr<Node::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const
+std::unique_ptr<Evolution::Genotype> Evolution::Mutation::mutateGenotype(const Genotype& genotype, std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const
 {
     if(genotypeGenerator->size() == 0) {
         throw std::runtime_error("Evolution::Mutation::mutateGenotype: genotypeGenerator is empty.");
@@ -81,9 +81,9 @@ std::unique_ptr<Evolution::Genotype> Evolution::Mutation::mutateGenotype(const G
 
     double pMutateNode = 0.5;
 
-    Node::NodeGenerator& nodeGenerator = genotypeGenerator->getNodeGeneratorAt(0);
+    GraphBased::NodeGenerator& nodeGenerator = genotypeGenerator->getNodeGeneratorAt(0);
     for(size_t idxNodeGroup = 0; idxNodeGroup < genotype.getSize(); idxNodeGroup++) {
-        Node::NodeGroup& mutatedGroup = mutatedGenotype->getNodeGroup(idxNodeGroup);
+        GraphBased::NodeGroup& mutatedGroup = mutatedGenotype->getNodeGroup(idxNodeGroup);
 
         for(size_t idxNode = 0; idxNode < mutatedGroup.getSize(); idxNode++) {
             if(rng.getDouble(0, 1) < pMutateNode) {
