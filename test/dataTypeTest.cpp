@@ -27,7 +27,7 @@ TEST(DataTypeTest, DefaultConstructorCreatesInvalidDescriptor)
 
 TEST(DataTypeTest, ScalarFactoryCreatesScalarDescriptor)
 {
-    const auto descriptor = Data::DataType::scalar<double>();
+    const Data::DataType descriptor = Data::DataType::scalar<double>();
 
     EXPECT_EQ(descriptor.rank, 0u) << "Scalar rank should be 0.";
     EXPECT_EQ(descriptor.dimensions[0], 1u) << "Scalar dimension should be {1, 0}.";
@@ -50,7 +50,7 @@ TEST(DataTypeTest, ScalarFactoryCreatesScalarDescriptor)
 
 TEST(DataTypeTest, Array1dFactoryCreates1DDescriptor)
 {
-    const auto descriptor = Data::DataType::array1d<int>(4);
+    const Data::DataType descriptor = Data::DataType::array1d<int>(4);
 
     EXPECT_EQ(descriptor.rank, 1u) << "1D rank should be 1.";
     EXPECT_EQ(descriptor.dimensions[0], 4u) << "1D size should be 4.";
@@ -79,7 +79,7 @@ TEST(DataTypeTest, Array1dFactoryCreates1DDescriptor)
 
 TEST(DataTypeTest, Array2dFactoryCreates2DDescriptor)
 {
-    const auto descriptor = Data::DataType::array2d<float>(2, 3);
+    const Data::DataType descriptor = Data::DataType::array2d<float>(2, 3);
 
     EXPECT_EQ(descriptor.rank, 2u) << "2D rank should be 2.";
     EXPECT_EQ(descriptor.dimensions[0], 2u) << "2D row count should be 2.";
@@ -112,17 +112,17 @@ TEST(DataTypeTest, FromDeductionMatchesFactoryLiterals)
     int values[4] = {1, 2, 3, 4};
     double matrix[2][3] = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
 
-    const auto scalarDescriptor = Data::DataType::from(scalarValue);
+    const Data::DataType scalarDescriptor = Data::DataType::from(scalarValue);
     EXPECT_EQ(scalarDescriptor.rank, 0u) << "Scalar from() should create rank 0.";
     EXPECT_TRUE(*scalarDescriptor.elementType == typeid(int)) << "from(scalar) should resolve int.";
     EXPECT_EQ(scalarDescriptor.dimensions[0], 1u) << "Scalar from() dimension should be 1.";
 
-    const auto array1dDescriptor = Data::DataType::from(values);
+    const Data::DataType array1dDescriptor = Data::DataType::from(values);
     EXPECT_EQ(array1dDescriptor.rank, 1u) << "from(array1d) should create rank 1.";
     EXPECT_EQ(array1dDescriptor.dimensions[0], 4u) << "from(array1d) should keep the array size.";
     EXPECT_TRUE(*array1dDescriptor.elementType == typeid(int)) << "from(array1d) should resolve int.";
 
-    const auto array2dDescriptor = Data::DataType::from(matrix);
+    const Data::DataType array2dDescriptor = Data::DataType::from(matrix);
     EXPECT_EQ(array2dDescriptor.rank, 2u) << "from(array2d) should create rank 2.";
     EXPECT_EQ(array2dDescriptor.dimensions[0], 2u) << "from(array2d) should keep row count.";
     EXPECT_EQ(array2dDescriptor.dimensions[1], 3u) << "from(array2d) should keep column count.";
@@ -131,8 +131,8 @@ TEST(DataTypeTest, FromDeductionMatchesFactoryLiterals)
 
 TEST(DataTypeTest, SubViewPreservesSourceMetadata)
 {
-    const auto source = Data::DataType::array2d<double>(3, 4);
-    const auto sub = Data::DataType::subView(Data::DataType::array2d<double>(2, 3), source, 5);
+    const Data::DataType source = Data::DataType::array2d<double>(3, 4);
+    const Data::DataType sub = Data::DataType::subView(Data::DataType::array2d<double>(2, 3), source, 5);
 
     EXPECT_EQ(sub.rank, 2u) << "Sub-view rank should match requested rank.";
     EXPECT_EQ(sub.dimensions[0], 2u) << "Sub-view row count should be 2.";
@@ -148,9 +148,9 @@ TEST(DataTypeTest, SubViewPreservesSourceMetadata)
 
 TEST(DataTypeTest, CanFitInHandlesScalar1DAnd2DCases)
 {
-    const auto scalar = Data::DataType::scalar<int>();
-    const auto oneD = Data::DataType::array1d<int>(5);
-    const auto twoD = Data::DataType::array2d<int>(3, 4);
+    const Data::DataType scalar = Data::DataType::scalar<int>();
+    const Data::DataType oneD = Data::DataType::array1d<int>(5);
+    const Data::DataType twoD = Data::DataType::array2d<int>(3, 4);
     Data::DataType wrong;
     wrong.rank = 3;
 
@@ -173,8 +173,8 @@ TEST(DataTypeTest, CanFitInHandlesScalar1DAnd2DCases)
 
 TEST(DataTypeTest, CanFitInUsesLinearOffsetRelativeToCurrentDescriptor)
 {
-    const auto source = Data::DataType::array2d<int>(3, 4);
-    const auto window = Data::DataType::subView(Data::DataType::array2d<int>(2, 2), source, 5);
+    const Data::DataType source = Data::DataType::array2d<int>(3, 4);
+    const Data::DataType window = Data::DataType::subView(Data::DataType::array2d<int>(2, 2), source, 5);
 
     EXPECT_TRUE(window.canFitIn(Data::DataType::array2d<int>(2, 2), 0)) << "The exact same 2x2 window should fit inside itself.";
     EXPECT_FALSE(window.canFitIn(Data::DataType::array2d<int>(2, 2), 1)) << "A shifted 2x2 window should not fit if it leaves its own descriptor.";
@@ -182,11 +182,47 @@ TEST(DataTypeTest, CanFitInUsesLinearOffsetRelativeToCurrentDescriptor)
     EXPECT_FALSE(source.canFitIn(Data::DataType::array2d<int>(2, 2), 10)) << "An offset past the valid bounds should fail.";
 }
 
+TEST(DataTypeTest, getAddressSpace) 
+{
+    const Data::DataType scalar0 = Data::DataType::scalar<int>();
+    const Data::DataType scalar1 = Data::DataType::scalar<int>(); 
+
+    ASSERT_EQ(scalar0.getAddressSpace(scalar1), 1) << "AddressSpace should be 1";
+    ASSERT_EQ(scalar0.getAddressSpace(scalar0), 1) << "AddressSpace should be 1";
+
+    const Data::DataType array1d0 = Data::DataType::array1d<int>(8);
+    const Data::DataType array1d1 = Data::DataType::array1d<int>(4); 
+    
+    ASSERT_EQ(array1d1.getAddressSpace(array1d1), 1) << "AddressSpace should be 1";
+    ASSERT_EQ(array1d0.getAddressSpace(array1d0), 1) << "AddressSpace should be 1";
+    ASSERT_EQ(array1d0.getAddressSpace(scalar0), 8) << "AddressSpace should be 8";
+    ASSERT_EQ(array1d0.getAddressSpace(array1d1), 5) << "AddressSpace should be 5";
+    ASSERT_EQ(scalar0.getAddressSpace(array1d0), 0) << "AddressSpace should be 0";
+    ASSERT_EQ(array1d1.getAddressSpace(array1d0), 0) << "AddressSpace should be 0";
+
+    
+    const Data::DataType array2d0 = Data::DataType::array2d<int>(8, 8);
+    const Data::DataType array2d1 = Data::DataType::array2d<int>(4, 4);
+    
+    ASSERT_EQ(array2d0.getAddressSpace(array2d0), 1) << "AddressSpace should be 1";
+    ASSERT_EQ(array2d1.getAddressSpace(array2d1), 1) << "AddressSpace should be 1";
+    ASSERT_EQ(array2d0.getAddressSpace(array2d1), 25) << "AddressSpace should be 25 (5*5)";
+    ASSERT_EQ(array2d0.getAddressSpace(array1d0), 8) << "AddressSpace should be 8";
+    ASSERT_EQ(array2d0.getAddressSpace(array1d1), 40) << "AddressSpace should be 40 (8*5)";
+    ASSERT_EQ(array2d0.getAddressSpace(scalar1), 64) << "AddressSpace should be 64 (8*8)";
+    ASSERT_EQ(array2d1.getAddressSpace(array1d1), 4) << "AddressSpace should be 4";
+    
+    
+    ASSERT_EQ(array2d1.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
+    ASSERT_EQ(scalar0.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
+    ASSERT_EQ(array1d0.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
+}
+
 TEST(DataTypeTest, EqualityAndSourceAwareComparisonBehaveAsExpected)
 {
-    const auto a = Data::DataType::array2d<int>(2, 3);
-    const auto b = Data::DataType::array2d<int>(2, 3);
-    const auto c = Data::DataType::subView(Data::DataType::array2d<int>(2, 3), Data::DataType::array2d<int>(4, 5), 7);
+    const Data::DataType a = Data::DataType::array2d<int>(2, 3);
+    const Data::DataType b = Data::DataType::array2d<int>(2, 3);
+    const Data::DataType c = Data::DataType::subView(Data::DataType::array2d<int>(2, 3), Data::DataType::array2d<int>(4, 5), 7);
 
     EXPECT_TRUE(a == b) << "Same logical shape and type should compare equal.";
     EXPECT_FALSE(a != b) << "Inequality should be false for identical descriptors.";
@@ -197,7 +233,7 @@ TEST(DataTypeTest, EqualityAndSourceAwareComparisonBehaveAsExpected)
 
 TEST(DataTypeTest, ToString)
 {
-    const auto descriptor = Data::DataType::subView(
+    const Data::DataType descriptor = Data::DataType::subView(
         Data::DataType::array2d<double>(2, 2),
         Data::DataType::array2d<double>(3, 4),
         5);

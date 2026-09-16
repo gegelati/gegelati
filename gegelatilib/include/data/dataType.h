@@ -242,6 +242,13 @@ namespace Data {
         bool canFitIn(const DataType& requested, size_t offset = 0) const noexcept;
 
         /**
+         * \brief Return the address space reachable by the requested type inside this descriptor.
+         * 
+         * For example if this descriptor is an array of size 8, and the requested is an array of size 4, the address space should be 5 (It can access indices 0, 1, 2, 3 and 4, but 5, 6, and 7 would be out of bound)
+         */
+        size_t getAddressSpace(const DataType& requested) const noexcept;
+
+        /**
          * \brief Compares two descriptors while ignoring source context.
          *
          * \param[in] other Descriptor to compare with.

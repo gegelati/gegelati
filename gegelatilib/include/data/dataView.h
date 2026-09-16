@@ -177,6 +177,7 @@ namespace Data {
          */
         void canBeAccess(const std::type_info& type) const;
 
+        
         /**
          * \brief Returns a reference to a scalar value of type T.
          *

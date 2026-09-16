@@ -100,7 +100,7 @@ namespace Instructions {
         if (!this->checkOperandTypes(args)) {
             throw std::invalid_argument("Instruction operand type mismatch.");
         }
-        return Data::DataValue::scalar(
+        return Data::DataValue::scalar<T>(
             args.at(0).template getScalar<T>() +
             args.at(1).template getScalar<T>());
     }
