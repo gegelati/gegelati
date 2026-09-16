@@ -39,7 +39,7 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-#include "representation/repParameters.h"
+#include "oldRepresentations/repParameters.h"
 #include "selector/selectionParameters.h"
 #include "learn/learningParameters.h"
 

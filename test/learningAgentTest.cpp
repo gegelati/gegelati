@@ -43,12 +43,12 @@
 
 #include "log/laBasicLogger.h"
 
-#include "representation/tpg/tpgRepresentation.h"
-#include "representation/lgp/lgpRepresentation.h"
-#include "representation/cgp/cgpRepresentation.h"
-#include "representation/tgp/tgpRepresentation.h"
-#include "representation/maple/mapleRepresentation.h"
-#include "representation/atpg/atpgRepresentation.h"
+#include "oldRepresentations/tpg/tpgRepresentation.h"
+#include "oldRepresentations/lgp/lgpRepresentation.h"
+#include "oldRepresentations/cgp/cgpRepresentation.h"
+#include "oldRepresentations/tgp/tgpRepresentation.h"
+#include "oldRepresentations/maple/mapleRepresentation.h"
+#include "oldRepresentations/atpg/atpgRepresentation.h"
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"

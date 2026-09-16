@@ -36,9 +36,9 @@
 #ifndef LA_POLICY_STATS_LOGGER_H
 #define LA_POLICY_STATS_LOGGER_H
 
-#include "representation/individual.h"
+#include "oldRepresentations/individual.h"
 #include "log/laLogger.h"
-#include "representation/policyStats.h"
+#include "oldRepresentations/policyStats.h"
 
 namespace Log {
     /**

@@ -3,7 +3,7 @@
 #ifndef SELECTION_METRICS_H
 #define SELECTION_METRICS_H
 
-#include "representation/individual.h"
+#include "oldRepresentations/individual.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/graph.h"
 

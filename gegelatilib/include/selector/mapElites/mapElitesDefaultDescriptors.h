@@ -2,7 +2,7 @@
 #ifndef MAP_ELITES_DEFAULT_DESCRIPTORS_H
 #define MAP_ELITES_DEFAULT_DESCRIPTORS_H
 
-#include "representation/individual.h"
+#include "oldRepresentations/individual.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "evoGraph/graph.h"
 

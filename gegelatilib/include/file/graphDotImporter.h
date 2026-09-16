@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "representation/lgp/lgpIndividual.h"
+#include "oldRepresentations/lgp/lgpIndividual.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"

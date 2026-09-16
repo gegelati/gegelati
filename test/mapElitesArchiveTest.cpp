@@ -1,7 +1,7 @@
 #include "selector/mapElites/mapElitesArchive.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "representation/lgp/environment.h"
+#include "oldRepresentations/lgp/environment.h"
 #include <gtest/gtest.h>
 
 /*

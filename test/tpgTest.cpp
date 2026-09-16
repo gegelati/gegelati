@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-#include "representation/lgp/lgpIndividual.h"
+#include "oldRepresentations/lgp/lgpIndividual.h"
 
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"

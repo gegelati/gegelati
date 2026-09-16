@@ -52,8 +52,8 @@
 #include "representations/tpgRepresentation.h"
 
 #include "evolution/reproduction.h"
-#include "selectors/random.h"
-#include "selectors/truncation.h"
+#include "selection/random.h"
+#include "selection/truncation.h"
 
 #include "util/counterReset.h"
 // Set all file in comment

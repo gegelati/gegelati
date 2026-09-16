@@ -3,7 +3,7 @@
 #ifndef SELECTION_CONTEXT_H
 #define SELECTION_CONTEXT_H
 
-#include "representation/individual.h"
+#include "oldRepresentations/individual.h"
 #include "evoGraph/graph.h"
 
 namespace Selector {

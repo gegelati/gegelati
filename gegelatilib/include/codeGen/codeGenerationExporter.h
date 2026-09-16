@@ -47,8 +47,8 @@
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
-#include "representation/individual.h"
-#include "representation/representation.h"
+#include "oldRepresentations/individual.h"
+#include "oldRepresentations/representation.h"
 
 namespace CodeGen {
     /**

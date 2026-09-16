@@ -40,7 +40,7 @@
 
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"
-#include "representation/lgp/environment.h"
+#include "oldRepresentations/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"

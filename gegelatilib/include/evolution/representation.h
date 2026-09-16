@@ -13,7 +13,7 @@
 #include "graphBased/genotypeConstraint.h"
 #include "graphBased/genotypeGenerator.h"
 #include "graphBased/genotype.h"
-#include "representation/repParameters.h"
+#include "oldRepresentations/repParameters.h"
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
 #include "dimensions/activationFunctions.h"

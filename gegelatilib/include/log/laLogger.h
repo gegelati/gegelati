@@ -42,7 +42,7 @@
 #include <map>
 #include <ostream>
 
-#include "representation/representation.h"
+#include "oldRepresentations/representation.h"
 #include "learn/evaluationResult.h"
 #include "log/logger.h"
 #include "evoGraph/graph.h"

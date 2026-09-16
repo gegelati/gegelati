@@ -3,7 +3,7 @@
 #ifndef SELECTOR_H
 #define SELECTOR_H
 
-#include "representation/population.h"
+#include "oldRepresentations/population.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "learn/learningParameters.h"

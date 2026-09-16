@@ -48,7 +48,7 @@
 #endif
 
 #include "codeGen/tpgGenerationEngineFactory.h"
-#include "representation/lgp/environment.h"
+#include "oldRepresentations/lgp/environment.h"
 #include "file/graphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"

@@ -55,8 +55,8 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 #include "file/graphDotExporter.h"
-#include "representation/population.h"
-#include "representation/representation.h"
+#include "oldRepresentations/population.h"
+#include "oldRepresentations/representation.h"
 #include "util/counterReset.h"
 
 namespace Representation{

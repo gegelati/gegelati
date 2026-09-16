@@ -2,7 +2,7 @@
 #ifndef MAP_ELITES_DESCRIPTORS_H
 #define MAP_ELITES_DESCRIPTORS_H
 
-#include "representation/individual.h"
+#include "oldRepresentations/individual.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/graph.h"
 

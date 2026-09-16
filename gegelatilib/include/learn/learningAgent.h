@@ -42,7 +42,7 @@
 #include <map>
 #include <queue>
 
-#include "representation/representation.h"
+#include "oldRepresentations/representation.h"
 
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"

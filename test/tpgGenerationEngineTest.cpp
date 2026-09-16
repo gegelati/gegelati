@@ -48,7 +48,7 @@
 #include <filesystem>
 #endif
 
-#include "representation/lgp/environment.h"
+#include "oldRepresentations/lgp/environment.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "evoGraph/graph.h"

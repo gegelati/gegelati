@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "representation/lgp/lgpIndividual.h"
+#include "oldRepresentations/lgp/lgpIndividual.h"
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
@@ -48,7 +48,7 @@
 #include "mutator/rng.h"
 #include "parameters.h"
 
-#include "representation/tpg/archive.h"
+#include "oldRepresentations/tpg/archive.h"
 #if 0
 class ArchiveTest : public ::testing::Test
 {

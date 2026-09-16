@@ -51,48 +51,48 @@
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <representation/individual.h>
-#include <representation/representation.h>
-#include <representation/job.h>
-#include <representation/mutator.h>
-#include <representation/population.h>
-#include <representation/executionEngine.h>
+#include <oldRepresentations/individual.h>
+#include <oldRepresentations/representation.h>
+#include <oldRepresentations/job.h>
+#include <oldRepresentations/mutator.h>
+#include <oldRepresentations/population.h>
+#include <oldRepresentations/executionEngine.h>
 
-#include <representation/atpg/atpgRepresentation.h>
-#include <representation/atpg/atpgPopulation.h>
-#include <representation/atpg/atpgMutator.h>
-#include <representation/atpg/atpgExecutionEngine.h>
+#include <oldRepresentations/atpg/atpgRepresentation.h>
+#include <oldRepresentations/atpg/atpgPopulation.h>
+#include <oldRepresentations/atpg/atpgMutator.h>
+#include <oldRepresentations/atpg/atpgExecutionEngine.h>
 
-#include <representation/cgp/cgpRepresentation.h>
-#include <representation/cgp/cgpLineMutator.h>
-#include <representation/cgp/cgpMutator.h>
+#include <oldRepresentations/cgp/cgpRepresentation.h>
+#include <oldRepresentations/cgp/cgpLineMutator.h>
+#include <oldRepresentations/cgp/cgpMutator.h>
 
-#include <representation/lgp/environment.h>
-#include <representation/lgp/lgpRepresentation.h>
-#include <representation/lgp/lgpIndividual.h>
-#include <representation/lgp/lgpPopulation.h>
-#include <representation/lgp/lgpMutator.h>
-#include <representation/lgp/lgpLine.h>
-#include <representation/lgp/lgpLineMutator.h>
-#include <representation/lgp/lgpCodeGenerationEngine.h>
-#include <representation/lgp/lgpExecutionEngine.h>
+#include <oldRepresentations/lgp/environment.h>
+#include <oldRepresentations/lgp/lgpRepresentation.h>
+#include <oldRepresentations/lgp/lgpIndividual.h>
+#include <oldRepresentations/lgp/lgpPopulation.h>
+#include <oldRepresentations/lgp/lgpMutator.h>
+#include <oldRepresentations/lgp/lgpLine.h>
+#include <oldRepresentations/lgp/lgpLineMutator.h>
+#include <oldRepresentations/lgp/lgpCodeGenerationEngine.h>
+#include <oldRepresentations/lgp/lgpExecutionEngine.h>
 
-#include <representation/maple/mapleIndividual.h>
-#include <representation/maple/mapleRepresentation.h>
-#include <representation/maple/mapleExecutionEngine.h>
-#include <representation/maple/maplePopulation.h>
-#include <representation/maple/mapleMutator.h>
+#include <oldRepresentations/maple/mapleIndividual.h>
+#include <oldRepresentations/maple/mapleRepresentation.h>
+#include <oldRepresentations/maple/mapleExecutionEngine.h>
+#include <oldRepresentations/maple/maplePopulation.h>
+#include <oldRepresentations/maple/mapleMutator.h>
 
-#include <representation/tgp/tgpRepresentation.h>
-#include <representation/tgp/tgpLineMutator.h>
-#include <representation/tgp/tgpMutator.h>
+#include <oldRepresentations/tgp/tgpRepresentation.h>
+#include <oldRepresentations/tgp/tgpLineMutator.h>
+#include <oldRepresentations/tgp/tgpMutator.h>
 
-#include <representation/tpg/archive.h>
-#include <representation/tpg/tpgRepresentation.h>
-#include <representation/tpg/tpgIndividual.h>
-#include <representation/tpg/tpgPopulation.h>
-#include <representation/tpg/tpgMutator.h>
-#include <representation/tpg/tpgExecutionEngine.h>
+#include <oldRepresentations/tpg/archive.h>
+#include <oldRepresentations/tpg/tpgRepresentation.h>
+#include <oldRepresentations/tpg/tpgIndividual.h>
+#include <oldRepresentations/tpg/tpgPopulation.h>
+#include <oldRepresentations/tpg/tpgMutator.h>
+#include <oldRepresentations/tpg/tpgExecutionEngine.h>
 
 
 #include <oldData/array2DWrapper.h>

@@ -1,0 +1,53 @@
+
+#ifndef MAPLE_EXECUTION_ENGINE_H
+#define MAPLE_EXECUTION_ENGINE_H
+
+#include "oldRepresentations/tpg/tpgExecutionEngine.h"
+#include "oldRepresentations/maple/mapleIndividual.h"
+
+
+namespace Representation::Maple {
+    /**
+     * \brief class used to execute the individual of an representation
+     */
+    class MapleExecutionEngine : public TPG::TPGExecutionEngine {
+
+    public:
+
+        /**
+         * \brief MapleExecutionEngine constructor.
+         * 
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
+         * \param[in] representationID id of the representation used.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
+         */
+        MapleExecutionEngine(const Output::OutputHandler& outputs, uint64_t representationID, bool isTraining = false): TPGExecutionEngine(outputs, representationID, isTraining) {}
+
+        /**
+         * \brief TPGExecutionEngine constructor.
+         * 
+         * \param[in] executedIndividual the individual to execute.
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
+         */
+        MapleExecutionEngine(const Individual& executedIndividual, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedIndividual, outputs, isTraining) {}
+
+
+        /**
+         * \brief Execute the Graph starting from the vertex pointed by the given individual.
+         *
+         * This method browse the graph by successively evaluating Teams and
+         * following the Edge proposing the best bids.
+         * 
+         * \return a vector containing all the Vertex traversed during the
+         *         evaluation of the Graph. The Action resulting from the
+         *         Graph execution is at the end of the returned vector.
+         */
+        virtual std::vector<double> execute() override; 
+        
+    }; 
+}; // namespace Representation::Maple
+
+#endif // MAPLE_EXECUTION_ENGINE_H

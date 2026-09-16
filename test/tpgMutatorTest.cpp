@@ -42,14 +42,14 @@
 #include <set>
 #include <vector>
 
-#include "representation/lgp/lgpMutator.h"
-#include "representation/lgp/lgpLineMutator.h"
-#include "representation/mutator.h"
-#include "representation/tpg/tpgMutator.h"
-#include "representation/tpg/tpgExecutionEngine.h"
+#include "oldRepresentations/lgp/lgpMutator.h"
+#include "oldRepresentations/lgp/lgpLineMutator.h"
+#include "oldRepresentations/mutator.h"
+#include "oldRepresentations/tpg/tpgMutator.h"
+#include "oldRepresentations/tpg/tpgExecutionEngine.h"
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"
-#include "representation/lgp/environment.h"
+#include "oldRepresentations/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"

@@ -3,8 +3,8 @@
 #ifndef COUNTER_RESET_H
 #define COUNTER_RESET_H
 
-#include "representation/individual.h"
-#include "representation/representation.h"
+#include "oldRepresentations/individual.h"
+#include "oldRepresentations/representation.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
 #include "graphBased/gpNode.h"
