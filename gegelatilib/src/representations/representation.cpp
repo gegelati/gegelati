@@ -1,43 +1,33 @@
 
-#include "evolution/representation.h"
+#include "representations/representation.h"
 
-#include "evolution/individual.h"
+#include "individual.h"
 
-std::unique_ptr<Evolution::Representation> Evolution::Representation::cloneUniquePtr() const
+std::unique_ptr<Representations::Representation> Representations::Representation::cloneUniquePtr() const
 {
-    std::unique_ptr<Evolution::Representation> clone = this->cloneOnlyRepresentation();
+    std::unique_ptr<Representations::Representation> clone = this->cloneOnlyRepresentation();
     for(const std::unique_ptr<Dimensions::ActivationFunctions::Function>& function: this->outputFunctions) {
         clone->addOutputFunction(function->cloneUniquePtr());
     }
     return std::move(clone);
 }
 
-size_t Evolution::Representation::getMinNbNodes() const
-{
-    return this->nbNodesMin;
-}
-
-size_t Evolution::Representation::getMaxNbNodes() const
-{
-    return this->nbNodesMax;
-}
-
-void Evolution::Representation::addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function)
+void Representations::Representation::addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function)
 {
     this->dimensionFlow.addLayer(function->name(), function->inputDimensions(), function->outputDimension());
     if(!this->dimensionFlow.isValid()) {
-        throw std::runtime_error("Evolution::Representation::addOutputFunction: Function " + function->name() +" cannot be add to current flow: " + this->dimensionFlow.summary());
+        throw std::runtime_error("Representations::Representation::addOutputFunction: Function " + function->name() +" cannot be add to current flow: " + this->dimensionFlow.summary());
     }
     this->outputFunctions.push_back(std::move(function));
     
 }
 
-const GraphBased::GenotypeConstraint& Evolution::Representation::getGenotypeConstraint() const
+const GraphBased::GenotypeConstraint& Representations::Representation::getGenotypeConstraint() const
 {
     return *this->genotypeConstraint;
 }
 
-bool Evolution::Representation::isValid(const Genotype& genotype) const 
+bool Representations::Representation::isValid(const GraphBased::Genotype& genotype) const 
 {
     if(this->genotypeConstraint == nullptr || genotype.getSize() != this->genotypeConstraint->size()) {
         // Not the same number of node groups
@@ -74,7 +64,7 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
                 // For now it is forced shared_ptr of const individual... 
                 if(value.getElementType() == typeid(std::shared_ptr<const Individual>)) {
                     // Get individual
-                    const std::shared_ptr<const Evolution::Individual>& individualValue = value.getScalar<std::shared_ptr<const Individual>>();
+                    const std::shared_ptr<const Individual>& individualValue = value.getScalar<std::shared_ptr<const Individual>>();
                     if(!individualValue->isValid()) {
                         return false;
                     }
@@ -102,29 +92,29 @@ bool Evolution::Representation::isValid(const Genotype& genotype) const
     
 }
 
-const Dimensions::DimensionFlow& Evolution::Representation::getDimensionFlow() const
+const Dimensions::DimensionFlow& Representations::Representation::getDimensionFlow() const
 {
     return this->dimensionFlow;
 }
 
-std::string Evolution::Representation::summary() const
+std::string Representations::Representation::summary() const
 {
     return this->dimensionFlow.summary();
 }
 
-Data::DataValue Evolution::Representation::execute(
-          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
+Data::DataValue Representations::Representation::execute(
+          const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // No need to check if the dimension flow is valid, it is necessarily valid by construction for now.
 
     // Check inputs are valid
     const std::vector<Dimensions::Requirement>& inputDim = this->dimensionFlow.getInputDimensions();
     if(inputSources.size() != inputDim.size()) {
-        throw std::runtime_error("Evolution::Representation::execute: Dimensions of the input sources are wrong");
+        throw std::runtime_error("Representations::Representation::execute: Dimensions of the input sources are wrong");
     }
     for(size_t idx = 0; idx < inputSources.size(); idx++){
         if(!inputDim.at(0).accepts(inputSources.at(0))) {
-            throw std::runtime_error("Evolution::Representation::execute: Dimensions of the input sources are wrong");
+            throw std::runtime_error("Representations::Representation::execute: Dimensions of the input sources are wrong");
         }
     }
 

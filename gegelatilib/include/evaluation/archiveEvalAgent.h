@@ -86,8 +86,8 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividual(
-            const Evolution::Individual& individual, 
-            const Evolution::Representation& representation,
+            const Individual& individual, 
+            const Representation& representation,
             uint64_t generationNumber,
             LearningMode mode) const override;
 
@@ -107,8 +107,8 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividuals(
-          const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-          const Evolution::Representation& representation,
+          const std::set<std::reference_wrapper<const Individual>>& individuals, 
+          const Representation& representation,
           uint64_t generationNumber,
           LearningMode mode) const override;
     };

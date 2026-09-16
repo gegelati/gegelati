@@ -1,20 +1,20 @@
-#ifndef SELECTION_H
-#define SELECTION_H
+#ifndef SELECTION_SELECTOR_H
+#define SELECTION_SELECTOR_H
 
 #include <set>
 #include <algorithm>
 
-#include "evolution/individual.h"
+#include "individual.h"
 #include "evaluation/evaluationResult.h"
 
 #include "evaluation/scoreMetric.h"
 
-namespace Evolution {
+ namespace Selection {
 
     /**
      * \brief Class representing the selection mechanism of the evolution algorithm, that can be used either for parents selection, surviving selection or anything else requiring selection.
      */
-    class Selection {
+    class Selector {
 
         protected:          
             /// Boolean indicating wether this selection mechanism allows replacement.  
@@ -23,18 +23,18 @@ namespace Evolution {
         public: 
 
             /// Default polymorphic destructor
-            virtual ~Selection() = default;
+            virtual ~Selector() = default;
 
             /**
              * \brief Default constructor
              * 
              * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.  
              */
-            Selection(bool replacement) : replacement{replacement} {};
+            Selector(bool replacement) : replacement{replacement} {};
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
-            Selection(const Selection&) = delete;
-            Selection& operator=(const Selection&) = delete;
+            Selector(const Selector&) = delete;
+            Selector& operator=(const Selector&) = delete;
 
             /**
              * \brief method returning the evaluation metrics required for the selection process.
@@ -46,8 +46,8 @@ namespace Evolution {
              * 
              * \param[in] individuals the individuals containing the scores.
              */
-            virtual std::vector<std::pair<double, std::shared_ptr<const Individual>>> getRankedScores(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Evolution::Individual>>& individuals) const;
+            virtual std::vector<std::pair<double, std::shared_ptr<const Individual>>> assignFitness(
+                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals) const;
 
             /**
              * \brief method performing the selection
@@ -59,7 +59,7 @@ namespace Evolution {
              * \return a vector of the selected individuals.
              */
             virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Evolution::Individual>>& individuals,
+                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
                 size_t nbSelected, RNG::RNG& rng) const = 0;
 
             /**
@@ -69,8 +69,8 @@ namespace Evolution {
              * 
              * \return the best individual.
              */
-            virtual const Evolution::Individual& getBest(const std::set<std::shared_ptr<const Individual>, SharedLess<Evolution::Individual>>& individuals) const;
+            virtual const Individual& getBest(const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals) const;
     };
 };
 
-#endif // SELECTION_H
+#endif // SELECTION_SELECTOR_H

@@ -769,7 +769,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction)
     // is a copy of the original
     ASSERT_EQ(progPointer1.use_count(), 1)
         << "Shared pointer should no longer be used inside the TPG after "
-           "mutation.";
+           "evolution/mutation.";
 }
 
 TEST_F(TpgMutatorTest, TPGMutatorMutateActionEdge_MultiAction)
@@ -851,7 +851,7 @@ TEST_F(TpgMutatorTest, TPGMutatorOutgoingEdgeMutateAction)
     // is a copy of the original
     ASSERT_EQ(progPointer1.use_count(), 1)
         << "Shared pointer should no longer be used inside the TPG after "
-           "mutation.";
+           "evolution/mutation.";
 }*/
 
 TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)

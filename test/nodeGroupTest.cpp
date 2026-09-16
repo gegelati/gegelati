@@ -42,7 +42,7 @@
 #include <numeric>
 
 #include "graphBased/nodeGroup.h"
-#include "evolution/individual.h"
+#include "individual.h"
 
 
 TEST(NodeGroupTest, Constructor)

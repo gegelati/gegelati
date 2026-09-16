@@ -74,7 +74,7 @@ namespace Evaluation {
          * \param[in] seed used to reset the learningEnvironment.
          */
         virtual void initMetrics(
-            const Evolution::Individual& individual,
+            const Individual& individual,
             const Evaluation::LearningEnvironment& learningEnvironment,
             size_t seed) override;
 
@@ -91,7 +91,7 @@ namespace Evaluation {
          * individual is evaluated.
          */
         virtual void extractMetricsStep(
-            const Evolution::Individual& individual, std::vector<double> actionValues,
+            const Individual& individual, std::vector<double> actionValues,
             const Evaluation::LearningEnvironment& learningEnvironment) override;
     };
 

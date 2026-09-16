@@ -7,7 +7,7 @@
     "maxNbEvaluationPerPolicy" : 100,
     "abcdef" : 3,
 
-    "mutation":
+    "evolution/mutation":
     {
 	    "tpg" :
 	    {

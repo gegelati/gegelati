@@ -1,21 +1,21 @@
-#ifndef TRUNCATION_H
-#define TRUNCATION_H
+#ifndef EVOLUTION_SELECTION_TRUNCATION_SELECTOR_H
+#define EVOLUTION_SELECTION_TRUNCATION_SELECTOR_H
 
-#include "evolution/selection.h"
+#include "selection/selector.h"
 
-namespace Selectors {
+ namespace Selection {
 
     /**
      * \brief Class representing the truncation selection mechanism used for surviving selection, notably for mu+lambda replacements
      */
-    class Truncation : public Evolution::Selection {
+    class TruncationSelector : public Selector {
 
         protected:            
         
         public: 
 
             /// @brief Default constructor setting replacement value to false
-            Truncation() : Evolution::Selection(false) {}
+            TruncationSelector() : Selector(false) {}
 
             /**
              * \brief method performing the truncation selection
@@ -28,10 +28,10 @@ namespace Selectors {
              * 
              * \return a vector of the selected individuals.
              */
-            virtual std::vector<std::shared_ptr<const Evolution::Individual>> select(
-                const std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>>& individuals,
+            virtual std::vector<std::shared_ptr<const Individual>> select(
+                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
                 size_t nbSelected, RNG::RNG& rng) const override;
     };
 };
 
-#endif // MU_PLUS_LAMBDA_H
+#endif // EVOLUTION_SELECTION_TRUNCATION_SELECTOR_H

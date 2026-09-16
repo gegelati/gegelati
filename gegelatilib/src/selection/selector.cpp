@@ -1,14 +1,14 @@
-#include "evolution/selection.h"
+#include "selection/selector.h"
 
-std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Evolution::Selection::getSelectionMetrics()
+std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Selection::Selector::getSelectionMetrics()
 {
     std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> vect;
     vect.push_back(std::make_unique<Evaluation::ScoreMetric>());
     return vect;
 }
 
-std::vector<std::pair<double, std::shared_ptr<const Evolution::Individual>>> Evolution::Selection::getRankedScores(
-    const std::set<std::shared_ptr<const Individual>, SharedLess<Evolution::Individual>>& individuals
+std::vector<std::pair<double, std::shared_ptr<const Individual>>> Selection::Selector::assignFitness(
+    const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals
 ) const
 {
     // Get the average score of each individual.
@@ -31,7 +31,7 @@ std::vector<std::pair<double, std::shared_ptr<const Evolution::Individual>>> Evo
         ranked.emplace_back(score, individual);
 
         if(nbScoreMetrics == 0) {
-            throw std::runtime_error("Evolution::Selection::getRankedScores: No score metric recieved for computing fitness");
+            throw std::runtime_error("Selection::getRankedScores: No score metric recieved for computing fitness");
         }
     }
 
@@ -42,8 +42,8 @@ std::vector<std::pair<double, std::shared_ptr<const Evolution::Individual>>> Evo
     return ranked;
 }
 
-const Evolution::Individual& Evolution::Selection::getBest(
-    const std::set<std::shared_ptr<const Individual>, SharedLess<Evolution::Individual>>& individuals) const
+const Individual& Selection::Selector::getBest(
+    const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals) const
 {    
-    return *this->getRankedScores(individuals).begin()->second;
+    return *this->assignFitness(individuals).begin()->second;
 }

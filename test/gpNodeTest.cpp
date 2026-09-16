@@ -41,10 +41,10 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "evolution/individual.h"
+#include "individual.h"
 #include "graphBased/gpNode.h"
 #include "util/counterReset.h"
-#include "representations/lgpRepresentation.h"
+#include "representations/LGP.h"
 #include "learn/fakeRepresentation.h"
 
 
@@ -99,11 +99,11 @@ TEST_F(GPNodeTest, Constructor)
 
 TEST_F(GPNodeTest, clone) 
 {
-    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(rep);
+    std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
-    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
+    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1));
     GraphBased::GPNode node(variantValues);
 
     std::unique_ptr<GraphBased::GPNode> clone = node.cloneUniquePtr();
@@ -120,17 +120,17 @@ TEST_F(GPNodeTest, clone)
 
 TEST_F(GPNodeTest, SetGetValue)
 {
-    std::shared_ptr<const Evolution::Individual> indiv1 = std::make_shared<Evolution::Individual>(rep);
+    std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
     variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
-    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1));
+    variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1));
     GraphBased::GPNode node(variantValues);
 
     
     ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<size_t>(1)) << "Getting value of the GPNode failed.";
     ASSERT_TRUE(node.getValue(1) == Data::DataValue::zeros<double>(10, 2)) << "Getting value of the GPNode failed.";
-    ASSERT_TRUE(node.getValue(2) == Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(2) == Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1)) << "Getting value of the GPNode failed.";
 
 
     ASSERT_NO_THROW(node.setValue<double>(0, 10.5)) << "Setting value of the GPNode failed.";
@@ -147,8 +147,8 @@ TEST_F(GPNodeTest, SetGetValue)
     ASSERT_NO_THROW(node.setIsIntron(true)) << "Setting node to intron state failed";
     ASSERT_TRUE(node.getIsIntron()) << "Node should now be an intron";
 
-    ASSERT_NO_THROW(node.addValue(Data::DataValue::scalar<std::shared_ptr<const Evolution::Individual>>(indiv1))) << "Adding a value should not fail";
-    ASSERT_TRUE(node.getValue(3).getScalar<std::shared_ptr<const Evolution::Individual>>() == indiv1) << "Value should be indiv1.";
+    ASSERT_NO_THROW(node.addValue(Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1))) << "Adding a value should not fail";
+    ASSERT_TRUE(node.getValue(3).getScalar<std::shared_ptr<const Individual>>() == indiv1) << "Value should be indiv1.";
     
     ASSERT_NO_THROW(node.addValue<float>(10)) << "Adding a value should not fail";
     ASSERT_TRUE(node.getValue(4) == Data::DataValue::scalar<float>(10)) << "Value should be a float of 10.";

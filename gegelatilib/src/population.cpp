@@ -1,34 +1,34 @@
 
 
-#include "evolution/population.h"
+#include "population.h"
 
 // Declaration of static GPNnode ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 static size_t POPULATION_COUNTER_ID = 0;
 
-size_t Evolution::Population::incrementeCounter()
+size_t Population::incrementeCounter()
 {
     return POPULATION_COUNTER_ID++;
 }
 
-size_t Evolution::Population::getPopulationIDCounter()
+size_t Population::getPopulationIDCounter()
 {
     return POPULATION_COUNTER_ID;
 }
 
-void Evolution::Population::resetPopulationIDCounter()
+void Population::resetPopulationIDCounter()
 {
     POPULATION_COUNTER_ID = 0;
 }
 
 
-size_t Evolution::Population::getPopulationID() const
+size_t Population::getPopulationID() const
 {
     return this->populationID;
 }
 
-void Evolution::Population::setPopulationID(size_t newID)
+void Population::setPopulationID(size_t newID)
 {
     this->populationID = newID;
 
@@ -38,22 +38,22 @@ void Evolution::Population::setPopulationID(size_t newID)
     }
 }
 
-bool Evolution::operator<(const Evolution::Population& a, const Evolution::Population& b)
+bool operator<(const Population& a, const Population& b)
 {
     return a.getPopulationID() < b.getPopulationID();
 }
 
-bool Evolution::operator==(const Evolution::Population& a, const Evolution::Population& b)
+bool operator==(const Population& a, const Population& b)
 {
     return a.getPopulationID() == b.getPopulationID();
 }
-bool Evolution::operator!=(const Evolution::Population& a, const Evolution::Population& b)
+bool operator!=(const Population& a, const Population& b)
 {
     return a.getPopulationID() != b.getPopulationID();
 }
 
 
-std::set<std::shared_ptr<Evolution::Individual>>::iterator Evolution::Population::getIndividualFromCst(const Individual& individual)
+std::set<std::shared_ptr<Individual>>::iterator Population::getIndividualFromCst(const Individual& individual)
 {
     auto iterator = this->individuals.find(&individual);
     if(iterator == this->individuals.end() || (*iterator).get() != &individual){
@@ -63,29 +63,29 @@ std::set<std::shared_ptr<Evolution::Individual>>::iterator Evolution::Population
     return iterator;
 }
 
-bool Evolution::Population::containsIndividual(const Individual& individual) const
+bool Population::containsIndividual(const Individual& individual) const
 {
     auto iterator = this->individuals.find(&individual);
     return iterator != this->individuals.end() && (*iterator).get() == &individual;
 }
 
-Evolution::Individual& Evolution::Population::getMutableIndividual(const Individual& individual)
+Individual& Population::getMutableIndividual(const Individual& individual)
 {
     return *(this->getIndividualFromCst(individual)->get());
 }
 
-std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getIndividuals() const
+std::set<std::reference_wrapper<const Individual>> Population::getIndividuals() const
 {
-    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Individual>> vect;
     for (const auto& ptr : individuals) {
         vect.insert(*ptr);
     }
     return vect;
 }
 
-std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getProtectedIndividuals() const
+std::set<std::reference_wrapper<const Individual>> Population::getProtectedIndividuals() const
 {
-    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Individual>> vect;
     for (const auto& ptr : individuals) {
         if(ptr.use_count() > 1) {
             vect.insert(*ptr);
@@ -94,9 +94,9 @@ std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Populat
     return vect;
 }
 
-std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Population::getNotProtectedIndividuals() const
+std::set<std::reference_wrapper<const Individual>> Population::getNotProtectedIndividuals() const
 {
-    std::set<std::reference_wrapper<const Evolution::Individual>> vect;
+    std::set<std::reference_wrapper<const Individual>> vect;
     for (const auto& ptr : individuals) {
         if(ptr.use_count() == 1) {
             vect.insert(*ptr);
@@ -105,28 +105,28 @@ std::set<std::reference_wrapper<const Evolution::Individual>> Evolution::Populat
     return vect;
 }
 
-std::vector<std::weak_ptr<const Evolution::Individual>> Evolution::Population::getIndividualPtrs() const
+std::vector<std::weak_ptr<const Individual>> Population::getIndividualPtrs() const
 {
-    std::vector<std::weak_ptr<const Evolution::Individual>> vect;
+    std::vector<std::weak_ptr<const Individual>> vect;
     for (const auto& ptr : individuals) {
         vect.push_back(ptr);
     }
     return vect;
 }
 
-const Evolution::Individual& Evolution::Population::addIndividual(std::unique_ptr<Individual> individual)
+const Individual& Population::addIndividual(std::unique_ptr<Individual> individual)
 {
     this->individuals.insert(std::move(individual));
     return **this->individuals.rbegin();
 }
 
-void Evolution::Population::emptyIndividual(const Individual& individual)
+void Population::emptyIndividual(const Individual& individual)
 {
     auto it = this->getIndividualFromCst(individual);
 
 }
 
-bool Evolution::Population::deleteIndividual(const Individual& individual)
+bool Population::deleteIndividual(const Individual& individual)
 {
     auto it = this->getIndividualFromCst(individual);
     if(it->use_count() > 1) {
@@ -139,7 +139,7 @@ bool Evolution::Population::deleteIndividual(const Individual& individual)
     return true;
 }
 
-void Evolution::Population::clearIndividuals() {
+void Population::clearIndividuals() {
 
     // Keep trying until the container is empty
     while (this->individuals.size() > 0) {
@@ -152,18 +152,18 @@ void Evolution::Population::clearIndividuals() {
         }
 
         if (this->individuals.size() == sizeBefore) {
-            throw std::runtime_error("Evolution::Population::clearIndividuals: individuals remain after a full removal pass. Check deleteIndividual ordering or container management. However, this might be intended, this error could be removed in future versions");
+            throw std::runtime_error("Population::clearIndividuals: individuals remain after a full removal pass. Check deleteIndividual ordering or container management. However, this might be intended, this error could be removed in future versions");
         }
         
     }
 }
 
-size_t Evolution::Population::size() const
+size_t Population::size() const
 {
     return this->individuals.size();
 }
 
-size_t Evolution::Population::sizeProtected() const
+size_t Population::sizeProtected() const
 {
     return std::count_if(this->individuals.begin(), this->individuals.end(),
                          [](const std::shared_ptr<Individual>& individual) {
@@ -171,7 +171,7 @@ size_t Evolution::Population::sizeProtected() const
                          });
 }
 
-size_t Evolution::Population::sizeNotProtected() const
+size_t Population::sizeNotProtected() const
 {
     return std::count_if(this->individuals.begin(), this->individuals.end(),
                          [](const std::shared_ptr<Individual>& individual) {

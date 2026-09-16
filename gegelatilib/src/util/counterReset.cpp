@@ -8,6 +8,6 @@ void CounterReset::counterReset()
     Representation::Individual::resetIndividualIDCounter();
     Representation::Representation::resetRepresentationIDCounter();
     GraphBased::GPNode::resetGPNodeIDCounter();
-    Evolution::Individual::resetIndividualIDCounter();
-    Evolution::Population::resetPopulationIDCounter();
+    Individual::resetIndividualIDCounter();
+    Population::resetPopulationIDCounter();
 }

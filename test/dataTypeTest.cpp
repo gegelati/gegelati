@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "data/dataType.h"
-#include "evolution/individual.h"
+#include "individual.h"
 
 TEST(DataTypeTest, DefaultConstructorCreatesInvalidDescriptor)
 {
@@ -217,7 +217,7 @@ TEST(DataTypeTest, ToString)
     ASSERT_NO_THROW(wrongType.summary());
     ASSERT_NO_THROW(descriptor.summary());
 
-    auto typeD =  Data::DataType::scalar<std::shared_ptr<const Evolution::Individual>>();
+    auto typeD =  Data::DataType::scalar<std::shared_ptr<const Individual>>();
     typeD.elementType = nullptr;
     ASSERT_NO_THROW(typeD.summary()) << "For coverage";
     ASSERT_NO_THROW(typeD.toString()) << "For coverage";

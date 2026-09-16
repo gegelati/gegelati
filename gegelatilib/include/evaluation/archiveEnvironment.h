@@ -44,8 +44,8 @@
 #include "evaluation/scoreMetric.h"
 #include "evaluation/archiveMetric.h"
 
-#include "evolution/population.h"
-#include "evolution/representation.h"
+#include "population.h"
+#include "representation.h"
 
 namespace Evaluation {
 
@@ -76,10 +76,10 @@ namespace Evaluation {
         std::vector<std::pair<std::vector<std::reference_wrapper<const Data::DataHandler>>, std::map<size_t, double>>> archive;
 
         /// The population in which individuals contains archive metrics used as input for the archive.
-        std::optional<std::reference_wrapper<const Evolution::Population>> archiveInputPopulation;
+        std::optional<std::reference_wrapper<const Population>> archiveInputPopulation;
 
         /// The population used to compute the output values of the archive.
-        std::optional<std::reference_wrapper<const Evolution::Population>> archiveOutputPopulation;
+        std::optional<std::reference_wrapper<const Population>> archiveOutputPopulation;
 
         /**
          * \brief set the dimension of data source by creating a copy of the given one
@@ -111,7 +111,7 @@ namespace Evaluation {
          * 
          * \param[in] population the archive input propulation
          */
-        virtual void setArchiveInputPopulation(const Evolution::Population& population);
+        virtual void setArchiveInputPopulation(const Population& population);
 
         /**
          * Return if the current evaluation contains an archive input population
@@ -121,14 +121,14 @@ namespace Evaluation {
         /**
          * \brief return the ArchiveInputPopulation of the current evaluation
          */
-        virtual const std::optional<std::reference_wrapper<const Evolution::Population>>& getArchiveInputPopulation();
+        virtual const std::optional<std::reference_wrapper<const Population>>& getArchiveInputPopulation();
 
         /**
          * \brief set the population in which the individual provides the output of the archive.
          * 
          * \param[in] population the archive output propulation
          */
-        virtual void setArchiveOutputPopulation(const Evolution::Population& population);
+        virtual void setArchiveOutputPopulation(const Population& population);
 
         /**
          * Return if the current evaluation contains an archive output population
@@ -138,7 +138,7 @@ namespace Evaluation {
         /**
          * \brief return the ArchiveOutputPopulation of the current evaluation
          */
-        virtual const std::optional<std::reference_wrapper<const Evolution::Population>>& getArchiveOutputPopulation();
+        virtual const std::optional<std::reference_wrapper<const Population>>& getArchiveOutputPopulation();
 
 
         /**
@@ -189,7 +189,7 @@ namespace Evaluation {
          * \param[in] memberRepresentation the representation used to execute the individuals.
          */
         virtual void updateArchiveOutputs(
-            const Evolution::Representation& memberRepresentation);
+            const Representation& memberRepresentation);
 
         /**
          * \brief boring override

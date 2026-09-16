@@ -1,6 +1,6 @@
 
-#ifndef REPRESENTATION_H
-#define REPRESENTATION_H
+#ifndef REPRESENTATIONS_REPRESENTATION_H
+#define REPRESENTATIONS_REPRESENTATION_H
 
 #include <memory>
 #include <vector>
@@ -13,14 +13,12 @@
 #include "graphBased/genotypeConstraint.h"
 #include "graphBased/genotypeGenerator.h"
 #include "graphBased/genotype.h"
-#include "oldRepresentations/repParameters.h"
+
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
 #include "dimensions/activationFunctions.h"
 
-using RepParam = Representation::RepresentationParameters;
-
-namespace Evolution {
+ namespace Representations {
     /**
      * \brief Abstract class representing an Representation.
      *
@@ -29,12 +27,6 @@ namespace Evolution {
     class Representation
     {
       protected:
-
-        /// Minimum Number of nodes in the representation.
-        size_t nbNodesMin = 0;
-
-        /// Maximum number of nodes in the representation.
-        size_t nbNodesMax = 0;
 
         /// Name of the representation.
         std::string representationName = "";
@@ -51,7 +43,7 @@ namespace Evolution {
          * \brief private method for executing genotype
          */
         virtual Data::DataValue executeGenotype(
-          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const = 0;
+          const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const = 0;
 
 
 
@@ -79,21 +71,15 @@ namespace Evolution {
          * 
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimension of the output.
-         * \param[in] nbNodesMin the minimum number of nodes in the representation.
-         * \param[in] nbNodesMax the maximum number of nodes in the representation.
          * \param[in] representationName name of the representation used.
          * \param[in] representationColor color of the representation used (during .dot files).
          */
         Representation(
             const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension,
-            size_t nbNodesMin, size_t nbNodesMax=0,
             std::string representationName = "Representation", 
             std::string representationColor = "#000000")
-               : nbNodesMin{nbNodesMin}, nbNodesMax{nbNodesMax}, representationName(representationName), 
+               : representationName(representationName), 
                  representationColor(representationColor), dimensionFlow{inputDimensions} {
-                if(this->nbNodesMax == 0) {
-                    this->nbNodesMax = this->nbNodesMin;
-                }
 
                 // Add layer
                 this->dimensionFlow.addLayer(representationName, inputDimensions, outputDimension);
@@ -111,16 +97,6 @@ namespace Evolution {
          * \brief Return the color of the representation.
          */
         std::string getRepresentationColor() const { return this->representationColor; }
-
-        /**
-         * \brief get the minimum number of nodes
-         */
-        virtual size_t getMinNbNodes() const;
-
-        /**
-         * \brief get the maximum number of nodes
-         */
-        virtual size_t getMaxNbNodes() const;
 
         /** \brief Adds a typed post-processing function to the representation output. */
         virtual void addOutputFunction(std::unique_ptr<Dimensions::ActivationFunctions::Function> function);
@@ -150,7 +126,7 @@ namespace Evolution {
          * 
          * \param[in] genotype genotype controlled.
          */
-        virtual bool isValid(const Genotype& genotype) const;
+        virtual bool isValid(const GraphBased::Genotype& genotype) const;
 
         /**
          * \brief execute the specified representation, executing the given genotype and the output functions based on the current dataSources
@@ -159,9 +135,9 @@ namespace Evolution {
          * \param[in] inputSources input sources on which the individual is executed.
          */
         Data::DataValue execute(
-          const Genotype& genotype, const std::vector<Data::DataView>& inputSources) const;
+          const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const;
 
     };
 }; // namespace Representation
 
-#endif // REPRESENTATION_H
+#endif // REPRESENTATION_REPRESENTATION_H

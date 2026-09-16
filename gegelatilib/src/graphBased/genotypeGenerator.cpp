@@ -10,7 +10,7 @@ size_t GraphBased::GenotypeGenerator::size() const
 void GraphBased::GenotypeGenerator::addNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, size_t minRange, size_t maxRange)
 {
     if(nodeGenerator->size() == 0) {
-        throw std::runtime_error("Node:GenotypeGenerator:addNodeGenerator: nodeGenerators is empty.");
+        throw std::runtime_error("Node:GenotypeGenerator:addNodeGenerator: nodeGenerator is empty.");
     }
     this->nodeGenerators.push_back(std::move(nodeGenerator));
 

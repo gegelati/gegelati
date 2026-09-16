@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "evaluation/scoreMetric.h"
-#include "evolution/individual.h"
+#include "individual.h"
 
 #include "learn/fakeRepresentation.h"
 
@@ -56,7 +56,7 @@ TEST(ScoreMetricTest, ExtractMetricsEpisode)
 
     // Call extraction
     Representations::FakeRepresentation rep;
-    Evolution::Individual indiv(rep);
+    Individual indiv(rep);
     metric.extractMetricsRun(indiv, 0, env);
 
     // score should be set

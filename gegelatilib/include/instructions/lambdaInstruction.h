@@ -117,17 +117,11 @@ namespace Instructions {
             const std::vector<Data::DataView>& arguments) const override
         {
             if (arguments.size() != this->operandTypes.size()) {
-                std::cout << "here" << std::endl;
                 return false;
             }
             for (size_t index = 0; index < arguments.size(); index++) {
                 if (arguments.at(index).getType() !=
                     this->operandTypes.at(index)) {
-                    std::cout << "here2\n " << index << " "
-                              << arguments 
-                              << "\n"
-                              << this->operandTypes.at(index)
-                              << std::endl;
                     return false;
                 }
             }

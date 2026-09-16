@@ -1,23 +1,23 @@
 
-#ifndef LGP_REPRESENTATION_H
-#define LGP_REPRESENTATION_H
+#ifndef REPRESENTATIONS_LGP_H
+#define REPRESENTATIONS_LGP_H
 
 #include <memory>
 #include <vector>
 
-#include "evolution/representation.h"
+#include "representations/representation.h"
 #include "instructions/set.h"
 
-namespace Representations {
+ namespace Representations {
 
     /**
-     * \brief Abstract class representing a LGPRepresentation
+     * \brief Abstract class representing a LGP
      */
-    class LGPRepresentation : public Evolution::Representation
+    class LGP : public Representation
     {
         protected:
 
-            /// Instruction Set used by the LGPRepresentation
+            /// Instruction Set used by the LGP
             const Instructions::Set& iSet;
 
             /// The number of registers required to output a value.
@@ -43,7 +43,7 @@ namespace Representations {
              * \param[in] inputSources input sources on which the individual is executed.
              */
             virtual Data::DataValue executeGenotype(
-                const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
+                const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
             /// @brief Unique pointer of the genotypeGenerator, as it is fixed during evolution
             std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator;
@@ -59,30 +59,37 @@ namespace Representations {
              */
             virtual void setGenotypeGenerator();
 
+            /// \brief the minimum number of lines in the representation.
+            size_t nbLinesMin;
+            /// \brief the maximum number of lines in the representation.
+            size_t nbLinesMax;
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneOnlyRepresentation() const override;
+            virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override;
 
             /**
              * \brief Main Representation constructor.x
              * 
              * \param[in] inputDimensions for the representation
              * \param[in] nbOutputRegisters number of output registers to create the outputDimension
-             * \param[in] iSet the Instruction Set used by the LGPRepresentation.
+             * \param[in] iSet the Instruction Set used by the LGP.
              * \param[in] nbRegisters the number of registers used by the LGPs
-             * \param[in] nbNodesMin the minimum number of nodes in the representation.
-             * \param[in] nbNodesMax the maximum number of nodes in the representation.
+             * \param[in] nbLinesMin the minimum number of lines in the representation.
+             * \param[in] nbLinesMax the maximum number of lines in the representation.
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            LGPRepresentation(std::vector<Dimensions::Requirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbNodesMin, size_t nbNodesMax=0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
-                : Evolution::Representation(
+            LGP(std::vector<Dimensions::Requirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
+                : Representation(
                     inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
-                    nbNodesMin, nbNodesMax, representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
-                    nbRegisters{nbRegisters}{
+                    representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
+                    nbRegisters{nbRegisters}, nbLinesMin{nbLinesMin}, nbLinesMax{nbLinesMax} {
                 if(nbOutputRegisters > nbRegisters) {
-                    throw std::runtime_error("LGPRepresentation::Constructor: Number of outputRegisters cannot be higher than the number of registers");
+                    throw std::runtime_error("LGP::Constructor: Number of outputRegisters cannot be higher than the number of registers");
+                }
+                if(nbLinesMax == 0) {
+                    this->nbLinesMax = nbLinesMin;
                 }
                 this->setGenotypeConstraint();
                 this->setGenotypeGenerator();
@@ -97,4 +104,4 @@ namespace Representations {
 }; // namespace LGP_Representation
 
 
-#endif
+#endif // REPRESENTATION_LGP_H

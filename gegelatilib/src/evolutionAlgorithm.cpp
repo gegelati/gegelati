@@ -1,38 +1,38 @@
-#include "evolution/evolutionAlgorithm.h"
+#include "evolutionAlgorithm.h"
 
 
-Evolution::Population& Evolution::EvolutionAlgorithm::getPopulation()
+Population& EvolutionAlgorithm::getPopulation()
 {
     return *this->population;
 }
 
-const Evolution::Representation& Evolution::EvolutionAlgorithm::getRepresentation() const
+const Representations::Representation& EvolutionAlgorithm::getRepresentation() const
 {
     return this->representation;
 }
 
 
-Evolution::Mutation& Evolution::EvolutionAlgorithm::getMutation()
+Mutation::Mutator& EvolutionAlgorithm::getMutation()
 {
     return *this->mutation;
 }
 
-Evaluation::EvaluationAgent& Evolution::EvolutionAlgorithm::getEvaluation()
+Evaluation::EvaluationAgent& EvolutionAlgorithm::getEvaluation()
 {
     return this->evaluation;
 }
 
-Evolution::Selection& Evolution::EvolutionAlgorithm::getSelector()
+Selection::Selector& EvolutionAlgorithm::getSelector()
 {
     return *this->survivingSelection;
 }
 
-RNG::RNG& Evolution::EvolutionAlgorithm::getRNG()
+RNG::RNG& EvolutionAlgorithm::getRNG()
 {
     return this->rng;
 }
 
-void Evolution::EvolutionAlgorithm::initializePopulation()
+void EvolutionAlgorithm::initializePopulation()
 {
     std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = this->survivingSelection->getSelectionMetrics();
     for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
@@ -42,11 +42,11 @@ void Evolution::EvolutionAlgorithm::initializePopulation()
 
 }
 
-std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::EvolutionAlgorithm::selectParents(size_t nbParents)
+std::vector<std::reference_wrapper<const Individual>> EvolutionAlgorithm::selectParents(size_t nbParents)
 {
-    std::set<std::reference_wrapper<const Evolution::Individual>> currentIndividuals(this->population->getIndividuals());
+    std::set<std::reference_wrapper<const Individual>> currentIndividuals(this->population->getIndividuals());
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> selectedParents;
+    std::vector<std::reference_wrapper<const Individual>> selectedParents;
     for(size_t idx = 0; idx < nbParents; idx ++) {
         // Random parent selection for now
         auto it = currentIndividuals.begin();
@@ -56,7 +56,7 @@ std::vector<std::reference_wrapper<const Evolution::Individual>> Evolution::Evol
     return selectedParents;
 }
 
-std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> Evolution::EvolutionAlgorithm::reproduceParents(
+std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> EvolutionAlgorithm::reproduceParents(
     std::vector<std::reference_wrapper<const Individual>> parents
 )
 {    // Reproduction process, only replication for now.
@@ -67,19 +67,19 @@ std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individua
     return offspring;
 }
 
-void Evolution::EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
+void EvolutionAlgorithm::mutateOffspring(const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring)
 {
     for(const std::unique_ptr<Individual>& indiv: offspring) {
         //this->mutation->mutateGenotype(indiv->getMutableGenotype(), std::move(this->representation.getGenotypeTemplate()), rng);
     }
 }
 
-void Evolution::EvolutionAlgorithm::evaluatePopulation(
+void EvolutionAlgorithm::evaluatePopulation(
     const std::set<std::unique_ptr<Individual>, UniqueLess<Individual>>& offspring, 
     size_t generationNumber, Evaluation::LearningMode mode
     )
 {
-    std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    std::set<std::reference_wrapper<const Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
     for (const std::unique_ptr<Individual>& os: offspring) {
         evaluatedIndividuals.insert(*os);
     }
@@ -87,15 +87,15 @@ void Evolution::EvolutionAlgorithm::evaluatePopulation(
     //this->evaluation.evaluateIndividuals(  evaluatedIndividuals, generationNumber, mode);
 }
 
-void Evolution::EvolutionAlgorithm::selectSurvivors(
+void EvolutionAlgorithm::selectSurvivors(
     std::set<std::unique_ptr <Individual>, UniqueLess<Individual>>& offspring)
 {
 
-    /*std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
+    /*std::set<std::reference_wrapper<const Individual>> evaluatedIndividuals = this->population->getNotProtectedIndividuals();
     for (const std::unique_ptr<Individual>& os: offspring) {
         evaluatedIndividuals.insert(*os);
     }
-    std::map<std::reference_wrapper<const Evolution::Individual>, bool> selectionResult = this->survivingSelection->select(evaluatedIndividuals, 0, this->rng);
+    std::map<std::reference_wrapper<const Individual>, bool> selectionResult = this->survivingSelection->select(evaluatedIndividuals, 0, this->rng);
 
 
     for (auto it = selectionResult.begin(); it != selectionResult.end();) {

@@ -6,10 +6,8 @@
 #include "evaluation/learningEnvironment.h"
 
 
-namespace Evolution {
-    /// For include
-    class Individual;
-};
+/// For include
+class Individual;
 
 namespace Evaluation {
     /**
@@ -41,7 +39,7 @@ namespace Evaluation {
          * \param[in] seed used to reset the learningEnvironment.
          */
         virtual void initMetrics(
-            const Evolution::Individual& individual,
+            const Individual& individual,
             const Evaluation::LearningEnvironment& learningEnvironment,
             size_t seed) {
             /* Empty because sub-class does not need to inherrit from it.*/
@@ -58,7 +56,7 @@ namespace Evaluation {
          * individual is evaluated.
          */
         virtual void extractMetricsStep(
-            const Evolution::Individual& individual, const Data::DataView& action,
+            const Individual& individual, const Data::DataView& action,
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -76,7 +74,7 @@ namespace Evaluation {
          * which the individual is evaluated.
          */
         virtual void extractMetricsRun(
-            const Evolution::Individual& individual, size_t nbStepsExecuted,
+            const Individual& individual, size_t nbStepsExecuted,
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };

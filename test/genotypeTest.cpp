@@ -42,21 +42,21 @@
 #include <numeric>
 
 #include "graphBased/genotype.h"
-#include "evolution/individual.h"
+#include "individual.h"
 
 
 TEST(GenotypeTest, Constructor)
 {
-    Evolution::Genotype* genotype;
+    GraphBased::Genotype* genotype;
 
-    ASSERT_NO_THROW(genotype = new Evolution::Genotype()) << "Constructor of Genotype failed.";
+    ASSERT_NO_THROW(genotype = new GraphBased::Genotype()) << "Constructor of Genotype failed.";
 
     ASSERT_NO_THROW(delete genotype) << "Destructor of Genotype failed.";
 }
 
 TEST(GenotypeTest, addRemoveNodeGroup)
 {
-    Evolution::Genotype genotype;
+    GraphBased::Genotype genotype;
 
     ASSERT_EQ(genotype.getSize(), 0) << "Getting size of the Genotype failed.";
 
@@ -84,14 +84,14 @@ TEST(GenotypeTest, addRemoveNodeGroup)
     ASSERT_THROW(genotype.getNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
     ASSERT_THROW(genotype.setNodeGroup(group->cloneUniquePtr(), 2), std::runtime_error) << "setting NodeGroup of the Genotype should have failed with wrong index.";
 
-    const Evolution::Genotype& cGenotype = genotype;
+    const GraphBased::Genotype& cGenotype = genotype;
     ASSERT_NO_THROW(genotype.getNodeGroup(0)) << "Getter for coverage failed!.";
     ASSERT_THROW(cGenotype.getNodeGroup(2), std::runtime_error) << "Getting NodeGroup of the Genotype should have failed with wrong index.";
 }
 
 TEST(GenotypeTest, getSizes)
 {
-    Evolution::Genotype genotype;
+    GraphBased::Genotype genotype;
 
     GraphBased::NodeGroup group1;
     group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
@@ -112,7 +112,7 @@ TEST(GenotypeTest, getSizes)
 
 TEST(GenotypeTest, getEffectiveNodes)
 {
-    Evolution::Genotype genotype;
+    GraphBased::Genotype genotype;
 
     GraphBased::NodeGroup group1;
     group1.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
@@ -146,8 +146,8 @@ TEST(GenotypeTest, getEffectiveNodes)
 
 TEST(GenotypeTest, equalityAndClone){
 
-    Evolution::Genotype genotype1;
-    Evolution::Genotype genotype2;
+    GraphBased::Genotype genotype1;
+    GraphBased::Genotype genotype2;
     genotype1.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     genotype2.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     ASSERT_TRUE(genotype1 == genotype2) << "Empty genotypes should be equal!";
@@ -197,7 +197,7 @@ TEST(GenotypeTest, equalityAndClone){
     ASSERT_TRUE(genotype1 == genotype2) << "genotypes should be equal";
     ASSERT_TRUE(genotype2 == genotype1) << "genotypes should be equal both directions";
 
-    std::unique_ptr<Evolution::Genotype> clone = genotype1.cloneUniquePtr();
+    std::unique_ptr<GraphBased::Genotype> clone = genotype1.cloneUniquePtr();
     ASSERT_TRUE (*clone == genotype1) << "Clone should be equal to its origin";
     ASSERT_TRUE (*clone == genotype2) << "Clone should be equal to something equal to its origin";
 }

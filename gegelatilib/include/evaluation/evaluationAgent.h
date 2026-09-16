@@ -57,8 +57,7 @@
 
 #include "evaluation/evaluationResult.h"
 #include "evaluation/archiveMetric.h"
-#include "evolution/representation.h"
-#include "evolution/individual.h"
+#include "individual.h"
 
 namespace Evaluation {
 
@@ -143,7 +142,7 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividual(
-            const Evolution::Individual& individual, 
+            const Individual& individual, 
             uint64_t generationNumber,
             LearningMode mode) const = 0;
 
@@ -162,7 +161,7 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividuals(
-            const std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>>& individuals, 
+            const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
             uint64_t generationNumber,
             LearningMode mode) const;
     };

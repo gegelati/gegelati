@@ -1,11 +1,11 @@
-#ifndef NODE_CONSTRAINT_H
-#define NODE_CONSTRAINT_H
+#ifndef GRAPH_BASED_NODE_CONSTRAINT_H
+#define GRAPH_BASED_NODE_CONSTRAINT_H
 
 #include <vector>
 #include "dimensions/constraint.h"
 #include "dimensions/dataValueGenerator.h"
 
-namespace  GraphBased {
+ namespace GraphBased {
 
     /**
      * \brief class representation the constraint of a GPNode.
@@ -59,4 +59,4 @@ namespace  GraphBased {
     };
 }
 
-#endif // NODE_CONSTRAINT_H
+#endif // GRAPH_BASED_NODE_CONSTRAINT_H

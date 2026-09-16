@@ -1,10 +1,10 @@
 
-#ifndef GENOTYPE_GENERATOR_H
-#define GENOTYPE_GENERATOR_H
+#ifndef GRAPH_BASED_GENOTYPE_GENERATOR_H
+#define GRAPH_BASED_GENOTYPE_GENERATOR_H
 
 #include "graphBased/nodeGenerator.h"
 
-namespace  GraphBased {
+ namespace GraphBased {
 
 
     /**
@@ -96,4 +96,4 @@ namespace  GraphBased {
     };
 }
 
-#endif // GENOTYPE_GENERATOR_H
+#endif // GRAPH_BASED_GENOTYPE_GENERATOR_H

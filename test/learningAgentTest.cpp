@@ -81,8 +81,8 @@ class LearningAgentTest : public ::testing::Test
     StickGameWithOpponent le;
     FakeMultiContinuousLearningEnvironment cle;
     Parameters params;
-    Representation::LGPRepresentation* lgp;
-    Representation::TPGRepresentation* tpg;
+    Representation::LGP* lgp;
+    Representation::TPG* tpg;
     Selector::Selector* selector;
 
     virtual void SetUp()
@@ -110,8 +110,8 @@ class LearningAgentTest : public ::testing::Test
         params.representation.lgp.maxConstValue = 1;
         params.representation.lgp.nbProgramConstant = 5;
 
-        lgp = new Representation::LGPRepresentation(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
-        tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+        lgp = new Representation::LGP(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
+        tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
         selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
         tpg->setSelector(*selector);
@@ -279,7 +279,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
@@ -308,7 +308,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // we will validate in order to cover validation log
     params.evaluation.doValidation = true;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);
@@ -361,7 +361,7 @@ TEST_F(LearningAgentTest, Train)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 3;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);
@@ -378,7 +378,7 @@ TEST_F(LearningAgentTest, Train)
     // For coverage
     params.evaluation.doValidation = true;
     params.evaluation.stepValidation = 2;
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);
@@ -457,7 +457,7 @@ TEST_F(LearningAgentTest, TrainPortability)
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     tpg->setSelector(*selector);
@@ -484,7 +484,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
     params.representation.lgp.nbProgramConstant=0;
 
 
-    auto lgp1 = new Representation::LGPRepresentation(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto lgp1 = new Representation::LGP(set, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *lgp1, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);
@@ -642,7 +642,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.representation.lgp.forceProgramBehaviorChangeOnMutation = false;
     params.evaluation.nbThreads = 1;
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
 
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
@@ -669,7 +669,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     tpg = new Representation::ATPGRepresentation(*lgp, *actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
@@ -699,7 +699,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple = new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     tpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
@@ -731,7 +731,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     params.representation.tpg.pProgramMutation = 0.6;
     params.evaluation.nbThreads = 1;
 
-    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple = new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     auto atpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation));
     atpg->addAggregatedActionProgramRepresentation(*actionMaple);
@@ -795,14 +795,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     params.evaluation.nbThreads = 1;
 
     
-    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple =
         new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation), "MAPLEAction");
     auto matpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "MATPG");
 
-    auto standaloneLGP = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
+    auto standaloneLGP = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
 
-    auto standaloneLGPforMaple = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
+    auto standaloneLGPforMaple = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
     auto standaloneMaple = new Representation::MapleRepresentation(*standaloneLGPforMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "Maple2");
     std::vector<std::reference_wrapper<Representation::Representation>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
@@ -841,14 +841,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     params.selection._selectionMode = "tournament";
 
     
-    auto actionLgp = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
+    auto actionLgp = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGPAction");
     auto actionMaple =
         new Representation::MapleRepresentation(*actionLgp, std::make_unique<Representation::RepresentationParameters>(params.representation), "MAPLEAction");
     auto matpg = new Representation::ATPGRepresentation(*lgp, *actionMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "MATPG");
 
-    auto standaloneLGP = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
+    auto standaloneLGP = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP1");
 
-    auto standaloneLGPforMaple = std::make_shared<Representation::LGPRepresentation>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
+    auto standaloneLGPforMaple = std::make_shared<Representation::LGP>(set, std::make_unique<Representation::RepresentationParameters>(params.representation), "LGP2");
     auto standaloneMaple = new Representation::MapleRepresentation(*standaloneLGPforMaple, std::make_unique<Representation::RepresentationParameters>(params.representation), "Maple2");
     std::vector<std::reference_wrapper<Representation::Representation>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
@@ -1009,7 +1009,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     params.selection.truncation.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 1;
-    tpg = new Representation::TPGRepresentation(params, *lgp);
+    tpg = new Representation::TPG(params, *lgp);
     Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
@@ -1117,7 +1117,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 4;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     pla.init();
@@ -1142,7 +1142,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
 
-    auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgLa = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset RNG to 0
     auto results = la.evaluateAllIndividuals(0, Learn::LearningMode::TRAINING);
@@ -1150,7 +1150,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsSequential = params.evaluation;
     paramsSequential.nbThreads = 1;
-    auto tpgSequential = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgSequential = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1161,7 +1161,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgParallel = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1255,7 +1255,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    auto tpgLa = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgLa = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset centralized RNG to 0
     auto results = la.evaluateAllIndividuals(0, Learn::LearningMode::VALIDATION);
@@ -1264,7 +1264,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     Learn::LearningParameters paramsSequential = params.evaluation;
     paramsSequential.nbThreads = 1;
     
-    auto tpgSequential = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgSequential = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1275,7 +1275,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    auto tpgParallel = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1380,7 +1380,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
         0.85; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 4;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getRepresentations().front().get().setSelector(*selector);
@@ -1415,7 +1415,7 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
         params.evaluation.nbIterationsPerPolicyEvaluation * 2;
     params.evaluation.nbThreads = 1;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getRepresentations().front().get().setSelector(*selector);
@@ -1515,7 +1515,7 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
         params.evaluation.nbIterationsPerPolicyEvaluation * 3;
     params.evaluation.nbThreads = 3;
 
-    tpg = new Representation::TPGRepresentation(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
+    tpg = new Representation::TPG(*lgp, std::make_unique<Representation::RepresentationParameters>(params.representation));
     Learn::ParallelLearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getRepresentations().front().get().setSelector(*selector);

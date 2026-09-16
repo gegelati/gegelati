@@ -1,9 +1,9 @@
-#ifndef NODE_GROUP_H
-#define NODE_GROUP_H
+#ifndef GRAPH_BASED_NODE_GROUP_H
+#define GRAPH_BASED_NODE_GROUP_H
 
 #include "graphBased/gpNode.h"
 
-namespace  GraphBased {
+ namespace GraphBased {
     /**
      * \brief class storing a vector of nodes.
      */
@@ -93,4 +93,4 @@ namespace  GraphBased {
     bool operator!=(const GraphBased::NodeGroup& group1, const GraphBased::NodeGroup& group2);
 };
 
-#endif // NODE_GROUP_H
+#endif // GRAPH_BASED_NODE_GROUP_H

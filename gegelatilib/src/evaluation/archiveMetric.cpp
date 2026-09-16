@@ -36,14 +36,14 @@ const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandle
 }
 
 void Evaluation::ArchiveMetric::initMetrics(
-    const Evolution::Individual& individual,
+    const Individual& individual,
     const Evaluation::LearningEnvironment& learningEnvironment,
     size_t seed) {
     rng.setSeed(seed);
 };
 
 void Evaluation::ArchiveMetric::extractMetricsStep(
-    const Evolution::Individual& individual, std::vector<double> actionValues,
+    const Individual& individual, std::vector<double> actionValues,
     const Evaluation::LearningEnvironment& learningEnvironment)
 {
     

@@ -8,8 +8,8 @@
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
 #include "graphBased/gpNode.h"
-#include "evolution/individual.h"
-#include "evolution/population.h"
+#include "individual.h"
+#include "population.h"
 
 /**
  * \brief Struct to reset static counters in classes.

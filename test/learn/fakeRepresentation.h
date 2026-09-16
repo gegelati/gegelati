@@ -2,14 +2,14 @@
 #define FAKE_REPRESENTATION_H
 
 
-#include "evolution/representation.h"
+#include "representations/representation.h"
 
 namespace Representations {
 
     /**
      * \brief Fake rep
      */
-    class FakeRepresentation : public Evolution::Representation
+    class FakeRepresentation : public Representation
     {
         protected:
 
@@ -24,7 +24,7 @@ namespace Representations {
              * \param[in] inputSources input sources on which the individual is executed.
              */
             virtual Data::DataValue executeGenotype(
-                const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override {
+                const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override {
                     return Data::DataValue::scalar<double>(1);
                 }
 
@@ -38,7 +38,7 @@ namespace Representations {
         public:
 
             /// @brief clone pattern 
-            virtual std::unique_ptr<Evolution::Representation> cloneOnlyRepresentation() const override {
+            virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override {
                 return std::make_unique<FakeRepresentation>();
             };
 
@@ -46,7 +46,7 @@ namespace Representations {
              * \brief Main FakeRepresentation constructor.
              * 
              * \param[in] inputDimensions the dimensions of the input sources.
-             * \param[in] outputDimension The number of actions in the TPGRepresentation.
+             * \param[in] outputDimension The number of actions in the TPG.
              * \param[in] nbNodesMin the minimum number of nodes in the representation.
              * \param[in] nbNodesMax the maximum number of nodes in the representation.
              * \param[in] representationName name of the representation used.
@@ -54,11 +54,10 @@ namespace Representations {
              */
             FakeRepresentation(std::vector<Dimensions::Requirement> inputDimensions = {Dimensions::Requirement::scalar<int>()},
                                Dimensions::Requirement outputDimension = Dimensions::Requirement::scalar<int>(),
-                               size_t nbNodesMin=5, size_t nbNodesMax=0,
                                std::string representationName = "FakeRepresentation", 
                                std::string representationColor = "#FFFFFF")
-                : Evolution::Representation(
-                    inputDimensions, outputDimension, nbNodesMin, nbNodesMax, representationName, representationColor){
+                : Representation(
+                    inputDimensions, outputDimension, representationName, representationColor){
                         this->setGenotypeConstraint();
                     };
 

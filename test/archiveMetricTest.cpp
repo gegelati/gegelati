@@ -43,7 +43,7 @@
 #include "oldData/primitiveTypeArray.h"
 
 #include "evaluation/archiveMetric.h"
-#include "evolution/individual.h"
+#include "individual.h"
 #if 0
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Evaluation::LearningEnvironment
@@ -76,7 +76,7 @@ class ArchiveMetricTest : public ::testing::Test
 {
   protected:
 
-    Evolution::Individual indiv;
+    Individual indiv;
     FakeLearningEnvironment le;
 
     virtual void SetUp()

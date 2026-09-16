@@ -42,7 +42,7 @@
 #include <numeric>
 #include <cmath>
 
-#include "representations/lgpRepresentation.h"
+#include "representations/LGP.h"
 
 #include "instructions/lambdaInstruction.h"
 
@@ -80,10 +80,10 @@ class LGPRepresentationTest : public ::testing::Test
 
 TEST_F(LGPRepresentationTest, Constructor)
 {
-    Representations::LGPRepresentation* representation;
+    Representations::LGP* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::LGPRepresentation({inputType}, 1, set, 8, 5, 10)) << "Constructor of Representation failed.";
-    ASSERT_THROW(Representations::LGPRepresentation({inputType}, 10, set, 8, 5, 10), std::runtime_error) << "Constructor of Representation should fail.";
+    ASSERT_NO_THROW(representation = new Representations::LGP({inputType}, 1, set, 8, 5)) << "Constructor of Representation failed.";
+    ASSERT_THROW(Representations::LGP({inputType}, 10, set, 8, 5, 10), std::runtime_error) << "Constructor of Representation should fail.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
@@ -93,7 +93,7 @@ TEST_F(LGPRepresentationTest, Constructor)
 TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 {
     size_t nbRegisters = 8;
-    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
     const GraphBased::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
 
     ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
@@ -113,7 +113,7 @@ TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 
 TEST_F(LGPRepresentationTest, getGenotypeGenerator)
 {
-    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
     RNG::RNG rng;
 
     std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator();
@@ -141,9 +141,9 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 {
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
-    Representations::LGPRepresentation representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
 
-    Evolution::Genotype genotype;
+    GraphBased::Genotype genotype;
     std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
     group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
@@ -171,7 +171,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 TEST_F(LGPRepresentationTest, compatibilityCheck) 
 {
 
-    Evolution::Genotype genotype;
+    GraphBased::Genotype genotype;
     std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
     group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0
@@ -185,7 +185,7 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
-    Representations::LGPRepresentation representation({inputType}, 5, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, 5, set, 8, 5, 10);
 
     std::string text = representation.summary();
     
@@ -217,7 +217,7 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     ASSERT_FALSE(representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)) << "Representation should not be compatible with environment output";
     ASSERT_TRUE(representation.execute(genotype, {inputSource.view()}) == Data::DataValue::scalar<size_t>(1u)) << "Values should be equal";
 
-    std::unique_ptr<Evolution::Representation> clone = representation.cloneUniquePtr();
+    std::unique_ptr<Representations::Representation> clone = representation.cloneUniquePtr();
     ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
     ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }

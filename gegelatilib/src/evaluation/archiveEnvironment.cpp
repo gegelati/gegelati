@@ -19,7 +19,7 @@ std::vector<std::reference_wrapper<const Data::DataHandler>> Evaluation::Archive
 }
 
 
-void Evaluation::ArchiveEnvironment::setArchiveInputPopulation(const Evolution::Population& population)
+void Evaluation::ArchiveEnvironment::setArchiveInputPopulation(const Population& population)
 {
     this->archiveInputPopulation = population;
 }
@@ -29,12 +29,12 @@ bool Evaluation::ArchiveEnvironment::hasArchiveInputPopulation()
     return this->archiveInputPopulation.has_value();
 }
 
-const std::optional<std::reference_wrapper<const Evolution::Population>>& Evaluation::ArchiveEnvironment::getArchiveInputPopulation()
+const std::optional<std::reference_wrapper<const Population>>& Evaluation::ArchiveEnvironment::getArchiveInputPopulation()
 {
     return this->archiveInputPopulation;
 }
 
-void Evaluation::ArchiveEnvironment::setArchiveOutputPopulation(const Evolution::Population& population)
+void Evaluation::ArchiveEnvironment::setArchiveOutputPopulation(const Population& population)
 {
     this->archiveOutputPopulation = population;
 }
@@ -44,7 +44,7 @@ bool Evaluation::ArchiveEnvironment::hasArchiveOutputPopulation()
     return this->archiveOutputPopulation.has_value();
 }
 
-const std::optional<std::reference_wrapper<const Evolution::Population>>& Evaluation::ArchiveEnvironment::getArchiveOutputPopulation()
+const std::optional<std::reference_wrapper<const Population>>& Evaluation::ArchiveEnvironment::getArchiveOutputPopulation()
 {
     return this->archiveOutputPopulation;
 }
@@ -98,7 +98,7 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
     if(!this->archiveInputPopulation.has_value()) {
         throw std::runtime_error("Evaluation::ArchiveEvalAgent::updateArchiveInputs: An population to get the archive input should be set when trying to update the inputs.");
     }
-    std::set<std::reference_wrapper<const Evolution::Individual>> teamIndividuals = this->archiveInputPopulation.value().get().getIndividuals();
+    std::set<std::reference_wrapper<const Individual>> teamIndividuals = this->archiveInputPopulation.value().get().getIndividuals();
 
     
 
@@ -106,7 +106,7 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
 
     // First get all archiveMetric input measured.
     // Disgusting code!
-    for(const Evolution::Individual& teams: teamIndividuals) {
+    for(const Individual& teams: teamIndividuals) {
         for(const auto& pairRun: teams.getEvaluationResult().getEvaluationRuns()) {
             for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: pairRun.second->getMetrics()) {
                 if(dynamic_cast<const Evaluation::ArchiveMetric*>(metric.get()) != nullptr) {
@@ -144,14 +144,14 @@ void Evaluation::ArchiveEnvironment::updateArchiveInputs()
 }
 
 void Evaluation::ArchiveEnvironment::updateArchiveOutputs(
-    const Evolution::Representation& representation)
+    const Representation& representation)
 {
     if(!this->archiveOutputPopulation.has_value()) {
         throw std::runtime_error("Evaluation::ArchiveEvalAgent::updateArchiveOutputs: A population to get the archive output should be set when trying to update the outputs.");
     }
-    std::set<std::reference_wrapper<const Evolution::Individual>> individuals(this->archiveOutputPopulation.value().get().getProtectedIndividuals());
+    std::set<std::reference_wrapper<const Individual>> individuals(this->archiveOutputPopulation.value().get().getProtectedIndividuals());
 
-    for(const Evolution::Individual& individual: individuals) {
+    for(const Individual& individual: individuals) {
         if(!representation.isValid(individual)){
             throw std::runtime_error("Evaluation::ArchiveEvalAgent::updateArchiveOutputs: Individual not valid for the representation");
         }
@@ -163,7 +163,7 @@ void Evaluation::ArchiveEnvironment::updateArchiveOutputs(
         pair.second.clear();
 
         // Execute each individual (could be optimized)
-        for(const Evolution::Individual& individual: individuals) {
+        for(const Individual& individual: individuals) {
             pair.second.insert({
                 individual.getIndividualID(),
                 representation.executeIndividual(individual, pair.first).at(0)

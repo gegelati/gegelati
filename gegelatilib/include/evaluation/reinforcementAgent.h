@@ -95,7 +95,7 @@ namespace Evaluation {
          * evaluation.
          */
         virtual void evaluateIndividual(
-            const Evolution::Individual& individual, 
+            const Individual& individual, 
             uint64_t generationNumber,
             LearningMode mode) const override;
     };

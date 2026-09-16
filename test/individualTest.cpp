@@ -43,7 +43,7 @@
 
 #include "evaluation/scoreMetric.h"
 
-#include "evolution/individual.h"
+#include "individual.h"
 #include "learn/fakeRepresentation.h"
 #include "util/counterReset.h"
 
@@ -66,12 +66,12 @@ class IndividualTest : public ::testing::Test
 
 TEST_F(IndividualTest, Constructor)
 {
-    Evolution::Individual* individual1;
-    Evolution::Individual* individual2;
-    std::unique_ptr<Evolution::Genotype> genotype = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    Individual* individual1;
+    Individual* individual2;
+    std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
 
-    ASSERT_NO_THROW(individual1 = new Evolution::Individual(fakeRep)) << "Constructor of Individual failed.";
-    ASSERT_NO_THROW(individual2 = new Evolution::Individual(fakeRep, std::move(genotype))) << "Constructor of Individual failed.";
+    ASSERT_NO_THROW(individual1 = new Individual(fakeRep)) << "Constructor of Individual failed.";
+    ASSERT_NO_THROW(individual2 = new Individual(fakeRep, std::move(genotype))) << "Constructor of Individual failed.";
 
     ASSERT_NO_THROW(delete individual1) << "Destructor of Individual failed.";
     ASSERT_NO_THROW(delete individual2) << "Destructor of Individual failed.";
@@ -79,16 +79,16 @@ TEST_F(IndividualTest, Constructor)
 
 TEST_F(IndividualTest, SetGetGenotype)
 {
-    std::unique_ptr<Evolution::Genotype> genotypeInit = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
-    Evolution::Individual individual(fakeRep, std::move(genotypeInit->cloneUniquePtr()));
-    const Evolution::Genotype* genotype;
+    std::unique_ptr<GraphBased::Genotype> genotypeInit = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<double>{1.0, 2.0, 3.0}));
+    Individual individual(fakeRep, std::move(genotypeInit->cloneUniquePtr()));
+    const GraphBased::Genotype* genotype;
     ASSERT_NO_THROW(genotype = &individual.getGenotype()) << "Getting genotype failed";
 
 
     ASSERT_EQ(individual.getSize(), genotype->getFullSize()) << "Individual size should be size of full genotype";
     ASSERT_TRUE(individual.getGenotype() == *genotypeInit) << "Genotypes should be equals";
 
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
+    std::unique_ptr<GraphBased::Genotype> genotypeSet = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
     ASSERT_NO_THROW(individual.setGenotype(std::move(genotypeSet->cloneUniquePtr()))) << "Should not throw";
     ASSERT_TRUE(individual.getGenotype() != *genotypeInit) << "Genotypes should not be equals anymore";
     ASSERT_TRUE(individual.getGenotype() == *genotypeSet) << "Genotypes should be equals";
@@ -96,17 +96,17 @@ TEST_F(IndividualTest, SetGetGenotype)
 
 TEST_F(IndividualTest, cloneIndividual)
 {       
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
-    Evolution::Individual individual(fakeRep);
+    std::unique_ptr<GraphBased::Genotype> genotypeSet = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
+    Individual individual(fakeRep);
 
-    std::unique_ptr<Evolution::Individual> copyIndivUnique;
+    std::unique_ptr<Individual> copyIndivUnique;
     ASSERT_NO_THROW(copyIndivUnique = std::move(individual.cloneUniquePtr())) << "Copying individual failed";
 
     ASSERT_EQ(copyIndivUnique->getSize(), individual.getSize()) << "Copy was not effective";
     ASSERT_TRUE(copyIndivUnique->getGenotype() == individual.getGenotype()) << "Copy was not effective";
     ASSERT_TRUE(&copyIndivUnique->getRepresentation() == &individual.getRepresentation()) << "Copy was not effective";
 
-    std::shared_ptr<Evolution::Individual> copyIndivShared;
+    std::shared_ptr<Individual> copyIndivShared;
     ASSERT_NO_THROW(copyIndivShared = std::move(individual.cloneSharedPtr())) << "Copying individual failed";
 
     ASSERT_EQ(copyIndivShared->getSize(), individual.getSize()) << "Copy was not effective";
@@ -116,8 +116,8 @@ TEST_F(IndividualTest, cloneIndividual)
 
 TEST_F(IndividualTest, results) 
 {
-    Evolution::Individual individual(fakeRep);
-    const Evolution::Individual& constIndiv = individual;
+    Individual individual(fakeRep);
+    const Individual& constIndiv = individual;
 
     ASSERT_NO_THROW(constIndiv.addEvaluationRun(        
         std::make_unique<Evaluation::EvaluationRun>(
@@ -134,14 +134,14 @@ TEST_F(IndividualTest, results)
 
 TEST_F(IndividualTest, validAndExecute)
 {
-    std::unique_ptr<Evolution::Genotype> genotypeSet = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
-    Evolution::Individual individual(fakeRep, std::move(genotypeSet));
+    std::unique_ptr<GraphBased::Genotype> genotypeSet = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 5, 6}));
+    Individual individual(fakeRep, std::move(genotypeSet));
 
     ASSERT_FALSE(individual.isValid()) << "Should not be valid";
     Data::DataValue source = Data::DataValue::scalar<int>(1);
     ASSERT_THROW(individual.execute({source.view()}), std::runtime_error) << "Should throw with invalid individual";
 
-    std::unique_ptr<Evolution::Genotype> genotypeSet2 = Evolution::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4}));
+    std::unique_ptr<GraphBased::Genotype> genotypeSet2 = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4}));
     individual.setGenotype(std::move(genotypeSet2));
 
     ASSERT_TRUE(individual.isValid()) << "Should be valid now";
@@ -151,22 +151,22 @@ TEST_F(IndividualTest, validAndExecute)
 
 TEST_F(IndividualTest, IDCounter)
 {
-    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 0) << "Individual ID counter should be 0 at the beginning.";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 0) << "Individual ID counter should be 0 at the beginning.";
 
-    Evolution::Individual individual1(fakeRep);
-    Evolution::Individual individual2(fakeRep);
-    Evolution::Individual individual3(fakeRep);
+    Individual individual1(fakeRep);
+    Individual individual2(fakeRep);
+    Individual individual3(fakeRep);
 
     ASSERT_EQ(individual1.getIndividualID(), 0) << "Individual ID should be 0.";
     ASSERT_EQ(individual2.getIndividualID(), 1) << "Individual ID should be 1.";
     ASSERT_EQ(individual3.getIndividualID(), 2) << "Individual ID should be 2.";
 
-    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 3) << "Individual ID counter should be 3 after creating three individuals.";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 3) << "Individual ID counter should be 3 after creating three individuals.";
 
     individual1.setIndividualID(100);
     ASSERT_EQ(individual1.getIndividualID(), 100) << "Setting Individual ID failed.";
 
-    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 101) << "Individual ID counter should be 101 after setting the first individual's ID.";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 101) << "Individual ID counter should be 101 after setting the first individual's ID.";
     
     // Check <, = and != operators
     ASSERT_FALSE(individual1 == individual2) << "operator == failed.";

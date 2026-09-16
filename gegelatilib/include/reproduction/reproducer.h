@@ -1,33 +1,33 @@
 
-#ifndef REPRODUCTION_H
-#define REPRODUCTION_H
+#ifndef REPRODUCTION_REPRODUCER_H
+#define REPRODUCTION_REPRODUCER_H
 
 #include <set>
 
-#include "evolution/individual.h"
+#include "individual.h"
 
 
-namespace Evolution {
+ namespace Reproduction {
     /**
      * \brief Class representing a Reproduction.
      */
-    class Reproduction
+    class Reproducer
     {
     protected:
 
     public:
 
         /// Default polymorphic destructor
-        virtual ~Reproduction() = default;
+        virtual ~Reproducer() = default;
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
-        Reproduction(const Reproduction&) = delete;
-        Reproduction& operator=(const Reproduction&) = delete;
+        Reproducer(const Reproducer&) = delete;
+        Reproducer& operator=(const Reproducer&) = delete;
     
         /**
-         * \brief Main Reproduction constructor.
+         * \brief Main Reproducer constructor.
          */
-        Reproduction() {};
+        Reproducer() {};
 
         /**
          * \brief Basic reproduction method replicating individuals
@@ -36,12 +36,12 @@ namespace Evolution {
          * \param[in] nbOffspring the number of offspring created.
          * \param[in] rng Random Number Generator.
          */
-        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> reproduce(
-            std::vector<std::shared_ptr<const Evolution::Individual>> parents, size_t nbOffspring, RNG::RNG& rng) const;
+        virtual std::set<std::shared_ptr<Individual>, SharedLess<Individual>> reproduce(
+            std::vector<std::shared_ptr<const Individual>> parents, size_t nbOffspring, RNG::RNG& rng) const = 0;
 
 
 
     };
 }; // namespace Reproduction
 
-#endif
+#endif // REPRODUCTION_REPRODUCER_H

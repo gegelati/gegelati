@@ -1,18 +1,18 @@
-#include "representations/lgpRepresentation.h"
+#include "representations/LGP.h"
 
-#include "evolution/individual.h"
+#include "individual.h"
 
-std::unique_ptr<Evolution::Representation> Representations::LGPRepresentation::cloneOnlyRepresentation() const
+std::unique_ptr<Representations::Representation> Representations::LGP::cloneOnlyRepresentation() const
 {
-    auto clone = std::make_unique<Representations::LGPRepresentation>(
+    auto clone = std::make_unique<Representations::LGP>(
         this->dimensionFlow.getInputDimensions(), this->nbOutputRegisters,
         this->iSet, this->nbRegisters,
-        this->nbNodesMin, this->nbNodesMax,
+        this->nbLinesMin, this->nbLinesMax,
         this->representationName, this->representationColor
     );
     return clone;
 }
-void Representations::LGPRepresentation::setGenotypeConstraint()
+void Representations::LGP::setGenotypeConstraint()
 {
     size_t maxInputSourceIdx = 8;
     GraphBased::NodeConstraint instructionNodes;
@@ -29,12 +29,12 @@ void Representations::LGPRepresentation::setGenotypeConstraint()
         instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, maxInputSourceIdx - 1));
     }
 
-    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(instructionNodes, this->nbLinesMin, this->nbLinesMax);
 }
 
 
 
-void Representations::LGPRepresentation::setGenotypeGenerator()
+void Representations::LGP::setGenotypeGenerator()
 {
     size_t maxInputSourceIdx = 8;
     GraphBased::NodeGenerator instructionNodes;
@@ -51,16 +51,16 @@ void Representations::LGPRepresentation::setGenotypeGenerator()
         instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, maxInputSourceIdx - 1));
     }
 
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, this->nbLinesMin, this->nbLinesMax);
 }
 
-std::unique_ptr<GraphBased::GenotypeGenerator> Representations::LGPRepresentation::getGenotypeGenerator() const
+std::unique_ptr<GraphBased::GenotypeGenerator> Representations::LGP::getGenotypeGenerator() const
 {
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
-Data::DataValue Representations::LGPRepresentation::executeGenotype(
-    const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
+Data::DataValue Representations::LGP::executeGenotype(
+    const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
     std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();

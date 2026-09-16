@@ -1,21 +1,21 @@
-#ifndef RANDOM_SELECTOR_H
-#define RANDOM_SELECTOR_H
+#ifndef SELECTION_RANDOM_SELECTOR_H
+#define SELECTION_RANDOM_SELECTOR_H
 
-#include "evolution/selection.h"
+#include "selection/selector.h"
 
-namespace Selectors {
+ namespace Selection {
 
     /**
      * \brief Class representing the mu plus lambda selection mechanism used for surviving selection
      */
-    class Random : public Evolution::Selection {
+    class RandomSelector : public Selector {
 
         protected:            
         
         public: 
 
             /// @brief Default constructor setting replacement value to false
-            Random(bool replacement) : Evolution::Selection(replacement) {}
+            RandomSelector(bool replacement) : Selector(replacement) {}
 
             /**
              * \brief method performing the random selection
@@ -26,10 +26,10 @@ namespace Selectors {
              * 
              * \return a vector of the selected individuals.
              */
-            virtual std::vector<std::shared_ptr<const Evolution::Individual>> select(
-                const std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>>& individuals,
+            virtual std::vector<std::shared_ptr<const Individual>> select(
+                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
                 size_t nbSelected, RNG::RNG& rng) const override;
     };
 };
 
-#endif // MU_PLUS_LAMBDA_H
+#endif // SELECTION_RANDOM_SELECTOR_H

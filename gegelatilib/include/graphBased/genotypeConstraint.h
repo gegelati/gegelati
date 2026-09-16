@@ -1,10 +1,10 @@
 
-#ifndef GENOTYPE_CONSTRAINT_H
-#define GENOTYPE_CONSTRAINT_H
+#ifndef GRAPH_BASED_GENOTYPE_CONSTRAINT_H
+#define GRAPH_BASED_GENOTYPE_CONSTRAINT_H
 
 #include "graphBased/nodeConstraint.h"
 
-namespace  GraphBased {
+ namespace GraphBased {
 
 
     /**
@@ -96,4 +96,4 @@ namespace  GraphBased {
     };
 }
 
-#endif // GENOTYPE_CONSTRAINT_H
+#endif // GRAPH_BASED_GENOTYPE_CONSTRAINT_H

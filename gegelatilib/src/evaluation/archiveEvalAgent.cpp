@@ -2,8 +2,8 @@
 #if 0
 
 void Evaluation::ArchiveEvalAgent::evaluateIndividual(
-    const Evolution::Individual& individual, 
-    const Evolution::Representation& representation,
+    const Individual& individual, 
+    const Representation& representation,
     uint64_t generationNumber,
     LearningMode mode) const
 {
@@ -56,8 +56,8 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividual(
 
 
 void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
-    const std::set<std::reference_wrapper<const Evolution::Individual>>& individuals, 
-    const Evolution::Representation& representation,
+    const std::set<std::reference_wrapper<const Individual>>& individuals, 
+    const Representation& representation,
     uint64_t generationNumber,
     LearningMode mode) const
 {
@@ -66,7 +66,7 @@ void Evaluation::ArchiveEvalAgent::evaluateIndividuals(
     archive.updateArchiveOutputs(representation);
 
     // Evaluate the individuals
-    for(const Evolution::Individual& indiv: individuals){
+    for(const Individual& indiv: individuals){
         this->evaluateIndividual(
             indiv, representation, generationNumber, mode
         );

@@ -1,19 +1,19 @@
-#include "representations/tpgRepresentation.h"
+#include "representations/TPG.h"
 
 #include <sstream>
 #include <limits>
 
-std::unique_ptr<Evolution::Representation> Representations::TPGRepresentation::cloneOnlyRepresentation() const
+std::unique_ptr<Representations::Representation> Representations::TPG::cloneOnlyRepresentation() const
 {
-    auto clone = std::make_unique<Representations::TPGRepresentation>(
+    auto clone = std::make_unique<Representations::TPG>(
         this->dimensionFlow.getInputDimensions(), this->nbActions,
-        this->nbNodesMin, this->nbNodesMax,
+        this->nbMembersMin, this->nbMembersMax,
         this->representationName, this->representationColor
     );
     return clone;
 }
 
-void Representations::TPGRepresentation::setGenotypeConstraint()
+void Representations::TPG::setGenotypeConstraint()
 {
    GraphBased::NodeConstraint bidNodes;
 
@@ -23,10 +23,10 @@ void Representations::TPGRepresentation::setGenotypeConstraint()
     // Action constraint
     bidNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbActions - 1));
 
-    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(bidNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(bidNodes, this->nbMembersMin, this->nbMembersMax);
 }
 
-void Representations::TPGRepresentation::setGenotypeGenerator()
+void Representations::TPG::setGenotypeGenerator()
 {
    GraphBased::NodeGenerator bidNodes;
 
@@ -34,7 +34,7 @@ void Representations::TPGRepresentation::setGenotypeGenerator()
     /* === Value requirements for members === */
     
     // Value Requirements for members
-    bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>>(this->availableMembers));
+    bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(this->availableMembers));
 
     /* === Value requirements for actions/Tangled connections === */
 
@@ -44,7 +44,7 @@ void Representations::TPGRepresentation::setGenotypeGenerator()
     // Add the generator for tangled individuals only if it is not empty
     if(this->availableForTangled.size() > 0) {
         // Tangled generator
-        Dimensions::ListUniformGenerator<std::shared_ptr<const Evolution::Individual>> tangledGenerator(this->availableForTangled);
+        Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>> tangledGenerator(this->availableForTangled);
 
         // Multi generator
         Dimensions::MultiGenerator multi;
@@ -56,17 +56,17 @@ void Representations::TPGRepresentation::setGenotypeGenerator()
         bidNodes.addGenerator(actionGenerator);
     }
 
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, this->nbNodesMin, this->nbNodesMax);
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, this->nbMembersMin, this->nbMembersMax);
 }
 
-void Representations::TPGRepresentation::setAvailableMembers(const std::vector<std::shared_ptr<const Evolution::Individual>>& members)
+void Representations::TPG::setAvailableMembers(const std::vector<std::shared_ptr<const Individual>>& members)
 {
     this->availableMembers.clear();
     this->availableMembers.insert(this->availableMembers.begin(), members.begin(), members.end());
 }
 
 
-void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Evolution::Individual>>& tangledIndiv)
+void Representations::TPG::setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Individual>>& tangledIndiv)
 {
     bool isEmpty = this->availableForTangled.empty();
     this->availableForTangled.clear();
@@ -78,14 +78,14 @@ void Representations::TPGRepresentation::setAvailableTangledIndiv(const std::vec
     }
 }
 
-std::unique_ptr<GraphBased::GenotypeGenerator> Representations::TPGRepresentation::getGenotypeGenerator() const
+std::unique_ptr<GraphBased::GenotypeGenerator> Representations::TPG::getGenotypeGenerator() const
 {
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
 
-Data::DataValue Representations::TPGRepresentation::executeGenotype(
-    const Evolution::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
+Data::DataValue Representations::TPG::executeGenotype(
+    const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
     // Get effective nodes
     std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
@@ -95,7 +95,7 @@ Data::DataValue Representations::TPGRepresentation::executeGenotype(
 
     for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
         const GraphBased::GPNode& node = effectiveNodes.at(idx);
-        const std::shared_ptr<const Evolution::Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Evolution::Individual>>();
+        const std::shared_ptr<const Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Individual>>();
         double bid = member->execute(inputSources).getScalar<double>();
 
         if(bid > maxBid) {
@@ -109,6 +109,6 @@ Data::DataValue Representations::TPGRepresentation::executeGenotype(
         return effectiveNodes.at(winnerIdx).get().getValue(1).clone();
     } else {
         // Return action of tangled individual
-        return effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Evolution::Individual>>()->execute(inputSources);
+        return effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Individual>>()->execute(inputSources);
     }
 }

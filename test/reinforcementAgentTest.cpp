@@ -44,7 +44,7 @@
 #include "evaluation/reinforcementAgent.h"
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
-#include "representations/lgpRepresentation.h"
+#include "representations/LGP.h"
 
 #include "learn/stickGameWithOpponentDupDouble.h"
 #include "selector/truncationSelector.h"
@@ -126,15 +126,14 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     Evaluation::ReinforcementAgent rlAgent(le, std::move(params));
     Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING;
 
-    Evolution::Representation* representation;
-    representation = new Representations::LGPRepresentation(le.getInputDimensions(), 1, set, 8, 5, 10);
+    Representations::LGP representation(le.getInputDimensions(), 1, set, 8, 5, 10);
 
-    Evolution::Individual indiv(*representation);
+    Individual indiv(representation);
     
     ASSERT_THROW(rlAgent.evaluateIndividual(indiv, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 
     // Fill individual
-    std::unique_ptr<Evolution::Genotype> genotype = std::make_unique<Evolution::Genotype>();
+    std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>();
     std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
     
     group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 2, 1, 5, 1, 2}));// R[1] = S[1] * S[2] = 3.0

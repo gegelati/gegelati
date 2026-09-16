@@ -1,11 +1,11 @@
-#ifndef NODE_GENERATOR_H
-#define NODE_GENERATOR_H
+#ifndef GRAPH_BASED_NODE_GENERATOR_H
+#define GRAPH_BASED_NODE_GENERATOR_H
 
 #include <vector>
 #include "dimensions/constraint.h"
 #include "dimensions/dataValueGenerator.h"
 
-namespace  GraphBased {
+ namespace GraphBased {
 
     /**
      * \brief class representation the generator of a GPNode.
@@ -58,4 +58,4 @@ namespace  GraphBased {
     };
 }
 
-#endif // NODE_GENERATOR_H
+#endif // GRAPH_BASED_NODE_GENERATOR_H

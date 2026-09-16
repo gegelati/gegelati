@@ -24,7 +24,7 @@ size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Eval
 
 
 void Evaluation::ReinforcementAgent::evaluateIndividual(
-    const Evolution::Individual& individual, 
+    const Individual& individual, 
     uint64_t generationNumber,
     LearningMode mode) const
 {

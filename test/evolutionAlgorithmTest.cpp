@@ -43,17 +43,18 @@
 
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
-#include "evolution/evolutionAlgorithm.h"
+#include "evolutionAlgorithm.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
 #include "evaluation/reinforcementAgent.h"
 #include "evaluation/archiveEvalAgent.h"
 
-#include "representations/lgpRepresentation.h"
-#include "representations/tpgRepresentation.h"
+#include "representations/LGP.h"
+#include "representations/TPG.h"
 
-#include "evolution/reproduction.h"
-#include "selection/random.h"
-#include "selection/truncation.h"
+#include "mutation/pointMutator.h"
+#include "reproduction/replicator.h"
+#include "selection/randomSelector.h"
+#include "selection/truncationSelector.h"
 
 #include "util/counterReset.h"
 // Set all file in comment
@@ -62,7 +63,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Evolution::Representation* representation;
+    Representations::Representation* representation;
 
 
     StickGameWithOpponentD le;
@@ -82,7 +83,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
     
-        representation = new Representations::LGPRepresentation(le.getInputDimensions(), 1, set, 8, 10);
+        representation = new Representations::LGP(le.getInputDimensions(), 1, set, 8, 10);
 
         evalAgent = new Evaluation::ReinforcementAgent(le);
     }
@@ -101,11 +102,9 @@ class EvolutionAlgorithmTest : public ::testing::Test
 
 TEST_F(EvolutionAlgorithmTest, Constructor)
 {
-    Evolution::EvolutionAlgorithm* ea;
+    EvolutionAlgorithm* ea;
 
-    ASSERT_NO_THROW(ea = new Evolution::EvolutionAlgorithm(*representation, *evalAgent, 12)) << "Constructor of EA failed.";
-
-    ASSERT_EQ(ea->getRepresentation().getMaxNbNodes(), representation->getMaxNbNodes()) << "Constructor should have copied the representation";
+    ASSERT_NO_THROW(ea = new EvolutionAlgorithm(*representation, *evalAgent, 12)) << "Constructor of EA failed.";
 
     ASSERT_NO_THROW(ea->getMutation()) << "For Coverage :D";
     ASSERT_NO_THROW(ea->getEvaluation()) << "For Coverage :D";
@@ -118,29 +117,29 @@ TEST_F(EvolutionAlgorithmTest, Constructor)
 /*
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
 {
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
 
     ASSERT_NO_THROW(ea.initializePopulation()) << "Initialization of population failed.";
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population size is wrong after initialization.";
 
-    for(const Evolution::Individual& indiv: ea.getPopulation().getIndividuals()) {
+    for(const Individual& indiv: ea.getPopulation().getIndividuals()) {
         ASSERT_TRUE(indiv.isValid()) << "An individual is not valid after population initialization";
     }
 }
 
 TEST_F(EvolutionAlgorithmTest, selectParents) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents;
+    std::vector<std::reference_wrapper<const Individual>> parents;
     ASSERT_NO_THROW(parents = ea.selectParents(100)) << "Selecting parents failed";
-    for(const Evolution::Individual& parent: parents) {
+    for(const Individual& parent: parents) {
         ASSERT_TRUE(ea.getPopulation().containsIndividual(parent)) << "Parent should be contained in the population";
     }
 
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents2;
+    std::vector<std::reference_wrapper<const Individual>> parents2;
     ASSERT_NO_THROW(parents2 = ea.selectParents(100)) << "Selecting parents failed";
     bool sameParents = true;
     for(size_t idx = 0; idx < 100 && sameParents; idx++) {
@@ -152,13 +151,13 @@ TEST_F(EvolutionAlgorithmTest, selectParents)
 TEST_F(EvolutionAlgorithmTest, reproduceParents) 
 {
     
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
+    std::vector<std::reference_wrapper<const Individual>> parents = ea.selectParents(100);
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should be 100 before reproduction";
 
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring;
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring;
     ASSERT_NO_THROW(offspring = ea.reproduceParents(parents)) << "Reproducing failed.";
 
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Population Size should still be 100 after reproduction";
@@ -173,10 +172,10 @@ TEST_F(EvolutionAlgorithmTest, reproduceParents)
 
 TEST_F(EvolutionAlgorithmTest, mutateOffspring) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
-    std::vector<std::reference_wrapper<const Evolution::Individual>> parents = ea.selectParents(100);
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(parents);
+    std::vector<std::reference_wrapper<const Individual>> parents = ea.selectParents(100);
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = ea.reproduceParents(parents);
 
 
     size_t idx = 0;
@@ -197,21 +196,21 @@ TEST_F(EvolutionAlgorithmTest, mutateOffspring)
 
 TEST_F(EvolutionAlgorithmTest, evaluatePopulation) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
     ASSERT_NO_THROW(ea.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING)) << "Evaluation failed";
 
 
-    Evolution::EvolutionAlgorithm ea2(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea2(*representation, *evalAgent, 12);
     ea2.initializePopulation();
 
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring2 = ea2.reproduceParents(ea2.selectParents(100));
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring2 = ea2.reproduceParents(ea2.selectParents(100));
     ea2.mutateOffspring(offspring2);    
-    std::map<std::reference_wrapper<const Evolution::Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results2;
+    std::map<std::reference_wrapper<const Individual>, std::shared_ptr<Evaluation::EvaluationResult>> results2;
     ASSERT_NO_THROW(ea2.evaluatePopulation(offspring2, 0, Evaluation::LearningMode::TRAINING)) << "Evaluation of entire population failed";
 
     auto it1 = offspring.begin();
@@ -229,10 +228,10 @@ TEST_F(EvolutionAlgorithmTest, evaluatePopulation)
 
 TEST_F(EvolutionAlgorithmTest, survivorSelection) 
 {
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
 
     ea.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
@@ -246,7 +245,7 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
     ASSERT_EQ(offspring.size(), 0) << "Offspring size should be 0 after replacement";
 
     size_t nbOffspringSurviving = 0;
-    std::set<std::reference_wrapper<const Evolution::Individual>> indivs(ea.getPopulation().getIndividuals());
+    std::set<std::reference_wrapper<const Individual>> indivs(ea.getPopulation().getIndividuals());
     for(auto it = indivs.begin(); it != indivs.end(); it++){
         if(it->get().getIndividualID() >= minIndexOffspring) {
             nbOffspringSurviving++;
@@ -257,13 +256,13 @@ TEST_F(EvolutionAlgorithmTest, survivorSelection)
 
 TEST_F(EvolutionAlgorithmTest, doGenerations) {
     
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
 
     size_t nbGen = 20;
     double formerBest = -1;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
-        std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+        std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
         ea.mutateOffspring(offspring);
         ea.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
         ea.selectSurvivors(offspring);
@@ -272,21 +271,21 @@ TEST_F(EvolutionAlgorithmTest, doGenerations) {
     }
     //std::cout<<ea.getSelector().getBest(ea.getPopulation().getIndividuals()).getEvaluationResult()<<std::endl;
 
-    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 2100) << "Individual ID counter not determinist";
     ASSERT_EQ(ea.getPopulation().size(), 100) << "Size of population not determinist";
     ASSERT_EQ(ea.getRNG().getUnsignedInt64(0, UINT64_MAX), 3098313116838862914U) << "RNG not determinist";
 }
 
 TEST_F(EvolutionAlgorithmTest, testArchive) {
     
-    Evolution::EvolutionAlgorithm ea(*representation, *evalAgent, 12);
+    EvolutionAlgorithm ea(*representation, *evalAgent, 12);
     ea.initializePopulation();
     evalAgent->addRequestedMetric(Evaluation::ArchiveMetric(1.0));
 
     size_t nbGen = 20;
     double formerBest = -1;
 
-    std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
+    std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = ea.reproduceParents(ea.selectParents(100));
     ea.mutateOffspring(offspring);
     ea.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
     ea.selectSurvivors(offspring);
@@ -297,19 +296,19 @@ TEST_F(EvolutionAlgorithmTest, testArchive) {
 
 
 TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
-    Evolution::EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
+    EvolutionAlgorithm eaLgp(*representation, *evalAgent, 12);
     eaLgp.initializePopulation();
 
     
-    Representations::TPGRepresentation tpgRep(evalAgent->getInputDimensions(), evalAgent->getOutputDimension().getDataType().totalElements(), 5, 10);
-    Evolution::EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
+    Representations::TPG tpgRep(evalAgent->getInputDimensions(), evalAgent->getOutputDimension().getDataType().totalElements(), 5, 10);
+    EvolutionAlgorithm eaTpg(tpgRep, *evalAgent);
     ASSERT_NO_THROW(eaTpg.initializePopulation()) << "Initializing population failed.";
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         {
-            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
+            std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
             eaLgp.mutateOffspring(offspring);
             eaLgp.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
             eaLgp.selectSurvivors(offspring);
@@ -318,7 +317,7 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
 
 
         {
-            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
+            std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
             eaTpg.mutateOffspring(offspring);
             eaTpg.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
             eaTpg.selectSurvivors(offspring);
@@ -326,14 +325,14 @@ TEST_F(EvolutionAlgorithmTest, evolveTPGandLGP) {
         }
     }
 
-    ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 4200) << "Individual ID counter not determinist";
     ASSERT_EQ(eaTpg.getPopulation().size(), 298) << "Size of TPG population not determinist";
     ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 5830540304690856934U) << "RNG not determinist";
 
     std::cout<<eaLgp.getRepresentation().summary()<<std::endl;
     std::cout<<eaTpg.getRepresentation().summary()<<std::endl;
 
-    /*const Evolution::Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
+    /*const Individual& best = eaTpg.getSelector().getBest(eaTpg.getPopulation().getIndividuals());
     std::cout<<best.getEvaluationResult()<<std::endl;
 }
 
@@ -342,16 +341,16 @@ TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
     
 
     Evaluation::ReinforcementAgent evalAgent(le);
-    Representations::LGPRepresentation representation(set, 8, 10);
+    Representations::LGP representation(set, 8, 10);
 
     Evaluation::ArchiveEnvironment archiveEnv(le.getDataSources(), 10);
     Evaluation::ArchiveEvalAgent archiveEval(archiveEnv, std::make_unique<Learn::LearningParameters>(), 2);
 
-    Evolution::EvolutionAlgorithm eaLgp(representation, archiveEval, 12);
+    EvolutionAlgorithm eaLgp(representation, archiveEval, 12);
     eaLgp.initializePopulation();
 
-    Representations::TPGRepresentation tpgRep(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
-    Evolution::EvolutionAlgorithm eaTpg(tpgRep, evalAgent, 0);
+    Representations::TPG tpgRep(eaLgp.getRepresentation(), eaLgp.getPopulation(), 5, 10);
+    EvolutionAlgorithm eaTpg(tpgRep, evalAgent, 0);
     
     eaTpg.getEvaluation().addRequestedMetric(Evaluation::ArchiveMetric(0.5));
     archiveEnv.setArchiveInputPopulation(eaTpg.getPopulation());
@@ -365,18 +364,18 @@ TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
 
         size_t nbGood = 0;
         while(nbGood < 100) {
-            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
+            std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = eaLgp.reproduceParents(eaLgp.selectParents(100));
             eaLgp.mutateOffspring(offspring);
             eaLgp.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
 
             
-            std::set<std::reference_wrapper<const Evolution::Individual>> evaluatedIndividuals = eaLgp.getPopulation().getNotProtectedIndividuals();
-            for (const std::unique_ptr<Evolution::Individual>& os: offspring) {
+            std::set<std::reference_wrapper<const Individual>> evaluatedIndividuals = eaLgp.getPopulation().getNotProtectedIndividuals();
+            for (const std::unique_ptr<Individual>& os: offspring) {
                 evaluatedIndividuals.insert(*os);
             }
-            std::vector<std::pair<double, std::reference_wrapper<const Evolution::Individual>>> fitnesses = eaLgp.getSelector().getRankedScores(evaluatedIndividuals);
+            std::vector<std::pair<double, std::reference_wrapper<const Individual>>> fitnesses = eaLgp.getSelector().getRankedScores(evaluatedIndividuals);
             nbGood = std::count_if(fitnesses.begin(), fitnesses.end(),
-                                [](const std::pair<double, std::reference_wrapper<const Evolution::Individual>>& pair) {
+                                [](const std::pair<double, std::reference_wrapper<const Individual>>& pair) {
                                     return pair.first == 1.0;
                                 });
 
@@ -386,14 +385,14 @@ TEST_F(EvolutionAlgorithmTest, testArchiveTPG) {
 
 
         {
-            std::set<std::unique_ptr<Evolution::Individual>, UniqueLess<Evolution::Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
+            std::set<std::unique_ptr<Individual>, UniqueLess<Individual>> offspring = eaTpg.reproduceParents(eaTpg.selectParents(100));
             eaTpg.mutateOffspring(offspring);
             eaTpg.evaluatePopulation(offspring, 0, Evaluation::LearningMode::TRAINING);
             eaTpg.selectSurvivors(offspring);
         }
 
     }
-    //ASSERT_EQ(Evolution::Individual::getIndividualIDCounter(), 6500) << "Individual ID counter not determinist";
+    //ASSERT_EQ(Individual::getIndividualIDCounter(), 6500) << "Individual ID counter not determinist";
     ASSERT_EQ(eaTpg.getPopulation().size(), 309) << "Size of TPG population not determinist";
     ASSERT_EQ(eaTpg.getRNG().getUnsignedInt64(0, UINT64_MAX), 16814013097088067763U) << "RNG not determinist";
 }
@@ -404,15 +403,15 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     rng.setSeed(4);
 
     // Create representation
-    Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le.getInputDimensions(), 1, set, 8, 10);
 
     // Create Mutator and breeder
-    Evolution::Reproduction breeder;
-    Evolution::Mutation mutator;
+    Reproduction::Replicator breeder;
+    Mutation::PointMutator mutator(0.5, 0.1, 0.1);
 
     // Create selectors
-    Selectors::Random parentSelection(true);
-    Selectors::Truncation survivingSelection;
+    Selection::RandomSelector parentSelection(true);
+    Selection::TruncationSelector survivingSelection;
     
     // Create evaluationAgent
     Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
@@ -427,8 +426,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     size_t nbOffspring = 100;
 
     // Initialize population
-    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individuals = mutator.initIndividuals(lgpRep, sizePopulation, rng);
-    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> population(individuals.begin(), individuals.end());
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population(individuals.begin(), individuals.end());
     individuals.clear();
 
     // Initial evaluation
@@ -438,21 +437,21 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         // Parent selection 
-        std::vector<std::shared_ptr<const Evolution::Individual>> parents = parentSelection.select(population, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parents = parentSelection.select(population, nbOffspring, rng);
 
         // Reproduce the parents
-        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
         // Mutate the offspring
-        mutator.mutateIndividuals(offspring, rng);
+        Mutation::mutateIndividuals(mutator, offspring, rng);
 
         // Evaluate the population
-        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividuals(population);
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(population);
         evaluatedIndividuals.insert(offspring.begin(), offspring.end());
         evaluation.evaluateIndividuals(evaluatedIndividuals, 0, Evaluation::LearningMode::TRAINING);
 
         // Do replacement
-        std::vector<std::shared_ptr<const Evolution::Individual>> survivors = survivingSelection.select(evaluatedIndividuals, sizePopulation, rng);
+        std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(evaluatedIndividuals, sizePopulation, rng);
         population.clear();
         population.insert(survivors.begin(), survivors.end());
 
@@ -467,16 +466,16 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     rng.setSeed(4);
 
     // Create representations
-    Representations::LGPRepresentation lgpRep(le.getInputDimensions(), 1, set, 8, 10);
-    Representations::TPGRepresentation tpgRep(le.getInputDimensions(), 3, 2, 10);
+    Representations::LGP lgpRep(le.getInputDimensions(), 1, set, 8, 10);
+    Representations::TPG tpgRep(le.getInputDimensions(), 3, 2, 10);
 
     // Create Mutator and breeder
-    Evolution::Reproduction breeder;
-    Evolution::Mutation mutator;
+    Reproduction::Replicator breeder;
+    Mutation::PointMutator mutator(0.5, 0.1, 0.1);
 
     // Create selectors
-    Selectors::Random parentSelection(true);
-    Selectors::Truncation survivingSelection;
+    Selection::RandomSelector parentSelection(true);
+    Selection::TruncationSelector survivingSelection;
     
     // Create evaluationAgent
     Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
@@ -491,17 +490,17 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     size_t nbOffspring = 100;
 
     // Initialize LGP population
-    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individualsLGP = mutator.initIndividuals(lgpRep, sizePopulation, rng);
-    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
     individualsLGP.clear();
     evaluation.evaluateIndividuals(populationLGP, 0, Evaluation::LearningMode::TRAINING);
 
     // Initialize TPG population
-    std::vector<std::shared_ptr<const Evolution::Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
+    std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
     tpgRep.setAvailableMembers(members);
 
-    std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> individualsTPG = mutator.initIndividuals(tpgRep, sizePopulation, rng);
-    std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, sizePopulation, rng);
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     individualsTPG.clear();
     evaluation.evaluateIndividuals(populationTPG, 0, Evaluation::LearningMode::TRAINING);
 
@@ -510,36 +509,36 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         // LGP Evolution : variation
-        std::vector<std::shared_ptr<const Evolution::Individual>> parentsLGP = parentSelection.select(populationLGP, nbOffspring, rng);
-        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
-        mutator.mutateIndividuals(offspringLGP, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsLGP = parentSelection.select(populationLGP, nbOffspring, rng);
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
+        Mutation::mutateIndividuals(mutator, offspringLGP, rng);
         // LGP Evolution : evaluation
-        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividualsLGP(populationLGP);
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsLGP(populationLGP);
         evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
         evaluation.evaluateIndividuals(evaluatedIndividualsLGP, 0, Evaluation::LearningMode::TRAINING);
         // LGP Evolution : replacement
-        std::vector<std::shared_ptr<const Evolution::Individual>> survivorsLGP = survivingSelection.select(evaluatedIndividualsLGP, sizePopulation, rng);
+        std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(evaluatedIndividualsLGP, sizePopulation, rng);
         populationLGP.clear();
         populationLGP.insert(survivorsLGP.begin(), survivorsLGP.end());
 
 
         // TPG Evolution : variation
-        std::vector<std::shared_ptr<const Evolution::Individual>> parentsTPG = parentSelection.select(populationTPG, nbOffspring, rng);
-        std::set<std::shared_ptr<Evolution::Individual>, SharedLess<Evolution::Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(populationTPG, nbOffspring, rng);
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
 
         
-        std::vector<std::shared_ptr<const Evolution::Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
-        std::vector<std::shared_ptr<const Evolution::Individual>> tangleds = parentSelection.select(populationTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> tangleds = parentSelection.select(populationTPG, nbOffspring, rng);
         tpgRep.setAvailableMembers(members);
         tpgRep.setAvailableTangledIndiv(tangleds);
 
-        mutator.mutateIndividuals(offspringTPG, rng);
+        Mutation::mutateIndividuals(mutator, offspringTPG, rng);
         // TPG Evolution : evaluation
-        std::set<std::shared_ptr<const Evolution::Individual>, SharedLess<Evolution::Individual>> evaluatedIndividualsTPG(populationTPG);
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
         evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
         evaluation.evaluateIndividuals(evaluatedIndividualsTPG, 0, Evaluation::LearningMode::TRAINING);
         // TPG Evolution : replacement
-        std::vector<std::shared_ptr<const Evolution::Individual>> survivorsTPG = survivingSelection.select(evaluatedIndividualsTPG, sizePopulation, rng);
+        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(evaluatedIndividualsTPG, sizePopulation, rng);
         populationTPG.clear();
         populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
 
