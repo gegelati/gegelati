@@ -23,6 +23,9 @@ TEST(LambdaInstructionsTest, ExecutePrimitiveType)
 
     const Data::DataValue result = instruction.execute({Data::DataView(valueA), b});
     ASSERT_DOUBLE_EQ(result.getScalar<double>(), -2.9);
+
+    float wrongValue = 0.0;
+    ASSERT_THROW(instruction.execute({Data::DataView(wrongValue), b}), std::invalid_argument) << "Should throw with wrong input type";
 }
 
 TEST(LambdaInstructionsTest, ExecuteConstant)

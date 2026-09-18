@@ -60,9 +60,23 @@ const Instructions::Instruction& Instructions::Set::getInstruction(
 unsigned int Instructions::Set::getMaxNbOperands() const
 {
     unsigned int res = 0;
-    for (auto instruction : this->instructions) {
-        unsigned int nb = instruction.get().getNbOperands();
+    for (const Instructions::Instruction& instruction : this->instructions) {
+        unsigned int nb = instruction.getNbOperands();
         res = (nb > res) ? nb : res;
     }
     return res;
+}
+
+Instructions::Set Instructions::Set::filterInstructionSet(const std::vector<Data::DataType>& inputRequirements, const Data::DataType& outputRequirement) const
+{
+    if(inputRequirements.size() == 0) {
+        throw std::runtime_error("Instructions::Set::filterInstructionSet: cannot filter with empty requirements list.");
+    }
+    Set filteredSet;
+    for (const Instructions::Instruction& instruction : instructions) {
+        if(instruction.handleInputTypes(inputRequirements) && instruction.handleOutputType(outputRequirement)) {
+            filteredSet.add(instruction);
+        }
+    }
+    return filteredSet;
 }

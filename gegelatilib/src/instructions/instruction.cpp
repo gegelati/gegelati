@@ -64,6 +64,11 @@ unsigned int Instructions::Instruction::getNbOperands() const
     return (unsigned int)this->operandTypes.size();
 }
 
+const Data::DataType Instructions::Instruction::getOutputType() const
+{
+    return this->outputType;
+}
+
 bool Instruction::checkOperandTypes(
     const std::vector<Data::DataView>& arguments) const
 {
@@ -86,6 +91,27 @@ Data::DataValue Instruction::execute(
         throw std::invalid_argument("Instruction::execute: Instruction operand type mismatch.");
     }
     throw std::logic_error("Instruction::execute must be overridden.");
+}
+
+bool Instruction::handleInputTypes(const std::vector<Data::DataType>& types) const
+{
+    for(const Data::DataType& operandType: this->operandTypes) {
+        bool canOperandHandle = false;
+        for(const Data::DataType& inputType: types) {
+            if(operandType.elementType == inputType.elementType && inputType.canFitIn(operandType, 0)) {
+                canOperandHandle = true;
+                break;
+            }
+        }
+        if(!canOperandHandle) {
+            return false;
+        }
+    }
+    return true;
+}
+bool Instruction::handleOutputType(const Data::DataType& type) const
+{
+    return (this->outputType.elementType == type.elementType && type.canFitIn(this->outputType, 0));
 }
 
 #ifdef CODE_GENERATION

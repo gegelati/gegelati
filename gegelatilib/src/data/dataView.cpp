@@ -81,8 +81,12 @@ Data::DataView::operator bool() const noexcept {
 }
 
 size_t Data::DataView::scaleLocation(const Data::DataType& required, const size_t address) const {
-    return address % this->type.totalElements();
-    // Update base on required for rank > 0
+    size_t scaleAddress = address % this->type.getAddressSpace(required);
+    if(this->type.rank == 2) {
+        scaleAddress = this->type.getValidAddress(required, scaleAddress);
+    }
+    return scaleAddress;
+    
 }
 
 std::string Data::DataView::toString() const {

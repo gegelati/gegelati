@@ -56,7 +56,7 @@ bool Data::DataType::canFitIn(const DataType& requested, size_t offset) const no
 
 size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept
 {
-    if(!this->canFitIn(requested, 0)) {
+    if(!this->canFitIn(requested, 0) || this->elementType != requested.elementType) {
         return 0;
     }
     else if (this->rank == 0) {
@@ -82,6 +82,18 @@ size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept
     } else {
         return (this->dimensions[1] - requested.dimensions[1] + 1) * (this->dimensions[0] - requested.dimensions[0] + 1);
     }
+}
+
+size_t Data::DataType::getValidAddress(const Data::DataType& requested, const size_t address) const noexcept
+{
+    if(this->rank < 2 || requested.rank == 0) {
+        return address; 
+    }
+    const size_t colAllowedLength = this->dimensions[1] - requested.dimensions[requested.rank == 2 ? 1 : 0] + 1;
+
+    const size_t realRow = address / colAllowedLength;
+    return realRow * this->dimensions[1] + address % colAllowedLength;
+
 }
 
 bool Data::DataType::operator==(const DataType& other) const noexcept {

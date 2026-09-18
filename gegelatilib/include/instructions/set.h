@@ -104,6 +104,16 @@ namespace Instructions {
          * of operands needed to execute an Instruction in the Set.
          */
         unsigned int getMaxNbOperands() const;
+
+        /**
+         * \brief Return a copy of the current instruction set, with the instruction filtered based on the necessary required types
+         * 
+         * An instruction is copied in the clone only if it handle at least one of the required types.
+         * 
+         * \param[in] inputRequirements vector of the necessary types.
+         * \param[in] outputRequirement vector of the necessary types.
+         */
+        Set filterInstructionSet(const std::vector<Data::DataType>& inputRequirements, const Data::DataType& outputRequirement) const;
     };
 } // namespace Instructions
 

@@ -163,6 +163,11 @@ namespace Instructions {
           getOperandTypes() const;
 
         /**
+         * \brief Get the type output by the instruction.
+         */
+        const Data::DataType getOutputType() const;
+
+        /**
          * \brief Get the number of operands required to execute the
          * Instruction.
          *
@@ -194,6 +199,15 @@ namespace Instructions {
         virtual Data::DataValue execute(
             const std::vector<Data::DataView>& args) const = 0;
 
+        /**
+         * \brief Return a boolean indicating is the instruction can support the types as input (Each operand can support at least one type for at least one address).
+         */
+        bool handleInputTypes(const std::vector<Data::DataType>& types) const;
+        /**
+         * \brief Return a boolean indicating is the instruction can support the type as output (at least one address index).
+         */
+        bool handleOutputType(const Data::DataType& type) const;
+
       protected:
 #ifndef CODE_GENERATION
         /**
@@ -209,6 +223,11 @@ namespace Instructions {
          * instruction.
          */
         std::vector<Data::DataType> operandTypes;
+
+        /**
+         * Type of the outputed value when executed.
+         */
+        Data::DataType outputType;
     };
 
 } // namespace Instructions

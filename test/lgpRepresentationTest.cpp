@@ -221,3 +221,81 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
     ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }
+
+TEST_F(LGPRepresentationTest, CheckWrongInstructionIgnored) 
+{
+    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
+    Data::DataValue inputSource0 = Data::DataValue::zeros<double>(16, 16);
+    Data::DataValue inputSource1 = Data::DataValue::zeros<float>(16, 16);
+    Data::DataValue inputSource2 = Data::DataValue::zeros<int>(16, 16);
+    Data::DataValue inputSource3 = Data::DataValue::zeros<double>(16);
+    Data::DataValue inputSource4 = Data::DataValue::zeros<float>(16);
+    Data::DataValue inputSource5 = Data::DataValue::zeros<int>(16);
+    Data::DataValue inputSource6 = Data::DataValue::zeros<double>(0);
+    Data::DataValue inputSource7 = Data::DataValue::zeros<float>(0);
+    Data::DataValue inputSource8 = Data::DataValue::zeros<int>(0);
+    std::vector<Data::DataView> inputSources = {
+        inputSource0.view(), inputSource1.view(), inputSource2.view(),
+        inputSource3.view(), inputSource4.view(), inputSource5.view(),
+        inputSource6.view(), inputSource7.view(), inputSource8.view()
+    };
+
+    std::vector<Dimensions::Requirement> inputTypes;
+    for(auto source: inputSources) {
+        inputTypes.push_back(Dimensions::Requirement(source.getType()));
+    }
+
+    
+    Instructions::Set customSet;
+    customSet.add(*(new Instructions::LambdaInstruction<double, double>([](double a) -> double { return 1.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, float>([](float a) -> double { return 2.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, int>([](int a) -> double { return 3.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, const double[16][16]>([](const double a[16][16]) -> double { return 4.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, const float[16][16]>([](const float a[16][16]) -> double { return 5.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double[4], const int[16][16]>([](const int a[16][16]) { 
+        return Data::DataValue::array1d<double[4]>({6.0, 7.0, 8.0, 9.0}); })));
+
+    Representations::LGP representation(inputTypes, 16, customSet, 16, 1, 10);
+    ASSERT_EQ(representation.getInstructionSet().getNbInstructions(), 6) << "All instruction should have been kept";
+
+    customSet.add(*(new Instructions::LambdaInstruction<float, double, double>([](double a, double b) -> double { return 6.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double[17], double, double>([](double a, double b) { return Data::DataValue::zeros<double>(17); })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, const double[16][17], const double[16][16]>([](const double a[16][17], const double b[16][16]) -> double { return 8.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, const float[16][17], const int[16][16]>([](const float a[16][17], const int b[16][16]) -> double { return 9.0; })));
+    customSet.add(*(new Instructions::LambdaInstruction<double, const float[16][16], const int[16][17]>([](const float a[16][16], const int b[16][17]) -> double { return 10.0; })));
+
+
+    Representations::LGP representation1(inputTypes, 16, customSet, 16, 1, 10);
+    ASSERT_EQ(representation1.getInstructionSet().getNbInstructions(), 6) << "All instruction should have been kept";
+
+    // Should throw
+    Instructions::Set smallSet;
+    smallSet.add(*(new Instructions::LambdaInstruction<double, float>([](double a) -> double { return 2.0; })));
+    ASSERT_THROW(Representations::LGP({Dimensions::Requirement::array1d<std::string>(8)}, 16, smallSet, 16, 1, 10), std::runtime_error) << "Should throw because set is empty";
+
+    // Should never throw!
+    std::unique_ptr<GraphBased::Genotype> genotype;
+    for(size_t idx0 = 0; idx0 < 16; idx0++) { // NbRegisters
+        for(size_t idx1 = 0; idx1 < 6; idx1++) { // NbInstructions
+            for(size_t idx2 = 0; idx2 < 10; idx2++) { // NbInputTypes
+                for(size_t idx3 = 0; idx3 < 16*16; idx3++) { // NbAddressSpace
+                    genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{idx0, idx1, idx2, idx3}));
+                    ASSERT_NO_THROW(representation.execute(*genotype, inputSources));
+                    if(idx1 < 5) {
+                        EXPECT_EQ(representation.execute(*genotype, inputSources).getData<double>()[idx0], double(idx1 + 1));
+                    } else {
+                        EXPECT_EQ(representation.execute(*genotype, inputSources).getData<double>()[idx0 % 13], 6.0);
+                        EXPECT_EQ(representation.execute(*genotype, inputSources).getData<double>()[idx0 % 13 + 1], 7.0);
+                        EXPECT_EQ(representation.execute(*genotype, inputSources).getData<double>()[idx0 % 13 + 2], 8.0);
+                        EXPECT_EQ(representation.execute(*genotype, inputSources).getData<double>()[idx0 % 13 + 3], 9.0);
+                    }
+                }
+            }
+        }
+    }
+
+    for (size_t idx = 0; idx < 11; idx++) {
+        delete (&customSet.getInstruction(idx));
+    }
+    delete (&smallSet.getInstruction(0));
+}

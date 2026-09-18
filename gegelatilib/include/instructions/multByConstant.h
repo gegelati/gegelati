@@ -98,6 +98,10 @@ namespace Instructions {
          * of the instruction.
          */
         void setUpOperand();
+        /**
+         * \brief Function call in constructor to setup the output type of the instruction
+         */
+        void setUpOutput();
     };
 
 #ifdef CODE_GENERATION
@@ -105,6 +109,7 @@ namespace Instructions {
     MultByConstant<T>::MultByConstant(const std::string& printTemplate)
         : Instruction(printTemplate)
     {
+        setUpOutput();
         setUpOperand();
     }
 
@@ -113,6 +118,7 @@ namespace Instructions {
 #ifndef CODE_GENERATION
     template <class T> MultByConstant<T>::MultByConstant() : Instruction()
     {
+        setUpOutput();
         setUpOperand();
     }
 #endif // CODE_GENERATION
@@ -129,6 +135,10 @@ namespace Instructions {
             args.at(0).template getScalar<T>() * static_cast<T>(constantValue));
     }
 
+    template <class T> void MultByConstant<T>::setUpOutput()
+    {
+        this->outputType = Data::DataType::scalar<T>();
+    }
     template <class T> void MultByConstant<T>::setUpOperand()
     {
         this->operandTypes.push_back(Data::DataType::scalar<T>());

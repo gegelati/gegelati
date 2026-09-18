@@ -216,6 +216,34 @@ TEST(DataTypeTest, getAddressSpace)
     ASSERT_EQ(array2d1.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
     ASSERT_EQ(scalar0.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
     ASSERT_EQ(array1d0.getAddressSpace(array2d0), 0) << "AddressSpace should be 0";
+
+    // getValidAddress
+    ASSERT_EQ(array2d0.getValidAddress(scalar0, 0), 0);
+    ASSERT_EQ(array2d0.getValidAddress(scalar0, 10), 10);
+    ASSERT_EQ(array2d0.getValidAddress(scalar0, 63), 63);
+
+    // 8x8 source, 1D request of length 4.
+    // Compact addresses: 0..4 per row.
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 0), 0);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 1), 1);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 4), 4);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 5), 8);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 6), 9);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 9), 12);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 10), 16);
+    ASSERT_EQ(array2d0.getValidAddress(array1d1, 39), 60);
+
+    // 8x8 source, 4x4 request.
+    // Compact addresses form a 5x5 grid.
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 0), 0);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 1), 1);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 4), 4);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 5), 8);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 6), 9);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 9), 12);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 10), 16);
+    ASSERT_EQ(array2d0.getValidAddress(array2d1, 24), 36);
+
 }
 
 TEST(DataTypeTest, EqualityAndSourceAwareComparisonBehaveAsExpected)

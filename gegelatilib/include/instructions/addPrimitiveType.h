@@ -86,10 +86,15 @@ namespace Instructions {
          * of the instruction.
          */
         void setUpOperand();
+        /**
+         * \brief Function call in constructor to setup the output type of the instruction
+         */
+        void setUpOutput();
     };
 #ifndef CODE_GENERATION
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
     {
+        setUpOutput();
         setUpOperand();
     }
 #endif // CODE_GENERATION
@@ -110,10 +115,16 @@ namespace Instructions {
     AddPrimitiveType<T>::AddPrimitiveType(const std::string& printTemplate)
         : Instruction(printTemplate)
     {
+        setUpOutput();
         setUpOperand();
     }
 #endif // CODE_GENERATION
 
+    
+    template <class T> void AddPrimitiveType<T>::setUpOutput()
+    {
+        this->outputType = Data::DataType::scalar<T>();
+    }
     template <class T> void AddPrimitiveType<T>::setUpOperand()
     {
         this->operandTypes.push_back(Data::DataType::scalar<T>());

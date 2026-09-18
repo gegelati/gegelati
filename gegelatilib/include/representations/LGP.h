@@ -18,7 +18,7 @@
         protected:
 
             /// Instruction Set used by the LGP
-            const Instructions::Set& iSet;
+            Instructions::Set iSet;
 
             /// The number of registers required to output a value.
             size_t nbOutputRegisters;
@@ -63,7 +63,20 @@
             size_t nbLinesMin;
             /// \brief the maximum number of lines in the representation.
             size_t nbLinesMax;
+
+            /**
+             * \brief Define the largest address space reachable by the provided instructions based on the input types.
+             */
+            void setLargestAddressSpace();
+
+            /// @brief Largest address space of the representation
+            size_t largestAddressSpace;
         public:
+
+            /**
+             * \brief get a const reference toward the current instruction set.
+             */
+            const Instructions::Set& getInstructionSet();
 
             /// @brief clone pattern 
             virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override;
@@ -83,7 +96,7 @@
             LGP(std::vector<Dimensions::Requirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Representation(
                     inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
-                    representationName, representationColor), iSet{iSet}, nbOutputRegisters{nbOutputRegisters},
+                    representationName, representationColor), nbOutputRegisters{nbOutputRegisters},
                     nbRegisters{nbRegisters}, nbLinesMin{nbLinesMin}, nbLinesMax{nbLinesMax} {
                 if(nbOutputRegisters > nbRegisters) {
                     throw std::runtime_error("LGP::Constructor: Number of outputRegisters cannot be higher than the number of registers");
@@ -91,6 +104,18 @@
                 if(nbLinesMax == 0) {
                     this->nbLinesMax = nbLinesMin;
                 }
+
+                Data::DataType registers = Data::DataType::array1d<double>(this->nbRegisters);
+                std::vector<Data::DataType> inputTypes{registers};
+                for(const Dimensions::Requirement& req: inputDimensions) {
+                    inputTypes.push_back(req.getDataType());
+                }
+                this->iSet = iSet.filterInstructionSet(inputTypes, registers);
+                if(this->iSet.getNbInstructions() == 0) {
+                    throw std::runtime_error("LGP:Constructor: No instruction can be used with current inputs");
+                }
+
+                this->setLargestAddressSpace();
                 this->setGenotypeConstraint();
                 this->setGenotypeGenerator();
             };
