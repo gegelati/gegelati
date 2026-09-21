@@ -131,16 +131,19 @@ namespace Instructions {
 
       private:
             /**
-             * \brief Invokes the wrapped callable by unpacking the arguments.
+             * \brief Invokes the wrapped callable with the data extracted from the operands.
              *
-             * The first argument is extracted as `First` and the remaining
-             * arguments are extracted as the `Rest...` pack using a compiled
-             * index sequence, then forwarded to the stored callable.
+             * Array data returned by \c DataView::getData is temporarily owned by the
+             * \c shared_ptr objects stored in \c data. This ensures that any temporary
+             * contiguous copy created for a non-contiguous view remains alive until the
+             * callable has finished executing.
              *
-             * \tparam Index Compile-time index pack spanning the `Rest...` operands.
-             * \param args The argument data views to unpack.
-             * \param [in] indexSequence The compile-time index sequence used to
-             *                           extract the `Rest...` arguments.
+             * Scalars are passed directly, while array arguments are converted back to
+             * the raw pointer types expected by the wrapped callable.
+             *
+             * \tparam Index Compile-time indices used to extract the remaining operands.
+             * \param args The operand data views.
+             * \param indexSequence Compile-time indices for the remaining operands.
              * \return The \c Data::DataValue returned by the callable.
              */
             template <size_t... Index>
@@ -148,24 +151,32 @@ namespace Instructions {
                 const std::vector<Data::DataView>& args,
                 std::index_sequence<Index...>) const
             {
-                return this->function(
+                // Keep array data alive until the callable has finished.
+                auto data = std::make_tuple(
                     getData<First>(args[0]),
                     getData<Rest>(args[Index + 1])...
+                );
+
+                return this->function(
+                    getDataPtr<First>(std::get<0>(data)),
+                    getDataPtr<Rest>(std::get<Index + 1>(data))...
                 );
             }
 
             /**
-             * \brief Extracts a typed value from an argument data view.
+             * \brief Extracts an operand from a data view.
              *
-             * Scalar arguments are returned by reference via
-             * \c DataView::getScalar. One-dimensional arrays are returned as a
-             * pointer to their element type, and two-dimensional arrays are
-             * returned as a pointer to a row of the fixed column count.
+             * Scalar operands are returned directly through \c DataView::getScalar.
+             * Array operands are returned as a \c shared_ptr owning either the original
+             * data through a non-owning deleter or a temporary contiguous copy when the
+             * view is non-contiguous.
              *
-             * \tparam T The operand type (scalar, 1D array, or 2D array).
-             * \param view The data views.
-             * \return The extracted value: a scalar reference, a 1D array pointer,
-             *         or a 2D row-array pointer depending on \c T.
+             * The returned \c shared_ptr is kept alive by \c doExecution while the
+             * callable is being invoked.
+             *
+             * \tparam T The declared operand type.
+             * \param view The data view containing the operand.
+             * \return The scalar value/reference or shared array data.
              */
             template <typename T>
             static auto getData(const Data::DataView& view)
@@ -173,21 +184,46 @@ namespace Instructions {
                 if constexpr (!std::is_array_v<T>) {
                     return view.template getScalar<std::remove_cv_t<T>>();
                 }
-                else if constexpr (std::rank_v<T> == 1) {
-                    using Element = std::remove_extent_t<T>;
+                else {
+                    using Element = std::remove_all_extents_t<T>;
 
                     return view.template getData<std::remove_cv_t<Element>>();
                 }
-                else if constexpr (std::rank_v<T> == 2) {
+            }
+
+            /**
+             * \brief Converts extracted operand data to the type expected by the callable.
+             *
+             * Scalar data is returned unchanged. One-dimensional arrays are converted
+             * to pointers to their first element. Two-dimensional arrays are converted
+             * to pointers to rows with their compile-time column count.
+             *
+             * For array operands, the \c shared_ptr itself is not returned because the
+             * callable expects a raw pointer. The owning \c shared_ptr remains alive in
+             * \c doExecution for the duration of the call.
+             *
+             * \tparam T The declared operand type.
+             * \tparam Data The type returned by \c getData.
+             * \param data The extracted operand data.
+             * \return The value or raw pointer expected by the callable.
+             */
+            template <typename T, typename Data>
+            static auto getDataPtr(Data& data)
+            {
+                if constexpr (!std::is_array_v<T>) {
+                    return data;
+                }
+                else if constexpr (std::rank_v<T> == 1) {
+                    return data.get();
+                }
+                else {
                     using Element = std::remove_all_extents_t<T>;
                     constexpr size_t Cols = std::extent_v<T, 1>;
 
-                    const Element* data =
-                        view.template getData<std::remove_cv_t<Element>>();
-
-                    return reinterpret_cast<const Element (*)[Cols]>(data);
+                    return reinterpret_cast<const Element (*)[Cols]>(data.get());
                 }
             }
+
 
             /**
             * \brief Determines the \c Data::DataType matching a given operand type.

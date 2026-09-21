@@ -32,7 +32,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_EQ(oneDView.getSourceOffset(), 0u);
     EXPECT_TRUE(oneDView);
 
-    const int* oneDPtr = nullptr;
+    std::shared_ptr<const int[]> oneDPtr = nullptr;
     ASSERT_NO_THROW(oneDPtr = oneDView.getData<int>());
     ASSERT_NE(oneDPtr, nullptr);
     for (size_t i = 0; i < values.size(); ++i) {
@@ -49,7 +49,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_EQ(twoDView.getSourceDimensions()[0], 2u);
     EXPECT_EQ(twoDView.getSourceDimensions()[1], 3u);
 
-    const int* twoDPtr = nullptr;
+    std::shared_ptr<const int[]> twoDPtr = nullptr;
     ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 1);
@@ -88,7 +88,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
     EXPECT_EQ(oneDView.getDimensions()[1], 0u);
     EXPECT_EQ(oneDView.getElementType(), typeid(int));
 
-    const int* oneDPtr = oneDView.getData<int>();
+    std::shared_ptr<const int[]> oneDPtr = oneDView.getData<int>();
     ASSERT_NE(oneDPtr, nullptr);
     EXPECT_EQ(oneDPtr[0], 10);
     EXPECT_EQ(oneDPtr[1], 20);
@@ -103,7 +103,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
     EXPECT_EQ(twoDView.getDimensions()[1], 3u);
     EXPECT_EQ(twoDView.getElementType(), typeid(int));
 
-    const int* twoDPtr = twoDView.getData<int>();
+    std::shared_ptr<const int[]> twoDPtr = twoDView.getData<int>();
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 1);
     EXPECT_EQ(twoDPtr[1], 2);
@@ -128,7 +128,7 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     Data::DataView oneDView(source[0], Data::DataType::array1d<int>(4));
     Data::DataView validOneDSubView;
     ASSERT_NO_THROW(validOneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(2), 1));
-    const int* validOneDSubPtr = nullptr;
+    std::shared_ptr<const int[]> validOneDSubPtr = nullptr;
     ASSERT_NO_THROW(validOneDSubPtr = validOneDSubView.getData<int>());
     ASSERT_NE(validOneDSubPtr, nullptr);
     EXPECT_EQ(validOneDSubPtr[0], 1);
@@ -138,7 +138,7 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
 
     Data::DataView validTwoDSubView;
     ASSERT_NO_THROW(validTwoDSubView = view.getSubView(Data::DataType::array2d<int>(2, 2), 1));
-    const int* validTwoDSubPtr = nullptr;
+    std::shared_ptr<const int[]> validTwoDSubPtr = nullptr;
     ASSERT_NO_THROW(validTwoDSubPtr = validTwoDSubView.getData<int>());
     ASSERT_NE(validTwoDSubPtr, nullptr);
     EXPECT_EQ(validTwoDSubPtr[0], 1);
@@ -176,7 +176,7 @@ TEST(DataViewTest, multiSubView)
     }
     Data::DataView view(source);
     Data::DataView subView = view.getSubView(Data::DataType::array2d<int>(14, 14), 28 * 7 + 7);
-    const int* subViewData = subView.getData<int>();
+    std::shared_ptr<const int[]> subViewData = subView.getData<int>();
     for (size_t idx0 = 0; idx0 < 14; idx0 ++){
         for (size_t idx1 = 0; idx1 < 14; idx1 ++){
             EXPECT_EQ(subViewData[idx0 * 14 + idx1], (idx0 + 7) * 28 + (idx1 + 7));
@@ -185,7 +185,7 @@ TEST(DataViewTest, multiSubView)
 
     
     Data::DataView subSubView = subView.getSubView(Data::DataType::array2d<int>(3, 3), 30);
-    const int* subSubViewData = subSubView.getData<int>();
+    std::shared_ptr<const int[]> subSubViewData = subSubView.getData<int>();
     for (size_t idx0 = 0; idx0 < 3; idx0 ++){
         for (size_t idx1 = 0; idx1 < 3; idx1 ++){
             EXPECT_EQ(subSubViewData[idx0 * 3 + idx1], (idx0 + 9) * 28 + (idx1 + 9));
@@ -239,7 +239,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     std::vector<int> oneD{11, 22, 33, 44, 55};
     Data::DataView oneDView(oneD.data(), Data::DataType::array1d<int>(oneD.size()));
 
-    const int* oneDPtr = nullptr;
+    std::shared_ptr<const int[]> oneDPtr = nullptr;
     ASSERT_NO_THROW(oneDPtr = oneDView.getData<int>());
     ASSERT_NE(oneDPtr, nullptr);
     EXPECT_EQ(oneDPtr[0], 11);
@@ -248,7 +248,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
 
     Data::DataView oneDSubView;
     ASSERT_NO_THROW(oneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(3), 1));
-    const int* oneDSubPtr = nullptr;
+    std::shared_ptr<const int[]> oneDSubPtr = nullptr;
     ASSERT_NO_THROW(oneDSubPtr = oneDSubView.getData<int>());
     ASSERT_NE(oneDSubPtr, nullptr);
     EXPECT_EQ(oneDSubPtr[0], 22);
@@ -258,7 +258,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     int matrix[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
     Data::DataView twoDView(matrix, Data::DataType::array2d<int>(3, 4));
 
-    const int* twoDPtr = nullptr;
+    std::shared_ptr<const int[]> twoDPtr = nullptr;
     ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
     ASSERT_NE(twoDPtr, nullptr);
     EXPECT_EQ(twoDPtr[0], 0);
@@ -269,7 +269,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
 
     Data::DataView twoDSubView;
     ASSERT_NO_THROW(twoDSubView = twoDView.getSubView(Data::DataType::array2d<int>(2, 3), 5));
-    const int* twoDSubPtr = nullptr;
+    std::shared_ptr<const int[]> twoDSubPtr = nullptr;
     ASSERT_NO_THROW(twoDSubPtr = twoDSubView.getData<int>());
     ASSERT_NE(twoDSubPtr, nullptr);
     EXPECT_EQ(twoDSubPtr[0], 5);
@@ -428,7 +428,7 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
         storage.get() + type.sourceOffset * type.elementSize,
         type);
 
-    const int* clonedData = clonedView.getData<int>();
+    std::shared_ptr<const int[]> clonedData = clonedView.getData<int>();
 
     ASSERT_NE(clonedData, nullptr);
     EXPECT_EQ(clonedData[0], 6);
@@ -440,7 +440,7 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
     source[1][1] = 999;
 
     // A fresh getData() from the original view sees the change.
-    const int* originalData = subView.getData<int>();
+    std::shared_ptr<const int[]> originalData = subView.getData<int>();
 
     ASSERT_NE(originalData, nullptr);
     EXPECT_EQ(originalData[0], 999);
@@ -450,7 +450,4 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
     EXPECT_EQ(clonedData[1], 7);
     EXPECT_EQ(clonedData[2], 11);
     EXPECT_EQ(clonedData[3], 12);
-
-    delete[] originalData;
-    delete[] clonedData;
 }

@@ -124,7 +124,7 @@ Data::DataValue Representations::LGP::executeGenotype(
     Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);
     
     // Replace Nan values by -inf.
-    const double* values = output.getData<double>();
+    std::shared_ptr<const double[]> values = output.getData<double>();
     for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
         if(std::isnan(values[idx])) {
             output.setScalarAt<double>(-std::numeric_limits<double>::infinity(), idx);

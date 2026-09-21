@@ -408,7 +408,7 @@ namespace Data {
 
             // Apply conversion
             size_t count = source.getType().totalElements();
-            const S* data = source.getData<S>();
+            std::shared_ptr<const S[]> data = source.getData<S>();
             std::vector<D> values(count);
             for (size_t idx = 0; idx < count; ++idx) {
                 values[idx] = static_cast<D>(data[idx]);

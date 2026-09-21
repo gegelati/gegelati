@@ -219,8 +219,8 @@ namespace Data {
          * \throws std::runtime_error If the view is null or the type does not match.
          */
         template <typename T>
-        const T* getData() const {
-
+        std::shared_ptr<const T[]> getData() const
+        {
             this->canBeAccess(typeid(T));
             using ValueType = std::remove_const_t<T>;
 
@@ -231,21 +231,23 @@ namespace Data {
             const size_t cols = this->type.dimensions[1];
             const size_t stride = this->type.sourceDimensions[1];
 
-            // Already contiguous: return the original memory.
             if (rows == 0 || stride == cols || cols == 0) {
-                return source;
+                return std::shared_ptr<const T[]>(
+                    source,
+                    [](const T*) {}
+                );
             }
 
-            // Strided sub-view: create a contiguous copy.
-            std::vector<ValueType> contiguous;
+            std::shared_ptr<ValueType[]> contiguous(new ValueType[rows * cols]);
 
             for (size_t row = 0; row < rows; ++row) {
                 for (size_t col = 0; col < cols; ++col) {
-                    contiguous.push_back(source[row * stride + col]);
+                    contiguous[row * cols + col] =
+                        source[row * stride + col];
                 }
             }
 
-            return contiguous.data();
+            return contiguous;
         }
 
         /**

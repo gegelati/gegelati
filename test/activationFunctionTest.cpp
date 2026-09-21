@@ -211,7 +211,7 @@ ASSERT_EQ(
     source.size())
     << "Tanh must preserve the number of elements in a one-dimensional array.";
 
-const double* values = result.getData<double>();
+std::shared_ptr<const double[]> values = result.getData<double>();
 
 for (size_t i = 0; i < source.size(); ++i) {
     EXPECT_NEAR(
@@ -258,7 +258,7 @@ ASSERT_EQ(
     6u)
     << "Tanh must preserve the total number of elements in a two-dimensional array.";
 
-const double* values = result.getData<double>();
+std::shared_ptr<const double[]> values = result.getData<double>();
 
 for (size_t i = 0; i < source.size(); ++i) {
     for (size_t j = 0; j < source[i].size(); ++j) {

@@ -131,7 +131,7 @@ TEST(LambdaInstructionsTest, executeVectoProduct)
     const Data::DataValue result1 = instruction.execute(
         {Data::DataView(input1, Data::DataType::array1d<float>(4)),
          Data::DataView(&factor, Data::DataType::scalar<float>())});
-    const float* arrayResult1 = result1.getData<float>();
+    std::shared_ptr<const float[]> arrayResult1 = result1.getData<float>();
     for(size_t idx = 0; idx < 4; idx++) {
         ASSERT_EQ(arrayResult1[idx], input1[idx] * factor) << "Value mismatch";
     }
@@ -145,7 +145,7 @@ TEST(LambdaInstructionsTest, executeVectoProduct)
         {subView,
          Data::DataView(&factor, Data::DataType::scalar<float>())});
         
-    const float* arrayResult2 = result2.getData<float>();
+    std::shared_ptr<const float[]> arrayResult2 = result2.getData<float>();
     for(size_t idx = 0; idx < 4; idx++) {
         ASSERT_EQ(arrayResult2[idx], input2[idx+2] * factor) << "Value mismatch";
     }
@@ -170,7 +170,7 @@ TEST(LambdaInstructionsTest, executeMatrixProduct)
          Data::DataView(vector, Data::DataType::array1d<float>(2))});
     
     const float expected[2] = {-1, 1};
-    const float* arrayResult1 = result1.getData<float>();
+    std::shared_ptr<const float[]> arrayResult1 = result1.getData<float>();
     for(size_t idx = 0; idx < 2; idx++) {
         ASSERT_EQ(arrayResult1[idx], expected[idx]) << "Value mismatch";
     }
@@ -188,7 +188,7 @@ TEST(LambdaInstructionsTest, executeMatrixProduct)
         {subViewMatrix,
          Data::DataView(vector, Data::DataType::array1d<float>(2))});
 
-    const float* arrayResult2 = result2.getData<float>();
+    std::shared_ptr<const float[]> arrayResult2 = result2.getData<float>();
     for(size_t idx = 0; idx < 2; idx++) {
         ASSERT_EQ(arrayResult2[idx], expected[idx]) << "Value mismatch";
     }
@@ -231,7 +231,7 @@ TEST(LambdaInstructionsTest, executeMatrixProductMixTypes)
      */
     float expected[4] = {-3, -7, -8, 8};
     Data::DataValue result = instruction.execute({matrix1SubView, matrix2SubView});
-    const float* array = result.getData<float>();
+    std::shared_ptr<const float[]> array = result.getData<float>();
     for (size_t idx = 0; idx < 4; idx++) {
         ASSERT_EQ(array[idx], expected[idx]) << "Value mismatch";
     }

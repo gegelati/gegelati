@@ -103,7 +103,7 @@ namespace Dimensions
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Apply tanh transformation
                 size_t count = value.getType().totalElements();
-                const T* data = value.getData<T>();
+                std::shared_ptr<const T[]> data = value.getData<T>();
                 std::vector<T> values(count);
                 for (size_t idx = 0; idx < count; ++idx) {
                     values[idx] = static_cast<T>(std::tanh(data[idx]));
@@ -162,7 +162,7 @@ namespace Dimensions
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Find argmax index
                 size_t count = value.getType().totalElements();
-                const T* data = value.getData<T>();
+                std::shared_ptr<const T[]> data = value.getData<T>();
                 size_t index = 0;
                 T max = data[0];
 

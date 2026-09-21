@@ -99,7 +99,7 @@ namespace Dimensions {
                 return contains(view.getScalar<T>());
             }
 
-            const T* values = view.getData<T>();
+            std::shared_ptr<const T[]> values = view.getData<T>();
             for (size_t index = 0; index < view.getType().totalElements(); ++index) {
                 if (!contains(values[index])) {
                     return false;
