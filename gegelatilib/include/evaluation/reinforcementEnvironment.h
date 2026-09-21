@@ -37,7 +37,7 @@
 #ifndef REINFORCEMENT_ENVIRONMENT_H
 #define REINFORCEMENT_ENVIRONMENT_H
 
-#include "evaluation/learningEnvironment.h"
+#include "evaluation/problem.h"
 
 namespace Evaluation {
 
@@ -53,10 +53,10 @@ namespace Evaluation {
      * update its state, accessible through the data sources it provides. The
      * learning environment also provides a score resulting from the past
      * actions, and a termination boolean indicating that the
-     * learningEnvironment has reached a final state, that no action will
+     * problem has reached a final state, that no action will
      * affect.
      */
-    class ReinforcementEnvironment : public LearningEnvironment
+    class ReinforcementEnvironment : public Problem
     {
       protected:
 
@@ -68,10 +68,10 @@ namespace Evaluation {
          * \param[in] outputDimension the dimensions of the output source.
          */
         ReinforcementEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension)
-            : LearningEnvironment(inputDimensions, outputDimension) {};
+            : Problem(inputDimensions, outputDimension) {};
 
         /**
-         * \brief Execute an action on the LearningEnvironment.
+         * \brief Execute an action on the Problem.
          *
          * \param[in] action the view representing the action to
          * execute.
@@ -80,18 +80,18 @@ namespace Evaluation {
         virtual void doAction(const Data::DataValue& action);
 
         /**
-         * \brief Reset the LearningEnvironment.
+         * \brief Reset the Problem.
          *
          * Resetting a learning environment is needed to train an agent.
          * Optionally seed can be given to this function to control the
-         * randomness of a LearningEnvironment (if any). When available, this
+         * randomness of a Problem (if any). When available, this
          * feature will be used:
          * - for comparing the performance of several agents with the same
          * random starting conditions.
          * - for training each agent with diverse starting conditions.
          *
          * \param[in] seed the integer value for controlling the randomness of
-         * the LearningEnvironment.
+         * the Problem.
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
          * \param[in] iterationNumber the integer value to indicate the current
@@ -105,14 +105,14 @@ namespace Evaluation {
                            uint64_t generationNumber = 0) = 0;
 
         /**
-         * \brief Method for checking if the LearningEnvironment has reached a
+         * \brief Method for checking if the Problem has reached a
          * terminal state.
          *
          * The boolean value returned by this method, when equal to true,
-         * indicates that the LearningEnvironment has reached a terminal state.
+         * indicates that the Problem has reached a terminal state.
          * A terminal state is a state in which further calls to the doAction
          * method will have no effects on the dataSources of the
-         * LearningEnvironment, or on its score. For example, this terminal
+         * Problem, or on its score. For example, this terminal
          * state may be reached for a Game Over state within a game, or in case
          * the objective of the learning agent has been successfuly reached.
          *

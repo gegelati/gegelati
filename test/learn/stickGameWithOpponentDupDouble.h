@@ -86,22 +86,22 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     /// Destructor
     ~StickGameWithOpponentD(){};
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual bool isCopyable() const override;
 
-    // Inherited via LearningEnvironment
-    virtual LearningEnvironment* clone() const override;
+    // Inherited via Problem
+    virtual std::unique_ptr<Problem> cloneUniquePtr() const override;
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual void doAction(const Data::DataValue& action) override;
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual void reset(size_t seed = 0,
                        Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING,
                        uint16_t iterationNumber = 0,
                        uint64_t generationNumber = 0) override;
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual std::vector<Data::DataView>
       getDataSources() const override;
 
@@ -110,7 +110,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
      */
     virtual double getScore() const override;
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual bool isTerminal() const override;
 };
 

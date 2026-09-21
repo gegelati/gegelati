@@ -51,8 +51,7 @@
 #include "data/hash.h"
 #include "mutator/rng.h"
 
-#include "learn/classificationLearningEnvironment.h"
-#include "evaluation/learningEnvironment.h"
+#include "evaluation/problem.h"
 #include "learn/learningParameters.h"
 
 #include "evaluation/evaluationResult.h"
@@ -63,13 +62,13 @@ namespace Evaluation {
 
     /**
      * \brief Class used to control the learning steps of a Graph within
-     * a given LearningEnvironment.
+     * a given Problem.
      */
     class EvaluationAgent
     {
       protected:
-        /// LearningEnvironment with which the EvaluationAgent will interact.
-        Evaluation::LearningEnvironment& learningEnvironment;
+        /// Problem with which the EvaluationAgent will interact.
+        Problem& problem;
 
         /// Vector of requested metric to measure during evaluation
         std::vector<std::unique_ptr<EvaluationMetric>> requestedMetrics;
@@ -84,14 +83,14 @@ namespace Evaluation {
         /**
          * \brief Constructor for EvaluationAgent.
          * 
-         * \param[in] le The LearningEnvironment to optimize (which should correspond to the evaluationAgent)
+         * \param[in] le The Problem to optimize (which should correspond to the evaluationAgent)
          * \param[in] parameters The LearningParameters for the EvaluationAgent.
          * \param[in] seed Seed for deterministic randomizer of evaluation.
          */
         EvaluationAgent(
-          Evaluation::LearningEnvironment& le,
+          Evaluation::Problem& le,
           std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), size_t seed = 0)
-            : learningEnvironment{le}, params{std::move(std::make_unique<Learn::LearningParameters>(*parameters))}, seed{seed} {};
+            : problem{le}, params{std::move(std::make_unique<Learn::LearningParameters>(*parameters))}, seed{seed} {};
 
         /// Default destructor for polymorphism
         virtual ~EvaluationAgent() = default;
@@ -138,6 +137,7 @@ namespace Evaluation {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] individual The individual whose genotype is evaluted.
+         * \param[in] currentProblem Problem with which the individual will interact.
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -145,6 +145,7 @@ namespace Evaluation {
          */
         virtual void evaluateIndividual(
             const Individual& individual, 
+            Evaluation::Problem& currentProblem,
             uint64_t generationNumber,
             LearningMode mode) const = 0;
 

@@ -130,7 +130,7 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
 
     Individual indiv(representation);
     
-    ASSERT_THROW(rlAgent.evaluateIndividual(indiv, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
+    ASSERT_THROW(rlAgent.evaluateIndividual(indiv, le, 0, mode), std::runtime_error) << "Evaluation of empty individual should have fail";
 
     // Fill individual
     std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>();
@@ -145,5 +145,5 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
     genotype->addNodeGroup(std::move(group));
     indiv.setGenotype(std::move(genotype));
 
-    ASSERT_NO_THROW(rlAgent.evaluateIndividual(indiv, 0, mode)) << "Evaluation should not have fail";
+    ASSERT_NO_THROW(rlAgent.evaluateIndividual(indiv, le, 0, mode)) << "Evaluation should not have fail";
 }

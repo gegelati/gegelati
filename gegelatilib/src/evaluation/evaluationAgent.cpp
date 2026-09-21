@@ -62,22 +62,22 @@ std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Evaluation::Evaluatio
 
 const std::vector<Dimensions::Requirement>& Evaluation::EvaluationAgent::getInputDimensions() const
 {
-    return this->learningEnvironment.getInputDimensions();
+    return this->problem.getInputDimensions();
 }
 
 const Dimensions::Requirement& Evaluation::EvaluationAgent::getOutputDimension() const
 {
-    return this->learningEnvironment.getOutputDimension();
+    return this->problem.getOutputDimension();
 }
 
 std::string Evaluation::EvaluationAgent::summary() const
 {
     std::ostringstream result;            
-    result << "Inputs (" << this->learningEnvironment.getInputDimensions().size() << "):\n";
-    for (const auto& input : this->learningEnvironment.getInputDimensions()) {
+    result << "Inputs (" << this->problem.getInputDimensions().size() << "):\n";
+    for (const auto& input : this->problem.getInputDimensions()) {
         result << "  * " << input.summary() << "\n";
     }
-    result << "\nOutput: " << this->learningEnvironment.getOutputDimension() << "\n";
+    result << "\nOutput: " << this->problem.getOutputDimension() << "\n";
     return result.str();
 }
 
@@ -89,7 +89,7 @@ void Evaluation::EvaluationAgent::evaluateIndividuals(
 {
     // Evaluate the individuals and insert the results
     for(const std::shared_ptr<const Individual>& indiv: individuals){
-        this->evaluateIndividual(*indiv, generationNumber, mode);        
+        this->evaluateIndividual(*indiv, this->problem, generationNumber, mode);        
     }
 }
 

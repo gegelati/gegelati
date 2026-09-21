@@ -6,7 +6,7 @@
 #include <typeindex>
 
 #include "data/dataValue.h"
-#include "evaluation/learningEnvironment.h"
+#include "evaluation/problem.h"
 
 
 /// For include
@@ -50,12 +50,12 @@ namespace Evaluation {
          * This method is called at the beginning of the evaluateJob method.
          *
          * \param[in] individual the individual representing the individual.
-         * \param[in] learningEnvironment the learning environment in which the
+         * \param[in] problem the learning environment in which the
          * individual is evaluated.
          */
         virtual void initExtraction(
             const Individual& individual,
-            const Evaluation::LearningEnvironment& learningEnvironment) {
+            const Evaluation::Problem& problem) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -65,12 +65,12 @@ namespace Evaluation {
          * This method is called at every step of the environment evaluation.
          *
          * \param[in] individual the individual performing a step.
-         * \param[in] learningEnvironment the learning environment in which the
+         * \param[in] problem the learning environment in which the
          * individual is evaluated.
          */
         virtual void extractBeforeExecution(
             const Individual& individual,
-            const Evaluation::LearningEnvironment& learningEnvironment) {
+            const Evaluation::Problem& problem) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -81,12 +81,12 @@ namespace Evaluation {
          *
          * \param[in] individual the individual performing a step.
          * \param[in] action the action taken by the individual.
-         * \param[in] learningEnvironment the learning environment in which the
+         * \param[in] problem the learning environment in which the
          * individual is evaluated.
          */
         virtual void extractAfterExecution(
             const Individual& individual, const Data::DataView& action,
-            const Evaluation::LearningEnvironment& learningEnvironment) {
+            const Evaluation::Problem& problem) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -96,12 +96,12 @@ namespace Evaluation {
          * This method is called at every step of the environment evaluation.
          *
          * \param[in] individual the individual performing a step.
-         * \param[in] learningEnvironment the learning environment in which the
+         * \param[in] problem the learning environment in which the
          * individual is evaluated.
          */
         virtual void extractAfterStep(
             const Individual& individual,
-            const Evaluation::LearningEnvironment& learningEnvironment) {
+            const Evaluation::Problem& problem) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -114,12 +114,12 @@ namespace Evaluation {
          * \param[in] individual the individual performing the run.
          * \param[in] nbStepsExecuted number of steps executed at the end of the
          * episode.
-         * \param[in] learningEnvironment the learning environment in
+         * \param[in] problem the learning environment in
          * which the individual is evaluated.
          */
         virtual void extractMetricRun(
             const Individual& individual, size_t nbStepsExecuted,
-            const Evaluation::LearningEnvironment& learningEnvironment) {
+            const Evaluation::Problem& problem) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 

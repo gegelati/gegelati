@@ -46,7 +46,7 @@ namespace Evaluation {
 
     /**
      * \brief Class used to control the learning steps of a Graph within
-     * a given LearningEnvironment.
+     * a given Problem.
      */
     class ReinforcementAgent : public EvaluationAgent
     {
@@ -89,6 +89,7 @@ namespace Evaluation {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] individual The individual whose genotype is evaluted.
+         * \param[in] currentProblem Problem with which the individual will interact.
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -96,6 +97,7 @@ namespace Evaluation {
          */
         virtual void evaluateIndividual(
             const Individual& individual, 
+            Evaluation::Problem& currentProblem,
             uint64_t generationNumber,
             LearningMode mode) const override;
     };

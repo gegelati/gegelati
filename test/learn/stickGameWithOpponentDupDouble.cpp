@@ -41,10 +41,10 @@ bool StickGameWithOpponentD::isCopyable() const
     return true;
 }
 
-Evaluation::LearningEnvironment* StickGameWithOpponentD::clone() const
+std::unique_ptr<Evaluation::Problem> StickGameWithOpponentD::cloneUniquePtr() const
 {
     // Default copy constructor does the trick.
-    return (Evaluation::LearningEnvironment*)new StickGameWithOpponentD(*this);
+    return std::unique_ptr<StickGameWithOpponentD>();
 }
 
 void StickGameWithOpponentD::doAction(const Data::DataValue& action)

@@ -25,11 +25,12 @@ size_t Evaluation::ReinforcementAgent::getNbEvaluationIndiv(std::shared_ptr<Eval
 
 void Evaluation::ReinforcementAgent::evaluateIndividual(
     const Individual& individual, 
+    Evaluation::Problem& currentProblem,
     uint64_t generationNumber,
     LearningMode mode) const
 {
 
-    ReinforcementEnvironment& reinforcementEnvironment = dynamic_cast<ReinforcementEnvironment&>(this->learningEnvironment);
+    ReinforcementEnvironment& reinforcementEnvironment = dynamic_cast<ReinforcementEnvironment&>(currentProblem);
 
     // Skip the individual evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
@@ -53,7 +54,7 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         // create Evaluation metric and initialize them.
         std::vector<std::unique_ptr<EvaluationMetric>> metrics = std::move(this->createEvaluationMetrics(hash));
         for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
-            metric->initExtraction(individual, learningEnvironment); }
+            metric->initExtraction(individual, currentProblem); }
 
         uint64_t nbActions = 0;
         while (!reinforcementEnvironment.isTerminal() &&
@@ -62,22 +63,22 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
 
             // Extract the metrics before execution
             for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
-                metric->extractBeforeExecution(individual, learningEnvironment); }
+                metric->extractBeforeExecution(individual, currentProblem); }
 
             // Get the actions
-            Data::DataValue action = std::move(individual.execute(learningEnvironment.getDataSources()));
+            Data::DataValue action = std::move(individual.execute(currentProblem.getDataSources()));
 
             
             // Extract the metrics after execution
             for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
-                metric->extractAfterExecution(individual, action, learningEnvironment); }
+                metric->extractAfterExecution(individual, action, currentProblem); }
 
             // Do it
             reinforcementEnvironment.doAction(action);
 
             // Extract the metrics after environment step
             for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
-                metric->extractAfterStep(individual, learningEnvironment); }
+                metric->extractAfterStep(individual, currentProblem); }
 
             // Count actions
             nbActions++;
@@ -85,7 +86,7 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
 
         // Extract metric at the end of the run, and add the metric to the individual.
         for(auto it = metrics.begin(); it != metrics.end(); it++) { 
-            (*it)->extractMetricRun(individual, nbActions, learningEnvironment); 
+            (*it)->extractMetricRun(individual, nbActions, currentProblem); 
             individual.addEvaluationMetric(std::move(*it));
         }
     }

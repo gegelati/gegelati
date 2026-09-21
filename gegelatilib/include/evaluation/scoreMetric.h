@@ -51,12 +51,12 @@ namespace Evaluation {
          * \param[in] individual the individual performing the run.
          * \param[in] nbStepsExecuted number of steps executed at the end of the
          * episode.
-         * \param[in] learningEnvironment the learning environment in
+         * \param[in] problem the learning environment in
          * which the individual is evaluated.
          */
         virtual void extractMetricRun(
             const Individual& individual, size_t nbStepsExecuted,
-            const Evaluation::LearningEnvironment& learningEnvironment) override;
+            const Evaluation::Problem& problem) override;
 
         /**
          * \brief Print the score of the metric.

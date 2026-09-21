@@ -45,7 +45,7 @@
 namespace Evaluation {
 
     /**
-     * \brief Different modes in which the LearningEnvironment can be reset.
+     * \brief Different modes in which the Problem can be reset.
      *
      * Each of the following mode corresponds to a classical phase of a learning
      * process. These mode usually refer to different parts of the data set used
@@ -76,10 +76,10 @@ namespace Evaluation {
      * update its state, accessible through the data sources it provides. The
      * learning environment also provides a score resulting from the past
      * actions, and a termination boolean indicating that the
-     * learningEnvironment has reached a final state, that no action will
+     * problem has reached a final state, that no action will
      * affect.
      */
-    class LearningEnvironment
+    class Problem
     {
       protected:
 
@@ -90,16 +90,16 @@ namespace Evaluation {
         Dimensions::Requirement outputDimension;
 
         /// Make the default copy constructor protected.
-        LearningEnvironment(const LearningEnvironment& other) = default;
+        Problem(const Problem& other) = default;
 
       public:
         /**
-         * \brief Delete the default constructor of a LearningEnvironment.
+         * \brief Delete the default constructor of a Problem.
          */
-        LearningEnvironment() = delete;
+        Problem() = delete;
 
         /// Default virtual destructor
-        virtual ~LearningEnvironment() = default;
+        virtual ~Problem() = default;
 
         /**
          * \brief Constructor for LearningEnviroment.
@@ -107,50 +107,50 @@ namespace Evaluation {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          */
-        LearningEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
+        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension) {};
 
         /**
-         * \brief Get a copy of the LearningEnvironment.
+         * \brief Get a copy of the Problem.
          *
          * Default implementation returns a null pointer.
          *
-         * \return a copy of the LearningEnvironment if it is copyable,
+         * \return a copy of the Problem if it is copyable,
          * otherwise this method returns a NULL pointer.
          */
-        virtual LearningEnvironment* clone() const;
+        virtual std::unique_ptr<Evaluation::Problem> cloneUniquePtr() const;
 
         /**
-         * \brief Can the LearningEnvironment be copy constructed to evaluate
+         * \brief Can the Problem be copy constructed to evaluate
          * several LearningAgent in parallel.
          *
-         * \return true if the LearningEnvironment can be copied and run in
+         * \return true if the Problem can be copied and run in
          * parallel. Default implementation returns false.
          */
         virtual bool isCopyable() const;
 
 
         /**
-         * \brief get the input dimensions of the LearningEnvironment.
+         * \brief get the input dimensions of the Problem.
          */
         virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
-         * \brief get the output dimension of the LearningEnvironment.
+         * \brief get the output dimension of the Problem.
          */
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
         /**
-         * \brief Get the data sources for this LearningEnvironment.
+         * \brief Get the data sources for this Problem.
          *
          * This method returns a vector of reference to the DataHandler that
          * will be given to the LearningAgent, and to its Program to learn how
-         * to interact with the LearningEnvironment. Throughout the existence
-         * of the LearningEnvironment, data contained in the data will be
+         * to interact with the Problem. Throughout the existence
+         * of the Problem, data contained in the data will be
          * modified, but never the number, nature or size of the dataHandlers.
          * Since this methods return references to the DataHandler, the
          * LearningAgent will assume that the referenced dataHandler are
          * automatically updated each time the doAction, or reset methods
-         * are called on the LearningEnvironment.
+         * are called on the Problem.
          *
          * \return a vector of references to the DataHandler.
          */
@@ -162,7 +162,7 @@ namespace Evaluation {
          * The returned score will be used as a reward during the learning
          * phase of a LearningAgent.
          *
-         * \return the current score for the LearningEnvironment.
+         * \return the current score for the Problem.
          */
         virtual double getScore() const = 0;
     };

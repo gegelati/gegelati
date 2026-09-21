@@ -9,16 +9,16 @@
 
 #include "learn/fakeRepresentation.h"
 
-// Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode
-class FakedLearningEnvironment : public Evaluation::LearningEnvironment
+// Fake Problem to test SelectionMetrics::extractMetricsEpisode
+class FakedProblem : public Evaluation::Problem
 {
   private:
     double m_score;
     
 
   public:
-    FakedLearningEnvironment(double score)
-        : Evaluation::LearningEnvironment({}, Dimensions::Requirement()), m_score(score)
+    FakedProblem(double score)
+        : Evaluation::Problem({}, Dimensions::Requirement()), m_score(score)
     {
     }
 
@@ -52,7 +52,7 @@ TEST(ScoreMetricTest, Constructor)
 TEST(ScoreMetricTest, ExtractMetricsEpisode)
 {
     Evaluation::ScoreMetric metric;
-    FakedLearningEnvironment env(3.0);
+    FakedProblem env(3.0);
 
     // Call extraction
     Representations::FakeRepresentation rep;

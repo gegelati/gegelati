@@ -37,26 +37,26 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "evaluation/learningEnvironment.h"
+#include "evaluation/problem.h"
 #include "dimensions/dimensionFlow.h"
 
-Evaluation::LearningEnvironment* Evaluation::LearningEnvironment::clone() const
+std::unique_ptr<Evaluation::Problem> Evaluation::Problem::cloneUniquePtr() const
 {
     return NULL;
 }
 
-bool Evaluation::LearningEnvironment::isCopyable() const
+bool Evaluation::Problem::isCopyable() const
 {
     return false;
 }
 
 
-const std::vector<Dimensions::Requirement>& Evaluation::LearningEnvironment::getInputDimensions() const
+const std::vector<Dimensions::Requirement>& Evaluation::Problem::getInputDimensions() const
 {
     return this->inputDimensions;
 }
 
-const Dimensions::Requirement& Evaluation::LearningEnvironment::getOutputDimension() const
+const Dimensions::Requirement& Evaluation::Problem::getOutputDimension() const
 {
     return this->outputDimension;
 }
