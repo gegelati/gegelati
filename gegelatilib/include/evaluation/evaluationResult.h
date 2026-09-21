@@ -41,17 +41,17 @@
 #include <memory>
 #include <map>
 
-#include "evaluation/evaluationRun.h"
+#include "evaluation/evaluationMetric.h"
 
 namespace Evaluation {
     /**
-     * \brief class for storing multiple EvaluationRun corresponding to an individual
+     * \brief class for storing multiple EvaluationMetric corresponding to an individual
      */
     class EvaluationResult
     {
       protected:
-        /// @brief map of the evaluationRuns performed on an individual with the seed of the run as key.
-        std::map<size_t, std::unique_ptr<EvaluationRun>> evaluationRuns;
+        /// @brief vector of the evaluationMetrics performed on an individual.
+        std::map<std::type_index, std::vector<std::unique_ptr<EvaluationMetric>>> evaluationMetrics;
 
       public:
         /**
@@ -67,35 +67,38 @@ namespace Evaluation {
         EvaluationResult() {};
 
         /**
-         * \brief Construct an evaluation result with an evaluation run and its associated seed.
-         *
-         * \param[in] evaluationRun evaluation run.
-         * \param[in] seed seed associated with the evaluation run.
-         */
-        EvaluationResult(std::unique_ptr<EvaluationRun> evaluationRun, size_t seed) {
-            this->addEvaluationRun(std::move(evaluationRun), seed);
-        };
-
-        /**
-         * \brief Add an evaluation run with its associated seed to the evaluation result.
+         * \brief Add an evaluation metric to the evaluation result.
          * 
-         * \param[in] evaluationRun evaluation run added.
-         * \param[in] seed seed associated with the evaluation run.
+         * \param[in] metric evaluation metric added.
          */
-        virtual void addEvaluationRun(std::unique_ptr<EvaluationRun> evaluationRun, size_t seed);
+        virtual void addEvaluationMetric(std::unique_ptr<EvaluationMetric> metric);
 
         /**
-         * \brief Method to get the number of evaluationRun registered.
+         * \brief Method to get the number of EvaluationMetric type registered.
          */
         virtual size_t getSize() const;
 
         /**
-         * \brief Method to get the map of evaluationRun
+         * \brief Return true if the result contains the typeIndex.
+         * 
+         * \param[in] index index controlled
          */
-        virtual const std::map<size_t, std::unique_ptr<EvaluationRun>>& getEvaluationRuns() const;
+        virtual bool hasTypeIndex(const std::type_index& index) const;
 
         /**
-         * \brief Print all the evaluation run evaluated.
+         * \brief Method to get the vector of EvaluationMetric
+         * 
+         * \param[in] index index controlled
+         */
+        virtual const std::vector<std::unique_ptr<EvaluationMetric>>& getEvaluationMetricsAt(const std::type_index& index) const;
+
+        /**
+         * \brief Return all the evaluation metrics.
+         */
+        virtual const std::map<std::type_index, std::vector<std::unique_ptr<EvaluationMetric>>>& getEvaluationMetrics() const;
+
+        /**
+         * \brief Print all the evaluation metric evaluated.
          */
         virtual std::string toString(std::string prefix = "") const;
     };

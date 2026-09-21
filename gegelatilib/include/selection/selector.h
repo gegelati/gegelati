@@ -42,7 +42,7 @@
             virtual std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> getSelectionMetrics();
             
             /**
-             * \brief method ranking the individuals based on their average score on their evaluationRun
+             * \brief method ranking the individuals based on their average score on their run
              * 
              * \param[in] individuals the individuals containing the scores.
              */

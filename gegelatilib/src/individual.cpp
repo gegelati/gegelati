@@ -77,9 +77,9 @@ std::shared_ptr<Individual> Individual::cloneSharedPtr() const
     return std::make_shared<Individual>(this->representation, this->genotype->cloneUniquePtr());
 }
 
-void Individual::addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const
+void Individual::addEvaluationMetric(std::unique_ptr<Evaluation::EvaluationMetric> metric) const
 {
-    this->result->addEvaluationRun(std::move(evaluationRun), seed);
+    this->result->addEvaluationMetric(std::move(metric));
 }
 
 const Evaluation::EvaluationResult& Individual::getEvaluationResult() const

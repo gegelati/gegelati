@@ -43,7 +43,7 @@ TEST(ScoreMetricTest, Constructor)
     ASSERT_NO_THROW(metric1 = new Evaluation::ScoreMetric()) << "Constructor failed";
     ASSERT_NO_THROW(metric2 = new Evaluation::ScoreMetric(1.5)) << "Constructor failed";
 
-    ASSERT_NO_THROW(metric1->cloneEmptyUniquePtr()) << "Construction with cloning failed";
+    ASSERT_NO_THROW(metric1->cloneEmptyUniquePtr(0)) << "Construction with cloning failed";
 
     ASSERT_NO_THROW(delete metric1) << "Destructor failed";
     ASSERT_NO_THROW(delete metric2) << "Destructor failed";
@@ -57,7 +57,7 @@ TEST(ScoreMetricTest, ExtractMetricsEpisode)
     // Call extraction
     Representations::FakeRepresentation rep;
     Individual indiv(rep);
-    metric.extractMetricsRun(indiv, 0, env);
+    metric.extractMetricRun(indiv, 0, env);
 
     // score should be set
     ASSERT_DOUBLE_EQ(metric.getScore(), 3.0);

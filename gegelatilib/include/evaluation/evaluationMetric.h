@@ -3,6 +3,9 @@
 #ifndef EVALUATION_METRICS_H
 #define EVALUATION_METRICS_H
 
+#include <typeindex>
+
+#include "data/dataValue.h"
 #include "evaluation/learningEnvironment.h"
 
 
@@ -17,16 +20,29 @@ namespace Evaluation {
     {
       protected:
 
+        /// @brief Unique seed of this metric.
+        size_t seed;
+
       public:
         /**
          * \brief Default constructor
+         * 
+         * \param[in] seed Unique seed of this metric.
          */
-        EvaluationMetric() = default;
+        EvaluationMetric(size_t seed) : seed{seed} {};
+
+        /**
+         * \brief Get the seed of the metric
+         */
+        size_t getSeed() const {return this->seed; }
 
         /**
          * \brief Method to dupplicate the current polymorphic metric, keeping the current parameter but forgetting the extractions.
+         * 
+         * \param[in] seed Unique seed of this metric.
          */
-        virtual std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const = 0;
+        virtual std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr(size_t seed) const = 0;
+        
 
         /**
          * \brief Init the metrics for the individual in the learning environment.
@@ -36,12 +52,25 @@ namespace Evaluation {
          * \param[in] individual the individual representing the individual.
          * \param[in] learningEnvironment the learning environment in which the
          * individual is evaluated.
-         * \param[in] seed used to reset the learningEnvironment.
          */
-        virtual void initMetrics(
+        virtual void initExtraction(
             const Individual& individual,
-            const Evaluation::LearningEnvironment& learningEnvironment,
-            size_t seed) {
+            const Evaluation::LearningEnvironment& learningEnvironment) {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
+
+        /**
+         * \brief Extract metrics from the individual in the learning environment.
+         *
+         * This method is called at every step of the environment evaluation.
+         *
+         * \param[in] individual the individual performing a step.
+         * \param[in] learningEnvironment the learning environment in which the
+         * individual is evaluated.
+         */
+        virtual void extractBeforeExecution(
+            const Individual& individual,
+            const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -55,8 +84,23 @@ namespace Evaluation {
          * \param[in] learningEnvironment the learning environment in which the
          * individual is evaluated.
          */
-        virtual void extractMetricsStep(
+        virtual void extractAfterExecution(
             const Individual& individual, const Data::DataView& action,
+            const Evaluation::LearningEnvironment& learningEnvironment) {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
+
+        /**
+         * \brief Extract metrics from the individual in the learning environment.
+         *
+         * This method is called at every step of the environment evaluation.
+         *
+         * \param[in] individual the individual performing a step.
+         * \param[in] learningEnvironment the learning environment in which the
+         * individual is evaluated.
+         */
+        virtual void extractAfterStep(
+            const Individual& individual,
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -73,7 +117,7 @@ namespace Evaluation {
          * \param[in] learningEnvironment the learning environment in
          * which the individual is evaluated.
          */
-        virtual void extractMetricsRun(
+        virtual void extractMetricRun(
             const Individual& individual, size_t nbStepsExecuted,
             const Evaluation::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
@@ -84,10 +128,11 @@ namespace Evaluation {
          */
         virtual std::string toString(std::string prefix = "") const = 0;
 
+
         /**
-         * \brief compare two metrics and return true if they do the same thing.
+         * \brief Return the typeId of the metric
          */
-        virtual bool sameMetricMethod(const EvaluationMetric& other) const = 0;
+        virtual std::type_index typeId() const noexcept = 0;
     };
         
     /**

@@ -119,11 +119,13 @@ namespace Evaluation {
         void addRequestedMetric(const EvaluationMetric& metric);
 
         /**
-         * \brief Create an EvaluationRun unique_ptr. 
+         * \brief Create an vector of the metric as unique_ptr. 
          * 
-         * A copy of each requested metric is added to the evaluationRun.
+         * A copy of each requested metric.
+         * 
+         * \param[in] seed Unique seed of this metric.
          */
-        std::unique_ptr<EvaluationRun> createEvaluationRun() const;
+        std::vector<std::unique_ptr<EvaluationMetric>> createEvaluationMetrics(size_t seed) const;
         
         /**
          * \brief Evaluates policy starting from the given root.

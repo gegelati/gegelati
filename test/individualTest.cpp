@@ -119,12 +119,7 @@ TEST_F(IndividualTest, results)
     Individual individual(fakeRep);
     const Individual& constIndiv = individual;
 
-    ASSERT_NO_THROW(constIndiv.addEvaluationRun(        
-        std::make_unique<Evaluation::EvaluationRun>(
-            std::make_unique<Evaluation::ScoreMetric>(8)
-        ),
-        10
-    )) << "Adding an evaluationRun to the result failed";
+    ASSERT_NO_THROW(constIndiv.addEvaluationMetric(std::make_unique<Evaluation::ScoreMetric>(8))) << "Adding an evaluationRun to the result failed";
 
     const Evaluation::EvaluationResult* result;
     ASSERT_NO_THROW(result = &constIndiv.getEvaluationResult()) << "Getting evaluation result failed";

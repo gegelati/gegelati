@@ -3,7 +3,7 @@
 std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Selection::Selector::getSelectionMetrics()
 {
     std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> vect;
-    vect.push_back(std::make_unique<Evaluation::ScoreMetric>());
+    vect.push_back(std::make_unique<Evaluation::ScoreMetric>(0u));
     return vect;
 }
 
@@ -14,25 +14,19 @@ std::vector<std::pair<double, std::shared_ptr<const Individual>>> Selection::Sel
     // Get the average score of each individual.
     std::vector<std::pair<double, std::shared_ptr<const Individual>>> ranked;
     for (const std::shared_ptr<const Individual>& individual : individuals){
-        // TODO BETTER DESIGN
-        size_t nbScoreMetrics = 0;
+
         double score = 0;
-        for (const auto& pairRun: individual->getEvaluationResult().getEvaluationRuns()) {
-
-            // Ugly loop to find the corresponding metric, a set should be considered.
-            for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: pairRun.second->getMetrics()) {
-                if(dynamic_cast<Evaluation::ScoreMetric*>(metric.get()) != nullptr) {
-                    score += dynamic_cast<Evaluation::ScoreMetric*>(metric.get())->getScore();
-                    nbScoreMetrics ++;
-                    break;
-                }
-            }
-        }
-        ranked.emplace_back(score, individual);
-
-        if(nbScoreMetrics == 0) {
+        const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = individual->getEvaluationResult().getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
+        if(scoreMetrics.empty()) {
             throw std::runtime_error("Selection::getRankedScores: No score metric recieved for computing fitness");
         }
+
+        for (const std::unique_ptr<Evaluation::EvaluationMetric>& metric: scoreMetrics) {
+            // No check that it is effectively a score metric because we are crazyyy
+            score += dynamic_cast<const Evaluation::ScoreMetric*>(metric.get())->getScore();
+        }
+        score /= static_cast<double>(scoreMetrics.size());
+        ranked.emplace_back(score, individual);
     }
 
     // Sort the individual to get ranks.

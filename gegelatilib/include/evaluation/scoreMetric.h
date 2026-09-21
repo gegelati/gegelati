@@ -19,23 +19,22 @@ namespace Evaluation {
         double score = 0;
 
       public:
-        /**
-         * \brief Default constructor
-         */
-        ScoreMetric(): EvaluationMetric() {};
 
         /**
-         * \brief Constructor with score.
+         * \brief Constructor.
          *
+         * \param[in] seed Unique seed
          * \param[in] score the score obtained by the individual.
          */
-        ScoreMetric(double score)
-            : EvaluationMetric(), score{score} {};
+        ScoreMetric(size_t seed = 0, double score = 0.0)
+            : EvaluationMetric(seed), score{score} {};
 
         /**
          * \brief Method to dupplicate the current polymorphic metric, keeping the current parameter but forgetting the extractions.
+         * 
+         * \param[in] seed Unique seed of this metric.
          */
-        virtual std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr() const override;
+        virtual std::unique_ptr<EvaluationMetric> cloneEmptyUniquePtr(size_t seed) const override;
 
         /**
          * Return the score of the individual.
@@ -55,7 +54,7 @@ namespace Evaluation {
          * \param[in] learningEnvironment the learning environment in
          * which the individual is evaluated.
          */
-        virtual void extractMetricsRun(
+        virtual void extractMetricRun(
             const Individual& individual, size_t nbStepsExecuted,
             const Evaluation::LearningEnvironment& learningEnvironment) override;
 
@@ -65,9 +64,9 @@ namespace Evaluation {
         virtual std::string toString(std::string prefix = "") const ;
 
         /**
-         * \brief return true if other is a ScoreMetric.
+         * \brief Return typeId of scoreMetric
          */
-        virtual bool sameMetricMethod(const EvaluationMetric& other) const;
+        virtual std::type_index typeId() const noexcept override;
     };
 
 

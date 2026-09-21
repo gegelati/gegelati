@@ -42,20 +42,20 @@ void Evaluation::EvaluationAgent::addRequestedMetric(const EvaluationMetric& met
 {
     // Don't add twice the same metric :)
     for(const auto& currentMetric: this->requestedMetrics){
-        if(currentMetric->sameMetricMethod(metric)) {
+        if(currentMetric->typeId() == metric.typeId()) {
             return;
         }
     }
-    this->requestedMetrics.push_back(std::move(metric.cloneEmptyUniquePtr()));
+    this->requestedMetrics.push_back(std::move(metric.cloneEmptyUniquePtr(0)));
 }
 
-std::unique_ptr<Evaluation::EvaluationRun> Evaluation::EvaluationAgent::createEvaluationRun() const
+std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Evaluation::EvaluationAgent::createEvaluationMetrics(size_t seed) const
 {
-    std::unique_ptr<EvaluationRun> evalRun = std::make_unique<EvaluationRun>();
+    std::vector<std::unique_ptr<EvaluationMetric>> metrics;
     for(const auto& metric: this->requestedMetrics) {
-        evalRun->addMetric(metric->cloneEmptyUniquePtr());
+        metrics.push_back(metric->cloneEmptyUniquePtr(seed));
     }
-    return std::move(evalRun);
+    return std::move(metrics);
 }
 
 

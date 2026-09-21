@@ -50,39 +50,44 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         // Reset the learning Environment
         reinforcementEnvironment.reset(hash, mode, iterationNumber, generationNumber);
 
-        // create Evaluation run for this episode with default metric for now.
-        std::unique_ptr<EvaluationRun> evaluationRun = std::move(this->createEvaluationRun());
-
-        // Init the metrics of the run
-        for(const auto& metric: evaluationRun->getMetrics()) {
-            metric->initMetrics(individual, learningEnvironment, hash);
-        }
+        // create Evaluation metric and initialize them.
+        std::vector<std::unique_ptr<EvaluationMetric>> metrics = std::move(this->createEvaluationMetrics(hash));
+        for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
+            metric->initExtraction(individual, learningEnvironment); }
 
         uint64_t nbActions = 0;
         while (!reinforcementEnvironment.isTerminal() &&
                nbActions < this->params->maxNbActionsPerEval) {
+
+
+            // Extract the metrics before execution
+            for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
+                metric->extractBeforeExecution(individual, learningEnvironment); }
+
             // Get the actions
-            Data::DataValue action =
-                std::move(individual.execute(learningEnvironment.getDataSources()));
+            Data::DataValue action = std::move(individual.execute(learningEnvironment.getDataSources()));
+
+            
+            // Extract the metrics after execution
+            for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
+                metric->extractAfterExecution(individual, action, learningEnvironment); }
 
             // Do it
             reinforcementEnvironment.doAction(action);
+
+            // Extract the metrics after environment step
+            for(const std::unique_ptr<EvaluationMetric>& metric: metrics) { 
+                metric->extractAfterStep(individual, learningEnvironment); }
+
             // Count actions
             nbActions++;
-
-            // Extract the metrics of current stpe.
-            for(const auto& metric: evaluationRun->getMetrics()) {
-                metric->extractMetricsStep(individual, action.view(), learningEnvironment);
-            }
         }
 
-        // Extract the final metrics of the run.
-        for(const auto& metric: evaluationRun->getMetrics()) {
-            metric->extractMetricsRun(individual, nbActions, learningEnvironment);
+        // Extract metric at the end of the run, and add the metric to the individual.
+        for(auto it = metrics.begin(); it != metrics.end(); it++) { 
+            (*it)->extractMetricRun(individual, nbActions, learningEnvironment); 
+            individual.addEvaluationMetric(std::move(*it));
         }
-
-        // Add the evaluationRun to the evaluationResult.
-        individual.addEvaluationRun(std::move(evaluationRun), hash);
     }
 }
 

@@ -125,12 +125,11 @@ public:
     virtual void setGenotype(std::unique_ptr<GraphBased::Genotype> genotype);
 
     /**
-     * \brief add an evaluationRun to the evaluationResult of the individual
+     * \brief add an EvaluationMetric to the evaluationResult of the individual
      * 
-     * \param[in] evaluationRun evaluation run.
-     * \param[in] seed seed associated with the evaluation run.
+     * \param[in] metric new metric added to the results.
      */
-    virtual void addEvaluationRun(std::unique_ptr<Evaluation::EvaluationRun> evaluationRun, size_t seed) const;
+    virtual void addEvaluationMetric(std::unique_ptr<Evaluation::EvaluationMetric> metric) const;
 
     /**
      * \brief return the current evaluation result of the individual.

@@ -45,8 +45,7 @@ TEST(SelectorTest, getRankedScores)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
         
-        indiv->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population.insert(indiv);
     }
 
@@ -68,8 +67,7 @@ TEST(SelectorTest, getBest)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
         
-        indiv->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population.insert(indiv);
     }
 
@@ -91,8 +89,7 @@ TEST(TruncationSelectorTest, select)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
         
-        indiv->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population.insert(indiv);
     }
 

@@ -67,6 +67,9 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     /// Randomness control
     RNG::RNG rng;
 
+    // Vector of dataView sources
+    std::vector<Data::DataView> res;
+
   public:
     /**
      * Constructor.
@@ -74,11 +77,10 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     StickGameWithOpponentD()
         : Evaluation::ReinforcementEnvironment(
             {Dimensions::Requirement::array1d<double>(3), Dimensions::Requirement::array1d<double>(1)}, 
-             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false}
+             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false},
+             hints{1.0, 2.0, 3.0}, res{Data::DataView(hints.data(), Data::DataType::array1d<double>(3)), Data::DataView(&remainingSticks, Data::DataType::array1d<double>(1))}
     {
         this->reset(0);
-        // Set hints
-        this->hints = {1.0, 2.0, 3.0};
     };
 
     /// Destructor

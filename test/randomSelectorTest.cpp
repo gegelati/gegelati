@@ -30,8 +30,7 @@ TEST(RandomSelectorTest, selectWithoutReplacement)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
         
-        indiv->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population.insert(indiv);
     }
 
@@ -66,8 +65,7 @@ TEST(RandomSelectorTest, selectWithReplacement)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
         
-        indiv->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population.insert(indiv);
     }
 
@@ -104,15 +102,13 @@ TEST(RandomSelectorTest, selectIsDeterminist)
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
         
-        indiv1->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(double(idx))))), 1);
+        indiv1->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
         population1.insert(indiv1);
 
         
         std::shared_ptr<const Individual> indiv2 = std::make_shared<Individual>(rep);
         
-        indiv2->addEvaluationRun(std::move(std::make_unique<Evaluation::EvaluationRun>(
-                                      std::move(std::make_unique<Evaluation::ScoreMetric>(rng.uniformSample<double>(-1000.0, 1000.0))))), 1);
+        indiv2->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(rng.uniformSample<double>(-1000.0, 1000.0))));
         population2.insert(indiv2);
     }
 

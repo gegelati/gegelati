@@ -1,9 +1,9 @@
 
 #include "evaluation/scoreMetric.h"
 
-std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::ScoreMetric::cloneEmptyUniquePtr() const
+std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::ScoreMetric::cloneEmptyUniquePtr(size_t seed) const
 {
-    return std::make_unique<ScoreMetric>();
+    return std::make_unique<ScoreMetric>(seed);
 }
 
 double Evaluation::ScoreMetric::getScore() const
@@ -11,7 +11,7 @@ double Evaluation::ScoreMetric::getScore() const
     return score;
 }
 
-void Evaluation::ScoreMetric::extractMetricsRun(
+void Evaluation::ScoreMetric::extractMetricRun(
     const Individual& individual, size_t nbStepsExecuted,
     const Evaluation::LearningEnvironment& learningEnvironment)
 {
@@ -23,12 +23,11 @@ void Evaluation::ScoreMetric::extractMetricsRun(
 std::string Evaluation::ScoreMetric::toString(std::string prefix) const
 {
     std::ostringstream oss;
-    oss << prefix << "Score: " << score;
+    oss << prefix << "Seed:"<<this->seed <<"; Score:" << score;
 
     return oss.str();
 }
-
-bool Evaluation::ScoreMetric::sameMetricMethod(const EvaluationMetric& other) const
+std::type_index Evaluation::ScoreMetric::typeId() const noexcept
 {
-    return dynamic_cast<const ScoreMetric*>(&other) != nullptr;
+    return typeid(ScoreMetric);
 }

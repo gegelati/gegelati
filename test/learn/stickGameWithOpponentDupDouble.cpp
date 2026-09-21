@@ -110,16 +110,9 @@ void StickGameWithOpponentD::reset(size_t seed, Evaluation::LearningMode mode,
     this->forbiddenMove = false;
 }
 
-std::vector<Data::DataView>
-StickGameWithOpponentD::getDataSources() const
+std::vector<Data::DataView> StickGameWithOpponentD::getDataSources() const
 {
-    Data::DataView hintsView(hints.data(), Data::DataType::array1d<double>(3));
-    Data::DataView remainingSticksView(&remainingSticks, Data::DataType::array1d<double>(1));
-    std::vector<Data::DataView> res = {
-        hintsView, remainingSticksView
-    };
-
-    return res;
+    return this->res;
 }
 
 double StickGameWithOpponentD::getScore() const

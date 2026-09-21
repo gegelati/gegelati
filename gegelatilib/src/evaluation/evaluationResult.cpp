@@ -36,30 +36,56 @@
 
 #include "evaluation/evaluationResult.h"
 
-void Evaluation::EvaluationResult::addEvaluationRun(std::unique_ptr<EvaluationRun> evaluationRun, size_t seed)
+void Evaluation::EvaluationResult::addEvaluationMetric(std::unique_ptr<EvaluationMetric> metric)
 {
-    this->evaluationRuns.insert({seed, std::move(evaluationRun)});
+    std::type_index index = metric->typeId();
+    if(!this->hasTypeIndex(index)) {
+        this->evaluationMetrics[index] = std::vector<std::unique_ptr<EvaluationMetric>>();   
+    }
+    this->evaluationMetrics[index].push_back(std::move(metric));
 }
 
 
 size_t Evaluation::EvaluationResult::getSize() const
 {
-    return this->evaluationRuns.size();
+    return this->evaluationMetrics.size();
 }
 
-const std::map<size_t, std::unique_ptr<Evaluation::EvaluationRun>>& Evaluation::EvaluationResult::getEvaluationRuns() const
+bool Evaluation::EvaluationResult::hasTypeIndex(const std::type_index& index) const
 {
-    return this->evaluationRuns;
+    return this->evaluationMetrics.find(index) != this->evaluationMetrics.end();
+}
+
+const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& Evaluation::EvaluationResult::getEvaluationMetricsAt(const std::type_index& index) const
+{
+    if(!this->hasTypeIndex(index)) {
+        throw std::runtime_error("Evaluation::EvaluationResult::getEvaluationMetricsAt: Results does not contains index " + std::string(index.name()));
+    }
+    return this->evaluationMetrics.at(index);
+}
+
+const std::map<std::type_index, std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>>& Evaluation::EvaluationResult::getEvaluationMetrics() const
+{
+    return this->evaluationMetrics;
 }
 
 std::string Evaluation::EvaluationResult::toString(std::string prefix) const
 {
     std::ostringstream oss;
-    oss << prefix <<"EvaluationResult{\n";
-    for(auto it = this->evaluationRuns.begin(); it != this->evaluationRuns.end(); it++) {
-        oss << prefix << "\tSeed " << it->first << ": " << it->second->toString(prefix + "\t") << ",\n";
+
+    oss << prefix << "EvaluationResult{\n";
+
+    for (const auto& [typeIndex, metrics] : this->evaluationMetrics) {
+        oss << prefix << "\t" << DEMANGLE_TYPEID_NAME(typeIndex.name()) << " [\n";
+
+        for (const auto& metric : metrics) {
+            oss << metric->toString(prefix + "\t\t") << ",\n";
+        }
+
+        oss << prefix << "\t],\n";
     }
-    oss << prefix <<"}";
+
+    oss << prefix << "}";
 
     return oss.str();
 }
