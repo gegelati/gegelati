@@ -1,76 +1,54 @@
 
 #include "evaluation/archiveMetric.h"
 
-#if 0
-Evaluation::ArchiveMetric::~ArchiveMetric()
+std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::ArchiveMetric::cloneEmptyUniquePtr(size_t seed) const
 {
-    for (const auto& pairHashInputs : this->inputsExtracted) {
-        for (const Data::DataHandler& dHandler : pairHashInputs.second) {
-            // Free memory of DataHandlers within the archive
-            delete &dHandler;
-        }
-    }
+    return std::make_unique<Evaluation::ArchiveMetric>(seed, this->extractionProbability);
 }
 
-std::unique_ptr<Evaluation::EvaluationMetric> Evaluation::ArchiveMetric::cloneEmptyUniquePtr() const
+
+std::string Evaluation::ArchiveMetric::toString(std::string prefix) const
 {
-    return std::make_unique<Evaluation::ArchiveMetric>(
-        this->extractionProbability);
+    std::ostringstream oss;
+    oss << prefix << "Seed:"<<this->seed <<"; pExtract:" << this->extractionProbability<<"; nbExtract:" << this->inputsExtracted.size();
+
+    return oss.str();
+}
+std::type_index Evaluation::ArchiveMetric::typeId() const noexcept
+{
+    return typeid(ArchiveMetric);
 }
 
-size_t Evaluation::ArchiveMetric::getCombinedHash(
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-        dHandlers)
-{
-    size_t hash = 0;
-    for (const std::reference_wrapper<const Data::DataHandler> dHandler :
-         dHandlers) {
-        hash ^= dHandler.get().getHash();
-    }
-    return hash;
-}
 
-const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>&  Evaluation::ArchiveMetric::getInputsExtracted() const
+const std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>>>& Evaluation::ArchiveMetric::getInputsExtracted() const
 {
     return this->inputsExtracted;
 }
 
-void Evaluation::ArchiveMetric::initMetrics(
+void Evaluation::ArchiveMetric::extractBeforeExecution(
     const Individual& individual,
-    const Evaluation::LearningEnvironment& learningEnvironment,
-    size_t seed) {
-    rng.setSeed(seed);
-};
-
-void Evaluation::ArchiveMetric::extractMetricsStep(
-    const Individual& individual, std::vector<double> actionValues,
-    const Evaluation::LearningEnvironment& learningEnvironment)
+    const Evaluation::Problem& problem)
 {
     
     if(this->rng.getDouble(0.0, 1.0) < this->extractionProbability) {
         /// Success, the inputs are extracted.
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler = learningEnvironment.getDataSources();
+        std::vector<Data::DataView> views = problem.getDataSources();
+
         // get the combined hash
-        size_t hash = getCombinedHash(dHandler);
+        size_t hash = Data::DataView::getCombinedHash(views);
 
         // Check if dataHandler is already contained, if yes do not add it.
         if (this->inputsExtracted.find(hash) != this->inputsExtracted.end()) {
             return;
         }
 
-        
         // Store a copy of data handlers.
-        std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dHandlersCpy;
-        for (std::reference_wrapper<const Data::DataHandler> dh :
-                dHandler) {
-            Data::DataHandler* dhCopy = dh.get().clone();
-            dHandlersCpy.push_back(*dhCopy);
+        std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>> viewDeepCopies;
+        for (const Data::DataView& view : views) {
+            viewDeepCopies.push_back(view.deepClone());
         }
 
         // Create the map entry
-        this->inputsExtracted.emplace(hash, std::move(dHandlersCpy));
+        this->inputsExtracted.emplace(hash, std::move(viewDeepCopies));
     }
 }
-
-#endif

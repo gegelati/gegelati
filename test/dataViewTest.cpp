@@ -314,3 +314,143 @@ TEST(DataViewTest, ToStringContainsViewAndTypeInformation)
     ASSERT_NO_THROW(std::cout<<view<<std::endl);
 }
 
+TEST(DataViewTest, hash)
+{
+    int values1[] = {1, 2, 3, 4};
+    int values2[] = {1, 2, 3, 4};
+    int values3[] = {1, 2, 3, 5};
+
+    Data::DataView view1(
+        values1,
+        Data::DataType::array1d<int>(4));
+
+    Data::DataView view2(
+        values2,
+        Data::DataType::array1d<int>(4));
+
+    Data::DataView view3(
+        values3,
+        Data::DataType::array1d<int>(4));
+
+    EXPECT_EQ(view1.hash(), view2.hash());
+    EXPECT_NE(view1.hash(), view3.hash());
+
+    int matrix1[2][3] = {
+        {1, 2, 3},
+        {4, 5, 6}
+    };
+
+    int matrix2[2][3] = {
+        {1, 2, 3},
+        {4, 5, 6}
+    };
+
+    Data::DataView matrixView1(
+        matrix1,
+        Data::DataType::array2d<int>(2, 3));
+
+    Data::DataView matrixView2(
+        matrix2,
+        Data::DataType::array2d<int>(2, 3));
+
+    EXPECT_EQ(matrixView1.hash(), matrixView2.hash());
+
+    matrix2[1][1] = 99;
+
+    EXPECT_NE(matrixView1.hash(), matrixView2.hash());
+}
+
+TEST(DataViewTest, deepClone)
+{
+    std::vector<int> values{10, 20, 30, 40};
+
+    Data::DataView view(
+        values.data(),
+        Data::DataType::array1d<int>(values.size()));
+
+    auto [storage, type] = view.deepClone();
+
+    ASSERT_NE(storage, nullptr);
+
+    EXPECT_EQ(type.rank, view.getRank());
+    EXPECT_EQ(type.dimensions, view.getDimensions());
+    EXPECT_EQ(type.elementType, &typeid(int));
+    EXPECT_EQ(type.elementSize, sizeof(int));
+    EXPECT_EQ(type.sourceRank, view.getSourceRank());
+    EXPECT_EQ(type.sourceDimensions, view.getSourceDimensions());
+    EXPECT_EQ(type.sourceOffset, view.getSourceOffset());
+
+    const int* clonedData =
+        reinterpret_cast<const int*>(storage.get());
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        EXPECT_EQ(clonedData[i], values[i]);
+    }
+
+    // The clone owns independent memory.
+    values[0] = 999;
+
+    EXPECT_EQ(clonedData[0], 10);
+}
+
+TEST(DataViewTest, deepClonePreserves2DSourceLayout)
+{
+    int source[4][5];
+
+    for (size_t row = 0; row < 4; ++row) {
+        for (size_t col = 0; col < 5; ++col) {
+            source[row][col] = static_cast<int>(row * 5 + col);
+        }
+    }
+
+    Data::DataView view(
+        source,
+        Data::DataType::array2d<int>(4, 5));
+
+    Data::DataView subView =
+        view.getSubView(
+            Data::DataType::array2d<int>(2, 2),
+            6);
+
+    auto [storage, type] = subView.deepClone();
+
+    ASSERT_NE(storage, nullptr);
+
+    EXPECT_EQ(type.rank, subView.getRank());
+    EXPECT_EQ(type.dimensions, subView.getDimensions());
+    EXPECT_EQ(type.sourceRank, subView.getSourceRank());
+    EXPECT_EQ(type.sourceDimensions, subView.getSourceDimensions());
+    EXPECT_EQ(type.sourceOffset, subView.getSourceOffset());
+    EXPECT_EQ(type.elementType, &typeid(int));
+    EXPECT_EQ(type.elementSize, sizeof(int));
+
+    Data::DataView clonedView(
+        storage.get() + type.sourceOffset * type.elementSize,
+        type);
+
+    const int* clonedData = clonedView.getData<int>();
+
+    ASSERT_NE(clonedData, nullptr);
+    EXPECT_EQ(clonedData[0], 6);
+    EXPECT_EQ(clonedData[1], 7);
+    EXPECT_EQ(clonedData[2], 11);
+    EXPECT_EQ(clonedData[3], 12);
+
+    // Change the original source.
+    source[1][1] = 999;
+
+    // A fresh getData() from the original view sees the change.
+    const int* originalData = subView.getData<int>();
+
+    ASSERT_NE(originalData, nullptr);
+    EXPECT_EQ(originalData[0], 999);
+
+    // The clone is independent.
+    EXPECT_EQ(clonedData[0], 6);
+    EXPECT_EQ(clonedData[1], 7);
+    EXPECT_EQ(clonedData[2], 11);
+    EXPECT_EQ(clonedData[3], 12);
+
+    delete[] originalData;
+    delete[] clonedData;
+}

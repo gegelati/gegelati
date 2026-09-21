@@ -66,6 +66,43 @@ void Data::DataView::canBeAccess(const std::type_info& type) const {
     }
 }
 
+std::unique_ptr<std::byte[]> Data::DataView::deepPtrClone() const
+{
+    const size_t bytes =
+        type.sourceTotalElements() * type.elementSize;
+
+    auto storage = std::make_unique<std::byte[]>(bytes);
+
+    const auto* source =
+        static_cast<const std::byte*>(ptr)
+        - type.sourceOffset * type.elementSize;
+
+    std::memcpy(storage.get(), source, bytes);
+
+    return storage;
+}
+
+std::pair<std::unique_ptr<std::byte[]>, Data::DataType> Data::DataView::deepClone() const
+{
+    return {this->deepPtrClone(), type};
+}
+
+size_t Data::DataView::hash() const
+{
+    const auto* data = static_cast<const std::byte*>(ptr);
+    const std::size_t size =
+        type.totalElements() * type.elementSize;
+
+    std::size_t hash = 14695981039346656037ull;
+
+    for (std::size_t i = 0; i < size; ++i) {
+        hash ^= std::to_integer<unsigned char>(data[i]);
+        hash *= 1099511628211ull;
+    }
+
+    return hash;
+}
+
 bool Data::DataView::operator==(const DataView& other) const noexcept
 {
     return (this->ptr == other.ptr) && (this->type == other.type);
@@ -98,4 +135,19 @@ std::string Data::DataView::toString() const {
         << "}";
 
     return oss.str();
+}
+
+size_t Data::DataView::getCombinedHash(const std::vector<DataView>& views)
+{
+    size_t hash = 0;
+
+    for (const auto& view : views) {
+        const std::uint64_t h = view.hash();
+
+        hash ^= h + 0x9e3779b97f4a7c15ULL +
+                (hash << 6) +
+                (hash >> 2);
+    }
+
+    return hash;
 }

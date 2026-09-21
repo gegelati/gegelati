@@ -8,6 +8,9 @@
 #include <string>
 #include <iostream>
 #include <type_traits>
+#include <vector>
+#include <memory>
+#include <cstring>
 
 #include "data/dataType.h"
 
@@ -234,17 +237,39 @@ namespace Data {
             }
 
             // Strided sub-view: create a contiguous copy.
-            ValueType* contiguous = new ValueType[rows * cols];
+            std::vector<ValueType> contiguous;
 
             for (size_t row = 0; row < rows; ++row) {
                 for (size_t col = 0; col < cols; ++col) {
-                    contiguous[row * cols + col] =
-                        source[row * stride + col];
+                    contiguous.push_back(source[row * stride + col]);
                 }
             }
 
-            return contiguous;
+            return contiguous.data();
         }
+
+        /**
+         * \brief Performs a deep clone of the pointer inside the dataView.
+         */
+        std::unique_ptr<std::byte[]> deepPtrClone() const;
+
+        /**
+         * \brief Perform a deep copy of the dataView.
+         * 
+         * The clone contains a copied pointer pointed in the unique_ptr. 
+         */
+        std::pair<std::unique_ptr<std::byte[]>, DataType> deepClone() const;
+
+
+        /**
+         * \brief Return the hash of the dataView.
+         */
+        size_t hash() const;
+
+        /**
+         * \brief Static method to compute the combined hash of multiple dataviews!
+         */
+        static size_t getCombinedHash(const std::vector<Data::DataView>& views);
 
         /** \brief Checks if this view has a non-null data pointer. */
         explicit operator bool() const noexcept;
