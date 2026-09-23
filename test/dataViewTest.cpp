@@ -360,6 +360,34 @@ TEST(DataViewTest, hash)
     EXPECT_NE(matrixView1.hash(), matrixView2.hash());
 }
 
+TEST(DataViewTest, combinedHash)
+{
+    int values1[] = {1, 2, 3};
+    int values2[] = {4, 5, 6};
+    int values3[] = {7, 8, 9};
+
+    Data::DataView view1(values1,  Data::DataType::array1d<int>(3));
+    Data::DataView view2(values2, Data::DataType::array1d<int>(3));
+    Data::DataView view3(values3, Data::DataType::array1d<int>(3));
+
+    const std::vector<Data::DataView> views1 = {view1,view2};
+    const std::vector<Data::DataView> views2 = {view1,view2};
+    const std::vector<Data::DataView> views3 = {view1,view3};
+    const std::vector<Data::DataView> reversedViews = {view2,view1};
+
+    EXPECT_EQ(
+        Data::DataView::getCombinedHash(views1),
+        Data::DataView::getCombinedHash(views2));
+
+    EXPECT_NE(
+        Data::DataView::getCombinedHash(views1),
+        Data::DataView::getCombinedHash(views3));
+
+    EXPECT_NE(
+        Data::DataView::getCombinedHash(views1),
+        Data::DataView::getCombinedHash(reversedViews));
+}
+
 TEST(DataViewTest, deepClone)
 {
     std::vector<int> values{10, 20, 30, 40};
@@ -368,7 +396,8 @@ TEST(DataViewTest, deepClone)
         values.data(),
         Data::DataType::array1d<int>(values.size()));
 
-    auto [storage, type] = view.deepClone();
+    auto [storage, cloneView] = view.deepClone();
+    const auto& type = view.getType();
 
     ASSERT_NE(storage, nullptr);
 
@@ -412,7 +441,8 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
             Data::DataType::array2d<int>(2, 2),
             6);
 
-    auto [storage, type] = subView.deepClone();
+    auto [storage, clonedView] = subView.deepClone();
+    const auto& type = clonedView.getType();
 
     ASSERT_NE(storage, nullptr);
 
@@ -424,9 +454,7 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
     EXPECT_EQ(type.elementType, &typeid(int));
     EXPECT_EQ(type.elementSize, sizeof(int));
 
-    Data::DataView clonedView(
-        storage.get() + type.sourceOffset * type.elementSize,
-        type);
+        
 
     std::shared_ptr<const int[]> clonedData = clonedView.getData<int>();
 

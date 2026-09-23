@@ -51,86 +51,12 @@
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <oldRepresentations/individual.h>
-#include <oldRepresentations/representation.h>
-#include <oldRepresentations/job.h>
-#include <oldRepresentations/mutator.h>
-#include <oldRepresentations/population.h>
-#include <oldRepresentations/executionEngine.h>
 
-#include <oldRepresentations/atpg/atpgRepresentation.h>
-#include <oldRepresentations/atpg/atpgPopulation.h>
-#include <oldRepresentations/atpg/atpgMutator.h>
-#include <oldRepresentations/atpg/atpgExecutionEngine.h>
-
-#include <oldRepresentations/cgp/cgpRepresentation.h>
-#include <oldRepresentations/cgp/cgpLineMutator.h>
-#include <oldRepresentations/cgp/cgpMutator.h>
-
-#include <oldRepresentations/lgp/environment.h>
-#include <oldRepresentations/lgp/lgpRepresentation.h>
-#include <oldRepresentations/lgp/lgpIndividual.h>
-#include <oldRepresentations/lgp/lgpPopulation.h>
-#include <oldRepresentations/lgp/lgpMutator.h>
-#include <oldRepresentations/lgp/lgpLine.h>
-#include <oldRepresentations/lgp/lgpLineMutator.h>
-#include <oldRepresentations/lgp/lgpCodeGenerationEngine.h>
-#include <oldRepresentations/lgp/lgpExecutionEngine.h>
-
-#include <oldRepresentations/maple/mapleIndividual.h>
-#include <oldRepresentations/maple/mapleRepresentation.h>
-#include <oldRepresentations/maple/mapleExecutionEngine.h>
-#include <oldRepresentations/maple/maplePopulation.h>
-#include <oldRepresentations/maple/mapleMutator.h>
-
-#include <oldRepresentations/tgp/tgpRepresentation.h>
-#include <oldRepresentations/tgp/tgpLineMutator.h>
-#include <oldRepresentations/tgp/tgpMutator.h>
-
-#include <oldRepresentations/tpg/archive.h>
-#include <oldRepresentations/tpg/tpgRepresentation.h>
-#include <oldRepresentations/tpg/tpgIndividual.h>
-#include <oldRepresentations/tpg/tpgPopulation.h>
-#include <oldRepresentations/tpg/tpgMutator.h>
-#include <oldRepresentations/tpg/tpgExecutionEngine.h>
-
-
-#include <oldData/array2DWrapper.h>
-#include <oldData/arrayWrapper.h>
-#include <data/constant.h>
-#include <oldData/constantHandler.h>
-#include <oldData/dataHandler.h>
-#include <data/hash.h>
-#include <oldData/pointerWrapper.h>
-#include <oldData/primitiveTypeArray.h>
-#include <oldData/primitiveTypeArray2D.h>
-#include <oldData/untypedSharedPtr.h>
-
-
-#include <evoGraph/abstractEngine.h>
-#include <evoGraph/action.h>
-#include <evoGraph/edge.h>
-#include <evoGraph/element.h>
-#include <evoGraph/factory.h>
-#include <evoGraph/graph.h>
-#include <evoGraph/team.h>
-#include <evoGraph/vertex.h>
-
-#include <evoGraph/instrumented/actionInstrumented.h>
-#include <evoGraph/instrumented/edgeInstrumented.h>
-#include <evoGraph/instrumented/factoryInstrumented.h>
-#include <evoGraph/instrumented/teamInstrumented.h>
-#include <evoGraph/instrumented/vertexInstrumented.h>
-
+/* 
 #include <file/parametersParser.h>
 #include <file/graphDotExporter.h>
 #include <file/graphDotImporter.h>
 
-#include <instructions/addPrimitiveType.h>
-#include <instructions/instruction.h>
-#include <instructions/lambdaInstruction.h>
-#include <instructions/multByConstant.h>
-#include <instructions/set.h>
 
 #include <learn/evaluationResult.h>
 #include <learn/learningAgent.h>
@@ -171,14 +97,63 @@
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 
+
+#include <codeGen/codeGenerationExporter.h>
+
+#include <parameters.h>
+#include <outputInfo.h>*/
+
+#include <data/constant.h>
+#include <data/dataConcept.h>
+#include <data/dataType.h>
+#include <data/dataValue.h>
+#include <data/dataView.h>
+#include <data/hash.h>
+
+#include <dimensions/activationFunctions.h>
+#include <dimensions/constraint.h>
+#include <dimensions/dataValueGenerator.h>
+#include <dimensions/dimensionFlow.h>
+#include <dimensions/numericRange.h>
+#include <dimensions/requirement.h>
+
+#include <evaluation/evaluationAgent.h>
+#include <evaluation/evaluationMetric.h>
+#include <evaluation/evaluationResult.h>
+#include <evaluation/problem.h>
+#include <evaluation/reinforcementAgent.h>
+#include <evaluation/reinforcementEnvironment.h>
+#include <evaluation/scoreMetric.h>
+
+#include <graphBased/genotype.h>
+#include <graphBased/genotypeConstraint.h>
+#include <graphBased/genotypeGenerator.h>
+#include <graphBased/gpNode.h>
+#include <graphBased/nodeConstraint.h>
+#include <graphBased/nodeGenerator.h>
+#include <graphBased/nodeGroup.h>
+
+#include <mutation/mutator.h>
+#include <mutation/pointMutator.h>
+
+#include <reproduction/replicator.h>
+#include <reproduction/reproducer.h>
+
+#include <selection/selector.h>
+#include <selection/randomSelector.h>
+#include <selection/truncationSelector.h>
+
+#include <individual.h>
+
 #include <dimensions/activationFunctions.h>
 #include <util/counterReset.h>
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <codeGen/codeGenerationExporter.h>
-
-#include <parameters.h>
-#include <outputInfo.h>
+#include <instructions/addPrimitiveType.h>
+#include <instructions/instruction.h>
+#include <instructions/lambdaInstruction.h>
+#include <instructions/multByConstant.h>
+#include <instructions/set.h>
 
 #endif

@@ -9,8 +9,9 @@
 
 #include "learn/fakeRepresentation.h"
 
+
 // Fake Problem to test SelectionMetrics::extractMetricsEpisode
-class FakedProblem : public Evaluation::Problem
+class FakedProblem : public Evaluation::ReinforcementEnvironment
 {
   private:
     double m_score;
@@ -18,7 +19,7 @@ class FakedProblem : public Evaluation::Problem
 
   public:
     FakedProblem(double score)
-        : Evaluation::Problem({}, Dimensions::Requirement()), m_score(score)
+        : Evaluation::ReinforcementEnvironment({}, Dimensions::Requirement()), m_score(score)
     {
     }
 
@@ -32,6 +33,12 @@ class FakedProblem : public Evaluation::Problem
     {
         return m_score;
     }
+    void reset(size_t seed = 0,
+                           Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING,
+                           uint16_t iterationNumber = 0,
+                           uint64_t generationNumber = 0) override {}
+                           
+    bool isTerminal() const override {return false;}
 };
 
 TEST(ScoreMetricTest, Constructor)

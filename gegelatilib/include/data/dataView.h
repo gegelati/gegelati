@@ -53,8 +53,6 @@ namespace Data {
          */
         explicit DataView(const void* ptr, DataType type)
             : ptr(ptr), type(std::move(type)) {}
-
-
         /**
          * \brief Constructs a DataView with a data of known type.
          *
@@ -260,7 +258,7 @@ namespace Data {
          * 
          * The clone contains a copied pointer pointed in the unique_ptr. 
          */
-        std::pair<std::unique_ptr<std::byte[]>, DataType> deepClone() const;
+        std::pair<std::unique_ptr<std::byte[]>, DataView> deepClone() const;
 
 
         /**

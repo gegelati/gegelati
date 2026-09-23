@@ -40,9 +40,9 @@ void Evaluation::EvaluationResult::addEvaluationMetric(std::unique_ptr<Evaluatio
 {
     std::type_index index = metric->typeId();
     if(!this->hasTypeIndex(index)) {
-        this->evaluationMetrics[index] = std::vector<std::unique_ptr<EvaluationMetric>>();   
+        this->evaluationMetrics[index] = std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>();   
     }
-    this->evaluationMetrics[index].push_back(std::move(metric));
+    this->evaluationMetrics[index].insert(std::make_pair(metric->getSeed(), std::move(metric)));
 }
 
 
@@ -56,7 +56,7 @@ bool Evaluation::EvaluationResult::hasTypeIndex(const std::type_index& index) co
     return this->evaluationMetrics.find(index) != this->evaluationMetrics.end();
 }
 
-const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& Evaluation::EvaluationResult::getEvaluationMetricsAt(const std::type_index& index) const
+const std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>& Evaluation::EvaluationResult::getEvaluationMetricsAt(const std::type_index& index) const
 {
     if(!this->hasTypeIndex(index)) {
         throw std::runtime_error("Evaluation::EvaluationResult::getEvaluationMetricsAt: Results does not contains index " + std::string(index.name()));
@@ -64,7 +64,7 @@ const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& Evaluation::Ev
     return this->evaluationMetrics.at(index);
 }
 
-const std::map<std::type_index, std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>>& Evaluation::EvaluationResult::getEvaluationMetrics() const
+const std::map<std::type_index, std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>>& Evaluation::EvaluationResult::getEvaluationMetrics() const
 {
     return this->evaluationMetrics;
 }
@@ -78,8 +78,8 @@ std::string Evaluation::EvaluationResult::toString(std::string prefix) const
     for (const auto& [typeIndex, metrics] : this->evaluationMetrics) {
         oss << prefix << "\t" << DEMANGLE_TYPEID_NAME(typeIndex.name()) << " [\n";
 
-        for (const auto& metric : metrics) {
-            oss << metric->toString(prefix + "\t\t") << ",\n";
+        for (const auto& pairMetric : metrics) {
+            oss << pairMetric.second->toString(prefix + "\t\t") << ",\n";
         }
 
         oss << prefix << "\t],\n";

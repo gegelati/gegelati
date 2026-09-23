@@ -119,6 +119,16 @@ namespace Evaluation {
          * \return a boolean indicating termination.
          */
         virtual bool isTerminal() const = 0;
+
+        /**
+         * \brief Returns the current score of the Environment.
+         *
+         * The returned score will be used as a reward during the learning
+         * phase of a LearningAgent.
+         *
+         * \return the current score for the Problem.
+         */
+        virtual double getScore() const = 0;
     };
 }; // namespace Learn
 

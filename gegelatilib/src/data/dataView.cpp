@@ -68,23 +68,23 @@ void Data::DataView::canBeAccess(const std::type_info& type) const {
 
 std::unique_ptr<std::byte[]> Data::DataView::deepPtrClone() const
 {
-    const size_t bytes =
-        type.sourceTotalElements() * type.elementSize;
+    const size_t bytes = (type.sourceTotalElements() - type.sourceOffset) * type.elementSize;
 
     auto storage = std::make_unique<std::byte[]>(bytes);
 
     const auto* source =
-        static_cast<const std::byte*>(ptr)
-        - type.sourceOffset * type.elementSize;
+        static_cast<const std::byte*>(ptr);
 
     std::memcpy(storage.get(), source, bytes);
 
     return storage;
 }
 
-std::pair<std::unique_ptr<std::byte[]>, Data::DataType> Data::DataView::deepClone() const
+std::pair<std::unique_ptr<std::byte[]>, Data::DataView> Data::DataView::deepClone() const
 {
-    return {this->deepPtrClone(), type};
+    std::unique_ptr<std::byte[]> clonePtr = this->deepPtrClone();
+    Data::DataView cloneView(clonePtr.get(), this->type);
+    return {std::move(clonePtr), std::move(cloneView)};
 }
 
 size_t Data::DataView::hash() const

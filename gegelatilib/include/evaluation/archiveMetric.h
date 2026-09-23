@@ -23,7 +23,7 @@ namespace Evaluation {
         RNG::RNG rng;
 
         /// map of Copied datahandler of the environment containing the inputs extracted.
-        std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>>> inputsExtracted;
+        std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataView>>> inputsExtracted;
 
       public:
 
@@ -69,7 +69,7 @@ namespace Evaluation {
         /**
          * Return the inputs extracted.
          */
-        virtual const std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>>>&  getInputsExtracted() const;
+        virtual const std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataView>>>&  getInputsExtracted() const;
 
 
 

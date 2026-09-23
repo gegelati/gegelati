@@ -51,7 +51,7 @@ namespace Evaluation {
     {
       protected:
         /// @brief vector of the evaluationMetrics performed on an individual.
-        std::map<std::type_index, std::vector<std::unique_ptr<EvaluationMetric>>> evaluationMetrics;
+        std::map<std::type_index, std::map<size_t, std::unique_ptr<EvaluationMetric>>> evaluationMetrics;
 
       public:
         /**
@@ -90,12 +90,12 @@ namespace Evaluation {
          * 
          * \param[in] index index controlled
          */
-        virtual const std::vector<std::unique_ptr<EvaluationMetric>>& getEvaluationMetricsAt(const std::type_index& index) const;
+        virtual const std::map<size_t, std::unique_ptr<EvaluationMetric>>& getEvaluationMetricsAt(const std::type_index& index) const;
 
         /**
          * \brief Return all the evaluation metrics.
          */
-        virtual const std::map<std::type_index, std::vector<std::unique_ptr<EvaluationMetric>>>& getEvaluationMetrics() const;
+        virtual const std::map<std::type_index, std::map<size_t, std::unique_ptr<EvaluationMetric>>>& getEvaluationMetrics() const;
 
         /**
          * \brief Print all the evaluation metric evaluated.

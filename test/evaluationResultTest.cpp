@@ -101,7 +101,7 @@ TEST(EvaluationResultTest, addEvaluationRun)
     ASSERT_TRUE(result.hasTypeIndex(typeid(FakeMetric))) << "Should be true";
     ASSERT_EQ(result.getSize(), 2) << "Wrong size";
 
-    const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = result.getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
+    const std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = result.getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
     ASSERT_EQ(scoreMetrics.size(), 3);
     for(size_t idx = 0; idx < 3; idx++) {
 
@@ -111,8 +111,8 @@ TEST(EvaluationResultTest, addEvaluationRun)
         ASSERT_EQ(scoreMetric->getScore(), double(idx + 1));
     }
 
-    const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& fakeMetrics = result.getEvaluationMetricsAt(typeid(FakeMetric));
-    ASSERT_EQ(fakeMetrics.size(), 2);
+    const std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>& fakeMetrics = result.getEvaluationMetricsAt(typeid(FakeMetric));
+    ASSERT_EQ(fakeMetrics.size(), 1) << "Should store only one fake since it has the same seed";
 
     ASSERT_NO_THROW(result.toString()) << "For coverage";
 

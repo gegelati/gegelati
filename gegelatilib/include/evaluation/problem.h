@@ -155,16 +155,6 @@ namespace Evaluation {
          * \return a vector of references to the DataHandler.
          */
         virtual std::vector<Data::DataView>  getDataSources() const = 0;
-
-        /**
-         * \brief Returns the current score of the Environment.
-         *
-         * The returned score will be used as a reward during the learning
-         * phase of a LearningAgent.
-         *
-         * \return the current score for the Problem.
-         */
-        virtual double getScore() const = 0;
     };
 }; // namespace Learn
 

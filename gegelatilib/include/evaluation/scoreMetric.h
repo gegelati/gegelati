@@ -3,6 +3,7 @@
 #ifndef SCORE_METRICS_H
 #define SCORE_METRICS_H
 
+#include "evaluation/reinforcementEnvironment.h"
 #include "evaluation/evaluationMetric.h"
 
 

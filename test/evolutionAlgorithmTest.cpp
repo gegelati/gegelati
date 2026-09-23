@@ -456,7 +456,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         population.insert(survivors.begin(), survivors.end());
 
         // Print best individual
-        //std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
+        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
     }
 }
 

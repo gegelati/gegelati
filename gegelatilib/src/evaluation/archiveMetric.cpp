@@ -20,7 +20,7 @@ std::type_index Evaluation::ArchiveMetric::typeId() const noexcept
 }
 
 
-const std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>>>& Evaluation::ArchiveMetric::getInputsExtracted() const
+const std::map<size_t, std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataView>>>& Evaluation::ArchiveMetric::getInputsExtracted() const
 {
     return this->inputsExtracted;
 }
@@ -43,7 +43,7 @@ void Evaluation::ArchiveMetric::extractBeforeExecution(
         }
 
         // Store a copy of data handlers.
-        std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataType>> viewDeepCopies;
+        std::vector<std::pair<std::unique_ptr<std::byte[]>, Data::DataView>> viewDeepCopies;
         for (const Data::DataView& view : views) {
             viewDeepCopies.push_back(view.deepClone());
         }

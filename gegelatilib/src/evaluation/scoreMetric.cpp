@@ -16,7 +16,7 @@ void Evaluation::ScoreMetric::extractMetricRun(
     const Evaluation::Problem& problem)
 {
     // Update score
-    this->score = problem.getScore();
+    this->score = dynamic_cast<const ReinforcementEnvironment&>(problem).getScore();
 }
 
 

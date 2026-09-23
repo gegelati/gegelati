@@ -16,14 +16,14 @@ std::vector<std::pair<double, std::shared_ptr<const Individual>>> Selection::Sel
     for (const std::shared_ptr<const Individual>& individual : individuals){
 
         double score = 0;
-        const std::vector<std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = individual->getEvaluationResult().getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
+        const std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = individual->getEvaluationResult().getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
         if(scoreMetrics.empty()) {
             throw std::runtime_error("Selection::getRankedScores: No score metric recieved for computing fitness");
         }
 
-        for (const std::unique_ptr<Evaluation::EvaluationMetric>& metric: scoreMetrics) {
+        for (const auto& pair: scoreMetrics) {
             // No check that it is effectively a score metric because we are crazyyy
-            score += dynamic_cast<const Evaluation::ScoreMetric*>(metric.get())->getScore();
+            score += dynamic_cast<const Evaluation::ScoreMetric*>(pair.second.get())->getScore();
         }
         score /= static_cast<double>(scoreMetrics.size());
         ranked.emplace_back(score, individual);
