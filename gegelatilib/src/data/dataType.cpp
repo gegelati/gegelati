@@ -1,5 +1,6 @@
 #include "data/dataType.h"
 
+
 Data::DataType Data::DataType::subView(DataType viewShape, const DataType& source, size_t offset) {
     // Keep the requested logical shape while carrying the original source layout forward.
     DataType dt;
@@ -56,7 +57,7 @@ bool Data::DataType::canFitIn(const DataType& requested, size_t offset) const no
 
 size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept
 {
-    if(!this->canFitIn(requested, 0) || this->elementType != requested.elementType) {
+    if(!this->canFitIn(requested, 0) || *this->elementType != *requested.elementType) {
         return 0;
     }
     else if (this->rank == 0) {
@@ -99,7 +100,7 @@ size_t Data::DataType::getValidAddress(const Data::DataType& requested, const si
 bool Data::DataType::operator==(const DataType& other) const noexcept {
     return rank == other.rank &&
             dimensions == other.dimensions &&
-            elementType == other.elementType &&
+            *elementType == *other.elementType &&
             elementSize == other.elementSize;
 }
 

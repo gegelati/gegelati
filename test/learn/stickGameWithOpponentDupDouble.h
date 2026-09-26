@@ -40,14 +40,14 @@
 #include <random>
 
 #include "data/hash.h"
-#include "evaluation/reinforcementEnvironment.h"
+#include "evaluations/reinforcementEnvironment.h"
 #include "dimensions/numericRange.h"
 #include "mutator/rng.h"
 
 /**
  * Play the stick game against a random player
  */
-class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
+class StickGameWithOpponentD : public Evaluations::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
@@ -75,7 +75,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : Evaluation::ReinforcementEnvironment(
+        : Evaluations::ReinforcementEnvironment(
             {Dimensions::Requirement::array1d<double>(3), Dimensions::Requirement::array1d<double>(1)}, 
              Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false},
              hints{1.0, 2.0, 3.0}, res{Data::DataView(hints.data(), Data::DataType::array1d<double>(3)), Data::DataView(&remainingSticks, Data::DataType::array1d<double>(1))}
@@ -90,16 +90,13 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     virtual bool isCopyable() const override;
 
     // Inherited via Problem
-    virtual std::unique_ptr<Problem> cloneUniquePtr() const override;
+    virtual std::unique_ptr<ReinforcementEnvironment> cloneUniquePtr() const override;
 
     // Inherited via Problem
     virtual void doAction(const Data::DataValue& action) override;
 
     // Inherited via Problem
-    virtual void reset(size_t seed = 0,
-                       Evaluation::LearningMode mode = Evaluation::LearningMode::TRAINING,
-                       uint16_t iterationNumber = 0,
-                       uint64_t generationNumber = 0) override;
+    virtual void reset(size_t seed = 0) override;
 
     // Inherited via Problem
     virtual std::vector<Data::DataView>
@@ -108,7 +105,7 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     /**
      * Returns 1.0 when the player won, 0.0 otherwise.
      */
-    virtual double getScore() const override;
+    virtual double getLastReward() const override;
 
     // Inherited via Problem
     virtual bool isTerminal() const override;

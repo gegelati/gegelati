@@ -9,6 +9,7 @@
 #include "graphBased/genotype.h"
 #include "evaluation/evaluationResult.h"
 #include "representations/representation.h"
+#include "evaluations/feature.h"
 #include "util/genericComparator.h"
 
 struct CounterReset;
@@ -22,16 +23,16 @@ class Individual
 protected:
 
     /// \brief Genotype of the individual.
-    std::unique_ptr<GraphBased::Genotype> genotype;
+    std::unique_ptr<const GraphBased::Genotype> genotype;
 
     /// @brief Representation of the individual.
     const Representations::Representation& representation;
 
-    /// \brief Evaluation result of the individual.
-    std::unique_ptr<Evaluation::EvaluationResult> result;
+    /// \brief Features measured on the individual, mutable since features can only be added to it.
+    mutable std::map<uint64_t, std::unique_ptr<Evaluations::Feature>> features;
 
     /// Unique ID of the individual.
-    size_t individualID;
+    uint64_t individualID;
 
     /// \brief Define if the 
     bool valid = false;
@@ -39,7 +40,7 @@ protected:
     /**
      * \brief Incremente the individual ID counter and return the new value.
      */
-    static size_t incrementeCounter();
+    static uint64_t incrementeCounter();
 
     /**
      * \brief Reset the individual ID counter.
@@ -73,7 +74,7 @@ public:
      */
     Individual(const Representations::Representation& representation, std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>()) 
         : representation{representation}, genotype(std::move(genotype)), 
-            individualID(incrementeCounter()), result{std::make_unique<Evaluation::EvaluationResult>()} {
+            individualID(incrementeCounter()) {
             this->updateValidity();
             };
 
@@ -125,16 +126,26 @@ public:
     virtual void setGenotype(std::unique_ptr<GraphBased::Genotype> genotype);
 
     /**
-     * \brief add an EvaluationMetric to the evaluationResult of the individual
-     * 
-     * \param[in] metric new metric added to the results.
+     * \brief Return if the feature has been measured for this individual.
      */
-    virtual void addEvaluationMetric(std::unique_ptr<Evaluation::EvaluationMetric> metric) const;
+    virtual bool hasFeature(size_t keyFeature) const;
 
     /**
-     * \brief return the current evaluation result of the individual.
+     * \brief return the feature at required key.
      */
-    const Evaluation::EvaluationResult& getEvaluationResult() const;
+    virtual const Evaluations::Feature& getFeatureAt(size_t keyFeature) const;
+
+    /**
+     * \brief Return the features of the individual
+     */
+    virtual const std::map<uint64_t, std::unique_ptr<Evaluations::Feature>>& getFeatures() const {return this->features; };
+
+    /**
+     * \brief add an EvaluationMetric to the evaluationResult of the individual
+     * 
+     * \param[in] newFeatures new features added to the individual.
+     */
+    virtual void addFeatures(std::map<size_t, std::unique_ptr<Evaluations::Feature>> newFeatures) const;
 
     /**
      * \brief Return true if the current genotype is valid regarding the current representation

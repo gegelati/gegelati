@@ -5,9 +5,7 @@
 #include <algorithm>
 
 #include "individual.h"
-#include "evaluation/evaluationResult.h"
-
-#include "evaluation/scoreMetric.h"
+#include "evaluations/totalRewardMetric.h"
 
  namespace Selection {
 
@@ -20,6 +18,9 @@
             /// Boolean indicating wether this selection mechanism allows replacement.  
             bool replacement;
 
+            /// @brief List of metrics required for selection
+            std::vector<std::shared_ptr<const Evaluations::Metric>> metrics;
+
         public: 
 
             /// Default polymorphic destructor
@@ -30,7 +31,7 @@
              * 
              * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.  
              */
-            Selector(bool replacement) : replacement{replacement} {};
+            Selector(bool replacement) : replacement{replacement}, metrics{std::make_shared<Evaluations::TotalRewardMetric>()} {};
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Selector(const Selector&) = delete;
@@ -39,7 +40,7 @@
             /**
              * \brief method returning the evaluation metrics required for the selection process.
              */
-            virtual std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> getSelectionMetrics();
+            virtual const std::vector<std::shared_ptr<const Evaluations::Metric>>& getSelectionMetrics();
             
             /**
              * \brief method ranking the individuals based on their average score on their run

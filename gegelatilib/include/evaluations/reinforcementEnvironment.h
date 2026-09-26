@@ -34,35 +34,14 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef LEARNING_ENVIRONMENT_H
-#define LEARNING_ENVIRONMENT_H
+#ifndef RREINFORCEMENT_ENVIRONMENT_H
+#define RREINFORCEMENT_ENVIRONMENT_H
+
 
 #include "data/dataValue.h"
 #include "dimensions/requirement.h"
-#include <cstdint>
-#include <vector>
 
-namespace Evaluation {
-
-    /**
-     * \brief Different modes in which the Problem can be reset.
-     *
-     * Each of the following mode corresponds to a classical phase of a learning
-     * process. These mode usually refer to different parts of the data set used
-     * throughout the learning process. Classically, the TRAINING mode is used
-     * to effectively train an agent. The VALIDATION mode is used to evaluate
-     * the efficiency of the learning process during the training phase, but on
-     * data differring from the one used for training, in order to avoid biased
-     * evaluation. TESTING mode is used at the end of all training activity to
-     * evaluate the efficiency of the agent on completely new data.
-     */
-    enum class LearningMode
-    {
-        TRAINING,
-        VALIDATION,
-        TESTING
-    };
-
+namespace Evaluations {
 
     /**
      * \brief Interface for creating a Learning Environment.
@@ -79,7 +58,7 @@ namespace Evaluation {
      * problem has reached a final state, that no action will
      * affect.
      */
-    class Problem
+    class ReinforcementEnvironment
     {
       protected:
 
@@ -89,27 +68,23 @@ namespace Evaluation {
         /// Output dimension
         Dimensions::Requirement outputDimension;
 
-        /// Make the default copy constructor protected.
-        Problem(const Problem& other) = default;
+        /// @brief Maximum number of steps doable in a single episode.
+        uint64_t maxSteps;
 
+        /// Make the default copy constructor protected.
+        ReinforcementEnvironment(const ReinforcementEnvironment& other) = default;
 
 
       public:
         /**
-         * \brief Delete the default constructor of a Problem.
-         */
-        Problem() = delete;
-
-        /// Default virtual destructor
-        virtual ~Problem() = default;
-
-        /**
          * \brief Constructor for LearningEnviroment.
-         * 
+         *
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
+         * \param[in] maxSteps Maximum number of steps doable in a single episode.
          */
-        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension){};
+        ReinforcementEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension, uint64_t maxSteps = UINT64_MAX)
+            : inputDimensions(inputDimensions), outputDimension(outputDimension), maxSteps{maxSteps} {};
 
         /**
          * \brief Get a copy of the Problem.
@@ -119,7 +94,7 @@ namespace Evaluation {
          * \return a copy of the Problem if it is copyable,
          * otherwise this method returns a NULL pointer.
          */
-        virtual std::unique_ptr<Evaluation::Problem> cloneUniquePtr() const;
+        virtual std::unique_ptr<Evaluations::ReinforcementEnvironment> cloneUniquePtr() const;
 
         /**
          * \brief Can the Problem be copy constructed to evaluate
@@ -142,6 +117,11 @@ namespace Evaluation {
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
         /**
+         * \brief get the maximum number of steps doable in a single episode.
+         */
+        virtual uint64_t getMaxSteps() const;
+
+        /**
          * \brief Get the data sources for this Problem.
          *
          * This method returns a vector of reference to the DataHandler that
@@ -157,6 +137,57 @@ namespace Evaluation {
          * \return a vector of references to the DataHandler.
          */
         virtual std::vector<Data::DataView>  getDataSources() const = 0;
+
+        /**
+         * \brief Execute an action on the Problem.
+         *
+         * \param[in] action the view representing the action to
+         * execute.
+         * \throw std::runtime_error if the action does not correspond to the output dimension.
+         */
+        virtual void doAction(const Data::DataValue& action);
+
+        /**
+         * \brief Reset the Problem.
+         *
+         * Resetting a learning environment is needed to train an agent.
+         * Optionally seed can be given to this function to control the
+         * randomness of a Problem (if any). When available, this
+         * feature will be used:
+         * - for comparing the performance of several agents with the same
+         * random starting conditions.
+         * - for training each agent with diverse starting conditions.
+         *
+         * \param[in] seed the integer value for controlling the randomness of
+         * the Problem.
+         */
+        virtual void reset(size_t seed = 0) = 0;
+
+        /**
+         * \brief Method for checking if the Problem has reached a
+         * terminal state.
+         *
+         * The boolean value returned by this method, when equal to true,
+         * indicates that the Problem has reached a terminal state.
+         * A terminal state is a state in which further calls to the doAction
+         * method will have no effects on the dataSources of the
+         * Problem, or on its score. For example, this terminal
+         * state may be reached for a Game Over state within a game, or in case
+         * the objective of the learning agent has been successfuly reached.
+         *
+         * \return a boolean indicating termination.
+         */
+        virtual bool isTerminal() const = 0;
+
+        /**
+         * \brief Returns the current score of the Environment.
+         *
+         * The returned score will be used as a reward during the learning
+         * phase of a LearningAgent.
+         *
+         * \return the current score for the Problem.
+         */
+        virtual double getLastReward() const = 0;
     };
 }; // namespace Learn
 

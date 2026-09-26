@@ -43,10 +43,9 @@
 
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
-#include "evolutionAlgorithm.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
-#include "evaluation/reinforcementAgent.h"
-#include "evaluation/archiveEvalAgent.h"
+#include "evaluations/reinforcementEnvironment.h"
+#include "evaluations/evaluator.h"
 
 #include "representations/LGP.h"
 #include "representations/TPG.h"
@@ -63,11 +62,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Representations::Representation* representation;
-
-
     StickGameWithOpponentD le;
-    Evaluation::EvaluationAgent* evalAgent;
 
 
     virtual void SetUp()
@@ -83,9 +78,6 @@ class EvolutionAlgorithmTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
     
-        representation = new Representations::LGP(le.getInputDimensions(), 1, set, 8, 10);
-
-        evalAgent = new Evaluation::ReinforcementAgent(le);
     }
 
     virtual void TearDown()
@@ -94,25 +86,8 @@ class EvolutionAlgorithmTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
-        delete representation;
-        delete evalAgent;
     }
 };
-
-
-TEST_F(EvolutionAlgorithmTest, Constructor)
-{
-    EvolutionAlgorithm* ea;
-
-    ASSERT_NO_THROW(ea = new EvolutionAlgorithm(*representation, *evalAgent, 12)) << "Constructor of EA failed.";
-
-    ASSERT_NO_THROW(ea->getMutation()) << "For Coverage :D";
-    ASSERT_NO_THROW(ea->getEvaluation()) << "For Coverage :D";
-    ASSERT_NO_THROW(ea->getSelector()) << "For Coverage :D";
-    ASSERT_NO_THROW(ea->getRNG()) << "For Coverage :D";
-
-    ASSERT_NO_THROW(delete ea) << "Destructor of EA failed.";
-}
 
 /*
 TEST_F(EvolutionAlgorithmTest, initializePopulation)
@@ -414,12 +389,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     Selection::TruncationSelector survivingSelection;
     
     // Create evaluationAgent
-    Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
-    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = survivingSelection.getSelectionMetrics();
-    for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
-        evaluation.addRequestedMetric(*metric);
-    }
-
+    Evaluations::ReinforcementProblem problem(le, 3);
+    Evaluations::Evaluator evaluator;
 
 
     size_t sizePopulation = 100;
@@ -431,7 +402,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     individuals.clear();
 
     // Initial evaluation
-    evaluation.evaluateIndividuals(population, 0, Evaluation::LearningMode::TRAINING);
+    evaluator.evaluateIndividuals(population, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -448,15 +419,22 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         // Evaluate the population
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(population);
         evaluatedIndividuals.insert(offspring.begin(), offspring.end());
-        evaluation.evaluateIndividuals(evaluatedIndividuals, 0, Evaluation::LearningMode::TRAINING);
+        evaluator.evaluateIndividuals(evaluatedIndividuals, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
 
         // Do replacement
         std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(evaluatedIndividuals, sizePopulation, rng);
         population.clear();
         population.insert(survivors.begin(), survivors.end());
 
+
         // Print best individual
-        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() <<" and score: "<<survivingSelection.getBest(population).getEvaluationResult() << std::endl;
+        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() 
+        <<" and score: ";
+        const auto& features = survivingSelection.getBest(population).getFeatures();
+        Evaluations::TotalRewardMetric metric;
+        for(const auto& pair: features) {
+            std::cout<<metric.computeMetrics(features).getScalar<double>() << " ";
+        }std::cout<<std::endl;
     }
 }
 
@@ -478,11 +456,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     Selection::TruncationSelector survivingSelection;
     
     // Create evaluationAgent
-    Evaluation::ReinforcementAgent evaluation(le, std::make_unique<Learn::LearningParameters>(), 3);
-    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> selectionMetrics = survivingSelection.getSelectionMetrics();
-    for(const std::unique_ptr<Evaluation::EvaluationMetric>& metric: selectionMetrics) {
-        evaluation.addRequestedMetric(*metric);
-    }
+    Evaluations::ReinforcementProblem problem(le, 3);
+    Evaluations::Evaluator evaluator;
 
 
 
@@ -493,7 +468,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
     individualsLGP.clear();
-    evaluation.evaluateIndividuals(populationLGP, 0, Evaluation::LearningMode::TRAINING);
+    evaluator.evaluateIndividuals(populationLGP, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+
 
     // Initialize TPG population
     std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
@@ -502,7 +478,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     individualsTPG.clear();
-    evaluation.evaluateIndividuals(populationTPG, 0, Evaluation::LearningMode::TRAINING);
+    evaluator.evaluateIndividuals(populationTPG, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+
 
 
     size_t nbGen = 20;
@@ -515,7 +492,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         // LGP Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsLGP(populationLGP);
         evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
-        evaluation.evaluateIndividuals(evaluatedIndividualsLGP, 0, Evaluation::LearningMode::TRAINING);
+        evaluator.evaluateIndividuals(evaluatedIndividualsLGP, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
         // LGP Evolution : replacement
         std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(evaluatedIndividualsLGP, sizePopulation, rng);
         populationLGP.clear();
@@ -536,7 +513,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         // TPG Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
         evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
-        evaluation.evaluateIndividuals(evaluatedIndividualsTPG, 0, Evaluation::LearningMode::TRAINING);
+        evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
         // TPG Evolution : replacement
         std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(evaluatedIndividualsTPG, sizePopulation, rng);
         populationTPG.clear();
@@ -544,6 +521,12 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
 
         // Print best individual
-        //std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() <<" and score: "<<survivingSelection.getBest(populationTPG).getEvaluationResult()<< std::endl;
+        std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() 
+        <<" and score: ";
+        const auto& features = survivingSelection.getBest(populationTPG).getFeatures();
+        Evaluations::TotalRewardMetric metric;
+        for(const auto& pair: features) {
+            std::cout<<metric.computeMetrics(features).getScalar<double>() << " ";
+        }std::cout<<std::endl;
     }
 }

@@ -29,5 +29,5 @@ std::string Evaluation::ScoreMetric::toString(std::string prefix) const
 }
 std::type_index Evaluation::ScoreMetric::typeId() const noexcept
 {
-    return typeid(ScoreMetric);
+    return std::type_index(typeid(ScoreMetric));
 }

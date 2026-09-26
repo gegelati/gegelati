@@ -1,10 +1,8 @@
 #include "selection/selector.h"
 
-std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> Selection::Selector::getSelectionMetrics()
+const std::vector<std::shared_ptr<const Evaluations::Metric>>& Selection::Selector::getSelectionMetrics()
 {
-    std::vector<std::unique_ptr<Evaluation::EvaluationMetric>> vect;
-    vect.push_back(std::make_unique<Evaluation::ScoreMetric>(0u));
-    return vect;
+    return this->metrics;
 }
 
 std::vector<std::pair<double, std::shared_ptr<const Individual>>> Selection::Selector::assignFitness(
@@ -15,17 +13,7 @@ std::vector<std::pair<double, std::shared_ptr<const Individual>>> Selection::Sel
     std::vector<std::pair<double, std::shared_ptr<const Individual>>> ranked;
     for (const std::shared_ptr<const Individual>& individual : individuals){
 
-        double score = 0;
-        const std::map<size_t, std::unique_ptr<Evaluation::EvaluationMetric>>& scoreMetrics = individual->getEvaluationResult().getEvaluationMetricsAt(typeid(Evaluation::ScoreMetric));
-        if(scoreMetrics.empty()) {
-            throw std::runtime_error("Selection::getRankedScores: No score metric recieved for computing fitness");
-        }
-
-        for (const auto& pair: scoreMetrics) {
-            // No check that it is effectively a score metric because we are crazyyy
-            score += dynamic_cast<const Evaluation::ScoreMetric*>(pair.second.get())->getScore();
-        }
-        score /= static_cast<double>(scoreMetrics.size());
+        double score = this->metrics.at(0)->computeMetrics(individual->getFeatures()).getScalar<double>();
         ranked.emplace_back(score, individual);
     }
 

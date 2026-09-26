@@ -87,7 +87,7 @@ void Evaluation::ReinforcementAgent::evaluateIndividual(
         // Extract metric at the end of the run, and add the metric to the individual.
         for(auto it = metrics.begin(); it != metrics.end(); it++) { 
             (*it)->extractMetricRun(individual, nbActions, currentProblem); 
-            individual.addEvaluationMetric(std::move(*it));
+            //individual.addEvaluationMetric(std::move(*it));
         }
     }
 }
