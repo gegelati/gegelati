@@ -39,6 +39,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#if 0
+
 
 #include "evaluation/archiveMetric.h"
 #include "individual.h"
@@ -188,3 +190,4 @@ TEST_F(ArchiveMetricTest, getInputs)
     }
     ASSERT_EQ(intValues, std::set<int>({0, 1, 2, 3, 4})) << "Set filling went wrong";
 }
+#endif

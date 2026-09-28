@@ -1,8 +1,10 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2025)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,129 +36,88 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef LEARNING_ENVIRONMENT_H
-#define LEARNING_ENVIRONMENT_H
+#ifndef EVALUATIONS_PROBLEM_H
+#define EVALUATIONS_PROBLEM_H
 
-#include "data/dataValue.h"
-#include "dimensions/requirement.h"
-#include <cstdint>
-#include <vector>
+#include <map>
+#include <queue>
+#include <inttypes.h>
+#include <queue>
+
+#include "mutator/rng.h"
+#include "evaluation/metric.h"
+#include "individual.h"
 
 namespace Evaluation {
 
     /**
-     * \brief Different modes in which the Problem can be reset.
-     *
-     * Each of the following mode corresponds to a classical phase of a learning
-     * process. These mode usually refer to different parts of the data set used
-     * throughout the learning process. Classically, the TRAINING mode is used
-     * to effectively train an agent. The VALIDATION mode is used to evaluate
-     * the efficiency of the learning process during the training phase, but on
-     * data differring from the one used for training, in order to avoid biased
-     * evaluation. TESTING mode is used at the end of all training activity to
-     * evaluate the efficiency of the agent on completely new data.
-     */
-    enum class LearningMode
-    {
-        TRAINING,
-        VALIDATION,
-        TESTING
-    };
-
-
-    /**
-     * \brief Interface for creating a Learning Environment.
-     *
-     * This class defines all the method that should be implemented for a
-     * Learner to interact with an learning environment and learn to interact
-     * with it.
-     *
-     * Interaction with a learning environment are made through a discrete set
-     * of actions. As a result of these actions, the learning environment may
-     * update its state, accessible through the data sources it provides. The
-     * learning environment also provides a score resulting from the past
-     * actions, and a termination boolean indicating that the
-     * problem has reached a final state, that no action will
-     * affect.
+     * \brief Class used to control the learning steps of a Graph within
+     * a given Problem.
      */
     class Problem
     {
       protected:
-
+      
         /// Input dimensions
         std::vector<Dimensions::Requirement> inputDimensions;
 
         /// Output dimension
         Dimensions::Requirement outputDimension;
 
-        /// Make the default copy constructor protected.
-        Problem(const Problem& other) = default;
-
-
+        /// Unique seed of the problem
+        uint64_t problemSeed;
 
       public:
         /**
-         * \brief Delete the default constructor of a Problem.
-         */
-        Problem() = delete;
-
-        /// Default virtual destructor
-        virtual ~Problem() = default;
-
-        /**
-         * \brief Constructor for LearningEnviroment.
+         * \brief Constructor for Problem.
          * 
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
+         * \param[in] problemSeed unique seed of the problem.
          */
-        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension) : inputDimensions(inputDimensions), outputDimension(outputDimension){};
+        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension, uint64_t problemSeed = 0) : inputDimensions(inputDimensions), outputDimension(outputDimension), problemSeed(problemSeed)  {};
+
+        /// Default destructor for polymorphism
+        virtual ~Problem() = default;
 
         /**
-         * \brief Get a copy of the Problem.
-         *
-         * Default implementation returns a null pointer.
-         *
-         * \return a copy of the Problem if it is copyable,
-         * otherwise this method returns a NULL pointer.
-         */
-        virtual std::unique_ptr<Evaluation::Problem> cloneUniquePtr() const;
-
-        /**
-         * \brief Can the Problem be copy constructed to evaluate
-         * several LearningAgent in parallel.
-         *
-         * \return true if the Problem can be copied and run in
-         * parallel. Default implementation returns false.
-         */
-        virtual bool isCopyable() const;
-
-
-        /**
-         * \brief get the input dimensions of the Problem.
+         * \brief get the input dimensions of the EvaluationAgent.
          */
         virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
-         * \brief get the output dimension of the Problem.
+         * \brief get the output dimension of the EvaluationAgent.
          */
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
         /**
-         * \brief Get the data sources for this Problem.
-         *
-         * This method returns a vector of reference to the DataHandler that
-         * will be given to the LearningAgent, and to its Program to learn how
-         * to interact with the Problem. Throughout the existence
-         * of the Problem, data contained in the data will be
-         * modified, but never the number, nature or size of the dataHandlers.
-         * Since this methods return references to the DataHandler, the
-         * LearningAgent will assume that the referenced dataHandler are
-         * automatically updated each time the doAction, or reset methods
-         * are called on the Problem.
-         *
-         * \return a vector of references to the DataHandler.
+         * \brief return string of dimension summary
          */
-        virtual std::vector<Data::DataView>  getDataSources() const = 0;
+        virtual std::string summary() const;
+        
+        /**
+         * \brief return the unique seed of the problem.
+         */
+        uint64_t getProblemSeed() const;
+
+        /**
+         * \brief return the maximum hash acceptable during evaluation
+         * 
+         * Default is uint64_t maximum value
+         */
+        virtual uint64_t maxHash() const;        
+
+        /**
+         * \brief TODO
+         *
+         * \param[in] individual The individual whose genotype is evaluted.
+         * \param[in] metrics list of metrics to extract from the individual.
+         * \param[in] hashes list of hash to use to set the seed of the evaluation
+         */
+        virtual void extractMetrics(
+            const Individual& individual, MetricMap& metrics,
+            const std::set<uint64_t>& hashes) const = 0;
+
     };
 }; // namespace Learn
 

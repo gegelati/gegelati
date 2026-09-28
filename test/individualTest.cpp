@@ -41,8 +41,6 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "evaluation/scoreMetric.h"
-
 #include "individual.h"
 #include "learn/fakeRepresentation.h"
 #include "util/counterReset.h"
@@ -112,19 +110,6 @@ TEST_F(IndividualTest, cloneIndividual)
     ASSERT_EQ(copyIndivShared->getSize(), individual.getSize()) << "Copy was not effective";
     ASSERT_TRUE(copyIndivShared->getGenotype() == individual.getGenotype()) << "Copy was not effective";
     ASSERT_TRUE(&copyIndivShared->getRepresentation() == &individual.getRepresentation()) << "Copy was not effective";
-}
-
-TEST_F(IndividualTest, results) 
-{
-    Individual individual(fakeRep);
-    const Individual& constIndiv = individual;
-
-    ASSERT_NO_THROW(constIndiv.addEvaluationMetric(std::make_unique<Evaluation::ScoreMetric>(8))) << "Adding an evaluationRun to the result failed";
-
-    const Evaluation::EvaluationResult* result;
-    ASSERT_NO_THROW(result = &constIndiv.getEvaluationResult()) << "Getting evaluation result failed";
-
-    ASSERT_EQ(result->getSize(), 1) << "Result should have size 1";
 }
 
 TEST_F(IndividualTest, validAndExecute)

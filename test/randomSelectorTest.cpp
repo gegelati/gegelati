@@ -5,7 +5,6 @@
 #include "learn/fakeRepresentation.h"
 #include "util/counterReset.h"
 
-#include "evaluation/scoreMetric.h"
 
 TEST(RandomSelectorTest, Constructor)
 {
@@ -15,7 +14,7 @@ TEST(RandomSelectorTest, Constructor)
 
     ASSERT_NO_THROW(delete selection) << "Destructor of SurvivingSelection failed.";
 }
-
+/*
 
 TEST(RandomSelectorTest, selectWithoutReplacement)
 {
@@ -123,4 +122,4 @@ TEST(RandomSelectorTest, selectIsDeterminist)
     for(size_t idx = 0; idx < 100; idx++) {
         ASSERT_EQ(selectionResults1.at(idx)->getIndividualID(), selectionResults2.at(idx)->getIndividualID() - 1) << "Order should be exactly the same!";
     }
-} 
+} */

@@ -117,13 +117,15 @@
 #include <dimensions/numericRange.h>
 #include <dimensions/requirement.h>
 
-#include <evaluation/evaluationAgent.h>
-#include <evaluation/evaluationMetric.h>
-#include <evaluation/evaluationResult.h>
 #include <evaluation/problem.h>
-#include <evaluation/reinforcementAgent.h>
+#include <evaluation/classificationProblem.h>
 #include <evaluation/reinforcementEnvironment.h>
-#include <evaluation/scoreMetric.h>
+#include <evaluation/reinforcementProblem.h>
+
+#include <evaluation/metric.h>
+#include <evaluation/rewardsMetric.h>
+#include <evaluation/predictionMetric.h>
+
 
 #include <graphBased/genotype.h>
 #include <graphBased/genotypeConstraint.h>

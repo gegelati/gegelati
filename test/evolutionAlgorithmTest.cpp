@@ -44,8 +44,9 @@
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
 #include "learn/stickGameWithOpponentDupDouble.h"
-#include "evaluations/reinforcementEnvironment.h"
-#include "evaluations/evaluator.h"
+#include "evaluation/reinforcementProblem.h"
+#include "evaluation/evaluator.h"
+#include "evaluation/rewardsMetric.h"
 
 #include "representations/LGP.h"
 #include "representations/TPG.h"
@@ -54,6 +55,7 @@
 #include "reproduction/replicator.h"
 #include "selection/randomSelector.h"
 #include "selection/truncationSelector.h"
+#include "fitnessAssignment/defaultAssigner.h"
 
 #include "util/counterReset.h"
 // Set all file in comment
@@ -387,10 +389,12 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     // Create selectors
     Selection::RandomSelector parentSelection(true);
     Selection::TruncationSelector survivingSelection;
+    FitnessAssignment::DefaultAssigner assigner;
     
     // Create evaluationAgent
-    Evaluations::ReinforcementProblem problem(le, 3);
-    Evaluations::Evaluator evaluator;
+    Evaluation::ReinforcementProblem problem(le, 3);
+    Evaluation::Evaluator evaluator;
+    Evaluation::MetricMap metrics(std::make_unique<Evaluation::RewardsMetric>());
 
 
     size_t sizePopulation = 100;
@@ -402,13 +406,17 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     individuals.clear();
 
     // Initial evaluation
-    evaluator.evaluateIndividuals(population, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> evaluationResults = 
+            evaluator.evaluateIndividuals(population, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
+    // Fitness assignment 
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitness = assigner.assignFitness(evaluationResults, metrics.metrics.begin()->first);
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
+
         // Parent selection 
-        std::vector<std::shared_ptr<const Individual>> parents = parentSelection.select(population, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parents = parentSelection.select(individualFitness, nbOffspring, rng);
 
         // Reproduce the parents
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
@@ -419,22 +427,18 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         // Evaluate the population
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(population);
         evaluatedIndividuals.insert(offspring.begin(), offspring.end());
-        evaluator.evaluateIndividuals(evaluatedIndividuals, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+        evaluationResults = evaluator.evaluateIndividuals(evaluatedIndividuals, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
 
         // Do replacement
-        std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(evaluatedIndividuals, sizePopulation, rng);
+        individualFitness = assigner.assignFitness(evaluationResults, metrics.metrics.begin()->first);
+        std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(individualFitness, sizePopulation, rng);
         population.clear();
         population.insert(survivors.begin(), survivors.end());
 
 
         // Print best individual
-        std::cout<<"ID: "<<survivingSelection.getBest(population).getIndividualID() 
-        <<" and score: ";
-        const auto& features = survivingSelection.getBest(population).getFeatures();
-        Evaluations::TotalRewardMetric metric;
-        for(const auto& pair: features) {
-            std::cout<<metric.computeMetrics(features).getScalar<double>() << " ";
-        }std::cout<<std::endl;
+        std::cout<<"ID: "<<individualFitness.begin()->second->getIndividualID() 
+        <<" and score: " << individualFitness.begin()->first <<std::endl;
     }
 }
 
@@ -454,10 +458,12 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     // Create selectors
     Selection::RandomSelector parentSelection(true);
     Selection::TruncationSelector survivingSelection;
+    FitnessAssignment::DefaultAssigner assigner;
     
     // Create evaluationAgent
-    Evaluations::ReinforcementProblem problem(le, 3);
-    Evaluations::Evaluator evaluator;
+    Evaluation::ReinforcementProblem problem(le, 3);
+    Evaluation::Evaluator evaluator;
+    Evaluation::MetricMap metrics(std::make_unique<Evaluation::RewardsMetric>());
 
 
 
@@ -468,44 +474,50 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
     individualsLGP.clear();
-    evaluator.evaluateIndividuals(populationLGP, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> evaluationResultsLGP = 
+            evaluator.evaluateIndividuals(populationLGP, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
+    // Fitness assignment 
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, metrics.metrics.begin()->first);
 
 
     // Initialize TPG population
-    std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
+
+    std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
     tpgRep.setAvailableMembers(members);
 
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     individualsTPG.clear();
-    evaluator.evaluateIndividuals(populationTPG, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
-
-
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
+            evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
+    // Fitness assignment 
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, metrics.metrics.begin()->first);
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         // LGP Evolution : variation
-        std::vector<std::shared_ptr<const Individual>> parentsLGP = parentSelection.select(populationLGP, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsLGP = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
         Mutation::mutateIndividuals(mutator, offspringLGP, rng);
         // LGP Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsLGP(populationLGP);
         evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
-        evaluator.evaluateIndividuals(evaluatedIndividualsLGP, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+        evaluationResultsLGP = evaluator.evaluateIndividuals(evaluatedIndividualsLGP, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // LGP Evolution : replacement
-        std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(evaluatedIndividualsLGP, sizePopulation, rng);
+        individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, metrics.metrics.begin()->first);
+        std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(individualFitnessLGP, sizePopulation, rng);
         populationLGP.clear();
         populationLGP.insert(survivorsLGP.begin(), survivorsLGP.end());
 
 
         // TPG Evolution : variation
-        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(populationTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
 
         
-        std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(populationLGP, nbOffspring, rng);
-        std::vector<std::shared_ptr<const Individual>> tangleds = parentSelection.select(populationTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> tangleds = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
         tpgRep.setAvailableMembers(members);
         tpgRep.setAvailableTangledIndiv(tangleds);
 
@@ -513,20 +525,18 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         // TPG Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
         evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
-        evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, survivingSelection.getSelectionMetrics(), 3, 0, Evaluations::Mode::TRAINING);
+        evaluationResultsTPG = evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // TPG Evolution : replacement
-        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(evaluatedIndividualsTPG, sizePopulation, rng);
+        individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, metrics.metrics.begin()->first);
+        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(individualFitnessTPG, sizePopulation, rng);
         populationTPG.clear();
         populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
 
 
         // Print best individual
-        std::cout<<"ID: "<<survivingSelection.getBest(populationTPG).getIndividualID() 
-        <<" and score: ";
-        const auto& features = survivingSelection.getBest(populationTPG).getFeatures();
-        Evaluations::TotalRewardMetric metric;
-        for(const auto& pair: features) {
-            std::cout<<metric.computeMetrics(features).getScalar<double>() << " ";
-        }std::cout<<std::endl;
+        std::cout<<"ID: "<<individualFitnessTPG.begin()->second->getIndividualID() 
+        <<" and score: " << individualFitnessTPG.begin()->first <<std::endl;
     }
+
+    ASSERT_EQ(17166780935771532435U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }

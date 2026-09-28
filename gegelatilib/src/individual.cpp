@@ -84,38 +84,6 @@ std::shared_ptr<Individual> Individual::cloneSharedPtr() const
     return std::make_shared<Individual>(this->representation, this->genotype->cloneUniquePtr());
 }
 
-
-
-
-void Individual::addFeatures(std::map<size_t, std::unique_ptr<Evaluations::Feature>> newFeatures) const
-{
-    for(auto& [key, feature]: newFeatures) {
-        // If feature is new, move the value
-        if(this->features.find(key) == this->features.end()) {
-            this->features.insert(std::make_pair(key, std::move(feature)));
-
-        // Else add the feature measured
-        } else {
-            this->features.at(key)->merge(*feature);
-        }
-    }
-}
-
-bool Individual::hasFeature(size_t keyFeature) const {
-    return this->features.find(keyFeature) != this->features.end();
-}
-
-const Evaluations::Feature& Individual::getFeatureAt(size_t keyFeature) const
-{
-    if(!this->hasFeature(keyFeature)) {
-        throw std::runtime_error("Individual::getFeatureAt: key of faeture not found");
-    }
-    return *this->features.at(keyFeature);
-}
-
-
-
-
 Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {
     // Individual need to be valid to be executed.
@@ -124,10 +92,6 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
     }
     return this->representation.execute(*this->genotype, inputSources);
 }
-
-
-
-
 
 bool operator<(const Individual& a, const Individual& b)
 {

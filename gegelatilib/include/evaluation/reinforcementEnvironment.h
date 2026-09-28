@@ -34,10 +34,12 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef REINFORCEMENT_ENVIRONMENT_H
-#define REINFORCEMENT_ENVIRONMENT_H
+#ifndef RREINFORCEMENT_ENVIRONMENT_H
+#define RREINFORCEMENT_ENVIRONMENT_H
 
-#include "evaluation/problem.h"
+
+#include "data/dataValue.h"
+#include "dimensions/requirement.h"
 
 namespace Evaluation {
 
@@ -56,9 +58,22 @@ namespace Evaluation {
      * problem has reached a final state, that no action will
      * affect.
      */
-    class ReinforcementEnvironment : public Problem
+    class ReinforcementEnvironment
     {
       protected:
+
+        /// Input dimensions
+        std::vector<Dimensions::Requirement> inputDimensions;
+
+        /// Output dimension
+        Dimensions::Requirement outputDimension;
+
+        /// @brief Maximum number of steps doable in a single episode.
+        uint64_t maxSteps;
+
+        /// Make the default copy constructor protected.
+        ReinforcementEnvironment(const ReinforcementEnvironment& other) = default;
+
 
       public:
         /**
@@ -66,9 +81,62 @@ namespace Evaluation {
          *
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
+         * \param[in] maxSteps Maximum number of steps doable in a single episode.
          */
-        ReinforcementEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension)
-            : Problem(inputDimensions, outputDimension) {};
+        ReinforcementEnvironment(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension, uint64_t maxSteps = UINT64_MAX)
+            : inputDimensions(inputDimensions), outputDimension(outputDimension), maxSteps{maxSteps} {};
+
+        /**
+         * \brief Get a copy of the Problem.
+         *
+         * Default implementation returns a null pointer.
+         *
+         * \return a copy of the Problem if it is copyable,
+         * otherwise this method returns a NULL pointer.
+         */
+        virtual std::unique_ptr<Evaluation::ReinforcementEnvironment> cloneUniquePtr() const;
+
+        /**
+         * \brief Can the Problem be copy constructed to evaluate
+         * several LearningAgent in parallel.
+         *
+         * \return true if the Problem can be copied and run in
+         * parallel. Default implementation returns false.
+         */
+        virtual bool isCopyable() const;
+
+
+        /**
+         * \brief get the input dimensions of the Problem.
+         */
+        virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
+
+        /**
+         * \brief get the output dimension of the Problem.
+         */
+        virtual const Dimensions::Requirement& getOutputDimension() const;
+
+        /**
+         * \brief get the maximum number of steps doable in a single episode.
+         */
+        virtual uint64_t getMaxSteps() const;
+
+        /**
+         * \brief Get the data sources for this Problem.
+         *
+         * This method returns a vector of reference to the DataHandler that
+         * will be given to the LearningAgent, and to its Program to learn how
+         * to interact with the Problem. Throughout the existence
+         * of the Problem, data contained in the data will be
+         * modified, but never the number, nature or size of the dataHandlers.
+         * Since this methods return references to the DataHandler, the
+         * LearningAgent will assume that the referenced dataHandler are
+         * automatically updated each time the doAction, or reset methods
+         * are called on the Problem.
+         *
+         * \return a vector of references to the DataHandler.
+         */
+        virtual std::vector<Data::DataView>  getDataSources() const = 0;
 
         /**
          * \brief Execute an action on the Problem.
@@ -92,17 +160,8 @@ namespace Evaluation {
          *
          * \param[in] seed the integer value for controlling the randomness of
          * the Problem.
-         * \param[in] mode LearningMode in which the Environment should be
-         * reset for the next set of actions.
-         * \param[in] iterationNumber the integer value to indicate the current
-         * iteration number when parameter nbIterationsPerPolicyEvaluation > 1
-         * \param[in] generationNumber the integer value to indicate the
-         * current generation number
          */
-        virtual void reset(size_t seed = 0,
-                           LearningMode mode = LearningMode::TRAINING,
-                           uint16_t iterationNumber = 0,
-                           uint64_t generationNumber = 0) = 0;
+        virtual void reset(size_t seed = 0) = 0;
 
         /**
          * \brief Method for checking if the Problem has reached a
@@ -128,7 +187,7 @@ namespace Evaluation {
          *
          * \return the current score for the Problem.
          */
-        virtual double getScore() const = 0;
+        virtual double getLastReward() const = 0;
     };
 }; // namespace Learn
 

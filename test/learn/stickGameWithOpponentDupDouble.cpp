@@ -41,7 +41,7 @@ bool StickGameWithOpponentD::isCopyable() const
     return true;
 }
 
-std::unique_ptr<Evaluations::ReinforcementEnvironment> StickGameWithOpponentD::cloneUniquePtr() const
+std::unique_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponentD::cloneUniquePtr() const
 {
     // Default copy constructor does the trick.
     return std::unique_ptr<StickGameWithOpponentD>();

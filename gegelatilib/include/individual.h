@@ -7,9 +7,7 @@
 
  
 #include "graphBased/genotype.h"
-#include "evaluation/evaluationResult.h"
 #include "representations/representation.h"
-#include "evaluations/feature.h"
 #include "util/genericComparator.h"
 
 struct CounterReset;
@@ -28,13 +26,10 @@ protected:
     /// @brief Representation of the individual.
     const Representations::Representation& representation;
 
-    /// \brief Features measured on the individual, mutable since features can only be added to it.
-    mutable std::map<uint64_t, std::unique_ptr<Evaluations::Feature>> features;
-
     /// Unique ID of the individual.
     uint64_t individualID;
 
-    /// \brief Define if the 
+    /// \brief Define if the genotype is valid for the representation
     bool valid = false;
 
     /**
@@ -125,27 +120,6 @@ public:
      */
     virtual void setGenotype(std::unique_ptr<GraphBased::Genotype> genotype);
 
-    /**
-     * \brief Return if the feature has been measured for this individual.
-     */
-    virtual bool hasFeature(size_t keyFeature) const;
-
-    /**
-     * \brief return the feature at required key.
-     */
-    virtual const Evaluations::Feature& getFeatureAt(size_t keyFeature) const;
-
-    /**
-     * \brief Return the features of the individual
-     */
-    virtual const std::map<uint64_t, std::unique_ptr<Evaluations::Feature>>& getFeatures() const {return this->features; };
-
-    /**
-     * \brief add an EvaluationMetric to the evaluationResult of the individual
-     * 
-     * \param[in] newFeatures new features added to the individual.
-     */
-    virtual void addFeatures(std::map<size_t, std::unique_ptr<Evaluations::Feature>> newFeatures) const;
 
     /**
      * \brief Return true if the current genotype is valid regarding the current representation

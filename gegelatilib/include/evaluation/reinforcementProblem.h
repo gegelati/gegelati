@@ -1,8 +1,10 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,42 +36,50 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <iostream>
-#include <stdexcept>
-#include <string>
+#ifndef REINFORCEMENT_PROBLEM_H
+#define REINFORCEMENT_PROBLEM_H
 
-#include "evaluations/reinforcementEnvironment.h"
+#include "evaluation/problem.h"
+#include "evaluation/reinforcementEnvironment.h"
 
+namespace Evaluation {
 
-std::unique_ptr<Evaluations::ReinforcementEnvironment> Evaluations::ReinforcementEnvironment::cloneUniquePtr() const
-{
-    return NULL;
-}
+    /**
+     * \brief Class used to control the learning steps of a Graph within
+     * a given Problem.
+     */
+    class ReinforcementProblem : public Problem
+    {
+      protected:
+        /// Number of class in the dataset
+        Evaluation::ReinforcementEnvironment& env;
 
-bool Evaluations::ReinforcementEnvironment::isCopyable() const
-{
-    return false;
-}
+      public:
+        /**
+         * \brief Constructor for Problem.
+         * 
+         * \param[in] env TODO
+         * \param[in] problemSeed TODO
+         */
+        ReinforcementProblem(
+            Evaluation::ReinforcementEnvironment& env, uint64_t problemSeed = 0) 
+            : Problem(env.getInputDimensions(), env.getOutputDimension(), problemSeed), env{env} {};
 
+        /// Default destructor for polymorphism
+        virtual ~ReinforcementProblem() = default;
 
-const std::vector<Dimensions::Requirement>& Evaluations::ReinforcementEnvironment::getInputDimensions() const
-{
-    return this->inputDimensions;
-}
+        /**
+         * \brief TODO
+         */
+        virtual void extractMetrics(
+            const Individual& individual, MetricMap& metrics,
+            const std::set<uint64_t>& hashes) const override;
 
-const Dimensions::Requirement& Evaluations::ReinforcementEnvironment::getOutputDimension() const
-{
-    return this->outputDimension;
-}
+        /**
+         * \brief return a const reference of the rl environment.
+         */
+        virtual const Evaluation::ReinforcementEnvironment& getEnvironment() const;
+    };
+}; // namespace Learn
 
-uint64_t Evaluations::ReinforcementEnvironment::getMaxSteps() const
-{
-    return this->maxSteps;
-}
-
-void Evaluations::ReinforcementEnvironment::doAction(const Data::DataValue& action)
-{
-    if (!this->outputDimension.accepts(action.view())) {
-        throw std::runtime_error("Action has wrong requirement.\nExpected: " + this->outputDimension.toString() + "\nRecieved:" + action.getType().toString() + ". If the types corresponds, its probably the range that failed.");
-    }
-}
+#endif

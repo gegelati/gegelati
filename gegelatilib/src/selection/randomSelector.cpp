@@ -3,10 +3,14 @@
 #include "selection/randomSelector.h"
 
 std::vector<std::shared_ptr<const Individual>> Selection::RandomSelector::select(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
+                const std::vector<std::pair<double, std::shared_ptr<const Individual>>>& individualFitnesses,
                 size_t nbSelected, RNG::RNG& rng) const
 {
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> available(individuals);
+
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> available;
+    for(const auto& pair: individualFitnesses) {
+        available.insert(pair.second);
+    }
 
     // Standard (mu+lambda) replacement
     std::vector<std::shared_ptr<const Individual>> selected;

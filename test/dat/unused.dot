@@ -1,6 +1,6 @@
 // File exported with GEGELATI v2.1.0
-// On the 2026-09-22 23:55:41
-// With the File::GraphDotExporter
+// On the 2026-09-26 18:06:47
+// With the class File::GraphDotExporter
 digraph{
 	graph[pad = "0.212, 0.055" bgcolor = lightgray]
 	node[shape=circle style = filled label = ""]

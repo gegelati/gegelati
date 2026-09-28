@@ -36,80 +36,65 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef EVALUATIONS_AGENT_H
-#define EVALUATIONS_AGENT_H
+#ifndef CLASSIFICATION_PROBLEM_H
+#define CLASSIFICATION_PROBLEM_H
 
-#include <map>
-#include <queue>
-#include <inttypes.h>
-#include <set>
+#include "evaluation/problem.h"
 
-#include "mutator/rng.h"
-#include "individual.h"
-#include "data/hash.h"
-
-#include "evaluations/problem.h"
-#include "evaluations/metric.h"
-
-namespace Evaluations {
-    
-    /// @brief Modes
-    enum class Mode
-    {
-        TRAINING,
-        VALIDATION,
-        TESTING
-    };
+namespace Evaluation {
 
     /**
      * \brief Class used to control the learning steps of a Graph within
      * a given Problem.
      */
-    class Evaluator
+    class ClassificationProblem : public Problem
     {
       protected:
-
+        /// Number of class in the dataset
+        size_t nbClass;
+      
+        /// Dataset used for the classification learning task.
+        std::vector<std::pair<std::vector<Data::DataValue>, size_t>> dataset; 
       public:
         /**
-         * \brief Constructor for EvaluationAgent.
+         * \brief Constructor for Problem.
          * 
+         * \param[in] inputDimensions the dimensions of the input sources.
+         * \param[in] nbClass the number of class in the dataset.
+         * \param[in] dataset The dataset.
+         * \param[in] problemSeed the seed of the problem.
          */
-        Evaluator() {};
+        ClassificationProblem(
+            const std::vector<Dimensions::Requirement>& inputDimensions, size_t nbClass, 
+            std::vector<std::pair<std::vector<Data::DataValue>, size_t>> dataset, uint64_t problemSeed = 0) 
+            : Problem(inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>(0, nbClass-1)), problemSeed), 
+              nbClass{nbClass}, dataset{std::move(dataset)} {};
 
         /// Default destructor for polymorphism
-        virtual ~Evaluator() = default;
+        virtual ~ClassificationProblem() = default;
 
         /**
-         * \brief compute the hashes used the evaluation.
+         * \brief Return the dataView at the specified index of the dataset.
          */
-        std::set<uint64_t> computeEvaluationHashes(
-            uint64_t nbIterations, uint64_t generationNumber, Mode mode,
-            uint64_t problemSeed, uint64_t problemMaxHash) const;
+        std::vector<Data::DataView> getDataViewAt(size_t index) const;
+        
+        /**
+         * \brief Return the target at the specified index of the dataset.
+         */
+        const size_t& getTargetAt(size_t index) const;
+        
+        /**
+         * \brief Override of Problem method to set the maximum hash to the size of the dataset.
+         */
+        virtual uint64_t maxHash() const override;
 
         /**
-         * \brief Evaluate all individual of the representations.
-         *
-         * This method calls the evaluateIndividual method for every individual
-         * of the representations. The method returns a sorted map associating each
-         * individual to its average score.
-         *
-         * \param[in] individuals The individuals whose genotypes are evaluted.
-         * \param[in] problem problem
-         * \param[in] metrics problem
-         * \param[in] nbIterations problem
-         * \param[in] generationNumber the integer number of the current
-         * generation.
-         * \param[in] mode the LearningMode to use during the policy
-         * evaluation.
+         * \brief TODO
          */
-        virtual void evaluateIndividuals(
-            const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
-            Problem& problem,
-            const std::vector<std::shared_ptr<const Metric>>& metrics,
-            size_t nbIterations,
-            uint64_t generationNumber,
-            Mode mode) const;
+        virtual void extractMetrics(
+            const Individual& individual, MetricMap& metrics,
+            const std::set<uint64_t>& hashes) const override;
     };
 }; // namespace Learn
 
-#endif
+#endif // CLASSIFICATION_PROBLEM_H

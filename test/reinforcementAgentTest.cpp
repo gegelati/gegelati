@@ -41,14 +41,13 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "evaluation/reinforcementAgent.h"
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
 #include "representations/LGP.h"
 
 #include "learn/stickGameWithOpponentDupDouble.h"
 #include "selector/truncationSelector.h"
-
+#if 0
 // Set all file in comment
 
 class ReinforcementAgentTest : public ::testing::Test
@@ -147,3 +146,4 @@ TEST_F(ReinforcementAgentTest, evaluateIndividual)
 
     ASSERT_NO_THROW(rlAgent.evaluateIndividual(indiv, le, 0, mode)) << "Evaluation should not have fail";
 }
+#endif

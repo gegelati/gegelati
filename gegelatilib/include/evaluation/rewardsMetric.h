@@ -3,35 +3,38 @@
 #ifndef EVALUATIONS_REWARD_FEATURE_H
 #define EVALUATIONS_REWARD_FEATURE_H
 
-#include "evaluations/feature.h"
-#include "reinforcementProblem.h"
+#include "evaluation/metric.h"
+#include "evaluation/reinforcementProblem.h"
 
 
 
-namespace Evaluations {
+namespace Evaluation {
 
     /**
      * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
-    class RewardFeature: public Feature
+    class RewardsMetric: public Metric
     {
       protected:
         /// @brief List of current rewards to store an episode
-        std::vector<double> currentRewards;
-
-        /// @brief BOolean indicating if a new episode is reached.
-        bool newEpisode = true;
+        double currentScore = 0;
+        
+        /// Hash of the current episode
+        uint64_t currentHash = 0;
 
       public:
         /**
          * \brief Default constructor
          */
-        RewardFeature() {};
+        RewardsMetric() {};
 
         /**
-         * \brief Extract metrics from the individual in the problem.
-         *
-         * This method is called at every step of the evaluation, before execution.
+         * \brief clone returning RewardsMetric
+         */
+        virtual std::unique_ptr<Metric> cloneEmptyPtr() const override;
+
+        /**
+         * \brief if currentHash == Hash, extract reward, else set currentHash to hash and return (we don't extract reward at step 0)
          *
          * \param[in] hash unique hash identifying the evaluation.
          * \param[in] individual the individual performing a step.
@@ -42,6 +45,18 @@ namespace Evaluations {
             const uint64_t& hash,
             const Individual& individual,
             const std::vector<Data::DataView>& inputs,
+            const Problem& problem) override;
+
+        /**
+         * \brief Extract the final reward and insert the score.
+         *
+         * \param[in] hash unique hash identifying the evaluation.
+         * \param[in] individual the individual performing a step.
+         * \param[in] problem the problem in which the individual is evaluated.
+         */
+        virtual void extractionEndAndComputeMetric(
+            const uint64_t& hash,
+            const Individual& individual,
             const Problem& problem) override;
 
         /**

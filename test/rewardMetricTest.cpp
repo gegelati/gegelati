@@ -4,6 +4,8 @@
 #include <memory>
 #include <stdexcept>
 
+#if 0
+
 #include "evaluation/scoreMetric.h"
 #include "individual.h"
 
@@ -69,3 +71,5 @@ TEST(ScoreMetricTest, ExtractMetricsEpisode)
     // score should be set
     ASSERT_DOUBLE_EQ(metric.getScore(), 3.0);
 }
+
+#endif

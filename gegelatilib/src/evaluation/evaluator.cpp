@@ -1,7 +1,7 @@
 
-#include "evaluations/evaluator.h"
+#include "evaluation/evaluator.h"
 
-std::set<uint64_t> Evaluations::Evaluator::computeEvaluationHashes(
+std::set<uint64_t> Evaluation::Evaluator::computeEvaluationHashes(
   uint64_t nbIterations, uint64_t generationNumber, Mode mode,
   uint64_t problemSeed, uint64_t problemMaxHash) const
 {
@@ -24,28 +24,28 @@ std::set<uint64_t> Evaluations::Evaluator::computeEvaluationHashes(
   return hashes;
 }
 
-void Evaluations::Evaluator::evaluateIndividuals(
+std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> Evaluation::Evaluator::evaluateIndividuals(
   const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
-  Evaluations::Problem& problem,
-  const std::vector<std::shared_ptr<const Metric>>& metrics,
-  size_t nbIterations,
-  uint64_t generationNumber,
+  Problem& problem, const MetricMap& metrics,
+  size_t nbIterations, uint64_t generationNumber,
   Mode mode) const
 {
-  if(metrics.empty() || individuals.empty()) {
-    throw std::runtime_error("Evaluations::Evaluator::evaluateIndividuals: cannot evaluate with empty list of metrics or empty set of individuals");
+  if(metrics.metrics.empty() || individuals.empty()) {
+    throw std::runtime_error("Evaluation::Evaluator::evaluateIndividuals: cannot evaluate with empty list of metrics or empty set of individuals");
   }
 
   // Define hashes
   std::set<uint64_t> hashes = this->computeEvaluationHashes(
     nbIterations, generationNumber, mode, problem.getProblemSeed(), problem.maxHash());
 
+  std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> results;
   for(const std::shared_ptr<const Individual>& individual: individuals) {
 
-    std::map<size_t, std::unique_ptr<Evaluations::Feature>> features = Metric::getUniqueRequestedMetrics(metrics);
+    std::unique_ptr<MetricMap> localMetrics = metrics.clone();
 
-    problem.extractFeatures(*individual, features, hashes);
+    problem.extractMetrics(*individual, *localMetrics, hashes);
 
-    individual->addFeatures(std::move(features));
+    results.insert(std::make_pair(individual, std::move(localMetrics)));
   }
+  return results;
 }

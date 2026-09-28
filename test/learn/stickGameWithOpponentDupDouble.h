@@ -40,14 +40,14 @@
 #include <random>
 
 #include "data/hash.h"
-#include "evaluations/reinforcementEnvironment.h"
+#include "evaluation/reinforcementEnvironment.h"
 #include "dimensions/numericRange.h"
 #include "mutator/rng.h"
 
 /**
  * Play the stick game against a random player
  */
-class StickGameWithOpponentD : public Evaluations::ReinforcementEnvironment
+class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
@@ -75,7 +75,7 @@ class StickGameWithOpponentD : public Evaluations::ReinforcementEnvironment
      * Constructor.
      */
     StickGameWithOpponentD()
-        : Evaluations::ReinforcementEnvironment(
+        : Evaluation::ReinforcementEnvironment(
             {Dimensions::Requirement::array1d<double>(3), Dimensions::Requirement::array1d<double>(1)}, 
              Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false},
              hints{1.0, 2.0, 3.0}, res{Data::DataView(hints.data(), Data::DataType::array1d<double>(3)), Data::DataView(&remainingSticks, Data::DataType::array1d<double>(1))}

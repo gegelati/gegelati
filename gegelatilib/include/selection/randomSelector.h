@@ -20,14 +20,14 @@
             /**
              * \brief method performing the random selection
              * 
-             * \param[in] individuals the individuals containing the scores.
+             * \param[in] individualFitnesses the individuals containing the scores.
              * \param[in] nbSelected the number of individuals to select.
              * \param[in] rng required for selecting
              * 
              * \return a vector of the selected individuals.
              */
             virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
+                const std::vector<std::pair<double, std::shared_ptr<const Individual>>>& individualFitnesses,
                 size_t nbSelected, RNG::RNG& rng) const override;
     };
 };

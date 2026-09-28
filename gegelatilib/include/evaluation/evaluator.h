@@ -36,61 +36,55 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ARCHIVE_EVAL_AGENT_H
-#define ARCHIVE_EVAL_AGENT_H
+#ifndef EVALUATIONS_AGENT_H
+#define EVALUATIONS_AGENT_H
 
-#include "evaluation/archiveEnvironment.h"
-#include "evaluation/evaluationAgent.h"
-#if 0
+#include <map>
+#include <queue>
+#include <inttypes.h>
+#include <set>
+
+#include "mutator/rng.h"
+#include "individual.h"
+#include "data/hash.h"
+
+#include "evaluation/problem.h"
+#include "evaluation/metric.h"
+
 namespace Evaluation {
+    
+    /// @brief Modes
+    enum class Mode
+    {
+        TRAINING,
+        VALIDATION,
+        TESTING
+    };
 
     /**
      * \brief Class used to control the learning steps of a Graph within
-     * a given LearningEnvironment.
+     * a given Problem.
      */
-    class ArchiveEvalAgent : public EvaluationAgent
+    class Evaluator
     {
       protected:
-
 
       public:
         /**
          * \brief Constructor for EvaluationAgent.
-         *
-         * \param[in] le the archiveEnvironment used to evaluate the population.
-         * \param[in] parameters The LearningParameters for the EvaluationAgent.
-         * \param[in] seed Seed for deterministic randomizer of archive selection.
+         * 
          */
-        ArchiveEvalAgent(
-          Evaluation::ArchiveEnvironment& le, 
-          std::unique_ptr<Learn::LearningParameters> parameters = std::make_unique<Learn::LearningParameters>(), 
-          size_t seed = 0)
-            :  EvaluationAgent(le, std::move(std::make_unique<Learn::LearningParameters>(*parameters)), seed) {};
+        Evaluator() {};
 
+        /// Default destructor for polymorphism
+        virtual ~Evaluator() = default;
 
         /**
-         * \brief Evaluates policy starting from the given root.
-         *
-         * The policy, that is, the Graph execution starting from the given
-         * Vertex is evaluated nbIteration times. The generationNumber is
-         * combined with the current iteration number to generate a set of
-         * seeds for evaluating the policy.
-         *
-         * The method is const to enable potential parallel calls to it.
-         *
-         * \param[in] individual The individual whose genotype is evaluted.
-         * \param[in] representation The representation of the individual evaluated, used to map the individual genotype to phenotype
-         * \param[in] generationNumber the integer number of the current
-         * generation.
-         * \param[in] mode the LearningMode to use during the policy
-         * evaluation.
+         * \brief compute the hashes used the evaluation.
          */
-        virtual void evaluateIndividual(
-            const Individual& individual, 
-            const Representation& representation,
-            uint64_t generationNumber,
-            LearningMode mode) const override;
-
+        std::set<uint64_t> computeEvaluationHashes(
+            uint64_t nbIterations, uint64_t generationNumber, Mode mode,
+            uint64_t problemSeed, uint64_t problemMaxHash) const;
 
         /**
          * \brief Evaluate all individual of the representations.
@@ -100,19 +94,20 @@ namespace Evaluation {
          * individual to its average score.
          *
          * \param[in] individuals The individuals whose genotypes are evaluted.
-         * \param[in] representation The representation of the individuals evaluated, used to map the individual genotypes to phenotypes
+         * \param[in] problem problem
+         * \param[in] metrics problem
+         * \param[in] nbIterations problem
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual void evaluateIndividuals(
-          const std::set<std::reference_wrapper<const Individual>>& individuals, 
-          const Representation& representation,
-          uint64_t generationNumber,
-          LearningMode mode) const override;
+        virtual std::map<std::shared_ptr<const Individual>, std::unique_ptr<MetricMap>, SharedLess<Individual>> evaluateIndividuals(
+            const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
+            Problem& problem, const MetricMap& metrics,
+            size_t nbIterations, uint64_t generationNumber,
+            Mode mode) const;
     };
-}; // namespace Evaluation
+}; // namespace Learn
 
-#endif // ARCHIVE_EVAL_AGENT_H
 #endif

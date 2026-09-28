@@ -40,6 +40,33 @@
 
 #include "evaluation/reinforcementEnvironment.h"
 
+
+std::unique_ptr<Evaluation::ReinforcementEnvironment> Evaluation::ReinforcementEnvironment::cloneUniquePtr() const
+{
+    return NULL;
+}
+
+bool Evaluation::ReinforcementEnvironment::isCopyable() const
+{
+    return false;
+}
+
+
+const std::vector<Dimensions::Requirement>& Evaluation::ReinforcementEnvironment::getInputDimensions() const
+{
+    return this->inputDimensions;
+}
+
+const Dimensions::Requirement& Evaluation::ReinforcementEnvironment::getOutputDimension() const
+{
+    return this->outputDimension;
+}
+
+uint64_t Evaluation::ReinforcementEnvironment::getMaxSteps() const
+{
+    return this->maxSteps;
+}
+
 void Evaluation::ReinforcementEnvironment::doAction(const Data::DataValue& action)
 {
     if (!this->outputDimension.accepts(action.view())) {

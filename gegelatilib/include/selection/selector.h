@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "individual.h"
-#include "evaluations/totalRewardMetric.h"
 
  namespace Selection {
 
@@ -18,9 +17,6 @@
             /// Boolean indicating wether this selection mechanism allows replacement.  
             bool replacement;
 
-            /// @brief List of metrics required for selection
-            std::vector<std::shared_ptr<const Evaluations::Metric>> metrics;
-
         public: 
 
             /// Default polymorphic destructor
@@ -31,46 +27,25 @@
              * 
              * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.  
              */
-            Selector(bool replacement) : replacement{replacement}, metrics{std::make_shared<Evaluations::TotalRewardMetric>()} {};
+            Selector(bool replacement) : replacement{replacement} {};
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Selector(const Selector&) = delete;
             Selector& operator=(const Selector&) = delete;
-
-            /**
-             * \brief method returning the evaluation metrics required for the selection process.
-             */
-            virtual const std::vector<std::shared_ptr<const Evaluations::Metric>>& getSelectionMetrics();
             
-            /**
-             * \brief method ranking the individuals based on their average score on their run
-             * 
-             * \param[in] individuals the individuals containing the scores.
-             */
-            virtual std::vector<std::pair<double, std::shared_ptr<const Individual>>> assignFitness(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals) const;
 
             /**
              * \brief method performing the selection
              * 
-             * \param[in] individuals the individuals containing the scores.
+             * \param[in] individualFitnesses the individuals containing the scores.
              * \param[in] nbSelected the number of individuals to select.
              * \param[in] rng required for selecting
              * 
              * \return a vector of the selected individuals.
              */
             virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals,
+                const std::vector<std::pair<double, std::shared_ptr<const Individual>>>& individualFitnesses,
                 size_t nbSelected, RNG::RNG& rng) const = 0;
-
-            /**
-             * \brief method returning the best individual from the given scores
-             * 
-             * \param[in] individuals the individuals containing the scores.
-             * 
-             * \return the best individual.
-             */
-            virtual const Individual& getBest(const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals) const;
     };
 };
 
