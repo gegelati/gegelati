@@ -2,7 +2,7 @@
 #include "fitnessAssignment/defaultAssigner.h"
 
 std::vector<std::pair<double, std::shared_ptr<const Individual>>> FitnessAssignment::DefaultAssigner::assignFitness(
-                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>>& individualMetrics,
+                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
                 uint64_t metricHash) const
 {
     // Get the average score of each individual.
@@ -11,12 +11,12 @@ std::vector<std::pair<double, std::shared_ptr<const Individual>>> FitnessAssignm
 
         double avgScore = 0.0;
 
-        const Evaluation::Metric& metric = *metricMap->metrics.at(metricHash);
-        for(const uint64_t& key: metric.getKeys()) {
-            avgScore += metric.getMetricAt(key).getScalar<double>();
+        std::map<uint64_t, const Metrics::ScoreMetric*> scoreMetrics = metricMap->getMetricValues<Metrics::ScoreMetric>(metricHash);
+        for(const auto& [key, metric]: scoreMetrics) {
+            avgScore += metric->getScore();
         }
 
-        avgScore /= metric.size();
+        avgScore /= scoreMetrics.size();
         
         ranked.emplace_back(avgScore, individual);
     }

@@ -49,7 +49,7 @@
 #include "data/hash.h"
 
 #include "evaluation/problem.h"
-#include "evaluation/metric.h"
+
 
 namespace Evaluation {
     
@@ -95,16 +95,16 @@ namespace Evaluation {
          *
          * \param[in] individuals The individuals whose genotypes are evaluted.
          * \param[in] problem problem
-         * \param[in] metrics problem
+         * \param[in] metricTemplate problem
          * \param[in] nbIterations problem
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::map<std::shared_ptr<const Individual>, std::unique_ptr<MetricMap>, SharedLess<Individual>> evaluateIndividuals(
+        virtual std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluateIndividuals(
             const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
-            Problem& problem, const MetricMap& metrics,
+            Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
             size_t nbIterations, uint64_t generationNumber,
             Mode mode) const;
     };

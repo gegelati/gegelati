@@ -137,6 +137,15 @@ public:
      * \param[in] inputSources input sources on which the individual is executed.
      */
     virtual Data::DataValue execute(const std::vector<Data::DataView>& inputSources) const;
+
+    /**
+     * \brief execute based on the representation, with datavalue
+     * 
+     * This method convert the dataValue to dataView and run execute(dataview).
+     * 
+     * \param[in] inputSources input sources on which the individual is executed.
+     */
+    virtual Data::DataValue execute(const std::vector<Data::DataValue>& inputSources) const;
 };
 
 /**

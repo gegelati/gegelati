@@ -72,7 +72,7 @@ namespace Evaluation {
          * \brief TODO
          */
         virtual void extractMetrics(
-            const Individual& individual, MetricMap& metrics,
+            const Individual& individual, Metrics::MetricMap& metrics,
             const std::set<uint64_t>& hashes) const override;
 
         /**

@@ -36,9 +36,10 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef CLASSIFICATION_PROBLEM_H
-#define CLASSIFICATION_PROBLEM_H
+#ifndef PREDICTION_PROBLEM_H
+#define PREDICTION_PROBLEM_H
 
+#include "evaluation/dataset.h"
 #include "evaluation/problem.h"
 
 namespace Evaluation {
@@ -47,41 +48,23 @@ namespace Evaluation {
      * \brief Class used to control the learning steps of a Graph within
      * a given Problem.
      */
-    class ClassificationProblem : public Problem
+    class PredictionProblem : public Problem
     {
       protected:
-        /// Number of class in the dataset
-        size_t nbClass;
-      
-        /// Dataset used for the classification learning task.
-        std::vector<std::pair<std::vector<Data::DataValue>, size_t>> dataset; 
+        /// Dataset used for the prediction learning task.
+        const DataSet& dataset; 
       public:
         /**
          * \brief Constructor for Problem.
          * 
-         * \param[in] inputDimensions the dimensions of the input sources.
-         * \param[in] nbClass the number of class in the dataset.
          * \param[in] dataset The dataset.
          * \param[in] problemSeed the seed of the problem.
          */
-        ClassificationProblem(
-            const std::vector<Dimensions::Requirement>& inputDimensions, size_t nbClass, 
-            std::vector<std::pair<std::vector<Data::DataValue>, size_t>> dataset, uint64_t problemSeed = 0) 
-            : Problem(inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>(0, nbClass-1)), problemSeed), 
-              nbClass{nbClass}, dataset{std::move(dataset)} {};
+        PredictionProblem(const DataSet& dataset, uint64_t problemSeed = 0) 
+            : Problem(dataset.getInputDimensions(), dataset.getOutputDimension(), problemSeed), dataset{dataset} {};
 
         /// Default destructor for polymorphism
-        virtual ~ClassificationProblem() = default;
-
-        /**
-         * \brief Return the dataView at the specified index of the dataset.
-         */
-        std::vector<Data::DataView> getDataViewAt(size_t index) const;
-        
-        /**
-         * \brief Return the target at the specified index of the dataset.
-         */
-        const size_t& getTargetAt(size_t index) const;
+        virtual ~PredictionProblem() = default;
         
         /**
          * \brief Override of Problem method to set the maximum hash to the size of the dataset.
@@ -89,12 +72,17 @@ namespace Evaluation {
         virtual uint64_t maxHash() const override;
 
         /**
+         * \brief get the reference of the dataset.
+         */
+        virtual const DataSet& getDataSet() const;
+
+        /**
          * \brief TODO
          */
         virtual void extractMetrics(
-            const Individual& individual, MetricMap& metrics,
+            const Individual& individual, Metrics::MetricMap& metrics,
             const std::set<uint64_t>& hashes) const override;
     };
 }; // namespace Learn
 
-#endif // CLASSIFICATION_PROBLEM_H
+#endif // PREDICTION_PROBLEM_H

@@ -45,7 +45,7 @@
 #include <queue>
 
 #include "rng/rng.h"
-#include "evaluation/metric.h"
+#include "metrics/metricMap.h"
 #include "individual.h"
 
 namespace Evaluation {
@@ -115,7 +115,7 @@ namespace Evaluation {
          * \param[in] hashes list of hash to use to set the seed of the evaluation
          */
         virtual void extractMetrics(
-            const Individual& individual, MetricMap& metrics,
+            const Individual& individual, Metrics::MetricMap& metrics,
             const std::set<uint64_t>& hashes) const = 0;
 
     };

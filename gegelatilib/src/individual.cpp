@@ -93,6 +93,15 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
     return this->representation.execute(*this->genotype, inputSources);
 }
 
+Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const
+{
+    std::vector<Data::DataView> inputSourcesView;
+    for(const Data::DataValue& value: inputSources) {
+        inputSourcesView.push_back(value.view());
+    }
+    return this->representation.execute(*this->genotype, inputSourcesView);
+}
+
 bool operator<(const Individual& a, const Individual& b)
 {
     return a.getIndividualID() < b.getIndividualID();

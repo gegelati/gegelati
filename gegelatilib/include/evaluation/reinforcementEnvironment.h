@@ -136,7 +136,7 @@ namespace Evaluation {
          *
          * \return a vector of references to the DataHandler.
          */
-        virtual std::vector<Data::DataView>  getDataSources() const = 0;
+        virtual const std::vector<Data::DataValue>& getDataSources() const = 0;
 
         /**
          * \brief Execute an action on the Problem.

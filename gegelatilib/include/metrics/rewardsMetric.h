@@ -1,23 +1,21 @@
 
 
-#ifndef EVALUATIONS_REWARD_FEATURE_H
-#define EVALUATIONS_REWARD_FEATURE_H
+#ifndef REWARD_METRICS_H
+#define REWARD_METRICS_H
 
-#include "evaluation/metric.h"
+#include "metrics/scoreMetric.h"
 #include "evaluation/reinforcementProblem.h"
 
 
 
-namespace Evaluation {
+namespace Metrics {
 
     /**
      * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
-    class RewardsMetric: public Metric
+    class RewardsMetric: public ScoreMetric
     {
       protected:
-        /// @brief List of current rewards to store an episode
-        double currentScore = 0;
         
         /// Hash of the current episode
         uint64_t currentHash = 0;
@@ -44,8 +42,8 @@ namespace Evaluation {
         virtual void extractBeforeExecution(
             const uint64_t& hash,
             const Individual& individual,
-            const std::vector<Data::DataView>& inputs,
-            const Problem& problem) override;
+            const std::vector<Data::DataValue>& inputs,
+            const Evaluation::Problem& problem) override;
 
         /**
          * \brief Extract the final reward and insert the score.
@@ -54,10 +52,10 @@ namespace Evaluation {
          * \param[in] individual the individual performing a step.
          * \param[in] problem the problem in which the individual is evaluated.
          */
-        virtual void extractionEndAndComputeMetric(
+        virtual void extractionEnd(
             const uint64_t& hash,
             const Individual& individual,
-            const Problem& problem) override;
+            const Evaluation::Problem& problem) override;
 
         /**
          * \brief Print the content of the metric.
@@ -66,6 +64,6 @@ namespace Evaluation {
     };
 
 
-}; // namespace Evaluation
+}; // namespace Metrics
 
-#endif // EVALUATIONS_REWARD_FEATURE_H
+#endif // REWARD_METRICS_H

@@ -1,24 +1,20 @@
 
 
-#ifndef EVALUATIONS_PREDICTION_METRIC_H
-#define EVALUATIONS_PREDICTION_METRIC_H
+#ifndef PREDICTION_METRIC_H
+#define PREDICTION_METRIC_H
 
-#include "evaluation/metric.h"
-#include "evaluation/classificationProblem.h"
+#include "metrics/scoreMetric.h"
+#include "evaluation/predictionProblem.h"
 
 
 
-namespace Evaluation {
+namespace Metrics {
 
     /**
      * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
-    class PredictionMetric: public Metric
+    class PredictionMetric: public ScoreMetric
     {
-
-      protected:
-        /// \brief Current prediction
-        bool currentPrediction;
 
       public:
         /**
@@ -46,19 +42,7 @@ namespace Evaluation {
             const uint64_t& hash,
             const Individual& individual, 
             const Data::DataValue& output,
-            const Problem& problem) override;
-
-        /**
-         * \brief Stores the prediction
-         *
-         * \param[in] hash unique hash identifying the evaluation.
-         * \param[in] individual the individual performing a step.
-         * \param[in] problem the problem in which the individual is evaluated.
-         */
-        virtual void extractionEndAndComputeMetric(
-            const uint64_t& hash,
-            const Individual& individual,
-            const Problem& problem) override;
+            const Evaluation::Problem& problem) override;
 
         /**
          * \brief Print the content of the metric.
@@ -67,6 +51,6 @@ namespace Evaluation {
     };
 
 
-}; // namespace Evaluation
+}; // namespace Metrics
 
-#endif // EVALUATIONS_PREDICTION_METRIC_H
+#endif // PREDICTION_METRIC_H

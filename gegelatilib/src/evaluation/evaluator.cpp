@@ -24,13 +24,13 @@ std::set<uint64_t> Evaluation::Evaluator::computeEvaluationHashes(
   return hashes;
 }
 
-std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> Evaluation::Evaluator::evaluateIndividuals(
+std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> Evaluation::Evaluator::evaluateIndividuals(
   const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
-  Problem& problem, const MetricMap& metrics,
+  Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
   size_t nbIterations, uint64_t generationNumber,
   Mode mode) const
 {
-  if(metrics.metrics.empty() || individuals.empty()) {
+  if(metricTemplate->size() == 0 || individuals.empty()) {
     throw std::runtime_error("Evaluation::Evaluator::evaluateIndividuals: cannot evaluate with empty list of metrics or empty set of individuals");
   }
 
@@ -38,10 +38,10 @@ std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMa
   std::set<uint64_t> hashes = this->computeEvaluationHashes(
     nbIterations, generationNumber, mode, problem.getProblemSeed(), problem.maxHash());
 
-  std::map<std::shared_ptr<const Individual>, std::unique_ptr<Evaluation::MetricMap>, SharedLess<Individual>> results;
+  std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
   for(const std::shared_ptr<const Individual>& individual: individuals) {
 
-    std::unique_ptr<MetricMap> localMetrics = metrics.clone();
+    std::unique_ptr<Metrics::MetricMap> localMetrics = std::make_unique<Metrics::MetricMap>(metricTemplate);
 
     problem.extractMetrics(*individual, *localMetrics, hashes);
 
