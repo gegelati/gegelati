@@ -37,6 +37,7 @@
  */
 
 #include <gtest/gtest.h>
+#if 0
 
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"
@@ -53,7 +54,6 @@
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 #endif
 
-#if 0
 
 class ExecutionEngineTest : public ::testing::Test
 {

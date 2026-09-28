@@ -36,6 +36,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -45,11 +46,10 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "parameters.h"
 
 #include "oldRepresentations/tpg/archive.h"
-#if 0
 class ArchiveTest : public ::testing::Test
 {
   protected:

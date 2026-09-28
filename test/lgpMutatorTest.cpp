@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#if 0
 #include "instructions/lambdaInstruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
@@ -11,7 +12,6 @@
 #include "parameters.h"
 
 
-#if 0
 class LgpMutatorTest : public ::testing::Test
 {
   protected:

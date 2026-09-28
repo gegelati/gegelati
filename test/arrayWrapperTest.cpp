@@ -34,12 +34,12 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include "oldData/arrayWrapper.h"
 #include "oldData/dataHandler.h"
 #include "oldData/primitiveTypeArray.h"
-#if 0
 TEST(ArrayWrapperTest, Constructor)
 {
     std::vector<double> values{0.0, 1.1, 2.2};

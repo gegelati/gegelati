@@ -8,7 +8,7 @@
 
 #include "oldRepresentations/individual.h"
 #include "oldRepresentations/population.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "oldRepresentations/repParameters.h"
 #include "selector/selector.h"
 #include "evoGraph/graph.h"

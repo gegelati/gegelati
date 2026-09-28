@@ -1,10 +1,10 @@
-#include "selector/mapElites/mapElitesArchive.h"
+
+/*#include "selector/mapElites/mapElitesArchive.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "oldRepresentations/lgp/environment.h"
 #include <gtest/gtest.h>
 
-/*
 class MapElitesArchiveTest : public ::testing::Test
 {
   protected:

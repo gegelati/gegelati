@@ -8,7 +8,7 @@
 #include <set>
 
 #include "individual.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 
  namespace Mutation {

@@ -1,3 +1,6 @@
+
+#if 0
+
 #include "selector/mapElites/mapElitesSelector.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
@@ -6,7 +9,6 @@
 
 #include "selector/mapElites/mapElitesDefaultDescriptors.h"
 
-#if 0
 class MapElitesSelectorTest : public ::testing::Test
 {
   protected:

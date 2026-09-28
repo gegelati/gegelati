@@ -35,19 +35,19 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef LGP_LINE_MUTATOR_H
-#define LGP_LINE_MUTATOR_H
+#ifndef CGP_LINE_MUTATOR_H
+#define CGP_LINE_MUTATOR_H
 
 #include <typeinfo>
 
-#include "mutator/rng.h"
-#include "oldRepresentations/lgp/lgpLine.h"
+#include "rng/rng.h"
+#include "oldRepresentations/lgp/lgpLineMutator.h"
 
-namespace Representation::LGP {
+namespace Representation::CGP {
     /**
      * Class containing all functions to apply randomness to a LGPLine
      */
-    class LGPLineMutator {
+    class CGPLineMutator : public LGP::LGPLineMutator {
     
     public:
         /**
@@ -59,6 +59,7 @@ namespace Representation::LGP {
          *
          * \param[in] instruction the selected Instruction for this line.
          * \param[in,out] line the LGPLine  to initialize.
+         * \param[in] nbAvailableRegister number of register usable as inputs, depending on the layer of the instruction
          * \param[in] operandIdx the index of the operand of the Line to initialize.
          * \param[in] initOperandDataSource should the operand data source be
          * (re-)initialized?
@@ -71,9 +72,14 @@ namespace Representation::LGP {
          * data source could be found for this Instruction and operandIdx couple.
          */
         bool initRandomCorrectLineOperand(
-            const Instructions::Instruction& instruction, LGPLine& line,
+            const Instructions::Instruction& instruction, LGP::LGPLine& line, size_t nbAvailableRegister,
             const uint64_t& operandIdx, const bool initOperandDataSource,
             const bool initOperandLocation, const bool forceChange, RNG::RNG& rng);
+
+        /**
+         * \brief control if the line is correct
+         */
+        bool isLineCorrect(LGP::LGPLine& line, size_t nbAvailableRegister);
 
         /**
          * \brief Randomly initializes a LGPLine.
@@ -90,12 +96,14 @@ namespace Representation::LGP {
          *
          * \param[in,out] line the LGPLine whose attributes are being
          * initialized.
+         * \param[in] idxRegister index of the register the line should write in
+         * \param[in] nbAvailableRegister number of register usable as inputs, depending on the layer of the instruction
          * \param[in] rng Random Number Generator used in the mutation process.
          * \throw std::runtime_error if the provided Environment has no
          * dataSource that can successfully provide data for any of its
          * Instruction.
          */
-        void initRandomCorrectLine(LGPLine& line, RNG::RNG& rng);
+        void initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, size_t nbAvailableRegister, RNG::RNG& rng);
 
         /**
          * \brief This function randomly modifies the behavior of a
@@ -120,9 +128,10 @@ namespace Representation::LGP {
          *
          * \param[in,out] line the LGPLine whose attributes are being
          * altered.
+         * \param[in] nbAvailableRegister number of register usable as inputs, depending on the layer of the instruction
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void alterCorrectLine(LGPLine& line, RNG::RNG& rng);
+        void alterCorrectLine(LGP::LGPLine& line, size_t nbAvailableRegister, RNG::RNG& rng);
     }; // class LineMutator
 }; // namespace Mutator
 #endif

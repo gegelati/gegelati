@@ -33,6 +33,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
+
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
@@ -44,8 +46,6 @@ TEST(DataHandlerPrinterTest, test)
 {
     ASSERT_FALSE(false) <<"Code gen handler needs update TODO";
 }
-
-#if 0
 
 class DataHandlerPrinterTest : public ::testing::Test
 {

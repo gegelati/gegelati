@@ -3,14 +3,8 @@
 #ifndef COUNTER_RESET_H
 #define COUNTER_RESET_H
 
-#include "oldRepresentations/individual.h"
-#include "oldRepresentations/representation.h"
-#include "evoGraph/edge.h"
-#include "evoGraph/vertex.h"
 #include "graphBased/gpNode.h"
 #include "individual.h"
-#include "population.h"
-
 /**
  * \brief Struct to reset static counters in classes.
  */

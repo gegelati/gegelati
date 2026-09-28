@@ -38,7 +38,7 @@
 
 #include <memory>
 #include <random>
-#include "mutator/deterministicRandom.h"
+#include "rng/deterministicRandom.h"
 
 namespace RNG {
 
@@ -125,14 +125,14 @@ namespace RNG {
 
           // If type is float, use uniform real, else uniform int
           if constexpr (std::is_floating_point_v<T>) {
-              Mutator::uniform_real_distribution<T> distribution(min, max);
+              uniform_real_distribution<T> distribution(min, max);
               return distribution(*engine);
           } else {
-              Mutator::uniform_int_distribution<T> distribution(min, max);
+              uniform_int_distribution<T> distribution(min, max);
               return distribution(*engine);
           }
         }
     };
-}; // namespace Mutator
+}; // namespace RNG
 
 #endif

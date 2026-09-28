@@ -33,6 +33,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
+
 #include <gtest/gtest.h>
 
 #include "learn/learningAgent.h"
@@ -82,3 +84,4 @@ TEST(JobTest, getRoot)
     delete job2;
 }
 */
+#endif

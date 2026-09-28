@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "dimensions/constraint.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 namespace Dimensions {
 
     /**

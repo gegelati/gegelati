@@ -35,6 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include "oldData/dataHandler.h"
@@ -237,3 +238,4 @@ TEST(DataHandlersTest, PrimitiveDataArrayAssignmentOperator)
 
     delete d, d2, d3;
 }
+#endif

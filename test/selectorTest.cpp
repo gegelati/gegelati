@@ -41,6 +41,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#if 0
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
@@ -55,7 +56,6 @@
 #include "selector/truncationSelector.h"
 #include "util/counterReset.h"
 
-#if 0
 class SelectorTest : public ::testing::Test
 {
   protected:

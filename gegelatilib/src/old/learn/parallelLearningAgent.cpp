@@ -42,7 +42,7 @@
 #include <queue>
 #include <thread>
 
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"

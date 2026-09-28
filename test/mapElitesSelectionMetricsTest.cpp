@@ -1,3 +1,5 @@
+
+#if 0
 #include "selector/mapElites/mapElitesSelectionMetrics.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
@@ -6,7 +8,6 @@
 #include "evoGraph/graph.h"
 #include <gtest/gtest.h>
 
-#if 0
 class MapElitesSelectionMetricsTest : public ::testing::Test
 {
   protected:

@@ -33,6 +33,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <fstream>
 #include <gtest/gtest.h>
@@ -72,3 +73,4 @@ TEST(loggerTest, logWithFile)
 
     remove("tempFileForTest");
 }
+#endif

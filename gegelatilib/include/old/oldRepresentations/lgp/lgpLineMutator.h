@@ -35,19 +35,19 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TGP_LINE_MUTATOR_H
-#define TGP_LINE_MUTATOR_H
+#ifndef LGP_LINE_MUTATOR_H
+#define LGP_LINE_MUTATOR_H
 
 #include <typeinfo>
 
-#include "mutator/rng.h"
-#include "oldRepresentations/lgp/lgpLineMutator.h"
+#include "rng/rng.h"
+#include "oldRepresentations/lgp/lgpLine.h"
 
-namespace Representation::TGP {
+namespace Representation::LGP {
     /**
      * Class containing all functions to apply randomness to a LGPLine
      */
-    class TGPLineMutator : public LGP::LGPLineMutator {
+    class LGPLineMutator {
     
     public:
         /**
@@ -59,7 +59,6 @@ namespace Representation::TGP {
          *
          * \param[in] instruction the selected Instruction for this line.
          * \param[in,out] line the LGPLine  to initialize.
-         * \param[in] maxDepthReached boolean to indicate if the line to insert if at the max depth of the graph
          * \param[in] operandIdx the index of the operand of the Line to initialize.
          * \param[in] initOperandDataSource should the operand data source be
          * (re-)initialized?
@@ -72,14 +71,9 @@ namespace Representation::TGP {
          * data source could be found for this Instruction and operandIdx couple.
          */
         bool initRandomCorrectLineOperand(
-            const Instructions::Instruction& instruction, LGP::LGPLine& line, bool maxDepthReached, 
+            const Instructions::Instruction& instruction, LGPLine& line,
             const uint64_t& operandIdx, const bool initOperandDataSource,
             const bool initOperandLocation, const bool forceChange, RNG::RNG& rng);
-
-        /**
-         * \brief control if the line is correct
-         */
-        bool isLineCorrect(LGP::LGPLine& line, bool maxDepthReached);
 
         /**
          * \brief Randomly initializes a LGPLine.
@@ -96,14 +90,12 @@ namespace Representation::TGP {
          *
          * \param[in,out] line the LGPLine whose attributes are being
          * initialized.
-         * \param[in] idxRegister index of the register the line should write in
-         * \param[in] maxDepthReached boolean to indicate if the line to insert if at the max depth of the graph
          * \param[in] rng Random Number Generator used in the mutation process.
          * \throw std::runtime_error if the provided Environment has no
          * dataSource that can successfully provide data for any of its
          * Instruction.
          */
-        void initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, bool maxDepthReached, RNG::RNG& rng);
+        void initRandomCorrectLine(LGPLine& line, RNG::RNG& rng);
 
         /**
          * \brief This function randomly modifies the behavior of a
@@ -128,10 +120,9 @@ namespace Representation::TGP {
          *
          * \param[in,out] line the LGPLine whose attributes are being
          * altered.
-         * \param[in] maxDepthReached boolean to indicate if the line to insert if at the max depth of the graph
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void alterCorrectLine(LGP::LGPLine& line, bool maxDepthReached, RNG::RNG& rng);
+        void alterCorrectLine(LGPLine& line, RNG::RNG& rng);
     }; // class LineMutator
 }; // namespace Mutator
 #endif

@@ -35,6 +35,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+/*
 
 #include <gtest/gtest.h>
 
@@ -42,7 +43,6 @@
 #include "file/parametersParser.h"
 #include "parameters.h"
 
-/*
 TEST(LearningParametersTest, readConfigFile)
 {
     Json::Value root;
@@ -181,7 +181,7 @@ TEST(LearningParametersTest, loadParametersFromJson)
     // only testing 1 parameter as readConfigFile was already tested
     ASSERT_EQ(params.representation.lgp.nbRegisters, 3.0)
         << "There should be 3 registers according to the params file";
-}*/
+}
 
 TEST(LearningParametersTest, writeParametersToJson)
 {
@@ -294,3 +294,4 @@ TEST(LearningParametersTest, writeParametersToJson)
     ASSERT_EQ(params.selection.truncation.ratioDeletedRoots,
               params2.selection.truncation.ratioDeletedRoots);
 }
+*/

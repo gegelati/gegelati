@@ -5,7 +5,7 @@
 
 #include "oldRepresentations/population.h"
 #include "learn/evaluationResult.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "learn/learningParameters.h"
 #include "selector/selectionContext.h"
 #include "selector/selectionMetrics.h"

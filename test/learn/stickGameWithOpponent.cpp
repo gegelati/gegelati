@@ -36,38 +36,52 @@
 
 #include "stickGameWithOpponent.h"
 
-bool StickGameWithOpponent::isCopyable() const
+bool StickGameWithOpponentD::isCopyable() const
 {
     return true;
 }
 
-Learn::LearningEnvironment* StickGameWithOpponent::clone() const
+std::unique_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponentD::cloneUniquePtr() const
 {
     // Default copy constructor does the trick.
-    return (Learn::LearningEnvironment*)new StickGameWithOpponent(*this);
+    return std::unique_ptr<StickGameWithOpponentD>();
 }
 
-void StickGameWithOpponent::doAction(double actionID)
+void StickGameWithOpponentD::doAction(const Data::DataValue& action)
 {
-    LearningEnvironment::doAction(actionID);
+    int actionInt = 0;
+
+    if (!this->outputDimension.accepts(action)) {
+        double actionDouble = action.getScalar<double>();
+        if(actionDouble >= 2){
+            actionInt = 2;
+        } else  if(actionDouble <= 0) {
+            actionInt = 0;
+        } else {
+            actionInt = int(actionDouble);
+        }
+    } else {
+        actionInt = action.getScalar<size_t>();
+    }
+
 
     // if the game is not over
     if (!this->isTerminal()) {
         // Execute the action
         // Get current state
-        int currentState = this->remainingSticks.getDataAt(typeid(int), 0).getScalar<int>();
-        if ((actionID + 1) > currentState) {
+        int currentState = this->remainingSticks;
+        if ((actionInt + 1) > currentState) {
             // Illegal move
             this->forbiddenMove = true;
             // and game over
-            this->remainingSticks.setDataAt(typeid(int), 0, 0);
+            this->remainingSticks = 0.0;
             // stop there
             return;
         }
         else {
             // update state
-            currentState -= ((int)actionID + 1);
-            this->remainingSticks.setDataAt(typeid(int), 0, currentState);
+            currentState -= (actionInt + 1);
+            this->remainingSticks = currentState;
             // if current state is now zero, the player lost
         }
 
@@ -75,7 +89,7 @@ void StickGameWithOpponent::doAction(double actionID)
         if (currentState > 0) {
             currentState -=
                 (int)this->rng.getUnsignedInt64(1, std::min(currentState, 3));
-            this->remainingSticks.setDataAt(typeid(int), 0, currentState);
+            this->remainingSticks = currentState;
             if (currentState == 0) {
                 this->win = true;
             }
@@ -83,30 +97,25 @@ void StickGameWithOpponent::doAction(double actionID)
     }
 }
 
-void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode,
-                                  uint16_t iterationNumber,
-                                  uint64_t generationNumber)
+void StickGameWithOpponentD::reset(size_t seed)
 {
     // Create seed from seed and mode
-    size_t hash_seed =
-        Data::Hash<size_t>()(seed) ^ Data::Hash<Learn::LearningMode>()(mode);
-    this->rng.setSeed(hash_seed);
-    this->remainingSticks.setDataAt(typeid(int), 0, 21);
+    this->rng.setSeed(seed);
+    this->remainingSticks = 21;
     this->win = false;
     this->forbiddenMove = false;
 }
 
-std::vector<std::reference_wrapper<const Data::DataHandler>>
-StickGameWithOpponent::getDataSources()
+std::vector<Data::DataView> StickGameWithOpponentD::getDataSources() const
 {
-    std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
-        this->hints, this->remainingSticks};
-
-    return res;
+    return this->res;
 }
 
-double StickGameWithOpponent::getScore() const
+double StickGameWithOpponentD::getLastReward() const
 {
+    if(!this->isTerminal()) {
+        return 0.0;
+    }
     if (this->win) {
         return 1.0;
     }
@@ -120,7 +129,7 @@ double StickGameWithOpponent::getScore() const
     }
 }
 
-bool StickGameWithOpponent::isTerminal() const
+bool StickGameWithOpponentD::isTerminal() const
 {
-    return this->remainingSticks.getDataAt(typeid(int), 0).getScalar<int>() == 0;
+    return this->remainingSticks == 0;
 }

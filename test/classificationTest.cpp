@@ -35,6 +35,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <gtest/gtest.h>
 
@@ -319,4 +320,4 @@ TEST_F(ClassificationTest, DoSelection)
                           &teamRoot) == remainingRoots.end())
         << "Action roots with poor score were not preserved during decimation.";
 }
-*/
+*/#endif

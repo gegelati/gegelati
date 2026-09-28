@@ -35,6 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include "instructions/addPrimitiveType.h"
@@ -43,7 +44,6 @@
 #include "instructions/multByConstant.h"
 
 
-#if 0
 
 class PolicyStatsTest : public ::testing::Test
 {

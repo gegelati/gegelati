@@ -36,6 +36,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -48,7 +49,6 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
-#if 0
 
 class ProgramExecutionEngineTest : public ::testing::Test
 {

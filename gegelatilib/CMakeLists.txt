@@ -38,6 +38,10 @@ file(
         ../lib/*.h
 )
 
+# Exclude files in the "old" folder (or subfolders)
+list(FILTER ${LIBRARY_TARGET_NAME}_SRC EXCLUDE REGEX ".*/old/.*")
+list(FILTER ${LIBRARY_TARGET_NAME}_HDR EXCLUDE REGEX ".*/old/.*")
+
 # You can add an external dependency using the find_package() function call
 # See: https://cmake.org/cmake/help/latest/command/find_package.html
 # Note that the imported objects resulting from the find_package() depends upon

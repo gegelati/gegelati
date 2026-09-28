@@ -44,7 +44,7 @@
 #include <inttypes.h>
 #include <set>
 
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "individual.h"
 #include "data/hash.h"
 

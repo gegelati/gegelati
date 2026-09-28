@@ -33,6 +33,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <gtest/gtest.h>
 
@@ -269,3 +270,5 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
     ASSERT_GT(s.length(), 0) << "Cycle in custom TPG is not detected.";
 }
 */
+
+#endif

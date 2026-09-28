@@ -36,6 +36,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include "oldData/dataHandler.h"
@@ -47,7 +48,6 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
-#if 0
 
 class ProgramEngineTest : public ::testing::Test
 {

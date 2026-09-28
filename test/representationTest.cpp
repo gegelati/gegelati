@@ -42,9 +42,9 @@
 #include <numeric>
 
 #include "representations/representation.h"
-#include "population.h"
 #include "dimensions/numericRange.h"
 
+#include "individual.h"
 #include "learn/fakeRepresentation.h"
 
 // Set all file in comment

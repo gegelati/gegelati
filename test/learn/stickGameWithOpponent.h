@@ -39,22 +39,23 @@
 
 #include <random>
 
-#include "oldData/primitiveTypeArray.h"
-#include "learn/learningEnvironment.h"
-#include "mutator/rng.h"
+#include "data/hash.h"
+#include "evaluation/reinforcementEnvironment.h"
+#include "dimensions/numericRange.h"
+#include "rng/rng.h"
 
 /**
  * Play the stick game against a random player
  */
-class StickGameWithOpponent : public Learn::LearningEnvironment
+class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
-    Data::PrimitiveTypeArray<int> remainingSticks;
+    double remainingSticks;
 
     /// This source of data give useful numbers for helping undertanding the
     /// game.
-    Data::PrimitiveTypeArray<int> hints;
+    std::vector<int> hints;
 
     /// Did the player win or lose
     bool win;
@@ -66,48 +67,47 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     /// Randomness control
     RNG::RNG rng;
 
+    // Vector of dataView sources
+    std::vector<Data::DataView> res;
+
   public:
     /**
      * Constructor.
      */
-    StickGameWithOpponent()
-        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false}
+    StickGameWithOpponentD()
+        : Evaluation::ReinforcementEnvironment(
+            {Dimensions::Requirement::array1d<int>(3), Dimensions::Requirement::array1d<double>(1)}, 
+             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false},
+             hints{1, 2, 3}, res{Data::DataView(hints.data(), Data::DataType::array1d<int>(3)), Data::DataView(&remainingSticks, Data::DataType::array1d<double>(1))}
     {
         this->reset(0);
-        // Set hints
-        this->hints.setDataAt(typeid(int), 0, 1);
-        this->hints.setDataAt(typeid(int), 1, 2);
-        this->hints.setDataAt(typeid(int), 2, 3);
     };
 
     /// Destructor
-    ~StickGameWithOpponent(){};
+    ~StickGameWithOpponentD(){};
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual bool isCopyable() const override;
 
-    // Inherited via LearningEnvironment
-    virtual LearningEnvironment* clone() const override;
+    // Inherited via Problem
+    virtual std::unique_ptr<ReinforcementEnvironment> cloneUniquePtr() const override;
 
-    // Inherited via LearningEnvironment
-    virtual void doAction(double actionID) override;
+    // Inherited via Problem
+    virtual void doAction(const Data::DataValue& action) override;
 
-    // Inherited via LearningEnvironment
-    virtual void reset(size_t seed = 0,
-                       Learn::LearningMode mode = Learn::LearningMode::TRAINING,
-                       uint16_t iterationNumber = 0,
-                       uint64_t generationNumber = 0) override;
+    // Inherited via Problem
+    virtual void reset(size_t seed = 0) override;
 
-    // Inherited via LearningEnvironment
-    virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override;
+    // Inherited via Problem
+    virtual std::vector<Data::DataView>
+      getDataSources() const override;
 
     /**
      * Returns 1.0 when the player won, 0.0 otherwise.
      */
-    virtual double getScore() const override;
+    virtual double getLastReward() const override;
 
-    // Inherited via LearningEnvironment
+    // Inherited via Problem
     virtual bool isTerminal() const override;
 };
 

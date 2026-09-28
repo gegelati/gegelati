@@ -34,6 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include "oldData/array2DWrapper.h"
@@ -264,4 +265,5 @@ TEST(Array2DWrapperTest, getDimensionSize)
 
     delete d;
 }
+#endif
 #endif

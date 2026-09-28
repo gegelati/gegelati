@@ -36,6 +36,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -54,14 +55,13 @@
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "selector/truncationSelector.h"
 #include "selector/tournamentSelector.h"
 #include "evoGraph/graph.h"
 #include "util/counterReset.h"
 
 #include "parameters.h"
-#if 0
 class TpgMutatorTest : public ::testing::Test
 {
   protected:

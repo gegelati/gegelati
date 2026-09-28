@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 void RNG::RNG::setSeed(uint64_t seed)
 {
@@ -42,18 +42,18 @@ void RNG::RNG::setSeed(uint64_t seed)
 
 uint64_t RNG::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
 {
-    Mutator::uniform_int_distribution<uint64_t> distribution(min, max);
+    uniform_int_distribution<uint64_t> distribution(min, max);
     return distribution(*engine);
 }
 
 int32_t RNG::RNG::getInt32(int32_t min, int32_t max)
 {
-    Mutator::uniform_int_distribution<int32_t> distribution(min, max);
+    uniform_int_distribution<int32_t> distribution(min, max);
     return distribution(*engine);
 }
 
 double RNG::RNG::getDouble(double min, double max)
 {
-    Mutator::uniform_real_distribution<double> distribution(min, max);
+    uniform_real_distribution<double> distribution(min, max);
     return distribution(*engine);
 }

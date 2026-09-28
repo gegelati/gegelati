@@ -35,6 +35,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <algorithm>
 #include <fstream>
@@ -59,7 +60,7 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
@@ -73,7 +74,6 @@
 #include "util/counterReset.h"
 
 // Set all file in comment
-#if 0
 class LearningAgentTest : public ::testing::Test
 {
   protected:

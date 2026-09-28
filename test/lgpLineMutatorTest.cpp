@@ -1,5 +1,6 @@
 
 
+#if 0
 
 #include <gtest/gtest.h>
 #include "instructions/lambdaInstruction.h"
@@ -11,7 +12,6 @@
 #include "oldRepresentations/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
 #include "parameters.h"
-#if 0
 class LineMutatorTest : public ::testing::Test
 {
   protected:

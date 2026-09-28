@@ -43,7 +43,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include "oldData/constantHandler.h"
+#include "data/constant.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {

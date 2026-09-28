@@ -42,7 +42,7 @@
 
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 #include "learn/learningAgent.h"
 

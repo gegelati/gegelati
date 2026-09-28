@@ -44,7 +44,7 @@
 #include <inttypes.h>
 #include <queue>
 
-#include "mutator/rng.h"
+#include "rng/rng.h"
 #include "evaluation/metric.h"
 #include "individual.h"
 

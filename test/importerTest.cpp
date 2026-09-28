@@ -36,6 +36,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
+
 #include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -488,3 +490,4 @@ TEST_F(ImporterTest, setNewFilePath)
                  std::runtime_error)
         << "Changing the input file with an invalid path should not work.";
 }*/
+#endif

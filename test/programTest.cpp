@@ -34,6 +34,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#if 0
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -45,7 +46,6 @@
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "util/counterReset.h"
-#if 0
 class ProgramTest : public ::testing::Test
 {
   protected:

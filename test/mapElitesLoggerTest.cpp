@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#if 0
 
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
@@ -74,7 +75,6 @@ class MapElitesLoggerTest : public ::testing::Test
     }
 };
 
-#if 0
 TEST_F(MapElitesLoggerTest, Constructor)
 {
     auto archive = selector->addArchiveFromDescriptor(2, descriptor, le);

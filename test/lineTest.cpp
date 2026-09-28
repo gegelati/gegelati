@@ -35,6 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -44,7 +45,6 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 
-#if 0
 class LineTest : public ::testing::Test
 {
   protected:

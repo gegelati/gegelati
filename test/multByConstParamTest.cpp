@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "data/constant.h"
-#include "oldData/dataValue.h"
 #include "instructions/multByConstant.h"
 
 TEST(MultByConstParamTest, ExecutePrimitiveType)

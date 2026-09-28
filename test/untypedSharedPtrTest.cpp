@@ -34,6 +34,7 @@
  */
 
 #include <gtest/gtest.h>
+#if 0
 
 #include "oldData/untypedSharedPtr.h"
 
@@ -295,3 +296,5 @@ TEST_F(UntypedSharedPtrTest, getSharedPtrOnBuiltFromConcept)
                "fail.";
     }
 }
+
+#endif

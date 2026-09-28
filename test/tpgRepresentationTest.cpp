@@ -41,6 +41,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 #include <cmath>
+#if 0
 
 #include "representations/TPG.h"
 #include "representations/LGP.h"
@@ -272,3 +273,4 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
     ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }
+#endif

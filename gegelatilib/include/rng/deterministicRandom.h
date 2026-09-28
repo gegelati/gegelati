@@ -41,7 +41,7 @@
 #define _NODISCARD [[nodiscard]]
 
 // For unsigned int
-namespace Mutator {
+namespace RNG {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -365,10 +365,10 @@ namespace Mutator {
         return !(_Left == _Right);
     }
 #endif
-} // namespace Mutator
+} // namespace RNG
 #include <istream>
 // For Double
-namespace Mutator {
+namespace RNG {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #define _NRAND(eng, resty)                                                     \
@@ -576,6 +576,6 @@ namespace Mutator {
         return !(_Left == _Right);
     }
 #endif
-} // namespace Mutator
+} // namespace RNG
 
 #endif

@@ -47,7 +47,7 @@
 
 #include "oldData/dataHandler.h"
 #include "oldRepresentations/individual.h"
-#include "mutator/rng.h"
+#include "rng/rng.h"
 
 namespace Representation::TPG {
 
