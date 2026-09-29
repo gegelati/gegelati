@@ -379,7 +379,7 @@ namespace Data {
         /**
          * \brief Renders the owned value and its metadata as a debugging string.
          */
-        std::string toString() const;
+        virtual std::string toString(std::string prefix = "") const override;
 
         /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;

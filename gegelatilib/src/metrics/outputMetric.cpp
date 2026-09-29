@@ -16,5 +16,21 @@ void Metrics::OutputMetric::extractAfterExecution(
 
 std::string Metrics::OutputMetric::toString(std::string prefix) const
 {
-    return "todo";
+    std::stringstream ss;
+    ss << prefix << "OutputMetric with "<< this->outputs.size() <<" extractions: \n";
+    for(size_t idx=0; idx < this->outputs.size(); idx++) {
+        ss << prefix << "  Extraction "<<idx<<": \n";
+        ss << this->outputs.at(idx).toString(prefix + "    ") <<",\n";
+    }
+    return ss.str();
+}
+
+uint64_t Metrics::OutputMetric::staticHash() 
+{
+    return std::type_index(typeid(OutputMetric)).hash_code();
+}
+
+const std::vector<Data::DataValue>& Metrics::OutputMetric::getOutputs() const
+{
+    return this->outputs;
 }

@@ -126,13 +126,13 @@ size_t Data::DataView::scaleLocation(const Data::DataType& required, const size_
     
 }
 
-std::string Data::DataView::toString() const {
+std::string Data::DataView::toString(std::string prefix) const {
     std::ostringstream oss;
 
-    oss << "DataView{\n"
-        << "\tPointer   = " << ptr << ",\n"
-        << "\tDataType  = " << type.toString() << "\n"
-        << "}";
+    oss << prefix << "DataView{\n"
+        << prefix << "\tPointer   = " << ptr << ",\n"
+        << prefix << "\tDataType  = " << type.toString() << "\n"
+        << prefix << "}";
 
     return oss.str();
 }

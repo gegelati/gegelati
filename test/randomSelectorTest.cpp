@@ -14,7 +14,6 @@ TEST(RandomSelectorTest, Constructor)
 
     ASSERT_NO_THROW(delete selection) << "Destructor of SurvivingSelection failed.";
 }
-/*
 
 TEST(RandomSelectorTest, selectWithoutReplacement)
 {
@@ -25,17 +24,16 @@ TEST(RandomSelectorTest, selectWithoutReplacement)
     rng.setSeed(0);
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population;
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores;
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
-        
-        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
-        population.insert(indiv);
+        populationScores.push_back(std::make_pair(double(199 - idx), indiv));
     }
 
 
+
     std::vector<std::shared_ptr<const Individual>> selectionResults;
-    ASSERT_NO_THROW(selectionResults = selection.select(population, 100, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults = selection.select(populationScores, 100, rng)) << "Selecting individuals failed";
     ASSERT_EQ(selectionResults.size(), 100) << "There should be 100 selection results";
 
     for(size_t idx = 0; idx < 100; idx++) {
@@ -46,7 +44,7 @@ TEST(RandomSelectorTest, selectWithoutReplacement)
     setSelection.insert(selectionResults.begin(), selectionResults.end());
     ASSERT_EQ(setSelection.size(), 100) << "There should be 100 selection results";
 
-    ASSERT_NO_THROW(selectionResults = selection.select(population, 1000, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults = selection.select(populationScores, 1000, rng)) << "Selecting individuals failed";
     ASSERT_EQ(selectionResults.size(), 200) << "There should be 200 selection results";
 }
 
@@ -60,17 +58,14 @@ TEST(RandomSelectorTest, selectWithReplacement)
 
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population;
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores;
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
-        
-        indiv->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
-        population.insert(indiv);
+        populationScores.push_back(std::make_pair(double(199 - idx), indiv));
     }
 
-
     std::vector<std::shared_ptr<const Individual>> selectionResults;
-    ASSERT_NO_THROW(selectionResults = selection.select(population, 100, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults = selection.select(populationScores, 100, rng)) << "Selecting individuals failed";
     ASSERT_EQ(selectionResults.size(), 100) << "There should be 200 selection results";
 
     for(size_t idx = 0; idx < 100; idx++) {
@@ -81,7 +76,7 @@ TEST(RandomSelectorTest, selectWithReplacement)
     setSelection.insert(selectionResults.begin(), selectionResults.end());
     ASSERT_LT(setSelection.size(), 100) << "It is very very very unlickly that no individual has been sampled twice!";
 
-    ASSERT_NO_THROW(selectionResults = selection.select(population, 1000, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults = selection.select(populationScores, 1000, rng)) << "Selecting individuals failed";
     ASSERT_EQ(selectionResults.size(), 1000) << "There should be 1000 selection results";
 }
 
@@ -96,30 +91,23 @@ TEST(RandomSelectorTest, selectIsDeterminist)
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199 and IDS 0, 2, 4, ..., 398.
     // Create 200 individuals with random scores in ranges  and IDS 1, 3, 5, ..., 399.
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population1;
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population2;
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores1;
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores2;
     for(size_t idx = 0; idx < 200; idx++) {
-        std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
-        
-        indiv1->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(0, double(idx))));
-        population1.insert(indiv1);
-
-        
-        std::shared_ptr<const Individual> indiv2 = std::make_shared<Individual>(rep);
-        
-        indiv2->addEvaluationMetric(std::move(std::make_unique<Evaluation::ScoreMetric>(rng.uniformSample<double>(-1000.0, 1000.0))));
-        population2.insert(indiv2);
+        std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
+        populationScores1.push_back(std::make_pair(double(199 - idx), indiv));
+        populationScores2.push_back(std::make_pair(rng.uniformSample<double>(-1000.0, 1000.0), indiv));
     }
 
     rng.setSeed(0);
     std::vector<std::shared_ptr<const Individual>> selectionResults1;
-    ASSERT_NO_THROW(selectionResults1 = selection.select(population1, 100, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults1 = selection.select(populationScores1, 100, rng)) << "Selecting individuals failed";
 
     rng.setSeed(0);
     std::vector<std::shared_ptr<const Individual>> selectionResults2;
-    ASSERT_NO_THROW(selectionResults2 = selection.select(population2, 100, rng)) << "Selecting individuals failed";
+    ASSERT_NO_THROW(selectionResults2 = selection.select(populationScores2, 100, rng)) << "Selecting individuals failed";
 
     for(size_t idx = 0; idx < 100; idx++) {
-        ASSERT_EQ(selectionResults1.at(idx)->getIndividualID(), selectionResults2.at(idx)->getIndividualID() - 1) << "Order should be exactly the same!";
+        ASSERT_EQ(selectionResults1.at(idx), selectionResults2.at(idx)) << "Order should be exactly the same!";
     }
-} */
+}

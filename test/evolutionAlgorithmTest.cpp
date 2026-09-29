@@ -64,7 +64,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    StickGameWithOpponentD le;
+    StickGameWithOpponent le;
 
 
     virtual void SetUp()
@@ -113,7 +113,6 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     Evaluation::Evaluator evaluator;
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-    size_t metricHash = std::make_unique<Metrics::RewardsMetric>()->hash();
 
 
     size_t sizePopulation = 100;
@@ -128,7 +127,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
             evaluator.evaluateIndividuals(population, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitness = assigner.assignFitness(evaluationResults, metricHash);
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -149,7 +148,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         evaluationResults = evaluator.evaluateIndividuals(evaluatedIndividuals, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
 
         // Do replacement
-        individualFitness = assigner.assignFitness(evaluationResults, metricHash);
+        individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
         std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(individualFitness, sizePopulation, rng);
         population.clear();
         population.insert(survivors.begin(), survivors.end());
@@ -184,7 +183,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     Evaluation::Evaluator evaluator;
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-    size_t metricHash = std::make_unique<Metrics::RewardsMetric>()->hash();
+    
 
 
 
@@ -198,7 +197,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsLGP = 
             evaluator.evaluateIndividuals(populationLGP, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, metricHash);
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
 
 
     // Initialize TPG population
@@ -212,7 +211,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
             evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, metricHash);
+    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -226,7 +225,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
         evaluationResultsLGP = evaluator.evaluateIndividuals(evaluatedIndividualsLGP, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // LGP Evolution : replacement
-        individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, metricHash);
+        individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
         std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(individualFitnessLGP, sizePopulation, rng);
         populationLGP.clear();
         populationLGP.insert(survivorsLGP.begin(), survivorsLGP.end());
@@ -248,7 +247,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
         evaluationResultsTPG = evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // TPG Evolution : replacement
-        individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, metricHash);
+        individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
         std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(individualFitnessTPG, sizePopulation, rng);
         populationTPG.clear();
         populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());

@@ -41,7 +41,6 @@
 #include <gtest/gtest.h>
 #include <numeric>
 #include <cmath>
-#if 0
 
 #include "representations/TPG.h"
 #include "representations/LGP.h"
@@ -131,6 +130,7 @@ TEST_F(TPGRepresentationTest, getGenotypeConstraint)
 TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 {
     RNG::RNG rng;
+    rng.getInt32(0, 3); // for random coverage
 
     size_t nbActions = 3;
     Representations::TPG representation({inputType}, nbActions, 2, 10);
@@ -273,4 +273,3 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
     ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }
-#endif

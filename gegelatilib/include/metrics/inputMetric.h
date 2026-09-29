@@ -19,7 +19,7 @@ namespace Metrics {
 
       protected:
         /// \brief Current vector of features extracted.
-        std::vector<Data::DataValue> inputs;
+        std::vector<std::vector<Data::DataValue>> inputs;
 
       public:
         /**
@@ -50,6 +50,16 @@ namespace Metrics {
          * \brief Print the content of the metric.
          */
         virtual std::string toString(std::string prefix = "") const override;
+
+        /**
+         * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
+         */
+        static uint64_t staticHash();
+
+        /**
+         * \brief return the inputs extracted
+         */
+        const std::vector<std::vector<Data::DataValue>>& getInputs() const;
     };
 
 

@@ -47,15 +47,11 @@
 /**
  * Play the stick game against a random player
  */
-class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
+class StickGameWithOpponent : public Evaluation::ReinforcementEnvironment
 {
   protected:
     /// During a game, number of remaining sticks.
     double remainingSticks;
-
-    /// This source of data give useful numbers for helping undertanding the
-    /// game.
-    std::vector<int> hints;
 
     /// Did the player win or lose
     bool win;
@@ -67,24 +63,22 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
     /// Randomness control
     RNG::RNG rng;
 
-    // Vector of dataView sources
-    std::vector<Data::DataView> res;
-
   public:
     /**
      * Constructor.
      */
-    StickGameWithOpponentD()
+    StickGameWithOpponent()
         : Evaluation::ReinforcementEnvironment(
-            {Dimensions::Requirement::array1d<int>(3), Dimensions::Requirement::array1d<double>(1)}, 
-             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false},
-             hints{1, 2, 3}, res{Data::DataView(hints.data(), Data::DataType::array1d<int>(3)), Data::DataView(&remainingSticks, Data::DataType::array1d<double>(1))}
+            {Dimensions::Requirement::array1d<int>(3), Dimensions::Requirement::scalar<double>()}, 
+             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false}
     {
+        this->dataSources.push_back(Data::DataValue::array1d<int[3]>({1, 2, 3}));
+        this->dataSources.push_back(Data::DataValue::scalar(remainingSticks));
         this->reset(0);
     };
 
     /// Destructor
-    ~StickGameWithOpponentD(){};
+    ~StickGameWithOpponent(){};
 
     // Inherited via Problem
     virtual bool isCopyable() const override;
@@ -97,10 +91,6 @@ class StickGameWithOpponentD : public Evaluation::ReinforcementEnvironment
 
     // Inherited via Problem
     virtual void reset(size_t seed = 0) override;
-
-    // Inherited via Problem
-    virtual std::vector<Data::DataView>
-      getDataSources() const override;
 
     /**
      * Returns 1.0 when the player won, 0.0 otherwise.

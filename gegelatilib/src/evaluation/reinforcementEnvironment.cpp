@@ -67,6 +67,22 @@ uint64_t Evaluation::ReinforcementEnvironment::getMaxSteps() const
     return this->maxSteps;
 }
 
+const std::vector<Data::DataValue>& Evaluation::ReinforcementEnvironment::getDataSources() const
+{
+    if(!Dimensions::Requirement::acceptListValues(this->inputDimensions, this->dataSources)) {
+        std::string receivedSource;
+        for(const auto& dataSource : this->dataSources) {
+            receivedSource += dataSource.toString() + " ";
+        }
+        std::string expectedDims;
+        for(const auto& inputDim : this->inputDimensions) {
+            expectedDims += inputDim.toString() + " ";
+        }
+        throw std::runtime_error("Evaluation::ReinforcementEnvironment::getDataSources: Current dataSources does not correspond to the requirements.\nExpected: " + expectedDims + "\nRecieved: " + receivedSource);
+    }
+    return this->dataSources;
+}
+
 void Evaluation::ReinforcementEnvironment::doAction(const Data::DataValue& action)
 {
     if (!this->outputDimension.accepts(action.view())) {

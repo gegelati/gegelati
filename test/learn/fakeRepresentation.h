@@ -25,8 +25,10 @@ namespace Representations {
              */
             virtual Data::DataValue executeGenotype(
                 const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override {
-                    return Data::DataValue::scalar<double>(1);
+                    return output.clone();
                 }
+
+
 
             
             virtual void setGenotypeConstraint() override {
@@ -36,6 +38,8 @@ namespace Representations {
             }
     
         public:
+
+            Data::DataValue output;
 
             /// @brief clone pattern 
             virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override {
@@ -56,8 +60,7 @@ namespace Representations {
                                Dimensions::Requirement outputDimension = Dimensions::Requirement::scalar<int>(),
                                std::string representationName = "FakeRepresentation", 
                                std::string representationColor = "#FFFFFF")
-                : Representation(
-                    inputDimensions, outputDimension, representationName, representationColor){
+                : Representation(inputDimensions, outputDimension, representationName, representationColor), output{Data::DataValue::scalar<double>(1)} {
                         this->setGenotypeConstraint();
                     };
 

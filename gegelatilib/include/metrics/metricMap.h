@@ -11,14 +11,24 @@ namespace Metrics {
             /// @brief Map of the empty metrics
             std::map<uint64_t, std::unique_ptr<Metric>> emptyMetrics;
 
+            /// @brief Default constructor
+            MetricMapTemplate() {};
+
             /// Constructor with single metric type
             MetricMapTemplate(std::unique_ptr<Metric> emptyMetric) {
-                emptyMetrics.insert(std::make_pair(emptyMetric->hash(), std::move(emptyMetric)));
+                this->addRequiredMetric(std::move(emptyMetric));
             }
             
             /// Constructor with predifined metric map
-            MetricMapTemplate(std::map<uint64_t, std::unique_ptr<Metric>>& emptyMetrics) : emptyMetrics(std::move(emptyMetrics)) {};
+            MetricMapTemplate(std::vector<std::unique_ptr<Metric>>& emptyMetrics) {
+                for(auto& metric: emptyMetrics) {
+                    this->addRequiredMetric(std::move(metric));
+                }
+            };
             
+            /// @brief add a metric
+            virtual void addRequiredMetric(std::unique_ptr<Metric> emptyMetric);
+
             /**
              * \brief Return the keys of the current metrics map
              */
@@ -95,7 +105,18 @@ namespace Metrics {
 
             /// Merge with another metricMap (steal values of other)
             void merge(MetricMap& other);
+
+            /**
+             * \brief Print the content of the metric map.
+             */
+            virtual std::string toString(std::string prefix = "") const;
     };
+    /**
+     * \brief operator for printing
+     */
+    inline std::ostream& operator<<(std::ostream& os, const MetricMap& metricMap) {
+        return os << metricMap.toString();
+    }
 
 };
 

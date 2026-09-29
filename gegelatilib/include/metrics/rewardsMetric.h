@@ -16,9 +16,6 @@ namespace Metrics {
     class RewardsMetric: public ScoreMetric
     {
       protected:
-        
-        /// Hash of the current episode
-        uint64_t currentHash = 0;
 
       public:
         /**
@@ -61,6 +58,11 @@ namespace Metrics {
          * \brief Print the content of the metric.
          */
         virtual std::string toString(std::string prefix = "") const override;
+
+        /**
+         * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
+         */
+        static uint64_t staticHash();
     };
 
 

@@ -14,13 +14,8 @@ const Dimensions::Requirement& Evaluation::DataSet::getOutputDimension() const
 
 void Evaluation::DataSet::addData(std::vector<Data::DataValue> inputs, Data::DataValue output)
 {
-    if(inputs.size() != this->inputDimensions.size()) {
-        throw std::runtime_error("Evaluation::DataSet::addDataSample: size of input vector is wrong.");
-    } 
-    for(size_t idx = 0; idx < inputs.size(); idx++) {
-        if(!this->inputDimensions.at(idx).accepts(inputs.at(idx))) {
-            throw std::runtime_error("Evaluation::DataSet::addDataSample: input not valid for the dataset's requirements");
-        }
+    if(!Dimensions::Requirement::acceptListValues(this->inputDimensions, inputs)) {
+        throw std::runtime_error("Representations::Representation::execute: Dimensions of the inputs are wrong");
     }
     if(!this->outputDimension.accepts(output)) {
         throw std::runtime_error("Evaluation::DataSet::addDataSample: output not valid for the dataset's requirements");

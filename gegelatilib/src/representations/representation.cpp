@@ -105,17 +105,9 @@ std::string Representations::Representation::summary() const
 Data::DataValue Representations::Representation::execute(
           const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
-    // No need to check if the dimension flow is valid, it is necessarily valid by construction for now.
-
     // Check inputs are valid
-    const std::vector<Dimensions::Requirement>& inputDim = this->dimensionFlow.getInputDimensions();
-    if(inputSources.size() != inputDim.size()) {
+    if(!Dimensions::Requirement::acceptListViews(this->dimensionFlow.getInputDimensions(), inputSources)) {
         throw std::runtime_error("Representations::Representation::execute: Dimensions of the input sources are wrong");
-    }
-    for(size_t idx = 0; idx < inputSources.size(); idx++){
-        if(!inputDim.at(0).accepts(inputSources.at(0))) {
-            throw std::runtime_error("Representations::Representation::execute: Dimensions of the input sources are wrong");
-        }
     }
 
     Data::DataValue resultIndiv = this->executeGenotype(genotype, inputSources);

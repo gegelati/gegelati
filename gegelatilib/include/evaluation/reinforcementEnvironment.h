@@ -71,6 +71,9 @@ namespace Evaluation {
         /// @brief Maximum number of steps doable in a single episode.
         uint64_t maxSteps;
 
+        /// @brief DataSources used as input space of the environment
+        std::vector<Data::DataValue> dataSources;
+
         /// Make the default copy constructor protected.
         ReinforcementEnvironment(const ReinforcementEnvironment& other) = default;
 
@@ -124,19 +127,9 @@ namespace Evaluation {
         /**
          * \brief Get the data sources for this Problem.
          *
-         * This method returns a vector of reference to the DataHandler that
-         * will be given to the LearningAgent, and to its Program to learn how
-         * to interact with the Problem. Throughout the existence
-         * of the Problem, data contained in the data will be
-         * modified, but never the number, nature or size of the dataHandlers.
-         * Since this methods return references to the DataHandler, the
-         * LearningAgent will assume that the referenced dataHandler are
-         * automatically updated each time the doAction, or reset methods
-         * are called on the Problem.
-         *
-         * \return a vector of references to the DataHandler.
+         * The dataSources should be updated during step or reset method.
          */
-        virtual const std::vector<Data::DataValue>& getDataSources() const = 0;
+        virtual const std::vector<Data::DataValue>& getDataSources() const;
 
         /**
          * \brief Execute an action on the Problem.

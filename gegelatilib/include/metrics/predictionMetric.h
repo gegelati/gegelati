@@ -48,6 +48,11 @@ namespace Metrics {
          * \brief Print the content of the metric.
          */
         virtual std::string toString(std::string prefix = "") const override;
+
+        /**
+         * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
+         */
+        static uint64_t staticHash();
     };
 
 

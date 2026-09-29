@@ -32,5 +32,10 @@ void Metrics::RewardsMetric::extractionEnd(
 
 std::string Metrics::RewardsMetric::toString(std::string prefix) const
 {
-    return "todo";
+    return prefix + " RewardsMetric with score of " + std::to_string(this->score);
+}
+
+uint64_t Metrics::RewardsMetric::staticHash() 
+{
+    return std::type_index(typeid(RewardsMetric)).hash_code();
 }

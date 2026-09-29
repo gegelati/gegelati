@@ -77,13 +77,13 @@ void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) 
     }
 }
 
-std::string Data::DataValue::toString() const {
+std::string Data::DataValue::toString(std::string prefix) const {
 
     std::ostringstream oss;
-    oss << "Data::DataValue{\n"
-        << "\tValue     = " << storage->toString() << "\n"
-        << "\tDataType  =  " << this->type.toString() <<",\n"
-        << "}";
+    oss << prefix << "Data::DataValue{\n"
+        << prefix << "\tValue     = " << storage->toString() << "\n"
+        << prefix << "\tDataType  =  " << this->type.toString() <<",\n"
+        << prefix << "}";
 
     return oss.str();
 }

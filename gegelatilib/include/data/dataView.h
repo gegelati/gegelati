@@ -284,7 +284,7 @@ namespace Data {
         virtual size_t scaleLocation(const Data::DataType& required, const size_t address) const;
 
         /** \brief Returns a diagnostic string containing the pointer and DataType. */
-        virtual std::string toString() const;
+        virtual std::string toString(std::string prefix = "") const;
 
         /**
          * \brief Compares two DataView while ignoring source context.

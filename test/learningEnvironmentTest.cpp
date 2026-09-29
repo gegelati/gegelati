@@ -38,7 +38,7 @@
 #include <gtest/gtest.h>
 
 #include "evaluation/learningEnvironment.h"
-#include "learn/stickGameWithOpponentDupDouble.h"
+#include "learn/StickGameWithOpponentupDouble.h"
 
 TEST(LearningEnvironmentTest, Constructor)
 {
@@ -119,7 +119,7 @@ TEST(LearningEnvironmentTest, getDataSource)
 
 TEST(LearningEnvironmentTest, doAction)
 {
-    StickGameWithOpponentD le;
+    StickGameWithOpponent le;
 
     ASSERT_NO_THROW(le.doAction(1))
         << "Remove 2 stick after game init should not fail.";
@@ -140,7 +140,7 @@ TEST(LearningEnvironmentTest, doAction)
 
 TEST(LearningEnvironmentTest, doActions)
 {
-    StickGameWithOpponentD le;
+    StickGameWithOpponent le;
 
     ASSERT_THROW(le.doActions({1.0, 1.0}), std::runtime_error)
         << "Should fail.";
@@ -151,7 +151,7 @@ TEST(LearningEnvironmentTest, doActions)
 
 TEST(LearningEnvironmentTest, getScoreAndIsTerminal)
 {
-    StickGameWithOpponentD le;
+    StickGameWithOpponent le;
 
     ASSERT_EQ(le.getScore(), 0.0)
         << "Score should be zero until the game is over";

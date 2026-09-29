@@ -3,7 +3,7 @@
 
 uint64_t Evaluation::PredictionProblem::maxHash() const
 {
-    return this->dataset.size() - 1;
+    return this->dataset.size();
 }
 
 const Evaluation::DataSet& Evaluation::PredictionProblem::getDataSet() const

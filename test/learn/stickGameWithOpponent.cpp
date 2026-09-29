@@ -36,18 +36,18 @@
 
 #include "stickGameWithOpponent.h"
 
-bool StickGameWithOpponentD::isCopyable() const
+bool StickGameWithOpponent::isCopyable() const
 {
     return true;
 }
 
-std::unique_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponentD::cloneUniquePtr() const
+std::unique_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponent::cloneUniquePtr() const
 {
     // Default copy constructor does the trick.
-    return std::unique_ptr<StickGameWithOpponentD>();
+    return std::unique_ptr<StickGameWithOpponent>();
 }
 
-void StickGameWithOpponentD::doAction(const Data::DataValue& action)
+void StickGameWithOpponent::doAction(const Data::DataValue& action)
 {
     int actionInt = 0;
 
@@ -95,23 +95,21 @@ void StickGameWithOpponentD::doAction(const Data::DataValue& action)
             }
         }
     }
+
+    this->dataSources.at(1).setScalarAt(this->remainingSticks, 0);
 }
 
-void StickGameWithOpponentD::reset(size_t seed)
+void StickGameWithOpponent::reset(size_t seed)
 {
     // Create seed from seed and mode
     this->rng.setSeed(seed);
     this->remainingSticks = 21;
     this->win = false;
     this->forbiddenMove = false;
+    this->dataSources.at(1).setScalarAt(this->remainingSticks, 0);
 }
 
-std::vector<Data::DataView> StickGameWithOpponentD::getDataSources() const
-{
-    return this->res;
-}
-
-double StickGameWithOpponentD::getLastReward() const
+double StickGameWithOpponent::getLastReward() const
 {
     if(!this->isTerminal()) {
         return 0.0;
@@ -129,7 +127,7 @@ double StickGameWithOpponentD::getLastReward() const
     }
 }
 
-bool StickGameWithOpponentD::isTerminal() const
+bool StickGameWithOpponent::isTerminal() const
 {
     return this->remainingSticks == 0;
 }

@@ -73,6 +73,18 @@ void Metrics::MetricMap::extractionEnd(
     this->resetCurrentMetrics();
 }
 
+std::string Metrics::MetricMap::toString(std::string prefix) const
+{
+    std::stringstream ss;
+    ss << prefix << "MetricMap:\n";
+    for(const auto& [featureHash, featureMetrics]: this->metrics) {
+        ss << prefix << "  Feature " << featureHash << ":\n";
+        for(const auto& [metricHash, metric]: featureMetrics) {
+            ss << metric->toString("    ") << "\n";
+        }
+    }
+    return ss.str();
+}
 
 std::set<uint64_t> Metrics::MetricMapTemplate::getMetricHash() const
 {
@@ -91,4 +103,9 @@ bool Metrics::MetricMapTemplate::hasMetricHash(uint64_t key) const
 size_t Metrics::MetricMapTemplate::size() const
 {
     return this->emptyMetrics.size();
+}
+
+void Metrics::MetricMapTemplate::addRequiredMetric(std::unique_ptr<Metric> emptyMetric)
+{
+    this->emptyMetrics.insert(std::make_pair(emptyMetric->hash(), std::move(emptyMetric)));
 }

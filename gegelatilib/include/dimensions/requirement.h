@@ -167,6 +167,32 @@ namespace Dimensions {
         std::string summary() const {
             return dataType.summary() + " in " + constraint->toString();
         }
+
+        /**
+         * \brief Static method to control if a list of requirement accepts a list of views (1 to 1)
+         */
+        static bool acceptListViews(const std::vector<Requirement>& requirements, const std::vector<Data::DataView>& views) {
+            if(requirements.size() != views.size()) {
+                return false;
+            }
+            for(size_t idx = 0; idx < requirements.size(); idx++) {
+                if(!requirements.at(idx).accepts(views.at(idx))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * \brief Static method to control if a list of requirement accepts a list of values (1 to 1)
+         */
+        static bool acceptListValues(const std::vector<Requirement>& requirements, const std::vector<Data::DataValue>& values) {
+            std::vector<Data::DataView> views;
+            for(const Data::DataValue& value: values) {
+                views.push_back(value.view());
+            }
+            return acceptListViews(requirements, views);
+        };
     };
 
 
