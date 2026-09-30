@@ -67,6 +67,16 @@ namespace Evaluation {
         virtual ~PredictionProblem() = default;
         
         /**
+         * \brief Return a copy of the problem with the same reference to the dataset as it is constant
+         */
+        virtual std::unique_ptr<Problem> cloneUniquePtr() const;
+
+        /**
+         * \brief PredictionProblem is always copyable.
+         */
+        virtual bool isCopyable() const;
+
+        /**
          * \brief Override of Problem method to set the maximum hash to the size of the dataset.
          */
         virtual uint64_t maxHash() const override;

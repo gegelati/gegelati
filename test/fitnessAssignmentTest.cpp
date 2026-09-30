@@ -32,7 +32,7 @@ TEST(FitnessAssignmentTest, assignFitness)
     FitnessAssignment::DefaultAssigner assigner;
     Representations::FakeRepresentation rep;
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;

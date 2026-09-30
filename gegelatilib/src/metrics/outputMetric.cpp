@@ -20,7 +20,7 @@ std::string Metrics::OutputMetric::toString(std::string prefix) const
     ss << prefix << "OutputMetric with "<< this->outputs.size() <<" extractions: \n";
     for(size_t idx=0; idx < this->outputs.size(); idx++) {
         ss << prefix << "  Extraction "<<idx<<": \n";
-        ss << this->outputs.at(idx).toString(prefix + "    ") <<",\n";
+        ss << this->outputs.at(idx).toShortString(prefix + "    ") <<",\n";
     }
     return ss.str();
 }

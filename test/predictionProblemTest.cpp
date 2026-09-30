@@ -96,7 +96,7 @@ TEST(PredictionMetricTest, extractAfterExecution) {
     
     ASSERT_NO_THROW(metric.toString()) << "Fail to print metric";
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem fakeProblem(le);
     ASSERT_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(1), fakeProblem), std::runtime_error) << "Should fail with wrong problem";
 

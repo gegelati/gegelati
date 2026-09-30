@@ -81,6 +81,25 @@ namespace Evaluation {
         virtual ~Problem() = default;
 
         /**
+         * \brief Get a copy of the Problem.
+         *
+         * Default implementation returns a null pointer.
+         *
+         * \return a copy of the Problem if it is copyable,
+         * otherwise this method returns a NULL pointer.
+         */
+        virtual std::unique_ptr<Problem> cloneUniquePtr() const;
+
+        /**
+         * \brief Can the Problem be copy constructed to evaluate
+         * several LearningAgent in parallel.
+         *
+         * \return true if the Problem can be copied and run in
+         * parallel. Default implementation returns false.
+         */
+        virtual bool isCopyable() const;
+
+        /**
          * \brief get the input dimensions of the EvaluationAgent.
          */
         virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;

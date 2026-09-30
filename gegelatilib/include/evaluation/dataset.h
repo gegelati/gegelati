@@ -89,6 +89,14 @@ namespace Evaluation {
              * \brief Return the output at the specified index of the dataset.
              */
             virtual const Data::DataValue& getOutputAt(size_t index) const;
+
+            /**
+             * \brief Return a string of the dataset with the required indices. Default print only the five first values.
+             * 
+             * \param[in] end end index of the dataset to print initially set to 5.
+             * \param[in] start starting index of the dataset to print.
+             */
+            virtual std::string toString(size_t end = 5, size_t start = 0) const;
     };
 };
 

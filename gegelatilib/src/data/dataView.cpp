@@ -87,22 +87,6 @@ std::pair<std::unique_ptr<std::byte[]>, Data::DataView> Data::DataView::deepClon
     return {std::move(clonePtr), std::move(cloneView)};
 }
 
-size_t Data::DataView::hash() const
-{
-    const auto* data = static_cast<const std::byte*>(ptr);
-    const std::size_t size =
-        type.totalElements() * type.elementSize;
-
-    std::size_t hash = 14695981039346656037ull;
-
-    for (std::size_t i = 0; i < size; ++i) {
-        hash ^= std::to_integer<unsigned char>(data[i]);
-        hash *= 1099511628211ull;
-    }
-
-    return hash;
-}
-
 bool Data::DataView::operator==(const DataView& other) const noexcept
 {
     return (this->ptr == other.ptr) && (this->type == other.type);
@@ -147,6 +131,22 @@ size_t Data::DataView::getCombinedHash(const std::vector<DataView>& views)
         hash ^= h + 0x9e3779b97f4a7c15ULL +
                 (hash << 6) +
                 (hash >> 2);
+    }
+
+    return hash;
+}
+
+size_t Data::DataView::hash() const
+{
+    const auto* data = static_cast<const std::byte*>(ptr);
+    const std::size_t size =
+        type.totalElements() * type.elementSize;
+
+    std::size_t hash = 14695981039346656037ull;
+
+    for (std::size_t i = 0; i < size; ++i) {
+        hash ^= std::to_integer<unsigned char>(data[i]);
+        hash *= 1099511628211ull;
     }
 
     return hash;

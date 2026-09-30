@@ -118,4 +118,6 @@ TEST(DataSetTest, getInputsOutput)
 
     const Data::DataValue& output = dataset.getOutputAt(2);
     ASSERT_EQ(2, output.getScalar<int>());
+
+    ASSERT_NO_THROW(dataset.toString()) << "should not throw!";
 }

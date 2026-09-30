@@ -25,7 +25,7 @@ std::string Metrics::InputMetric::toString(std::string prefix) const
     for(size_t idx=0; idx < this->inputs.size(); idx++) {
         ss << prefix << "  Extraction "<<idx<<": \n";
         for(size_t idxInput = 0; idxInput < this->inputs.at(idx).size(); idxInput++) {
-            ss << this->inputs.at(idx).at(idxInput).toString(prefix + "    ") <<",\n";
+            ss << this->inputs.at(idx).at(idxInput).toShortString(prefix + "    ") <<",\n";
         }
     }
     return ss.str();

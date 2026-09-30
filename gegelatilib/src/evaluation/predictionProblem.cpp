@@ -1,6 +1,17 @@
 
 #include "evaluation/predictionProblem.h"
 
+
+std::unique_ptr<Evaluation::Problem> Evaluation::PredictionProblem::cloneUniquePtr() const
+{
+  return std::make_unique<Evaluation::PredictionProblem>(this->dataset, this->problemSeed);
+}
+
+bool Evaluation::PredictionProblem::isCopyable() const
+{
+  return true;
+}
+
 uint64_t Evaluation::PredictionProblem::maxHash() const
 {
     return this->dataset.size();

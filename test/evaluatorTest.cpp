@@ -53,8 +53,8 @@ TEST(EvaluatorTest, computeEvaluationHashes)
 
 TEST(EvaluatorTest, evaluateIndividualsOnRL)
 {
-    StickGameWithOpponent environment;
-    Evaluation::ReinforcementProblem problem(environment);
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
+    Evaluation::ReinforcementProblem problem(le);
     Evaluation::Evaluator evaluator;
 
     Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());

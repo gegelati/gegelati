@@ -18,6 +18,28 @@ class FakeVectorMetric: public Metrics::VectorMetric {
     std::string toString(std::string prefix = "") const override {return "";};
 };
 
+class FakeScalarMetric: public Metrics::ScalarMetric {
+    public:
+    FakeScalarMetric(double value = 0.0) : Metrics::ScalarMetric() {this->values[0] = value;};
+    std::unique_ptr<Metric> cloneEmptyPtr() const override {return std::make_unique<FakeScalarMetric>(this->values[0]);};
+    std::string toString(std::string prefix = "") const override {return "";};
+};
+
+class FakeVectorMetric2: public Metrics::VectorMetric {
+    public:
+    FakeVectorMetric2(): Metrics::VectorMetric(2) {};
+    std::unique_ptr<Metric> cloneEmptyPtr() const override {return std::make_unique<FakeVectorMetric2>();};
+    std::string toString(std::string prefix = "") const override {return "";};
+    void extractionEnd(
+            const uint64_t& hash, const Individual& individual, 
+            const Evaluation::Problem& problem) override {
+                this->values.clear();
+                for(size_t idx = 0; idx < hash; idx++) {
+                    this->values.push_back(idx);
+                }
+            }
+};
+
 
 TEST(NoveltySearchTest, Constructor) 
 {
@@ -36,7 +58,7 @@ TEST(NoveltySearchTest, computeDescriptors)
 
     Representations::FakeRepresentation rep;
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{0.0}, {0.1}, {0.3}, {1.0}};
@@ -49,6 +71,8 @@ TEST(NoveltySearchTest, computeDescriptors)
         mapTemplate->addRequiredMetric(std::make_unique<FakeVectorMetric>(value));
         std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
         map->extractionEnd(0, *indiv, problem);
+        map->extractionEnd(1, *indiv, problem);
+        map->extractionEnd(2, *indiv, problem);
 
         mapResults.insert(std::make_pair(indiv, std::move(map)));
     }
@@ -63,10 +87,65 @@ TEST(NoveltySearchTest, computeDescriptors)
     ASSERT_NE(descriptor.find(2), descriptor.end());
     ASSERT_NE(descriptor.find(3), descriptor.end());
 
-    ASSERT_EQ(descriptor.at(0), std::vector<double>({0.0}));
-    ASSERT_EQ(descriptor.at(1), std::vector<double>({0.1}));
-    ASSERT_EQ(descriptor.at(2), std::vector<double>({0.3}));
-    ASSERT_EQ(descriptor.at(3), std::vector<double>({1.0}));
+    ASSERT_EQ(descriptor.at(0).size(), 1);
+    ASSERT_EQ(descriptor.at(1).size(), 1);
+    ASSERT_EQ(descriptor.at(2).size(), 1);
+    ASSERT_EQ(descriptor.at(3).size(), 1);
+
+    ASSERT_NEAR(descriptor.at(0).at(0), 0.0, 0.00001);
+    ASSERT_NEAR(descriptor.at(1).at(0), 0.1, 0.00001);
+    ASSERT_NEAR(descriptor.at(2).at(0), 0.3, 0.00001);
+    ASSERT_NEAR(descriptor.at(3).at(0), 1.0, 0.00001);
+}
+
+TEST(NoveltySearchTest, computeDescriptorsList)
+{
+    CounterReset::counterReset();
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, false);
+
+    Representations::FakeRepresentation rep;
+
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
+    Evaluation::ReinforcementProblem problem(le);
+
+    std::vector<double> descriptorValues{0.0, 0.1, 0.3, 1.0};
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+
+    for(const double& value: descriptorValues) {
+        std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
+
+        auto mapTemplate = std::make_shared<Metrics::MetricMapTemplate>();
+        mapTemplate->addRequiredMetric(std::make_unique<FakeScalarMetric>(value));
+        std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
+        map->extractionEnd(0, *indiv, problem);
+        map->extractionEnd(1, *indiv, problem);
+        map->extractionEnd(2, *indiv, problem);
+
+        mapResults.insert(std::make_pair(indiv, std::move(map)));
+    }
+
+    ASSERT_NO_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeScalarMetric>()->hash())) << "Assigning fitness failed";
+    std::map<uint64_t, std::vector<double>> descriptor = noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeScalarMetric>()->hash());
+
+    ASSERT_EQ(descriptor.size(), 4);
+    
+    ASSERT_NE(descriptor.find(0), descriptor.end());
+    ASSERT_NE(descriptor.find(1), descriptor.end());
+    ASSERT_NE(descriptor.find(2), descriptor.end());
+    ASSERT_NE(descriptor.find(3), descriptor.end());
+
+    ASSERT_EQ(descriptor.at(0).size(), 3);
+    ASSERT_EQ(descriptor.at(1).size(), 3);
+    ASSERT_EQ(descriptor.at(2).size(), 3);
+    ASSERT_EQ(descriptor.at(3).size(), 3);
+
+    for(size_t idx = 0; idx < 3; idx++) {
+        ASSERT_NEAR(descriptor.at(0).at(idx), 0.0, 0.00001);
+        ASSERT_NEAR(descriptor.at(1).at(idx), 0.1, 0.00001);
+        ASSERT_NEAR(descriptor.at(2).at(idx), 0.3, 0.00001);
+        ASSERT_NEAR(descriptor.at(3).at(idx), 1.0, 0.00001);
+    }
+
 }
 
 TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
@@ -76,7 +155,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
 
     Representations::FakeRepresentation rep;
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{}, {1.0}};
@@ -104,7 +183,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
 
     Representations::FakeRepresentation rep;
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{1.0}, {2.0, 3.0}};
@@ -122,6 +201,37 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
     }
 
     ASSERT_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric>()->hash()), std::runtime_error) << "Assigning fitness should fail with different size of descriptors";
+}
+
+TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
+{
+    CounterReset::counterReset();
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
+
+    Representations::FakeRepresentation rep;
+
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
+    Evaluation::ReinforcementProblem problem(le);
+
+    std::vector<std::vector<double>> descriptorValues{{1.0}, {2.0, 3.0}};
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+
+    bool first = true;
+    for(const std::vector<double>& value: descriptorValues) {
+        std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
+
+        auto mapTemplate = std::make_shared<Metrics::MetricMapTemplate>();
+        mapTemplate->addRequiredMetric(std::make_unique<FakeVectorMetric2>());
+        std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
+        map->extractionEnd(10, *indiv, problem);
+        map->extractionEnd(12, *indiv, problem);
+        map->extractionEnd(14, *indiv, problem);
+        map->extractionEnd(16, *indiv, problem);
+
+        mapResults.insert(std::make_pair(indiv, std::move(map)));
+    }
+
+    ASSERT_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric2>()->hash()), std::runtime_error) << "Assigning fitness should fail with different size of descriptors between features";
 }
 
 
@@ -203,6 +313,11 @@ TEST(NoveltySearchTest, computeNeighborsTest)
     ASSERT_EQ(neighbors.at(id3).size(), 2);
     ASSERT_EQ(neighbors.at(id3).at(0), id2);
     ASSERT_EQ(neighbors.at(id3).at(1), id1);
+
+    
+    FitnessAssignment::NoveltySearchAssigner noveltySearchWrong(4);
+    ASSERT_THROW(noveltySearchWrong.computeNeighbors(distances), std::runtime_error) << "computing neighbors should with 4 individuals and 4 neighbors";
+
 }
 
 TEST(NoveltySearchTest, computeNoveltyScore)
@@ -253,7 +368,7 @@ TEST(NoveltySearchTest, doSelection)
 
     Representations::FakeRepresentation rep;
 
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{0.0}, {0.1}, {0.3}, {1.0}};

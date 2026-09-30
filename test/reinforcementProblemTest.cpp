@@ -13,7 +13,7 @@
 
 TEST(ReinforcementProblemTest, Constructor)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem* problem;
 
     ASSERT_NO_THROW(problem = new Evaluation::ReinforcementProblem(environment)) << "Construction failed";
@@ -23,27 +23,27 @@ TEST(ReinforcementProblemTest, Constructor)
 
 TEST(ReinforcementProblemTest, getEnvironment)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
-    ASSERT_EQ(&problem.getEnvironment(), &environment) << "Returned environment should be the environment used to construct the problem";
+    ASSERT_EQ(&problem.getEnvironment(), environment.get()) << "Returned environment should be the environment used to construct the problem";
 }
 
 TEST(ReinforcementProblemTest, dimensions)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
     ASSERT_NO_THROW(problem.getInputDimensions()) << "Getting input dimensions failed";
     ASSERT_NO_THROW(problem.getOutputDimension()) << "Getting output dimension failed";
 
-    ASSERT_EQ(problem.getInputDimensions(), environment.getInputDimensions()) << "Input dimensions should match the environment";
-    ASSERT_EQ(problem.getOutputDimension(), environment.getOutputDimension()) << "Output dimension should match the environment";
+    ASSERT_EQ(problem.getInputDimensions(), environment->getInputDimensions()) << "Input dimensions should match the environment";
+    ASSERT_EQ(problem.getOutputDimension(), environment->getOutputDimension()) << "Output dimension should match the environment";
 }
 
 TEST(ReinforcementProblemTest, maxHash) 
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
     ASSERT_EQ(problem.maxHash(), UINT64_MAX) << "Max hash should be super high!";
@@ -51,7 +51,7 @@ TEST(ReinforcementProblemTest, maxHash)
 
 TEST(ReinforcementProblemTest, extractNoMetric)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
     Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
@@ -67,7 +67,7 @@ TEST(ReinforcementProblemTest, extractNoMetric)
 
 TEST(ReinforcementProblemTest, extractOneMetric)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
     Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
@@ -95,7 +95,7 @@ TEST(ReinforcementProblemTest, extractOneMetric)
 
 TEST(ReinforcementProblemTest, extractMultiMetric)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
     Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
@@ -170,7 +170,7 @@ TEST(RewardsMetricTest, staticHash)
 
 TEST(RewardsMetricTest, extract)
 {
-    StickGameWithOpponent environment;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
     Metrics::RewardsMetric metric;
 
@@ -179,14 +179,14 @@ TEST(RewardsMetricTest, extract)
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
-    environment.reset();
+    environment->reset();
 
-    double expectedReward = environment.getLastReward();
+    double expectedReward = environment->getLastReward();
 
-    ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment.getDataSources(), problem)) << "Extracting the reward before execution failed";
+    ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment->getDataSources(), problem)) << "Extracting the reward before execution failed";
     ASSERT_EQ(metric.getValue(), expectedReward) << "Score should contain the environment reward";
 
-    ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment.getDataSources(), problem)) << "Extracting the reward before execution failed";
+    ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment->getDataSources(), problem)) << "Extracting the reward before execution failed";
     ASSERT_EQ(metric.getValue(), expectedReward * 2) << "Score should contain the environment reward";
 
     

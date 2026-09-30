@@ -4,6 +4,7 @@
 
 #include "fitnessAssignment/assigner.h"
 #include "metrics/vectorMetric.h"
+#include "metrics/scalarMetric.h"
 
  namespace FitnessAssignment {
 
@@ -15,12 +16,34 @@
         
             /// @brief The number of neighbors.
             size_t nbNeighbors; 
+
+            /// @brief Indicate if the metrics over features are computed with average or a list.
+            bool averageFeature;
         public:
 
             /**
              * \brief Default constructor
+             * 
+             * \param[in] nbNeighbors the number of neighbors to measure.
+             * \param[in] averageFeature Indicate if the metrics over features are computed with average or a list.
              */
-            NoveltySearchAssigner(size_t nbNeighbors): nbNeighbors{nbNeighbors} {};
+            NoveltySearchAssigner(size_t nbNeighbors, bool averageFeature = true): nbNeighbors{nbNeighbors}, averageFeature{averageFeature} {};
+
+            /**
+             * \brief Method to compute the descriptor when faced to multiple features:
+             * This method compute the average of the vector metric over each feature.
+             * 
+             * \param[in] vectorMetrics the map of vector metrics averaged
+             */
+            virtual std::vector<double> computeOneDescriptorAvgVector(const std::map<uint64_t, const Metrics::VectorMetric*>& vectorMetrics) const;
+
+            /**
+             * \brief Method to compute the descriptor when faced to multiple features:
+             * This method compute the list of descriptors as the list of each scalar over feature
+             * 
+             * \param[in] scalarMetrics the map of scalar metrics listed
+             */
+            virtual std::vector<double> computeOneDescriptorListScalar(const std::map<uint64_t, const Metrics::ScalarMetric*>& scalarMetrics) const;
 
             /**
              * \brief Compute the descriptor values of the individuals based on the vector metric required
@@ -30,7 +53,7 @@
              * 
              * \return A map of each individual ID with the descriptor values. ID is used to reduce memory coset and increase lisibility
              */
-            std::map<uint64_t, std::vector<double>> computeDescriptors(
+            virtual std::map<uint64_t, std::vector<double>> computeDescriptors(
                 const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
                 uint64_t metricHash) const;
             
@@ -41,14 +64,14 @@
              * 
              * \return a map of map linking every individual to all his neighbors
              */
-            std::map<uint64_t, std::map<uint64_t, double>> computeDistances(std::map<uint64_t, std::vector<double>> descriptors) const;
+            virtual std::map<uint64_t, std::map<uint64_t, double>> computeDistances(std::map<uint64_t, std::vector<double>> descriptors) const;
 
             /**
              * \brief compute the N nearest neighbors of every individual based on the distances matrix.
              * 
              * \param[in] distances the distances matrix
              */
-            std::map<uint64_t, std::vector<uint64_t>> computeNeighbors(std::map<uint64_t, std::map<uint64_t, double>> distances) const;
+            virtual std::map<uint64_t, std::vector<uint64_t>> computeNeighbors(std::map<uint64_t, std::map<uint64_t, double>> distances) const;
 
             /**
              * \brief Compute novelty scores based on the distances
@@ -56,7 +79,7 @@
              * \param[in] distances the distances matrix
              * \param[in] neighbors the neighbors of each individual
              */
-            std::map<uint64_t, double> computeNoveltyScores(
+            virtual std::map<uint64_t, double> computeNoveltyScores(
                 std::map<uint64_t, std::map<uint64_t, double>> distances,
                 std::map<uint64_t, std::vector<uint64_t>> neighbors) const;
 

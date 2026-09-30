@@ -88,6 +88,12 @@ std::string Data::DataValue::toString(std::string prefix) const {
     return oss.str();
 }
 
+std::string Data::DataValue::toShortString(std::string prefix) const {
+    std::ostringstream oss;
+    oss << prefix << "Data=" <<storage->toString()<< ", type=" << DEMANGLE_TYPEID_NAME(this->getElementType().name()) << "";
+    return oss.str();
+}
+
 Data::DataValue::operator bool() const noexcept {
     return static_cast<bool>(storage);
 }
@@ -100,4 +106,13 @@ bool Data::DataValue::operator==(const Data::DataValue& other) const noexcept
 bool Data::DataValue::operator!=(const Data::DataValue& other) const noexcept
 {
     return !(*this == other);
+}
+
+size_t Data::DataValue::getCombinedHash(const std::vector<Data::DataValue>& values)
+{
+    std::vector<Data::DataView> views;
+    for(const Data::DataValue& value: values) {
+        views.push_back(value.view());
+    }
+    return Data::DataView::getCombinedHash(views);
 }

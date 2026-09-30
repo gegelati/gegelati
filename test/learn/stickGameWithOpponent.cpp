@@ -41,10 +41,10 @@ bool StickGameWithOpponent::isCopyable() const
     return true;
 }
 
-std::unique_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponent::cloneUniquePtr() const
+std::shared_ptr<Evaluation::ReinforcementEnvironment> StickGameWithOpponent::cloneSharedPtr() const
 {
     // Default copy constructor does the trick.
-    return std::unique_ptr<StickGameWithOpponent>();
+    return std::make_shared<StickGameWithOpponent>();
 }
 
 void StickGameWithOpponent::doAction(const Data::DataValue& action)

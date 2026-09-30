@@ -1,6 +1,17 @@
 
 #include "evaluation/problem.h"
 
+
+std::unique_ptr<Evaluation::Problem> Evaluation::Problem::cloneUniquePtr() const
+{
+    return NULL;
+}
+
+bool Evaluation::Problem::isCopyable() const
+{
+    return false;
+}
+
 const std::vector<Dimensions::Requirement>& Evaluation::Problem::getInputDimensions() const
 {
     return this->inputDimensions;

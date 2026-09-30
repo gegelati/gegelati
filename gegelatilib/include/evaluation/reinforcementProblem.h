@@ -52,7 +52,7 @@ namespace Evaluation {
     {
       protected:
         /// Number of class in the dataset
-        Evaluation::ReinforcementEnvironment& env;
+        std::shared_ptr<Evaluation::ReinforcementEnvironment> env;
 
       public:
         /**
@@ -62,11 +62,22 @@ namespace Evaluation {
          * \param[in] problemSeed TODO
          */
         ReinforcementProblem(
-            Evaluation::ReinforcementEnvironment& env, uint64_t problemSeed = 0) 
-            : Problem(env.getInputDimensions(), env.getOutputDimension(), problemSeed), env{env} {};
+            const std::shared_ptr<Evaluation::ReinforcementEnvironment>& env, uint64_t problemSeed = 0) 
+            : Problem(env->getInputDimensions(), env->getOutputDimension(), problemSeed), env{env} {};
 
         /// Default destructor for polymorphism
         virtual ~ReinforcementProblem() = default;
+
+
+        /**
+         * \brief return a copy of the environment if copyable, else throw
+         */
+        virtual std::unique_ptr<Problem> cloneUniquePtr() const;
+
+        /**
+         * \brief Reinforcement problem is copyable if the environment is
+         */
+        virtual bool isCopyable() const;
 
         /**
          * \brief TODO

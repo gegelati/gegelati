@@ -309,7 +309,8 @@ TEST(DataValueTest, arrayRangeFactoriesAndStringOutputRemainReliable)
     EXPECT_NE(text.find("[1, 2"), std::string::npos);
 
     ASSERT_NO_THROW(std::cout<<value<<std::endl);
-    
+
+    ASSERT_NO_THROW(value.toShortString()); // For coverage
 }
 
 

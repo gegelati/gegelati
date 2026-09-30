@@ -84,7 +84,7 @@ class StickGameWithOpponent : public Evaluation::ReinforcementEnvironment
     virtual bool isCopyable() const override;
 
     // Inherited via Problem
-    virtual std::unique_ptr<ReinforcementEnvironment> cloneUniquePtr() const override;
+    virtual std::shared_ptr<ReinforcementEnvironment> cloneSharedPtr() const override;
 
     // Inherited via Problem
     virtual void doAction(const Data::DataValue& action) override;

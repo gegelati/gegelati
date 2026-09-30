@@ -41,7 +41,7 @@
 #include "evaluation/reinforcementEnvironment.h"
 
 
-std::unique_ptr<Evaluation::ReinforcementEnvironment> Evaluation::ReinforcementEnvironment::cloneUniquePtr() const
+std::shared_ptr<Evaluation::ReinforcementEnvironment> Evaluation::ReinforcementEnvironment::cloneSharedPtr() const
 {
     return NULL;
 }

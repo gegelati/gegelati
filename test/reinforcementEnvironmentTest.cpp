@@ -45,7 +45,7 @@ TEST(ReinforcementEnvironmentTest, Clonable)
     FakeReinforcementEnvironment environment;
 
     ASSERT_FALSE(environment.isCopyable()) << "Default behavior of isCopyable should be false";
-    ASSERT_EQ(environment.cloneUniquePtr(), nullptr) << "Default behavior of cloneUniquePtr should return nullptr";
+    ASSERT_EQ(environment.cloneSharedPtr(), nullptr) << "Default behavior of cloneUniquePtr should return nullptr";
 }
 
 

@@ -97,7 +97,7 @@ namespace Evaluation {
          * \return a copy of the Problem if it is copyable,
          * otherwise this method returns a NULL pointer.
          */
-        virtual std::unique_ptr<Evaluation::ReinforcementEnvironment> cloneUniquePtr() const;
+        virtual std::shared_ptr<Evaluation::ReinforcementEnvironment> cloneSharedPtr() const;
 
         /**
          * \brief Can the Problem be copy constructed to evaluate

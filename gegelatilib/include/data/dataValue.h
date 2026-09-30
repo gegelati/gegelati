@@ -381,6 +381,11 @@ namespace Data {
          */
         virtual std::string toString(std::string prefix = "") const override;
 
+        /**
+         * \brief Renders the owned value in a short, one line, way
+         */
+        virtual std::string toShortString(std::string prefix = "") const;
+
         /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;
 
@@ -439,6 +444,11 @@ namespace Data {
          * \return `true` when the DataValue differ.
          */
         bool operator!=(const DataValue& other) const noexcept;
+
+        /**
+         * \brief Static method to compute the combined hash of multiple dataValues!
+         */
+        static size_t getCombinedHash(const std::vector<Data::DataValue>& values);
     };
 
 } // namespace Data

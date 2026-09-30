@@ -46,6 +46,7 @@
 #include "learn/stickGameWithOpponent.h"
 #include "evaluation/reinforcementProblem.h"
 #include "evaluation/evaluator.h"
+#include "evaluation/parallelEvaluator.h"
 #include "metrics/rewardsMetric.h"
 
 #include "representations/LGP.h"
@@ -64,7 +65,7 @@ class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    StickGameWithOpponent le;
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le;
 
 
     virtual void SetUp()
@@ -76,10 +77,11 @@ class EvolutionAlgorithmTest : public ::testing::Test
         auto div = [](int a, double b) -> double { return a / b; };
         
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<int, double, double>(minus)));
-        set.add(*(new Instructions::LambdaInstruction<double, int, double>(times)));
-        set.add(*(new Instructions::LambdaInstruction<int, double, double>(div)));
+        set.add(*(new Instructions::LambdaInstruction<double, int, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, int>(times)));
+        set.add(*(new Instructions::LambdaInstruction<double, int, double>(div)));
     
+        le = std::make_shared<StickGameWithOpponent>();
     }
 
     virtual void TearDown()
@@ -97,7 +99,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     rng.setSeed(4);
 
     // Create representation
-    Representations::LGP lgpRep(le.getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
 
     // Create Mutator and breeder
     Reproduction::Replicator breeder;
@@ -110,7 +112,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
-    Evaluation::Evaluator evaluator;
+    Evaluation::ParallelEvaluator evaluator(10);
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
 
@@ -166,8 +168,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     rng.setSeed(4);
 
     // Create representations
-    Representations::LGP lgpRep(le.getInputDimensions(), 1, set, 8, 10);
-    Representations::TPG tpgRep(le.getInputDimensions(), 3, 2, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
     // Create Mutator and breeder
     Reproduction::Replicator breeder;
@@ -180,7 +182,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
-    Evaluation::Evaluator evaluator;
+    Evaluation::ParallelEvaluator evaluator(20);
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
     
@@ -258,5 +260,5 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         <<" and score: " << individualFitnessTPG.begin()->second <<std::endl;
     }
 
-    ASSERT_EQ(5681813666992117604U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(17897024810324326341U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
