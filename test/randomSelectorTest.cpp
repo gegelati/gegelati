@@ -24,10 +24,10 @@ TEST(RandomSelectorTest, selectWithoutReplacement)
     rng.setSeed(0);
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores;
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> populationScores;
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
-        populationScores.push_back(std::make_pair(double(199 - idx), indiv));
+        populationScores.insert(std::make_pair(indiv, double(199 - idx)));
     }
 
 
@@ -58,10 +58,10 @@ TEST(RandomSelectorTest, selectWithReplacement)
 
 
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores;
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> populationScores;
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
-        populationScores.push_back(std::make_pair(double(199 - idx), indiv));
+        populationScores.insert(std::make_pair(indiv, double(199 - idx)));
     }
 
     std::vector<std::shared_ptr<const Individual>> selectionResults;
@@ -88,17 +88,16 @@ TEST(RandomSelectorTest, selectIsDeterminist)
     RNG::RNG rng;
     rng.setSeed(0);
 
-
     // Create 200 individuals with scores 0, 1, 2, ..., 199 and IDS 0, 2, 4, ..., 398.
     // Create 200 individuals with random scores in ranges  and IDS 1, 3, 5, ..., 399.
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores1;
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> populationScores2;
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> populationScores1;
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> populationScores2;
     for(size_t idx = 0; idx < 200; idx++) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
-        populationScores1.push_back(std::make_pair(double(199 - idx), indiv));
-        populationScores2.push_back(std::make_pair(rng.uniformSample<double>(-1000.0, 1000.0), indiv));
+        populationScores1.insert(std::make_pair(indiv, double(199 - idx)));
+        populationScores2.insert(std::make_pair(indiv, rng.uniformSample<double>(-1000.0, 1000.0)));
     }
-
+    
     rng.setSeed(0);
     std::vector<std::shared_ptr<const Individual>> selectionResults1;
     ASSERT_NO_THROW(selectionResults1 = selection.select(populationScores1, 100, rng)) << "Selecting individuals failed";

@@ -1,29 +1,26 @@
 
 #include "fitnessAssignment/defaultAssigner.h"
 
-std::vector<std::pair<double, std::shared_ptr<const Individual>>> FitnessAssignment::DefaultAssigner::assignFitness(
+
+std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> FitnessAssignment::DefaultAssigner::assignFitness(
                 const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
                 uint64_t metricHash) const
 {
     // Get the average score of each individual.
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> ranked;
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> fitnesses;
     for (const auto& [individual, metricMap] : individualMetrics){
 
-        double avgScore = 0.0;
+        double avgFitness = 0.0;
 
-        std::map<uint64_t, const Metrics::ScoreMetric*> scoreMetrics = metricMap->getMetricValues<Metrics::ScoreMetric>(metricHash);
-        for(const auto& [key, metric]: scoreMetrics) {
-            avgScore += metric->getScore();
+        std::map<uint64_t, const Metrics::ScalarMetric*> scalarMetrics = metricMap->getMetricValues<Metrics::ScalarMetric>(metricHash);
+        for(const auto& [key, metric]: scalarMetrics) {
+            avgFitness += metric->getValue();
         }
 
-        avgScore /= scoreMetrics.size();
+        avgFitness /= scalarMetrics.size();
         
-        ranked.emplace_back(avgScore, individual);
+        fitnesses.insert(std::make_pair(individual, avgFitness));
     }
 
-    // Sort the individual to get ranks.
-    std::stable_sort(ranked.begin(), ranked.end(),
-        [](const auto& a, const auto& b) { return a.first > b.first; });
-
-    return ranked;
+    return std::move(fitnesses);
 }

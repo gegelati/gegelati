@@ -16,12 +16,12 @@ void Metrics::PredictionMetric::extractAfterExecution(
     }
     const Evaluation::PredictionProblem& classifProblem = dynamic_cast<const Evaluation::PredictionProblem&>(problem);
 
-    this->score = double(output == classifProblem.getDataSet().getOutputAt(hash));
+    this->values[0] = double(output == classifProblem.getDataSet().getOutputAt(hash));
 }
 
 std::string Metrics::PredictionMetric::toString(std::string prefix) const
 {
-    return prefix + " PredictionMetric with score of " + std::to_string(this->score);
+    return prefix + " PredictionMetric with success: " + std::to_string(this->values[0]);
 }
 
 uint64_t Metrics::PredictionMetric::staticHash() 

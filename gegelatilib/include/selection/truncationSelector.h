@@ -20,7 +20,7 @@
             /**
              * \brief method performing the truncation selection
              * 
-             * \param[in] individualFitnesses the individuals containing the scores.
+             * \param[in] fitnessMap the individuals containing the scores.
              * \param[in] nbSelected the number of individuals to select.
              * \param[in] rng required for selecting (unused for truncation)
              * 
@@ -29,7 +29,7 @@
              * \return a vector of the selected individuals.
              */
             virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::vector<std::pair<double, std::shared_ptr<const Individual>>>& individualFitnesses,
+                const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap,
                 size_t nbSelected, RNG::RNG& rng) const override;
     };
 };

@@ -15,7 +15,7 @@ void Metrics::RewardsMetric::extractBeforeExecution(
     if(dynamic_cast<const Evaluation::ReinforcementProblem*>(&problem) == nullptr) {
         throw std::runtime_error ("Metrics::RewardsMetric::extractBeforeExecution: feature can only be extracted on a reinforcementProblem");
     }
-    this->score += dynamic_cast<const Evaluation::ReinforcementProblem&>(problem).getEnvironment().getLastReward();
+    this->values[0] += dynamic_cast<const Evaluation::ReinforcementProblem&>(problem).getEnvironment().getLastReward();
     
 }
 
@@ -27,12 +27,12 @@ void Metrics::RewardsMetric::extractionEnd(
     if(dynamic_cast<const Evaluation::ReinforcementProblem*>(&problem) == nullptr) {
         throw std::runtime_error ("Metrics::RewardsMetric::extractionEndAndComputeMetric: feature can only be extracted on a reinforcementProblem");
     }
-    this->score += dynamic_cast<const Evaluation::ReinforcementProblem&>(problem).getEnvironment().getLastReward();
+    this->values[0] += dynamic_cast<const Evaluation::ReinforcementProblem&>(problem).getEnvironment().getLastReward();
 }
 
 std::string Metrics::RewardsMetric::toString(std::string prefix) const
 {
-    return prefix + " RewardsMetric with score of " + std::to_string(this->score);
+    return prefix + " RewardsMetric with sum of rewards: " + std::to_string(this->values[0]);
 }
 
 uint64_t Metrics::RewardsMetric::staticHash() 

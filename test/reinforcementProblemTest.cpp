@@ -88,8 +88,8 @@ TEST(ReinforcementProblemTest, extractOneMetric)
     ASSERT_TRUE(metrics.find(0) != metrics.end()) << "Should have hash 0";
     ASSERT_TRUE(metrics.find(1) != metrics.end()) << "Should have hash 1";
 
-    ASSERT_NO_THROW(metrics.at(0)->getScore()) << "Getting reward metric at hash 0 failed";
-    ASSERT_NO_THROW(metrics.at(1)->getScore()) << "Getting reward metric at hash 1 failed";
+    ASSERT_NO_THROW(metrics.at(0)->getValue()) << "Getting reward metric at hash 0 failed";
+    ASSERT_NO_THROW(metrics.at(1)->getValue()) << "Getting reward metric at hash 1 failed";
 }
 
 
@@ -119,8 +119,8 @@ TEST(ReinforcementProblemTest, extractMultiMetric)
     ASSERT_TRUE(metrics.find(0) != metrics.end()) << "Should have hash 0";
     ASSERT_TRUE(metrics.find(1) != metrics.end()) << "Should have hash 1";
 
-    ASSERT_NO_THROW(metrics.at(0)->getScore()) << "Getting reward metric at hash 0 failed";
-    ASSERT_NO_THROW(metrics.at(1)->getScore()) << "Getting reward metric at hash 1 failed";
+    ASSERT_NO_THROW(metrics.at(0)->getValue()) << "Getting reward metric at hash 0 failed";
+    ASSERT_NO_THROW(metrics.at(1)->getValue()) << "Getting reward metric at hash 1 failed";
     
     std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = map.getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "Should have two metrics with two hash";
@@ -184,14 +184,14 @@ TEST(RewardsMetricTest, extract)
     double expectedReward = environment.getLastReward();
 
     ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment.getDataSources(), problem)) << "Extracting the reward before execution failed";
-    ASSERT_EQ(metric.getScore(), expectedReward) << "Score should contain the environment reward";
+    ASSERT_EQ(metric.getValue(), expectedReward) << "Score should contain the environment reward";
 
     ASSERT_NO_THROW(metric.extractBeforeExecution(0, indiv, environment.getDataSources(), problem)) << "Extracting the reward before execution failed";
-    ASSERT_EQ(metric.getScore(), expectedReward * 2) << "Score should contain the environment reward";
+    ASSERT_EQ(metric.getValue(), expectedReward * 2) << "Score should contain the environment reward";
 
     
     ASSERT_NO_THROW(metric.extractionEnd(0, indiv, problem)) << "Extracting the reward at the end of the episode failed";
-    ASSERT_EQ(metric.getScore(), expectedReward * 3) << "Score should contain the environment reward";
+    ASSERT_EQ(metric.getValue(), expectedReward * 3) << "Score should contain the environment reward";
 
     
     Evaluation::DataSet dataSet = createSmallDataSet();

@@ -3,7 +3,7 @@
 #ifndef REWARD_METRICS_H
 #define REWARD_METRICS_H
 
-#include "metrics/scoreMetric.h"
+#include "metrics/scalarMetric.h"
 #include "evaluation/reinforcementProblem.h"
 
 
@@ -13,7 +13,7 @@ namespace Metrics {
     /**
      * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
-    class RewardsMetric: public ScoreMetric
+    class RewardsMetric: public ScalarMetric
     {
       protected:
 

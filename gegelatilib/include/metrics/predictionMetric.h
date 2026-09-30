@@ -3,7 +3,7 @@
 #ifndef PREDICTION_METRIC_H
 #define PREDICTION_METRIC_H
 
-#include "metrics/scoreMetric.h"
+#include "metrics/scalarMetric.h"
 #include "evaluation/predictionProblem.h"
 
 
@@ -13,7 +13,7 @@ namespace Metrics {
     /**
      * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
      */
-    class PredictionMetric: public ScoreMetric
+    class PredictionMetric: public ScalarMetric
     {
 
       public:

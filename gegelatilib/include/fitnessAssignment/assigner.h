@@ -31,7 +31,7 @@
              * \param[in] individualMetrics the individuals with their metrics.
              * \param[in] metricHash the hash of the required metric.
              */
-            virtual std::vector<std::pair<double, std::shared_ptr<const Individual>>> assignFitness(
+            virtual std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> assignFitness(
                 const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
                 uint64_t metricHash = 0) const = 0;
     };

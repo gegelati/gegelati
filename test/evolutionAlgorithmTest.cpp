@@ -127,7 +127,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
             evaluator.evaluateIndividuals(population, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -155,8 +155,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 
 
         // Print best individual
-        std::cout<<"ID: "<<individualFitness.begin()->second->getIndividualID() 
-        <<" and score: " << individualFitness.begin()->first <<std::endl;
+        std::cout<<"ID: "<<individualFitness.begin()->first->getIndividualID() 
+        <<" and score: " << individualFitness.begin()->second <<std::endl;
     }
 }
 
@@ -197,7 +197,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsLGP = 
             evaluator.evaluateIndividuals(populationLGP, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
 
 
     // Initialize TPG population
@@ -211,7 +211,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
             evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::vector<std::pair<double, std::shared_ptr<const Individual>>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
@@ -254,8 +254,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
 
         // Print best individual
-        std::cout<<"ID: "<<individualFitnessTPG.begin()->second->getIndividualID() 
-        <<" and score: " << individualFitnessTPG.begin()->first <<std::endl;
+        std::cout<<"ID: "<<individualFitnessTPG.begin()->first->getIndividualID() 
+        <<" and score: " << individualFitnessTPG.begin()->second <<std::endl;
     }
 
     ASSERT_EQ(5681813666992117604U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";

@@ -79,19 +79,19 @@ TEST(PredictionMetricTest, extractAfterExecution) {
 
     Metrics::PredictionMetric metric;
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getScore(), 1) << "Score should be successful (1)";
+    ASSERT_EQ(metric.getValue(), 1) << "Score should be successful (1)";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(1), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getScore(), 0) << "Score should be unsuccessful (0)";
+    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<double>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getScore(), 0) << "Score should be unsuccessful (0)";
+    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(1, indiv, Data::DataValue::scalar<int>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getScore(), 0) << "Score should be unsuccessful (0)";
+    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(1, indiv, Data::DataValue::scalar<int>(1), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getScore(), 1) << "Score should be successful (1)";
+    ASSERT_EQ(metric.getValue(), 1) << "Score should be successful (1)";
 
     
     ASSERT_NO_THROW(metric.toString()) << "Fail to print metric";
@@ -141,8 +141,8 @@ TEST(PredictionProblemTest, extractOneMetric) {
     ASSERT_TRUE(metrics.find(0) != metrics.end()) << "Should have hash 0";
     ASSERT_TRUE(metrics.find(1) != metrics.end()) << "Should have hash 1";
 
-    ASSERT_EQ(metrics.at(0)->getScore(), 1.0) << "Score of metric at 0 should be 1";
-    ASSERT_EQ(metrics.at(1)->getScore(), 0.0) << "Score of metric at 1 should be 0";
+    ASSERT_EQ(metrics.at(0)->getValue(), 1.0) << "Score of metric at 0 should be 1";
+    ASSERT_EQ(metrics.at(1)->getValue(), 0.0) << "Score of metric at 1 should be 0";
 }
 
 TEST(PredictionProblemTest, extractMultiMetrics) {
@@ -171,8 +171,8 @@ TEST(PredictionProblemTest, extractMultiMetrics) {
     ASSERT_TRUE(predictionMetrics.find(0) != predictionMetrics.end()) << "Should have hash 0";
     ASSERT_TRUE(predictionMetrics.find(1) != predictionMetrics.end()) << "Should have hash 1";
 
-    ASSERT_EQ(predictionMetrics.at(0)->getScore(), 1.0) << "Score of metric at 0 should be 1";
-    ASSERT_EQ(predictionMetrics.at(1)->getScore(), 0.0) << "Score of metric at 1 should be 0";
+    ASSERT_EQ(predictionMetrics.at(0)->getValue(), 1.0) << "Score of metric at 0 should be 1";
+    ASSERT_EQ(predictionMetrics.at(1)->getValue(), 0.0) << "Score of metric at 1 should be 0";
     
     std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = map.getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "Should have two metrics with two hash";
