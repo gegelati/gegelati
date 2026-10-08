@@ -168,6 +168,29 @@ TEST_F(LGPRepresentationTest, executeIndividual)
     ASSERT_EQ(output.getScalar<double>(), 1.5) << "Value is not correct.";
 }
 
+TEST_F(LGPRepresentationTest, detectIntronNodes)
+{
+    Representations::LGP representation({inputType}, 1, set, 8, 4);
+    GraphBased::Genotype genotype;
+    std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
+
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 0, 1, 0, 1, 1})); // R[1] = S[0] + S[0] -> intron
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 0, 1, 1, 1, 2})); // R[1] = S[1] + S[2] -> not intron
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 0, 1, 0, 0, 1})); // R[2] = S[0] + R[1] -> intron
+    group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 0, 0, 1, 1, 0}, true)); // R[0] = R[1] + S[0] -> not intron
+    genotype.addNodeGroup(std::move(group));
+
+    representation.detectIntronNodes(genotype);
+
+    const GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
+    EXPECT_TRUE(instructions.getNode(0).getIsIntron());
+    EXPECT_FALSE(instructions.getNode(1).getIsIntron());
+    EXPECT_TRUE(instructions.getNode(2).getIsIntron());
+    EXPECT_FALSE(instructions.getNode(3).getIsIntron());
+
+    ASSERT_FALSE(true) << "Need test with array instructions";
+}
+
 TEST_F(LGPRepresentationTest, compatibilityCheck) 
 {
 
