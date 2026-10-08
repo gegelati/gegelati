@@ -11,7 +11,13 @@ std::vector<std::pair<std::shared_ptr<const Individual>, double>> Selection::Sel
     // Sort the individual to get ranks.
     std::stable_sort( orderedFitness.begin(), orderedFitness.end(),
         [ascending](const auto& a, const auto& b) {
-            return ascending ? a.second < b.second : a.second > b.second;
+            if(a.second != b.second) {
+                // First rank by fitness
+                return ascending ? a.second < b.second : a.second > b.second;
+            } else {
+                // If fitness is equal, individual with higher ID is higher: it favor newer individuals.
+                return ascending ? a.first->getIndividualID() > b.first->getIndividualID() : a.first->getIndividualID() < b.first->getIndividualID();
+            }
         });
 
     return std::move(orderedFitness);

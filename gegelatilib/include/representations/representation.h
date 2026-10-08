@@ -129,6 +129,15 @@
         virtual bool isValid(const GraphBased::Genotype& genotype) const;
 
         /**
+         * \brief Identifiy the intron nodes in the genotype and set them to intron states.
+         * 
+         * \param[in] genotype the genotype identified.
+         */
+        virtual void detectIntronNodes(GraphBased::Genotype& genotype) const {
+          /** Default is empty method **/
+        };
+
+        /**
          * \brief execute the specified representation, executing the given genotype and the output functions based on the current dataSources
          * 
          * \param[in] genotype Genotype executed

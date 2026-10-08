@@ -47,7 +47,7 @@ std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>,
             size_t nbIterations, uint64_t generationNumber,
             Mode mode) const
 {
-    if(!problem.isCopyable()) {
+    if(!problem.isCopyable() || this->maxNbThreads == 1) {
         return Evaluation::Evaluator::evaluateIndividuals(individuals, problem, metricTemplate, nbIterations, generationNumber, mode);
     }
 

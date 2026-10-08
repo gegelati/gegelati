@@ -93,7 +93,7 @@
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            LGP(std::vector<Dimensions::Requirement> inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
+            LGP(const std::vector<Dimensions::Requirement>& inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Representation(
                     inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
                     representationName, representationColor), nbOutputRegisters{nbOutputRegisters},
@@ -119,6 +119,11 @@
                 this->setGenotypeConstraint();
                 this->setGenotypeGenerator();
             };
+
+            /**
+             * \brief Identify the intron nodes: the nodes that does not write in any registers.
+             */
+            void detectIntronNodes(GraphBased::Genotype& genotype) const override;
 
             /**
              * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.

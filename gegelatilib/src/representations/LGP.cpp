@@ -80,6 +80,70 @@ std::unique_ptr<GraphBased::GenotypeGenerator> Representations::LGP::getGenotype
     return std::move(this->genotypeGenerator->cloneUniquePtr());
 }
 
+void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) const
+{
+    if(genotype.getSize() == 0) {
+        return;
+    }
+
+    GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
+    const Data::DataType registerType = Data::DataType::array1d<double>(this->nbRegisters);
+    std::vector<bool> usefulRegisters(this->nbRegisters, false);
+    for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
+        usefulRegisters[idx] = true;
+    }
+
+    const std::vector<Dimensions::Requirement>& inputDimensions = this->dimensionFlow.getInputDimensions();
+    const size_t nbSources = inputDimensions.size() + 1;
+    for(size_t reverseIdx = instructions.getSize(); reverseIdx > 0; reverseIdx--) {
+        GraphBased::GPNode& node = instructions.getNode(reverseIdx - 1);
+        const size_t outputIndex = node.getValue(0).getScalar<size_t>();
+        const size_t functionIndex = node.getValue(1).getScalar<size_t>();
+        const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
+        const Data::DataType outputType = instruction.getOutputType();
+        const size_t outputAddressSpace = registerType.getAddressSpace(outputType);
+        const size_t outputLocation = outputIndex % outputAddressSpace;
+        const size_t outputSize = outputType.totalElements();
+
+        bool isUseful = false;
+        for(size_t idx = 0; idx < outputSize; idx++) {
+            isUseful = isUseful || usefulRegisters[outputLocation + idx];
+            usefulRegisters[outputLocation + idx] = false;
+        }
+        node.setIsIntron(!isUseful);
+
+        if(!isUseful) {
+            continue;
+        }
+
+        for(size_t idxOperand = 0; idxOperand < instruction.getNbOperands(); idxOperand++) {
+            const size_t valueIndex = idxOperand * 2 + 2;
+            const size_t encodedSource = node.getValue(valueIndex).getScalar<size_t>();
+            const size_t inputIndex = node.getValue(valueIndex + 1).getScalar<size_t>();
+            const Data::DataType& operandType = instruction.getOperandTypes().at(idxOperand);
+
+            for(size_t offset = 0; offset < nbSources; offset++) {
+                const size_t sourceIndex = (encodedSource + offset) % nbSources;
+                const Data::DataType& sourceType = sourceIndex == 0
+                    ? registerType
+                    : inputDimensions.at(sourceIndex - 1).getDataType();
+                const size_t addressSpace = sourceType.getAddressSpace(operandType);
+                if(addressSpace == 0) {
+                    continue;
+                }
+
+                if(sourceIndex == 0) {
+                    const size_t inputLocation = inputIndex % addressSpace;
+                    for(size_t idx = 0; idx < operandType.totalElements(); idx++) {
+                        usefulRegisters[inputLocation + idx] = true;
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
 Data::DataValue Representations::LGP::executeGenotype(
     const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {

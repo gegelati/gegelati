@@ -48,8 +48,8 @@ void Representations::TPG::setGenotypeGenerator()
 
         // Multi generator
         Dimensions::MultiGenerator multi;
-        multi.addGenerator(actionGenerator, 0.5);
-        multi.addGenerator(tangledGenerator, 0.5);
+        multi.addGenerator(actionGenerator, 0.999);
+        multi.addGenerator(tangledGenerator, 0.001);
 
         bidNodes.addGenerator(multi);
     } else {
@@ -91,7 +91,7 @@ Data::DataValue Representations::TPG::executeGenotype(
     std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
-    size_t winnerIdx;
+    size_t winnerIdx = 0;
 
     for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
         const GraphBased::GPNode& node = effectiveNodes.at(idx);

@@ -57,6 +57,7 @@ const GraphBased::Genotype& Individual::getGenotype() const
 
 void Individual::setGenotype(std::unique_ptr<GraphBased::Genotype> genotype)
 {
+    this->representation.detectIntronNodes(*genotype);
     this->genotype = std::move(genotype);
     this->updateValidity();
 }
