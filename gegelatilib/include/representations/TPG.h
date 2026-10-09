@@ -36,8 +36,6 @@
             virtual Data::DataValue executeGenotype(
                 const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
-            /// @brief Unique pointer of the genotypeTemplate, as it is fixed during evolution
-            std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator;
 
             /// @brief Member available for the TPG individuals
             std::vector<std::shared_ptr<const Individual>> availableMembers;
@@ -85,11 +83,6 @@
                         this->setGenotypeConstraint();
                         this->setGenotypeGenerator();
                     };
-
-            /**
-             * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
-             */
-            virtual std::unique_ptr<GraphBased::GenotypeGenerator> getGenotypeGenerator() const override;
 
 
             /**

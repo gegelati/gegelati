@@ -49,6 +49,10 @@
 #include "evaluation/parallelEvaluator.h"
 #include "metrics/rewardsMetric.h"
 
+#include "evolution/defaultModule.h"
+
+#include "dimensions/individualValueGenerator.h"
+
 #include "representations/LGP.h"
 #include "representations/TPG.h"
 
@@ -121,7 +125,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     size_t nbOffspring = 100;
 
     // Initialize population
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population(individuals.begin(), individuals.end());
     individuals.clear();
 
@@ -142,7 +146,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
         // Mutate the offspring
-        Mutation::mutateIndividuals(mutator, offspring, rng);
+        Mutation::mutateIndividuals(mutator, offspring, lgpRep.getGenotypeGenerator(), rng);
 
         // Evaluate the population
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(population);
@@ -157,11 +161,25 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 
 
         // Print best individual
-        std::cout<<"ID: "<<individualFitness.begin()->first->getIndividualID() 
+        std::cout<<"At gen: "<<idxGen<<" - ID: "<<individualFitness.begin()->first->getIndividualID() 
         <<" and score: " << individualFitness.begin()->second <<std::endl;
     }
+    ASSERT_EQ(1263292321416791775, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
+TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
+
+    // Create representation
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    
+    // Create evaluationAgent
+    Evaluation::ReinforcementProblem problem(le, 3);
+
+    Evolution::DefaultModule module(lgpRep, problem, 100, 100, 3, 4, 10);
+    module.evolve(20);
+
+    ASSERT_EQ(1263292321416791775, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+}
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     RNG::RNG rng;
@@ -191,9 +209,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
     size_t sizePopulation = 100;
     size_t nbOffspring = 100;
-
     // Initialize LGP population
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, sizePopulation, rng);
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
     individualsLGP.clear();
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsLGP = 
@@ -203,11 +220,10 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
 
     // Initialize TPG population
-
     std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
     tpgRep.setAvailableMembers(members);
 
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, sizePopulation, rng);
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, tpgRep.getGenotypeGenerator(), sizePopulation, rng);
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     individualsTPG.clear();
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
@@ -221,7 +237,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         // LGP Evolution : variation
         std::vector<std::shared_ptr<const Individual>> parentsLGP = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
-        Mutation::mutateIndividuals(mutator, offspringLGP, rng);
+        Mutation::mutateIndividuals(mutator, offspringLGP, lgpRep.getGenotypeGenerator(), rng);
         // LGP Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsLGP(populationLGP);
         evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
@@ -243,7 +259,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         tpgRep.setAvailableMembers(members);
         tpgRep.setAvailableTangledIndiv(tangleds);
 
-        Mutation::mutateIndividuals(mutator, offspringTPG, rng);
+        Mutation::mutateIndividuals(mutator, offspringTPG, tpgRep.getGenotypeGenerator(), rng);
         // TPG Evolution : evaluation
         std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
         evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
@@ -260,5 +276,77 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         <<" and score: " << individualFitnessTPG.begin()->second <<std::endl;
     }
 
-    ASSERT_EQ(17897024810324326341U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(3785372112575905310U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
+
+
+TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
+    RNG::RNG rng;
+    rng.setSeed(5);
+
+    // Create representations
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
+
+    Mutation::PointMutator mutator(0.5, 0.0, 0.0);
+
+    /** CUSTOM GENERATOR **/
+    GraphBased::NodeGenerator bidNodes;
+    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(lgpRep, lgpRep.getGenotypeGenerator(), mutator));
+    bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, 3 - 1));
+    GraphBased::GenotypeGenerator customGenerator(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
+    /** CUSTOM GENERATOR **/
+
+    // Create Mutator and breeder
+    Reproduction::Replicator breeder;
+
+    // Create selectors
+    Selection::RandomSelector parentSelection(true);
+    Selection::TruncationSelector survivingSelection;
+    FitnessAssignment::DefaultAssigner assigner;
+    
+    // Create evaluationAgent
+    Evaluation::ReinforcementProblem problem(le, 3);
+    Evaluation::ParallelEvaluator evaluator(20);
+    std::shared_ptr<Metrics::MetricMapTemplate> metrics 
+        = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
+    
+
+
+
+    size_t sizePopulation = 100;
+    size_t nbOffspring = 100;
+
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, customGenerator, sizePopulation, rng);
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
+    individualsTPG.clear();
+    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
+            evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
+    // Fitness assignment 
+    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
+
+    size_t nbGen = 20;
+    for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
+
+        // TPG Evolution : variation
+        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
+
+        Mutation::mutateIndividuals(mutator, offspringTPG, customGenerator, rng);
+        // TPG Evolution : evaluation
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
+        evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
+        evaluationResultsTPG = evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
+        // TPG Evolution : replacement
+        individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
+        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(individualFitnessTPG, sizePopulation, rng);
+        populationTPG.clear();
+        populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
+
+        // Print best individual
+        std::cout<<"ID: "<<individualFitnessTPG.begin()->first->getIndividualID() << " and score: " << individualFitnessTPG.begin()->second<<std::endl;
+    }
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 3319) << "boug boug ";
+    ASSERT_EQ(10220074300555517450U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+}
+

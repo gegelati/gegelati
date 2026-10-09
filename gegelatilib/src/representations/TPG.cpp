@@ -29,8 +29,6 @@ void Representations::TPG::setGenotypeConstraint()
 void Representations::TPG::setGenotypeGenerator()
 {
    GraphBased::NodeGenerator bidNodes;
-
-    
     /* === Value requirements for members === */
     
     // Value Requirements for members
@@ -56,7 +54,7 @@ void Representations::TPG::setGenotypeGenerator()
         bidNodes.addGenerator(actionGenerator);
     }
 
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, this->nbMembersMin, this->nbMembersMax);
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(this->nbMembersMin, this->nbMembersMax));
 }
 
 void Representations::TPG::setAvailableMembers(const std::vector<std::shared_ptr<const Individual>>& members)
@@ -77,12 +75,6 @@ void Representations::TPG::setAvailableTangledIndiv(const std::vector<std::share
         this->setGenotypeGenerator();
     }
 }
-
-std::unique_ptr<GraphBased::GenotypeGenerator> Representations::TPG::getGenotypeGenerator() const
-{
-    return std::move(this->genotypeGenerator->cloneUniquePtr());
-}
-
 
 Data::DataValue Representations::TPG::executeGenotype(
     const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const

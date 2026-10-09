@@ -18,6 +18,23 @@
 #include "dimensions/dataValueGenerator.h"
 #include "learn/fakeRepresentation.h"
 
+namespace {
+    class IncrementingGenerator : public Dimensions::DataValueGenerator {
+    public:
+        Data::DataValue initialize(RNG::RNG&) override {
+            return Data::DataValue::scalar<int>(0);
+        }
+
+        Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG&) override {
+            return Data::DataValue::scalar<int>(currentValue.getScalar<int>() + 1);
+        }
+
+        std::unique_ptr<Dimensions::DataValueGenerator> cloneUniquePtr() const override {
+            return std::make_unique<IncrementingGenerator>();
+        }
+    };
+}
+
 
 /*
  * ============================================================================
@@ -81,8 +98,8 @@ TEST(MutatorTest, initRandomGenotype)
     nodeGenerator1.addGenerator(Dimensions::NumericUniformGenerator<size_t>(2, 2));
     std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator =
         std::make_unique<GraphBased::GenotypeGenerator>();
-    genotypeGenerator->addNodeGenerator(nodeGenerator0, 3);
-    genotypeGenerator->addNodeGenerator(nodeGenerator1, 5, 10);
+    genotypeGenerator->addFixRangeNodeGenerator(nodeGenerator0, 3);
+    genotypeGenerator->addNodeGenerator(nodeGenerator1, {5, 10});
 
     std::unique_ptr<GraphBased::Genotype> sampled;
     ASSERT_NO_THROW(sampled = std::move(mutator.initRandomGenotype(std::move(genotypeGenerator), rng))) << "Creating genotype failed";
@@ -201,6 +218,33 @@ TEST(PointMutatorTest, mutateNode)
     ) << "Mutation should fail when node and NodeGenerator sizes differ";
 }
 
+TEST(PointMutatorTest, UsesCurrentValueForMutationAndInitializationForAddedNodes)
+{
+    GraphBased::NodeGenerator nodeGenerator;
+    nodeGenerator.addGenerator(IncrementingGenerator());
+
+    RNG::RNG rng;
+    Mutation::PointMutator valueMutator(1.0);
+    GraphBased::GPNode node;
+    node.addValue(41);
+
+    valueMutator.mutateNode(node, nodeGenerator, rng);
+    EXPECT_EQ(node.getValue(0).getScalar<int>(), 42);
+
+    Mutation::PointMutator addNodeMutator(0.0, 1.0);
+    GraphBased::Genotype genotype;
+    genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
+
+    GraphBased::GenotypeGenerator genotypeGenerator;
+    genotypeGenerator.addNodeGenerator(nodeGenerator, {1, 1});
+
+    std::unique_ptr<GraphBased::Genotype> result = addNodeMutator.mutateGenotype(
+        genotype, genotypeGenerator.cloneUniquePtr(), rng);
+
+    ASSERT_EQ(result->getNodeGroup(0).getSize(), 1);
+    EXPECT_EQ(result->getNodeGroup(0).getNode(0).getValue(0).getScalar<int>(), 0);
+}
+
 
 TEST(PointMutatorTest, mutateGenotype)
 {
@@ -247,7 +291,7 @@ TEST(PointMutatorTest, mutateGenotype)
      * The group may contain between 1 and 2 nodes.
      */
     GraphBased::GenotypeGenerator genotypeGenerator;
-    genotypeGenerator.addNodeGenerator(nodeGenerator, 1, 2);
+    genotypeGenerator.addNodeGenerator(nodeGenerator, {1, 2});
 
     /*
      * Create a matching genotype containing one deterministic node.
@@ -509,7 +553,7 @@ TEST(PointMutatorTest, mutateGenotypeDoesNotMutateWhenProbabilityIsZero)
     );
 
     GraphBased::GenotypeGenerator genotypeGenerator;
-    genotypeGenerator.addNodeGenerator(nodeGenerator, 2, 2);
+    genotypeGenerator.addNodeGenerator(nodeGenerator, {2, 2});
 
     GraphBased::Genotype genotype;
 

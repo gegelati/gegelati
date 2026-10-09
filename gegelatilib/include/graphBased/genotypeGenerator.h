@@ -28,7 +28,9 @@
             std::vector<std::unique_ptr<NodeGenerator>> nodeGenerators;
 
             /// @brief vector of Node ranges.
-            std::vector<std::pair<size_t, size_t>> nodeRanges;
+            std::vector<std::pair<size_t, size_t>> nodeMutationRanges;
+            /// @brief vector of Node ranges.
+            std::vector<std::pair<size_t, size_t>> nodeInitializeRanges;
         public:
             /**
              * \brief Default Constructor.
@@ -44,11 +46,16 @@
              * \brief Constructor with one generator and range (for quick construction)
              * 
              * \param[in] nodeGenerator single NodeGenerator to initialize the GenotypeGenerator
-             * \param[in] minRange minimum number of nodes in the group.
-             * \param[in] maxRange minimum number of nodes in the group.
+             * \param[in] mutationRange ranges of node allowed during mutation.
+             * \param[in] initRange ranges of node allowed during initialization. default 0 set the value of mutation Range
              */
-            GenotypeGenerator(const NodeGenerator& nodeGenerator, size_t minRange, size_t maxRange
-            ) : nodeRanges{std::make_pair(minRange, maxRange)} {
+            GenotypeGenerator(const NodeGenerator& nodeGenerator, std::pair<size_t, size_t> mutationRange, std::pair<size_t, size_t>  initRange = {0, 0}
+            ) : nodeMutationRanges{mutationRange} {
+                if(initRange.first == 0 && initRange.second == 0) {
+                    this->nodeInitializeRanges.push_back(mutationRange);
+                } {
+                    this->nodeInitializeRanges.push_back(initRange);
+                }
                 nodeGenerators.push_back(std::move(nodeGenerator.cloneUniquePtr()));
             };
 
@@ -61,19 +68,35 @@
              * \brief add a node generator with its range.
              * 
              * \param[in] nodeGenerator node generator added
-             * \param[in] minRange minimal range, default to 1.
-             * \param[in] maxRange maximal range, default to 0. If value is 0, it is set to minRange.
+             * \param[in] mutationRange ranges of node allowed during mutation.
+             * \param[in] initRange ranges of node allowed during initialization. default 0 set the value of mutation Range
              */
-            void addNodeGenerator(const NodeGenerator& nodeGenerator, size_t minRange = 1, size_t maxRange = 0);
+            void addNodeGenerator(const NodeGenerator& nodeGenerator, std::pair<size_t, size_t> mutationRange, std::pair<size_t, size_t>  initRange = {0, 0});
 
             /**
              * \brief add a node generator with its range.
              * 
              * \param[in] nodeGenerator unique_ptr of node generator added
-             * \param[in] minRange minimal range, default to 1.
-             * \param[in] maxRange maximal range, default to 0. If value is 0, it is set to minRange.
+             * \param[in] mutationRange ranges of node allowed during mutation.
+             * \param[in] initRange ranges of node allowed during initialization. default 0 set the value of mutation Range
              */
-            void addNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, size_t minRange = 1, size_t maxRange = 0);
+            void addNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, std::pair<size_t, size_t> mutationRange, std::pair<size_t, size_t>  initRange = {0, 0});
+
+            /**
+             * \brief add a node generator with its range.
+             * 
+             * \param[in] nodeGenerator node generator added
+             * \param[in] fixRange fixed range of value
+             */
+            void addFixRangeNodeGenerator(const NodeGenerator& nodeGenerator, size_t fixRange);
+
+            /**
+             * \brief add a node generator with its range.
+             * 
+             * \param[in] nodeGenerator unique_ptr of node generator added
+             * \param[in] fixRange fixed range of value
+             */
+            void addFixRangeNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, size_t fixRange);
 
             /**
              * \brief Return the node generator at specified index.
@@ -83,11 +106,19 @@
             NodeGenerator& getNodeGeneratorAt(size_t idx);
 
             /**
-             * \brief Return the range at specified index.
+             * \brief Return the mutation range at specified index.
              * 
              * \param[in] idx specified index
              */
-            const std::pair<size_t, size_t>& getRangeAt(size_t idx) const;
+            const std::pair<size_t, size_t>& getMutationRangeAt(size_t idx) const;
+
+
+            /**
+             * \brief Return the initialization range at specified index.
+             * 
+             * \param[in] idx specified index
+             */
+            const std::pair<size_t, size_t>& getInitRangeAt(size_t idx) const;
 
             /**
              * \brief return a copy of the current GenotypeGenerator by dupplicating each NodeGenerator and range

@@ -50,6 +50,9 @@
         /// @brief Constraint of the genotype
         std::unique_ptr<GraphBased::GenotypeConstraint> genotypeConstraint;
 
+        /// @brief Unique pointer of the genotypeGenerator, as it is fixed during evolution
+        std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator;
+
         /**
          * \brief define the constraints required of the genotype
          */
@@ -119,7 +122,7 @@
         /**
          * \brief return a unique genotype generator of the representation.
          */
-        virtual std::unique_ptr<GraphBased::GenotypeGenerator> getGenotypeGenerator() const = 0;
+        virtual const GraphBased::GenotypeGenerator& getGenotypeGenerator() const;
 
         /**
          * \brief identified wether the genotype is valid faced to the expected node structure of the representation.

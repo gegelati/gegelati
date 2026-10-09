@@ -9,8 +9,9 @@ void Mutation::PointMutator::mutateNode(GraphBased::GPNode& node, GraphBased::No
     // Sample random index
     size_t idxValueMutated = rng.getUnsignedInt64(0, node.getSize() - 1);
 
-    // Sample random value for index
-    Data::DataValue newValue = nodeGenerator.getGeneratorAt(idxValueMutated).sample(rng);
+    // Mutate the value using its current value and the configured generator.
+    Data::DataValue newValue = nodeGenerator.getGeneratorAt(idxValueMutated)
+        .mutate(node.getValue(idxValueMutated), rng);
 
     // Copy node with assigned value
     node.setValue(idxValueMutated, newValue);
@@ -25,7 +26,7 @@ std::unique_ptr<GraphBased::Genotype> Mutation::PointMutator::mutateGenotype(con
     std::unique_ptr<GraphBased::Genotype> mutatedGenotype = genotype.cloneUniquePtr();
 
     for(size_t idxNodeGroup = 0; idxNodeGroup < genotype.getSize(); idxNodeGroup++) {
-        const std::pair<size_t, size_t>& rangeGroup = genotypeGenerator->getRangeAt(idxNodeGroup);
+        const std::pair<size_t, size_t>& rangeGroup = genotypeGenerator->getMutationRangeAt(idxNodeGroup);
         GraphBased::NodeGenerator& nodeGenerator = genotypeGenerator->getNodeGeneratorAt(idxNodeGroup);
         GraphBased::NodeGroup& mutatedGroup = mutatedGenotype->getNodeGroup(idxNodeGroup);
         

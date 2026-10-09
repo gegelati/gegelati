@@ -13,7 +13,7 @@ TEST(DataValueGeneratorTest, SamplesValuesWithinRange)
     RNG::RNG rng;
 
     for (size_t i = 0; i < 100; ++i) {
-        Data::DataValue value = generator.sample(rng);
+        Data::DataValue value = generator.initialize(rng);
 
         ASSERT_EQ(value.getElementType(), typeid(int))
             << "Generated value should have type int.";
@@ -33,7 +33,7 @@ TEST(DataValueGeneratorTest, SupportsDifferentNumericTypes)
     Dimensions::NumericUniformGenerator<double> generator(1.5, 3.5);
     RNG::RNG rng;
 
-    Data::DataValue value = generator.sample(rng);
+    Data::DataValue value = generator.initialize(rng);
 
     ASSERT_EQ(value.getElementType(), typeid(double))
         << "Generated value should have type double.";
@@ -63,7 +63,7 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
     RNG::RNG rng;
 
     for (size_t i = 0; i < 100; ++i) {
-        Data::DataValue value = generator.sample(rng);
+        Data::DataValue value = generator.initialize(rng);
 
         ASSERT_EQ(value.getElementType(), typeid(std::string))
             << "Generated value should have type std::string.";
@@ -78,7 +78,7 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
     }
 
     values.clear();
-    ASSERT_THROW(generator.sample(rng), std::runtime_error) << "should fail to sampled empty list";
+    ASSERT_THROW(generator.initialize(rng), std::runtime_error) << "should fail to sampled empty list";
 }
 
 TEST(DataValueGeneratorTest, CanSampleFromSingleValueList)
@@ -93,7 +93,7 @@ TEST(DataValueGeneratorTest, CanSampleFromSingleValueList)
     RNG::RNG rng;
 
     for (size_t i = 0; i < 10; ++i) {
-        Data::DataValue value = generator.sample(rng);
+        Data::DataValue value = generator.initialize(rng);
 
         ASSERT_EQ(value.getElementType(), typeid(std::shared_ptr<const int>))
             << "Generated value should have type int.";
@@ -109,7 +109,7 @@ TEST(DataValueGeneratorTest, GeneratorsCanBeUsedThroughBaseInterface)
     Dimensions::DataValueGenerator& baseGenerator = generator;
     RNG::RNG rng;
 
-    Data::DataValue value = baseGenerator.sample(rng);
+    Data::DataValue value = baseGenerator.initialize(rng);
 
     ASSERT_EQ(value.getElementType(), typeid(int))
         << "Sampling through the base interface should preserve the generated value type.";
@@ -158,7 +158,7 @@ TEST(DataValueGeneratorTest, AddGeneratorExtendsAvailableGenerators)
     bool generatedSecondValue = false;
 
     for (size_t i = 0; i < 100; ++i) {
-        const Data::DataValue value = multiGenerator.sample(rng);
+        const Data::DataValue value = multiGenerator.initialize(rng);
 
         ASSERT_EQ(value.getElementType(), typeid(int))
             << "MultiGenerator should preserve the generated value type.";
@@ -190,7 +190,7 @@ TEST(DataValueGeneratorTest, ZeroWeightGeneratorIsNeverSelected)
     RNG::RNG rng;
 
     for (size_t i = 0; i < 100; ++i) {
-        const Data::DataValue value = multiGenerator.sample(rng);
+        const Data::DataValue value = multiGenerator.initialize(rng);
 
         ASSERT_EQ(value.getElementType(), typeid(int))
             << "MultiGenerator should preserve the generated value type.";

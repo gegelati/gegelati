@@ -45,9 +45,6 @@
             virtual Data::DataValue executeGenotype(
                 const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
-            /// @brief Unique pointer of the genotypeGenerator, as it is fixed during evolution
-            std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator;
-
             /**
              * \brief Create the genotype constraint grammar
              */
@@ -124,11 +121,6 @@
              * \brief Identify the intron nodes: the nodes that does not write in any registers.
              */
             void detectIntronNodes(GraphBased::Genotype& genotype) const override;
-
-            /**
-             * \brief return the genotype template an LGP individual, defined in setGenotypeTemplate.
-             */
-            virtual std::unique_ptr<GraphBased::GenotypeGenerator> getGenotypeGenerator() const override;
 
     };
 }; // namespace LGP_Representation

@@ -27,10 +27,10 @@ TEST(NodeGeneratorTest, addValue) {
 
     RNG::RNG rng;
     Data::DataValue value = Data::DataValue::scalar<int>(1);
-    ASSERT_EQ(nodeGenerator.getGeneratorAt(0).sample(rng), value) << "Value should be 0";
+    ASSERT_EQ(nodeGenerator.getGeneratorAt(0).initialize(rng), value) << "Value should be 0";
 
     std::unique_ptr<GraphBased::NodeGenerator> clone = nodeGenerator.cloneUniquePtr();
-    ASSERT_EQ(clone->getGeneratorAt(0).sample(rng), value) << "Value should be 0";
+    ASSERT_EQ(clone->getGeneratorAt(0).initialize(rng), value) << "Value should be 0";
 }
 
 
@@ -43,7 +43,7 @@ TEST(GenotypeGeneratorTest, Constructor)
     GraphBased::NodeGenerator nodeGenerator;
 
     ASSERT_NO_THROW(genotypeGenerator = new GraphBased::GenotypeGenerator()) << "Creation of generator failed";
-    ASSERT_NO_THROW(genotypeGenerator1 = new GraphBased::GenotypeGenerator(nodeGenerator, 1, 2)) << "Creation of generator failed";
+    ASSERT_NO_THROW(genotypeGenerator1 = new GraphBased::GenotypeGenerator(nodeGenerator, {1, 2})) << "Creation of generator failed";
     
     ASSERT_NO_THROW(delete genotypeGenerator) << "Destructor of generator failed.";
     ASSERT_NO_THROW(delete genotypeGenerator1) << "Destructor of generator failed.";
@@ -55,17 +55,17 @@ TEST(GenotypeGeneratorTest, addValue) {
     ASSERT_EQ(genotypeGenerator.size(), 0) << "Size of genotypeGenerator mismatch.";
 
     GraphBased::NodeGenerator nodeGenerator0;
-    ASSERT_THROW(genotypeGenerator.addNodeGenerator(nodeGenerator0), std::runtime_error) << "Should have failed with empty value.";
+    ASSERT_THROW(genotypeGenerator.addFixRangeNodeGenerator(nodeGenerator0, 1), std::runtime_error) << "Should have failed with empty value.";
 
     
     nodeGenerator0.addGenerator(Dimensions::NumericUniformGenerator<int>(1, 1));
     nodeGenerator0.addGenerator(Dimensions::NumericUniformGenerator<int>(42, 42)); 
-    ASSERT_NO_THROW(genotypeGenerator.addNodeGenerator(nodeGenerator0, 1, 5)) << "Should not have failed.";
+    ASSERT_NO_THROW(genotypeGenerator.addNodeGenerator(nodeGenerator0, {1, 5}, {6, 10})) << "Should not have failed.";
     ASSERT_EQ(genotypeGenerator.size(), 1) << "Size of genotypeGenerator mismatch.";
 
     GraphBased::NodeGenerator nodeGenerator1;
     nodeGenerator1.addGenerator(Dimensions::NumericUniformGenerator<int>(1, 42)); 
-    ASSERT_NO_THROW(genotypeGenerator.addNodeGenerator(nodeGenerator1, 5)) << "Should not have failed.";
+    ASSERT_NO_THROW(genotypeGenerator.addFixRangeNodeGenerator(nodeGenerator1, 5)) << "Should not have failed.";
     
 
     Data::DataValue valueMin = Data::DataValue::scalar<int>(1);
@@ -76,11 +76,12 @@ TEST(GenotypeGeneratorTest, addValue) {
     ASSERT_EQ(nodeGeneratorGet1.size(), 1) << "Size should be equal";
 
     RNG::RNG rng;
-    ASSERT_TRUE(nodeGeneratorGet0.getGeneratorAt(0).sample(rng) == valueMin) << "Value should be the same";
-    ASSERT_TRUE(nodeGeneratorGet0.getGeneratorAt(1).sample(rng) == valueMax) << "Value should be the same";
-    Data::DataValue sampled = nodeGeneratorGet1.getGeneratorAt(0).sample(rng);
+    ASSERT_TRUE(nodeGeneratorGet0.getGeneratorAt(0).initialize(rng) == valueMin) << "Value should be the same";
+    ASSERT_TRUE(nodeGeneratorGet0.getGeneratorAt(1).initialize(rng) == valueMax) << "Value should be the same";
+    Data::DataValue sampled = nodeGeneratorGet1.getGeneratorAt(0).initialize(rng);
     ASSERT_TRUE(sampled.getScalar<int>() >= 1 || sampled.getScalar<int>() <= 42) << "Value should be accepted";
 
     ASSERT_THROW(genotypeGenerator.getNodeGeneratorAt(2), std::runtime_error) << "Should have failed with out of range.";
-    ASSERT_THROW(genotypeGenerator.getRangeAt(2), std::runtime_error) << "Should have failed with out of range.";
+    ASSERT_THROW(genotypeGenerator.getMutationRangeAt(2), std::runtime_error) << "Should have failed with out of range.";
+    ASSERT_THROW(genotypeGenerator.getInitRangeAt(2), std::runtime_error) << "Should have failed with out of range.";
 }

@@ -70,7 +70,8 @@ void Evolution::DefaultModule::initialize()
     this->population.clear();
 
     // Initialize population
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals = Mutation::initIndividuals(*this->mutation, this->representation, this->sizePopulation, this->rng);
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals 
+        = Mutation::initIndividuals(*this->mutation, this->representation, this->representation.getGenotypeGenerator(), this->sizePopulation, this->rng);
     this->population.insert(individuals.begin(), individuals.end());
     individuals.clear();
 
@@ -91,7 +92,7 @@ void Evolution::DefaultModule::doGeneration(size_t generationNumber)
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = this->breeder->reproduce(parents, this->nbOffspring, this->rng);
 
     // Mutate the offspring
-    Mutation::mutateIndividuals(*this->mutation, offspring, this->rng);
+    Mutation::mutateIndividuals(*this->mutation, offspring, this->representation.getGenotypeGenerator(), this->rng);
 
     // Evaluate the population
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(this->population);

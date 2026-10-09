@@ -72,12 +72,7 @@ void Representations::LGP::setGenotypeGenerator()
         instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->largestAddressSpace - 1));
     }
 
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, this->nbLinesMin, this->nbLinesMax);
-}
-
-std::unique_ptr<GraphBased::GenotypeGenerator> Representations::LGP::getGenotypeGenerator() const
-{
-    return std::move(this->genotypeGenerator->cloneUniquePtr());
+    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, std::make_pair(this->nbLinesMin, this->nbLinesMax));
 }
 
 void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) const

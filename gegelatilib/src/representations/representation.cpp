@@ -27,6 +27,11 @@ const GraphBased::GenotypeConstraint& Representations::Representation::getGenoty
     return *this->genotypeConstraint;
 }
 
+const GraphBased::GenotypeGenerator& Representations::Representation::getGenotypeGenerator() const
+{
+    return *this->genotypeGenerator;
+}
+
 bool Representations::Representation::isValid(const GraphBased::Genotype& genotype) const 
 {
     if(this->genotypeConstraint == nullptr || genotype.getSize() != this->genotypeConstraint->size()) {

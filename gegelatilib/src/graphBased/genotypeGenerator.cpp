@@ -6,25 +6,39 @@ size_t GraphBased::GenotypeGenerator::size() const
     return this->nodeGenerators.size();
 }
 
-
-void GraphBased::GenotypeGenerator::addNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, size_t minRange, size_t maxRange)
+void GraphBased::GenotypeGenerator::addNodeGenerator(
+    std::unique_ptr<NodeGenerator> nodeGenerator, std::pair<size_t, size_t> mutationRange, std::pair<size_t, size_t>  initRange)
 {
     if(nodeGenerator->size() == 0) {
         throw std::runtime_error("Node:GenotypeGenerator:addNodeGenerator: nodeGenerator is empty.");
     }
     this->nodeGenerators.push_back(std::move(nodeGenerator));
 
-    // if Max range is 0 (default value), it is automatically set to minRange, to have a fix number of node for this generator.
-    if(maxRange == 0) {
-        maxRange = minRange;
+    this->nodeMutationRanges.push_back(mutationRange);
+
+    if(initRange.first == 0 && initRange.second == 0) {
+        this->nodeInitializeRanges.push_back(mutationRange);
+    } {
+        this->nodeInitializeRanges.push_back(initRange);
     }
-    this->nodeRanges.push_back(std::make_pair(minRange, maxRange));
 }
 
-void GraphBased::GenotypeGenerator::addNodeGenerator(const NodeGenerator& nodeGenerator, size_t minRange, size_t maxRange)
+void GraphBased::GenotypeGenerator::addNodeGenerator(
+    const NodeGenerator& nodeGenerator, std::pair<size_t, size_t> mutationRange, std::pair<size_t, size_t>  initRange)
 {
-    this->addNodeGenerator(std::move(nodeGenerator.cloneUniquePtr()), minRange, maxRange);
+    this->addNodeGenerator(std::move(nodeGenerator.cloneUniquePtr()), mutationRange, initRange);
 }
+
+void GraphBased::GenotypeGenerator::addFixRangeNodeGenerator(std::unique_ptr<NodeGenerator> nodeGenerator, size_t fixRange)
+{
+    this->addNodeGenerator(std::move(nodeGenerator), std::make_pair(fixRange, fixRange));
+}
+
+void GraphBased::GenotypeGenerator::addFixRangeNodeGenerator(const NodeGenerator& nodeGenerator, size_t fixRange)
+{
+    this->addFixRangeNodeGenerator(std::move(nodeGenerator.cloneUniquePtr()), fixRange);
+}
+
 
 
 GraphBased::NodeGenerator& GraphBased::GenotypeGenerator::getNodeGeneratorAt(size_t idx)
@@ -36,19 +50,26 @@ GraphBased::NodeGenerator& GraphBased::GenotypeGenerator::getNodeGeneratorAt(siz
 }
 
 
-const std::pair<size_t, size_t>& GraphBased::GenotypeGenerator::getRangeAt(size_t idx) const
+const std::pair<size_t, size_t>& GraphBased::GenotypeGenerator::getMutationRangeAt(size_t idx) const
 {
-    if(idx >= this->nodeRanges.size()) {
-        throw std::runtime_error("Node:GenotypeGenerator:getNodeGeneratorAt: index out of bounds.");
+    if(idx >= this->nodeMutationRanges.size()) {
+        throw std::runtime_error("Node:GenotypeGenerator:getMutationRangeAt: index out of bounds.");
     }   
-    return this->nodeRanges.at(idx);
+    return this->nodeMutationRanges.at(idx);
+}
+
+const std::pair<size_t, size_t>& GraphBased::GenotypeGenerator::getInitRangeAt(size_t idx) const
+{
+    if(idx >= this->nodeInitializeRanges.size()) {
+        throw std::runtime_error("Node:GenotypeGenerator:getInitRangeAt: index out of bounds.");
+    }   
+    return this->nodeInitializeRanges.at(idx);
 }
 
 std::unique_ptr<GraphBased::GenotypeGenerator> GraphBased::GenotypeGenerator::cloneUniquePtr() const {
     std::unique_ptr<GenotypeGenerator> clone = std::make_unique<GenotypeGenerator>();
     for(size_t idx = 0; idx < this->nodeGenerators.size(); idx++) {
-        const std::pair<size_t, size_t>& pairRef = this->nodeRanges.at(idx);
-        clone->addNodeGenerator(*this->nodeGenerators.at(idx), pairRef.first, pairRef.second);
+        clone->addNodeGenerator(*this->nodeGenerators.at(idx), this->nodeMutationRanges.at(idx), this->nodeInitializeRanges.at(idx));
     }
     return std::move(clone);
 }

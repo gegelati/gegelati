@@ -116,23 +116,25 @@ TEST_F(LGPRepresentationTest, getGenotypeGenerator)
     Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
     RNG::RNG rng;
 
-    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator().cloneUniquePtr();
     
     ASSERT_EQ(generator->size(), 1) << "Size of generator should be 1";
-    ASSERT_EQ(generator->getRangeAt(0).first, 5) << "Low range should be 5";
-    ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 5";
+    ASSERT_EQ(generator->getMutationRangeAt(0).first, 5) << "Low range should be 5";
+    ASSERT_EQ(generator->getMutationRangeAt(0).second, 10) << "Low range should be 5";
+    ASSERT_EQ(generator->getInitRangeAt(0).first, 5) << "Low range should be 5";
+    ASSERT_EQ(generator->getInitRangeAt(0).second, 10) << "Low range should be 5";
 
     GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 6) << "Size should be 6";
 
     size_t value;
     for(size_t idx = 0; idx < 1000; idx++) {
-        ASSERT_TRUE(nodeGen.getGeneratorAt(0).sample(rng).getScalar<size_t>() < 8);
-        ASSERT_TRUE(nodeGen.getGeneratorAt(1).sample(rng).getScalar<size_t>() < set.getNbInstructions());
-        ASSERT_TRUE(nodeGen.getGeneratorAt(2).sample(rng).getScalar<size_t>() < 2);
-        ASSERT_TRUE(nodeGen.getGeneratorAt(3).sample(rng).getScalar<size_t>() < 8);
-        ASSERT_TRUE(nodeGen.getGeneratorAt(4).sample(rng).getScalar<size_t>() < 2);
-        ASSERT_TRUE(nodeGen.getGeneratorAt(5).sample(rng).getScalar<size_t>() < 8);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(0).initialize(rng).getScalar<size_t>() < 8);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(1).initialize(rng).getScalar<size_t>() < set.getNbInstructions());
+        ASSERT_TRUE(nodeGen.getGeneratorAt(2).initialize(rng).getScalar<size_t>() < 2);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(3).initialize(rng).getScalar<size_t>() < 8);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(4).initialize(rng).getScalar<size_t>() < 2);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(5).initialize(rng).getScalar<size_t>() < 8);
     }
 }
 

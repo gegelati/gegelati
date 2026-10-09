@@ -134,18 +134,20 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 
     size_t nbActions = 3;
     Representations::TPG representation({inputType}, nbActions, 2, 10);
-    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator().cloneUniquePtr();
 
     ASSERT_EQ(generator->size(), 1) << "Size of constraint should be 1";
-    ASSERT_EQ(generator->getRangeAt(0).first, 2) << "Low range should be 2";
-    ASSERT_EQ(generator->getRangeAt(0).second, 10) << "Low range should be 10";
+    ASSERT_EQ(generator->getMutationRangeAt(0).first, 2) << "Low range should be 2";
+    ASSERT_EQ(generator->getMutationRangeAt(0).second, 10) << "Low range should be 10";
+    ASSERT_EQ(generator->getInitRangeAt(0).first, 2) << "Low range should be 2";
+    ASSERT_EQ(generator->getInitRangeAt(0).second, 10) << "Low range should be 10";
 
     GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 2) << "Size should be 2";
 
-    ASSERT_THROW(nodeGen.getGeneratorAt(0).sample(rng), std::runtime_error) << "Should throw since no individual is set";
+    ASSERT_THROW(nodeGen.getGeneratorAt(0).initialize(rng), std::runtime_error) << "Should throw since no individual is set";
     for(size_t idx = 0; idx < 1000; idx++) {
-        ASSERT_TRUE(nodeGen.getGeneratorAt(1).sample(rng).getScalar<size_t>() < nbActions);
+        ASSERT_TRUE(nodeGen.getGeneratorAt(1).initialize(rng).getScalar<size_t>() < nbActions);
     }
 
     
@@ -165,13 +167,13 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
     // Should update generator automatically
     representation.setAvailableTangledIndiv(tangled);
 
-    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator().cloneUniquePtr();
     GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
     for(size_t idx = 0; idx < 1000; idx++) {
-        std::shared_ptr<const Individual> member = nodeGenNew.getGeneratorAt(0).sample(rng).getScalar<std::shared_ptr<const Individual>>();
+        std::shared_ptr<const Individual> member = nodeGenNew.getGeneratorAt(0).initialize(rng).getScalar<std::shared_ptr<const Individual>>();
         ASSERT_TRUE(member->getIndividualID() < members.size()) << "ID should be 0, 1 or 2";
 
-        Data::DataValue destination = nodeGenNew.getGeneratorAt(1).sample(rng);
+        Data::DataValue destination = nodeGenNew.getGeneratorAt(1).initialize(rng);
         if(destination.getElementType() == typeid(size_t)) {
             ASSERT_TRUE(destination.getScalar<size_t>() < nbActions);
         } else {

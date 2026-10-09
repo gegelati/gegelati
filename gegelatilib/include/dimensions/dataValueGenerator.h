@@ -15,12 +15,22 @@ namespace Dimensions {
     class DataValueGenerator {
 
         public:
+
             /**
-             * \brief Sample method creating a DataValue based on the random number generator.
-             * 
-             * The method is purpusely not const, as the generator may have internal state that is modified during sampling.
+             * \brief Initialize a value for a newly-created node.
+             *
+             * By default, initialization uses the existing sampling behavior.
              */
-            virtual Data::DataValue sample(RNG::RNG& rng) = 0;
+            virtual Data::DataValue initialize(RNG::RNG& rng) = 0;
+
+            /**
+             * \brief Mutate an existing value.
+             *
+             * By default, mutate uses the existing sampling behavior.
+             */
+            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) {
+                return this->initialize(rng);
+            }
 
             /**
              * \brief dupplicate the current DataValueGenerator as a unique pointer
@@ -49,7 +59,7 @@ namespace Dimensions {
             /**
              * \brief Sample method creating a DataValue of type T within the specified range.
              */
-            virtual Data::DataValue sample(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) override {
                 return Data::DataValue::scalar<T>(rng.uniformSample<T>(min, max));
             }
 
@@ -81,7 +91,7 @@ namespace Dimensions {
             /**
              * \brief Sample method creating a DataValue of type T from the list of possible values.
              */
-            virtual Data::DataValue sample(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) override {
                 if(this->values.size() == 0) {
                     throw std::runtime_error("Dimensions::ListUniformGenerator::sample: Sampling value failed because the vector is empty.");
                 }
@@ -143,9 +153,9 @@ namespace Dimensions {
             }
 
             /**
-             * \brief Sample a value by randomly selecting a generator based on the weights.
+             * \brief randomly select a generator based on the weights.
              */
-            virtual Data::DataValue sample(RNG::RNG& rng) override {
+            virtual DataValueGenerator& sampleGenerator(RNG::RNG& rng) {
                 const double totalWeight = std::accumulate(weights.begin(), weights.end(), 0.0);
 
                 const double randomValue =
@@ -156,9 +166,21 @@ namespace Dimensions {
                 for(;cumulativeWeight < randomValue; index++) {
                     cumulativeWeight += weights[index];
                 }
-                return generators.at(index - 1)->sample(rng);
+                return *generators.at(index - 1);
             }
 
+
+            /**
+             * \brief Sample a value by randomly selecting a generator based on the weights.
+             */
+            virtual Data::DataValue initialize(RNG::RNG& rng) override {
+                return this->sampleGenerator(rng).initialize(rng);
+            }
+
+
+            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) override {
+                return this->sampleGenerator(rng).mutate(currentValue, rng);
+            }
             
             /// @brief Inherrit from DataValueGenerator class 
             virtual std::unique_ptr<DataValueGenerator> cloneUniquePtr() const override {

@@ -73,18 +73,19 @@
      * \brief Initialize a set of individuals
      * 
      * \param[in] mutator Mutator method used to initialize the individuals
-     * \param[in] representation The representation from which individuals are created.
+     * \param[in] representation The representation for which individuals are created.
+     * \param[in] generator The generator from which individuals are created.
      * \param[in] nbIndividuals The number of individuals created.
      * \param[in] rng Random Number Generator used in the mutation process.
      */
     static std::set<std::shared_ptr<Individual>, SharedLess<Individual>> 
-        initIndividuals(const Mutator& mutator, const Representations::Representation& representation, size_t nbIndividuals, RNG::RNG& rng)
+        initIndividuals(const Mutator& mutator, const Representations::Representation& representation, const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng)
     {
         std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals;
         for(size_t idx = 0; idx < nbIndividuals; idx++) {
             individuals.insert(std::make_shared<Individual>(
                 representation, 
-                mutator.initRandomGenotype(representation.getGenotypeGenerator(), rng)
+                mutator.initRandomGenotype(generator.cloneUniquePtr(), rng)
             ));
         }
         return individuals;
@@ -97,10 +98,10 @@
      * \param[in] individuals set of individuals mutated.
      * \param[in] rng Random Number Generator used in the mutation process.
      */
-    static void mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, RNG::RNG& rng)
+    static void mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng)
     {
         for(const std::shared_ptr<Individual>& indiv: individuals) {
-            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), indiv->getRepresentation().getGenotypeGenerator(), rng)));
+            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), generator.cloneUniquePtr(), rng)));
         }
     }
 }; // namespace Mutator

@@ -8,7 +8,7 @@ std::unique_ptr<GraphBased::GPNode> Mutation::Mutator::createRandomNode(GraphBas
 
     std::vector<Data::DataValue> values;
     for(size_t idxValue = 0; idxValue < nodeGenerator.size(); idxValue++) {
-        values.push_back(nodeGenerator.getGeneratorAt(idxValue).cloneUniquePtr()->sample(rng));
+        values.push_back(nodeGenerator.getGeneratorAt(idxValue).initialize(rng));
     }
     return std::make_unique<GraphBased::GPNode>(values);
 }
@@ -24,7 +24,7 @@ std::unique_ptr<GraphBased::Genotype> Mutation::Mutator::initRandomGenotype(std:
     for(size_t idxGenerator = 0; idxGenerator < genotypeGenerator->size(); idxGenerator++) {
         std::unique_ptr<GraphBased::NodeGroup> nodeGroup = std::make_unique<GraphBased::NodeGroup>();
 
-        const std::pair<size_t, size_t>& range = genotypeGenerator->getRangeAt(idxGenerator);
+        const std::pair<size_t, size_t>& range = genotypeGenerator->getInitRangeAt(idxGenerator);
         size_t nbNodesOfGenerator = rng.getUnsignedInt64(range.first, range.second);
 
         for(size_t idxNode = 0; idxNode < nbNodesOfGenerator; idxNode++) {
