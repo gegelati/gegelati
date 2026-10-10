@@ -1,6 +1,10 @@
-#include "evolution/defaultModule.h"
+#include "evolution/basicmodule.h"
 
-Evolution::DefaultModule::DefaultModule(
+#include <algorithm>
+#include <chrono>
+#include <limits>
+
+Evolution::BasicModule::BasicModule(
     const Representations::Representation& representation, 
     Evaluation::Problem& problem,
     size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed, size_t nbThreads, 
@@ -14,6 +18,13 @@ nbOffspring{nbOffspring}, nbTrainingIterations{nbTrainingIterations}, seed{seed}
 assigner{assigner}, parentSelection{parentSelection}, survivingSelection{survivingSelection},
 breeder{breeder}, mutation{mutation}
 {
+    if(!Dimensions::DimensionFlow::acceptsRequirements(problem.getInputDimensions(), representation.getDimensionFlow().getInputDimensions())) {
+        throw std::runtime_error("Evolution::BasicModule: Cannot build module with input requirements not compatible between representation and problem");
+    }
+    if(!representation.getDimensionFlow().getOutputDimension().isCompatibleWith(problem.getOutputDimension())) {
+        throw std::runtime_error("Evolution::BasicModule: Cannot build module with output requirements not compatible between representation and problem (" + representation.getDimensionFlow().getOutputDimension().toString() + " =/= " + problem.getOutputDimension().toString() + ")");
+    }
+
     if(this->nbThreads > 1) {
         this->evaluator = std::make_unique<Evaluation::ParallelEvaluator>(nbThreads);
     } else {
@@ -40,11 +51,12 @@ breeder{breeder}, mutation{mutation}
         this->mutation = std::make_shared<Mutation::PointMutator>(0.5, 0.1, 0.1);
     }
 
+    this->generator = this->representation.getGenotypeGenerator().cloneUniquePtr();
     this->rng.setSeed(seed);
     this->initializeMetricTemplate();
 } 
 
-void Evolution::DefaultModule::initializeMetricTemplate() 
+void Evolution::BasicModule::initializeMetricTemplate() 
 {
     if(dynamic_cast<Evaluation::PredictionProblem*>(&this->problem) != nullptr) {
         this->fitnessMetricHash = Metrics::PredictionMetric::staticHash();
@@ -55,23 +67,30 @@ void Evolution::DefaultModule::initializeMetricTemplate()
     }
 }
 
-void Evolution::DefaultModule::addMetricToTemplate(std::unique_ptr<Metrics::Metric> metric) 
+void Evolution::BasicModule::addMetricToTemplate(std::unique_ptr<Metrics::Metric> metric) 
 {
     this->metricTemplate->addRequiredMetric(std::move(metric));
 }
 
-std::string Evolution::DefaultModule::summary() const 
+std::string Evolution::BasicModule::summary() const 
 {
     return "todo";
 }
 
-void Evolution::DefaultModule::initialize()
+void Evolution::BasicModule::addBasiclogger(std::ostream& output)
+{
+    auto logger = std::make_shared<Log::Basiclogger>(output);
+    this->basicloggers.push_back(logger);
+    this->loggers.push_back(logger);
+}
+
+void Evolution::BasicModule::initialize()
 {
     this->population.clear();
 
     // Initialize population
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals 
-        = Mutation::initIndividuals(*this->mutation, this->representation, this->representation.getGenotypeGenerator(), this->sizePopulation, this->rng);
+        = Mutation::initIndividuals(*this->mutation, this->representation, *this->generator, this->sizePopulation, this->rng);
     this->population.insert(individuals.begin(), individuals.end());
     individuals.clear();
 
@@ -80,19 +99,30 @@ void Evolution::DefaultModule::initialize()
             evaluator->evaluateIndividuals(this->population, this->problem, this->metricTemplate, this->nbTrainingIterations, UINT64_MAX, Evaluation::Mode::TRAINING);
     // Fitness assignment 
     this->individualFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
+
+    this->setBasicLoggerHeader();
 }
 
-void Evolution::DefaultModule::doGeneration(size_t generationNumber) 
+void Evolution::BasicModule::setBasicLoggerHeader() {
+    for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
+        defLogger->addHeaderValues({"Gen", "Pop_Size", "Fit_Min", "Fit_Avg", "Fit_Max", "T_Gen", "T_Total"});
+    }
+}
+
+void Evolution::BasicModule::doGeneration(size_t generationNumber) 
 {
 
     // Parent selection 
     std::vector<std::shared_ptr<const Individual>> parents = this->parentSelection->select(this->individualFitness, this->nbOffspring, this->rng);
 
+
     // Reproduce the parents
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = this->breeder->reproduce(parents, this->nbOffspring, this->rng);
 
+
     // Mutate the offspring
-    Mutation::mutateIndividuals(*this->mutation, offspring, this->representation.getGenotypeGenerator(), this->rng);
+    Mutation::mutateIndividuals(*this->mutation, offspring, *this->generator, this->rng);
+
 
     // Evaluate the population
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(this->population);
@@ -100,13 +130,38 @@ void Evolution::DefaultModule::doGeneration(size_t generationNumber)
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
         this->evaluator->evaluateIndividuals(evaluatedIndividuals, this->problem, this->metricTemplate, this->nbTrainingIterations, generationNumber, Evaluation::Mode::TRAINING);
 
+
     // Do replacement
     this->individualFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
+
+
     std::vector<std::shared_ptr<const Individual>> survivors = this->survivingSelection->select(individualFitness, this->sizePopulation, this->rng);
     this->population.clear();
     this->population.insert(survivors.begin(), survivors.end());
 
-    // Print best individual
-    std::cout<<"At gen: "<<generationNumber<<" - ID: "<<individualFitness.begin()->first->getIndividualID() 
-    <<" and score: " << individualFitness.begin()->second <<std::endl;
+    this->setNewBasicLoggerRow(generationNumber);
+}
+
+void Evolution::BasicModule::setNewBasicLoggerRow(size_t generationNumber)
+{
+    this->stopwatch.checkpoint();
+    for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
+        defLogger->addGenerationValues<size_t>({generationNumber, this->population.size()});
+    }
+
+    double minFitness = std::numeric_limits<double>::max();
+    double maxFitness = std::numeric_limits<double>::lowest();
+    double averageFitness = 0.0;
+    for (const auto& individual : this->population) {
+        const double fitness = this->individualFitness.at(individual);
+        minFitness = std::min(minFitness, fitness);
+        maxFitness = std::max(maxFitness, fitness);
+        averageFitness += fitness;
+    }
+    averageFitness /= this->population.size();
+
+    double generationTime = this->stopwatch.getCheckpoints().at(0);
+    for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
+        defLogger->addGenerationValues<double>({minFitness, averageFitness, maxFitness, generationTime, this->stopwatch.elapsed()});
+    }
 }

@@ -44,7 +44,7 @@
              * 
              * \param[in] idxValue specified index
              */
-            Dimensions::DataValueGenerator& getGeneratorAt(size_t idxValue);
+            const Dimensions::DataValueGenerator& getGeneratorAt(size_t idxValue) const;
 
             /**
              * \brief get the number of Generator

@@ -10,7 +10,7 @@ void GraphBased::NodeGenerator::addGenerator(const Dimensions::DataValueGenerato
     this->addGenerator(std::move(generator.cloneUniquePtr()));
 }
 
-Dimensions::DataValueGenerator& GraphBased::NodeGenerator::getGeneratorAt(size_t idxValue)
+const Dimensions::DataValueGenerator& GraphBased::NodeGenerator::getGeneratorAt(size_t idxValue) const
 {
     if(idxValue >= this->generators.size()) {
         throw std::runtime_error("Node:NodeRequirements:getRequirementAt: index out of bounds.");

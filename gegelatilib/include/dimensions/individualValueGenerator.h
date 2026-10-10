@@ -32,18 +32,18 @@ namespace Dimensions {
             /**
              * \brief Sample method creating a DataValue of type T within the specified range.
              */
-            virtual Data::DataValue initialize(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(
                     representation, 
-                    mutator.initRandomGenotype(generator.cloneUniquePtr(), rng));
+                    mutator.initRandomGenotype(generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv);
             }
 
-            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) override {
+            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> currentIndiv = currentValue.getScalar<std::shared_ptr<const Individual>>();
                 std::shared_ptr<const Individual> mutatedIndiv = std::make_shared<Individual>(
                     representation, 
-                    mutator.mutateGenotype(currentIndiv->getGenotype(), generator.cloneUniquePtr(), rng));
+                    mutator.mutateGenotype(currentIndiv->getGenotype(), generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(mutatedIndiv);
             }
 

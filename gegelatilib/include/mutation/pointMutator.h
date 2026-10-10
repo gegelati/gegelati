@@ -52,7 +52,7 @@
          * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(GraphBased::GPNode& node, GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const override;
+        virtual void mutateNode(GraphBased::GPNode& node, const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const override;
 
         /**
          * \brief return a mutated copy of a Genotype.
@@ -61,7 +61,7 @@
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<GraphBased::Genotype> mutateGenotype(const GraphBased::Genotype& genotype, std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const override;
+        virtual std::unique_ptr<GraphBased::Genotype> mutateGenotype(const GraphBased::Genotype& genotype, const GraphBased::GenotypeGenerator& genotypeGenerator, RNG::RNG& rng) const override;
 
     };
 }; // namespace Mutation

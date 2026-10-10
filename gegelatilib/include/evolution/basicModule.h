@@ -16,6 +16,9 @@
 #include "reproduction/replicator.h"
 #include "mutation/pointMutator.h"
 
+#include "log/basiclogger.h"
+
+
 namespace Evolution {
 
     /**
@@ -30,7 +33,7 @@ namespace Evolution {
      *  - A breeder (default is replication)
      *  - A mutator (default is point mutation)
      */
-    class DefaultModule: public Module {
+    class BasicModule: public Module {
 
         protected:
 
@@ -79,11 +82,17 @@ namespace Evolution {
             /// @brief TODO
             std::shared_ptr<Mutation::Mutator> mutation;
 
+            /// @brief TODO
+            std::unique_ptr<GraphBased::GenotypeGenerator> generator;
+
             /// @brief Todo
             std::shared_ptr<Metrics::MetricMapTemplate> metricTemplate;
 
             /// @brief Todo
             uint64_t fitnessMetricHash;
+
+            /// @brief Default loggers
+            std::vector<std::shared_ptr<Log::Basiclogger>> basicloggers;
 
         public:
 
@@ -93,7 +102,7 @@ namespace Evolution {
             /**
              * \brief Default constructor of module
              */
-            explicit DefaultModule(
+            explicit BasicModule(
                 const Representations::Representation& representation, 
                 Evaluation::Problem& problem,
                 size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
@@ -113,6 +122,11 @@ namespace Evolution {
             virtual void initialize() override;
 
             /**
+             * \brief Method used during initialize to create the column header of the basicLoggers
+             */
+            virtual void setBasicLoggerHeader();
+
+            /**
              * \brief initialize the metric template based on the evaluation problem
              */
             virtual void initializeMetricTemplate();
@@ -128,6 +142,18 @@ namespace Evolution {
              * \param[in] generationNumber the index of the generation
              */
             virtual void doGeneration(size_t generationNumber) override;
+
+            /**
+             * \brief Method used during doGeneration to add a raw to the basicLoggers
+             * 
+             * \param[in] generationNumber the index of the generation
+             */
+            virtual void setNewBasicLoggerRow(size_t generationNumber);
+
+            /**
+             * \brief Default logger
+             */
+            virtual void addBasiclogger(std::ostream& output = std::cout);
     };
 };
 

@@ -127,7 +127,7 @@ namespace Dimensions {
          * \return `true` when the view satisfies this requirement.
          */
         bool accepts(const Data::DataView& view) const {
-            return view.getType() == dataType && constraint->accepts(view);
+            return view.getType().canFitIn(dataType) && constraint->accepts(view);
         }
 
         /** \brief Checks whether this producer requirement satisfies a consumer requirement. */

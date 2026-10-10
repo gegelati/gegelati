@@ -13,6 +13,11 @@ std::unique_ptr<Representations::Representation> Representations::TPG::cloneOnly
     return clone;
 }
 
+const size_t& Representations::TPG::getNbActions() const
+{
+    return this->nbActions;
+}
+
 void Representations::TPG::setGenotypeConstraint()
 {
    GraphBased::NodeConstraint bidNodes;

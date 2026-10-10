@@ -53,7 +53,7 @@
             ) : nodeMutationRanges{mutationRange} {
                 if(initRange.first == 0 && initRange.second == 0) {
                     this->nodeInitializeRanges.push_back(mutationRange);
-                } {
+                } else {
                     this->nodeInitializeRanges.push_back(initRange);
                 }
                 nodeGenerators.push_back(std::move(nodeGenerator.cloneUniquePtr()));
@@ -103,7 +103,7 @@
              * 
              * \param[in] idx specified index
              */
-            NodeGenerator& getNodeGeneratorAt(size_t idx);
+            const NodeGenerator& getNodeGeneratorAt(size_t idx) const;
 
             /**
              * \brief Return the mutation range at specified index.

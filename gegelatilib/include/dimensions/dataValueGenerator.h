@@ -21,14 +21,14 @@ namespace Dimensions {
              *
              * By default, initialization uses the existing sampling behavior.
              */
-            virtual Data::DataValue initialize(RNG::RNG& rng) = 0;
+            virtual Data::DataValue initialize(RNG::RNG& rng) const = 0;
 
             /**
              * \brief Mutate an existing value.
              *
              * By default, mutate uses the existing sampling behavior.
              */
-            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) {
+            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) const {
                 return this->initialize(rng);
             }
 
@@ -59,7 +59,7 @@ namespace Dimensions {
             /**
              * \brief Sample method creating a DataValue of type T within the specified range.
              */
-            virtual Data::DataValue initialize(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 return Data::DataValue::scalar<T>(rng.uniformSample<T>(min, max));
             }
 
@@ -91,7 +91,7 @@ namespace Dimensions {
             /**
              * \brief Sample method creating a DataValue of type T from the list of possible values.
              */
-            virtual Data::DataValue initialize(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 if(this->values.size() == 0) {
                     throw std::runtime_error("Dimensions::ListUniformGenerator::sample: Sampling value failed because the vector is empty.");
                 }
@@ -112,7 +112,7 @@ namespace Dimensions {
     class MultiGenerator : public DataValueGenerator {
         protected: 
             /// \brief vector of the generators
-            std::vector<std::unique_ptr<DataValueGenerator>> generators;
+            std::vector<std::unique_ptr<const DataValueGenerator>> generators;
 
             /// \brief weights of generators
             std::vector<double> weights;
@@ -155,7 +155,7 @@ namespace Dimensions {
             /**
              * \brief randomly select a generator based on the weights.
              */
-            virtual DataValueGenerator& sampleGenerator(RNG::RNG& rng) {
+            virtual const DataValueGenerator& sampleGenerator(RNG::RNG& rng) const {
                 const double totalWeight = std::accumulate(weights.begin(), weights.end(), 0.0);
 
                 const double randomValue =
@@ -173,12 +173,12 @@ namespace Dimensions {
             /**
              * \brief Sample a value by randomly selecting a generator based on the weights.
              */
-            virtual Data::DataValue initialize(RNG::RNG& rng) override {
+            virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 return this->sampleGenerator(rng).initialize(rng);
             }
 
 
-            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) override {
+            virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) const override {
                 return this->sampleGenerator(rng).mutate(currentValue, rng);
             }
             

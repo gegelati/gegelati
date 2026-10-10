@@ -39,7 +39,7 @@
          * \param[in] nodeGenerator node Generator of the created node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<GraphBased::GPNode> createRandomNode(GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
+        virtual std::unique_ptr<GraphBased::GPNode> createRandomNode(const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
         
 
         /**
@@ -48,7 +48,7 @@
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<GraphBased::Genotype> initRandomGenotype(std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const;
+        virtual std::unique_ptr<GraphBased::Genotype> initRandomGenotype(const GraphBased::GenotypeGenerator& genotypeGenerator, RNG::RNG& rng) const;
 
         /**
          * \brief return a mutated copy of a GPNode
@@ -57,7 +57,7 @@
          * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateNode(GraphBased::GPNode& node, GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const = 0;
+        virtual void mutateNode(GraphBased::GPNode& node, const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const = 0;
 
         /**
          * \brief return a mutated copy of a Genotype.
@@ -66,7 +66,7 @@
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::unique_ptr<GraphBased::Genotype> mutateGenotype(const GraphBased::Genotype& genotype, std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator, RNG::RNG& rng) const = 0;
+        virtual std::unique_ptr<GraphBased::Genotype> mutateGenotype(const GraphBased::Genotype& genotype, const GraphBased::GenotypeGenerator& genotypeGenerator, RNG::RNG& rng) const = 0;
     };
 
     /**
@@ -85,7 +85,7 @@
         for(size_t idx = 0; idx < nbIndividuals; idx++) {
             individuals.insert(std::make_shared<Individual>(
                 representation, 
-                mutator.initRandomGenotype(generator.cloneUniquePtr(), rng)
+                mutator.initRandomGenotype(generator, rng)
             ));
         }
         return individuals;
@@ -101,7 +101,7 @@
     static void mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng)
     {
         for(const std::shared_ptr<Individual>& indiv: individuals) {
-            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), generator.cloneUniquePtr(), rng)));
+            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), generator, rng)));
         }
     }
 }; // namespace Mutator

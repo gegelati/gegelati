@@ -36,6 +36,7 @@ bool Representations::Representation::isValid(const GraphBased::Genotype& genoty
 {
     if(this->genotypeConstraint == nullptr || genotype.getSize() != this->genotypeConstraint->size()) {
         // Not the same number of node groups
+            std::cout<<"ah0"<<std::endl;
         return false;
     }
 
@@ -46,6 +47,7 @@ bool Representations::Representation::isValid(const GraphBased::Genotype& genoty
 
         // Number of nodes in the group is wrong
         if(group.getSize() < this->genotypeConstraint->getRangeAt(idxGroup).first || group.getSize() > this->genotypeConstraint->getRangeAt(idxGroup).second){
+            std::cout<<"ah1"<<std::endl;
             return false;
         }
 
@@ -83,6 +85,7 @@ bool Representations::Representation::isValid(const GraphBased::Genotype& genoty
                     // Individual must output a scalar with the required constraint.
                     const Dimensions::Requirement & outputDim = individualValue->getRepresentation().getDimensionFlow().getOutputDimension();
                     if(!outputDim.getConstraint().isCompatibleWith(constraint)) {
+            std::cout<<"ah " << idxValue << " "<< outputDim.toString() << " " << constraint.toString() << std::endl;
                         return false;
                     }
                 } else if(!constraint.accepts(value)) {

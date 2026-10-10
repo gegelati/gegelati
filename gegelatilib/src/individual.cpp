@@ -89,7 +89,7 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
 {
     // Individual need to be valid to be executed.
     if(!valid){
-        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation");
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
     }
     return this->representation.execute(*this->genotype, inputSources);
 }

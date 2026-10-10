@@ -86,6 +86,11 @@
 
 
             /**
+             * \brief return the number of action accessible by the tpg rep.
+             */
+            const size_t& getNbActions() const;
+
+            /**
              * Set the current available members
              */
             virtual void setAvailableMembers(const std::vector<std::shared_ptr<const Individual>>& members);

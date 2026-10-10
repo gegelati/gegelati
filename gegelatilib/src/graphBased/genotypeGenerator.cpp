@@ -18,7 +18,7 @@ void GraphBased::GenotypeGenerator::addNodeGenerator(
 
     if(initRange.first == 0 && initRange.second == 0) {
         this->nodeInitializeRanges.push_back(mutationRange);
-    } {
+    } else {
         this->nodeInitializeRanges.push_back(initRange);
     }
 }
@@ -41,7 +41,7 @@ void GraphBased::GenotypeGenerator::addFixRangeNodeGenerator(const NodeGenerator
 
 
 
-GraphBased::NodeGenerator& GraphBased::GenotypeGenerator::getNodeGeneratorAt(size_t idx)
+const GraphBased::NodeGenerator& GraphBased::GenotypeGenerator::getNodeGeneratorAt(size_t idx) const
 {
     if(idx >= this->nodeGenerators.size()) {
         throw std::runtime_error("Node:GenotypeGenerator:getNodeGeneratorAt: index out of bounds.");
