@@ -7,6 +7,10 @@
 #include <array>
 #include <set>
 
+#include <mutex>
+#include <queue>
+#include <thread>
+
 #include "individual.h"
 #include "rng/rng.h"
 
@@ -100,8 +104,89 @@
      */
     static void mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng)
     {
+        std::queue<size_t> rngSeeds;
         for(const std::shared_ptr<Individual>& indiv: individuals) {
-            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), generator, rng)));
+            rngSeeds.emplace(rng.getUnsignedInt64(0, UINT64_MAX));
+        }
+
+        for(const std::shared_ptr<Individual>& indiv: individuals) {
+            RNG::RNG localRng;
+            localRng.setSeed(rngSeeds.front());
+            indiv->setGenotype(std::move(mutator.mutateGenotype(indiv->getGenotype(), generator, localRng)));
+            rngSeeds.pop();
+        }
+    }
+
+    /**
+     * \brief Same behavior as above method but in parallel.
+     */
+    static void mutateIndividualsInParallel(
+        const Mutator& mutator,
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals,
+        const GraphBased::GenotypeGenerator& generator,
+        RNG::RNG& rng,
+        size_t maxNbThreads)
+    {
+        if (individuals.empty()) {
+            return;
+        }
+
+        // Generate one independent seed per individual.
+        std::queue<uint64_t> rngSeeds;
+        for (size_t i = 0; i < individuals.size(); ++i) {
+            rngSeeds.emplace(rng.getUnsignedInt64(0, UINT64_MAX));
+        }
+
+        // Create the job queue.
+        std::queue<std::shared_ptr<Individual>> individualsQueue;
+        for (const auto& indiv : individuals) {
+            individualsQueue.push(indiv);
+        }
+
+        std::mutex queueMutex;
+        std::mutex seedsMutex;
+
+        auto worker = [&]() {
+            while (true) {
+                std::shared_ptr<Individual> indiv;
+                uint64_t seed;
+
+                {
+                    std::lock_guard<std::mutex> lock(queueMutex);
+
+                    if (individualsQueue.empty()) {
+                        break;
+                    }
+
+                    indiv = individualsQueue.front();
+                    individualsQueue.pop();
+                }
+
+                {
+                    std::lock_guard<std::mutex> lock(seedsMutex);
+                    seed = rngSeeds.front();
+                    rngSeeds.pop();
+                }
+
+                RNG::RNG localRng;
+                localRng.setSeed(seed);
+
+                indiv->setGenotype(
+                    std::move(mutator.mutateGenotype(
+                        indiv->getGenotype(), generator, localRng)));
+            }
+        };
+
+        // Create worker threads.
+        std::vector<std::thread> threads;
+        const size_t nbThreads = std::min(maxNbThreads, individuals.size());
+
+        for (size_t i = 0; i < nbThreads; ++i) {
+            threads.emplace_back(worker);
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
         }
     }
 }; // namespace Mutator

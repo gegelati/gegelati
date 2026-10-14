@@ -4,21 +4,22 @@
 // Declaration of static individual ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
-static size_t INDIVIDUAL_COUNTER_ID = 0;
+#include <atomic>
+static std::atomic<size_t> INDIVIDUAL_COUNTER_ID{0};
 
 size_t Individual::incrementeCounter()
 {
-    return INDIVIDUAL_COUNTER_ID++;
+    return INDIVIDUAL_COUNTER_ID.fetch_add(1, std::memory_order_relaxed);
 }
 
 size_t Individual::getIndividualIDCounter()
 {
-    return INDIVIDUAL_COUNTER_ID;
+    return INDIVIDUAL_COUNTER_ID.load(std::memory_order_relaxed);
 }
 
 void Individual::resetIndividualIDCounter()
 {
-    INDIVIDUAL_COUNTER_ID = 0;
+    INDIVIDUAL_COUNTER_ID.store(0, std::memory_order_relaxed);
 }
 
 size_t Individual::getIndividualID() const
@@ -96,11 +97,11 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
 
 Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const
 {
-    std::vector<Data::DataView> inputSourcesView;
-    for(const Data::DataValue& value: inputSources) {
-        inputSourcesView.push_back(value.view());
+    // Individual need to be valid to be executed.
+    if(!valid){
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
     }
-    return this->representation.execute(*this->genotype, inputSourcesView);
+    return this->representation.execute(*this->genotype, inputSources);
 }
 
 bool operator<(const Individual& a, const Individual& b)

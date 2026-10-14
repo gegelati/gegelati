@@ -149,6 +149,15 @@
         Data::DataValue execute(
           const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const;
 
+        /**
+         * \brief execute the specified representation, executing the given genotype and the output functions based on the current dataSources
+         * 
+         * \param[in] genotype Genotype executed
+         * \param[in] inputSources input sources on which the individual is executed as value.
+         */
+        Data::DataValue execute(
+          const GraphBased::Genotype& genotype, const std::vector<Data::DataValue>& inputSources) const;
+
     };
 }; // namespace Representation
 

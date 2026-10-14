@@ -44,6 +44,9 @@ namespace Evolution {
             std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitness;
 
             /// @brief TODO
+            std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> populationMetrics;
+
+            /// @brief TODO
             const Representations::Representation& representation;
 
             /// @brief TODO
@@ -129,7 +132,7 @@ namespace Evolution {
             /**
              * \brief initialize the metric template based on the evaluation problem
              */
-            virtual void initializeMetricTemplate();
+            void initializeMetricTemplate();
 
             /**
              * \brief add a metric to measure for evaluation.

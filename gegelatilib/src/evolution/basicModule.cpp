@@ -97,8 +97,15 @@ void Evolution::BasicModule::initialize()
     // Initial evaluation
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
             evaluator->evaluateIndividuals(this->population, this->problem, this->metricTemplate, this->nbTrainingIterations, UINT64_MAX, Evaluation::Mode::TRAINING);
+    
     // Fitness assignment 
     this->individualFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
+    
+    // Update metric of population
+    this->populationMetrics.clear();
+    for(const std::shared_ptr<const Individual>& indiv: this->population) {
+        this->populationMetrics.insert(std::make_pair(indiv->getIndividualID(), std::move(evaluationResults.at(indiv))));
+    }
 
     this->setBasicLoggerHeader();
 }
@@ -121,7 +128,7 @@ void Evolution::BasicModule::doGeneration(size_t generationNumber)
 
 
     // Mutate the offspring
-    Mutation::mutateIndividuals(*this->mutation, offspring, *this->generator, this->rng);
+    Mutation::mutateIndividualsInParallel(*this->mutation, offspring, *this->generator, this->rng, this->nbThreads);
 
 
     // Evaluate the population
@@ -136,8 +143,16 @@ void Evolution::BasicModule::doGeneration(size_t generationNumber)
 
 
     std::vector<std::shared_ptr<const Individual>> survivors = this->survivingSelection->select(individualFitness, this->sizePopulation, this->rng);
+
+    // Update population
     this->population.clear();
     this->population.insert(survivors.begin(), survivors.end());
+
+    // Update metric of population
+    this->populationMetrics.clear();
+    for(const std::shared_ptr<const Individual>& indiv: this->population) {
+        this->populationMetrics.insert(std::make_pair(indiv->getIndividualID(), std::move(evaluationResults.at(indiv))));
+    }
 
     this->setNewBasicLoggerRow(generationNumber);
 }

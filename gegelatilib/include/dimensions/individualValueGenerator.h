@@ -12,7 +12,7 @@ namespace Dimensions {
      * \brief Class generating a DataValue of numeric type T sampled unfiromly within a specified range.
      */
     class IndividualValueGenerator : public DataValueGenerator {
-        private:
+        protected:
             /// Representation of the mutated individual
             const Representations::Representation& representation;
 

@@ -124,3 +124,14 @@ Data::DataValue Representations::Representation::execute(
     }
     return resultIndiv;
 }
+
+Data::DataValue Representations::Representation::execute(
+          const GraphBased::Genotype& genotype, const std::vector<Data::DataValue>& inputSources) const
+{
+    // Convert inputs
+    std::vector<Data::DataView> inputSourcesView;
+    for(const Data::DataValue& value: inputSources) {
+        inputSourcesView.push_back(value.view());
+    }
+    return this->execute(genotype, inputSourcesView);
+}

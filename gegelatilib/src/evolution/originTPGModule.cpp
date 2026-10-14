@@ -5,6 +5,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
     const Representations::Representation& memberRep, 
     Evaluation::Problem& problem,
     size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed, size_t nbThreads, 
+    bool useArchive,
     std::shared_ptr<FitnessAssignment::Assigner> assigner,
     std::shared_ptr<Selection::Selector> parentSelection ,
     std::shared_ptr<Selection::Selector> survivingSelection,
@@ -22,9 +23,24 @@ Evolution::OriginTPGModule::OriginTPGModule(
     }
 
     GraphBased::NodeGenerator bidNodes;
-    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+
+    if(useArchive) {
+        this->archive = 
+            std::make_unique<Evaluation::DataSet>(this->representation.getDimensionFlow().getInputDimensions(), Dimensions::Requirement::array1d<double>(1));
+
+        // Add input metric.
+        this->metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
+
+        
+        // Add archive individual generator
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+    } else {
+        // Add simple individual generator
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+    }
     bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, TPGRep.getNbActions() - 1));
     this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
+
 } 
 
 void Evolution::OriginTPGModule::setBasicLoggerHeader()
@@ -34,11 +50,84 @@ void Evolution::OriginTPGModule::setBasicLoggerHeader()
     }
 }
 
+Data::DataValue Evolution::OriginTPGModule::computeMemberAnswer(
+    const std::vector<Data::DataValue>& inputs, std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members)
+{
+    std::vector<double> answers;
+    for(const std::shared_ptr<const Individual>& member: members) {
+        answers.push_back(member->execute(inputs).getScalar<double>());
+    }
+
+    return Data::DataValue::array1d(answers);
+}
+
+void Evolution::OriginTPGModule::updateArchiveInputs()
+{
+    // Empty data set
+    while(this->archive->size() > 0) {
+        this->archive->removeData(0);
+    }
+
+    // Map of future metrics
+    std::map<uint64_t, std::vector<Data::DataValue>> allInputMetrics;
+
+    // For each individual evaluation
+    for(const auto& [indiv, metricMap]: this->populationMetrics) {
+
+        // Get the input metrics
+        std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = metricMap->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
+
+        // For each feature, get the input metric
+        for(const auto& [featureHash, inputMetric]: inputMetrics) {
+
+            // For each step in the evaluation feature hash, get the inputs
+            for(const std::vector<Data::DataValue>& inputsMetricStep: inputMetric->getInputs()) {
+
+                // Get combined hash of the inputs
+                uint64_t currentInputHash = Data::DataValue::getCombinedHash(inputsMetricStep);
+
+                // Inputs are new, dupplicate them and add them to the allInputMetrics Map!
+                if(allInputMetrics.find(currentInputHash) == allInputMetrics.end()) {
+                    std::vector<Data::DataValue> inputMetricStepClone;
+                    for(const Data::DataValue& input: inputsMetricStep) {
+                        inputMetricStepClone.push_back(input.clone());
+                    }
+                    allInputMetrics.insert(std::make_pair(currentInputHash, std::move(inputMetricStepClone)));
+                }
+            }
+        }
+    }
+
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members = this->getAllMembers();
+
+    size_t dataSetMaxSize = 50;
+    if(allInputMetrics.size() > dataSetMaxSize) {
+        while(this->archive->size() != dataSetMaxSize) {
+
+            auto it = allInputMetrics.begin();
+            std::advance(it, rng.uniformSample<uint64_t>(0, allInputMetrics.size() - 1));
+
+            this->archive->addData(std::move(it->second), this->computeMemberAnswer(it->second, members));
+            allInputMetrics.erase(it);
+        }
+    } else {
+        for(auto& [hash, inputs]: allInputMetrics) {
+            this->archive->addData(std::move(inputs), this->computeMemberAnswer(inputs, members));
+        }
+    }
+}
+
 void Evolution::OriginTPGModule::doGeneration(size_t generationNumber) 
 {
 
     GraphBased::NodeGenerator bidNodes;
-    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+    if(this->archive != nullptr) {
+        // Add archive individual generator
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+    } else {
+        // Add simple individual generator
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+    }
 
     // Action Generator
     Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, dynamic_cast<const Representations::TPG&>(this->representation).getNbActions() - 1);
@@ -57,6 +146,11 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
     this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
 
     BasicModule::doGeneration(generationNumber);
+
+    if(this->archive != nullptr) {
+        this->updateArchiveInputs();
+        std::cout<<"\narchive size: "<<this->archive->size()<<std::endl;
+    }
 }
 
 std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllVertices()

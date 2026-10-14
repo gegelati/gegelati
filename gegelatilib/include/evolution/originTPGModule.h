@@ -9,6 +9,10 @@
 #include "representations/TPG.h"
 
 #include "dimensions/individualValueGenerator.h"
+#include "dimensions/individualArchiveValueGenerator.h"
+
+#include "evaluation/dataset.h"
+#include "metrics/inputMetric.h"
 
 
 namespace Evolution {
@@ -26,6 +30,9 @@ namespace Evolution {
             /// @brief Current member for tangled connection (need to be saved somewhere!)
             std::vector<std::shared_ptr<const Individual>> currentMemberForTangled;
 
+            /// @brief archive for the member novelty.
+            std::unique_ptr<Evaluation::DataSet> archive;
+
         public:
 
             /**
@@ -36,6 +43,7 @@ namespace Evolution {
                 const Representations::Representation& memberRep, 
                 Evaluation::Problem& problem,
                 size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
+                bool useArchive = true,
                 std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr,
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,
                 std::shared_ptr<Selection::Selector> survivingSelection = nullptr,
@@ -56,6 +64,12 @@ namespace Evolution {
             std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllVertices();
 
             /**
+             * \brief compute the answer of the current member in the population of the archive.
+             */
+            Data::DataValue computeMemberAnswer(
+                const std::vector<Data::DataValue>& inputs, std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members);
+
+            /**
              * \brief Get all the members contained in the proposed individuals
              */
             std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getMembersOf(std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals);
@@ -64,6 +78,11 @@ namespace Evolution {
              * \brief Get all the members contained in the current population
              */
             std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllMembers();
+
+            /**
+             * \brief Update the inputs stored inside the archive.
+             */
+            void updateArchiveInputs();
 
             /**
              * \brief Override to update the generator before launching basicModule::doGeneration
