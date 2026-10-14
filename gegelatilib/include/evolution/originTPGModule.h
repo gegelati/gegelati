@@ -11,6 +11,8 @@
 #include "dimensions/individualValueGenerator.h"
 #include "dimensions/individualArchiveValueGenerator.h"
 
+#include "mutation/nodeTransferMutation.h"
+
 #include "evaluation/dataset.h"
 #include "metrics/inputMetric.h"
 
@@ -28,6 +30,9 @@ namespace Evolution {
 
             /// \brief Representation of the members
             const Representations::Representation& memberRep;
+
+            /// @brief TPG mutation using node transfer.
+            std::shared_ptr<Mutation::Mutator> memberMutation;
 
             /// @brief Current member for tangled connection (need to be saved somewhere!)
             std::vector<std::shared_ptr<const Individual>> currentMemberForTangled;
@@ -50,7 +55,8 @@ namespace Evolution {
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,
                 std::shared_ptr<Selection::Selector> survivingSelection = nullptr,
                 std::shared_ptr<Reproduction::Reproducer> breeder = nullptr,
-                std::shared_ptr<Mutation::Mutator> mutation = nullptr
+                std::shared_ptr<Mutation::NodeTransferMutation> mutation = nullptr,
+                std::shared_ptr<Mutation::Mutator> memberMutation = nullptr
             );
 
             /**

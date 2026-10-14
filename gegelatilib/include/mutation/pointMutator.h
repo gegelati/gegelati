@@ -55,6 +55,18 @@
         virtual void mutateNode(GraphBased::GPNode& node, const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const override;
 
         /**
+         * \brief Add a node to the current genotype group of nodes
+         */
+        virtual void addNode(
+            GraphBased::NodeGroup &mutatedGroup, size_t idxNodeGroup, const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const;
+
+        /**
+         * \brief Remove a node from the current genotype group of nodes
+         */
+        virtual void removeNode(
+            GraphBased::NodeGroup &mutatedGroup, size_t idxNodeGroup, RNG::RNG& rng) const;
+
+        /**
          * \brief return a mutated copy of a Genotype.
          *
          * \param[in,out] genotype the genotype mutated.

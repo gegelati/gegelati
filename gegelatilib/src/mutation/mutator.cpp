@@ -75,6 +75,8 @@ void Mutation::mutateIndividualsInParallel(
 {
     if (individuals.empty()) {
         return;
+    } else if (maxNbThreads == 1 || individuals.size() == 1) {
+        return Mutation::mutateIndividuals(mutator, individuals, generator, rng);
     }
 
     // Generate one independent seed per individual.

@@ -10,16 +10,23 @@ Evolution::OriginTPGModule::OriginTPGModule(
     std::shared_ptr<Selection::Selector> parentSelection ,
     std::shared_ptr<Selection::Selector> survivingSelection,
     std::shared_ptr<Reproduction::Reproducer> breeder,
-    std::shared_ptr<Mutation::Mutator> mutation
+    std::shared_ptr<Mutation::NodeTransferMutation> mutation,
+    std::shared_ptr<Mutation::Mutator> memberMutation
 ): BasicModule(TPGRep, problem, sizePopulation, nbOffspring, nbTrainingIterations, 
-               seed, nbThreads, assigner, parentSelection, survivingSelection, breeder, mutation),
+               seed, nbThreads, assigner, parentSelection, survivingSelection, breeder, 
+               (mutation == nullptr) ? std::make_shared<Mutation::NodeTransferMutation>(0.5, 0.1, 0.0) : mutation),
    memberRep{memberRep}
 {
-    if(!Dimensions::DimensionFlow::acceptsRequirements(TPGRep.getDimensionFlow().getInputDimensions(), memberRep.getDimensionFlow().getInputDimensions())) {
-        throw std::runtime_error("Evolution::BasicModule: Cannot build module with input requirements not compatible between representation and problem");
+    if(!Dimensions::DimensionFlow::acceptsRequirements(TPGRep.getDimensionFlow().getInputDimensions(), this->memberRep.getDimensionFlow().getInputDimensions())) {
+        throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with input requirements not compatible between representation and problem");
     }
-    if(!memberRep.getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>())) {
-        throw std::runtime_error("Evolution::BasicModule: Cannot build module with output requirements not compatible between representation and problem");
+    if(!this->memberRep.getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>())) {
+        throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with output requirements not compatible between representation and problem");
+    }
+
+
+    if(this->memberMutation == nullptr) {
+        this->memberMutation = std::make_shared<Mutation::PointMutator>(0.5, 0.1, 0.1);
     }
 
     GraphBased::NodeGenerator bidNodes;
@@ -33,10 +40,10 @@ Evolution::OriginTPGModule::OriginTPGModule(
 
         
         // Add archive individual generator
-        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     } else {
         // Add simple individual generator
-        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     }
     bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, TPGRep.getNbActions() - 1));
     this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
@@ -123,10 +130,10 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
     GraphBased::NodeGenerator bidNodes;
     if(this->archive != nullptr) {
         // Add archive individual generator
-        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*this->archive, this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     } else {
         // Add simple individual generator
-        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->mutation));
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     }
 
     // Action Generator
@@ -144,6 +151,11 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
 
     bidNodes.addGenerator(multi);
     this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
+
+    std::cout<<"1"<<std::endl;
+    std::vector<std::shared_ptr<const Individual>> potentialNodes;
+    potentialNodes.insert(potentialNodes.begin(), this->population.begin(), this->population.end());
+    dynamic_cast<Mutation::NodeTransferMutation*>(this->mutation.get())->setPotentialNodes(potentialNodes);
 
     BasicModule::doGeneration(generationNumber);
 

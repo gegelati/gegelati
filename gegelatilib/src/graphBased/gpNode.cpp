@@ -3,23 +3,23 @@
 // Declaration of static GPNnode ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
-static size_t GP_NODE_COUNTER_ID = 0;
+#include <atomic>
+static std::atomic<size_t> GP_NODE_COUNTER_ID{0};
 
 size_t GraphBased::GPNode::incrementeCounter()
 {
-    return GP_NODE_COUNTER_ID++;
+    return GP_NODE_COUNTER_ID.fetch_add(1, std::memory_order_relaxed);
 }
 
 size_t GraphBased::GPNode::getGPNodeIDCounter()
 {
-    return GP_NODE_COUNTER_ID;
+    return GP_NODE_COUNTER_ID.load(std::memory_order_relaxed);
 }
 
 void GraphBased::GPNode::resetGPNodeIDCounter()
 {
-    GP_NODE_COUNTER_ID = 0;
+    GP_NODE_COUNTER_ID.store(0, std::memory_order_relaxed);
 }
-
 
 size_t GraphBased::GPNode::getGPNodeID() const
 {

@@ -134,7 +134,7 @@ namespace Dimensions {
 
         /** \brief Checks whether this producer requirement satisfies a consumer requirement. */
         bool isCompatibleWith(const Requirement& consumer) const noexcept {
-            return dataType.elementType == consumer.getDataType().elementType && 
+            return *dataType.elementType == *consumer.getDataType().elementType && 
                    dataType.canFitIn(consumer.dataType, 0) &&
                    constraint->isCompatibleWith(*consumer.constraint);
         }

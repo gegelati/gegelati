@@ -82,8 +82,9 @@
      * \param[in] nbIndividuals The number of individuals created.
      * \param[in] rng Random Number Generator used in the mutation process.
      */
-    static std::set<std::shared_ptr<Individual>, SharedLess<Individual>> 
-        initIndividuals(const Mutator& mutator, const Representations::Representation& representation, const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng);
+    std::set<std::shared_ptr<Individual>, SharedLess<Individual>>  initIndividuals(
+        const Mutator& mutator, const Representations::Representation& representation, 
+        const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng);
 
     /**
      * \brief Mutate a set of individuals
@@ -92,17 +93,16 @@
      * \param[in] individuals set of individuals mutated.
      * \param[in] rng Random Number Generator used in the mutation process.
      */
-    static void mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng);
+    void mutateIndividuals(
+        const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, 
+        const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng);
 
     /**
      * \brief Same behavior as above method but in parallel.
      */
-    static void mutateIndividualsInParallel(
-        const Mutator& mutator,
-        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals,
-        const GraphBased::GenotypeGenerator& generator,
-        RNG::RNG& rng,
-        size_t maxNbThreads);
+    void mutateIndividualsInParallel(
+        const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals,
+        const GraphBased::GenotypeGenerator& generator,  RNG::RNG& rng, size_t maxNbThreads);
 }; // namespace Mutator
 
 #endif // MUTATION_MUTATOR_H
