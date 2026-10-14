@@ -19,6 +19,8 @@ namespace Evolution {
 
     /**
      * \brief Class for creating the original TPG framework
+     * 
+     * If used in parallelism, the determinism of the IDs of the members specifically is not guaranteed. (as members are dupplicated/mutated in parallel during TPG mutation)
      */
     class OriginTPGModule: public BasicModule {
 
