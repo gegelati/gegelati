@@ -83,6 +83,9 @@ void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(
 
         nbEvalPerClass.at(classIdx) += truePositive + falseNegative;
     }
+
+    score = std::accumulate(scorePerClass.begin(), scorePerClass.end(), 0.0) /
+            (double)scorePerClass.size();
 }
 
 const std::vector<double>& Selector::ClassificationSelectionMetrics::
