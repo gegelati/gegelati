@@ -40,6 +40,13 @@ namespace Evolution {
             /// @brief archive for the member novelty.
             std::unique_ptr<Evaluation::DataSet> archive;
 
+            /// \brief Maximum size of the archive
+            size_t archiveSize;
+
+            /// @brief Boolean indicating if the archive should be fixed (for classification for example).
+            /// If it is fixed, it will not be updated after initialization
+            bool isArchiveFixed;
+
         public:
 
             /**
@@ -50,7 +57,7 @@ namespace Evolution {
                 const Representations::Representation& memberRep, 
                 Evaluation::Problem& problem,
                 size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
-                bool useArchive = true,
+                size_t archiveSize = 50, bool isArchiveFixed = false,
                 std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr,
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,
                 std::shared_ptr<Selection::Selector> survivingSelection = nullptr,
@@ -91,6 +98,12 @@ namespace Evolution {
              * \brief Update the inputs stored inside the archive.
              */
             void updateArchiveInputs();
+
+
+            /**
+             * \brief Execute basicModule method and set the archive.
+             */
+            virtual void initialize() override;
 
             /**
              * \brief Override to update the generator before launching basicModule::doGeneration

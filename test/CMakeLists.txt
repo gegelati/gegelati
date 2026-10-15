@@ -46,6 +46,7 @@ file(
 # Add definition for relative path into project
 # Path to dat folder needed for tests
 add_definitions( -DTESTS_DAT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/dat/")
+add_definitions( -DMNIST_DATA_LOCATION="${CMAKE_CURRENT_SOURCE_DIR}/dat/")
 
 # Build for coverage when in debug
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -69,3 +70,31 @@ endif()
 add_test(NAME TPGTest
          COMMAND ${TEST_TARGET_NAME})
          #WORKING_DIRECTORY $<TARGET_FILE_DIR:${TEST_TARGET_NAME}>)
+
+
+
+# *******************************************
+# ************ MNIST database ***************
+# *******************************************
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/dat/train-images-idx3-ubyte.gz")
+	message(STATUS "Download MNIST training database 1/4 (may take a few seconds).")
+	file(DOWNLOAD https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz ${CMAKE_CURRENT_SOURCE_DIR}/dat/train-images-idx3-ubyte.gz)
+	message(STATUS "Download MNIST training database 2/4 (may take a few seconds).")
+	file(DOWNLOAD https://storage.googleapis.com/cvdf-datasets/mnist/train-labels-idx1-ubyte.gz ${CMAKE_CURRENT_SOURCE_DIR}/dat/train-labels-idx1-ubyte.gz)
+	message(STATUS "Download MNIST training database 3/4 (may take a few seconds).")
+	file(DOWNLOAD https://storage.googleapis.com/cvdf-datasets/mnist/t10k-images-idx3-ubyte.gz ${CMAKE_CURRENT_SOURCE_DIR}/dat/t10k-images-idx3-ubyte.gz)
+	message(STATUS "Download MNIST training database 4/4 (may take a few seconds).")
+	file(DOWNLOAD https://storage.googleapis.com/cvdf-datasets/mnist/t10k-labels-idx1-ubyte.gz ${CMAKE_CURRENT_SOURCE_DIR}/dat/t10k-labels-idx1-ubyte.gz)
+else()
+	message(STATUS "MNIST data already downloaded.")
+endif()	
+
+message(STATUS "Extract MNIST database.")
+execute_process(
+	COMMAND gzip -dfk ${CMAKE_SOURCE_DIR}/dat/train-images-idx3-ubyte.gz
+	COMMAND gzip -dfk ${CMAKE_SOURCE_DIR}/dat/train-labels-idx1-ubyte.gz
+	COMMAND gzip -dfk ${CMAKE_SOURCE_DIR}/dat/t10k-images-idx3-ubyte.gz
+	COMMAND gzip -dfk ${CMAKE_SOURCE_DIR}/dat/t10k-labels-idx1-ubyte.gz
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/dat
+)
+target_compile_definitions(${PROJECT_NAME} PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}" ROOT_DIR="${CMAKE_SOURCE_DIR}")

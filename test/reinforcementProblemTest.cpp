@@ -143,13 +143,13 @@ TEST(ReinforcementProblemTest, extractMultiMetric)
     ASSERT_GT(inputMetrics.at(0)->getInputs().size(), 1) << "Size of input should be more than 1 for reinforcement";
     ASSERT_GT(inputMetrics.at(1)->getInputs().size(), 1) << "Size of input should be more than 1 for reinforcement";
 
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0).size(), 2) << "Dataset should have only one source";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0).size(), 2) << "Dataset should have only one source";
+    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->size(), 2) << "Dataset should have only one source";
+    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->size(), 2) << "Dataset should have only one source";
 
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0).at(0), Data::DataValue::array1d<int[3]>({1, 2, 3})) << "Values should be equal";
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0).at(1), Data::DataValue::scalar<double>(21.0)) << "Values should be equal";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0).at(0), Data::DataValue::array1d<int[3]>({1, 2, 3})) << "Values should be equal";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0).at(1), Data::DataValue::scalar<double>(21.0)) << "Values should be equal";
+    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[3]>({1, 2, 3})) << "Values should be equal";
+    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->at(1), Data::DataValue::scalar<double>(21.0)) << "Values should be equal";
+    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[3]>({1, 2, 3})) << "Values should be equal";
+    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->at(1), Data::DataValue::scalar<double>(21.0)) << "Values should be equal";
 }
 
 TEST(RewardsMetricTest, Constructor)

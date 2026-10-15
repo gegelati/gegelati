@@ -16,6 +16,13 @@ namespace Metrics {
     class PredictionMetric: public ScalarMetric
     {
 
+      protected:
+
+        /// target of the prediction
+        std::shared_ptr<const Data::DataValue> target;
+        /// target of the prediction
+        std::shared_ptr<const Data::DataValue> prediction;
+
       public:
         /**
          * \brief Default constructor
@@ -53,6 +60,12 @@ namespace Metrics {
          * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
          */
         static uint64_t staticHash();
+
+        /// @brief Get the value predicted.
+        virtual const Data::DataValue& getPrediction() const;
+
+        /// @brief Get the value targetted. 
+        virtual const Data::DataValue& getTarget() const;
     };
 
 

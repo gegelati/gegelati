@@ -124,7 +124,7 @@ TEST_F(LGPRepresentationTest, getGenotypeGenerator)
     ASSERT_EQ(generator->getInitRangeAt(0).first, 5) << "Low range should be 5";
     ASSERT_EQ(generator->getInitRangeAt(0).second, 10) << "Low range should be 5";
 
-    GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    const GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 6) << "Size should be 6";
 
     size_t value;

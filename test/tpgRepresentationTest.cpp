@@ -142,7 +142,7 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
     ASSERT_EQ(generator->getInitRangeAt(0).first, 2) << "Low range should be 2";
     ASSERT_EQ(generator->getInitRangeAt(0).second, 10) << "Low range should be 10";
 
-    GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
+    const GraphBased::NodeGenerator& nodeGen = generator->getNodeGeneratorAt(0);
     ASSERT_EQ(nodeGen.size(), 2) << "Size should be 2";
 
     ASSERT_THROW(nodeGen.getGeneratorAt(0).initialize(rng), std::runtime_error) << "Should throw since no individual is set";
@@ -168,7 +168,7 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
     representation.setAvailableTangledIndiv(tangled);
 
     std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator().cloneUniquePtr();
-    GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
+    const GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
     for(size_t idx = 0; idx < 1000; idx++) {
         std::shared_ptr<const Individual> member = nodeGenNew.getGeneratorAt(0).initialize(rng).getScalar<std::shared_ptr<const Individual>>();
         ASSERT_TRUE(member->getIndividualID() < members.size()) << "ID should be 0, 1 or 2";

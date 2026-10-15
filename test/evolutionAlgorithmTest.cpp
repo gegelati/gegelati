@@ -40,6 +40,8 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <numeric>
+#include <sstream>
+#include <string>
 
 #include "instructions/set.h"
 #include "instructions/lambdaInstruction.h"
@@ -49,7 +51,9 @@
 #include "evaluation/parallelEvaluator.h"
 #include "metrics/rewardsMetric.h"
 
-#include "evolution/defaultModule.h"
+#include "evolution/basicmodule.h"
+#include "evolution/originTPGModule.h"
+#include "log/logger.h"
 
 #include "dimensions/individualValueGenerator.h"
 
@@ -103,7 +107,8 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     rng.setSeed(4);
 
     // Create representation
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), 3, set, 8, 10, 20);
+    lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
 
     // Create Mutator and breeder
     Reproduction::Replicator breeder;
@@ -164,21 +169,23 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         std::cout<<"At gen: "<<idxGen<<" - ID: "<<individualFitness.begin()->first->getIndividualID() 
         <<" and score: " << individualFitness.begin()->second <<std::endl;
     }
-    ASSERT_EQ(1263292321416791775, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(1704165046166301501U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
 
     // Create representation
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), 3, set, 8, 10, 20);
+    lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
     
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
 
-    Evolution::DefaultModule module(lgpRep, problem, 100, 100, 3, 4, 10);
+    Evolution::BasicModule module(lgpRep, problem, 100, 100, 3, 4, 10);
+    module.addBasiclogger();
     module.evolve(20);
 
-    ASSERT_EQ(1263292321416791775, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(1704165046166301501U, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
@@ -217,7 +224,6 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
             evaluator.evaluateIndividuals(populationLGP, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
     std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
-
 
     // Initialize TPG population
     std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
@@ -276,19 +282,19 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         <<" and score: " << individualFitnessTPG.begin()->second <<std::endl;
     }
 
-    ASSERT_EQ(3785372112575905310U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(2919827829777650766U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
     RNG::RNG rng;
-    rng.setSeed(5);
+    rng.setSeed(4);
 
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
     Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
-    Mutation::PointMutator mutator(0.5, 0.0, 0.0);
+    Mutation::PointMutator mutator(0.5, 0.1, 0.1);
 
     /** CUSTOM GENERATOR **/
     GraphBased::NodeGenerator bidNodes;
@@ -310,8 +316,6 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
     Evaluation::ParallelEvaluator evaluator(20);
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-    
-
 
 
     size_t sizePopulation = 100;
@@ -321,7 +325,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     individualsTPG.clear();
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
-            evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
+            evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, UINT64_MAX, Evaluation::Mode::TRAINING);
     // Fitness assignment 
     std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
 
@@ -346,7 +350,41 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
         // Print best individual
         std::cout<<"ID: "<<individualFitnessTPG.begin()->first->getIndividualID() << " and score: " << individualFitnessTPG.begin()->second<<std::endl;
     }
-    ASSERT_EQ(Individual::getIndividualIDCounter(), 3319) << "boug boug ";
-    ASSERT_EQ(10220074300555517450U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(Individual::getIndividualIDCounter(), 3585) << "boug boug ";
+    
+    ASSERT_EQ(8946111367163773343U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
+
+TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP3) {
+    // Create representations
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
+    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
+
+    // Create evaluationAgent
+    Evaluation::ReinforcementProblem problem(le, 3);
+
+    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 4, 1);
+    module.addBasiclogger();
+    module.evolve(20);
+
+    EXPECT_EQ(Individual::getIndividualIDCounter(), 3621) << "boug boug ";
+    EXPECT_EQ(module.getAllVertices().size(), 101) << "BMMEME";
+    EXPECT_EQ(8946111367163773343, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+}
+
+TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP4) {
+    // Create representations
+    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
+    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
+
+    // Create evaluationAgent
+    Evaluation::ReinforcementProblem problem(le, 3);
+
+    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 4, 10);
+    module.addBasiclogger();
+    module.evolve(20);
+
+    EXPECT_EQ(Individual::getIndividualIDCounter(), 3621) << "boug boug ";
+    EXPECT_EQ(8946111367163773343, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+}

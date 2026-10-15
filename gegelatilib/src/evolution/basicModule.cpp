@@ -48,7 +48,7 @@ breeder{breeder}, mutation{mutation}
     }
 
     if(this->mutation == nullptr) {
-        this->mutation = std::make_shared<Mutation::PointMutator>(0.5, 0.1, 0.1);
+        this->mutation = std::make_shared<Mutation::PointMutator>(0.1, 0.5, 0.5);
     }
 
     this->generator = this->representation.getGenotypeGenerator().cloneUniquePtr();
@@ -119,17 +119,22 @@ void Evolution::BasicModule::setBasicLoggerHeader() {
 void Evolution::BasicModule::doGeneration(size_t generationNumber) 
 {
 
+    this->stopwatch.checkpoint();
     // Parent selection 
     std::vector<std::shared_ptr<const Individual>> parents = this->parentSelection->select(this->individualFitness, this->nbOffspring, this->rng);
+
+    this->stopwatch.checkpoint();
 
 
     // Reproduce the parents
     std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = this->breeder->reproduce(parents, this->nbOffspring, this->rng);
 
+    this->stopwatch.checkpoint();
 
     // Mutate the offspring
     Mutation::mutateIndividualsInParallel(*this->mutation, offspring, *this->generator, this->rng, this->nbThreads);
 
+    this->stopwatch.checkpoint();
 
     // Evaluate the population
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(this->population);
@@ -137,10 +142,14 @@ void Evolution::BasicModule::doGeneration(size_t generationNumber)
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
         this->evaluator->evaluateIndividuals(evaluatedIndividuals, this->problem, this->metricTemplate, this->nbTrainingIterations, generationNumber, Evaluation::Mode::TRAINING);
 
+        
+    this->stopwatch.checkpoint();
 
     // Do replacement
     this->individualFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
 
+    
+    this->stopwatch.checkpoint();
 
     std::vector<std::shared_ptr<const Individual>> survivors = this->survivingSelection->select(individualFitness, this->sizePopulation, this->rng);
 
@@ -154,12 +163,12 @@ void Evolution::BasicModule::doGeneration(size_t generationNumber)
         this->populationMetrics.insert(std::make_pair(indiv->getIndividualID(), std::move(evaluationResults.at(indiv))));
     }
 
+    this->stopwatch.checkpoint();
     this->setNewBasicLoggerRow(generationNumber);
 }
 
 void Evolution::BasicModule::setNewBasicLoggerRow(size_t generationNumber)
 {
-    this->stopwatch.checkpoint();
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
         defLogger->addGenerationValues<size_t>({generationNumber, this->population.size()});
     }
@@ -175,7 +184,8 @@ void Evolution::BasicModule::setNewBasicLoggerRow(size_t generationNumber)
     }
     averageFitness /= this->population.size();
 
-    double generationTime = this->stopwatch.getCheckpoints().at(0);
+    std::vector<double> genCheckpoints = this->stopwatch.getCheckpoints();
+    double generationTime = std::accumulate(genCheckpoints.begin(), genCheckpoints.end(), 0.0);
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
         defLogger->addGenerationValues<double>({minFitness, averageFitness, maxFitness, generationTime, this->stopwatch.elapsed()});
     }

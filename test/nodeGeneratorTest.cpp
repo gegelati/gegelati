@@ -70,8 +70,8 @@ TEST(GenotypeGeneratorTest, addValue) {
 
     Data::DataValue valueMin = Data::DataValue::scalar<int>(1);
     Data::DataValue valueMax = Data::DataValue::scalar<int>(42);
-    GraphBased::NodeGenerator& nodeGeneratorGet0 = genotypeGenerator.getNodeGeneratorAt(0);
-    GraphBased::NodeGenerator& nodeGeneratorGet1 = genotypeGenerator.getNodeGeneratorAt(1);
+    const GraphBased::NodeGenerator& nodeGeneratorGet0 = genotypeGenerator.getNodeGeneratorAt(0);
+    const GraphBased::NodeGenerator& nodeGeneratorGet1 = genotypeGenerator.getNodeGeneratorAt(1);
     ASSERT_EQ(nodeGeneratorGet0.size(), 2) << "Size should be equal";
     ASSERT_EQ(nodeGeneratorGet1.size(), 1) << "Size should be equal";
 

@@ -21,11 +21,11 @@
 namespace {
     class IncrementingGenerator : public Dimensions::DataValueGenerator {
     public:
-        Data::DataValue initialize(RNG::RNG&) override {
+        Data::DataValue initialize(RNG::RNG&) const override {
             return Data::DataValue::scalar<int>(0);
         }
 
-        Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG&) override {
+        Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG&) const override {
             return Data::DataValue::scalar<int>(currentValue.getScalar<int>() + 1);
         }
 
@@ -102,7 +102,7 @@ TEST(MutatorTest, initRandomGenotype)
     genotypeGenerator->addNodeGenerator(nodeGenerator1, {5, 10});
 
     std::unique_ptr<GraphBased::Genotype> sampled;
-    ASSERT_NO_THROW(sampled = std::move(mutator.initRandomGenotype(std::move(genotypeGenerator), rng))) << "Creating genotype failed";
+    ASSERT_NO_THROW(sampled = std::move(mutator.initRandomGenotype(*genotypeGenerator, rng))) << "Creating genotype failed";
 
     ASSERT_EQ(sampled->getSize(), 2);
     GraphBased::NodeGroup& group0 = sampled->getNodeGroup(0);
@@ -132,7 +132,7 @@ TEST(MutatorTest, initRandomGenotype)
         std::make_unique<GraphBased::GenotypeGenerator>();
 
     ASSERT_THROW(
-        mutator.initRandomGenotype(std::move(emptyGenerator), rng),
+        mutator.initRandomGenotype(*emptyGenerator, rng),
         std::runtime_error
     ) << "Creating a genotype with an empty GenotypeGenerator should fail";
 }
@@ -239,7 +239,7 @@ TEST(PointMutatorTest, UsesCurrentValueForMutationAndInitializationForAddedNodes
     genotypeGenerator.addNodeGenerator(nodeGenerator, {1, 1});
 
     std::unique_ptr<GraphBased::Genotype> result = addNodeMutator.mutateGenotype(
-        genotype, genotypeGenerator.cloneUniquePtr(), rng);
+        genotype, genotypeGenerator, rng);
 
     ASSERT_EQ(result->getNodeGroup(0).getSize(), 1);
     EXPECT_EQ(result->getNodeGroup(0).getNode(0).getValue(0).getScalar<int>(), 0);
@@ -268,7 +268,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_THROW(
         pointMutator.mutateGenotype(
             emptyGenotype,
-            std::move(emptyGenerator),
+            *emptyGenerator,
             rng
         ),
         std::runtime_error
@@ -318,7 +318,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_NO_THROW(
         mutatedGenotype = pointMutator.mutateGenotype(
             genotype,
-            genotypeGenerator.cloneUniquePtr(),
+            genotypeGenerator,
             rng
         )
     );
@@ -380,7 +380,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_NO_THROW(
         addedGenotype = addMutator.mutateGenotype(
             genotype,
-            genotypeGenerator.cloneUniquePtr(),
+            genotypeGenerator,
             rng
         )
     );
@@ -441,7 +441,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_NO_THROW(
         removedGenotype = removeMutator.mutateGenotype(
             twoNodeGenotype,
-            genotypeGenerator.cloneUniquePtr(),
+            genotypeGenerator,
             rng
         )
     );
@@ -473,7 +473,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_NO_THROW(
         minimumGenotype = removeMutator.mutateGenotype(
             genotype,
-            genotypeGenerator.cloneUniquePtr(),
+            genotypeGenerator,
             rng
         )
     );
@@ -494,7 +494,7 @@ TEST(PointMutatorTest, mutateGenotype)
     ASSERT_NO_THROW(
         maximumGenotype = addMutator.mutateGenotype(
             twoNodeGenotype,
-            genotypeGenerator.cloneUniquePtr(),
+            genotypeGenerator,
             rng
         )
     );
@@ -575,7 +575,7 @@ TEST(PointMutatorTest, mutateGenotypeDoesNotMutateWhenProbabilityIsZero)
 
     std::unique_ptr<GraphBased::Genotype> mutatedGenotype;
 
-    ASSERT_NO_THROW(mutatedGenotype = pointMutator.mutateGenotype(genotype, genotypeGenerator.cloneUniquePtr(), rng));
+    ASSERT_NO_THROW(mutatedGenotype = pointMutator.mutateGenotype(genotype, genotypeGenerator, rng));
 
     ASSERT_NE(mutatedGenotype, nullptr);
 

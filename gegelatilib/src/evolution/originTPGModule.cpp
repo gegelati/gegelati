@@ -5,7 +5,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
     const Representations::Representation& memberRep, 
     Evaluation::Problem& problem,
     size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed, size_t nbThreads, 
-    bool useArchive,
+    size_t archiveSize, bool isArchiveFixed,
     std::shared_ptr<FitnessAssignment::Assigner> assigner,
     std::shared_ptr<Selection::Selector> parentSelection ,
     std::shared_ptr<Selection::Selector> survivingSelection,
@@ -14,8 +14,8 @@ Evolution::OriginTPGModule::OriginTPGModule(
     std::shared_ptr<Mutation::Mutator> memberMutation
 ): BasicModule(TPGRep, problem, sizePopulation, nbOffspring, nbTrainingIterations, 
                seed, nbThreads, assigner, parentSelection, survivingSelection, breeder, 
-               (mutation == nullptr) ? std::make_shared<Mutation::NodeTransferMutation>(0.5, 0.1, 0.0) : mutation),
-   memberRep{memberRep}
+               (mutation == nullptr) ? std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7) : mutation),
+   memberRep{memberRep}, archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
 {
     if(!Dimensions::DimensionFlow::acceptsRequirements(TPGRep.getDimensionFlow().getInputDimensions(), this->memberRep.getDimensionFlow().getInputDimensions())) {
         throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with input requirements not compatible between representation and problem");
@@ -31,7 +31,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
 
     GraphBased::NodeGenerator bidNodes;
 
-    if(useArchive) {
+    if(this->archiveSize > 0) {
         this->archive = 
             std::make_unique<Evaluation::DataSet>(this->representation.getDimensionFlow().getInputDimensions(), Dimensions::Requirement::array1d<double>(1));
 
@@ -46,14 +46,14 @@ Evolution::OriginTPGModule::OriginTPGModule(
         bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     }
     bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, TPGRep.getNbActions() - 1));
-    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
+    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(3U, 5U), std::make_pair(3U, 3U));
 
 } 
 
 void Evolution::OriginTPGModule::setBasicLoggerHeader()
 {
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
-        defLogger->addHeaderValues({"Gen", "NbVertex", "NbMember", "Fit_Min", "Fit_Avg", "Fit_Max", "T_Gen", "T_Total"});
+        defLogger->addHeaderValues({"Gen", "NbVertex", "NbMember", "Fit_Min", "Fit_Avg", "Fit_Max", "T_Mut", "T_Eval", "T_Gen", "T_Total"});
     }
 }
 
@@ -88,15 +88,15 @@ void Evolution::OriginTPGModule::updateArchiveInputs()
         for(const auto& [featureHash, inputMetric]: inputMetrics) {
 
             // For each step in the evaluation feature hash, get the inputs
-            for(const std::vector<Data::DataValue>& inputsMetricStep: inputMetric->getInputs()) {
+            for(std::shared_ptr<const std::vector<Data::DataValue>> inputsMetricStep: inputMetric->getInputs()) {
 
                 // Get combined hash of the inputs
-                uint64_t currentInputHash = Data::DataValue::getCombinedHash(inputsMetricStep);
+                uint64_t currentInputHash = Data::DataValue::getCombinedHash(*inputsMetricStep);
 
                 // Inputs are new, dupplicate them and add them to the allInputMetrics Map!
                 if(allInputMetrics.find(currentInputHash) == allInputMetrics.end()) {
                     std::vector<Data::DataValue> inputMetricStepClone;
-                    for(const Data::DataValue& input: inputsMetricStep) {
+                    for(const Data::DataValue& input: *inputsMetricStep) {
                         inputMetricStepClone.push_back(input.clone());
                     }
                     allInputMetrics.insert(std::make_pair(currentInputHash, std::move(inputMetricStepClone)));
@@ -107,9 +107,8 @@ void Evolution::OriginTPGModule::updateArchiveInputs()
 
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members = this->getAllMembers();
 
-    size_t dataSetMaxSize = 50;
-    if(allInputMetrics.size() > dataSetMaxSize) {
-        while(this->archive->size() != dataSetMaxSize) {
+    if(allInputMetrics.size() > this->archiveSize) {
+        while(this->archive->size() != this->archiveSize) {
 
             auto it = allInputMetrics.begin();
             std::advance(it, rng.uniformSample<uint64_t>(0, allInputMetrics.size() - 1));
@@ -122,6 +121,21 @@ void Evolution::OriginTPGModule::updateArchiveInputs()
             this->archive->addData(std::move(inputs), this->computeMemberAnswer(inputs, members));
         }
     }
+}
+
+void Evolution::OriginTPGModule::initialize() 
+{
+    Evolution::BasicModule::initialize();
+
+    if(this->archive != nullptr) {
+        this->updateArchiveInputs();
+    }
+
+    if(this->isArchiveFixed) {
+        // Reset the metric template to removed the input metric for efficiency
+        this->initializeMetricTemplate();
+    }
+
 }
 
 void Evolution::OriginTPGModule::doGeneration(size_t generationNumber) 
@@ -146,22 +160,20 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
 
     // Multi generator
     Dimensions::MultiGenerator multi;
-    multi.addGenerator(actionGenerator, 0.975);
-    multi.addGenerator(tangledGenerator, 0.025);
+    multi.addGenerator(actionGenerator, 0.99);
+    multi.addGenerator(tangledGenerator, 0.01);
 
     bidNodes.addGenerator(multi);
-    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
+    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(3U, 5U), std::make_pair(3U, 3U));
 
-    std::cout<<"1"<<std::endl;
     std::vector<std::shared_ptr<const Individual>> potentialNodes;
     potentialNodes.insert(potentialNodes.begin(), this->population.begin(), this->population.end());
     dynamic_cast<Mutation::NodeTransferMutation*>(this->mutation.get())->setPotentialNodes(potentialNodes);
 
     BasicModule::doGeneration(generationNumber);
 
-    if(this->archive != nullptr) {
+    if(this->archive != nullptr && !this->isArchiveFixed) {
         this->updateArchiveInputs();
-        std::cout<<"\narchive size: "<<this->archive->size()<<std::endl;
     }
 }
 
@@ -212,7 +224,6 @@ std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::O
 
 void Evolution::OriginTPGModule::setNewBasicLoggerRow(size_t generationNumber)
 {
-    this->stopwatch.checkpoint();
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> vertices = this->getAllVertices();
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members = this->getMembersOf(vertices);
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
@@ -230,8 +241,12 @@ void Evolution::OriginTPGModule::setNewBasicLoggerRow(size_t generationNumber)
     }
     averageFitness /= this->population.size();
 
-    double generationTime = this->stopwatch.getCheckpoints().at(0);
+    std::vector<double> genCheckpoints = this->stopwatch.getCheckpoints();
+    double mutTime = genCheckpoints.at(3);
+    double evalTime = genCheckpoints.at(4);
+    double generationTime = std::accumulate(genCheckpoints.begin(), genCheckpoints.end(), 0.0);
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
-        defLogger->addGenerationValues<double>({minFitness, averageFitness, maxFitness, generationTime, this->stopwatch.elapsed()});
+        defLogger->addGenerationValues<double>(
+            {minFitness, averageFitness, maxFitness, mutTime, evalTime, generationTime, this->stopwatch.elapsed()});
     }
 }

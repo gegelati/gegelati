@@ -85,17 +85,17 @@ TEST(MetricTest, extractAfterExecution) {
     Metrics::InputMetric metric1;
     ASSERT_NO_THROW(metric1.extractBeforeExecution(0, indiv, dataSet.getInputsAt(0), problem)) << "Fail to extract metric";
     ASSERT_EQ(metric1.getInputs().size(), 1);
-    ASSERT_EQ(metric1.getInputs().at(0).size(), 1) << "Dataset should have only one source";
-    ASSERT_EQ(metric1.getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
+    ASSERT_EQ(metric1.getInputs().at(0)->size(), 1) << "Dataset should have only one source";
+    ASSERT_EQ(metric1.getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
     
     ASSERT_NO_THROW(metric1.extractBeforeExecution(0, indiv, dataSet.getInputsAt(0), problem)) << "Fail to extract metric";
     ASSERT_NO_THROW(metric1.extractBeforeExecution(0, indiv, dataSet.getInputsAt(1), problem)) << "Fail to extract metric";
 
     ASSERT_EQ(metric1.getInputs().size(), 3);
-    ASSERT_EQ(metric1.getInputs().at(1).size(), 1) << "Dataset should have only one source";
-    ASSERT_EQ(metric1.getInputs().at(2).size(), 1) << "Dataset should have only one source";
-    ASSERT_EQ(metric1.getInputs().at(1).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
-    ASSERT_EQ(metric1.getInputs().at(2).at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
+    ASSERT_EQ(metric1.getInputs().at(1)->size(), 1) << "Dataset should have only one source";
+    ASSERT_EQ(metric1.getInputs().at(2)->size(), 1) << "Dataset should have only one source";
+    ASSERT_EQ(metric1.getInputs().at(1)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
+    ASSERT_EQ(metric1.getInputs().at(2)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
 
 
     Metrics::OutputMetric metric2;
@@ -206,8 +206,8 @@ TEST(MetricMapTest, extract)
 
     ASSERT_EQ(inputMetrics.at(0)->getInputs().size(), 1) << "First input metric should contain one input extraction";
     ASSERT_EQ(inputMetrics.at(1)->getInputs().size(), 1) << "Second input metric should contain one input extraction";
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "First input metric should contain the expected input values";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Second input metric should contain the expected input values";
+    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "First input metric should contain the expected input values";
+    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Second input metric should contain the expected input values";
 
     auto outputMetrics = map.getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "Should contain output metrics for two evaluations";
@@ -243,8 +243,8 @@ TEST(MetricMapTest, getMetrics)
     ASSERT_TRUE(inputMetrics.find(42) != inputMetrics.end()) << "Input metric for hash 42 should exist";
     ASSERT_NE(inputMetrics.at(42), nullptr) << "Input metric should not be null";
     ASSERT_EQ(inputMetrics.at(42)->getInputs().size(), 1) << "Input metric should contain one input extraction";
-    ASSERT_EQ(inputMetrics.at(42)->getInputs().at(0).size(), 1) << "Input extraction should contain one source";
-    ASSERT_EQ(inputMetrics.at(42)->getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Input metric should contain the expected input values";
+    ASSERT_EQ(inputMetrics.at(42)->getInputs().at(0)->size(), 1) << "Input extraction should contain one source";
+    ASSERT_EQ(inputMetrics.at(42)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Input metric should contain the expected input values";
 
     auto outputMetrics = map.getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 1) << "Should contain one output metric";
@@ -312,8 +312,8 @@ TEST(MetricMapTest, merge)
     ASSERT_TRUE(outputMetrics.find(0) != outputMetrics.end()) << "Merged map should contain output metric for first evaluation";
     ASSERT_TRUE(outputMetrics.find(1) != outputMetrics.end()) << "Merged map should contain output metric for second evaluation";
 
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "First merged input metric should contain the expected input values";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0).at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Second merged input metric should contain the expected input values";
+    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "First merged input metric should contain the expected input values";
+    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Second merged input metric should contain the expected input values";
 
     ASSERT_EQ(outputMetrics.at(0)->getOutputs().size(), 1) << "First merged output metric should contain one output";
     ASSERT_EQ(outputMetrics.at(1)->getOutputs().size(), 1) << "Second merged output metric should contain one output";
@@ -374,7 +374,7 @@ TEST(MetricMapTest, merge)
     ASSERT_EQ(overriddenOutputMetrics.size(), 1) << "Override merge should keep one output metric for the same evaluation";
     ASSERT_EQ(overriddenInputMetrics.at(0)->getInputs().size(), 1) << "Overridden input metric should contain one input";
     ASSERT_EQ(overriddenOutputMetrics.at(0)->getOutputs().size(), 1) << "Overridden output metric should contain one output";
-    ASSERT_EQ(overriddenInputMetrics.at(0)->getInputs().at(0).at(0), dataSet.getInputsAt(2).at(0)) << "Existing input metric should be overridden";
+    ASSERT_EQ(overriddenInputMetrics.at(0)->getInputs().at(0)->at(0), dataSet.getInputsAt(2).at(0)) << "Existing input metric should be overridden";
     ASSERT_EQ(overriddenOutputMetrics.at(0)->getOutputs().at(0), dataSet.getOutputAt(2)) << "Existing output metric should be overridden";
 }
 
