@@ -11,17 +11,20 @@
 namespace Metrics {
 
     /**
-     * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
+     * \brief Metric storing the (prediction, target) pairs of a whole evaluation loop over the dataset.
+     *
+     * The scalar value is the accuracy (ratio of predictions equal to the target).
      */
     class PredictionMetric: public ScalarMetric
     {
 
       protected:
 
-        /// target of the prediction
-        std::shared_ptr<const Data::DataValue> target;
-        /// target of the prediction
-        std::shared_ptr<const Data::DataValue> prediction;
+        /// (prediction, target) pairs, in the order of the evaluation.
+        std::vector<std::pair<Data::DataValue, Data::DataValue>> pairs;
+
+        /// Number of successful predictions (prediction == target).
+        size_t nbSuccess = 0;
 
       public:
         /**
@@ -61,11 +64,8 @@ namespace Metrics {
          */
         static uint64_t staticHash();
 
-        /// @brief Get the value predicted.
-        virtual const Data::DataValue& getPrediction() const;
-
-        /// @brief Get the value targetted. 
-        virtual const Data::DataValue& getTarget() const;
+        /// @brief Get all the (prediction, target) pairs of the evaluation.
+        virtual const std::vector<std::pair<Data::DataValue, Data::DataValue>>& getPairs() const;
     };
 
 

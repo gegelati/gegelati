@@ -14,7 +14,7 @@ namespace Log {
     {
       protected:
         /// @brief todo  
-        static constexpr int columnWidth = 9;
+        static constexpr int columnWidth = 14;
 
       public:
         /// @brief constructor

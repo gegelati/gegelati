@@ -142,20 +142,29 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
 Data::DataValue Representations::LGP::executeGenotype(
     const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
-    // Get effective nodes
-    std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> effectiveNodes = genotype.getEffectiveNodes();
+    // Effective nodes are iterated in place, no intermediate container.
+    const GraphBased::NodeGroup& instructionGroup = genotype.getNodeGroup(0);
+    const size_t nbSources = this->dimensionFlow.getInputDimensions().size() + 1;
 
     /// Registers used as internal memory.
     Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
     Data::DataView registerView = registers.view();
 
-    for(const GraphBased::GPNode& node: effectiveNodes.at(0)) {
+    std::vector<Data::DataView> operands;
+    operands.reserve(this->iSet.getMaxNbOperands());
+    size_t nbExecuted = 0;
+
+    for(size_t idxNode = 0; idxNode < instructionGroup.getSize(); idxNode++) {
+        const GraphBased::GPNode& node = instructionGroup.getNode(idxNode);
+        if(node.getIsIntron()) {
+            continue;
+        }
 
         size_t outputIndex = node.getValue(0).getScalar<size_t>();
         size_t functionIndex = node.getValue(1).getScalar<size_t>();
 
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
-        std::vector<Data::DataView> operands;
+        operands.clear();
 
         size_t nbOperands = instruction.getNbOperands();
         for(size_t idxOp = 0; idxOp < nbOperands; idxOp++){
@@ -164,18 +173,25 @@ Data::DataValue Representations::LGP::executeGenotype(
             size_t inputType = node.getValue(nodeIndex).getScalar<size_t>();
             size_t inputIndex = node.getValue(nodeIndex + 1).getScalar<size_t>();
 
-            const Data::DataType& operandType = instruction.getOperandTypes().at(idxOp);
+            const Data::DataType& operandType = instruction.getOperandTypes()[idxOp];
             const Data::DataView* dataSource = (inputType==0) ? &registerView : &inputSources.at(inputType - 1);
-            while(dataSource->getType().getAddressSpace(operandType) == 0) {
-                inputType = (inputType + 1) % (this->dimensionFlow.getInputDimensions().size() + 1);
+            size_t addressSpace = dataSource->getType().getAddressSpace(operandType);
+            while(addressSpace == 0) {
+                inputType = (inputType + 1) % nbSources;
                 dataSource = (inputType==0) ? &registerView : &inputSources.at(inputType - 1);
+                addressSpace = dataSource->getType().getAddressSpace(operandType);
             }
-            size_t operandLocation = dataSource->scaleLocation(operandType, inputIndex);
+            // Same as DataView::scaleLocation, reusing the address space already computed.
+            size_t operandLocation = inputIndex % addressSpace;
+            if(dataSource->getType().rank == 2) {
+                operandLocation = dataSource->getType().getValidAddress(operandType, operandLocation);
+            }
             operands.push_back(dataSource->getSubView(operandType, operandLocation));
         }
 
         size_t outputLocation = registers.scaleLocation(instruction.getOutputType(), outputIndex);
-        registers.setSubValue(instruction.execute(operands), outputLocation);
+        instruction.executeInto(operands, registers, outputLocation);
+        nbExecuted++;
     }
 
 

@@ -79,21 +79,22 @@ TEST(PredictionMetricTest, extractAfterExecution) {
 
     Metrics::PredictionMetric metric;
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getValue(), 1) << "Score should be successful (1)";
+    ASSERT_EQ(metric.getValue(), 1) << "Accuracy should be 1";
+    ASSERT_EQ(metric.getPairs().size(), 1);
 
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(1), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
+    ASSERT_EQ(metric.getValue(), 0.5) << "Accuracy should be 1/2";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(0, indiv, Data::DataValue::scalar<double>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
-
-    ASSERT_NO_THROW(metric.extractAfterExecution(1, indiv, Data::DataValue::scalar<int>(0), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getValue(), 0) << "Score should be unsuccessful (0)";
+    ASSERT_NEAR(metric.getValue(), 1.0 / 3.0, 1e-9) << "Accuracy should be 1/3";
 
     ASSERT_NO_THROW(metric.extractAfterExecution(1, indiv, Data::DataValue::scalar<int>(1), problem)) << "Fail to extract metric";
-    ASSERT_EQ(metric.getValue(), 1) << "Score should be successful (1)";
+    ASSERT_EQ(metric.getValue(), 0.5) << "Accuracy should be 2/4";
 
-    
+    ASSERT_EQ(metric.getPairs().size(), 4);
+    ASSERT_EQ(metric.getPairs().at(1).first, Data::DataValue::scalar<int>(1));
+    ASSERT_EQ(metric.getPairs().at(1).second, Data::DataValue::scalar<int>(0));
+
     ASSERT_NO_THROW(metric.toString()) << "Fail to print metric";
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
@@ -136,13 +137,11 @@ TEST(PredictionProblemTest, extractOneMetric) {
     ASSERT_NO_THROW(problem.extractMetrics(indiv, map, {0, 1}));
     
     std::map<uint64_t, const Metrics::PredictionMetric*> metrics = map.getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
-    ASSERT_EQ(metrics.size(), 2) << "Should have two metrics with two hash";
+    ASSERT_EQ(metrics.size(), 1) << "Should have a single metric for the whole loop";
 
-    ASSERT_TRUE(metrics.find(0) != metrics.end()) << "Should have hash 0";
-    ASSERT_TRUE(metrics.find(1) != metrics.end()) << "Should have hash 1";
-
-    ASSERT_EQ(metrics.at(0)->getValue(), 1.0) << "Score of metric at 0 should be 1";
-    ASSERT_EQ(metrics.at(1)->getValue(), 0.0) << "Score of metric at 1 should be 0";
+    const Metrics::PredictionMetric* metric = metrics.begin()->second;
+    ASSERT_EQ(metric->getValue(), 0.5) << "Accuracy should be 0.5";
+    ASSERT_EQ(metric->getPairs().size(), 2);
 }
 
 TEST(PredictionProblemTest, extractMultiMetrics) {
@@ -166,39 +165,23 @@ TEST(PredictionProblemTest, extractMultiMetrics) {
     ASSERT_NO_THROW(problem.extractMetrics(indiv, map, {0, 1}));
     
     std::map<uint64_t, const Metrics::PredictionMetric*> predictionMetrics = map.getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
-    ASSERT_EQ(predictionMetrics.size(), 2) << "Should have two metrics with two hash";
-
-    ASSERT_TRUE(predictionMetrics.find(0) != predictionMetrics.end()) << "Should have hash 0";
-    ASSERT_TRUE(predictionMetrics.find(1) != predictionMetrics.end()) << "Should have hash 1";
-
-    ASSERT_EQ(predictionMetrics.at(0)->getValue(), 1.0) << "Score of metric at 0 should be 1";
-    ASSERT_EQ(predictionMetrics.at(1)->getValue(), 0.0) << "Score of metric at 1 should be 0";
+    ASSERT_EQ(predictionMetrics.size(), 1) << "Should have a single metric for the whole loop";
+    ASSERT_EQ(predictionMetrics.begin()->second->getValue(), 0.5) << "Accuracy should be 0.5";
+    ASSERT_EQ(predictionMetrics.begin()->second->getPairs().size(), 2);
     
     std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = map.getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
-    ASSERT_EQ(outputMetrics.size(), 2) << "Should have two metrics with two hash";
-
-    ASSERT_TRUE(outputMetrics.find(0) != outputMetrics.end()) << "Should have hash 0";
-    ASSERT_TRUE(outputMetrics.find(1) != outputMetrics.end()) << "Should have hash 1";
-
-    ASSERT_EQ(outputMetrics.at(0)->getOutputs().size(), 1) << "Size of output should be 1 for classification";
-    ASSERT_EQ(outputMetrics.at(1)->getOutputs().size(), 1) << "Size of output should be 1 for classification";
-    
-    ASSERT_EQ(outputMetrics.at(0)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Values should be equal";
-    ASSERT_EQ(outputMetrics.at(1)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Values should be equal";
+    ASSERT_EQ(outputMetrics.size(), 1) << "Should have a single metric for the whole loop";
+    const auto& outputs = outputMetrics.begin()->second->getOutputs();
+    ASSERT_EQ(outputs.size(), 2) << "One output per hash";
+    ASSERT_EQ(outputs.at(0), Data::DataValue::scalar<int>(0)) << "Values should be equal";
+    ASSERT_EQ(outputs.at(1), Data::DataValue::scalar<int>(0)) << "Values should be equal";
     
     std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = map.getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
-    ASSERT_EQ(inputMetrics.size(), 2) << "Should have two metrics with two hash";
-
-    ASSERT_TRUE(inputMetrics.find(0) != inputMetrics.end()) << "Should have hash 0";
-    ASSERT_TRUE(inputMetrics.find(1) != inputMetrics.end()) << "Should have hash 1";
-
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().size(), 1) << "Size of input should be 1 for classification";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().size(), 1) << "Size of input should be 1 for classification";
-
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->size(), 1) << "Dataset should have only one source";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->size(), 1) << "Dataset should have only one source";
-
-    ASSERT_EQ(inputMetrics.at(0)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
-    ASSERT_EQ(inputMetrics.at(1)->getInputs().at(0)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
+    ASSERT_EQ(inputMetrics.size(), 1) << "Should have a single metric for the whole loop";
+    const auto& inputs = inputMetrics.begin()->second->getInputs();
+    ASSERT_EQ(inputs.size(), 2) << "One input set per hash";
+    ASSERT_EQ(inputs.at(0)->size(), 1) << "Dataset should have only one source";
+    ASSERT_EQ(inputs.at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
+    ASSERT_EQ(inputs.at(1)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
 }
 

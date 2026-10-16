@@ -200,6 +200,27 @@ namespace Instructions {
             const std::vector<Data::DataView>& args) const = 0;
 
         /**
+         * \brief Execute the Instruction and write its result directly into a
+         * sub-region of an existing DataValue.
+         *
+         * This lets a Representation (e.g. LGP) own and reuse its storage
+         * instead of having a temporary DataValue allocated per execution.
+         * The default implementation executes then copies with setSubValue;
+         * derived classes may override it with an allocation-free version.
+         *
+         * \param[in] args the vector of typed, borrowed DataView operands.
+         * \param[in,out] destination the DataValue to write into.
+         * \param[in] address the element address in destination.
+         */
+        virtual void executeInto(const std::vector<Data::DataView>& args,
+                                 Data::DataValue& destination,
+                                 size_t address) const
+        {
+            destination.setSubValue(this->execute(args), address);
+        }
+
+
+        /**
          * \brief Return a boolean indicating is the instruction can support the types as input (Each operand can support at least one type for at least one address).
          */
         bool handleInputTypes(const std::vector<Data::DataType>& types) const;

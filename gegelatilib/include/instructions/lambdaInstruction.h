@@ -2,9 +2,11 @@
 #define LAMBDA_INSTRUCTION_H
 
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <type_traits>
 #include <typeinfo>
+#include <vector>
 #include <iostream>
 
 #include "instructions/instruction.h"
@@ -37,6 +39,10 @@ namespace Instructions {
             /// It accepts the operands as `First` followed by the `Rest...` pack and
             /// returns a \c Data::DataValue.
             std::function<Data::DataValue(const First, const Rest...)> function;
+
+            /// \brief Same callable, writing its result directly into a DataValue.
+            std::function<void(Data::DataValue&, size_t, const First, const Rest...)> writer;
+
 
       public:
             /// \brief Deleted default constructor.
@@ -97,10 +103,33 @@ namespace Instructions {
                     } else {
                         return Data::DataValue::scalar(function(first, rest...));
                     }
+                }},
+                writer{[function](Data::DataValue& destination, size_t address, const First first, const Rest... rest) {
+                    using Return =
+                        std::decay_t<
+                            std::invoke_result_t<Function, First, Rest...>>;
+
+                    if constexpr (std::is_same_v<Return, Data::DataValue>) {
+                        destination.setSubValue(function(first, rest...), address);
+                    } else {
+                        destination.template setScalarAt<Return>(function(first, rest...), address);
+                    }
                 }}
             {
                 setUpOutput();
                 setUpOperand();
+            }
+
+            void executeInto(const std::vector<Data::DataView>& args,
+                             Data::DataValue& destination,
+                             size_t address) const override
+            {
+                if (!this->checkOperandTypes(args)) {
+                    throw std::invalid_argument(
+                        "LambdaInstruction::executeInto: Instruction operand type mismatch.");
+                }
+
+                doExecutionInto(args, destination, address, std::index_sequence_for<Rest...>{});
             }
 
             /**
@@ -130,11 +159,30 @@ namespace Instructions {
             }
 
       private:
+            template <size_t... Index>
+            void doExecutionInto(
+                const std::vector<Data::DataView>& args,
+                Data::DataValue& destination,
+                size_t address,
+                std::index_sequence<Index...>) const
+            {
+                auto data = std::make_tuple(
+                    getData<First>(args[0]),
+                    getData<Rest>(args[Index + 1])...
+                );
+
+                this->writer(
+                    destination,
+                    address,
+                    getDataPtr<First>(std::get<0>(data)),
+                    getDataPtr<Rest>(std::get<Index + 1>(data))...
+                );
+            }
             /**
              * \brief Invokes the wrapped callable with the data extracted from the operands.
              *
              * Array data returned by \c DataView::getData is temporarily owned by the
-             * \c shared_ptr objects stored in \c data. This ensures that any temporary
+             * \c unique_ptr objects stored in \c data. This ensures that any temporary
              * contiguous copy created for a non-contiguous view remains alive until the
              * callable has finished executing.
              *
@@ -167,16 +215,13 @@ namespace Instructions {
              * \brief Extracts an operand from a data view.
              *
              * Scalar operands are returned directly through \c DataView::getScalar.
-             * Array operands are returned as a \c shared_ptr owning either the original
-             * data through a non-owning deleter or a temporary contiguous copy when the
-             * view is non-contiguous.
-             *
-             * The returned \c shared_ptr is kept alive by \c doExecution while the
-             * callable is being invoked.
+             * Array operands are returned through \c DataView::getData, which
+             * borrows the view memory when contiguous and owns a copy otherwise.
+             * The result must stay alive while the callable is being invoked.
              *
              * \tparam T The declared operand type.
              * \param view The data view containing the operand.
-             * \return The scalar value/reference or shared array data.
+             * \return The scalar value or a contiguous array handle.
              */
             template <typename T>
             static auto getData(const Data::DataView& view)
@@ -185,9 +230,7 @@ namespace Instructions {
                     return view.template getScalar<std::remove_cv_t<T>>();
                 }
                 else {
-                    using Element = std::remove_all_extents_t<T>;
-
-                    return view.template getData<std::remove_cv_t<Element>>();
+                    return view.template getData<std::remove_all_extents_t<T>>();
                 }
             }
 
@@ -198,8 +241,8 @@ namespace Instructions {
              * to pointers to their first element. Two-dimensional arrays are converted
              * to pointers to rows with their compile-time column count.
              *
-             * For array operands, the \c shared_ptr itself is not returned because the
-             * callable expects a raw pointer. The owning \c shared_ptr remains alive in
+             * For array operands, the owning pointer itself is not returned because the
+             * callable expects a raw pointer. The owning pointer remains alive in
              * \c doExecution for the duration of the call.
              *
              * \tparam T The declared operand type.

@@ -360,7 +360,16 @@ namespace Data {
          */
         template <typename T>
         void setScalarAt(T value, size_t address) {
-            if (!this->canFit(DataType::scalar<T>(), address)) {
+            const std::type_info* et = this->type.elementType;
+            bool fits = et != nullptr && sameElementType(*et, typeid(T));
+            if (fits) {
+                switch (this->type.rank) {
+                case 0: fits = (address == 0); break;
+                case 1: fits = (address < this->type.dimensions[0]); break;
+                default: fits = (address < this->type.totalElements()); break;
+                }
+            }
+            if (!fits) {
                 throw std::out_of_range(
                     "DataValue::setScalarAt failed at address " + std::to_string(address) + ".\n"
                     "Value:\n" + this->toString() + "\n"
@@ -369,7 +378,7 @@ namespace Data {
             }
 
             T* dst = static_cast<T*>(storage->data());
-            size_t absOffset = getType().sourceOffset + address;
+            size_t absOffset = this->type.sourceOffset + address;
             dst[absOffset] = value;
         }
 
@@ -385,6 +394,11 @@ namespace Data {
          * \brief Renders the owned value in a short, one line, way
          */
         virtual std::string toShortString(std::string prefix = "") const;
+
+        /**
+         * \brief Renders only the stored values (no type metadata), e.g. "1.5" or "[1, 2]".
+         */
+        std::string toValueString() const;
 
         /** \brief Returns a non-owning view over the owned data. */
         Data::DataView view() const;

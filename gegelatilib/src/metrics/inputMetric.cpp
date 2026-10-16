@@ -38,7 +38,9 @@ std::shared_ptr<const std::vector<Data::DataValue>> Metrics::InputCache::intern(
     bucket.erase(std::remove_if(bucket.begin(), bucket.end(), [](const auto& entry) { return entry.expired(); }), bucket.end());
     for (const auto& entry : bucket) {
         if (auto existing = entry.lock()) {
-            return existing;
+            if (equalInputs(*existing, inputs)) {
+                return existing;
+            }
         }
     }
     auto stored = std::make_shared<const std::vector<Data::DataValue>>(cloneInputs(inputs));

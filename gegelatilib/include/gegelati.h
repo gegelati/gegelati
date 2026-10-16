@@ -124,7 +124,7 @@
 
 #include <evaluation/metric.h>
 #include <evaluation/rewardsMetric.h>
-#include <evaluation/predictionMetric.h>
+#include <metrics/predictionMetric.h>
 
 
 #include <graphBased/genotype.h>

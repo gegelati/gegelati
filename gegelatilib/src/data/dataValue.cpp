@@ -19,7 +19,7 @@ Data::DataValue Data::DataValue::clone() const
 
 
 void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) {
-    if (*type.elementType != *value.type.elementType) {
+    if (!Data::sameElementType(*type.elementType, *value.type.elementType)) {
         throw std::runtime_error(
             "Data::DataValue::setSubValue failed: source and destination element types differ.\n"
             "Destination:\n" + this->toString() + "\n"
@@ -92,6 +92,10 @@ std::string Data::DataValue::toShortString(std::string prefix) const {
     std::ostringstream oss;
     oss << prefix << "Data=" <<storage->toString()<< ", type=" << DEMANGLE_TYPEID_NAME(this->getElementType().name()) << "";
     return oss.str();
+}
+
+std::string Data::DataValue::toValueString() const {
+    return storage->toString();
 }
 
 Data::DataValue::operator bool() const noexcept {

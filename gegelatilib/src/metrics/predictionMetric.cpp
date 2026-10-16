@@ -16,25 +16,23 @@ void Metrics::PredictionMetric::extractAfterExecution(
     }
     const Evaluation::PredictionProblem& classifProblem = dynamic_cast<const Evaluation::PredictionProblem&>(problem);
 
-    //this->prediction = std::make_shared<const Data::DataValue>(output.clone());
-    //this->target = std::make_shared<const Data::DataValue>(classifProblem.getDataSet().getOutputAt(hash).clone());
-    //this->values[0] = double(*this->prediction == *target);
-    this->values[0] = double(output == classifProblem.getDataSet().getOutputAt(hash));
+    const Data::DataValue& target = classifProblem.getDataSet().getOutputAt(hash);
+    if(output == target) {
+        this->nbSuccess++;
+    }
+    this->pairs.emplace_back(output.clone(), target.clone());
+    this->values[0] = double(this->nbSuccess) / double(this->pairs.size());
 }
 
 std::string Metrics::PredictionMetric::toString(std::string prefix) const
 {
-    return prefix + " PredictionMetric with success: " + std::to_string(this->values[0]);
+    return prefix + " PredictionMetric with " + std::to_string(this->pairs.size()) 
+        + " predictions and accuracy: " + std::to_string(this->values[0]);
 }
 
-const Data::DataValue& Metrics::PredictionMetric::getPrediction() const
+const std::vector<std::pair<Data::DataValue, Data::DataValue>>& Metrics::PredictionMetric::getPairs() const
 {
-    return *this->prediction;
-}
-
-const Data::DataValue& Metrics::PredictionMetric::getTarget() const
-{
-    return *this->target;
+    return this->pairs;
 }
 
 

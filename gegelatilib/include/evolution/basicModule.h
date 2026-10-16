@@ -16,6 +16,8 @@
 #include "reproduction/replicator.h"
 #include "mutation/pointMutator.h"
 
+#include "file/populationDotExporter.h"
+
 #include "log/basiclogger.h"
 
 
@@ -97,6 +99,17 @@ namespace Evolution {
             /// @brief Default loggers
             std::vector<std::shared_ptr<Log::Basiclogger>> basicloggers;
 
+            /// @brief TODO
+            std::string filePath = "";
+
+            /// @brief TODO
+            bool oneFileGen;
+            /// @brief TODO
+            std::string filePathBest = "";
+
+            /// @brief TODO
+            bool oneFileGenBest;
+
         public:
 
             /// @brief Random number generator
@@ -115,6 +128,25 @@ namespace Evolution {
                 std::shared_ptr<Reproduction::Reproducer> breeder = nullptr,
                 std::shared_ptr<Mutation::Mutator> mutation = nullptr
             );
+
+            /**
+             * \brief set a path for exporting the individuals.
+             * 
+             * \param[in] filePath file of the path
+             * \param[in] oneFileGen boolean indicating if a unique graph is done per generation.
+             */
+            void setExporter(std::string filePath, bool oneFileGen = false);
+
+            /**
+             * \brief set a path for exporting the individuals.
+             * 
+             * \param[in] filePathBest file of the path
+             * \param[in] oneFileGenBest boolean indicating if a unique graph is done per generation.
+             */
+            void setBestExporter(std::string filePathBest, bool oneFileGenBest = false);
+
+            /// @brief Return the current population 
+            std::vector<std::shared_ptr<const Individual>> getPopulation() const;
 
             /// @brief print the summary of the current evolution 
             virtual std::string summary() const override;

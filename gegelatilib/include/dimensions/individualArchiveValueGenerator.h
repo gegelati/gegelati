@@ -33,6 +33,7 @@ namespace Dimensions {
                 bool isUnique = false;
                 while(!isUnique) {
                     genotype = mutator.mutateGenotype(currentIndiv->getGenotype(), generator, rng);
+                    this->representation.detectIntronNodes(*genotype);
 
                     std::set<size_t> remainingAnswers;
                     for(size_t idxAnswer = 0; idxAnswer < nbAnswers; idxAnswer ++) {

@@ -5,13 +5,13 @@ bool Data::DataView::canFit(const DataType& requested, size_t address) const noe
     if (requested.elementType == nullptr || this->type.elementType == nullptr) {
         return false;
     }
-    if (*requested.elementType != *this->type.elementType) {
+    if (!sameElementType(*requested.elementType, *this->type.elementType)) {
         return false;
     }
     return this->type.canFitIn(requested, address);
 }
 
-Data::DataView Data::DataView::getSubView(DataType requested, size_t address) const {
+Data::DataView Data::DataView::getSubView(const DataType& requested, size_t address) const {
     if (!this->canFit(requested, address)) {
         throw std::out_of_range(
             "Data::DataView::getSubView failed at address " + std::to_string(address) + ".\n"
@@ -57,7 +57,7 @@ void Data::DataView::canBeAccess(const std::type_info& type) const {
             "DataView access failed: the view has no data pointer.\n" + this->toString()
         );
     }
-    if (*this->type.elementType != type) {
+    if (!sameElementType(*this->type.elementType, type)) {
         throw std::runtime_error(
             "DataView access failed: requested element type " + std::string(type.name()) +
             " does not match stored element type " + std::string(this->type.elementType->name()) + ".\n" +

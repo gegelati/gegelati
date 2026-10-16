@@ -56,6 +56,25 @@ breeder{breeder}, mutation{mutation}
     this->initializeMetricTemplate();
 } 
 
+void Evolution::BasicModule::setExporter(std::string filePath, bool oneFileGen)
+{
+    this->filePath = filePath;
+    this->oneFileGen = oneFileGen;
+}
+
+void Evolution::BasicModule::setBestExporter(std::string filePathBest, bool oneFileGenBest)
+{
+    this->filePathBest = filePathBest;
+    this->oneFileGenBest = oneFileGenBest;
+}
+
+std::vector<std::shared_ptr<const Individual>> Evolution::BasicModule::getPopulation() const
+{
+    std::vector<std::shared_ptr<const Individual>> currentPopulation;
+    currentPopulation.insert(currentPopulation.begin(), this->population.begin(), this->population.end());
+    return std::move(currentPopulation);
+}
+
 void Evolution::BasicModule::initializeMetricTemplate() 
 {
     if(dynamic_cast<Evaluation::PredictionProblem*>(&this->problem) != nullptr) {
@@ -165,6 +184,15 @@ void Evolution::BasicModule::doGeneration(size_t generationNumber)
 
     this->stopwatch.checkpoint();
     this->setNewBasicLoggerRow(generationNumber);
+
+    if(this->filePath != "") {
+        std::string path = this->filePath + ((this->oneFileGen) ? std::to_string(generationNumber) : "") + ".dot";
+        File::PopulationDotExporter::exportToFile(path, this->getPopulation());
+    }
+    if(this->filePathBest != "") {
+        std::string path = this->filePathBest + ((this->oneFileGenBest) ? std::to_string(generationNumber) : "") + ".dot";
+        File::PopulationDotExporter::exportToFile(path, {this->individualFitness.begin()->first});
+    }
 }
 
 void Evolution::BasicModule::setNewBasicLoggerRow(size_t generationNumber)
@@ -173,14 +201,11 @@ void Evolution::BasicModule::setNewBasicLoggerRow(size_t generationNumber)
         defLogger->addGenerationValues<size_t>({generationNumber, this->population.size()});
     }
 
-    double minFitness = std::numeric_limits<double>::max();
-    double maxFitness = std::numeric_limits<double>::lowest();
+    double minFitness = this->individualFitness.rbegin()->second;
+    double maxFitness = this->individualFitness.begin()->second;
     double averageFitness = 0.0;
     for (const auto& individual : this->population) {
-        const double fitness = this->individualFitness.at(individual);
-        minFitness = std::min(minFitness, fitness);
-        maxFitness = std::max(maxFitness, fitness);
-        averageFitness += fitness;
+        averageFitness += this->individualFitness.at(individual);
     }
     averageFitness /= this->population.size();
 

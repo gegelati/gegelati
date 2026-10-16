@@ -26,7 +26,11 @@ void Evaluation::PredictionProblem::extractMetrics(
   const Individual& individual, Metrics::MetricMap& metrics,
   const std::set<uint64_t>& hashes) const 
 {
+  Data::Hash<uint64_t> hasher;
+  uint64_t evaluationHash = 0;
+
   for(const uint64_t& hash: hashes) {
+    evaluationHash ^= hasher(hash);
 
     // Get input sources
     const std::vector<Data::DataValue>& inputSources = this->dataset.getInputsAt(hash);
@@ -39,8 +43,8 @@ void Evaluation::PredictionProblem::extractMetrics(
 
     // extract after execution
     metrics.extractAfterExecution(hash, individual, executionReturn, *this);
-
-    // Extract at the end and compute metric
-    metrics.extractionEnd(hash, individual, *this);
   }
+
+  // A single metric covers the whole loop over the hashes.
+  metrics.extractionEnd(evaluationHash, individual, *this);
 }

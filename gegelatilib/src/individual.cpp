@@ -58,9 +58,13 @@ const GraphBased::Genotype& Individual::getGenotype() const
 
 void Individual::setGenotype(std::unique_ptr<GraphBased::Genotype> genotype)
 {
-    this->representation.detectIntronNodes(*genotype);
+    // Introns can only be detected on a genotype valid for the representation.
+    const bool isGenotypeValid = this->representation.isValid(*genotype);
+    if(isGenotypeValid) {
+        this->representation.detectIntronNodes(*genotype);
+    }
     this->genotype = std::move(genotype);
-    this->updateValidity();
+    this->valid = isGenotypeValid;
 }
 
 void Individual::updateValidity()
@@ -86,13 +90,16 @@ std::shared_ptr<Individual> Individual::cloneSharedPtr() const
     return std::make_shared<Individual>(this->representation, this->genotype->cloneUniquePtr());
 }
 
+
 Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {
     // Individual need to be valid to be executed.
     if(!valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
     }
+
     return this->representation.execute(*this->genotype, inputSources);
+
 }
 
 Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const

@@ -47,6 +47,15 @@ namespace Evolution {
             /// If it is fixed, it will not be updated after initialization
             bool isArchiveFixed;
 
+            /**
+             * \brief In initial implementation, an TPG individual becames "protected" when it is aggregated by another individual.
+             * As long as the aggregation exist, the individual cannot be deleted by the selection pressure.
+             */
+            bool protectAggregated;
+
+            /// @brief Vector of protected individuals
+            std::map<std::shared_ptr<const Individual>, std::vector<uint64_t>, SharedLess<Individual>> protectedIndividuals;
+
         public:
 
             /**
@@ -57,7 +66,7 @@ namespace Evolution {
                 const Representations::Representation& memberRep, 
                 Evaluation::Problem& problem,
                 size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
-                size_t archiveSize = 50, bool isArchiveFixed = false,
+                size_t archiveSize = 50, bool isArchiveFixed = false, bool protectAggregated = true,
                 std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr,
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,
                 std::shared_ptr<Selection::Selector> survivingSelection = nullptr,
@@ -76,7 +85,12 @@ namespace Evolution {
             /**
              * \brief Get all the vertices in the current population
              */
-            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllVertices();
+            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllVertices() const;
+
+            /**
+             * \brief Get all the vertices in the current population
+             */
+            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getSubVerticesOf(const Individual& indiv) const;
 
             /**
              * \brief compute the answer of the current member in the population of the archive.
@@ -87,23 +101,34 @@ namespace Evolution {
             /**
              * \brief Get all the members contained in the proposed individuals
              */
-            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getMembersOf(std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals);
+            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getMembersOf(std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals) const;
 
             /**
              * \brief Get all the members contained in the current population
              */
-            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllMembers();
+            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> getAllMembers() const;
 
             /**
-             * \brief Update the inputs stored inside the archive.
+             * \brief Update the inputs and outputs stored inside the archive.
              */
-            void updateArchiveInputs();
+            void updateArchive();
+            /**
+             * \brief Update the outputs stored inside the archive.
+             */
+            void updateArchiveOutputs();
 
 
             /**
              * \brief Execute basicModule method and set the archive.
              */
             virtual void initialize() override;
+
+            /**
+             * \brief Explore the population before and after generation.
+             * - A check that individual in the protectedIndividual map aggregators still exists, if they don't, the individual is added back to the population.
+             * - New offspring are controlled: if those offspring contains tangled members, they are set as aggregators.
+             */
+            virtual void updateProtectedIndividuals(std::vector<std::shared_ptr<const Individual>> populationBeforeGen);
 
             /**
              * \brief Override to update the generator before launching basicModule::doGeneration

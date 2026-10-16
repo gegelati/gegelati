@@ -166,7 +166,7 @@ namespace Data {
          * \return A DataView of the requested sub-view.
          * @throws std::out_of_range If the requested shape does not fit at the given address.
          */
-        DataView getSubView(DataType requested, size_t address) const;
+        DataView getSubView(const DataType& requested, size_t address) const;
 
         // --- Typed Accessors ---
 
@@ -208,44 +208,61 @@ namespace Data {
         }
 
         /**
+         * \brief Deleter of the pointers returned by \ref getData.
+         *
+         * Does nothing when the pointer borrows the view memory, and frees
+         * the buffer when it is a copy made for a strided sub-view.
+         */
+        template <typename T>
+        struct DataDeleter {
+            /// \brief Whether the pointer owns a copy to free.
+            bool owned = false;
+            /// \brief Frees the pointed array only if it is an owned copy.
+            void operator()(const T* ptr) const noexcept {
+                if (owned) {
+                    delete[] ptr;
+                }
+            }
+        };
+
+        /**
          * \brief Returns a pointer to the first element of a 1D or 2D array of type T, or to a scalar value.
          *
-         * if its a non-contiguous 2D array, the pointer is copied.
-         * 
+         * The elements are always laid out in a contiguous block. If the view
+         * is a strided 2D sub-region, they are copied (and the copy is freed
+         * with the returned pointer); otherwise the view memory is borrowed
+         * with no allocation.
+         *
+         * The result converts to a std::shared_ptr<const T[]> if needed.
+         *
          * \tparam T The element type of the data.
-         * \return A const pointer to the first element of the array.
+         * \return A pointer to the first element of the array.
          * \throws std::runtime_error If the view is null or the type does not match.
          */
         template <typename T>
-        std::shared_ptr<const T[]> getData() const
+        std::unique_ptr<const std::remove_const_t<T>[], DataDeleter<std::remove_const_t<T>>> getData() const
         {
             this->canBeAccess(typeid(T));
             using ValueType = std::remove_const_t<T>;
+            using Result = std::unique_ptr<const ValueType[], DataDeleter<ValueType>>;
 
-            const ValueType* source =
-                static_cast<const ValueType*>(this->ptr);
+            const ValueType* source = static_cast<const ValueType*>(this->ptr);
 
             const size_t rows = this->type.dimensions[0];
             const size_t cols = this->type.dimensions[1];
             const size_t stride = this->type.sourceDimensions[1];
 
             if (rows == 0 || stride == cols || cols == 0) {
-                return std::shared_ptr<const T[]>(
-                    source,
-                    [](const T*) {}
-                );
+                return Result(source, DataDeleter<ValueType>{false});
             }
 
-            std::shared_ptr<ValueType[]> contiguous(new ValueType[rows * cols]);
-
+            ValueType* contiguous = new ValueType[rows * cols];
             for (size_t row = 0; row < rows; ++row) {
                 for (size_t col = 0; col < cols; ++col) {
-                    contiguous[row * cols + col] =
-                        source[row * stride + col];
+                    contiguous[row * cols + col] = source[row * stride + col];
                 }
             }
-
-            return contiguous;
+            return Result(contiguous, DataDeleter<ValueType>{true});
         }
 
         /**

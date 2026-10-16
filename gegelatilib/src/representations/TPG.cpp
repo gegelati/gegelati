@@ -84,28 +84,44 @@ void Representations::TPG::setAvailableTangledIndiv(const std::vector<std::share
 Data::DataValue Representations::TPG::executeGenotype(
     const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {
-    // Get effective nodes
-    std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodes = genotype.getEffectiveNodes().at(0);
+    const GraphBased::NodeGroup& group = genotype.getNodeGroup(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
-    size_t winnerIdx = 0;
+    const GraphBased::GPNode* winner = nullptr;
+    const GraphBased::GPNode* firstEffective = nullptr;
+    size_t nbBids = 0;
 
-    for(size_t idx = 0; idx < effectiveNodes.size(); idx++) {
-        const GraphBased::GPNode& node = effectiveNodes.at(idx);
+    for(size_t idx = 0; idx < group.getSize(); idx++) {
+        const GraphBased::GPNode& node = group.getNode(idx);
+        if(node.getIsIntron()) {
+            continue;
+        }
+        if(firstEffective == nullptr) {
+            firstEffective = &node;
+        }
         const std::shared_ptr<const Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Individual>>();
         double bid = member->execute(inputSources).getScalar<double>();
+        nbBids++;
 
         if(bid > maxBid) {
             maxBid = bid;
-            winnerIdx = idx;
+            winner = &node;
         }
     }
 
-    if (typeid(size_t) == effectiveNodes.at(winnerIdx).get().getValue(1).getElementType()) {
+    // Same as before: when no bid beats -inf, the first effective node wins (at() throws if none).
+    if(winner == nullptr) {
+        if(firstEffective == nullptr) {
+            throw std::out_of_range("Representations::TPG::executeGenotype: no effective node.");
+        }
+        winner = firstEffective;
+    }
+
+    if (typeid(size_t) == winner->getValue(1).getElementType()) {
         // Return action
-        return effectiveNodes.at(winnerIdx).get().getValue(1).clone();
+        return winner->getValue(1).clone();
     } else {
         // Return action of tangled individual
-        return effectiveNodes.at(winnerIdx).get().getValue(1).getScalar<std::shared_ptr<const Individual>>()->execute(inputSources);
+        return winner->getValue(1).getScalar<std::shared_ptr<const Individual>>()->execute(inputSources);
     }
 }

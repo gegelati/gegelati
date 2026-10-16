@@ -1,7 +1,34 @@
 # Ideas about Gegelati changes
 
-Wouldn't it be more efficient to have a "list" of evaluation results for every evaluation done with an individual ? (right now its an average automatically).
-This could enable more ideas, like some lexicase over the number of evaluation, or compute different score than hand-crafted average (like fitness = minimum score over the episodes, to force consistency if needed)
 
-Sperate seed for algorithm and seed for environment
-- we don't know which of the seed actually creates these huge standard deviations.
+List to do
+- Adaptive instruction to weird dimensions - done
+- LearningEnvironment clone method: no classic ptr - done
+- Dimensions input/output - véééééé
+- Mutation rates in templates – better template - bééé
+- Tests of Evolution classes need to be rewrite -> all done
+- Tests of Evaluation classes need to be rewrite -> all done
+- Novelty for archive -> done
+- Parallel Agent -> done
+- From Representation to interpreter.
+- MultiConstraint and Individual Constraint
+- Other representations
+- Loggers
+- Saving
+- CodeGen
+ - Hasher in problem class not evaluator
+ - Add NodeTransfer mutation/reproduction
+ - Instrumented Nodes
+ - PolicyStats
+- Other selectors, mutation, crossovers…
+- Gegelapy: pythonMetric for allowing people to do weird stuff
+
+-ID into hash from genotype and representation!
+
+For tests:
+
+Folders:
+ - truncationSelector
+ - randomSelector
+ - TPG
+ - LGP

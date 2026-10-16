@@ -1,11 +1,12 @@
 #include "evolution/origintpgmodule.h"
 
+
 Evolution::OriginTPGModule::OriginTPGModule(
     const Representations::TPG& TPGRep,
     const Representations::Representation& memberRep, 
     Evaluation::Problem& problem,
     size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed, size_t nbThreads, 
-    size_t archiveSize, bool isArchiveFixed,
+    size_t archiveSize, bool isArchiveFixed, bool protectAggregated,
     std::shared_ptr<FitnessAssignment::Assigner> assigner,
     std::shared_ptr<Selection::Selector> parentSelection ,
     std::shared_ptr<Selection::Selector> survivingSelection,
@@ -15,7 +16,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
 ): BasicModule(TPGRep, problem, sizePopulation, nbOffspring, nbTrainingIterations, 
                seed, nbThreads, assigner, parentSelection, survivingSelection, breeder, 
                (mutation == nullptr) ? std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7) : mutation),
-   memberRep{memberRep}, archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
+   memberRep{memberRep}, archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}, protectAggregated{protectAggregated}
 {
     if(!Dimensions::DimensionFlow::acceptsRequirements(TPGRep.getDimensionFlow().getInputDimensions(), this->memberRep.getDimensionFlow().getInputDimensions())) {
         throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with input requirements not compatible between representation and problem");
@@ -26,7 +27,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
 
 
     if(this->memberMutation == nullptr) {
-        this->memberMutation = std::make_shared<Mutation::PointMutator>(0.5, 0.1, 0.1);
+        this->memberMutation = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     }
 
     GraphBased::NodeGenerator bidNodes;
@@ -46,7 +47,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
         bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRep, this->memberRep.getGenotypeGenerator(), *this->memberMutation));
     }
     bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, TPGRep.getNbActions() - 1));
-    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(3U, 5U), std::make_pair(3U, 3U));
+    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 20U), std::make_pair(2U, 2U));
 
 } 
 
@@ -68,7 +69,7 @@ Data::DataValue Evolution::OriginTPGModule::computeMemberAnswer(
     return Data::DataValue::array1d(answers);
 }
 
-void Evolution::OriginTPGModule::updateArchiveInputs()
+void Evolution::OriginTPGModule::updateArchive()
 {
     // Empty data set
     while(this->archive->size() > 0) {
@@ -123,12 +124,22 @@ void Evolution::OriginTPGModule::updateArchiveInputs()
     }
 }
 
+void Evolution::OriginTPGModule::updateArchiveOutputs() {
+    
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members = this->getAllMembers();
+    for(size_t idx = 0; idx < this->archive->size(); idx++) {
+        const std::vector<Data::DataValue>& inputs = this->archive->getInputsAt(idx);
+        this->archive->setOutputAt(idx, this->computeMemberAnswer(inputs, members));
+    }
+
+}
+
 void Evolution::OriginTPGModule::initialize() 
 {
     Evolution::BasicModule::initialize();
 
     if(this->archive != nullptr) {
-        this->updateArchiveInputs();
+        this->updateArchive();
     }
 
     if(this->isArchiveFixed) {
@@ -136,6 +147,36 @@ void Evolution::OriginTPGModule::initialize()
         this->initializeMetricTemplate();
     }
 
+}
+
+void Evolution::OriginTPGModule::updateProtectedIndividuals(std::vector<std::shared_ptr<const Individual>> populationBeforeGen)
+{
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> offspring(this->population);
+    std::vector<std::shared_ptr<const Individual>> discardedPop;
+    std::vector<std::shared_ptr<const Individual>> survivingPop;
+    for(const std::shared_ptr<const Individual>& indiv: populationBeforeGen) {
+        if(this->population.find(indiv) != this->population.end()) {
+            survivingPop.push_back(indiv);
+            offspring.erase(indiv);
+        } else {
+            discardedPop.push_back(indiv);
+        }
+    }
+
+    for(const std::shared_ptr<const Individual>& os: offspring) {
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> subVertices = this->getSubVerticesOf(*os);
+        for(const std::shared_ptr<const Individual>& subVertex: subVertices)
+        if(this->protectedIndividuals.find(subVertex) != this->protectedIndividuals.end()) {
+            this->protectedIndividuals.at(subVertex).push_back(os->getIndividualID());
+        }
+    }
+
+    for(const std::shared_ptr<const Individual>& indiv: survivingPop) {
+        if(this->protectedIndividuals.find(indiv) != this->protectedIndividuals.end()) {
+            // Individual is now protected, it is removed from the population
+            this->population.erase(indiv);
+        }
+    }
 }
 
 void Evolution::OriginTPGModule::doGeneration(size_t generationNumber) 
@@ -164,20 +205,31 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
     multi.addGenerator(tangledGenerator, 0.01);
 
     bidNodes.addGenerator(multi);
-    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(3U, 5U), std::make_pair(3U, 3U));
+    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 200U), std::make_pair(2U, 2U));
 
     std::vector<std::shared_ptr<const Individual>> potentialNodes;
     potentialNodes.insert(potentialNodes.begin(), this->population.begin(), this->population.end());
     dynamic_cast<Mutation::NodeTransferMutation*>(this->mutation.get())->setPotentialNodes(potentialNodes);
 
+    std::vector<std::shared_ptr<const Individual>> populationBeforeGen = this->getPopulation();
+
     BasicModule::doGeneration(generationNumber);
 
-    if(this->archive != nullptr && !this->isArchiveFixed) {
-        this->updateArchiveInputs();
+    if(this->protectAggregated) {
+        this->updateProtectedIndividuals(populationBeforeGen);
     }
+
+    if(this->archive != nullptr && !this->isArchiveFixed) {
+        if(this->isArchiveFixed) {
+            this->updateArchiveOutputs();
+        } else {
+            this->updateArchive();
+        }
+    }
+
 }
 
-std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllVertices()
+std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllVertices() const
 {
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> vertices(population);
     std::vector<std::shared_ptr<const Individual>> toControl;
@@ -185,24 +237,32 @@ std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::O
 
     while(!toControl.empty()) {
         std::shared_ptr<const Individual> currentIndiv = *toControl.begin();
-        std::vector<std::reference_wrapper<const GraphBased::GPNode>> nodesIndiv = currentIndiv->getGenotype().getNodeGroup(0).getNodes();
-        for(const GraphBased::GPNode& node: nodesIndiv) {
-            if(node.getValue(1).getElementType() == typeid(std::shared_ptr<const Individual>)) {
-                std::shared_ptr<const Individual> vertex = node.getValue(1).getScalar<std::shared_ptr<const Individual>>();
-                if(vertices.find(vertex) == vertices.end()) {
-                    vertices.insert(vertex);
-                    toControl.push_back(vertex);
-                }
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> subVertices = this->getSubVerticesOf(*currentIndiv);
+        for(const std::shared_ptr<const Individual>& vertex: subVertices) {
+            if(vertices.find(vertex) == vertices.end()) {
+                toControl.push_back(vertex);
+                vertices.insert(vertex);
             }
         }
-
         toControl.erase(toControl.begin());
     }
 
     return std::move(vertices);
 }
 
-std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getMembersOf(std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals)
+std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getSubVerticesOf(const Individual& indiv) const
+{
+    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> vertices;
+    std::vector<std::reference_wrapper<const GraphBased::GPNode>> nodesIndiv = indiv.getGenotype().getNodeGroup(0).getNodes();
+    for(const GraphBased::GPNode& node: nodesIndiv) {
+        if(node.getValue(1).getElementType() == typeid(std::shared_ptr<const Individual>)) {
+            vertices.insert(node.getValue(1).getScalar<std::shared_ptr<const Individual>>());
+        }
+    }
+    return std::move(vertices);
+}
+
+std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getMembersOf(std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals) const
 {
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members;
     for(const std::shared_ptr<const Individual>& indiv: individuals) {
@@ -216,7 +276,7 @@ std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::O
     return std::move(members);
 }
 
-std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllMembers()
+std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllMembers() const
 {
     std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> vertices = this->getAllVertices();
     return std::move(this->getMembersOf(vertices));
@@ -245,6 +305,7 @@ void Evolution::OriginTPGModule::setNewBasicLoggerRow(size_t generationNumber)
     double mutTime = genCheckpoints.at(3);
     double evalTime = genCheckpoints.at(4);
     double generationTime = std::accumulate(genCheckpoints.begin(), genCheckpoints.end(), 0.0);
+
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
         defLogger->addGenerationValues<double>(
             {minFitness, averageFitness, maxFitness, mutTime, evalTime, generationTime, this->stopwatch.elapsed()});

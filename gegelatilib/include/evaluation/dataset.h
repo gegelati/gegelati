@@ -76,6 +76,11 @@ namespace Evaluation {
             virtual void removeData(size_t index);
 
             /**
+             * \brief Redefined the output at given index;
+             */
+            virtual void setOutputAt(size_t index, Data::DataValue output);
+
+            /**
              * \brief return the size of the dataset
              */
             virtual size_t size() const;

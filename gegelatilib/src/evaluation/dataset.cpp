@@ -12,6 +12,8 @@ const Dimensions::Requirement& Evaluation::DataSet::getOutputDimension() const
     return this->outputDimension;
 }
 
+
+
 void Evaluation::DataSet::addData(std::vector<Data::DataValue> inputs, Data::DataValue output)
 {
     if(!Dimensions::Requirement::acceptListValues(this->inputDimensions, inputs)) {
@@ -30,6 +32,14 @@ void Evaluation::DataSet::removeData(size_t index)
     throw std::runtime_error("Evaluation::DataSet::removeData: index out of dataset range");
   }
   this->data.erase(this->data.begin() + index);
+}
+
+void Evaluation::DataSet::setOutputAt(size_t index, Data::DataValue output)
+{
+  if(index >= this->data.size()) {
+    throw std::runtime_error("Evaluation::DataSet::removeData: index out of dataset range");
+  }
+  this->data.at(index).second = std::move(output);
 }
 
 size_t Evaluation::DataSet::size() const

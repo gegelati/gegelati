@@ -35,6 +35,9 @@ namespace Metrics {
          */
         Metric() {};
 
+        /// Virtual destructor, required to delete derived metrics through Metric pointers.
+        virtual ~Metric() = default;
+
         /**
          * \brief Clone the metric object with an empty metrics map.
          */

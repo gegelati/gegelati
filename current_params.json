@@ -1,0 +1,206 @@
+{
+	"evaluation" : 
+	{
+		// Boolean used to activate an evaluation of the surviving roots in validation
+		// mode after the training at each generation.
+		// "doValidation" : false, // Default value
+		"doValidation" : true,
+		// Maximum number of actions performed on the learning environment during the
+		// each evaluation of a root.
+		// "maxNbActionsPerEval" : 1000, // Default value
+		"maxNbActionsPerEval" : 300,
+		// Maximum number of times a given root is evaluated.After this number is
+		// reached, possibly after several generations, the score of the root will be
+		// fixed, and no further evaluation will be done.
+		// "maxNbEvaluationPerPolicy" : 1000, // Default value
+		"maxNbEvaluationPerPolicy" : 20,
+		// Number of generations of the training.
+		// "nbGenerations" : 500, // Default value
+		"nbGenerations" : 10,
+		// Number of evaluation of each root per generation.
+		// "nbIterationsPerPolicyEvaluation" : 5, // Default value
+		"nbIterationsPerPolicyEvaluation" : 3,
+		// Number of evaluation of each root per generation.
+		// "nbIterationsPerPolicyValidation" : 5, // Default value
+		"nbIterationsPerPolicyValidation" : 20,
+		// [Only used in ParallelLearningAgent and child classes.]
+		// Number of threads used for the training process.
+		// When undefined in the json file, this parameter is automatically set to the
+		// number of cores of the CPU.
+		// /* "nbThreads" : 0,*/ // Commented by default
+		"nbThreads" : 20,
+		// Value to indicate how many generation between each validation step
+		// "stepValidation" : 1, // Default value
+		"stepValidation" : 50
+	},
+	"representation" : 
+	{
+		// string that indicate the activation function used for continuous actions 
+		// "activationFunction" : 'none', // Default value
+		"activationFunction" : "tanh",
+		"atpg" : 
+		{
+			// When an edge is mutate, the choice between action and context program is based on this
+			// "probaContextOverActionProgram" : 0.5, // Default value
+			"probaContextOverActionProgram" : 0.5
+		},
+		"cgp" : 
+		{
+			// Number of layer in the CGP.
+			// "nbLayers" : 1, // Default value
+			"nbLayers" : 5,
+			// Number of nodes per layer of the CGP.
+			// "nbNodesPerLayer" : 5, // Default value
+			"nbNodesPerLayer" : 3,
+			// Probability of altering a Node of the CGP.
+			// "pMutateNode" : 0.1, // Default value
+			"pMutateNode" : 2.0
+		},
+		"lgp" : 
+		{
+			// When a Program is mutated, makes sure its behavior is no longer the same.
+			// "forceProgramBehaviorChangeOnMutation" : false, // Default value
+			"forceProgramBehaviorChangeOnMutation" : false,
+			// Initial maximum number of Line within the Program of the Graph.
+			// "initMaxProgramSize" : 10, // Default value
+			"initMaxProgramSize" : 5,
+			// Initial minimum number of Line within the Program of the Graph.
+			// "initMinProgramSize" : 1, // Default value
+			"initMinProgramSize" : 1,
+			// Maximum constant value possible.
+			// "maxConstValue" : 1.0, // Default value
+			"maxConstValue" : 1.0,
+			// Maximum number of Line within the Program of the TPG.
+			// "maxProgramSize" : 96, // Default value
+			"maxProgramSize" : 5,
+			// Minimum constant value possible.
+			// "minConstValue" : -1.0, // Default value
+			"minConstValue" : -1.0,
+			// Number of Constant available in each Program.
+			// "nbProgramConstant" : 0, // Default value
+			"nbProgramConstant" : 10,
+			// Number of registers for the Program execution.
+			// "nbRegisters" : 8, // Default value
+			"nbRegisters" : 12,
+			// Probability of inserting a line in the Program.
+			// "pAdd" : 0.5, // Default value
+			"pAdd" : 0.5,
+			// Probability of each constant to be mutated.
+			// "pConstantMutation" : 0.5, // Default value
+			"pConstantMutation" : 0.5,
+			// Probability of deleting a line of the Program.
+			// "pDelete" : 0.5, // Default value
+			"pDelete" : 0.5,
+			// Probability of altering a line of the Program.
+			// "pMutate" : 1.0, // Default value
+			"pMutate" : 1.0,
+			// Probability of mutating an output index.
+			// "pMutateOutput" : 0.0, // Default value
+			"pMutateOutput" : 0.0,
+			// Probability of creating a new program.
+			// "pNewProgram" : 0.0, // Default value
+			"pNewProgram" : 0.0,
+			// Probability of swapping two lines of the Program.
+			// "pSwap" : 1.0, // Default value
+			"pSwap" : 1.0
+		},
+		"maple" : 
+		{
+			// Number of edge per action vertex at initialisation
+			// "nbActionEdgeInit" : 1, // Default value
+			"nbActionEdgeInit" : 6,
+			// Probability of adding an outgoing Action Edge to a Action.
+			// "pActionEdgeAddition" : 0.7, // Default value
+			"pActionEdgeAddition" : 0.0,
+			// Probability of deleting an outgoing ActionEdge of a Action.
+			// "pActionEdgeDeletion" : 0.7, // Default value
+			"pActionEdgeDeletion" : 0.0,
+			//  Probablity of changing the action edge by any other action edge in the graph
+			// "pChangeActionClass" : 0.1, // Default value
+			"pChangeActionClass" : 0.1,
+			// Probability of doing a crossover with two MAPLE individuals (edge crossover by default).
+			// "pCrossIndividuals" : 0.0, // Default value
+			"pCrossIndividuals" : 0.7,
+			// When doing a crossover with two MAPLE individuals, probability to do a program crossover instead of an edge crossover.
+			// "pCrossPrograms" : 0.0, // Default value
+			"pCrossPrograms" : 0.5,
+			//  Probablity of mutation the program on the action edge
+			// "pMutateActionProgram" : 0.1, // Default value
+			"pMutateActionProgram" : 0.7,
+			//  Probablity of swapping two action edge within the same action vertex
+			// "pSwapActionProgram" : 0.1, // Default value
+			"pSwapActionProgram" : 0.5
+		},
+		// Number of individual for the evolution of the population// "nbIndividuals" : 100, // Default value
+		"nbIndividuals" : 100,
+		"tgp" : 
+		{
+			// Maximum depth that the graph can reach.
+			// "maxDepth" : 5, // Default value
+			"maxDepth" : 5,
+			// Maximum depth that the graph can reach at initialisation.
+			// "maxInitDepth" : 3, // Default value
+			"maxInitDepth" : 3,
+			// Maximum number of edges per node, we strongly advice to let it at 2 to avoid complexity explosion.
+			// "maxNbEdgePerNode" : 2, // Default value
+			"maxNbEdgePerNode" : 2
+		},
+		"tpg" : 
+		{
+			// Number of recordings held in the Archive.
+			// "archiveSize" : 50, // Default value
+			"archiveSize" : 50,
+			// Probability of archiving the result of each Program execution.
+			// "archivingProbability" : 0.05, // Default value
+			"archivingProbability" : 0.0005,
+			// Maximum number of Edge connected to each Team of the Graph when
+			// initialized.
+			// "maxInitOutgoingEdges" : 2, // Default value
+			"maxInitOutgoingEdges" : 2,
+			// Maximum number of outgoing edge during Graph mutations.
+			// "maxOutgoingEdges" : 5, // Default value
+			"maxOutgoingEdges" : 5,
+			// Probability of adding an outgoing Edge to a Team.
+			// "pEdgeAddition" : 0.7, // Default value
+			"pEdgeAddition" : 0.5,
+			// Probability of deleting an outgoing Edge of a Team.
+			// "pEdgeDeletion" : 0.7, // Default value
+			"pEdgeDeletion" : 0.2,
+			// Probability of changing the destination of an Edge.
+			// "pEdgeDestinationChange" : 0.1, // Default value
+			"pEdgeDestinationChange" : 0.1,
+			// Probability of the new destination of an Edge to be an Action.
+			// "pEdgeDestinationIsAction" : 0.5, // Default value
+			"pEdgeDestinationIsAction" : 0.5,
+			// Probability of mutating the Program of an outgoing Edge.
+			// "pProgramMutation" : 0.2, // Default value
+			"pProgramMutation" : 0.2
+		}
+	},
+	"selection" : 
+	{
+		// Selection mode used. Available modes are:
+		//   - "truncation"
+		//   - "tournament"
+		// "_selectionMode" : Truncation, // Default value
+		"_selectionMode" : "tournament",
+		"tournament" : 
+		{
+			// Indicates if the elites are used in the reproduction process.
+			// "areElitesReproductible" : false, // Default value
+			"areElitesReproductible" : true,
+			// Percentage of root Vertex saved from the tournament at each generation.
+			// "ratioSavedRoots" : 0.05, // Default value
+			"ratioSavedRoots" : 0.05,
+			// Size of tournament if tournament selection is used.
+			// "sizeTournament" : 5, // Default value
+			"sizeTournament" : 3
+		},
+		"truncation" : 
+		{
+			// Percentage of deleted (and regenerated) root Vertex at each generation.
+			// "ratioDeletedRoots" : 0.5, // Default value
+			"ratioDeletedRoots" : 0.5
+		}
+	}
+}

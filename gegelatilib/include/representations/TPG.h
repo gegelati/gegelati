@@ -73,7 +73,7 @@
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            TPG(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, size_t nbMembersMin, size_t nbMembersMax=0, std::string representationName = "TPG", std::string representationColor = "#922DB4")
+            TPG(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, size_t nbMembersMin, size_t nbMembersMax=0, std::string representationName = "TPG", std::string representationColor = "#2db436")
                 : Representation(
                     inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), representationName, representationColor), 
                     nbActions{nbActions}, nbMembersMin{nbMembersMin}, nbMembersMax{nbMembersMax} {

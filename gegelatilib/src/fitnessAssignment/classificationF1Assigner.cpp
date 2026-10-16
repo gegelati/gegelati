@@ -13,9 +13,11 @@ std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> Fitn
     for (const auto& [individual, metricMap] : individualMetrics) {
         const auto scalarMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
         for (const auto& [key, metric] : scalarMetrics) {
-            const size_t prediction = metric->getPrediction().getScalar<size_t>();
-            const size_t target = metric->getTarget().getScalar<size_t>();
-            numClasses = std::max(numClasses, std::max(prediction, target) + 1);
+            for (const auto& [predictionValue, targetValue] : metric->getPairs()) {
+                const size_t prediction = predictionValue.getScalar<size_t>();
+                const size_t target = targetValue.getScalar<size_t>();
+                numClasses = std::max(numClasses, std::max(prediction, target) + 1);
+            }
         }
     }
 
@@ -32,9 +34,11 @@ std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> Fitn
         std::vector<std::vector<uint64_t>> confusionMatrix(numClasses, std::vector<uint64_t>(numClasses, 0));
 
         for (const auto& [key, metric] : scalarMetrics) {
-            const size_t prediction = metric->getPrediction().getScalar<size_t>();
-            const size_t target = metric->getTarget().getScalar<size_t>();
-            ++confusionMatrix.at(target).at(prediction);
+            for (const auto& [predictionValue, targetValue] : metric->getPairs()) {
+                const size_t prediction = predictionValue.getScalar<size_t>();
+                const size_t target = targetValue.getScalar<size_t>();
+                ++confusionMatrix.at(target).at(prediction);
+            }
         }
 
         double averageF1Score = 0.0;

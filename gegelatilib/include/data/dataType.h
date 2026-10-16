@@ -31,6 +31,11 @@
 
 namespace Data {
 
+    /// \brief Compares two type_info, with a pointer-equality fast path (type_info::operator== can be slow).
+    inline bool sameElementType(const std::type_info& a, const std::type_info& b) noexcept {
+        return &a == &b || a == b;
+    }
+
     /**
      * \brief Descriptor of a typed view or value, including shape and source context.
      *

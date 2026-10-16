@@ -68,9 +68,8 @@ public:
      * \param[in] genotype the genotype set to the individual. Default is empty
      */
     Individual(const Representations::Representation& representation, std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>()) 
-        : representation{representation}, genotype(std::move(genotype)), 
-            individualID(incrementeCounter()) {
-            this->updateValidity();
+        : representation{representation}, individualID(incrementeCounter()) {
+            this->setGenotype(std::move(genotype));
             };
 
     /**
@@ -119,7 +118,6 @@ public:
      * \param[in] genotype unique pointer towards the genotype set.
      */
     virtual void setGenotype(std::unique_ptr<GraphBased::Genotype> genotype);
-
 
     /**
      * \brief Return true if the current genotype is valid regarding the current representation
