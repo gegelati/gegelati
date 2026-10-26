@@ -5,8 +5,8 @@
 
 static Evaluation::DataSet createSmallDataSet() {
     std::vector<Dimensions::Requirement> inputDim;
-    inputDim.push_back(Dimensions::Requirement::array1d<int>(2));
-    Evaluation::DataSet dataSet(inputDim, Dimensions::Requirement::scalar<int>());
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<int>({2})));
+    Evaluation::DataSet dataSet(inputDim, Dimensions::Requirement(Data::DataType::type<int>()));
 
     
     std::vector<Data::DataValue> inputs1;

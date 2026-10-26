@@ -99,14 +99,14 @@ TEST(InstructionSetTest, filterSet) {
     s.add(iAdd);
     s.add(iMinus);
 
-    Data::DataType output = Data::DataType::scalar<float>();
-    Data::DataType type = Data::DataType::scalar<float>();
+    Data::DataType output = Data::DataType::type<float>();
+    Data::DataType type = Data::DataType::type<float>();
     Instructions::Set clone = s.filterInstructionSet({type}, output);
     ASSERT_EQ(clone.getNbInstructions(), 1) << "Should contain only one instruction";
     ASSERT_TRUE(dynamic_cast<const Instructions::AddPrimitiveType<float>*>(&clone.getInstruction(0)) != nullptr) << "Should be the primitive type!";
 
     
-    Data::DataType type2 = Data::DataType::scalar<int>();
+    Data::DataType type2 = Data::DataType::type<int>();
     Instructions::Set clone2 = s.filterInstructionSet({type2}, output);
     ASSERT_EQ(clone2.getNbInstructions(), 0) << "Should be empty";
 
@@ -120,18 +120,18 @@ TEST(InstructionSetTest, filterSet) {
     Instructions::Set s2;
     s2.add(iBig);
     // Input check
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::scalar<double>()}, Data::DataType::array1d<double>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array1d<double>(2)}, Data::DataType::array1d<double>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array1d<double>(4)}, Data::DataType::array1d<double>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(2, 2)}, Data::DataType::array1d<double>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::array1d<double>(2)).getNbInstructions(), 1) << "Should have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 2), Data::DataType::array2d<double>(2, 3)}, Data::DataType::array1d<double>(2)).getNbInstructions(), 1) << "Should have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::scalar<float>()}, Data::DataType::array1d<double>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>()}, Data::DataType::type<double>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({2})}, Data::DataType::type<double>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({4})}, Data::DataType::type<double>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({2, 2})}, Data::DataType::type<double>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<double>({2})).getNbInstructions(), 1) << "Should have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 2}), Data::DataType::type<double>({2, 3})}, Data::DataType::type<double>({2})).getNbInstructions(), 1) << "Should have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<float>()}, Data::DataType::type<double>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
     // output check
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::scalar<double>()).getNbInstructions(), 0) << "Should not have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::array1d<double>(3)).getNbInstructions(), 1) << "Should have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::array1d<double>(20)).getNbInstructions(), 1) << "Should have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::array2d<double>(2, 2)).getNbInstructions(), 1) << "Should have keep the instruction";
-    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::array2d<double>(3, 3)}, Data::DataType::array1d<float>(2)).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<double>()).getNbInstructions(), 0) << "Should not have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<double>({3})).getNbInstructions(), 1) << "Should have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<double>({20})).getNbInstructions(), 1) << "Should have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<double>({2, 2})).getNbInstructions(), 1) << "Should have keep the instruction";
+    ASSERT_EQ(s2.filterInstructionSet({Data::DataType::type<double>({3, 3})}, Data::DataType::type<float>({2})).getNbInstructions(), 0) << "Should not have keep the instruction";
     
 }

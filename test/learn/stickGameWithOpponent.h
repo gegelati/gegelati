@@ -69,8 +69,8 @@ class StickGameWithOpponent : public Evaluation::ReinforcementEnvironment
      */
     StickGameWithOpponent()
         : Evaluation::ReinforcementEnvironment(
-            {Dimensions::Requirement::array1d<int>(3), Dimensions::Requirement::scalar<double>()}, 
-             Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::atMost(2))), win{false}
+            {Dimensions::Requirement(Data::DataType::type<int>({3})), Dimensions::Requirement(Data::DataType::type<double>())}, 
+             Dimensions::Requirement(Data::DataType::type<size_t>(), Dimensions::NumericRange<size_t>::atMost(2))), win{false}
     {
         this->dataSources.push_back(Data::DataValue::array1d<int[3]>({1, 2, 3}));
         this->dataSources.push_back(Data::DataValue::scalar(remainingSticks));

@@ -1,0 +1,40 @@
+#ifndef EVOLUTION_SELECTION_TOURNAMENT_SELECTOR_H
+#define EVOLUTION_SELECTION_TOURNAMENT_SELECTOR_H
+
+#include "selection/selector.h"
+
+ namespace Selection {
+
+    /**
+     * \brief Class representing the tournament selection mechanism used surviving selection
+     */
+    class TournamentSelector : public Selector {
+
+        protected:            
+        
+            /// Tournament sizes
+            size_t sizeTournament;
+
+        public: 
+
+            /// @brief Default constructor setting replacement value to false
+            TournamentSelector(size_t sizeTournament, bool replacement=true) : Selector(replacement), sizeTournament{sizeTournament} {}
+
+            /**
+             * \brief method performing the truncation selection
+             * 
+             * \param[in] fitnessMap the individuals containing the scores.
+             * \param[in] nbSelected the number of individuals to select.
+             * \param[in] rng required for selecting (unused for truncation)
+             * 
+             * If NbSelected is higher than the number of individuals, it will return a vector with each individual.
+             * 
+             * \return a vector of the selected individuals.
+             */
+            virtual std::vector<std::shared_ptr<const Individual>> select(
+                const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap,
+                size_t nbSelected, RNG::RNG& rng) const override;
+    };
+};
+
+#endif // EVOLUTION_SELECTION_TRUNCATION_SELECTOR_H

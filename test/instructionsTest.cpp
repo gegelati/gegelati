@@ -90,30 +90,30 @@ TEST(InstructionTest, handleInputTypes)
     auto unary = [](double a) -> double { return a; };
     Instructions::LambdaInstruction<double, double> iUnary(unary);
 
-    ASSERT_TRUE(iUnary.handleInputTypes({Data::DataType::scalar<double>()}));
-    ASSERT_TRUE(iUnary.handleInputTypes({Data::DataType::scalar<float>(), Data::DataType::scalar<double>()}));
-    ASSERT_FALSE(iUnary.handleInputTypes({Data::DataType::scalar<float>()}));
+    ASSERT_TRUE(iUnary.handleInputTypes({Data::DataType::type<double>()}));
+    ASSERT_TRUE(iUnary.handleInputTypes({Data::DataType::type<float>(), Data::DataType::type<double>()}));
+    ASSERT_FALSE(iUnary.handleInputTypes({Data::DataType::type<float>()}));
     ASSERT_FALSE(iUnary.handleInputTypes({}));
 
     auto binary = [](double a, double b) -> double { return a + b; };
     Instructions::LambdaInstruction<double, double, double> iBinary(binary);
 
     // The same input can satisfy multiple operands.
-    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::scalar<double>()}));
-    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::scalar<double>(), Data::DataType::scalar<double>()}));
-    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::scalar<double>(), Data::DataType::scalar<float>()}));
-    ASSERT_FALSE(iBinary.handleInputTypes({Data::DataType::scalar<float>(), Data::DataType::scalar<int>()}));
+    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::type<double>()}));
+    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::type<double>(), Data::DataType::type<double>()}));
+    ASSERT_TRUE(iBinary.handleInputTypes({Data::DataType::type<double>(), Data::DataType::type<float>()}));
+    ASSERT_FALSE(iBinary.handleInputTypes({Data::DataType::type<float>(), Data::DataType::type<int>()}));
 
     auto mixed = [](double a, float b) -> double { return a + b; };
     Instructions::LambdaInstruction<double, double, float> iMixed(mixed);
 
     ASSERT_TRUE(iMixed.handleInputTypes({
-        Data::DataType::scalar<double>(),
-        Data::DataType::scalar<float>()
+        Data::DataType::type<double>(),
+        Data::DataType::type<float>()
     }));
-    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::scalar<double>()}));
-    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::scalar<float>()}));
-    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::scalar<int>()}));
+    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::type<double>()}));
+    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::type<float>()}));
+    ASSERT_FALSE(iMixed.handleInputTypes({Data::DataType::type<int>()}));
 }
 
 TEST(InstructionTest, handleInputTypesArrayShapes)
@@ -127,32 +127,32 @@ TEST(InstructionTest, handleInputTypesArrayShapes)
     });
 
     ASSERT_TRUE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(16, 17),
-        Data::DataType::array2d<double>(16, 16)
+        Data::DataType::type<double>({16, 17}),
+        Data::DataType::type<double>({16, 16})
     }));
 
     ASSERT_FALSE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(16, 16)
+        Data::DataType::type<double>({16, 16})
     }));
 
     ASSERT_TRUE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(16, 17)
+        Data::DataType::type<double>({16, 17})
     }));
 
     ASSERT_FALSE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(3, 3),
-        Data::DataType::array2d<double>(4, 4)
+        Data::DataType::type<double>({3, 3}),
+        Data::DataType::type<double>({4, 4})
     }));
 
     ASSERT_FALSE(instruction.handleInputTypes({
-        Data::DataType::array2d<float>(16, 17),
-        Data::DataType::array2d<float>(16, 16)
+        Data::DataType::type<float>({16, 17}),
+        Data::DataType::type<float>({16, 16})
     }));
 
     ASSERT_TRUE(instruction.handleInputTypes({
-        Data::DataType::array2d<float>(3, 3),
-        Data::DataType::array2d<double>(16, 17),
-        Data::DataType::array2d<double>(16, 16)
+        Data::DataType::type<float>({3, 3}),
+        Data::DataType::type<double>({16, 17}),
+        Data::DataType::type<double>({16, 16})
     }));
 }
 
@@ -168,21 +168,21 @@ TEST(InstructionTest, handleInputTypesRegression)
 
     // Only the second operand can be satisfied. The instruction must be rejected.
     ASSERT_FALSE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(16, 16),
-        Data::DataType::array2d<float>(16, 16),
-        Data::DataType::array2d<int>(16, 16),
-        Data::DataType::array1d<double>(16),
-        Data::DataType::array1d<float>(16),
-        Data::DataType::array1d<int>(16),
-        Data::DataType::array1d<double>(0),
-        Data::DataType::array1d<float>(0),
-        Data::DataType::array1d<int>(0)
+        Data::DataType::type<double>({16, 16}),
+        Data::DataType::type<float>({16, 16}),
+        Data::DataType::type<int>({16, 16}),
+        Data::DataType::type<double>({16}),
+        Data::DataType::type<float>({16}),
+        Data::DataType::type<int>({16}),
+        Data::DataType::type<double>(),
+        Data::DataType::type<float>(),
+        Data::DataType::type<int>()
     }));
 
     // Both operands can now be satisfied.
     ASSERT_TRUE(instruction.handleInputTypes({
-        Data::DataType::array2d<double>(16, 17),
-        Data::DataType::array2d<double>(16, 16)
+        Data::DataType::type<double>({16, 17}),
+        Data::DataType::type<double>({16, 16})
     }));
 }
 
@@ -192,8 +192,8 @@ TEST(InstructionTest, handleOutputType)
         [](double a) -> double { return a; }
     );
 
-    ASSERT_TRUE(instruction.handleOutputType(Data::DataType::scalar<double>()));
-    ASSERT_TRUE(instruction.handleOutputType(Data::DataType::array1d<double>(4)));
-    ASSERT_FALSE(instruction.handleOutputType(Data::DataType::scalar<float>()));
+    ASSERT_TRUE(instruction.handleOutputType(Data::DataType::type<double>()));
+    ASSERT_TRUE(instruction.handleOutputType(Data::DataType::type<double>({4})));
+    ASSERT_FALSE(instruction.handleOutputType(Data::DataType::type<float>()));
 }
 

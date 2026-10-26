@@ -109,14 +109,7 @@ namespace Dimensions
                     values[idx] = static_cast<T>(std::tanh(data[idx]));
                 }
 
-                if (value.getRank() == 0) {
-                    return Data::DataValue::scalar<T>(values[0]);
-                } else if (value.getRank() == 1) {
-                    return Data::DataValue::array1d(values);
-                } else {
-                    return Data::DataValue::array2d(values, value.getType().dimensions[0], value.getType().dimensions[1]);
-                }
-
+                return Data::DataValue::fromRange(values, value.getType());
             }
 
              /**
@@ -145,7 +138,7 @@ namespace Dimensions
               * \param input The requirement of the input.
               */
             ArgMax(const Requirement& input)
-             : Function({input}, Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1))) {}
+             : Function({input}, Requirement(Data::DataType::type<size_t>(), Dimensions::NumericRange<size_t>::between(0, input.getDataType().totalElements() - 1))) {}
             /**
              * \brief Clone current function
              */
@@ -181,6 +174,199 @@ namespace Dimensions
                */
             virtual std::string name() const override {
                 return "ArgMax";
+            }
+        };
+
+        /**
+        * \brief Sum reduction over specified axes, or over all elements.
+        *
+        * An empty axes list performs a global sum and returns a scalar.
+        * Otherwise, the specified axes are removed from the output shape.
+        *
+        * Examples:
+        * - Shape {28, 28}, axes {}    -> scalar
+        * - Shape {28, 28}, axes {1}   -> {28}
+        * - Shape {8, 28, 28}, axes {1, 2} -> {8}
+        * - Shape {8, 28, 28}, axes {2} -> {8, 28}
+        *
+        * \tparam T Arithmetic element type used for input and output.
+        */
+        template <typename T>
+        struct Sum final : Function {
+            static_assert(
+                std::is_arithmetic_v<T>,
+                "ActivationFunctions::Sum requires a numeric type."
+            );
+
+        private:
+            std::vector<size_t> axes_;
+
+            /**
+             * \brief Computes the output DataType and validates the reduction axes.
+             */
+            static Data::DataType makeOutputType(
+                const Data::DataType& inputType,
+                const std::vector<size_t>& axes)
+            {
+                if (!inputType.elementType ||
+                    *inputType.elementType != typeid(T)) {
+                    throw std::invalid_argument(
+                        "ActivationFunctions::Sum: input element type must match T."
+                    );
+                }
+
+                const size_t rank = inputType.rank;
+
+                // An empty axes list means global reduction.
+                if (axes.empty()) {
+                    return Data::DataType::type<T>();
+                }
+
+                std::vector<bool> reduced(rank, false);
+
+                for (size_t axis : axes) {
+                    if (axis >= rank) {
+                        throw std::invalid_argument("ActivationFunctions::Sum: axis " +std::to_string(axis) + " is outside the input rank " +std::to_string(rank) + ".");
+                    }
+
+                    if (reduced[axis]) {
+                        throw std::invalid_argument(  "ActivationFunctions::Sum: duplicate reduction axis " + std::to_string(axis) + ".");
+                    }
+
+                    reduced[axis] = true;
+                }
+
+                auto dimensions = inputType.dimensions;
+                size_t outputRank = 0;
+
+                for (size_t axis = 0; axis < rank; ++axis) {
+                    if (!reduced[axis]) {
+                        dimensions[outputRank++] = dimensions[axis];
+                    }
+                }
+                dimensions.resize(outputRank);
+                return Data::DataType::type<T>(dimensions);
+            }
+
+        public:
+            /**
+             * \brief Constructs a sum reduction.
+             *
+             * \param input Input requirement.
+             * \param axes Axes to reduce. Empty means global sum.
+             */
+            explicit Sum(
+                const Requirement& input,
+                std::vector<size_t> axes = {})
+                : Function(
+                    {input},
+                    Requirement(makeOutputType(input.getDataType(), axes), NumericRange<double>::unbounded())
+                ),
+                axes_(std::move(axes)) { }
+
+            /**
+             * \brief Clones this reduction, preserving its axes and input requirement.
+             */
+            std::unique_ptr<Function> cloneUniquePtr() const override
+            {
+                return std::make_unique<Sum<T>>(
+                    this->inputs.at(0), this->axes_
+                );
+            }
+
+            /**
+             * \brief Returns the function name.
+             */
+            std::string name() const override
+            {
+                return "Sum";
+            }
+
+            /**
+             * \brief Executes the reduction and returns an owning DataValue.
+             */
+            Data::DataValue execute(
+                const Data::DataValue& value) const override
+            {
+                const Data::DataType& inputType = value.getType();
+
+                if (!inputType.elementType ||
+                    *inputType.elementType != typeid(T)) {
+                    throw std::invalid_argument(
+                        "ActivationFunctions::Sum: input element type must match T."
+                    );
+                }
+
+                const size_t rank = inputType.rank;
+                const size_t count = inputType.totalElements();
+
+                // Validate axes and derive the actual output shape.
+                Data::DataType resultType = makeOutputType(inputType, axes_);
+
+                const T* data = value.getData<T>().get();
+
+                // Global sum.
+                if (axes_.empty()) {
+                    T total{};
+
+                    for (size_t i = 0; i < count; ++i) {
+                        total += data[i];
+                    }
+
+                    return Data::DataValue::scalar<T>(total);
+                }
+
+                std::vector<bool> reduced(rank, false);
+
+                for (size_t axis : axes_) {
+                    reduced[axis] = true;
+                }
+
+                const size_t outputRank = resultType.rank;
+                const size_t outputCount = resultType.totalElements();
+
+                std::vector<T> result(outputCount, T{});
+
+                // Map each input axis to its corresponding output axis.
+                // Reduced axes map to -1.
+                std::vector<size_t> outputAxisForInput(rank, static_cast<size_t>(-1));
+
+                size_t nextOutputAxis = 0;
+
+                for (size_t axis = 0; axis < rank; ++axis) {
+                    if (!reduced[axis]) {
+                        outputAxisForInput[axis] = nextOutputAxis++;
+                    }
+                }
+
+                // Compute row-major output strides.
+                std::vector<size_t> outputStrides(outputRank, 1);
+
+                for (size_t axis = outputRank; axis > 1; --axis) {
+                    outputStrides[axis - 2] = outputStrides[axis - 1] * resultType.dimensions[axis - 1];
+                }
+
+                // Accumulate each input element into its output element.
+                for (size_t flat = 0; flat < count; ++flat) {
+                    size_t remainder = flat;
+                    size_t outputIndex = 0;
+
+                    for (size_t axis = rank; axis > 0; --axis) {
+                        const size_t a = axis - 1;
+                        const size_t dimension = inputType.dimensions[a];
+
+                        const size_t coordinate = remainder % dimension;
+                        remainder /= dimension;
+
+                        if (!reduced[a]) {
+                            outputIndex += coordinate * outputStrides[outputAxisForInput[a]];
+                        }
+                    }
+
+                    result[outputIndex] += data[flat];
+                }
+
+                return Data::DataValue::fromRange(result, resultType);
             }
         };
     };

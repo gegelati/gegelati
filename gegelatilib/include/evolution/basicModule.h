@@ -46,6 +46,9 @@ namespace Evolution {
             std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitness;
 
             /// @brief TODO
+            std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> validationFitness;
+
+            /// @brief TODO
             std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> populationMetrics;
 
             /// @brief TODO
@@ -62,6 +65,9 @@ namespace Evolution {
 
             /// \brief number of evaluation iteration perform on training mode on the individuals
             size_t nbTrainingIterations;
+
+            /// \brief number of evaluation iteration perform on validation mode on the individuals
+            size_t nbValidationIterations;
 
             /// \brief Number of threads autorized
             size_t nbThreads;
@@ -121,7 +127,7 @@ namespace Evolution {
             explicit BasicModule(
                 const Representations::Representation& representation, 
                 Evaluation::Problem& problem,
-                size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
+                size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, size_t nbValidationIterations = 0, uint64_t seed = 0, size_t nbThreads = 1,
                 std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr,
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,
                 std::shared_ptr<Selection::Selector> survivingSelection = nullptr,

@@ -65,7 +65,7 @@ namespace Evolution {
                 const Representations::TPG& TPGRep,
                 const Representations::Representation& memberRep, 
                 Evaluation::Problem& problem,
-                size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed = 0, size_t nbThreads = 1,
+                size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, size_t nbValidationIterations=0, uint64_t seed = 0, size_t nbThreads = 1,
                 size_t archiveSize = 50, bool isArchiveFixed = false, bool protectAggregated = true,
                 std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr,
                 std::shared_ptr<Selection::Selector> parentSelection = nullptr,

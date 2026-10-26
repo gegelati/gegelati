@@ -137,12 +137,12 @@ namespace Instructions {
 
     template <class T> void MultByConstant<T>::setUpOutput()
     {
-        this->outputType = Data::DataType::scalar<T>();
+        this->outputType = Data::DataType::type<T>();
     }
     template <class T> void MultByConstant<T>::setUpOperand()
     {
-        this->operandTypes.push_back(Data::DataType::scalar<T>());
-        this->operandTypes.push_back(Data::DataType::scalar<Data::Constant>());
+        this->operandTypes.push_back(Data::DataType::type<T>());
+        this->operandTypes.push_back(Data::DataType::type<Data::Constant>());
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

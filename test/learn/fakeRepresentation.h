@@ -56,8 +56,8 @@ namespace Representations {
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            FakeRepresentation(std::vector<Dimensions::Requirement> inputDimensions = {Dimensions::Requirement::scalar<int>()},
-                               Dimensions::Requirement outputDimension = Dimensions::Requirement::scalar<int>(),
+            FakeRepresentation(std::vector<Dimensions::Requirement> inputDimensions = {Dimensions::Requirement(Data::DataType::type<int>())},
+                               Dimensions::Requirement outputDimension = Dimensions::Requirement(Data::DataType::type<int>()),
                                std::string representationName = "FakeRepresentation", 
                                std::string representationColor = "#FFFFFF")
                 : Representation(inputDimensions, outputDimension, representationName, representationColor), output{Data::DataValue::scalar<double>(1)} {

@@ -65,8 +65,8 @@ class LGPRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputType = Dimensions::Requirement::array1d<double>(4);
-        outputType = Dimensions::Requirement::scalar<double>();
+        inputType = Dimensions::Requirement(Data::DataType::type<double>({4}));
+        outputType = Dimensions::Requirement(Data::DataType::type<double>());
     }
 
     virtual void TearDown()
@@ -82,8 +82,8 @@ TEST_F(LGPRepresentationTest, Constructor)
 {
     Representations::LGP* representation;
 
-    ASSERT_NO_THROW(representation = new Representations::LGP({inputType}, 1, set, 8, 5)) << "Constructor of Representation failed.";
-    ASSERT_THROW(Representations::LGP({inputType}, 10, set, 8, 5, 10), std::runtime_error) << "Constructor of Representation should fail.";
+    ASSERT_NO_THROW(representation = new Representations::LGP({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 5)) << "Constructor of Representation failed.";
+    ASSERT_THROW(Representations::LGP({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({10}), 5, 10), std::runtime_error) << "Constructor of Representation should fail.";
 
     ASSERT_NO_THROW(representation->cloneUniquePtr()) << "Cloning should not fail";
 
@@ -93,7 +93,7 @@ TEST_F(LGPRepresentationTest, Constructor)
 TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 {
     size_t nbRegisters = 8;
-    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 5, 10);
     const GraphBased::GenotypeConstraint& constraint = representation.getGenotypeConstraint();
 
     ASSERT_EQ(constraint.size(), 1) << "Size of constraint should be 1";
@@ -113,7 +113,7 @@ TEST_F(LGPRepresentationTest, getGenotypeConstraint)
 
 TEST_F(LGPRepresentationTest, getGenotypeGenerator)
 {
-    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 5, 10);
     RNG::RNG rng;
 
     std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator().cloneUniquePtr();
@@ -143,7 +143,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 {
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
-    Representations::LGP representation({inputType}, 1, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 5, 10);
 
     GraphBased::Genotype genotype;
     std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
@@ -172,7 +172,7 @@ TEST_F(LGPRepresentationTest, executeIndividual)
 
 TEST_F(LGPRepresentationTest, detectIntronNodes)
 {
-    Representations::LGP representation({inputType}, 1, set, 8, 4);
+    Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 4);
     GraphBased::Genotype genotype;
     std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
 
@@ -207,10 +207,10 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
 
     genotype.addNodeGroup(std::move(group));
     
-    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
+    Dimensions::Requirement inputType = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-3.0, 3.0));
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
 
-    Representations::LGP representation({inputType}, 5, set, 8, 5, 10);
+    Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({5}), 5, 10);
 
     std::string text = representation.summary();
     
@@ -218,8 +218,8 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
     EXPECT_NE(text.find("Overall: VALID"), std::string::npos);
 
     
-    Dimensions::Requirement inputTypeEnv = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-1.0, 1.0));
-    Dimensions::Requirement outputTypeEnv = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1.0, 1.0));
+    Dimensions::Requirement inputTypeEnv = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-1.0, 1.0));
+    Dimensions::Requirement outputTypeEnv = Dimensions::Requirement(Data::DataType::type<double>(),Dimensions::NumericRange<double>::between(-1.0, 1.0));
     ASSERT_TRUE(inputTypeEnv.isCompatibleWith(representation.getDimensionFlow().getInputDimensions().at(0))) << "Representation should be compatible with environment output";
     ASSERT_FALSE(representation.getDimensionFlow().isCompatibleWith(outputTypeEnv)) << "Representation should not be compatible with environment output";
     ASSERT_TRUE(representation.execute(genotype, {inputSource.view()}) == Data::DataValue::array1d<double[5]>({1.5, 3.0, 1.0, 0.0, 0.0})) << "Values should be equal";
@@ -249,16 +249,16 @@ TEST_F(LGPRepresentationTest, compatibilityCheck)
 
 TEST_F(LGPRepresentationTest, CheckWrongInstructionIgnored) 
 {
-    Dimensions::Requirement inputType = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-3.0, 3.0));
-    Data::DataValue inputSource0 = Data::DataValue::zeros<double>(16, 16);
-    Data::DataValue inputSource1 = Data::DataValue::zeros<float>(16, 16);
-    Data::DataValue inputSource2 = Data::DataValue::zeros<int>(16, 16);
-    Data::DataValue inputSource3 = Data::DataValue::zeros<double>(16);
-    Data::DataValue inputSource4 = Data::DataValue::zeros<float>(16);
-    Data::DataValue inputSource5 = Data::DataValue::zeros<int>(16);
-    Data::DataValue inputSource6 = Data::DataValue::zeros<double>(0);
-    Data::DataValue inputSource7 = Data::DataValue::zeros<float>(0);
-    Data::DataValue inputSource8 = Data::DataValue::zeros<int>(0);
+    Dimensions::Requirement inputType = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-3.0, 3.0));
+    Data::DataValue inputSource0 = Data::DataValue::zeros<double>({16, 16});
+    Data::DataValue inputSource1 = Data::DataValue::zeros<float>({16, 16});
+    Data::DataValue inputSource2 = Data::DataValue::zeros<int>({16, 16});
+    Data::DataValue inputSource3 = Data::DataValue::zeros<double>({16});
+    Data::DataValue inputSource4 = Data::DataValue::zeros<float>({16});
+    Data::DataValue inputSource5 = Data::DataValue::zeros<int>({16});
+    Data::DataValue inputSource6 = Data::DataValue::zeros<double>();
+    Data::DataValue inputSource7 = Data::DataValue::zeros<float>();
+    Data::DataValue inputSource8 = Data::DataValue::zeros<int>();
     std::vector<Data::DataView> inputSources = {
         inputSource0.view(), inputSource1.view(), inputSource2.view(),
         inputSource3.view(), inputSource4.view(), inputSource5.view(),
@@ -280,23 +280,23 @@ TEST_F(LGPRepresentationTest, CheckWrongInstructionIgnored)
     customSet.add(*(new Instructions::LambdaInstruction<double[4], const int[16][16]>([](const int a[16][16]) { 
         return Data::DataValue::array1d<double[4]>({6.0, 7.0, 8.0, 9.0}); })));
 
-    Representations::LGP representation(inputTypes, 16, customSet, 16, 1, 10);
+    Representations::LGP representation(inputTypes, Data::DataType::type<double>({16}), customSet, Data::DataType::type<double>({16}), 1, 10);
     ASSERT_EQ(representation.getInstructionSet().getNbInstructions(), 6) << "All instruction should have been kept";
 
     customSet.add(*(new Instructions::LambdaInstruction<float, double, double>([](double a, double b) -> double { return 6.0; })));
-    customSet.add(*(new Instructions::LambdaInstruction<double[17], double, double>([](double a, double b) { return Data::DataValue::zeros<double>(17); })));
+    customSet.add(*(new Instructions::LambdaInstruction<double[17], double, double>([](double a, double b) { return Data::DataValue::zeros<double>({17}); })));
     customSet.add(*(new Instructions::LambdaInstruction<double, const double[16][17], const double[16][16]>([](const double a[16][17], const double b[16][16]) -> double { return 8.0; })));
     customSet.add(*(new Instructions::LambdaInstruction<double, const float[16][17], const int[16][16]>([](const float a[16][17], const int b[16][16]) -> double { return 9.0; })));
     customSet.add(*(new Instructions::LambdaInstruction<double, const float[16][16], const int[16][17]>([](const float a[16][16], const int b[16][17]) -> double { return 10.0; })));
 
 
-    Representations::LGP representation1(inputTypes, 16, customSet, 16, 1, 10);
+    Representations::LGP representation1(inputTypes, Data::DataType::type<double>({16}), customSet, Data::DataType::type<double>({16}), 1, 10);
     ASSERT_EQ(representation1.getInstructionSet().getNbInstructions(), 6) << "All instruction should have been kept";
 
     // Should throw
     Instructions::Set smallSet;
     smallSet.add(*(new Instructions::LambdaInstruction<double, float>([](double a) -> double { return 2.0; })));
-    ASSERT_THROW(Representations::LGP({Dimensions::Requirement::array1d<std::string>(8)}, 16, smallSet, 16, 1, 10), std::runtime_error) << "Should throw because set is empty";
+    ASSERT_THROW(Representations::LGP({Dimensions::Requirement(Data::DataType::type<std::string>({8}))}, Data::DataType::type<double>({16}), smallSet, Data::DataType::type<double>({16}), 1, 10), std::runtime_error) << "Should throw because set is empty";
 
     // Should never throw!
     std::unique_ptr<GraphBased::Genotype> genotype;

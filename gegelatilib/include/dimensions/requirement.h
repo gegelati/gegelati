@@ -60,62 +60,6 @@ namespace Dimensions {
         Requirement(Data::DataType dataType, const std::shared_ptr<const Constraint>& constraint)
             : dataType(std::move(dataType)), constraint(constraint) {}
 
-        template <typename T>
-        /** \brief Creates an unconstrained scalar requirement of type T. */
-        static Requirement scalar() {
-            return Requirement(Data::DataType::scalar<T>());
-        }
-
-        template <typename T>
-        /** \brief Creates an unconstrained 1D array requirement of type T.
-         * \param[in] size Required number of elements.
-         */
-        static Requirement array1d(size_t size) {
-            return Requirement(Data::DataType::array1d<T>(size));
-        }
-
-        template <typename T>
-        /** \brief Creates an unconstrained 2D array requirement of type T.
-         * \param[in] rows Required number of rows.
-         * \param[in] columns Required number of columns.
-         */
-        static Requirement array2d(size_t rows, size_t columns) {
-            return Requirement(Data::DataType::array2d<T>(rows, columns));
-        }
-
-        template <typename T>
-        /** \brief Creates a constrained scalar requirement of type T.
-         * \param[in] constraint Value constraint to apply.
-         */
-        static Requirement scalar(const Constraint& constraint) {
-            return Requirement(
-                Data::DataType::scalar<T>(),
-                constraint);
-        }
-
-        template <typename T>
-        /** \brief Creates a constrained 1D array requirement of type T.
-         * \param[in] size Required number of elements.
-         * \param[in] constraint Value constraint to apply.
-         */
-        static Requirement array1d(size_t size, const Constraint& constraint) {
-            return Requirement(
-                Data::DataType::array1d<T>(size),
-                constraint);
-        }
-
-        template <typename T>
-        /** \brief Creates a constrained 2D array requirement of type T.
-         * \param[in] rows Required number of rows.
-         * \param[in] columns Required number of columns.
-         * \param[in] constraint Value constraint to apply.
-         */
-        static Requirement array2d(size_t rows, size_t columns, const Constraint& constraint) {
-            return Requirement(
-                Data::DataType::array2d<T>(rows, columns),
-                constraint);
-        }
-
         /** \brief Returns the required shape and element type. */
         const Data::DataType& getDataType() const noexcept {
             return dataType;

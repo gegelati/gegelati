@@ -21,12 +21,10 @@
             Instructions::Set iSet;
 
             /// The number of registers required to output a value.
-            size_t nbOutputRegisters;
+            Data::DataType outputRegistersType;
 
-            /// The number of registers used by the LGPs
-            size_t nbRegisters;
-
-
+            /// The register values dupplicated during LGP individual execution
+            Data::DataType registersType;
 
             /**
              * \brief execute each node as an instruction line. 
@@ -82,32 +80,31 @@
              * \brief Main Representation constructor.x
              * 
              * \param[in] inputDimensions for the representation
-             * \param[in] nbOutputRegisters number of output registers to create the outputDimension
+             * \param[in] registersType the register used by the LGP.
              * \param[in] iSet the Instruction Set used by the LGP.
-             * \param[in] nbRegisters the number of registers used by the LGPs
+             * \param[in] outputRegistersType number of output registers to create the outputDimension
              * \param[in] nbLinesMin the minimum number of lines in the representation.
              * \param[in] nbLinesMax the maximum number of lines in the representation.
              * \param[in] representationName name of the representation used.
              * \param[in] representationColor name of the representation used.
              */
-            LGP(const std::vector<Dimensions::Requirement>& inputDimensions, size_t nbOutputRegisters, const Instructions::Set& iSet, size_t nbRegisters, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
+            LGP(const std::vector<Dimensions::Requirement>& inputDimensions, const Data::DataType& registersType, const Instructions::Set& iSet, const Data::DataType& outputRegistersType, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Representation(
-                    inputDimensions, Dimensions::Requirement::array1d<double>(nbOutputRegisters, Dimensions::NumericRange<double>::unbounded()), 
-                    representationName, representationColor), nbOutputRegisters{nbOutputRegisters},
-                    nbRegisters{nbRegisters}, nbLinesMin{nbLinesMin}, nbLinesMax{nbLinesMax} {
-                if(nbOutputRegisters > nbRegisters) {
+                    inputDimensions, Dimensions::Requirement(outputRegistersType, Dimensions::NumericRange<double>::unbounded()), 
+                    representationName, representationColor), outputRegistersType{outputRegistersType},
+                    registersType{registersType}, nbLinesMin{nbLinesMin}, nbLinesMax{nbLinesMax} {
+                if(outputRegistersType.totalElements() > this->registersType.totalElements()) {
                     throw std::runtime_error("LGP::Constructor: Number of outputRegisters cannot be higher than the number of registers");
                 }
                 if(nbLinesMax == 0) {
                     this->nbLinesMax = nbLinesMin;
                 }
 
-                Data::DataType registers = Data::DataType::array1d<double>(this->nbRegisters);
-                std::vector<Data::DataType> inputTypes{registers};
+                std::vector<Data::DataType> inputTypes{this->registersType};
                 for(const Dimensions::Requirement& req: inputDimensions) {
                     inputTypes.push_back(req.getDataType());
                 }
-                this->iSet = iSet.filterInstructionSet(inputTypes, registers);
+                this->iSet = iSet.filterInstructionSet(inputTypes, this->registersType);
                 if(this->iSet.getNbInstructions() == 0) {
                     throw std::runtime_error("LGP:Constructor: No instruction can be used with current inputs");
                 }

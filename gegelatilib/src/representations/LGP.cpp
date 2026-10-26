@@ -5,8 +5,8 @@
 std::unique_ptr<Representations::Representation> Representations::LGP::cloneOnlyRepresentation() const
 {
     auto clone = std::make_unique<Representations::LGP>(
-        this->dimensionFlow.getInputDimensions(), this->nbOutputRegisters,
-        this->iSet, this->nbRegisters,
+        this->dimensionFlow.getInputDimensions(), this->registersType,
+        this->iSet, this->outputRegistersType,
         this->nbLinesMin, this->nbLinesMax,
         this->representationName, this->representationColor
     );
@@ -20,9 +20,6 @@ const Instructions::Set& Representations::LGP::getInstructionSet()
 
 void Representations::LGP::setLargestAddressSpace()
 {
-    // Register type
-    Data::DataType registers = Data::DataType::array1d<double>(this->nbRegisters);
-
     this->largestAddressSpace = 0;
     for(size_t idx = 0; idx < this->iSet.getNbInstructions(); idx++) {
         const Instructions::Instruction& instruction = this->iSet.getInstruction(idx);
@@ -30,7 +27,7 @@ void Representations::LGP::setLargestAddressSpace()
             for(const Dimensions::Requirement& inputReq: this->dimensionFlow.getInputDimensions()) {
                 this->largestAddressSpace = std::max(this->largestAddressSpace, inputReq.getDataType().getAddressSpace(instrType));
             }
-            this->largestAddressSpace = std::max(this->largestAddressSpace, registers.getAddressSpace(instrType));
+            this->largestAddressSpace = std::max(this->largestAddressSpace, this->registersType.getAddressSpace(instrType));
         }
     }
 }
@@ -40,7 +37,7 @@ void Representations::LGP::setGenotypeConstraint()
     GraphBased::NodeConstraint instructionNodes;
 
     // Value Requirements for register
-    instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->nbRegisters - 1));
+    instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->registersType.totalElements() - 1));
     
     // Value requirements for instruction
     instructionNodes.addConstraint(Dimensions::NumericRange<size_t>::between(0, this->iSet.getNbInstructions() - 1));
@@ -61,7 +58,7 @@ void Representations::LGP::setGenotypeGenerator()
     GraphBased::NodeGenerator instructionNodes;
 
     // Value Requirements for register
-    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->nbRegisters - 1));
+    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->registersType.totalElements() - 1));
     
     // Value requirements for instruction
     instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->iSet.getNbInstructions() - 1));
@@ -82,9 +79,8 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
     }
 
     GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
-    const Data::DataType registerType = Data::DataType::array1d<double>(this->nbRegisters);
-    std::vector<bool> usefulRegisters(this->nbRegisters, false);
-    for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
+    std::vector<bool> usefulRegisters(this->registersType.totalElements(), false);
+    for(size_t idx = 0; idx < this->outputRegistersType.totalElements(); idx++) {
         usefulRegisters[idx] = true;
     }
 
@@ -96,7 +92,7 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
         const size_t functionIndex = node.getValue(1).getScalar<size_t>();
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
         const Data::DataType outputType = instruction.getOutputType();
-        const size_t outputAddressSpace = registerType.getAddressSpace(outputType);
+        const size_t outputAddressSpace = this->registersType.getAddressSpace(outputType);
         const size_t outputLocation = outputIndex % outputAddressSpace;
         const size_t outputSize = outputType.totalElements();
 
@@ -120,7 +116,7 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
             for(size_t offset = 0; offset < nbSources; offset++) {
                 const size_t sourceIndex = (encodedSource + offset) % nbSources;
                 const Data::DataType& sourceType = sourceIndex == 0
-                    ? registerType
+                    ? this->registersType
                     : inputDimensions.at(sourceIndex - 1).getDataType();
                 const size_t addressSpace = sourceType.getAddressSpace(operandType);
                 if(addressSpace == 0) {
@@ -147,7 +143,7 @@ Data::DataValue Representations::LGP::executeGenotype(
     const size_t nbSources = this->dimensionFlow.getInputDimensions().size() + 1;
 
     /// Registers used as internal memory.
-    Data::DataValue registers = Data::DataValue::zeros<double>(Data::DataType::array1d<double>(this->nbRegisters));
+    Data::DataValue registers = Data::DataValue::zeros<double>(this->registersType);
     Data::DataView registerView = registers.view();
 
     std::vector<Data::DataView> operands;
@@ -183,7 +179,7 @@ Data::DataValue Representations::LGP::executeGenotype(
             }
             // Same as DataView::scaleLocation, reusing the address space already computed.
             size_t operandLocation = inputIndex % addressSpace;
-            if(dataSource->getType().rank == 2) {
+            if(dataSource->getType().rank >= 2) {
                 operandLocation = dataSource->getType().getValidAddress(operandType, operandLocation);
             }
             operands.push_back(dataSource->getSubView(operandType, operandLocation));
@@ -196,16 +192,17 @@ Data::DataValue Representations::LGP::executeGenotype(
 
 
     // GetOutput
-    Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);
+    //Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);
+    
     
     // Replace Nan values by -inf.
-    std::shared_ptr<const double[]> values = output.getData<double>();
+    /*std::shared_ptr<const double[]> values = registers.getData<double>();
     for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
         if(std::isnan(values[idx])) {
-            output.setScalarAt<double>(-std::numeric_limits<double>::infinity(), idx);
+            registers.setScalarAt<double>(-std::numeric_limits<double>::infinity(), idx);
         }
-    }
+    }*/
     
     // Return value of first register
-    return output;
+    return registers.getSubValue<double>(this->outputRegistersType, 0);
 }

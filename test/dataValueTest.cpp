@@ -12,7 +12,6 @@ TEST(DataValueTest, factoryConstructionCreatesScalarAndArrayValues)
     auto scalarValue = Data::DataValue::scalar(42.5);
     EXPECT_TRUE(scalarValue);
     EXPECT_EQ(scalarValue.getType().rank, 0u);
-    EXPECT_EQ(scalarValue.getType().dimensions[0], 1u);
     EXPECT_DOUBLE_EQ(scalarValue.getScalar<double>(), 42.5);
 
     std::vector<int> oneD = {10, 20, 30, 40};
@@ -99,11 +98,11 @@ TEST(DataValueTest, clone)
 
 TEST(DataValueTest, zerosInitialisesEverySupportedRank)
 {
-    ASSERT_NO_THROW(Data::DataValue::zeros<double>(Data::DataType::scalar<double>()));
-    auto scalarZero = Data::DataValue::zeros<double>(Data::DataType::scalar<double>());
+    ASSERT_NO_THROW(Data::DataValue::zeros<double>());
+    auto scalarZero = Data::DataValue::zeros<double>();
     EXPECT_DOUBLE_EQ(scalarZero.getScalar<double>(), 0.0);
 
-    auto oneDZero = Data::DataValue::zeros<int>(Data::DataType::array1d<int>(4));
+    auto oneDZero = Data::DataValue::zeros<int>({4});
     std::shared_ptr<const int[]> oneDZeroPtr = oneDZero.getData<int>();
     ASSERT_NE(oneDZeroPtr, nullptr);
     EXPECT_EQ(oneDZeroPtr[0], 0);
@@ -111,7 +110,7 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
     EXPECT_EQ(oneDZeroPtr[2], 0);
     EXPECT_EQ(oneDZeroPtr[3], 0);
 
-    auto twoDZero = Data::DataValue::zeros<int>(Data::DataType::array2d<int>(2, 3));
+    auto twoDZero = Data::DataValue::zeros<int>({2, 3});
     std::shared_ptr<const int[]> twoDZeroPtr = twoDZero.getData<int>();
     ASSERT_NE(twoDZeroPtr, nullptr);
     EXPECT_EQ(twoDZeroPtr[0], 0);
@@ -122,8 +121,6 @@ TEST(DataValueTest, zerosInitialisesEverySupportedRank)
     EXPECT_EQ(twoDZeroPtr[5], 0);
 
     Data::DataType unsupported;
-    unsupported.rank = 3;
-    ASSERT_THROW(Data::DataValue::zeros<int>(unsupported), std::invalid_argument);
 }
 
 TEST(DataValueTest, convertNumericValue)
@@ -161,17 +158,17 @@ TEST(DataValueTest, convertNumericValue)
 TEST(DataValueTest, getSubValueCoversAllRankCombinations)
 {
     auto scalarTarget = Data::DataValue::scalar(10.0);
-    ASSERT_NO_THROW(scalarTarget.getSubValue<double>(Data::DataType::scalar<double>(), 0));
-    auto scalarCopy = scalarTarget.getSubValue<double>(Data::DataType::scalar<double>(), 0);
+    ASSERT_NO_THROW(scalarTarget.getSubValue<double>(Data::DataType::type<double>(), 0));
+    auto scalarCopy = scalarTarget.getSubValue<double>(Data::DataType::type<double>(), 0);
     EXPECT_DOUBLE_EQ(scalarCopy.getScalar<double>(), 10.0);
 
     auto oneDTarget = Data::DataValue::array1d(std::vector<int>{10, 20, 30, 40, 50});
-    ASSERT_NO_THROW(oneDTarget.getSubValue<int>(Data::DataType::scalar<int>(), 2));
-    auto scalarFrom1D = oneDTarget.getSubValue<int>(Data::DataType::scalar<int>(), 2);
+    ASSERT_NO_THROW(oneDTarget.getSubValue<int>(Data::DataType::type<int>(), 2));
+    auto scalarFrom1D = oneDTarget.getSubValue<int>(Data::DataType::type<int>(), 2);
     EXPECT_EQ(scalarFrom1D.getScalar<int>(), 30);
 
-    ASSERT_NO_THROW(oneDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 1));
-    auto arrayFrom1D = oneDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 1);
+    ASSERT_NO_THROW(oneDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 1));
+    auto arrayFrom1D = oneDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 1);
     std::shared_ptr<const int[]> fromOneDPtr = arrayFrom1D.getData<int>();
     ASSERT_NE(fromOneDPtr, nullptr);
     EXPECT_EQ(fromOneDPtr[0], 20);
@@ -179,20 +176,20 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
     EXPECT_EQ(fromOneDPtr[2], 40);
 
     auto twoDTarget = Data::DataValue::array2d(std::vector<std::vector<int>>{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}});
-    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::scalar<int>(), 4));
-    auto scalarFrom2D = twoDTarget.getSubValue<int>(Data::DataType::scalar<int>(), 4);
+    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::type<int>(), 4));
+    auto scalarFrom2D = twoDTarget.getSubValue<int>(Data::DataType::type<int>(), 4);
     EXPECT_EQ(scalarFrom2D.getScalar<int>(), 4);
 
-    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 3));
-    auto array1DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 3);
+    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 3));
+    auto array1DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 3);
     std::shared_ptr<const int[]> from2D1D = array1DFrom2D.getData<int>();
     ASSERT_NE(from2D1D, nullptr);
     EXPECT_EQ(from2D1D[0], 3);
     EXPECT_EQ(from2D1D[1], 4);
     EXPECT_EQ(from2D1D[2], 5);
 
-    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::array2d<int>(2, 2), 1));
-    auto array2DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::array2d<int>(2, 2), 1);
+    ASSERT_NO_THROW(twoDTarget.getSubValue<int>(Data::DataType::type<int>({2, 2}), 1));
+    auto array2DFrom2D = twoDTarget.getSubValue<int>(Data::DataType::type<int>({2, 2}), 1);
     std::shared_ptr<const int[]> from2D2D = array2DFrom2D.getData<int>();
     ASSERT_NE(from2D2D, nullptr);
     EXPECT_EQ(from2D2D[0], 1);
@@ -200,11 +197,11 @@ TEST(DataValueTest, getSubValueCoversAllRankCombinations)
     EXPECT_EQ(from2D2D[2], 4);
     EXPECT_EQ(from2D2D[3], 5);
 
-    ASSERT_THROW(scalarTarget.getSubValue<double>(Data::DataType::array1d<double>(2), 0), std::out_of_range);
-    ASSERT_THROW(oneDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 3), std::out_of_range);
-    ASSERT_THROW(twoDTarget.getSubValue<int>(Data::DataType::array2d<int>(2, 2), 7), std::out_of_range);
-    ASSERT_THROW(twoDTarget.getSubValue<int>(Data::DataType::array1d<int>(3), 1), std::out_of_range);
-    ASSERT_THROW(twoDTarget.getSubValue<float>(Data::DataType::array2d<float>(2, 2), 1), std::runtime_error);
+    ASSERT_THROW(scalarTarget.getSubValue<double>(Data::DataType::type<double>({2}), 0), std::out_of_range);
+    ASSERT_THROW(oneDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 3), std::out_of_range);
+    ASSERT_THROW(twoDTarget.getSubValue<int>(Data::DataType::type<int>({2, 2}), 7), std::out_of_range);
+    ASSERT_THROW(twoDTarget.getSubValue<int>(Data::DataType::type<int>({3}), 1), std::out_of_range);
+    ASSERT_THROW(twoDTarget.getSubValue<float>(Data::DataType::type<float>({2, 2}), 1), std::runtime_error);
 }
 
 TEST(DataValueTest, setSubValue)
@@ -214,7 +211,7 @@ TEST(DataValueTest, setSubValue)
     ASSERT_NO_THROW(scalarTarget.setSubValue(scalarSource, 0));
     EXPECT_DOUBLE_EQ(scalarTarget.getScalar<double>(), 7.5);
 
-    auto oneDTarget = Data::DataValue::zeros<int>(Data::DataType::array1d<int>(4));
+    auto oneDTarget = Data::DataValue::zeros<int>({4});
     auto oneDSource = Data::DataValue::array1d(std::vector<int>{1, 2, 3});
     auto scalarSourceInt = Data::DataValue::scalar<int>(7);
     ASSERT_NO_THROW(oneDTarget.setSubValue(oneDSource, 1));
@@ -228,7 +225,7 @@ TEST(DataValueTest, setSubValue)
     ASSERT_NO_THROW(oneDTarget.setSubValue(scalarSourceInt, 2));
     ASSERT_EQ(oneDTarget.getScalarAt<int>(2), 7);
 
-    auto twoDTarget = Data::DataValue::zeros<int>(3, 3);
+    auto twoDTarget = Data::DataValue::zeros<int>({3, 3});
     auto twoDSource = Data::DataValue::array2d(std::vector<std::vector<int>>{{9, 8}, {7, 6}});
     ASSERT_NO_THROW(twoDTarget.setSubValue(twoDSource, 1));
     std::shared_ptr<const int[]> twoDPtr = twoDTarget.getData<int>();
@@ -256,7 +253,7 @@ TEST(DataValueTest, setSubValue)
 
 
 
-    auto target2D = Data::DataValue::zeros<double>(3, 3);
+    auto target2D = Data::DataValue::zeros<double>({3, 3});
     auto scalarInsert = Data::DataValue::scalar(5.5);
     ASSERT_NO_THROW(target2D.setSubValue(scalarInsert, 4));
     EXPECT_DOUBLE_EQ(target2D.getScalarAt<double>(4), 5.5);
@@ -270,9 +267,9 @@ TEST(DataValueTest, setSubValue)
 
 TEST(DataValueTest, setScalarAt) 
 {
-    auto scalarTarget = Data::DataValue::zeros<int>(0);
-    auto oneDTarget = Data::DataValue::zeros<int>(4);
-    auto twoDTarget = Data::DataValue::zeros<int>(3, 3);
+    auto scalarTarget = Data::DataValue::zeros<int>({});
+    auto oneDTarget = Data::DataValue::zeros<int>({4});
+    auto twoDTarget = Data::DataValue::zeros<int>({3, 3});
     
     ASSERT_NO_THROW(scalarTarget.setScalarAt<int>(8, 0)) << "Setting value failed";
     ASSERT_NO_THROW(oneDTarget.setScalarAt<int>(8, 2)) << "Setting value failed";

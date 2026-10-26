@@ -80,6 +80,15 @@ endif()
 # always treated as the name of either an alias or imported target. Any attempt
 # to use such a name for a different target type will result in an error.
 add_library(${PROJECT_NAME}::${LIBRARY_TARGET_NAME} ALIAS ${LIBRARY_TARGET_NAME})
+
+if(GEGELATI_WITH_OPENCV)
+        find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+        target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC GEGELATI_WITH_OPENCV)
+        target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC ${OpenCV_INCLUDE_DIRS})
+        target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC ${OpenCV_LIBS})
+        message(STATUS "OpenCV image instructions of GEGELATI are enabled.")
+endif()
+
 if(CODE_GEN)
         target_compile_definitions(${PROJECT_NAME} PUBLIC -DCODE_GENERATION)
 endif()

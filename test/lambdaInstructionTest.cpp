@@ -53,8 +53,8 @@ TEST(LambdaInstructionsTest, ExecuteArray)
         });
 
     const Data::DataValue result = instruction.execute(
-        {Data::DataView(first, Data::DataType::array1d<double>(3)),
-         Data::DataView(second, Data::DataType::array1d<double>(3))});
+        {Data::DataView(first, Data::DataType::type<double>({3})),
+         Data::DataView(second, Data::DataType::type<double>({3}))});
     ASSERT_DOUBLE_EQ(result.getScalar<double>(), 23.54);
 }
 
@@ -74,8 +74,8 @@ TEST(LambdaInstructionsTest, ExecuteArray2D)
         });
 
     const Data::DataValue result = instruction.execute(
-        {Data::DataView(first, Data::DataType::array2d<double>(2, 3)),
-         Data::DataView(second, Data::DataType::array2d<double>(2, 3))});
+        {Data::DataView(first, Data::DataType::type<double>({2, 3})),
+         Data::DataView(second, Data::DataType::type<double>({2, 3}))});
     ASSERT_DOUBLE_EQ(result.getScalar<double>(), 144.1);
 }
 
@@ -90,8 +90,8 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
     int multiplier = 2;
 
     const Data::DataValue result = instruction.execute(
-        {Data::DataView(&first, Data::DataType::scalar<double>()), Data::DataView(&second, Data::DataType::scalar<double>()),
-         Data::DataView(&multiplier, Data::DataType::scalar<int>())});
+        {Data::DataView(&first, Data::DataType::type<double>()), Data::DataView(&second, Data::DataType::type<double>()),
+         Data::DataView(&multiplier, Data::DataType::type<int>())});
     ASSERT_DOUBLE_EQ(result.getScalar<double>(), 4.2);
     
 }
@@ -110,8 +110,8 @@ TEST(LambdaInstructionsTest, productFloatOutput)
     float v1 = 2.0;
     float v2 = 3.5;
     const Data::DataValue result = instruction.execute({
-        Data::DataView(&v1, Data::DataType::scalar<float>()),
-        Data::DataView(&v2, Data::DataType::scalar<float>())
+        Data::DataView(&v1, Data::DataType::type<float>()),
+        Data::DataView(&v2, Data::DataType::type<float>())
     });
     ASSERT_EQ(result.getScalar<float>(), 7.0) << "Value mismatch";
 }
@@ -128,8 +128,8 @@ TEST(LambdaInstructionsTest, executeVectoProduct)
     const float input1[] = {1.0f, 2.0f, 3.0f, 4.0f};
     float factor = 2.0f;
     const Data::DataValue result1 = instruction.execute(
-        {Data::DataView(input1, Data::DataType::array1d<float>(4)),
-         Data::DataView(&factor, Data::DataType::scalar<float>())});
+        {Data::DataView(input1, Data::DataType::type<float>({4})),
+         Data::DataView(&factor, Data::DataType::type<float>())});
     std::shared_ptr<const float[]> arrayResult1 = result1.getData<float>();
     for(size_t idx = 0; idx < 4; idx++) {
         ASSERT_EQ(arrayResult1[idx], input1[idx] * factor) << "Value mismatch";
@@ -137,12 +137,12 @@ TEST(LambdaInstructionsTest, executeVectoProduct)
 
     
     const float input2[] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
-    Data::DataView viewInput2(input2, Data::DataType::array1d<float>(6));
-    Data::DataView subView = viewInput2.getSubView(Data::DataType::array1d<float>(4), 2);
+    Data::DataView viewInput2(input2, Data::DataType::type<float>({6}));
+    Data::DataView subView = viewInput2.getSubView(Data::DataType::type<float>({4}), 2);
 
     const Data::DataValue result2 = instruction.execute(
         {subView,
-         Data::DataView(&factor, Data::DataType::scalar<float>())});
+         Data::DataView(&factor, Data::DataType::type<float>())});
         
     std::shared_ptr<const float[]> arrayResult2 = result2.getData<float>();
     for(size_t idx = 0; idx < 4; idx++) {
@@ -165,8 +165,8 @@ TEST(LambdaInstructionsTest, executeMatrixProduct)
      * r1 = 4 * 1 + 3 * -1 = 1
      */
     const Data::DataValue result1 = instruction.execute(
-        {Data::DataView(matrix, Data::DataType::array2d<float>(2, 2)),
-         Data::DataView(vector, Data::DataType::array1d<float>(2))});
+        {Data::DataView(matrix, Data::DataType::type<float>({2, 2})),
+         Data::DataView(vector, Data::DataType::type<float>({2}))});
     
     const float expected[2] = {-1, 1};
     std::shared_ptr<const float[]> arrayResult1 = result1.getData<float>();
@@ -180,12 +180,12 @@ TEST(LambdaInstructionsTest, executeMatrixProduct)
         {0, 4, 3, 0},
         {0, 0, 0, 0}
     };
-    Data::DataView viewMatrix(matrixBig, Data::DataType::array2d<float>(4, 4));
-    Data::DataView subViewMatrix = viewMatrix.getSubView(Data::DataType::array2d<float>(2, 2), 5);
+    Data::DataView viewMatrix(matrixBig, Data::DataType::type<float>({4, 4}));
+    Data::DataView subViewMatrix = viewMatrix.getSubView(Data::DataType::type<float>({2, 2}), 5);
 
     const Data::DataValue result2 = instruction.execute(
         {subViewMatrix,
-         Data::DataView(vector, Data::DataType::array1d<float>(2))});
+         Data::DataView(vector, Data::DataType::type<float>({2}))});
 
     std::shared_ptr<const float[]> arrayResult2 = result2.getData<float>();
     for(size_t idx = 0; idx < 2; idx++) {
@@ -215,11 +215,11 @@ TEST(LambdaInstructionsTest, executeMatrixProductMixTypes)
         {4, 4},
         {0, 0}};
 
-    Data::DataView matrix1View(matrix1);
-    Data::DataView matrix2View(matrix2);
+    Data::DataValue matrix1View = Data::DataValue::array2d(matrix1);
+    Data::DataValue matrix2View = Data::DataValue::array2d(matrix2);
 
-    Data::DataView matrix1SubView = matrix1View.getSubView(Data::DataType::array2d<double>(2, 2), 5);
-    Data::DataView matrix2SubView = matrix2View.getSubView(Data::DataType::array2d<int>(2, 2), 2);
+    Data::DataView matrix1SubView = matrix1View.getSubView(Data::DataType::type<double>({2, 2}), 5);
+    Data::DataView matrix2SubView = matrix2View.getSubView(Data::DataType::type<int>({2, 2}), 2);
 
     /**
      * M1 = | 1, -2| -- M2 = |5, 1|

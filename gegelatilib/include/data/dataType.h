@@ -1,5 +1,3 @@
-
-
 /**
  * @file dataType.h
  * \brief Defines DataType, a descriptor for the shape, type, and source context of data.
@@ -26,7 +24,10 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <typeinfo>
+#include <utility>
+#include <vector>
 #include "data/demangle.h"
 
 namespace Data {
@@ -56,8 +57,9 @@ namespace Data {
      * - Rank 0: scalar
      * - Rank 1: 1D array
      * - Rank 2: 2D array
+     * - Rank N: N-dimensional array
      *
-     * For 1D arrays, `dimensions = {size, 0}`. For 2D arrays, `dimensions = {rows, cols}`.
+     * For 1D arrays, `dimensions = {size, 0, ...}`. For 2D arrays, `dimensions = {rows, cols, 0, ...}`.
      * All linear indexing is done in row-major order.
      *
      * ### Source context
@@ -75,12 +77,16 @@ namespace Data {
      * row-major linearization: offset = row * width + col.
      */
     struct DataType {
+
+        /// \brief Highest rank supported by the fixed-size stack storage of \ref forEachRun.
+        static constexpr size_t MaxRank = 8;
+
         // --- Shape of THIS view ---
         /// \brief Number of dimensions (0=scalar, 1=1D array, 2=2D array).
         uint8_t rank = 0;
 
-        /// \brief Extent of each dimension. For 1D: [size, 0]. For 2D: [height, width].
-        std::array<size_t, 2> dimensions{0, 0};
+        /// \brief Extent of each dimension. For 1D: [size, 0, ...]. For 2D: [height, width, 0, ...].
+        std::vector<size_t> dimensions;
 
         // --- Type information ---
         /// \brief Runtime type of the elements (e.g., `typeid(double)`).
@@ -94,7 +100,7 @@ namespace Data {
         uint8_t sourceRank = 0;
 
         /// \brief Dimensions of the original source (for top-level, equals `dimensions`).
-        std::array<size_t, 2> sourceDimensions{0, 0};
+        std::vector<size_t> sourceDimensions{};
 
         /// \brief Linear offset (in **elements**) from the start of the source.
         /// For top-level, this is 0. For sub-views, this is the starting index in the source.
@@ -107,109 +113,40 @@ namespace Data {
          */
         DataType() = default;
 
-
         /**
-         * \brief Builds a descriptor for a scalar value.
+         * \brief static constructor creating a scalar.
          *
-         * A scalar is represented as a rank-0 object whose logical size is one element.
-         * The `dimensions` field is normalized to `{1, 0}` so that downstream code can
-         * treat scalar and array metadata uniformly when needed.
-         *
-         * @tparam T The scalar element type.
-         * \return A DataType describing a single value of type T.
+         * \tparam T The element type of the array.
          */
         template <typename T>
-        static DataType scalar() {
+        static DataType type() {
             DataType dt;
-            dt.rank = 0;
-            dt.dimensions = {1, 0};
             dt.elementType = &typeid(T);
             dt.elementSize = sizeof(T);
-            dt.sourceRank = 0;
-            dt.sourceDimensions = {1, 0};
-            dt.sourceOffset = 0;
             return dt;
-        }
+        } 
+
 
         /**
-         * \brief Builds a descriptor for a 1D array.
+         * \brief Builds a descriptor for a row-major N-dimensional array.
          *
-         * The view shape is stored as `{size, 0}` because the implementation uses a fixed
-         * two-element dimension array: the first slot is the primary extent and the second is
-         * unused for rank-1 data.
-         *
-         * @tparam T The element type of the array.
-         * \param[in] size Number of elements in the array.
-         * \return A DataType describing a contiguous 1D view of T.
+         * \tparam T The element type of the array.
+         * \param[in] dims Extent of each dimension.
          */
         template <typename T>
-        static DataType array1d(size_t size) {
+        static DataType type(const std::vector<size_t>& dims){
+
             DataType dt;
-            dt.rank = 1;
-            dt.dimensions = {size, 0};
+            
+            dt.rank = dims.size();
+            dt.dimensions = dims;
             dt.elementType = &typeid(T);
             dt.elementSize = sizeof(T);
-            dt.sourceRank = 1;
-            dt.sourceDimensions = {size, 0};
-            dt.sourceOffset = 0;
+            dt.sourceRank = dims.size();
+            dt.sourceDimensions = dims;
+
             return dt;
         }
-
-        /**
-         * \brief Builds a descriptor for a 2D array in row-major layout.
-         *
-         * The element ordering is assumed to be row-major: for a 2D matrix with dimension
-         * `rows x cols`, the linear index of `(row, col)` is `row * cols + col`.
-         *
-         * @tparam T The element type of the array.
-         * \param[in] rows Number of rows.
-         * \param[in] cols Number of columns.
-         * \return A DataType describing a 2D view of T.
-         */
-        template <typename T>
-        static DataType array2d(size_t rows, size_t cols) {
-            DataType dt;
-            dt.rank = 2;
-            dt.dimensions = {rows, cols};
-            dt.elementType = &typeid(T);
-            dt.elementSize = sizeof(T);
-            dt.sourceRank = 2;
-            dt.sourceDimensions = {rows, cols};
-            dt.sourceOffset = 0;
-            return dt;
-        }
-
-        /**
-         * \brief Deduce the DataType of a scalar object.
-         *
-         * This overload is intended to be used with a single object value, such as:
-         * `DataType::from(value)`.
-         */
-        template <typename T>
-        static DataType from(const T (&)) {
-            return scalar<T>();
-        }
-
-        /**
-         * \brief Deduce the DataType of a 1D C array.
-         *
-         * Example: `int values[4]; DataType::from(values)` creates an array1d<int>(4).
-         */
-        template <typename T, size_t N>
-        static DataType from(const T (&)[N]) {
-            return array1d<T>(N);
-        }
-
-        /**
-         * \brief Deduce the DataType of a 2D C array.
-         *
-         * Example: `double matrix[2][3]; DataType::from(matrix)` creates an array2d<double>(2, 3).
-         */
-        template <typename T, size_t Rows, size_t Cols>
-        static DataType from(const T (&)[Rows][Cols]) {
-            return array2d<T>(Rows, Cols);
-        }
-
         /**
          * \brief Creates metadata for a sub-view while preserving source provenance.
          *
@@ -222,6 +159,129 @@ namespace Data {
         static DataType subView(DataType viewShape, const DataType& source, size_t offset);
 
         // --- Helpers ---
+        /// Extent of the requested shape along axis k of a type of rank `rank` (leading axes count as 1).
+        size_t requestedExtent(const Data::DataType& requested, size_t rank, size_t k) const noexcept;
+
+        /**
+         * \brief Returns the element offset, from the start of this view, of the sub-view located at address.
+         *
+         * The address is the row-major linear index of the sub-view origin within this view's own
+         * dimensions. The result takes the strides of the underlying source into account, so it
+         * differs from the address for strided sub-views.
+         */
+        size_t sourceOffsetOf(size_t address) const noexcept;
+
+        /** \brief Returns true when the elements of this view are contiguous in memory. */
+        bool isContiguous() const noexcept;
+
+        /**
+         * \brief Calls fn(srcOffset, blockOffset, runLength) for each contiguous run of a block.
+         *
+         * The block (shape given by `block`) starts at element `baseOffset` of this descriptor's
+         * source, laid out with this descriptor's source strides. Runs follow the last axis of the
+         * block, and `blockOffset` is the position of the run in the block's own row-major order.
+         */
+        template <typename F>
+        void forEachRun(const DataType& block, size_t baseOffset, F&& fn) const
+        {
+            const size_t blockRank = block.rank;
+
+            // A scalar always contains exactly one element.
+            if (blockRank == 0) {
+                fn(baseOffset, size_t{0}, size_t{1});
+                return;
+            }
+
+            const size_t total = block.totalElements();
+
+            // An empty block has nothing to copy.
+            if (total == 0) {
+                return;
+            }
+
+            // When the block rank exceeds the source rank, preserve the
+            // direct-addressing convention used by sourceOffsetOf().
+            if (blockRank > sourceRank) {
+                fn(baseOffset, size_t{0}, total);
+                return;
+            }
+
+            const size_t axisOffset = sourceRank - blockRank;
+
+            // A block is contiguous when every axis except the first spans
+            // the complete corresponding source dimension.
+            //
+            // The first axis may be shorter: consecutive rows are still
+            // contiguous when all trailing dimensions are fully covered.
+            bool contiguous = true;
+
+            for (size_t k = 1; k < blockRank; ++k) {
+                if (block.dimensions[k] !=
+                    sourceDimensions[axisOffset + k]) {
+                    contiguous = false;
+                    break;
+                }
+            }
+
+            // Fast path: the entire block is one contiguous memory region.
+            if (contiguous) {
+                fn(baseOffset, size_t{0}, total);
+                return;
+            }
+
+            // The last dimension is always copied as one contiguous run.
+            const size_t run = block.dimensions[blockRank - 1];
+
+            // Number of runs along all preceding dimensions.
+            const size_t runs = total / run;
+            const size_t iterRank = blockRank - 1;
+
+            // Fixed-size stack storage avoids heap allocations per invocation.
+            // Strided iteration is only possible up to MaxRank axes: fail loudly
+            // rather than writing past the end of the arrays below.
+            if (blockRank > MaxRank) {
+                throw std::length_error(
+                    "DataType::forEachRun: block rank exceeds DataType::MaxRank.");
+            }
+
+            std::array<size_t, MaxRank> index{};
+            std::array<size_t, MaxRank> strides;
+
+            // Compute the source stride associated with each block dimension.
+            // The last dimension has stride 1 in row-major storage.
+            size_t stride = 1;
+
+            for (size_t k = blockRank; k-- > 0;) {
+                strides[k] = stride;
+                stride *= sourceDimensions[axisOffset + k];
+            }
+
+            size_t srcOffset = baseOffset;
+
+            for (size_t i = 0; i < runs; ++i) {
+                // Emit one contiguous run.
+                fn(srcOffset, i * run, run);
+
+                // Advance the multidimensional index using an odometer.
+                // Avoid division and modulo in the main iteration loop.
+                for (size_t k = iterRank; k-- > 0;) {
+                    ++index[k];
+
+                    if (index[k] < block.dimensions[k]) {
+                        // No rollover: advance one source stride.
+                        srcOffset += strides[k];
+                        break;
+                    }
+
+                    // Rollover: reset this coordinate and rewind its stride.
+                    index[k] = 0;
+                    srcOffset -=
+                        (block.dimensions[k] - 1) * strides[k];
+
+                    // Carry into the preceding dimension.
+                }
+            }
+        }
 
         /** \brief Returns the number of elements in this descriptor. */
         size_t totalElements() const noexcept;

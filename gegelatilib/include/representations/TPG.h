@@ -75,7 +75,7 @@
              */
             TPG(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, size_t nbMembersMin, size_t nbMembersMax=0, std::string representationName = "TPG", std::string representationColor = "#2db436")
                 : Representation(
-                    inputDimensions, Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), representationName, representationColor), 
+                    inputDimensions, Dimensions::Requirement(Data::DataType::type<size_t>(), Dimensions::NumericRange<size_t>::between(0, nbActions - 1)), representationName, representationColor), 
                     nbActions{nbActions}, nbMembersMin{nbMembersMin}, nbMembersMax{nbMembersMax} {
                         if(nbMembersMax == 0) {
                             this->nbMembersMax = nbMembersMin;

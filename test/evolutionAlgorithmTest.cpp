@@ -107,8 +107,9 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     rng.setSeed(4);
 
     // Create representation
-    Representations::LGP lgpRep(le->getInputDimensions(), 3, set, 8, 10, 20);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
     lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
+
 
     // Create Mutator and breeder
     Reproduction::Replicator breeder;
@@ -175,7 +176,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
 
     // Create representation
-    Representations::LGP lgpRep(le->getInputDimensions(), 3, set, 8, 10, 20);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
     lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
     
     // Create evaluationAgent
@@ -193,7 +194,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     rng.setSeed(4);
 
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 10);
     Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
     // Create Mutator and breeder
@@ -291,7 +292,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
     rng.setSeed(4);
 
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
     Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
     Mutation::PointMutator mutator(0.5, 0.1, 0.1);
@@ -358,7 +359,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP3) {
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
     Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
     // Create evaluationAgent
@@ -375,7 +376,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP3) {
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP4) {
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), 1, set, 8, 10, 20);
+    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
     Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
 
     // Create evaluationAgent

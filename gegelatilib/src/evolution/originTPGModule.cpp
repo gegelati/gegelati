@@ -5,7 +5,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
     const Representations::TPG& TPGRep,
     const Representations::Representation& memberRep, 
     Evaluation::Problem& problem,
-    size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, uint64_t seed, size_t nbThreads, 
+    size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, size_t nbValidationIterations, uint64_t seed, size_t nbThreads, 
     size_t archiveSize, bool isArchiveFixed, bool protectAggregated,
     std::shared_ptr<FitnessAssignment::Assigner> assigner,
     std::shared_ptr<Selection::Selector> parentSelection ,
@@ -13,7 +13,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
     std::shared_ptr<Reproduction::Reproducer> breeder,
     std::shared_ptr<Mutation::NodeTransferMutation> mutation,
     std::shared_ptr<Mutation::Mutator> memberMutation
-): BasicModule(TPGRep, problem, sizePopulation, nbOffspring, nbTrainingIterations, 
+): BasicModule(TPGRep, problem, sizePopulation, nbOffspring, nbTrainingIterations, nbValidationIterations, 
                seed, nbThreads, assigner, parentSelection, survivingSelection, breeder, 
                (mutation == nullptr) ? std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7) : mutation),
    memberRep{memberRep}, archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}, protectAggregated{protectAggregated}
@@ -21,7 +21,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
     if(!Dimensions::DimensionFlow::acceptsRequirements(TPGRep.getDimensionFlow().getInputDimensions(), this->memberRep.getDimensionFlow().getInputDimensions())) {
         throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with input requirements not compatible between representation and problem");
     }
-    if(!this->memberRep.getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement::scalar<double>())) {
+    if(!this->memberRep.getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement(Data::DataType::type<double>()))) {
         throw std::runtime_error("Evolution::OriginTPGModule: Cannot build module with output requirements not compatible between representation and problem");
     }
 
@@ -34,7 +34,7 @@ Evolution::OriginTPGModule::OriginTPGModule(
 
     if(this->archiveSize > 0) {
         this->archive = 
-            std::make_unique<Evaluation::DataSet>(this->representation.getDimensionFlow().getInputDimensions(), Dimensions::Requirement::array1d<double>(1));
+            std::make_unique<Evaluation::DataSet>(this->representation.getDimensionFlow().getInputDimensions(), Dimensions::Requirement(Data::DataType::type<double>({1})));
 
         // Add input metric.
         this->metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
@@ -54,7 +54,11 @@ Evolution::OriginTPGModule::OriginTPGModule(
 void Evolution::OriginTPGModule::setBasicLoggerHeader()
 {
     for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
-        defLogger->addHeaderValues({"Gen", "NbVertex", "NbMember", "Fit_Min", "Fit_Avg", "Fit_Max", "T_Mut", "T_Eval", "T_Gen", "T_Total"});
+        if(this->nbValidationIterations == 0) {
+            defLogger->addHeaderValues({"Gen", "NbVertex", "NbMember", "Fit_Min", "Fit_Avg", "Fit_Max", "T_Mut", "T_Eval", "T_Gen", "T_Total"});
+        } else {
+            defLogger->addHeaderValues({"Gen", "NbVertex", "NbMember", "Fit_Min", "Fit_Avg", "Fit_Max", "Val_Min", "Val_Avg", "Val_Max", "T_Mut", "T_Eval", "T_Val", "T_Gen", "T_Total"});
+        }
     }
 }
 
@@ -140,12 +144,12 @@ void Evolution::OriginTPGModule::initialize()
 
     if(this->archive != nullptr) {
         this->updateArchive();
+        if(this->isArchiveFixed) {
+            // Reset the metric template to removed the input metric for efficiency
+            this->initializeMetricTemplate();
+        }
     }
 
-    if(this->isArchiveFixed) {
-        // Reset the metric template to removed the input metric for efficiency
-        this->initializeMetricTemplate();
-    }
 
 }
 
@@ -201,11 +205,11 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
 
     // Multi generator
     Dimensions::MultiGenerator multi;
-    multi.addGenerator(actionGenerator, 0.99);
-    multi.addGenerator(tangledGenerator, 0.01);
+    multi.addGenerator(actionGenerator, 0.995);
+    multi.addGenerator(tangledGenerator, 0.005);
 
     bidNodes.addGenerator(multi);
-    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 200U), std::make_pair(2U, 2U));
+    this->generator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(2U, 20U), std::make_pair(2U, 2U));
 
     std::vector<std::shared_ptr<const Individual>> potentialNodes;
     potentialNodes.insert(potentialNodes.begin(), this->population.begin(), this->population.end());
@@ -219,7 +223,7 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
         this->updateProtectedIndividuals(populationBeforeGen);
     }
 
-    if(this->archive != nullptr && !this->isArchiveFixed) {
+    if(this->archive != nullptr) {
         if(this->isArchiveFixed) {
             this->updateArchiveOutputs();
         } else {
@@ -293,21 +297,40 @@ void Evolution::OriginTPGModule::setNewBasicLoggerRow(size_t generationNumber)
     double minFitness = std::numeric_limits<double>::max();
     double maxFitness = std::numeric_limits<double>::lowest();
     double averageFitness = 0.0;
+
+    
+    double minFitnessVal = std::numeric_limits<double>::max();
+    double maxFitnessVal = std::numeric_limits<double>::lowest();
+    double averageFitnessVal = 0.0;
     for (const auto& individual : this->population) {
         const double fitness = this->individualFitness.at(individual);
         minFitness = std::min(minFitness, fitness);
         maxFitness = std::max(maxFitness, fitness);
         averageFitness += fitness;
+        
+        if(this->nbValidationIterations > 0) {
+            const double valFitness = this->validationFitness.at(individual);
+            minFitnessVal = std::min(minFitnessVal, valFitness);
+            maxFitnessVal = std::max(maxFitnessVal, valFitness);
+            averageFitnessVal += valFitness;
+        }
     }
     averageFitness /= this->population.size();
+    averageFitnessVal /= this->population.size();
+
 
     std::vector<double> genCheckpoints = this->stopwatch.getCheckpoints();
     double mutTime = genCheckpoints.at(3);
     double evalTime = genCheckpoints.at(4);
     double generationTime = std::accumulate(genCheckpoints.begin(), genCheckpoints.end(), 0.0);
-
-    for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
-        defLogger->addGenerationValues<double>(
-            {minFitness, averageFitness, maxFitness, mutTime, evalTime, generationTime, this->stopwatch.elapsed()});
+    if(this->nbValidationIterations == 0) {
+        for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
+            defLogger->addGenerationValues<double>({minFitness, averageFitness, maxFitness, mutTime, evalTime, generationTime, this->stopwatch.elapsed()});
+        }
+    } else {
+        double validationTime = genCheckpoints.at(7);
+        for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {
+            defLogger->addGenerationValues<double>({minFitness, averageFitness, maxFitness, minFitnessVal, averageFitnessVal, maxFitnessVal, mutTime, evalTime, validationTime, generationTime, this->stopwatch.elapsed()});
+        }
     }
 }

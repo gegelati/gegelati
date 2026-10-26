@@ -24,7 +24,7 @@ constexpr double kTolerance = 1e-6;
 
 TEST(ActivationFunctionsTanhTest, HasCorrectName)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -38,7 +38,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsTanhTest, ExposesInputDimension)
 {
-const auto input = Dimensions::Requirement::array1d<double>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -57,11 +57,11 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsTanhTest, OutputDimensionPreservesInputDataTypeAndShape)
 {
-const auto input = Dimensions::Requirement::array1d<double>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
-const auto expectedOutputType = Data::DataType::array1d<double>(3);
+const auto expectedOutputType = Data::DataType::type<double>({3});
 
 EXPECT_EQ(
     tanh.outputDimension().getDataType(),
@@ -73,7 +73,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsTanhTest, OutputDimensionIsConstrainedToMinusOneAndOne)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -104,7 +104,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForScalar)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -133,7 +133,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForZero)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -150,7 +150,7 @@ EXPECT_DOUBLE_EQ(
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForPositiveValue)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -168,7 +168,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForNegativeValue)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -186,7 +186,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForOneDimensionalArray)
 {
-const auto input = Dimensions::Requirement::array1d<double>(5);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({5}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -226,7 +226,7 @@ for (size_t i = 0; i < source.size(); ++i) {
 
 TEST(ActivationFunctionsTanhTest, ExecutesCorrectlyForTwoDimensionalArray)
 {
-const auto input = Dimensions::Requirement::array2d<double>(2, 3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({2,3}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -277,7 +277,7 @@ for (size_t i = 0; i < source.size(); ++i) {
 
 TEST(ActivationFunctionsTanhTest, PreservesOutputElementType)
 {
-const auto input = Dimensions::Requirement::array1d<float>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<float>({3}));
 const Dimensions::ActivationFunctions::Tanh<float> tanh(input);
 
 
@@ -287,7 +287,7 @@ const auto result =
 
 EXPECT_EQ(
     result.getType().elementType,
-    Data::DataType::scalar<float>().elementType)
+    Data::DataType::type<float>().elementType)
     << "Tanh<float> must produce float output values.";
 
 
@@ -295,7 +295,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsTanhTest, FloatExecutionIsNumericallyCorrect)
 {
-const auto input = Dimensions::Requirement::scalar<float>();
+const auto input = Dimensions::Requirement(Data::DataType::type<float>());
 const Dimensions::ActivationFunctions::Tanh<float> tanh(input);
 
 
@@ -315,7 +315,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, SaturatesForLargePositiveInput)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -333,7 +333,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, SaturatesForLargeNegativeInput)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -351,7 +351,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, PreservesOddFunctionSymmetry)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -372,7 +372,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsTanhTest, OutputDimensionAcceptsActualTransformedArray)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -389,7 +389,7 @@ EXPECT_TRUE(
 
 TEST(ActivationFunctionsTanhTest, InputDimensionRejectsWrongShape)
 {
-const auto input = Dimensions::Requirement::array1d<double>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -405,7 +405,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsTanhTest, InputDimensionRejectsWrongType)
 {
-const auto input = Dimensions::Requirement::array1d<double>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
 
 
@@ -421,7 +421,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsTanhTest, SupportsPolymorphicFunctionInterface)
 {
-const auto input = Dimensions::Requirement::scalar<double>();
+const auto input = Dimensions::Requirement(Data::DataType::type<double>());
 
 
 std::unique_ptr<Dimensions::ActivationFunctions::Function> function =
@@ -450,7 +450,7 @@ EXPECT_NEAR(
 
 TEST(ActivationFunctionsArgMaxTest, HasCorrectName)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -464,7 +464,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, HasExactlyOneInputDimension)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -478,7 +478,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, PreservesInputDimensionAsInputRequirement)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -497,13 +497,13 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, OutputIsScalarSizeT)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
 EXPECT_EQ(
     argmax.outputDimension().getDataType(),
-    Data::DataType::scalar<size_t>())
+    Data::DataType::type<size_t>())
     << "ArgMax must produce a scalar size_t index.";
 
 
@@ -511,7 +511,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, OutputRangeCoversAllValidIndices)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -538,7 +538,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsArgMaxTest, ReturnsIndexOfLargestElement)
 {
-const auto input = Dimensions::Requirement::array1d<double>(5);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({5}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -571,7 +571,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, ReturnsZeroWhenFirstElementIsLargest)
 {
-const auto input = Dimensions::Requirement::array1d<int>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({4}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -590,7 +590,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, ReturnsLastIndexWhenLastElementIsLargest)
 {
-const auto input = Dimensions::Requirement::array1d<int>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({4}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -609,7 +609,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, ReturnsFirstIndexWhenMaximumOccursMultipleTimes)
 {
-const auto input = Dimensions::Requirement::array1d<int>(5);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({5}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -628,7 +628,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, HandlesNegativeValues)
 {
-const auto input = Dimensions::Requirement::array1d<int>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({4}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -647,7 +647,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, HandlesAllEqualValues)
 {
-const auto input = Dimensions::Requirement::array1d<int>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({4}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -666,7 +666,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, WorksWithFloatingPointValues)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -685,7 +685,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, WorksWithFloatValues)
 {
-const auto input = Dimensions::Requirement::array1d<float>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<float>({4}));
 const Dimensions::ActivationFunctions::ArgMax<float> argmax(input);
 
 
@@ -704,7 +704,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, WorksWithUnsignedIntegerValues)
 {
-const auto input = Dimensions::Requirement::array1d<uint32_t>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<uint32_t>({4}));
 const Dimensions::ActivationFunctions::ArgMax<uint32_t> argmax(input);
 
 
@@ -723,7 +723,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, WorksWithSignedIntegerValues)
 {
-const auto input = Dimensions::Requirement::array1d<int32_t>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<int32_t>({4}));
 const Dimensions::ActivationFunctions::ArgMax<int32_t> argmax(input);
 
 
@@ -742,7 +742,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, WorksWithTwoDimensionalArray)
 {
-const auto input = Dimensions::Requirement::array2d<int>(2, 3);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({2, 3}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -769,7 +769,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, TwoDimensionalArrayUsesFlattenedIndex)
 {
-const auto input = Dimensions::Requirement::array2d<int>(2, 3);
+const auto input = Dimensions::Requirement(Data::DataType::type<int>({2, 3}));
 const Dimensions::ActivationFunctions::ArgMax<int> argmax(input);
 
 
@@ -791,7 +791,7 @@ EXPECT_EQ(
 
 TEST(ActivationFunctionsArgMaxTest, OutputDimensionAcceptsActualResult)
 {
-const auto input = Dimensions::Requirement::array1d<double>(5);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({5}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -809,7 +809,7 @@ EXPECT_TRUE(
 
 TEST(ActivationFunctionsArgMaxTest, OutputDimensionRejectsWrongType)
 {
-const auto input = Dimensions::Requirement::array1d<double>(3);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -825,7 +825,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsArgMaxTest, InputDimensionRejectsWrongShape)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -842,7 +842,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsArgMaxTest, InputDimensionRejectsWrongType)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(input);
 
 
@@ -859,7 +859,7 @@ EXPECT_FALSE(
 
 TEST(ActivationFunctionsArgMaxTest, SupportsPolymorphicFunctionInterface)
 {
-const auto input = Dimensions::Requirement::array1d<double>(4);
+const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 std::unique_ptr<Dimensions::ActivationFunctions::Function> function =
@@ -890,11 +890,11 @@ EXPECT_EQ(
 TEST(ActivationFunctionsTest, TanhAndArgMaxHaveDifferentOutputContracts)
 {
 const auto tanhInput =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto argmaxInput =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 const Dimensions::ActivationFunctions::Tanh<double> tanh(tanhInput);
 const Dimensions::ActivationFunctions::ArgMax<double> argmax(argmaxInput);
@@ -910,7 +910,7 @@ EXPECT_NE(
 TEST(ActivationFunctionsTest, BothFunctionsExposeTheirInputRequirements)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const Dimensions::ActivationFunctions::Tanh<double> tanh(input);
@@ -937,3 +937,149 @@ EXPECT_EQ(
     << "ArgMax must preserve its supplied input requirement.";
 
 }
+
+
+
+// ============================================================================
+// Sum
+// ============================================================================
+
+TEST(ActivationFunctionsSumTest, HasCorrectNameAndOneInput)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input);
+
+    EXPECT_EQ(sum.name(), "Sum");
+    ASSERT_EQ(sum.inputDimensions().size(), 1u);
+    EXPECT_EQ(sum.inputDimensions()[0], input);
+}
+TEST(ActivationFunctionsSumTest, GlobalSumReturnsScalar)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input);
+
+    const auto result = sum.execute(
+        Data::DataValue::array1d(std::vector<double>{1.0, 2.0, 3.0, 4.0}));
+
+    ASSERT_EQ(result.getRank(), 0u);
+    EXPECT_DOUBLE_EQ(result.getData<double>()[0], 10.0);
+}
+
+TEST(ActivationFunctionsSumTest, GlobalSumHandlesNegativeValues)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<int>({4}));
+    const Dimensions::ActivationFunctions::Sum<int> sum(input);
+
+    const auto result = sum.execute(
+        Data::DataValue::array1d(std::vector<int>{-2, 5, -1, 3}));
+
+    ASSERT_EQ(result.getRank(), 0u);
+    EXPECT_EQ(result.getData<int>()[0], 5);
+}
+
+TEST(ActivationFunctionsSumTest, ReducesOneAxisOfTwoDimensionalArray)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({2,3}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input, {1});
+
+    const auto result = sum.execute(Data::DataValue::array2d(
+        std::vector<std::vector<double>>{{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}));
+
+    ASSERT_EQ(result.getRank(), 1u);
+    ASSERT_EQ(result.getType().dimensions[0], 2u);
+    ASSERT_EQ(result.getType().totalElements(), 2u);
+
+    const auto values = result.getData<double>();
+    EXPECT_DOUBLE_EQ(values[0], 6.0);
+    EXPECT_DOUBLE_EQ(values[1], 15.0);
+}
+
+TEST(ActivationFunctionsSumTest, ReducesFirstAxisOfTwoDimensionalArray)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<int>({2, 3}));
+    const Dimensions::ActivationFunctions::Sum<int> sum(input, {0});
+
+    const auto result = sum.execute(Data::DataValue::array2d(
+        std::vector<std::vector<int>>{{1, 2, 3}, {4, 5, 6}}));
+
+    ASSERT_EQ(result.getRank(), 1u);
+    ASSERT_EQ(result.getType().dimensions[0], 3u);
+
+    const auto values = result.getData<int>();
+    EXPECT_EQ(values[0], 5);
+    EXPECT_EQ(values[1], 7);
+    EXPECT_EQ(values[2], 9);
+}
+
+TEST(ActivationFunctionsSumTest, ReducingAllAxesReturnsScalar)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<int>({2, 3}));
+    const Dimensions::ActivationFunctions::Sum<int> sum(input, {0, 1});
+
+    const auto result = sum.execute(Data::DataValue::array2d(
+        std::vector<std::vector<int>>{{1, 2, 3}, {4, 5, 6}}));
+
+    ASSERT_EQ(result.getRank(), 0u);
+    EXPECT_EQ(result.getData<int>()[0], 21);
+}
+
+TEST(ActivationFunctionsSumTest, OutputDimensionHasExpectedShapeAndElementType)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<float>({2, 3}));
+    const Dimensions::ActivationFunctions::Sum<float> sum(input, {1});
+
+    const auto expected = Data::DataType::type<float>({2});
+    EXPECT_EQ(sum.outputDimension().getDataType(), expected);
+}
+
+TEST(ActivationFunctionsSumTest, OutputDimensionHasExpectedShapeAndElementType2)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({8,28,28}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input, {1, 2});
+
+    const auto expected = Data::DataType::type<double>({8});
+    EXPECT_EQ(sum.outputDimension().getDataType(), expected);
+}
+
+TEST(ActivationFunctionsSumTest, OutputDimensionAcceptsComputedResult)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input);
+
+    const auto result = sum.execute(
+        Data::DataValue::array1d(std::vector<double>{1.0, 2.0, 3.0}));
+
+    EXPECT_TRUE(sum.outputDimension().accepts(result.view()));
+}
+
+TEST(ActivationFunctionsSumTest, ClonePreservesSumBehavior)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({2, 2}));
+    const Dimensions::ActivationFunctions::Sum<double> sum(input, {1});
+    const auto clone = sum.cloneUniquePtr();
+
+    const auto result = clone->execute(Data::DataValue::array2d(
+        std::vector<std::vector<double>>{{1.0, 2.0}, {3.0, 4.0}}));
+
+    ASSERT_EQ(result.getRank(), 1u);
+    const auto values = result.getData<double>();
+    EXPECT_DOUBLE_EQ(values[0], 3.0);
+    EXPECT_DOUBLE_EQ(values[1], 7.0);
+}
+
+TEST(ActivationFunctionsSumTest, RejectsDuplicateReductionAxes)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({2,3}));
+    EXPECT_THROW(
+        (Dimensions::ActivationFunctions::Sum<double>(input, {1, 1})),
+        std::invalid_argument);
+}
+
+TEST(ActivationFunctionsSumTest, RejectsOutOfRangeReductionAxis)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({2,3}));
+    EXPECT_THROW(
+        (Dimensions::ActivationFunctions::Sum<double>(input, {2})),
+        std::invalid_argument);
+}
+

@@ -57,8 +57,8 @@ class RepresentationTest : public ::testing::Test
     Dimensions::Requirement outputType;
     virtual void SetUp()
     {
-        inputType = Dimensions::Requirement::array1d<double>(4);
-        outputType = Dimensions::Requirement::scalar<double>();
+        inputType = Dimensions::Requirement(Data::DataType::type<double>({4}));
+        outputType = Dimensions::Requirement(Data::DataType::type<double>());
     }
 
     virtual void TearDown()
@@ -96,10 +96,10 @@ TEST_F(RepresentationTest, setDimensions)
 {
 
     std::vector<Dimensions::Requirement> inputSources {
-        Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::atLeast(1)),
-        Dimensions::Requirement::array1d<double>(8),
+        Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::atLeast(1)),
+        Dimensions::Requirement(Data::DataType::type<double>({8})),
     };
-    Dimensions::Requirement outputSource = Dimensions::Requirement::scalar<double>(Dimensions::NumericRange<double>::between(-1, 1));
+    Dimensions::Requirement outputSource = Dimensions::Requirement(Data::DataType::type<double>(),Dimensions::NumericRange<double>::between(-1, 1));
 
     Representations::FakeRepresentation representation(inputSources, outputSource);
 
@@ -125,8 +125,8 @@ TEST_F(RepresentationTest, addOutputFunction)
 
 TEST_F(RepresentationTest, isValid)
 {
-    Dimensions::Requirement customOutput = Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(1, 1));
-    Dimensions::Requirement customInput = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-10, 10));
+    Dimensions::Requirement customOutput = Dimensions::Requirement(Data::DataType::type<size_t>(), Dimensions::NumericRange<size_t>::between(1, 1));
+    Dimensions::Requirement customInput = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-10, 10));
     Representations::FakeRepresentation representation({customInput}, customOutput);
     std::unique_ptr<GraphBased::GenotypeConstraint>& genotypeConstraint = representation.getGenotypeConstraintMut();
     GraphBased::Genotype genotype;
@@ -195,7 +195,7 @@ TEST_F(RepresentationTest, isValid)
 
     {
         // Wrong output type of individual
-        Dimensions::Requirement customOutput1 = Dimensions::Requirement::scalar<size_t>(Dimensions::NumericRange<size_t>::between(0, 2));
+        Dimensions::Requirement customOutput1 = Dimensions::Requirement(Data::DataType::type<size_t>(),Dimensions::NumericRange<size_t>::between(0, 2));
         Representations::FakeRepresentation representation2({customInput}, customOutput1);
         std::shared_ptr<Individual> individual2 = std::make_shared<Individual>(representation2);
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
@@ -208,7 +208,7 @@ TEST_F(RepresentationTest, isValid)
 
     {
         // Too big but good output type of individual
-        Dimensions::Requirement customOutput1 = Dimensions::Requirement::array1d<size_t>(3, Dimensions::NumericRange<size_t>::between(1, 1));
+        Dimensions::Requirement customOutput1 = Dimensions::Requirement(Data::DataType::type<size_t>({3}), Dimensions::NumericRange<size_t>::between(1, 1));
         Representations::FakeRepresentation representation2({customInput}, customOutput1);
         std::shared_ptr<Individual> individual2 = std::make_shared<Individual>(representation2);
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
@@ -219,7 +219,7 @@ TEST_F(RepresentationTest, isValid)
     }
 
     // Wrong intput type of individuals
-    Dimensions::Requirement customInput1 = Dimensions::Requirement::array1d<double>(8);
+    Dimensions::Requirement customInput1 = Dimensions::Requirement(Data::DataType::type<double>({8}));
     Representations::FakeRepresentation representation3({customInput1}, customOutput);
     std::shared_ptr<Individual> individual3 = std::make_shared<Individual>(representation3);
     individual3->setGenotype(boringGenotype->cloneUniquePtr());
@@ -231,7 +231,7 @@ TEST_F(RepresentationTest, isValid)
 
     
     // Good intput type of individuals, even if smaller
-    Dimensions::Requirement customInput2 = Dimensions::Requirement::array1d<double>(3, Dimensions::NumericRange<double>::between(-20, 20));
+    Dimensions::Requirement customInput2 = Dimensions::Requirement(Data::DataType::type<double>({3}), Dimensions::NumericRange<double>::between(-20, 20));
     Representations::FakeRepresentation representation4({customInput2}, customOutput);
     std::shared_ptr<Individual> individual4 = std::make_shared<Individual>(representation4);
     individual4->setGenotype(boringGenotype->cloneUniquePtr());
@@ -243,7 +243,7 @@ TEST_F(RepresentationTest, isValid)
     group2.removeNode(1);
 
     // wrong range should not work
-    Dimensions::Requirement customInput3 = Dimensions::Requirement::array1d<double>(4, Dimensions::NumericRange<double>::between(-5, 5));
+    Dimensions::Requirement customInput3 = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-5, 5));
     Representations::FakeRepresentation representation5({customInput3}, customOutput);
     std::shared_ptr<Individual> individual5 = std::make_shared<Individual>(representation5);
     individual5->setGenotype(boringGenotype->cloneUniquePtr());
@@ -268,8 +268,8 @@ TEST_F(RepresentationTest, execute)
     Representations::FakeRepresentation representation({inputType}, outputType);
     GraphBased::Genotype genotype;
 
-    Data::DataValue input1 = Data::DataValue::zeros<double>(4);
-    Data::DataValue input2 = Data::DataValue::zeros<double>(2);
+    Data::DataValue input1 = Data::DataValue::zeros<double>({4});
+    Data::DataValue input2 = Data::DataValue::zeros<double>({2});
     ASSERT_NO_THROW(representation.execute(genotype, {input1.view()})) << "Should not have throw";
     ASSERT_EQ(representation.execute(genotype, {input1.view()}), Data::DataValue::scalar<double>(1)) << "Value is not equal";
 
@@ -277,7 +277,7 @@ TEST_F(RepresentationTest, execute)
     ASSERT_THROW(representation.execute(genotype, {input2.view()}), std::runtime_error) << "Should have throw";
 
     
-    Data::DataValue input3 = Data::DataValue::zeros<double>(10, 2);
+    Data::DataValue input3 = Data::DataValue::zeros<double>({10, 2});
     ASSERT_THROW(representation.execute(genotype, {input3.view()}), std::runtime_error) << "Should have throw";
     
     representation.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Tanh<double>>(representation.getDimensionFlow().getOutputDimension()));

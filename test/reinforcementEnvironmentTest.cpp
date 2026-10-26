@@ -6,7 +6,7 @@
 class FakeReinforcementEnvironment : public Evaluation::ReinforcementEnvironment
 {
   public:
-    FakeReinforcementEnvironment() : ReinforcementEnvironment({Dimensions::Requirement::array1d<int>(3)}, Dimensions::Requirement::scalar<double>(), 42) {};
+    FakeReinforcementEnvironment() : ReinforcementEnvironment({Dimensions::Requirement(Data::DataType::type<int>({3}))}, Dimensions::Requirement(Data::DataType::type<double>()), 42) {};
 
     void reset(size_t seed = 0) override
     {
@@ -54,8 +54,8 @@ TEST(ReinforcementEnvironmentTest, getDimensions)
     FakeReinforcementEnvironment environment;
 
     ASSERT_EQ(environment.getInputDimensions().size(), 1) << "Environment should have one input dimension";
-    ASSERT_EQ(environment.getInputDimensions().at(0), Dimensions::Requirement::array1d<int>(3)) << "Input dimension should match the expected requirement";
-    ASSERT_EQ(environment.getOutputDimension(), Dimensions::Requirement::scalar<double>()) << "Output dimension should match the expected requirement";
+    ASSERT_EQ(environment.getInputDimensions().at(0), Dimensions::Requirement(Data::DataType::type<int>({3}))) << "Input dimension should match the expected requirement";
+    ASSERT_EQ(environment.getOutputDimension(), Dimensions::Requirement(Data::DataType::type<double>())) << "Output dimension should match the expected requirement";
 }
 
 

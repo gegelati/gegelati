@@ -73,9 +73,9 @@ class TPGRepresentationTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(times)));
         set.add(*(new Instructions::LambdaInstruction<double, double, double>(div)));
 
-        inputType = Dimensions::Requirement::array1d<double>(4);
+        inputType = Dimensions::Requirement(Data::DataType::type<double>({4}));
 
-        memberRepresentation = new Representations::LGP({inputType}, 1, set, 8, 1, 10);
+        memberRepresentation = new Representations::LGP({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 1, 10);
     }
 
     virtual void TearDown()

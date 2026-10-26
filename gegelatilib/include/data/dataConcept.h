@@ -8,6 +8,7 @@
 #include <string>
 #include <stdexcept>
 #include <type_traits>
+#include <vector>
 
 namespace Data {
 
@@ -117,7 +118,7 @@ namespace Data {
             }
         };
 
-        /// \brief Storage model for a contiguous 1D array.
+        /// \brief Storage model for a contiguous row-major N-dimensional array.
         template <typename T>
         struct ArrayModel final : ValueConcept {
             /**
@@ -131,12 +132,22 @@ namespace Data {
             size_t count;
 
             /**
-             * \brief Constructs a 1D array storage model.
+             * \brief Extent of each axis (its size is the rank).
+             */
+            std::vector<size_t> shape;
+
+            /**
+             * \brief Constructs an N-dimensional array storage model.
              *
              * \param[in] v Buffer owning the array elements.
-             * \param[in] c Number of elements in the buffer.
+             * \param[in] s Extent of each axis; the buffer holds their product.
              */
-            ArrayModel(std::unique_ptr<T[]> v, size_t c) : values(std::move(v)), count(c) {}
+            ArrayModel(std::unique_ptr<T[]> v, std::vector<size_t> s)
+                : values(std::move(v)), count(1), shape(std::move(s)) {
+                for (size_t extent : shape) {
+                    count *= extent;
+                }
+            }
 
             /**
              * \brief Returns the mutable address of the array buffer.
@@ -153,129 +164,49 @@ namespace Data {
             std::unique_ptr<ValueConcept> clone() const override {
                 auto copy = std::make_unique<T[]>(count);
                 std::copy(values.get(), values.get() + count, copy.get());
-                return std::make_unique<ArrayModel<T>>(std::move(copy), count);
+                return std::make_unique<ArrayModel<T>>(std::move(copy), shape);
             }
 
             /**
-             * \brief Serializes the array as a bracketed list of values.
+             * \brief Serializes the array as nested bracketed lists.
              *
-             * \return String representation of the 1D array.
+             * \return String representation of the array.
              */
             std::string toString() const override {
                 std::ostringstream oss;
-                oss << "[";
-
-                for (size_t i = 0; i < count; ++i) {
-                    if (i > 0) {
-                        oss << ", ";
-                    }
-                    oss << values[i];
-                }
-
-                oss << "]";
+                size_t index = 0;
+                write(oss, 0, index);
                 return oss.str();
             }
 
             /**
-             * \brief array1d equality check
+             * \brief array equality check (shape and values)
              */
             bool equals(const ValueConcept& other) const override {
                 const auto* otherPtr = dynamic_cast<const ArrayModel<T>*>(&other);
 
-                if (otherPtr == nullptr || this->count != otherPtr->count) {
+                if (otherPtr == nullptr || this->shape != otherPtr->shape) {
                     return false;
                 }
 
                 return std::equal(this->values.get(), this->values.get() + count, otherPtr->values.get());
             }
-        };
 
-        /// \brief Storage model for a row-major 2D array.
-        template <typename T>
-        struct Array2dModel final : ValueConcept {
-            /**
-             * \brief Dynamic buffer storing the row-major matrix values.
-             */
-            std::unique_ptr<T[]> values;
-
-            /**
-             * \brief Number of rows in the 2D array.
-             */
-            size_t rows;
-
-            /**
-             * \brief Number of columns in the 2D array.
-             */
-            size_t cols;
-
-            /**
-             * \brief Constructs a 2D array storage model.
-             *
-             * \param[in] v Buffer owning the row-major array data.
-             * \param[in] r Number of rows.
-             * \param[in] c Number of columns.
-             */
-            Array2dModel(std::unique_ptr<T[]> v, size_t r, size_t c)
-                : values(std::move(v)), rows(r), cols(c) {}
-
-            /**
-             * \brief Returns the mutable address of the 2D array buffer.
-             *
-             * \return Pointer to the first element of the row-major storage.
-             */
-            void* data() noexcept override { return values.get(); }
-
-            /**
-             * \brief Creates a deep copy of the 2D array model.
-             *
-             * \return A deep clone containing the same row-major values.
-             */
-            std::unique_ptr<ValueConcept> clone() const override {
-                const size_t total = rows * cols;
-                auto copy = std::make_unique<T[]>(total);
-                std::copy(values.get(), values.get() + total, copy.get());
-                return std::make_unique<Array2dModel<T>>(std::move(copy), rows, cols);
-            }
-
-            /**
-             * \brief Serializes the matrix as a nested bracketed list.
-             *
-             * \return String representation of the 2D array.
-             */
-            std::string toString() const override {
-                std::ostringstream oss;
+        private:
+            /// \brief Recursively prints the axis `axis` starting at the linear `index`.
+            void write(std::ostringstream& oss, size_t axis, size_t& index) const {
                 oss << "[";
-
-                for (size_t row = 0; row < rows; ++row) {
-                    if (row > 0) {
+                for (size_t i = 0; i < shape[axis]; ++i) {
+                    if (i > 0) {
                         oss << ", ";
                     }
-
-                    oss << "[";
-                    for (size_t col = 0; col < cols; ++col) {
-                        if (col > 0) {
-                            oss << ", ";
-                        }
-                        oss << values[row * cols + col];
+                    if (axis + 1 == shape.size()) {
+                        oss << values[index++];
+                    } else {
+                        write(oss, axis + 1, index);
                     }
-                    oss << "]";
                 }
-
                 oss << "]";
-                return oss.str();
-            }
-
-            /**
-             * \brief array2d equality check
-             */
-            bool equals(const ValueConcept& other) const override {
-                const auto* otherPtr = dynamic_cast<const Array2dModel<T>*>(&other);
-
-                if (otherPtr == nullptr || this->rows != otherPtr->rows || this->cols != otherPtr->cols) {
-                    return false;
-                }
-
-                return std::equal(this->values.get(), this->values.get() + this->rows * this->cols, otherPtr->values.get());
             }
         };
 

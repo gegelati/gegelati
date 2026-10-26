@@ -98,23 +98,21 @@ Data::DataValue Representations::TPG::executeGenotype(
         }
         if(firstEffective == nullptr) {
             firstEffective = &node;
+            winner = &node;
         }
         const std::shared_ptr<const Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Individual>>();
         double bid = member->execute(inputSources).getScalar<double>();
         nbBids++;
 
-        if(bid > maxBid) {
+        if(!std::isnan(bid) && bid > maxBid) {
             maxBid = bid;
             winner = &node;
         }
     }
 
     // Same as before: when no bid beats -inf, the first effective node wins (at() throws if none).
-    if(winner == nullptr) {
-        if(firstEffective == nullptr) {
-            throw std::out_of_range("Representations::TPG::executeGenotype: no effective node.");
-        }
-        winner = firstEffective;
+    if(firstEffective == nullptr) {
+        throw std::out_of_range("Representations::TPG::executeGenotype: no effective node.");
     }
 
     if (typeid(size_t) == winner->getValue(1).getElementType()) {

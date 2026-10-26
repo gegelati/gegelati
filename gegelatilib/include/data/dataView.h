@@ -2,6 +2,7 @@
 #define DATA_VIEW_H
 
 #include <cstddef>
+#include <algorithm>
 #include <stdexcept>
 #include <typeinfo>
 #include <sstream>
@@ -53,6 +54,7 @@ namespace Data {
          */
         explicit DataView(const void* ptr, DataType type)
             : ptr(ptr), type(std::move(type)) {}
+
         /**
          * \brief Constructs a DataView with a data of known type.
          *
@@ -63,19 +65,7 @@ namespace Data {
         template <typename T>
         DataView(const T& data)
             : ptr(static_cast<const void*>(&data)),
-              type(DataType::from(data)) {}
-
-        /**
-         * \brief Constructs a DataView with a data of known type.
-         *
-         * Constructor automatically determine the dataType and get the given data as ptr.
-         * 
-         * \param[in] data data of known type.
-         */
-        template <typename T, size_t N>
-        DataView(const T (&data)[N])
-            : ptr(data),
-              type(DataType::from(data)) {}
+              type(DataType::type<T>()) {}
 
         /**
          * \brief Prevents implicit construction from another DataView-derived type.
@@ -111,7 +101,7 @@ namespace Data {
         /**
          * \brief Returns the dimensions of THIS view.
          */
-        const std::array<size_t, 2>& getDimensions() const noexcept { return type.dimensions; }
+        const std::vector<size_t>& getDimensions() const noexcept { return type.dimensions; }
 
         /**
          * \brief Returns the element type of the viewed data.
@@ -131,7 +121,7 @@ namespace Data {
         /**
          * \brief Returns the source's dimensions.
          */
-        const std::array<size_t, 2>& getSourceDimensions() const noexcept { return type.sourceDimensions; }
+        const std::vector<size_t>& getSourceDimensions() const noexcept { return type.sourceDimensions; }
 
         /**
          * \brief Returns the linear offset (in elements) in the source.
@@ -203,7 +193,7 @@ namespace Data {
          */
         template <typename T>
         const T& getScalarAt(size_t address) const {
-            Data::DataView subView = this->getSubView(Data::DataType::scalar<T>(), address);
+            Data::DataView subView = this->getSubView(Data::DataType::type<T>(), address);
             return subView.getScalar<T>();
         }
 
@@ -226,10 +216,10 @@ namespace Data {
         };
 
         /**
-         * \brief Returns a pointer to the first element of a 1D or 2D array of type T, or to a scalar value.
+         * \brief Returns a pointer to the first element of an N-dimensional array of type T, or to a scalar value.
          *
          * The elements are always laid out in a contiguous block. If the view
-         * is a strided 2D sub-region, they are copied (and the copy is freed
+         * is a strided sub-region, they are copied (and the copy is freed
          * with the returned pointer); otherwise the view memory is borrowed
          * with no allocation.
          *
@@ -248,20 +238,19 @@ namespace Data {
 
             const ValueType* source = static_cast<const ValueType*>(this->ptr);
 
-            const size_t rows = this->type.dimensions[0];
-            const size_t cols = this->type.dimensions[1];
-            const size_t stride = this->type.sourceDimensions[1];
-
-            if (rows == 0 || stride == cols || cols == 0) {
+            if (this->type.isContiguous()) {
                 return Result(source, DataDeleter<ValueType>{false});
             }
 
-            ValueType* contiguous = new ValueType[rows * cols];
-            for (size_t row = 0; row < rows; ++row) {
-                for (size_t col = 0; col < cols; ++col) {
-                    contiguous[row * cols + col] = source[row * stride + col];
-                }
+            const size_t total = this->type.totalElements();
+            if (total == 0) {
+                return Result(source, DataDeleter<ValueType>{false});
             }
+
+            ValueType* contiguous = new ValueType[total];
+            this->type.forEachRun(this->type, 0, [&](size_t srcOffset, size_t dstOffset, size_t length) {
+                std::copy(source + srcOffset, source + srcOffset + length, contiguous + dstOffset);
+            });
             return Result(contiguous, DataDeleter<ValueType>{true});
         }
 

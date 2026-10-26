@@ -17,7 +17,7 @@
 TEST(DimensionFlowTest, ConstructsWithValidInputDimension)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     EXPECT_NO_THROW(
@@ -48,11 +48,11 @@ TEST(DimensionFlowTest, RejectsInputDimensionWithoutElementType)
 TEST(DimensionFlowTest, AcceptsMultipleInputDimensions)
 {
     const auto input1 =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto input2 =
-        Dimensions::Requirement::scalar<int>();
+        Dimensions::Requirement(Data::DataType::type<int>());
 
     EXPECT_NO_THROW(
         Dimensions::DimensionFlow flow({input1, input2}))
@@ -63,7 +63,7 @@ TEST(DimensionFlowTest, AcceptsMultipleInputDimensions)
 TEST(DimensionFlowTest, StartsWithoutOutput)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     Dimensions::DimensionFlow flow({input});
@@ -76,7 +76,7 @@ TEST(DimensionFlowTest, StartsWithoutOutput)
 TEST(DimensionFlowTest, GetOutputDimensionThrowsBeforeFirstLayer)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     Dimensions::DimensionFlow flow({input});
@@ -90,10 +90,10 @@ TEST(DimensionFlowTest, GetOutputDimensionThrowsBeforeFirstLayer)
 TEST(DimensionFlowTest, IsCompatibleWithReturnsFalseBeforeFirstLayer)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
     const auto consumer =
-        Dimensions::Requirement::scalar<double>();
+        Dimensions::Requirement(Data::DataType::type<double>());
 
     Dimensions::DimensionFlow flow({input});
 
@@ -105,11 +105,11 @@ TEST(DimensionFlowTest, IsCompatibleWithReturnsFalseBeforeFirstLayer)
 TEST(DimensionFlowTest, ExposesOriginalInputDimensions)
 {
     const auto input1 =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto input2 =
-        Dimensions::Requirement::scalar<int>();
+        Dimensions::Requirement(Data::DataType::type<int>());
 
     Dimensions::DimensionFlow flow({input1, input2});
 
@@ -132,11 +132,11 @@ TEST(DimensionFlowTest, ExposesOriginalInputDimensions)
 TEST(DimensionFlowTest, FirstLayerConsumesFlowInputs)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto output =
-        Dimensions::Requirement::scalar<double>();
+        Dimensions::Requirement(Data::DataType::type<double>());
 
     Dimensions::DimensionFlow flow({input});
 
@@ -160,14 +160,14 @@ TEST(DimensionFlowTest, FirstLayerConsumesFlowInputs)
 TEST(DimensionFlowTest, FirstLayerRejectsIncompatibleInput)
 {
     const auto flowInput =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto layerInput =
-        Dimensions::Requirement::array1d<double>(5);
+        Dimensions::Requirement(Data::DataType::type<double>({5}));
 
     const auto output =
-        Dimensions::Requirement::scalar<double>();
+        Dimensions::Requirement(Data::DataType::type<double>());
 
     Dimensions::DimensionFlow flow({flowInput});
 
@@ -186,14 +186,14 @@ TEST(DimensionFlowTest, FirstLayerRejectsIncompatibleInput)
 TEST(DimensionFlowTest, FirstLayerRejectsWrongInputType)
 {
     const auto flowInput =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto layerInput =
-        Dimensions::Requirement::array1d<float>(4);
+        Dimensions::Requirement(Data::DataType::type<float>({4}));
 
     const auto output =
-        Dimensions::Requirement::scalar<double>();
+        Dimensions::Requirement(Data::DataType::type<double>());
 
     Dimensions::DimensionFlow flow({flowInput});
 
@@ -212,14 +212,14 @@ TEST(DimensionFlowTest, FirstLayerRejectsWrongInputType)
 TEST(DimensionFlowTest, FirstLayerRejectsWrongNumberOfInputs)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     const auto secondInput =
-        Dimensions::Requirement::scalar<int>();
+        Dimensions::Requirement(Data::DataType::type<int>());
 
     const auto output =
-        Dimensions::Requirement::scalar<double>();
+        Dimensions::Requirement(Data::DataType::type<double>());
 
     Dimensions::DimensionFlow flow({input});
 
@@ -238,14 +238,14 @@ TEST(DimensionFlowTest, FirstLayerRejectsWrongNumberOfInputs)
 TEST(DimensionFlowTest, FirstLayerCanHaveMultipleInputs)
 {
 const auto input1 =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto input2 =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input1, input2});
 
@@ -270,14 +270,14 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, SecondLayerConsumesPreviousOutput)
 {
 const auto flowInput =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto secondOutput =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 Dimensions::DimensionFlow flow({flowInput});
 
@@ -307,17 +307,17 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, SecondLayerDoesNotConsumeOriginalFlowInput)
 {
 const auto flowInput =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto wrongSecondInput =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 const auto secondOutput =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 Dimensions::DimensionFlow flow({flowInput});
 
@@ -342,17 +342,17 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, IncompatibleSecondLayerInvalidatesFlow)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto incompatibleInput =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto secondOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -374,23 +374,23 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, LaterCompatibleLayerDoesNotRestoreValidity)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto badSecondInput =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto secondOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto thirdInput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto thirdOutput =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -416,17 +416,17 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, OutputIsUpdatedEvenWhenLayerIsIncompatible)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto incompatibleInput =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto secondOutput =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -453,16 +453,16 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, CompatibleRangesAreAccepted)
 {
 const auto input =
-Dimensions::Requirement::scalar<double>(
+Dimensions::Requirement(Data::DataType::type<double>(),
 Dimensions::NumericRange<double>::between(-1.0, 1.0));
 
 
 const auto layerInput =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-2.0, 2.0));
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -476,16 +476,16 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, NarrowerRequiredRangeIsRejected)
 {
 const auto input =
-Dimensions::Requirement::scalar<double>(
+Dimensions::Requirement(Data::DataType::type<double>(),
 Dimensions::NumericRange<double>::between(-1.0, 1.0));
 
 
 const auto layerInput =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-0.5, 0.5));
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -499,14 +499,14 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, UnconstrainedRequiredInputAcceptsConstrainedOutput)
 {
 const auto input =
-Dimensions::Requirement::scalar<double>();
+Dimensions::Requirement(Data::DataType::type<double>());
 
 
 const auto layerInput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -524,15 +524,15 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, FinalOutputCanBeCompatibleWithConsumer)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-1.0, 1.0));
 
 const auto consumer =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-2.0, 2.0));
 
 Dimensions::DimensionFlow flow({input});
@@ -551,15 +551,15 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, FinalOutputCanBeIncompatibleWithConsumer)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-2.0, 2.0));
 
 const auto consumer =
-    Dimensions::Requirement::scalar<double>(
+    Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-1.0, 1.0));
 
 Dimensions::DimensionFlow flow({input});
@@ -578,14 +578,14 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, FinalOutputMustHaveCompatibleType)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto consumer =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -607,14 +607,14 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, MultiInputFirstLayerChecksInputsPositionally)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({first, second});
 
@@ -628,14 +628,14 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, MultiInputFirstLayerRejectsReorderedInputs)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({first, second});
 
@@ -649,17 +649,17 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, MultiInputFirstLayerRejectsOneIncorrectInput)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto wrongSecond =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({first, second});
 
@@ -673,14 +673,14 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, MultiInputLayerRejectsDifferentInputCount)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({first, second});
 
@@ -698,17 +698,17 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, ThreeCompatibleLayersRemainValid)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output1 =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto output2 =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 const auto output3 =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -739,14 +739,14 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, LastLayerDeterminesFinalOutput)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto firstOutput =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto finalOutput =
-    Dimensions::Requirement::array1d<int>(2);
+    Dimensions::Requirement(Data::DataType::type<int>({2}));
 
 Dimensions::DimensionFlow flow({input});
 
@@ -773,7 +773,7 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, AcceptsRequirementsReturnsTrueForMatchingRequirements)
 {
 const auto requirement =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 EXPECT_TRUE(
@@ -788,11 +788,11 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, AcceptsRequirementsReturnsFalseForDifferentNumberOfRequirements)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 EXPECT_FALSE(
     Dimensions::DimensionFlow::acceptsRequirements(
@@ -806,11 +806,11 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, AcceptsRequirementsReturnsFalseForIncompatibleRequirement)
 {
 const auto provided =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto required =
-    Dimensions::Requirement::array1d<float>(4);
+    Dimensions::Requirement(Data::DataType::type<float>({4}));
 
 EXPECT_FALSE(
     Dimensions::DimensionFlow::acceptsRequirements(
@@ -824,14 +824,14 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, AcceptsRequirementsChecksEveryRequirement)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 const auto wrongSecond =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 EXPECT_FALSE(
     Dimensions::DimensionFlow::acceptsRequirements(
@@ -845,11 +845,11 @@ EXPECT_FALSE(
 TEST(DimensionFlowTest, AcceptsRequirementsupportsMultipleCompatibleRequirements)
 {
 const auto first =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto second =
-    Dimensions::Requirement::scalar<int>();
+    Dimensions::Requirement(Data::DataType::type<int>());
 
 EXPECT_TRUE(
     Dimensions::DimensionFlow::acceptsRequirements(
@@ -867,7 +867,7 @@ EXPECT_TRUE(
 TEST(DimensionFlowTest, EmptyFlowSummary)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 Dimensions::DimensionFlow flow({input});
@@ -892,11 +892,11 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, SummaryIncludesLayerName)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -917,11 +917,11 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummaryIncludesInputAndOutputInformation)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -947,11 +947,11 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummaryReportsCompatibleLayer)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -972,14 +972,14 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummaryReportsIncompatibleLayer)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto incompatibleInput =
-    Dimensions::Requirement::array1d<float>(4);
+    Dimensions::Requirement(Data::DataType::type<float>({4}));
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -1005,11 +1005,11 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummaryReportsOverallValidState)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -1030,14 +1030,14 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummaryReportsOverallInvalidState)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto incompatibleInput =
-    Dimensions::Requirement::array1d<float>(4);
+    Dimensions::Requirement(Data::DataType::type<float>({4}));
 
 const auto output =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -1058,7 +1058,7 @@ EXPECT_NE(
 TEST(DimensionFlowTest, SummarySupportsPrefix)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 Dimensions::DimensionFlow flow({input});
@@ -1077,14 +1077,14 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, SummaryContainsCorrectLayerCount)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 const auto output1 =
-    Dimensions::Requirement::scalar<double>();
+    Dimensions::Requirement(Data::DataType::type<double>());
 
 const auto output2 =
-    Dimensions::Requirement::scalar<float>();
+    Dimensions::Requirement(Data::DataType::type<float>());
 
 Dimensions::DimensionFlow flow({input});
 
@@ -1113,7 +1113,7 @@ EXPECT_NE(
 TEST(DimensionFlowTest, CanRepresentTanhAsPipelineLayer)
 {
 const auto input =
-Dimensions::Requirement::array1d<double>(4);
+Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
 Dimensions::ActivationFunctions::Tanh<double> tanh(input);
@@ -1145,7 +1145,7 @@ EXPECT_EQ(
 TEST(DimensionFlowTest, CanChainTanhIntoArgMax)
 {
     const auto input =
-    Dimensions::Requirement::array1d<double>(4);
+    Dimensions::Requirement(Data::DataType::type<double>({4}));
 
 
     Dimensions::ActivationFunctions::Tanh<double> tanh(input);

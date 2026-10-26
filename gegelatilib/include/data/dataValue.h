@@ -2,6 +2,8 @@
 #define DATA_VALUE_H
 
 #include <algorithm>
+#include <initializer_list>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -75,7 +77,7 @@ namespace Data {
         static DataValue scalar(T value) {
             return DataValue(
                 std::make_unique<detail::ScalarModel<T>>(std::move(value)),
-                DataType::scalar<T>()
+                DataType::type<T>()
             );
         }
 
@@ -90,8 +92,53 @@ namespace Data {
         template <typename T>
         static DataValue array1d(std::unique_ptr<T[]> values, size_t count) {
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(values), count),
-                DataType::array1d<T>(count)
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>{count}),
+                DataType::type<T>({count})
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning an N-dimensional array (row-major).
+         *
+         * \param[in] values Buffer owning the data (takes ownership), holding the product of the extents.
+         * \param[in] shape Extent of each axis (1 to DataType::MAX_RANK axes).
+         * \return A DataValue owning the array.
+         * \throws std::invalid_argument If the rank is not supported.
+         */
+        template <typename T>
+        static DataValue array(std::unique_ptr<T[]> values, std::initializer_list<size_t> shape) {
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>(shape)),
+                DataType::type<T>(shape)
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue owning an N-dimensional array (row-major) from a flat range.
+         *
+         * \param[in] range Flat data, whose size must equal the product of the extents.
+         * \param[in] shape Extent of each axis (1 to DataType::MAX_RANK axes).
+         * \return A DataValue owning a copy of the data.
+         * \throws std::invalid_argument If the size does not match the shape or the rank is not supported.
+         */
+        template <typename Range>
+        static DataValue array(const Range& range, std::initializer_list<size_t> shape) {
+            using T = typename std::iterator_traits<decltype(std::begin(range))>::value_type;
+            DataType type = DataType::type<T>(shape);
+            const size_t total = type.totalElements();
+            const auto size = static_cast<size_t>(std::distance(std::begin(range), std::end(range)));
+            if (size != total) {
+                throw std::invalid_argument(
+                    "DataValue::array failed: range size (" + std::to_string(size) +
+                    ") must equal the product of the extents (" + std::to_string(total) +
+                    "). Requested type: " + type.toString()
+                );
+            }
+            auto ptr = std::make_unique<T[]>(total);
+            std::copy(std::begin(range), std::end(range), ptr.get());
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>(shape)),
+                std::move(type)
             );
         }
 
@@ -127,8 +174,40 @@ namespace Data {
 
             // Return as DataValue
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), count),
-                DataType::array1d<T>(count)
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{count}),
+                DataType::type<T>({count})
+            );
+        }
+
+        /**
+         * \brief Creates a DataValue of the given shape from a flat range (row-major).
+         *
+         * \param[in] range Flat data, whose size must equal type.totalElements().
+         * \param[in] type Requested shape (rank 0 to DataType::MAX_RANK); only rank and dimensions are used.
+         * \return A DataValue owning a copy of the data.
+         * \throws std::invalid_argument If the size does not match the shape.
+         */
+        template <typename Range>
+        static DataValue fromRange(const Range& range, const DataType& type) {
+            using T = typename std::iterator_traits<decltype(std::begin(range))>::value_type;
+            const size_t total = type.totalElements();
+            const auto size = static_cast<size_t>(std::distance(std::begin(range), std::end(range)));
+            if (size != total) {
+                throw std::invalid_argument(
+                    "DataValue::fromRange failed: range size (" + std::to_string(size) +
+                    ") must equal the product of the extents (" + std::to_string(total) + ")."
+                );
+            }
+            if (type.rank == 0) {
+                return DataValue::scalar<T>(*std::begin(range));
+            }
+            auto ptr = std::make_unique<T[]>(total);
+            std::copy(std::begin(range), std::end(range), ptr.get());
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(
+                    std::move(ptr),
+                    std::vector<size_t>(type.dimensions.begin(), type.dimensions.begin() + type.rank)),
+                DataType::type<T>(type.dimensions)
             );
         }
 
@@ -144,8 +223,8 @@ namespace Data {
         template <typename T>
         static DataValue array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols) {
             return DataValue(
-                std::make_unique<detail::Array2dModel<T>>(std::move(values), rows, cols),
-                DataType::array2d<T>(rows, cols)
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>{rows, cols}),
+                DataType::type<T>({rows, cols})
             );
         }
 
@@ -168,14 +247,14 @@ namespace Data {
                     "DataValue::array2d failed: range size (" +
                     std::to_string(std::distance(std::begin(range), std::end(range))) +
                     ") must equal rows * cols (" + std::to_string(total) + "). Requested type: " +
-                    DataType::array2d<T>(rows, cols).toString()
+                    DataType::type<T>({rows, cols}).toString()
                 );
             }
             auto ptr = std::make_unique<T[]>(total);
             std::copy(std::begin(range), std::end(range), ptr.get());
             return DataValue(
-                std::make_unique<detail::Array2dModel<T>>(std::move(ptr), rows, cols),
-                DataType::array2d<T>(rows, cols)
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{rows, cols}),
+                DataType::type<T>({rows, cols})
             );
         }
 
@@ -226,8 +305,8 @@ namespace Data {
             }
 
             return DataValue(
-                std::make_unique<detail::Array2dModel<T>>(std::move(ptr), rows, cols),
-                DataType::array2d<T>(rows, cols)
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{rows, cols}),
+                DataType::type<T>({rows, cols})
             );
         }
 
@@ -235,53 +314,68 @@ namespace Data {
         /**
          * \brief Creates a zero-initialized value with the requested shape and element type.
          * \tparam T Element type used for storage.
-         * \param[in] type Requested shape and runtime type metadata.
+         * \param[in] dims Dimensions of the required value.
          * \return A zero-initialized owning value.
          * \throws std::invalid_argument If the requested rank is unsupported.
          */
-        static DataValue zeros(const DataType& type)
+        static DataValue zeros(const std::vector<size_t>& dims)
         {
             static_assert(std::is_arithmetic_v<T>,
-                "ActivationFunctions::ArgMax requires a numeric type.");
+                "ActivationFunctions::Zero value requires arithmetic values.");
 
-            if (type.rank == 0) {
+            if (dims.empty()) {
                 return DataValue::scalar<T>(T{});
             }
 
-            if (type.rank == 1) {
-                std::vector<T> values(type.dimensions[0]);
-                return DataValue::array1d(values);
-            }
+            DataType type = DataType::type<T>(dims);
+            auto buffer = std::make_unique<T[]>(type.totalElements());
 
-            if (type.rank == 2) {
-                std::vector<T> values(type.dimensions[0] * type.dimensions[1]);
-                return DataValue::array2d(values, type.dimensions[0], type.dimensions[1]);
-            }
-
-            throw std::invalid_argument(
-                "DataValue::zeros failed: unsupported requested type.\n"
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(
+                    std::move(buffer),
+                    dims),
+                std::move(type)
             );
         }
-
         
         template <typename T>
         /**
-         * \brief Creates a zero-initialized value with the requested shape and element type.
+         * \brief Creates a zero-initialized scalar value.
          * \tparam T Element type used for storage.
-         * \param[in] dimension0 Size of dimension0: 0 for scalar.
-         * \param[in] dimension1 Size of dimension1: 0 for scalar/array1d. 
          * \return A zero-initialized owning value.
          * \throws std::invalid_argument If the requested rank is unsupported.
          */
-        static DataValue zeros(const size_t dimension0 = 0, const size_t dimension1 = 0) {
-            if(dimension0 == 0) {
-                return DataValue::zeros<T>(Data::DataType::scalar<T>());
-            } else if (dimension1 == 0) {
-                return DataValue::zeros<T>(Data::DataType::array1d<T>(dimension0));
-            } else {
-                return DataValue::zeros<T>(Data::DataType::array2d<T>(dimension0, dimension1));
-            }
+        static DataValue zeros()
+        {
+            static_assert(std::is_arithmetic_v<T>,
+                "ActivationFunctions::Zero value requires arithmetic values.");
+            return DataValue::scalar<T>(T{});
         }
+
+        template <typename T>
+        /**
+         * \brief Creates a zero-initialized value with the requested type.
+         * \tparam T Element type used for storage.
+         * \param[in] type Dimensions of the required value.
+         * \return A zero-initialized owning value.
+         * \throws std::invalid_argument If the requested rank is unsupported.
+         */
+        static DataValue zeros(const DataType& type) {
+            return zeros<T>(type.dimensions);
+        }
+
+        template <typename T>
+        /**
+         * \brief Creates a zero-initialized value with the requested type.
+         * \tparam T Element type used for storage.
+         * \param[in] dims Dimensions of the required value.
+         * \return A zero-initialized owning value.
+         * \throws std::invalid_argument If the requested rank is unsupported.
+         */
+        static DataValue zeros(std::initializer_list<size_t> dims) {
+            return zeros<T>(std::vector<size_t>(dims));
+        }
+
 
         /**
          * \brief Creates a **deep copy** of a sub-region of this DataValue.
@@ -314,33 +408,22 @@ namespace Data {
             }
 
             const T* src = static_cast<const T*>(storage->data());
-            size_t absOffset = getType().sourceOffset + address;
-            size_t srcStride = (getType().sourceRank >= 2) ? getType().sourceDimensions[1] : 0;
+            const size_t base = getType().sourceOffset + getType().sourceOffsetOf(address);
 
             if (requested.rank == 0) {
-                return DataValue::scalar<T>(src[absOffset]);
+                return DataValue::scalar<T>(src[base]);
             }
-            else if (requested.rank == 1) {
-                size_t count = requested.dimensions[0];
-                auto buffer = std::make_unique<T[]>(count);
-                std::copy(src + absOffset, src + absOffset + count, buffer.get());
-                return DataValue::array1d<T>(std::move(buffer), count);
-            }
-            else { // rank == 2
-                size_t rows = requested.dimensions[0];
-                size_t cols = requested.dimensions[1];
-                auto buffer = std::make_unique<T[]>(rows * cols);
 
-                size_t srcRowStart = absOffset / srcStride;
-                size_t srcColStart = absOffset % srcStride;
-
-                for (size_t i = 0; i < rows; ++i) {
-                    size_t srcIndex = (srcRowStart + i) * srcStride + srcColStart;
-                    std::copy(src + srcIndex, src + srcIndex + cols, buffer.get() + i * cols);
-                }
-
-                return DataValue::array2d<T>(std::move(buffer), rows, cols);
-            }
+            auto buffer = std::make_unique<T[]>(requested.totalElements());
+            getType().forEachRun(requested, base, [&](size_t srcOffset, size_t dstOffset, size_t length) {
+                std::copy(src + srcOffset, src + srcOffset + length, buffer.get() + dstOffset);
+            });
+            return DataValue(
+                std::make_unique<detail::ArrayModel<T>>(
+                    std::move(buffer),
+                    std::vector<size_t>(requested.dimensions.begin(), requested.dimensions.begin() + requested.rank)),
+                DataType::type<T>(requested.dimensions)
+            );
         }
 
         /**
@@ -373,7 +456,7 @@ namespace Data {
                 throw std::out_of_range(
                     "DataValue::setScalarAt failed at address " + std::to_string(address) + ".\n"
                     "Value:\n" + this->toString() + "\n"
-                    "Requested type:\n" + DataType::scalar<T>().toString()
+                    "Requested type:\n" + DataType::type<T>().toString()
                 );
             }
 
@@ -433,13 +516,7 @@ namespace Data {
                 values[idx] = static_cast<D>(data[idx]);
             }
 
-            if (source.getRank() == 0) {
-                return DataValue::scalar<D>(values[0]);
-            } else if (source.getRank() == 1) {
-                return DataValue::array1d(values);
-            } else { // A dataValue can never be build with a rank higher than 2 with current implementation.
-                return DataValue::array2d(values, source.getType().dimensions[0], source.getType().dimensions[1]);
-            }
+            return DataValue::fromRange(values, source.getType());
         }
 
         

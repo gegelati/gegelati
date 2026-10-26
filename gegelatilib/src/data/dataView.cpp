@@ -20,23 +20,8 @@ Data::DataView Data::DataView::getSubView(const DataType& requested, size_t addr
         );
     }
 
-    // Preserve the original source coordinate when the view is itself a sub-view.
-    size_t newOffset = this->type.sourceOffset;
-    if (this->type.sourceRank >= 2 && requested.rank >= 2) {
-        size_t row = (this->type.sourceOffset + address) / this->type.sourceDimensions[1];
-        size_t col = (this->type.sourceOffset + address) % this->type.sourceDimensions[1];
-        size_t newRowPos = (this->type.sourceOffset / this->type.sourceDimensions[1] + row);
-        size_t newColPos = (this->type.sourceOffset % this->type.sourceDimensions[1] + col);
-        newOffset = newRowPos * this->type.sourceDimensions[1] + newColPos;
-    } else {
-        newOffset = this->type.sourceOffset + address;
-    }
-
-    // Account for skipped columns when a 2D sub-view starts on a later row.
-    size_t newPtrOffset = address;
-    if (this->type.sourceRank >= 2) {
-        newPtrOffset += (this->type.sourceDimensions[0] - this->type.dimensions[0]) * (address / this->type.dimensions[1]);
-    }
+    // Offset (in elements) of the sub-view origin, accounting for the strides of the source.
+    const size_t newPtrOffset = this->type.sourceOffsetOf(address);
     const size_t byteOffset = newPtrOffset * this->type.elementSize;
 
     DataType subType = DataType::subView(
@@ -103,7 +88,7 @@ Data::DataView::operator bool() const noexcept {
 
 size_t Data::DataView::scaleLocation(const Data::DataType& required, const size_t address) const {
     size_t scaleAddress = address % this->type.getAddressSpace(required);
-    if(this->type.rank == 2) {
+    if(this->type.rank >= 2) {
         scaleAddress = this->type.getValidAddress(required, scaleAddress);
     }
     return scaleAddress;

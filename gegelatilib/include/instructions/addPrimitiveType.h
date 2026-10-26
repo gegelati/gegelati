@@ -123,12 +123,12 @@ namespace Instructions {
     
     template <class T> void AddPrimitiveType<T>::setUpOutput()
     {
-        this->outputType = Data::DataType::scalar<T>();
+        this->outputType = Data::DataType::type<T>();
     }
     template <class T> void AddPrimitiveType<T>::setUpOperand()
     {
-        this->operandTypes.push_back(Data::DataType::scalar<T>());
-        this->operandTypes.push_back(Data::DataType::scalar<T>());
+        this->operandTypes.push_back(Data::DataType::type<T>());
+        this->operandTypes.push_back(Data::DataType::type<T>());
     }
 } // namespace Instructions
 

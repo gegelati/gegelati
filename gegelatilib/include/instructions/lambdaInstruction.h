@@ -287,18 +287,18 @@ namespace Instructions {
                     if constexpr (std::is_array<ElementType>::value) {
                         // 2D array: T[first_dim][second_dim]
                         constexpr size_t second_dim = std::extent<ElementType>::value;
-                        return Data::DataType::array2d<std::remove_all_extents_t<T>>(
-                            first_dim, second_dim
+                        return Data::DataType::type<std::remove_all_extents_t<T>>(
+                            {first_dim, second_dim}
                         );
                     } else {
                         // 1D array: T[first_dim]
-                        return Data::DataType::array1d<std::remove_all_extents_t<T>>(
-                            first_dim
+                        return Data::DataType::type<std::remove_all_extents_t<T>>(
+                            {first_dim}
                         );
                     }
                 }
                 else {
-                    return Data::DataType::scalar<T>();
+                    return Data::DataType::type<T>();
                 }
             }
 

@@ -10,11 +10,9 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     std::vector<int> values{10, 20, 30, 40};
     int scalarValue = 42;
 
-    Data::DataView scalarView(&scalarValue, Data::DataType::scalar<int>());
-    ASSERT_NO_THROW(Data::DataView(&scalarValue, Data::DataType::scalar<int>()));
+    Data::DataView scalarView(&scalarValue, Data::DataType::type<int>());
+    ASSERT_NO_THROW(Data::DataView(&scalarValue, Data::DataType::type<int>()));
     EXPECT_EQ(scalarView.getRank(), 0u);
-    EXPECT_EQ(scalarView.getDimensions()[0], 1u);
-    EXPECT_EQ(scalarView.getDimensions()[1], 0u);
     EXPECT_EQ(scalarView.getElementType(), typeid(int));
     EXPECT_EQ(scalarView.getElementSize(), sizeof(int));
     EXPECT_TRUE(scalarView);
@@ -22,11 +20,10 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     const int& scalarRead = scalarView.getScalar<int>();
     EXPECT_EQ(scalarRead, 42);
 
-    Data::DataView oneDView(values.data(), Data::DataType::array1d<int>(values.size()));
-    ASSERT_NO_THROW(Data::DataView(values.data(), Data::DataType::array1d<int>(values.size())));
+    Data::DataView oneDView(values.data(), Data::DataType::type<int>({values.size()}));
+    ASSERT_NO_THROW(Data::DataView(values.data(), Data::DataType::type<int>({values.size()})));
     EXPECT_EQ(oneDView.getRank(), 1u);
     EXPECT_EQ(oneDView.getDimensions()[0], static_cast<size_t>(values.size()));
-    EXPECT_EQ(oneDView.getDimensions()[1], 0u);
     EXPECT_EQ(oneDView.getSourceRank(), 1u);
     EXPECT_EQ(oneDView.getSourceDimensions()[0], static_cast<size_t>(values.size()));
     EXPECT_EQ(oneDView.getSourceOffset(), 0u);
@@ -40,8 +37,8 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     }
 
     int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};
-    Data::DataView twoDView(matrix, Data::DataType::array2d<int>(2, 3));
-    ASSERT_NO_THROW(Data::DataView(matrix, Data::DataType::array2d<int>(2, 3)));
+    Data::DataView twoDView(matrix, Data::DataType::type<int>({2, 3}));
+    ASSERT_NO_THROW(Data::DataView(matrix, Data::DataType::type<int>({2, 3})));
     EXPECT_EQ(twoDView.getRank(), 2u);
     EXPECT_EQ(twoDView.getDimensions()[0], 2u);
     EXPECT_EQ(twoDView.getDimensions()[1], 3u);
@@ -59,7 +56,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_EQ(twoDPtr[4], 5);
     EXPECT_EQ(twoDPtr[5], 6);
 
-    Data::DataView nullScalar(nullptr, Data::DataType::scalar<int>());
+    Data::DataView nullScalar(nullptr, Data::DataType::type<int>());
     ASSERT_THROW(nullScalar.getScalar<int>(), std::runtime_error);
 
     ASSERT_THROW(scalarView.getScalar<double>(), std::runtime_error);
@@ -71,21 +68,18 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
 TEST(DataViewTest, ConstructorFromScalarInfersType)
 {
     int scalarValue = 42;
-    Data::DataView scalarView(scalarValue);
+    Data::DataView scalarView(&scalarValue, Data::DataType::type<int>());
 
     EXPECT_EQ(scalarView.getRank(), 0u);
-    EXPECT_EQ(scalarView.getDimensions()[0], 1u);
-    EXPECT_EQ(scalarView.getDimensions()[1], 0u);
     EXPECT_EQ(scalarView.getElementType(), typeid(int));
 
     EXPECT_EQ(scalarView.getScalar<int>(), 42);
 
     int oneDValues[4] = {10, 20, 30, 40};
-    Data::DataView oneDView(oneDValues);
+    Data::DataView oneDView(oneDValues, Data::DataType::type<int>({4}));
 
     EXPECT_EQ(oneDView.getRank(), 1u);
     EXPECT_EQ(oneDView.getDimensions()[0], 4u);
-    EXPECT_EQ(oneDView.getDimensions()[1], 0u);
     EXPECT_EQ(oneDView.getElementType(), typeid(int));
 
     std::shared_ptr<const int[]> oneDPtr = oneDView.getData<int>();
@@ -96,7 +90,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
     EXPECT_EQ(oneDPtr[3], 40);
 
     int twoDValues[2][3] = {{1, 2, 3}, {4, 5, 6}};
-    Data::DataView twoDView(twoDValues);
+    Data::DataView twoDView(twoDValues, Data::DataType::type<int>({2, 3}));
 
     EXPECT_EQ(twoDView.getRank(), 2u);
     EXPECT_EQ(twoDView.getDimensions()[0], 2u);
@@ -116,7 +110,7 @@ TEST(DataViewTest, ConstructorFromScalarInfersType)
 TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
 {
     int source[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
-    Data::DataView view(source, Data::DataType::array2d<int>(3, 4));
+    Data::DataView view(source, Data::DataType::type<int>({3, 4}));
 
     EXPECT_EQ(view.getScalarAt<int>(0), 0);
     EXPECT_EQ(view.getScalarAt<int>(3), 3);
@@ -125,19 +119,19 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     EXPECT_EQ(view.getScalarAt<int>(11), 11);
     ASSERT_THROW(view.getScalarAt<int>(12), std::out_of_range);
 
-    Data::DataView oneDView(source[0], Data::DataType::array1d<int>(4));
+    Data::DataView oneDView(source[0], Data::DataType::type<int>({4}));
     Data::DataView validOneDSubView;
-    ASSERT_NO_THROW(validOneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(2), 1));
+    ASSERT_NO_THROW(validOneDSubView = oneDView.getSubView(Data::DataType::type<int>({2}), 1));
     std::shared_ptr<const int[]> validOneDSubPtr = nullptr;
     ASSERT_NO_THROW(validOneDSubPtr = validOneDSubView.getData<int>());
     ASSERT_NE(validOneDSubPtr, nullptr);
     EXPECT_EQ(validOneDSubPtr[0], 1);
     EXPECT_EQ(validOneDSubPtr[1], 2);
 
-    ASSERT_THROW(oneDView.getSubView(Data::DataType::array1d<int>(4), 1), std::out_of_range);
+    ASSERT_THROW(oneDView.getSubView(Data::DataType::type<int>({4}), 1), std::out_of_range);
 
     Data::DataView validTwoDSubView;
-    ASSERT_NO_THROW(validTwoDSubView = view.getSubView(Data::DataType::array2d<int>(2, 2), 1));
+    ASSERT_NO_THROW(validTwoDSubView = view.getSubView(Data::DataType::type<int>({2, 2}), 1));
     std::shared_ptr<const int[]> validTwoDSubPtr = nullptr;
     ASSERT_NO_THROW(validTwoDSubPtr = validTwoDSubView.getData<int>());
     ASSERT_NE(validTwoDSubPtr, nullptr);
@@ -146,22 +140,22 @@ TEST(DataViewTest, GetScalarAtAndGetSubViewSupportValidAndInvalidAddresses)
     EXPECT_EQ(validTwoDSubPtr[2], 5);
     EXPECT_EQ(validTwoDSubPtr[3], 6);
 
-    ASSERT_THROW(view.getSubView(Data::DataType::array2d<int>(2, 3), 2), std::out_of_range);
+    ASSERT_THROW(view.getSubView(Data::DataType::type<int>({2, 3}), 2), std::out_of_range);
 }
 
 TEST(DataViewTest, equality) {
     int source[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
-    Data::DataView view(source, Data::DataType::array2d<int>(3, 4));
+    Data::DataView view(source, Data::DataType::type<int>({3, 4}));
     ASSERT_TRUE(view == view) << "Same view should be equal";
 
-    Data::DataView view2(source, Data::DataType::array2d<int>(3, 4));
+    Data::DataView view2(source, Data::DataType::type<int>({3, 4}));
     ASSERT_TRUE(view == view2) << "views should be equal";
 
-    Data::DataView view3(source, Data::DataType::array2d<double>(3, 4));
+    Data::DataView view3(source, Data::DataType::type<double>({3, 4}));
     ASSERT_TRUE(view != view3) << "views should not be equal";
 
     int source2[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
-    Data::DataView view4(source2, Data::DataType::array2d<int>(3, 4));
+    Data::DataView view4(source2, Data::DataType::type<int>({3, 4}));
     ASSERT_TRUE(view != view4) << "views should not be equal";
 }
 
@@ -174,8 +168,8 @@ TEST(DataViewTest, multiSubView)
             source[idx0][idx1] = idx0 * 28 + idx1;
         }
     }
-    Data::DataView view(source);
-    Data::DataView subView = view.getSubView(Data::DataType::array2d<int>(14, 14), 28 * 7 + 7);
+    Data::DataView view(source, Data::DataType::type<int>({28, 28}));
+    Data::DataView subView = view.getSubView(Data::DataType::type<int>({14, 14}), 28 * 7 + 7);
     std::shared_ptr<const int[]> subViewData = subView.getData<int>();
     for (size_t idx0 = 0; idx0 < 14; idx0 ++){
         for (size_t idx1 = 0; idx1 < 14; idx1 ++){
@@ -184,7 +178,7 @@ TEST(DataViewTest, multiSubView)
     }
 
     
-    Data::DataView subSubView = subView.getSubView(Data::DataType::array2d<int>(3, 3), 30);
+    Data::DataView subSubView = subView.getSubView(Data::DataType::type<int>({3, 3}), 30);
     std::shared_ptr<const int[]> subSubViewData = subSubView.getData<int>();
     for (size_t idx0 = 0; idx0 < 3; idx0 ++){
         for (size_t idx1 = 0; idx1 < 3; idx1 ++){
@@ -199,45 +193,45 @@ TEST(DataViewTest, CanFitCoversEveryRankAndTypeCombination)
     std::vector<int> oneD{10, 20, 30, 40, 50};
     int twoD[2][3] = {{1, 2, 3}, {4, 5, 6}};
 
-    Data::DataView scalarView(&scalarValue, Data::DataType::scalar<int>());
-    Data::DataView oneDView(oneD.data(), Data::DataType::array1d<int>(oneD.size()));
-    Data::DataView twoDView(twoD, Data::DataType::array2d<int>(2, 3));
+    Data::DataView scalarView(&scalarValue, Data::DataType::type<int>());
+    Data::DataView oneDView(oneD.data(), Data::DataType::type<int>({oneD.size()}));
+    Data::DataView twoDView(twoD, Data::DataType::type<int>({2, 3}));
 
-    EXPECT_TRUE(scalarView.canFit(Data::DataType::scalar<int>(), 0));
-    EXPECT_FALSE(scalarView.canFit(Data::DataType::array1d<int>(1), 0));
-    EXPECT_FALSE(scalarView.canFit(Data::DataType::array2d<int>(1, 1), 0));
-    EXPECT_FALSE(scalarView.canFit(Data::DataType::array1d<double>(1), 0));
+    EXPECT_TRUE(scalarView.canFit(Data::DataType::type<int>(), 0));
+    EXPECT_FALSE(scalarView.canFit(Data::DataType::type<int>({1}), 0));
+    EXPECT_FALSE(scalarView.canFit(Data::DataType::type<int>({1, 1}), 0));
+    EXPECT_FALSE(scalarView.canFit(Data::DataType::type<double>({1}), 0));
 
-    EXPECT_TRUE(oneDView.canFit(Data::DataType::scalar<int>(), 0));
-    EXPECT_TRUE(oneDView.canFit(Data::DataType::scalar<int>(), 2));
-    EXPECT_FALSE(oneDView.canFit(Data::DataType::scalar<int>(), 5));
-    EXPECT_TRUE(oneDView.canFit(Data::DataType::array1d<int>(2), 1));
-    EXPECT_TRUE(oneDView.canFit(Data::DataType::array1d<int>(3), 2));
-    EXPECT_FALSE(oneDView.canFit(Data::DataType::array1d<int>(4), 2));
-    EXPECT_FALSE(oneDView.canFit(Data::DataType::array2d<int>(1, 2), 0));
-    EXPECT_FALSE(oneDView.canFit(Data::DataType::array1d<double>(2), 0));
+    EXPECT_TRUE(oneDView.canFit(Data::DataType::type<int>(), 0));
+    EXPECT_TRUE(oneDView.canFit(Data::DataType::type<int>(), 2));
+    EXPECT_FALSE(oneDView.canFit(Data::DataType::type<int>(), 5));
+    EXPECT_TRUE(oneDView.canFit(Data::DataType::type<int>({2}), 1));
+    EXPECT_TRUE(oneDView.canFit(Data::DataType::type<int>({3}), 2));
+    EXPECT_FALSE(oneDView.canFit(Data::DataType::type<int>({4}), 2));
+    EXPECT_FALSE(oneDView.canFit(Data::DataType::type<int>({1, 2}), 0));
+    EXPECT_FALSE(oneDView.canFit(Data::DataType::type<double>({2}), 0));
 
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::scalar<int>(), 0));
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::scalar<int>(), 5));
-    EXPECT_FALSE(twoDView.canFit(Data::DataType::scalar<int>(), 6));
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::array1d<int>(2), 1));
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::array1d<int>(3), 3));
-    EXPECT_FALSE(twoDView.canFit(Data::DataType::array1d<int>(3), 1));
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::array2d<int>(1, 2), 1));
-    EXPECT_TRUE(twoDView.canFit(Data::DataType::array2d<int>(2, 2), 0));
-    EXPECT_FALSE(twoDView.canFit(Data::DataType::array2d<int>(2, 2), 2));
-    EXPECT_FALSE(twoDView.canFit(Data::DataType::array2d<double>(1, 2), 0));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>(), 0));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>(), 5));
+    EXPECT_FALSE(twoDView.canFit(Data::DataType::type<int>(), 6));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>({2}), 1));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>({3}), 3));
+    EXPECT_FALSE(twoDView.canFit(Data::DataType::type<int>({3}), 1));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>({1, 2}), 1));
+    EXPECT_TRUE(twoDView.canFit(Data::DataType::type<int>({2, 2}), 0));
+    EXPECT_FALSE(twoDView.canFit(Data::DataType::type<int>({2, 2}), 2));
+    EXPECT_FALSE(twoDView.canFit(Data::DataType::type<double>({1, 2}), 0));
 
     Data::DataView wrongView(nullptr, Data::DataType());
     Data::DataType wrongType;
     EXPECT_FALSE(scalarView.canFit(wrongType, 0));
-    EXPECT_FALSE(wrongView.canFit(Data::DataType::scalar<int>(), 0));
+    EXPECT_FALSE(wrongView.canFit(Data::DataType::type<int>(), 0));
 }
 
 TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
 {
     std::vector<int> oneD{11, 22, 33, 44, 55};
-    Data::DataView oneDView(oneD.data(), Data::DataType::array1d<int>(oneD.size()));
+    Data::DataView oneDView(oneD.data(), Data::DataType::type<int>({oneD.size()}));
 
     std::shared_ptr<const int[]> oneDPtr = nullptr;
     ASSERT_NO_THROW(oneDPtr = oneDView.getData<int>());
@@ -247,7 +241,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     EXPECT_EQ(oneDPtr[4], 55);
 
     Data::DataView oneDSubView;
-    ASSERT_NO_THROW(oneDSubView = oneDView.getSubView(Data::DataType::array1d<int>(3), 1));
+    ASSERT_NO_THROW(oneDSubView = oneDView.getSubView(Data::DataType::type<int>({3}), 1));
     std::shared_ptr<const int[]> oneDSubPtr = nullptr;
     ASSERT_NO_THROW(oneDSubPtr = oneDSubView.getData<int>());
     ASSERT_NE(oneDSubPtr, nullptr);
@@ -256,7 +250,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     EXPECT_EQ(oneDSubPtr[2], 44);
 
     int matrix[3][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
-    Data::DataView twoDView(matrix, Data::DataType::array2d<int>(3, 4));
+    Data::DataView twoDView(matrix, Data::DataType::type<int>({3, 4}));
 
     std::shared_ptr<const int[]> twoDPtr = nullptr;
     ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
@@ -268,7 +262,7 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     EXPECT_EQ(twoDPtr[11], 11);
 
     Data::DataView twoDSubView;
-    ASSERT_NO_THROW(twoDSubView = twoDView.getSubView(Data::DataType::array2d<int>(2, 3), 5));
+    ASSERT_NO_THROW(twoDSubView = twoDView.getSubView(Data::DataType::type<int>({2, 3}), 5));
     std::shared_ptr<const int[]> twoDSubPtr = nullptr;
     ASSERT_NO_THROW(twoDSubPtr = twoDSubView.getData<int>());
     ASSERT_NE(twoDSubPtr, nullptr);
@@ -279,31 +273,31 @@ TEST(DataViewTest, getDataAndSubViewPreserveExactElementValuesAcrossRanks)
     EXPECT_EQ(twoDSubPtr[4], 10);
     EXPECT_EQ(twoDSubPtr[5], 11);
 
-    ASSERT_THROW(twoDView.getSubView(Data::DataType::array2d<int>(2, 3), 10), std::out_of_range);
+    ASSERT_THROW(twoDView.getSubView(Data::DataType::type<int>({2, 3}), 10), std::out_of_range);
 }
 
 TEST(DataViewTest, BinaryCompatibilityAndTypeMismatchAreRejected)
 {
     std::vector<int> ints{10, 20, 30, 40};
     std::vector<double> doubles{1.0, 2.0, 3.0, 4.0};
-    Data::DataView intView(ints.data(), Data::DataType::array1d<int>(ints.size()));
-    Data::DataView doubleView(doubles.data(), Data::DataType::array1d<double>(doubles.size()));
+    Data::DataView intView(ints.data(), Data::DataType::type<int>({ints.size()}));
+    Data::DataView doubleView(doubles.data(), Data::DataType::type<double>({doubles.size()}));
 
-    EXPECT_TRUE(intView.canFit(Data::DataType::array1d<int>(2), 0));
-    EXPECT_TRUE(intView.canFit(Data::DataType::array1d<int>(2), 2));
-    EXPECT_FALSE(intView.canFit(Data::DataType::array1d<double>(2), 0));
-    EXPECT_FALSE(intView.canFit(Data::DataType::array2d<int>(1, 2), 0));
-    EXPECT_FALSE(doubleView.canFit(Data::DataType::array1d<int>(2), 0));
+    EXPECT_TRUE(intView.canFit(Data::DataType::type<int>({2}), 0));
+    EXPECT_TRUE(intView.canFit(Data::DataType::type<int>({2}), 2));
+    EXPECT_FALSE(intView.canFit(Data::DataType::type<double>({2}), 0));
+    EXPECT_FALSE(intView.canFit(Data::DataType::type<int>({1, 2}), 0));
+    EXPECT_FALSE(doubleView.canFit(Data::DataType::type<int>({2}), 0));
 
-    ASSERT_THROW(intView.getSubView(Data::DataType::array1d<double>(2), 0), std::out_of_range);
-    ASSERT_THROW(intView.getSubView(Data::DataType::array2d<int>(1, 2), 0), std::out_of_range);
+    ASSERT_THROW(intView.getSubView(Data::DataType::type<double>({2}), 0), std::out_of_range);
+    ASSERT_THROW(intView.getSubView(Data::DataType::type<int>({1, 2}), 0), std::out_of_range);
 }
 
 
 TEST(DataViewTest, ToStringContainsViewAndTypeInformation)
 {
     int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};
-    Data::DataView view(matrix, Data::DataType::array2d<int>(2, 3));
+    Data::DataView view(matrix, Data::DataType::type<int>({2, 3}));
 
     const std::string text = view.toString();
     EXPECT_NE(text.find("DataView{"), std::string::npos);
@@ -322,15 +316,15 @@ TEST(DataViewTest, hash)
 
     Data::DataView view1(
         values1,
-        Data::DataType::array1d<int>(4));
+        Data::DataType::type<int>({4}));
 
     Data::DataView view2(
         values2,
-        Data::DataType::array1d<int>(4));
+        Data::DataType::type<int>({4}));
 
     Data::DataView view3(
         values3,
-        Data::DataType::array1d<int>(4));
+        Data::DataType::type<int>({4}));
 
     EXPECT_EQ(view1.hash(), view2.hash());
     EXPECT_NE(view1.hash(), view3.hash());
@@ -347,11 +341,11 @@ TEST(DataViewTest, hash)
 
     Data::DataView matrixView1(
         matrix1,
-        Data::DataType::array2d<int>(2, 3));
+        Data::DataType::type<int>({2, 3}));
 
     Data::DataView matrixView2(
         matrix2,
-        Data::DataType::array2d<int>(2, 3));
+        Data::DataType::type<int>({2, 3}));
 
     EXPECT_EQ(matrixView1.hash(), matrixView2.hash());
 
@@ -366,9 +360,9 @@ TEST(DataViewTest, combinedHash)
     int values2[] = {4, 5, 6};
     int values3[] = {7, 8, 9};
 
-    Data::DataView view1(values1,  Data::DataType::array1d<int>(3));
-    Data::DataView view2(values2, Data::DataType::array1d<int>(3));
-    Data::DataView view3(values3, Data::DataType::array1d<int>(3));
+    Data::DataView view1(values1,  Data::DataType::type<int>({3}));
+    Data::DataView view2(values2, Data::DataType::type<int>({3}));
+    Data::DataView view3(values3, Data::DataType::type<int>({3}));
 
     const std::vector<Data::DataView> views1 = {view1,view2};
     const std::vector<Data::DataView> views2 = {view1,view2};
@@ -394,7 +388,7 @@ TEST(DataViewTest, deepClone)
 
     Data::DataView view(
         values.data(),
-        Data::DataType::array1d<int>(values.size()));
+        Data::DataType::type<int>({values.size()}));
 
     auto [storage, cloneView] = view.deepClone();
     const auto& type = view.getType();
@@ -434,11 +428,11 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
 
     Data::DataView view(
         source,
-        Data::DataType::array2d<int>(4, 5));
+        Data::DataType::type<int>({4, 5}));
 
     Data::DataView subView =
         view.getSubView(
-            Data::DataType::array2d<int>(2, 2),
+            Data::DataType::type<int>({2, 2}),
             6);
 
     auto [storage, clonedView] = subView.deepClone();

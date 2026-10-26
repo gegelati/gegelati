@@ -8,9 +8,9 @@ TEST(DataSetTest, Constructor)
     Evaluation::DataSet* dataset2;
 
     std::vector<Dimensions::Requirement> inputDim;
-    inputDim.push_back(Dimensions::Requirement::array1d<int>(1));
-    inputDim.push_back(Dimensions::Requirement::array1d<double>(1));
-    Dimensions::Requirement outputDim = Dimensions::Requirement::scalar<int>();
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<int>({1})));
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<double>({1})));
+    Dimensions::Requirement outputDim = Dimensions::Requirement(Data::DataType::type<int>());
 
     ASSERT_NO_THROW(dataset1 = new Evaluation::DataSet(inputDim, outputDim)) << "Constructor without data failed";
 
@@ -32,9 +32,9 @@ TEST(DataSetTest, Constructor)
 TEST(DataSetTest, addRemoveDataSample)
 {
     std::vector<Dimensions::Requirement> inputDim;
-    inputDim.push_back(Dimensions::Requirement::array1d<int>(1));
-    inputDim.push_back(Dimensions::Requirement::array1d<double>(1));
-    Dimensions::Requirement outputDim = Dimensions::Requirement::scalar<int>();
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<int>({1})));
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<double>({1})));
+    Dimensions::Requirement outputDim = Dimensions::Requirement(Data::DataType::type<int>());
 
     Evaluation::DataSet dataset(inputDim, outputDim);
     ASSERT_EQ(dataset.size(), 0) << "Size should be 0";
@@ -77,9 +77,9 @@ TEST(DataSetTest, addRemoveDataSample)
 TEST(DataSetTest, getInputsOutput)
 {
     std::vector<Dimensions::Requirement> inputDim;
-    inputDim.push_back(Dimensions::Requirement::array1d<int>(2));
-    inputDim.push_back(Dimensions::Requirement::array1d<double>(3));
-    Dimensions::Requirement outputDim = Dimensions::Requirement::scalar<int>();
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<int>({2})));
+    inputDim.push_back(Dimensions::Requirement(Data::DataType::type<double>({3})));
+    Dimensions::Requirement outputDim = Dimensions::Requirement(Data::DataType::type<int>());
 
     Evaluation::DataSet dataset(inputDim, outputDim);
 

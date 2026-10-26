@@ -37,44 +37,20 @@ void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) 
         );
     }
 
-    // Copy the source value into the destination while respecting 2D row strides.
-    size_t offset = type.sourceOffset + address;
+    // Copy the source value run by run, respecting the strides of the destination layout.
+    const size_t base = type.sourceOffset + type.sourceOffsetOf(address);
+    const size_t elementSize = type.elementSize;
 
     const char* src = static_cast<const char*>(value.storage->data());
     char* dst = static_cast<char*>(storage->data());
 
-    if (requested.rank == 0) {
+    type.forEachRun(requested, base, [&](size_t dstOffset, size_t srcOffset, size_t length) {
         std::copy(
-            src,
-            src + type.elementSize,
-            dst + offset * type.elementSize
+            src + srcOffset * elementSize,
+            src + (srcOffset + length) * elementSize,
+            dst + dstOffset * elementSize
         );
-    }
-    else if (requested.rank == 1) {
-        const size_t count = requested.dimensions[0];
-
-        std::copy(
-            src,
-            src + count * type.elementSize,
-            dst + offset * type.elementSize
-        );
-    }
-    else {
-        const size_t rows = requested.dimensions[0];
-        const size_t cols = requested.dimensions[1];
-        const size_t stride = type.sourceDimensions[1];
-
-        const size_t row = offset / stride;
-        const size_t col = offset % stride;
-
-        for (size_t r = 0; r < rows; ++r) {
-            std::copy(
-                src + r * cols * type.elementSize,
-                src + (r + 1) * cols * type.elementSize,
-                dst + ((row + r) * stride + col) * type.elementSize
-            );
-        }
-    }
+    });
 }
 
 std::string Data::DataValue::toString(std::string prefix) const {

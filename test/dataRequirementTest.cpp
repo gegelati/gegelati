@@ -12,7 +12,7 @@
 
 TEST(DataRequirementTest, UnconstrainedRequirementChecksShapeAndType)
 {
-    const auto requirement = Dimensions::Requirement::array1d<int>(3);
+    const auto requirement = Dimensions::Requirement(Data::DataType::type<int>({3}));
     const auto matching = Data::DataValue::array1d(std::vector<int>{1, 2, 3});
     const auto wrongSize = Data::DataValue::array1d(std::vector<int>{1, 2});
     const auto wrongType = Data::DataValue::array1d(std::vector<double>{1.0, 2.0, 3.0});
@@ -25,27 +25,27 @@ TEST(DataRequirementTest, UnconstrainedRequirementChecksShapeAndType)
 
 TEST(DataRequirementTest, UnconstrainedFactoriesSupportEveryShape)
 {
-    const auto scalar = Dimensions::Requirement::scalar<int>();
-    const auto array1d = Dimensions::Requirement::array1d<double>(3);
-    const auto array2d = Dimensions::Requirement::array2d<float>(2, 4);
+    const auto scalar = Dimensions::Requirement(Data::DataType::type<int>());
+    const auto array1d = Dimensions::Requirement(Data::DataType::type<double>({3}));
+    const auto array2d = Dimensions::Requirement(Data::DataType::type<float>({2, 4}));
 
-    EXPECT_EQ(scalar.getDataType(), Data::DataType::scalar<int>());
-    EXPECT_EQ(array1d.getDataType(), Data::DataType::array1d<double>(3));
-    EXPECT_EQ(array2d.getDataType(), Data::DataType::array2d<float>(2, 4));
+    EXPECT_EQ(scalar.getDataType(), Data::DataType::type<int>());
+    EXPECT_EQ(array1d.getDataType(), Data::DataType::type<double>({3}));
+    EXPECT_EQ(array2d.getDataType(), Data::DataType::type<float>({2, 4}));
 }
 
 TEST(DataRequirementTest, EqualityComparesDataTypeAndConstraint)
 {
-    const auto unconstrained = Dimensions::Requirement::array1d<int>(3);
-    const auto sameUnconstrained = Dimensions::Requirement::array1d<int>(3);
-    const auto differentShape = Dimensions::Requirement::array1d<int>(4);
-    const auto range = Dimensions::Requirement::scalar<int>(
+    const auto unconstrained = Dimensions::Requirement(Data::DataType::type<int>({3}));
+    const auto sameUnconstrained = Dimensions::Requirement(Data::DataType::type<int>({3}));
+    const auto differentShape = Dimensions::Requirement(Data::DataType::type<int>({4}));
+    const auto range = Dimensions::Requirement(Data::DataType::type<int>(),
         Dimensions::NumericRange<int>::between(0, 5));
-    const auto sameRange = Dimensions::Requirement::scalar<int>(
+    const auto sameRange = Dimensions::Requirement(Data::DataType::type<int>(),
         Dimensions::NumericRange<int>::between(0, 5));
-    const auto differentRange = Dimensions::Requirement::scalar<int>(
+    const auto differentRange = Dimensions::Requirement(Data::DataType::type<int>(),
         Dimensions::NumericRange<int>::between(0, 6));
-    const auto otherConstraint = Dimensions::Requirement::scalar<double>(
+    const auto otherConstraint = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(0.0, 5.0));
 
     EXPECT_TRUE(unconstrained == sameUnconstrained);
@@ -55,13 +55,13 @@ TEST(DataRequirementTest, EqualityComparesDataTypeAndConstraint)
     EXPECT_FALSE(range != sameRange);
     EXPECT_FALSE(range == differentRange);
     EXPECT_FALSE(range == otherConstraint);
-    EXPECT_FALSE(range == Dimensions::Requirement::scalar<int>());
+    EXPECT_FALSE(range == Dimensions::Requirement(Data::DataType::type<int>()));
 }
 
 TEST(DataRequirementTest, NumericRangePreservesTheExactBoundType)
 {
     const uint64_t maximum = std::numeric_limits<uint64_t>::max();
-    const auto requirement = Dimensions::Requirement::scalar<uint64_t>(
+    const auto requirement = Dimensions::Requirement(Data::DataType::type<uint64_t>(),
         Dimensions::NumericRange<uint64_t>::between(maximum - 1, maximum));
 
     const auto matching = Data::DataValue::scalar(maximum);
@@ -80,7 +80,7 @@ TEST(DataRequirementTest, ConstructorClonesConstraint)
 {
     const auto sourceConstraint = Dimensions::NumericRange<int>::between(0, 5);
     const Dimensions::Requirement requirement(
-        Data::DataType::scalar<int>(), sourceConstraint);
+        Data::DataType::type<int>(), sourceConstraint);
 
     EXPECT_NE(&requirement.getConstraint(), &sourceConstraint);
     EXPECT_TRUE(requirement.accepts(Data::DataValue::scalar(3).view()));
@@ -89,8 +89,7 @@ TEST(DataRequirementTest, ConstructorClonesConstraint)
 
 TEST(DataRequirementTest, NumericRangeAppliesToEveryScalarArrayElement)
 {
-    const auto requirement = Dimensions::Requirement::array1d<double>(
-        3, Dimensions::NumericRange<double>::between(-0.4, 0.4));
+    const auto requirement = Dimensions::Requirement(Data::DataType::type<double>({3}), Dimensions::NumericRange<double>::between(-0.4, 0.4));
 
     EXPECT_TRUE(requirement.accepts(
         Data::DataValue::array1d(std::vector<double>{-0.4, 0.0, 0.4}).view()));
@@ -100,8 +99,7 @@ TEST(DataRequirementTest, NumericRangeAppliesToEveryScalarArrayElement)
 
 TEST(DataRequirementTest, NumericRangeAppliesToEveryTwoDimensionalElement)
 {
-    const auto requirement = Dimensions::Requirement::array2d<int>(
-        2, 2, Dimensions::NumericRange<int>::between(0, 5));
+    const auto requirement = Dimensions::Requirement(Data::DataType::type<int>({2, 2}), Dimensions::NumericRange<int>::between(0, 5));
 
     EXPECT_TRUE(requirement.accepts(
         Data::DataValue::array2d(std::vector<std::vector<int>>{{0, 5}, {1, 4}}).view()));
@@ -112,10 +110,10 @@ TEST(DataRequirementTest, NumericRangeAppliesToEveryTwoDimensionalElement)
 TEST(DataRequirementTest, NumericRangeCanRejectFullMatrixButAcceptValidSubView)
 {
     const Dimensions::Requirement fullMatrixRequirement(
-        Data::DataType::array2d<int>(4, 4),
+        Data::DataType::type<int>({4, 4}),
         Dimensions::NumericRange<int>::between(0, 9));
     const Dimensions::Requirement subMatrixRequirement(
-        Data::DataType::array2d<int>(3, 3),
+        Data::DataType::type<int>({3, 3}),
         Dimensions::NumericRange<int>::between(0, 9));
     const auto matrix = Data::DataValue::array2d(
         std::vector<std::vector<int>>{
@@ -127,15 +125,15 @@ TEST(DataRequirementTest, NumericRangeCanRejectFullMatrixButAcceptValidSubView)
     EXPECT_FALSE(fullMatrixRequirement.accepts(matrix.view()));
 
     const Data::DataView subView = matrix.view().getSubView(
-        Data::DataType::array2d<int>(3, 3), 5);
+        Data::DataType::type<int>({3, 3}), 5);
     EXPECT_TRUE(subMatrixRequirement.accepts(subView));
 }
 
 TEST(DataRequirementTest, SupportsOneSidedAndUnboundedRanges)
 {
-    const auto atLeast = Dimensions::Requirement::scalar<int>(
+    const auto atLeast = Dimensions::Requirement(Data::DataType::type<int>(),
         Dimensions::NumericRange<int>::atLeast(0));
-    const auto unbounded = Dimensions::Requirement::scalar<double>(
+    const auto unbounded = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::unbounded());
 
     EXPECT_TRUE(atLeast.accepts(Data::DataValue::scalar(0).view()));
@@ -146,13 +144,13 @@ TEST(DataRequirementTest, SupportsOneSidedAndUnboundedRanges)
 
 TEST(DataRequirementTest, CompatibilityUsesRangeContainment)
 {
-    const auto producer = Dimensions::Requirement::scalar<double>(
+    const auto producer = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-0.5, 0.5));
-    const auto consumer = Dimensions::Requirement::scalar<double>(
+    const auto consumer = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-1.0, 1.0));
-    const auto narrowerConsumer = Dimensions::Requirement::scalar<double>(
+    const auto narrowerConsumer = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-0.25, 0.25));
-    const auto unconstrained = Dimensions::Requirement::scalar<double>(Dimensions::UnconstrainedData());
+    const auto unconstrained = Dimensions::Requirement(Data::DataType::type<double>(),Dimensions::UnconstrainedData());
 
     EXPECT_TRUE(producer.isCompatibleWith(consumer));
     EXPECT_FALSE(producer.isCompatibleWith(narrowerConsumer));
@@ -162,12 +160,12 @@ TEST(DataRequirementTest, CompatibilityUsesRangeContainment)
 
 TEST(DataRequirementTest, DimensionFlowChecksFinalProducerOutput)
 {
-    const auto input = Dimensions::Requirement::array1d<double>(4);
-    const auto producerOutput = Dimensions::Requirement::scalar<double>(
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({4}));
+    const auto producerOutput = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-1.0, 1.0));
-    const auto consumerOutput = Dimensions::Requirement::scalar<double>(
+    const auto consumerOutput = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-2.0, 2.0));
-    const auto incompatibleOutput = Dimensions::Requirement::scalar<double>(
+    const auto incompatibleOutput = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-0.5, 0.5));
 
     Dimensions::DimensionFlow producer({input});
@@ -184,8 +182,8 @@ TEST(DataRequirementTest, DimensionFlowChecksFinalProducerOutput)
 TEST(DataRequirementTest, ToStringDescribesTypeAndConstraint)
 {
     const Dimensions::Requirement unconstrained(
-        Data::DataType::array1d<int>(3));
-    const auto numeric = Dimensions::Requirement::scalar<double>(
+        Data::DataType::type<int>({3}));
+    const auto numeric = Dimensions::Requirement(Data::DataType::type<double>(),
         Dimensions::NumericRange<double>::between(-0.4, 0.4));
 
     std::string strUnconstrained = "Requirement{\n\tDataType{rank=1, dimensions=[3], elementType=int, elementSize=4, sourceRank=1, sourceDimensions=[3], sourceOffset=0},\n\tRequirement: unconstrained\n}";
@@ -202,7 +200,7 @@ TEST(DataRequirementTest, ToStringDescribesTypeAndConstraint)
 TEST(DataRequirementTest, HandlesInvalidBoundsAndMismatchedConstraintTypes)
 {
     const Dimensions::Requirement mismatchedRequirement(
-        Data::DataType::scalar<int>(),
+        Data::DataType::type<int>(),
         Dimensions::NumericRange<double>::between(0.0, 1.0));
 
     EXPECT_FALSE(mismatchedRequirement.accepts(Data::DataValue::scalar(1).view()));
@@ -211,7 +209,7 @@ TEST(DataRequirementTest, HandlesInvalidBoundsAndMismatchedConstraintTypes)
         std::invalid_argument);
 
     const Dimensions::Requirement requirement(
-        Data::DataType::scalar<int>(),
+        Data::DataType::type<int>(),
         Dimensions::NumericRange<int>::between(0, 5));
     EXPECT_FALSE(requirement.accepts(Data::DataValue::scalar(1.0).view()));
 }

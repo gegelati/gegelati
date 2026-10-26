@@ -87,7 +87,7 @@ TEST_F(GPNodeTest, Constructor)
 
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
-    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
+    variantValues.push_back(Data::DataValue::zeros<double>({10, 2}));
     ASSERT_NO_THROW(variantNode = new GraphBased::GPNode(variantValues))
         << "Construction of the variant GPNode failed.";
 
@@ -102,7 +102,7 @@ TEST_F(GPNodeTest, clone)
     std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
-    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
+    variantValues.push_back(Data::DataValue::zeros<double>({10, 2}));
     variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1));
     GraphBased::GPNode node(variantValues);
 
@@ -123,13 +123,13 @@ TEST_F(GPNodeTest, SetGetValue)
     std::shared_ptr<const Individual> indiv1 = std::make_shared<Individual>(rep);
     std::vector<Data::DataValue> variantValues;
     variantValues.push_back(Data::DataValue::scalar<size_t>(1));
-    variantValues.push_back(Data::DataValue::zeros<double>(10, 2));
+    variantValues.push_back(Data::DataValue::zeros<double>({10, 2}));
     variantValues.push_back(Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1));
     GraphBased::GPNode node(variantValues);
 
     
     ASSERT_TRUE(node.getValue(0) == Data::DataValue::scalar<size_t>(1)) << "Getting value of the GPNode failed.";
-    ASSERT_TRUE(node.getValue(1) == Data::DataValue::zeros<double>(10, 2)) << "Getting value of the GPNode failed.";
+    ASSERT_TRUE(node.getValue(1) == Data::DataValue::zeros<double>({10, 2})) << "Getting value of the GPNode failed.";
     ASSERT_TRUE(node.getValue(2) == Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv1)) << "Getting value of the GPNode failed.";
 
 
