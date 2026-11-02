@@ -1,0 +1,1192 @@
+// File exported with GEGELATI v2.1.0
+// On the 2026-10-30 00:27:12
+// With the File::PopulationDotExporter
+digraph{
+	graph[pad = "0.212, 0.055" bgcolor = lightgray]
+	node[shape=circle style = filled label = ""]
+		TPG33759 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG33759", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP34508,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2)]}"];
+		LGP99 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP99", genotype="{[(0,2,1,121,0,671),]}"];
+		LGP258 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP258", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP270 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP270", genotype="{[(0,1,1,739,1,119),]}"];
+		LGP79 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP79", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP34508 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP34508", genotype="{[(7,5,1,343,1,420),(5,6,0,575,1,233),(0,0,0,621,1,688),]}"];
+		LGP8372 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP8372", genotype="{[(0,7,1,38,1,567),]}"];
+		LGP67 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP67", genotype="{[(7,1,1,66,1,148),(0,4,0,567,1,172),]}"];
+		LGP147 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP147", genotype="{[(0,7,0,44,1,317)]}"];
+		LGP31 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP31", genotype="{[(0,7,0,465,0,177),]}"];
+		TPG33759 -> LGP99
+		TPG33759 -> LGP258
+		TPG33759 -> LGP270
+		TPG33759 -> LGP79
+		TPG33759 -> LGP34508
+		TPG33759 -> LGP8372
+		TPG33759 -> LGP67
+		TPG33759 -> LGP147
+		TPG33759 -> LGP31
+		TPG35128 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG35128", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP172,5),(LGP258,8)]}"];
+		LGP23968 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP23968", genotype="{[(0,2,1,564,1,602)]}"];
+		LGP3 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP3", genotype="{[(0,7,0,110,0,134),]}"];
+		LGP25338 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP25338", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP25508 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP25508", genotype="{[(0,6,1,739,1,119),]}"];
+		LGP172 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP172", genotype="{[(6,4,1,327,1,79),(0,0,1,373,0,510)]}"];
+		TPG35128 -> LGP23968
+		TPG35128 -> LGP3
+		TPG35128 -> LGP25338
+		TPG35128 -> LGP147
+		TPG35128 -> LGP270
+		TPG35128 -> LGP25508
+		TPG35128 -> LGP172
+		TPG35128 -> LGP258
+		TPG36491 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG36491", genotype="{[(LGP99,1),(LGP258,8),(LGP4785,7),(LGP67,3),(LGP270,7),(LGP298,9),(LGP79,0),(LGP147,6),(LGP172,5)]}"];
+		LGP4785 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP4785", genotype="{[(0,3,1,531,1,257)]}"];
+		LGP298 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP298", genotype="{[(0,4,1,412,1,334),]}"];
+		TPG36491 -> LGP99
+		TPG36491 -> LGP258
+		TPG36491 -> LGP4785
+		TPG36491 -> LGP67
+		TPG36491 -> LGP270
+		TPG36491 -> LGP298
+		TPG36491 -> LGP79
+		TPG36491 -> LGP147
+		TPG36491 -> LGP172
+		TPG36777 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG36777", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP298,9),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6)]}"];
+		LGP24108 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP24108", genotype="{[(0,3,1,531,1,257),]}"];
+		TPG36777 -> LGP99
+		TPG36777 -> LGP258
+		TPG36777 -> LGP24108
+		TPG36777 -> LGP298
+		TPG36777 -> LGP270
+		TPG36777 -> LGP172
+		TPG36777 -> LGP3
+		TPG36777 -> LGP25338
+		TPG36777 -> LGP147
+		TPG37556 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG37556", genotype="{[(LGP15397,9),(LGP38482,1),(LGP4785,0),(LGP26586,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP270,7)]}"];
+		LGP15397 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP15397", genotype="{[(0,1,1,455,0,224)]}"];
+		LGP38482 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP38482", genotype="{[(0,8,0,479,0,667),]}"];
+		LGP26586 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP26586", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP15398 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP15398", genotype="{[(7,1,1,60,1,372),(0,1,0,367,1,547),(6,3,1,743,0,200),(0,6,0,446,1,36)]}"];
+		TPG37556 -> LGP15397
+		TPG37556 -> LGP38482
+		TPG37556 -> LGP4785
+		TPG37556 -> LGP26586
+		TPG37556 -> LGP15398
+		TPG37556 -> LGP147
+		TPG37556 -> LGP79
+		TPG37556 -> LGP8372
+		TPG37556 -> LGP67
+		TPG37556 -> LGP270
+		TPG37948 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG37948", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP172,5),(LGP258,8)]}"];
+		TPG37948 -> LGP23968
+		TPG37948 -> LGP3
+		TPG37948 -> LGP25338
+		TPG37948 -> LGP147
+		TPG37948 -> LGP270
+		TPG37948 -> LGP25508
+		TPG37948 -> LGP172
+		TPG37948 -> LGP258
+		TPG39411 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG39411", genotype="{[(LGP15397,9),(LGP38482,1),(LGP4785,0),(LGP26586,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP270,7)]}"];
+		TPG39411 -> LGP15397
+		TPG39411 -> LGP38482
+		TPG39411 -> LGP4785
+		TPG39411 -> LGP26586
+		TPG39411 -> LGP15398
+		TPG39411 -> LGP147
+		TPG39411 -> LGP79
+		TPG39411 -> LGP8372
+		TPG39411 -> LGP67
+		TPG39411 -> LGP270
+		TPG40411 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG40411", genotype="{[(LGP216,1),(LGP37075,9),(LGP79,0),(LGP67,3),(LGP147,6),(LGP40125,8),(LGP270,7),(LGP20398,1),(LGP172,5),(LGP8372,6)]}"];
+		LGP216 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP216", genotype="{[]}"];
+		LGP37075 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP37075", genotype="{[(0,8,1,446,1,282),]}"];
+		LGP40125 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP40125", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP20398 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP20398", genotype="{[(0,8,0,197,0,195),(4,5,0,616,1,45),(0,2,0,316,1,132)]}"];
+		TPG40411 -> LGP216
+		TPG40411 -> LGP37075
+		TPG40411 -> LGP79
+		TPG40411 -> LGP67
+		TPG40411 -> LGP147
+		TPG40411 -> LGP40125
+		TPG40411 -> LGP270
+		TPG40411 -> LGP20398
+		TPG40411 -> LGP172
+		TPG40411 -> LGP8372
+		TPG40419 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG40419", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP38533,5),(LGP258,8),(LGP172,5)]}"];
+		LGP38533 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP38533", genotype="{[(6,1,1,176,1,713),(0,0,1,199,0,510),]}"];
+		TPG40419 -> LGP23968
+		TPG40419 -> LGP3
+		TPG40419 -> LGP25338
+		TPG40419 -> LGP147
+		TPG40419 -> LGP270
+		TPG40419 -> LGP25508
+		TPG40419 -> LGP38533
+		TPG40419 -> LGP258
+		TPG40419 -> LGP172
+		TPG40486 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG40486", genotype="{[(LGP15397,9),(LGP4794,1),(LGP4785,0),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP8372,6)]}"];
+		LGP4794 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP4794", genotype="{[(0,8,0,479,0,667),]}"];
+		TPG40486 -> LGP15397
+		TPG40486 -> LGP4794
+		TPG40486 -> LGP4785
+		TPG40486 -> LGP147
+		TPG40486 -> LGP67
+		TPG40486 -> LGP26586
+		TPG40486 -> LGP79
+		TPG40486 -> LGP79
+		TPG40486 -> LGP270
+		TPG40486 -> LGP8372
+		TPG40600 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG40600", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP34508,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2),(LGP270,1)]}"];
+		TPG40600 -> LGP99
+		TPG40600 -> LGP258
+		TPG40600 -> LGP270
+		TPG40600 -> LGP79
+		TPG40600 -> LGP34508
+		TPG40600 -> LGP8372
+		TPG40600 -> LGP67
+		TPG40600 -> LGP147
+		TPG40600 -> LGP31
+		TPG40600 -> LGP270
+		TPG40937 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG40937", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP298,9),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP67,1)]}"];
+		TPG40937 -> LGP99
+		TPG40937 -> LGP258
+		TPG40937 -> LGP24108
+		TPG40937 -> LGP298
+		TPG40937 -> LGP270
+		TPG40937 -> LGP172
+		TPG40937 -> LGP3
+		TPG40937 -> LGP25338
+		TPG40937 -> LGP147
+		TPG40937 -> LGP67
+		TPG41110 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG41110", genotype="{[(LGP15397,9),(LGP4794,1),(LGP4785,0),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5)]}"];
+		TPG41110 -> LGP15397
+		TPG41110 -> LGP4794
+		TPG41110 -> LGP4785
+		TPG41110 -> LGP147
+		TPG41110 -> LGP67
+		TPG41110 -> LGP26586
+		TPG41110 -> LGP79
+		TPG41110 -> LGP79
+		TPG41110 -> LGP270
+		TPG41110 -> LGP172
+		TPG41606 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG41606", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP147,6)]}"];
+		TPG41606 -> LGP99
+		TPG41606 -> LGP258
+		TPG41606 -> LGP24108
+		TPG41606 -> LGP270
+		TPG41606 -> LGP172
+		TPG41606 -> LGP3
+		TPG41606 -> LGP25338
+		TPG41606 -> LGP147
+		TPG41606 -> LGP147
+		TPG41708 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG41708", genotype="{[(LGP99,1),(LGP3,3),(LGP21585,0),(LGP270,7),(LGP67,1),(LGP99,1),(LGP258,8),(LGP147,6),(LGP270,7),(LGP172,5)]}"];
+		LGP21585 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP21585", genotype="{[(0,3,1,454,1,165)]}"];
+		TPG41708 -> LGP99
+		TPG41708 -> LGP3
+		TPG41708 -> LGP21585
+		TPG41708 -> LGP270
+		TPG41708 -> LGP67
+		TPG41708 -> LGP99
+		TPG41708 -> LGP258
+		TPG41708 -> LGP147
+		TPG41708 -> LGP270
+		TPG41708 -> LGP172
+		TPG41878 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG41878", genotype="{[(LGP23968,1),(LGP3,3),(LGP30445,0),(LGP147,6),(LGP270,7),(LGP25508,8),(LGP99,1),(LGP258,8),(LGP8372,6),(LGP37098,5)]}"];
+		LGP30445 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP30445", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP37098 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP37098", genotype="{[(6,4,1,327,1,200),(0,0,1,373,0,662),]}"];
+		TPG41878 -> LGP23968
+		TPG41878 -> LGP3
+		TPG41878 -> LGP30445
+		TPG41878 -> LGP147
+		TPG41878 -> LGP270
+		TPG41878 -> LGP25508
+		TPG41878 -> LGP99
+		TPG41878 -> LGP258
+		TPG41878 -> LGP8372
+		TPG41878 -> LGP37098
+		TPG41993 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG41993", genotype="{[(LGP159,1),(LGP33144,0),(LGP270,7),(LGP270,7),(LGP67,3),(LGP172,5),(LGP147,6),(LGP31937,9),(LGP31937,9),(LGP8372,6)]}"];
+		LGP159 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP159", genotype="{[(0,8,0,479,0,667),]}"];
+		LGP33144 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP33144", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP31937 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP31937", genotype="{[(4,0,1,716,1,245),(3,0,0,684,1,445),(0,1,0,564,0,155),]}"];
+		TPG41993 -> LGP159
+		TPG41993 -> LGP33144
+		TPG41993 -> LGP270
+		TPG41993 -> LGP270
+		TPG41993 -> LGP67
+		TPG41993 -> LGP172
+		TPG41993 -> LGP147
+		TPG41993 -> LGP31937
+		TPG41993 -> LGP31937
+		TPG41993 -> LGP8372
+		TPG42950 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG42950", genotype="{[(LGP38531,1),(LGP31785,5),(LGP3,3),(LGP21585,0),(LGP43928,6),(LGP270,7),(LGP38532,1),(LGP258,8),(LGP147,6),(LGP172,5)]}"];
+		LGP38531 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP38531", genotype="{[(0,5,1,252,0,265),]}"];
+		LGP31785 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP31785", genotype="{[(3,0,1,103,1,315),(3,0,0,531,0,673),(0,0,1,735,0,699),]}"];
+		LGP43928 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP43928", genotype="{[(0,8,0,777,1,758)]}"];
+		LGP38532 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP38532", genotype="{[(0,5,1,252,0,265),]}"];
+		TPG42950 -> LGP38531
+		TPG42950 -> LGP31785
+		TPG42950 -> LGP3
+		TPG42950 -> LGP21585
+		TPG42950 -> LGP43928
+		TPG42950 -> LGP270
+		TPG42950 -> LGP38532
+		TPG42950 -> LGP258
+		TPG42950 -> LGP147
+		TPG42950 -> LGP172
+		TPG42999 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG42999", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP25508,2)]}"];
+		TPG42999 -> LGP15397
+		TPG42999 -> LGP4794
+		TPG42999 -> LGP147
+		TPG42999 -> LGP67
+		TPG42999 -> LGP26586
+		TPG42999 -> LGP79
+		TPG42999 -> LGP79
+		TPG42999 -> LGP270
+		TPG42999 -> LGP172
+		TPG42999 -> LGP25508
+		TPG43016 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43016", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP67,3),(LGP31937,9)]}"];
+		TPG43016 -> LGP99
+		TPG43016 -> LGP258
+		TPG43016 -> LGP270
+		TPG43016 -> LGP79
+		TPG43016 -> LGP8372
+		TPG43016 -> LGP67
+		TPG43016 -> LGP147
+		TPG43016 -> LGP67
+		TPG43016 -> LGP31937
+		TPG43054 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43054", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6)]}"];
+		TPG43054 -> LGP99
+		TPG43054 -> LGP258
+		TPG43054 -> LGP24108
+		TPG43054 -> LGP270
+		TPG43054 -> LGP172
+		TPG43054 -> LGP3
+		TPG43054 -> LGP25338
+		TPG43054 -> LGP147
+		TPG43055 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43055", genotype="{[(LGP23968,1),(LGP3,3),(LGP30445,0),(LGP147,6),(LGP270,7),(LGP25508,8),(LGP99,1),(LGP258,8),(LGP37098,5),(LGP216,1)]}"];
+		TPG43055 -> LGP23968
+		TPG43055 -> LGP3
+		TPG43055 -> LGP30445
+		TPG43055 -> LGP147
+		TPG43055 -> LGP270
+		TPG43055 -> LGP25508
+		TPG43055 -> LGP99
+		TPG43055 -> LGP258
+		TPG43055 -> LGP37098
+		TPG43055 -> LGP216
+		TPG43075 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43075", genotype="{[(LGP99,1),(LGP3,3),(LGP21585,0),(LGP270,7),(LGP99,1),(LGP258,8),(LGP147,6),(LGP270,7),(LGP172,5),(LGP270,7)]}"];
+		TPG43075 -> LGP99
+		TPG43075 -> LGP3
+		TPG43075 -> LGP21585
+		TPG43075 -> LGP270
+		TPG43075 -> LGP99
+		TPG43075 -> LGP258
+		TPG43075 -> LGP147
+		TPG43075 -> LGP270
+		TPG43075 -> LGP172
+		TPG43075 -> LGP270
+		TPG43312 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43312", genotype="{[(LGP172,5),(LGP39939,0),(LGP20398,1),(LGP8372,6),(LGP22698,8),(LGP67,3),(LGP270,7),(LGP147,6),(LGP20398,1),(LGP174,1),(LGP270,7),(LGP38531,1)]}"];
+		LGP39939 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP39939", genotype="{[(0,3,1,454,1,165),]}"];
+		LGP22698 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP22698", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP174 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP174", genotype="{[]}"];
+		TPG43312 -> LGP172
+		TPG43312 -> LGP39939
+		TPG43312 -> LGP20398
+		TPG43312 -> LGP8372
+		TPG43312 -> LGP22698
+		TPG43312 -> LGP67
+		TPG43312 -> LGP270
+		TPG43312 -> LGP147
+		TPG43312 -> LGP20398
+		TPG43312 -> LGP174
+		TPG43312 -> LGP270
+		TPG43312 -> LGP38531
+		TPG43569 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43569", genotype="{[(LGP99,1),(LGP44189,8),(LGP44206,7),(LGP147,6),(LGP172,5),(LGP38590,0),(LGP298,9),(LGP258,5),(LGP270,7),(LGP3,3)]}"];
+		LGP44189 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP44189", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP44206 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP44206", genotype="{[(0,1,1,47,1,439),]}"];
+		LGP38590 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP38590", genotype="{[(0,3,1,454,1,165),]}"];
+		TPG43569 -> LGP99
+		TPG43569 -> LGP44189
+		TPG43569 -> LGP44206
+		TPG43569 -> LGP147
+		TPG43569 -> LGP172
+		TPG43569 -> LGP38590
+		TPG43569 -> LGP298
+		TPG43569 -> LGP258
+		TPG43569 -> LGP270
+		TPG43569 -> LGP3
+		TPG43776 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43776", genotype="{[(LGP99,1),(LGP24108,4),(LGP298,9),(LGP270,7),(LGP37098,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP258,8)]}"];
+		TPG43776 -> LGP99
+		TPG43776 -> LGP24108
+		TPG43776 -> LGP298
+		TPG43776 -> LGP270
+		TPG43776 -> LGP37098
+		TPG43776 -> LGP3
+		TPG43776 -> LGP25338
+		TPG43776 -> LGP147
+		TPG43776 -> LGP258
+		TPG43799 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG43799", genotype="{[(LGP216,1),(LGP37075,9),(LGP79,0),(LGP67,3),(LGP147,6),(LGP40125,8),(LGP270,7),(LGP172,5),(LGP8372,6),(LGP44297,3)]}"];
+		LGP44297 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP44297", genotype="{[(0,0,0,193,1,602)]}"];
+		TPG43799 -> LGP216
+		TPG43799 -> LGP37075
+		TPG43799 -> LGP79
+		TPG43799 -> LGP67
+		TPG43799 -> LGP147
+		TPG43799 -> LGP40125
+		TPG43799 -> LGP270
+		TPG43799 -> LGP172
+		TPG43799 -> LGP8372
+		TPG43799 -> LGP44297
+		TPG44399 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44399", genotype="{[(LGP15397,9),(LGP38482,1),(LGP26586,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP270,7)]}"];
+		TPG44399 -> LGP15397
+		TPG44399 -> LGP38482
+		TPG44399 -> LGP26586
+		TPG44399 -> LGP15398
+		TPG44399 -> LGP147
+		TPG44399 -> LGP79
+		TPG44399 -> LGP8372
+		TPG44399 -> LGP67
+		TPG44399 -> LGP270
+		TPG44427 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44427", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP67,3),(LGP31937,9)]}"];
+		TPG44427 -> LGP99
+		TPG44427 -> LGP258
+		TPG44427 -> LGP270
+		TPG44427 -> LGP79
+		TPG44427 -> LGP8372
+		TPG44427 -> LGP67
+		TPG44427 -> LGP147
+		TPG44427 -> LGP67
+		TPG44427 -> LGP31937
+		TPG44528 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44528", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP34508,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2),(LGP270,1)]}"];
+		TPG44528 -> LGP99
+		TPG44528 -> LGP258
+		TPG44528 -> LGP270
+		TPG44528 -> LGP79
+		TPG44528 -> LGP34508
+		TPG44528 -> LGP8372
+		TPG44528 -> LGP67
+		TPG44528 -> LGP147
+		TPG44528 -> LGP31
+		TPG44528 -> LGP270
+		TPG44642 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44642", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP25508,2),(LGP99,1)]}"];
+		TPG44642 -> LGP15397
+		TPG44642 -> LGP4794
+		TPG44642 -> LGP147
+		TPG44642 -> LGP67
+		TPG44642 -> LGP26586
+		TPG44642 -> LGP79
+		TPG44642 -> LGP79
+		TPG44642 -> LGP270
+		TPG44642 -> LGP172
+		TPG44642 -> LGP25508
+		TPG44642 -> LGP99
+		TPG44773 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44773", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5)]}"];
+		TPG44773 -> LGP15397
+		TPG44773 -> LGP4794
+		TPG44773 -> LGP147
+		TPG44773 -> LGP67
+		TPG44773 -> LGP26586
+		TPG44773 -> LGP79
+		TPG44773 -> LGP79
+		TPG44773 -> LGP270
+		TPG44773 -> LGP172
+		TPG44825 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44825", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP45512,0),(LGP37108,3),(LGP8372,6),(LGP45519,3),(LGP147,6),(LGP147,6),(LGP9440,1),(LGP3,3)]}"];
+		LGP45512 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP45512", genotype="{[(0,3,1,454,1,165),]}"];
+		LGP37108 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP37108", genotype="{[(7,5,1,343,1,420),(5,6,0,575,1,233),(0,8,1,672,1,370),(0,0,0,621,0,688),]}"];
+		LGP45519 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP45519", genotype="{[(7,1,1,66,1,148),(0,4,0,567,1,172),(3,3,0,448,1,30),(0,0,1,411,0,3)]}"];
+		LGP9440 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP9440", genotype="{[(1,7,0,569,1,195),(0,5,0,457,0,246)]}"];
+		TPG44825 -> LGP99
+		TPG44825 -> LGP258
+		TPG44825 -> LGP270
+		TPG44825 -> LGP45512
+		TPG44825 -> LGP37108
+		TPG44825 -> LGP8372
+		TPG44825 -> LGP45519
+		TPG44825 -> LGP147
+		TPG44825 -> LGP147
+		TPG44825 -> LGP9440
+		TPG44825 -> LGP3
+		TPG44828 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44828", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31937,9),(LGP25508,3)]}"];
+		TPG44828 -> LGP99
+		TPG44828 -> LGP258
+		TPG44828 -> LGP270
+		TPG44828 -> LGP79
+		TPG44828 -> LGP8372
+		TPG44828 -> LGP67
+		TPG44828 -> LGP147
+		TPG44828 -> LGP31937
+		TPG44828 -> LGP25508
+		TPG44943 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44943", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP147,6),(LGP67,3),(LGP31937,9),(LGP79,0)]}"];
+		TPG44943 -> LGP99
+		TPG44943 -> LGP258
+		TPG44943 -> LGP270
+		TPG44943 -> LGP79
+		TPG44943 -> LGP8372
+		TPG44943 -> LGP147
+		TPG44943 -> LGP67
+		TPG44943 -> LGP31937
+		TPG44943 -> LGP79
+		TPG44962 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG44962", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP172,5),(LGP258,8),(LGP79,0)]}"];
+		TPG44962 -> LGP23968
+		TPG44962 -> LGP3
+		TPG44962 -> LGP25338
+		TPG44962 -> LGP147
+		TPG44962 -> LGP270
+		TPG44962 -> LGP25508
+		TPG44962 -> LGP172
+		TPG44962 -> LGP258
+		TPG44962 -> LGP79
+		TPG45152 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45152", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP172,5),(LGP258,8),(LGP8372,6)]}"];
+		TPG45152 -> LGP23968
+		TPG45152 -> LGP3
+		TPG45152 -> LGP25338
+		TPG45152 -> LGP147
+		TPG45152 -> LGP270
+		TPG45152 -> LGP25508
+		TPG45152 -> LGP172
+		TPG45152 -> LGP258
+		TPG45152 -> LGP8372
+		TPG45281 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45281", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP34508,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2),(LGP270,3)]}"];
+		TPG45281 -> LGP99
+		TPG45281 -> LGP258
+		TPG45281 -> LGP270
+		TPG45281 -> LGP79
+		TPG45281 -> LGP34508
+		TPG45281 -> LGP8372
+		TPG45281 -> LGP67
+		TPG45281 -> LGP147
+		TPG45281 -> LGP31
+		TPG45281 -> LGP270
+		TPG45317 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45317", genotype="{[(LGP99,1),(LGP24108,8),(LGP298,9),(LGP172,5),(LGP3,3),(LGP29234,0),(LGP45715,8),(LGP79,0),(LGP147,6),(LGP79,0),(LGP8372,6)]}"];
+		LGP29234 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP29234", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP45715 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP45715", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG45317 -> LGP99
+		TPG45317 -> LGP24108
+		TPG45317 -> LGP298
+		TPG45317 -> LGP172
+		TPG45317 -> LGP3
+		TPG45317 -> LGP29234
+		TPG45317 -> LGP45715
+		TPG45317 -> LGP79
+		TPG45317 -> LGP147
+		TPG45317 -> LGP79
+		TPG45317 -> LGP8372
+		TPG45334 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45334", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP270,7),(LGP172,5),(LGP25338,0),(LGP147,6),(LGP3,3)]}"];
+		TPG45334 -> LGP99
+		TPG45334 -> LGP258
+		TPG45334 -> LGP24108
+		TPG45334 -> LGP270
+		TPG45334 -> LGP172
+		TPG45334 -> LGP25338
+		TPG45334 -> LGP147
+		TPG45334 -> LGP3
+		TPG45811 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45811", genotype="{[(LGP99,1),(LGP24108,8),(LGP298,9),(LGP172,5),(LGP3,3),(LGP45715,8),(LGP79,0),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP14260,0)]}"];
+		LGP14260 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP14260", genotype="{[(0,3,1,454,1,165)]}"];
+		TPG45811 -> LGP99
+		TPG45811 -> LGP24108
+		TPG45811 -> LGP298
+		TPG45811 -> LGP172
+		TPG45811 -> LGP3
+		TPG45811 -> LGP45715
+		TPG45811 -> LGP79
+		TPG45811 -> LGP147
+		TPG45811 -> LGP79
+		TPG45811 -> LGP8372
+		TPG45811 -> LGP14260
+		TPG45842 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45842", genotype="{[(LGP15397,9),(LGP38482,1),(LGP26586,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP270,7),(LGP172,5)]}"];
+		TPG45842 -> LGP15397
+		TPG45842 -> LGP38482
+		TPG45842 -> LGP26586
+		TPG45842 -> LGP15398
+		TPG45842 -> LGP147
+		TPG45842 -> LGP79
+		TPG45842 -> LGP8372
+		TPG45842 -> LGP270
+		TPG45842 -> LGP172
+		TPG45918 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG45918", genotype="{[(LGP159,1),(LGP33144,0),(LGP270,7),(LGP270,7),(LGP67,3),(LGP172,5),(LGP147,6),(LGP31937,9),(LGP31937,9),(LGP8372,6),(LGP8372,6)]}"];
+		TPG45918 -> LGP159
+		TPG45918 -> LGP33144
+		TPG45918 -> LGP270
+		TPG45918 -> LGP270
+		TPG45918 -> LGP67
+		TPG45918 -> LGP172
+		TPG45918 -> LGP147
+		TPG45918 -> LGP31937
+		TPG45918 -> LGP31937
+		TPG45918 -> LGP8372
+		TPG45918 -> LGP8372
+		TPG46189 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46189", genotype="{[(LGP23968,1),(LGP3,3),(LGP30445,0),(LGP147,6),(LGP270,7),(LGP25508,8),(LGP99,1),(LGP258,8),(LGP8372,6),(LGP37098,5)]}"];
+		TPG46189 -> LGP23968
+		TPG46189 -> LGP3
+		TPG46189 -> LGP30445
+		TPG46189 -> LGP147
+		TPG46189 -> LGP270
+		TPG46189 -> LGP25508
+		TPG46189 -> LGP99
+		TPG46189 -> LGP258
+		TPG46189 -> LGP8372
+		TPG46189 -> LGP37098
+		TPG46353 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46353", genotype="{[(LGP15397,9),(LGP38482,1),(LGP47006,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP270,7),(LGP3,3)]}"];
+		LGP47006 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP47006", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG46353 -> LGP15397
+		TPG46353 -> LGP38482
+		TPG46353 -> LGP47006
+		TPG46353 -> LGP15398
+		TPG46353 -> LGP147
+		TPG46353 -> LGP79
+		TPG46353 -> LGP8372
+		TPG46353 -> LGP270
+		TPG46353 -> LGP3
+		TPG46365 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46365", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP25508,2),(LGP38533,5),(LGP258,8),(LGP172,5),(LGP216,1)]}"];
+		TPG46365 -> LGP23968
+		TPG46365 -> LGP3
+		TPG46365 -> LGP25338
+		TPG46365 -> LGP147
+		TPG46365 -> LGP270
+		TPG46365 -> LGP25508
+		TPG46365 -> LGP38533
+		TPG46365 -> LGP258
+		TPG46365 -> LGP172
+		TPG46365 -> LGP216
+		TPG46446 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46446", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP147,6),(LGP67,3),(LGP31937,9),(LGP31937,9)]}"];
+		TPG46446 -> LGP99
+		TPG46446 -> LGP258
+		TPG46446 -> LGP270
+		TPG46446 -> LGP79
+		TPG46446 -> LGP8372
+		TPG46446 -> LGP147
+		TPG46446 -> LGP67
+		TPG46446 -> LGP31937
+		TPG46446 -> LGP31937
+		TPG46570 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46570", genotype="{[(LGP159,1),(LGP33144,0),(LGP147,6),(LGP270,7),(LGP40153,7),(LGP172,5),(LGP258,8),(LGP258,8),(LGP3,3),(LGP31937,9)]}"];
+		LGP40153 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP40153", genotype="{[(3,1,0,385,0,189),(0,3,0,611,1,394)]}"];
+		TPG46570 -> LGP159
+		TPG46570 -> LGP33144
+		TPG46570 -> LGP147
+		TPG46570 -> LGP270
+		TPG46570 -> LGP40153
+		TPG46570 -> LGP172
+		TPG46570 -> LGP258
+		TPG46570 -> LGP258
+		TPG46570 -> LGP3
+		TPG46570 -> LGP31937
+		TPG46588 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46588", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP270,7)]}"];
+		TPG46588 -> LGP15397
+		TPG46588 -> LGP4794
+		TPG46588 -> LGP147
+		TPG46588 -> LGP67
+		TPG46588 -> LGP26586
+		TPG46588 -> LGP79
+		TPG46588 -> LGP79
+		TPG46588 -> LGP270
+		TPG46588 -> LGP172
+		TPG46588 -> LGP270
+		TPG46692 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG46692", genotype="{[(LGP159,1),(LGP33144,0),(LGP270,7),(LGP67,3),(LGP172,5),(LGP147,6),(LGP31937,9),(LGP31937,9),(LGP8372,6),(LGP270,7)]}"];
+		TPG46692 -> LGP159
+		TPG46692 -> LGP33144
+		TPG46692 -> LGP270
+		TPG46692 -> LGP67
+		TPG46692 -> LGP172
+		TPG46692 -> LGP147
+		TPG46692 -> LGP31937
+		TPG46692 -> LGP31937
+		TPG46692 -> LGP8372
+		TPG46692 -> LGP270
+		TPG47197 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47197", genotype="{[(LGP99,1),(LGP258,8),(LGP48186,0),(LGP270,7),(LGP8372,6),(LGP147,6),(LGP67,3),(LGP99,1),(LGP172,5)]}"];
+		LGP48186 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP48186", genotype="{[(0,3,1,454,1,165),]}"];
+		TPG47197 -> LGP99
+		TPG47197 -> LGP258
+		TPG47197 -> LGP48186
+		TPG47197 -> LGP270
+		TPG47197 -> LGP8372
+		TPG47197 -> LGP147
+		TPG47197 -> LGP67
+		TPG47197 -> LGP99
+		TPG47197 -> LGP172
+		TPG47245 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47245", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP25508,2),(LGP99,1),(LGP26586,8)]}"];
+		TPG47245 -> LGP15397
+		TPG47245 -> LGP4794
+		TPG47245 -> LGP147
+		TPG47245 -> LGP67
+		TPG47245 -> LGP26586
+		TPG47245 -> LGP79
+		TPG47245 -> LGP79
+		TPG47245 -> LGP270
+		TPG47245 -> LGP172
+		TPG47245 -> LGP25508
+		TPG47245 -> LGP99
+		TPG47245 -> LGP26586
+		TPG47250 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47250", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP147,7),(LGP25338,0)]}"];
+		TPG47250 -> LGP99
+		TPG47250 -> LGP258
+		TPG47250 -> LGP24108
+		TPG47250 -> LGP270
+		TPG47250 -> LGP172
+		TPG47250 -> LGP3
+		TPG47250 -> LGP25338
+		TPG47250 -> LGP147
+		TPG47250 -> LGP147
+		TPG47250 -> LGP25338
+		TPG47708 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47708", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP147,6),(LGP67,3),(LGP48387,9),(LGP79,0),(LGP3,3)]}"];
+		LGP48387 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP48387", genotype="{[(4,6,1,716,1,245),(3,5,0,684,1,445),(0,1,0,564,0,155),]}"];
+		TPG47708 -> LGP99
+		TPG47708 -> LGP258
+		TPG47708 -> LGP270
+		TPG47708 -> LGP79
+		TPG47708 -> LGP8372
+		TPG47708 -> LGP147
+		TPG47708 -> LGP67
+		TPG47708 -> LGP48387
+		TPG47708 -> LGP79
+		TPG47708 -> LGP3
+		TPG47722 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47722", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP270,7)]}"];
+		TPG47722 -> LGP15397
+		TPG47722 -> LGP4794
+		TPG47722 -> LGP147
+		TPG47722 -> LGP67
+		TPG47722 -> LGP26586
+		TPG47722 -> LGP79
+		TPG47722 -> LGP79
+		TPG47722 -> LGP270
+		TPG47722 -> LGP172
+		TPG47722 -> LGP270
+		TPG47758 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47758", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP48426,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2),(LGP29234,0)]}"];
+		LGP48426 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP48426", genotype="{[(0,8,1,672,1,422),]}"];
+		TPG47758 -> LGP99
+		TPG47758 -> LGP258
+		TPG47758 -> LGP270
+		TPG47758 -> LGP79
+		TPG47758 -> LGP48426
+		TPG47758 -> LGP8372
+		TPG47758 -> LGP67
+		TPG47758 -> LGP147
+		TPG47758 -> LGP31
+		TPG47758 -> LGP29234
+		TPG47956 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47956", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31937,9),(LGP25508,3)]}"];
+		TPG47956 -> LGP99
+		TPG47956 -> LGP258
+		TPG47956 -> LGP270
+		TPG47956 -> LGP79
+		TPG47956 -> LGP8372
+		TPG47956 -> LGP67
+		TPG47956 -> LGP147
+		TPG47956 -> LGP31937
+		TPG47956 -> LGP25508
+		TPG47977 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG47977", genotype="{[(LGP99,1),(LGP44189,8),(LGP44206,7),(LGP147,6),(LGP172,5),(LGP38590,0),(LGP258,5),(LGP270,7),(LGP3,3),(LGP298,9)]}"];
+		TPG47977 -> LGP99
+		TPG47977 -> LGP44189
+		TPG47977 -> LGP44206
+		TPG47977 -> LGP147
+		TPG47977 -> LGP172
+		TPG47977 -> LGP38590
+		TPG47977 -> LGP258
+		TPG47977 -> LGP270
+		TPG47977 -> LGP3
+		TPG47977 -> LGP298
+		TPG48025 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48025", genotype="{[(LGP99,1),(LGP24108,8),(LGP298,9),(LGP172,5),(LGP3,3),(LGP45715,8),(LGP79,0),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP14260,0),(LGP99,1)]}"];
+		TPG48025 -> LGP99
+		TPG48025 -> LGP24108
+		TPG48025 -> LGP298
+		TPG48025 -> LGP172
+		TPG48025 -> LGP3
+		TPG48025 -> LGP45715
+		TPG48025 -> LGP79
+		TPG48025 -> LGP147
+		TPG48025 -> LGP79
+		TPG48025 -> LGP8372
+		TPG48025 -> LGP14260
+		TPG48025 -> LGP99
+		TPG48139 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48139", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP147,6)]}"];
+		TPG48139 -> LGP15397
+		TPG48139 -> LGP4794
+		TPG48139 -> LGP147
+		TPG48139 -> LGP67
+		TPG48139 -> LGP26586
+		TPG48139 -> LGP79
+		TPG48139 -> LGP79
+		TPG48139 -> LGP270
+		TPG48139 -> LGP172
+		TPG48139 -> LGP147
+		TPG48643 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48643", genotype="{[(LGP15397,9),(LGP47006,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP270,7),(LGP3,3),(LGP172,5)]}"];
+		TPG48643 -> LGP15397
+		TPG48643 -> LGP47006
+		TPG48643 -> LGP15398
+		TPG48643 -> LGP147
+		TPG48643 -> LGP79
+		TPG48643 -> LGP8372
+		TPG48643 -> LGP270
+		TPG48643 -> LGP3
+		TPG48643 -> LGP172
+		TPG48652 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48652", genotype="{[(LGP99,1),(LGP3,3),(LGP21585,0),(LGP99,1),(LGP258,8),(LGP147,6),(LGP270,7),(LGP172,5),(LGP49636,7),(LGP270,7)]}"];
+		LGP49636 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49636", genotype="{[(0,1,1,739,1,526),]}"];
+		TPG48652 -> LGP99
+		TPG48652 -> LGP3
+		TPG48652 -> LGP21585
+		TPG48652 -> LGP99
+		TPG48652 -> LGP258
+		TPG48652 -> LGP147
+		TPG48652 -> LGP270
+		TPG48652 -> LGP172
+		TPG48652 -> LGP49636
+		TPG48652 -> LGP270
+		TPG48756 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48756", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP258,8)]}"];
+		TPG48756 -> LGP15397
+		TPG48756 -> LGP4794
+		TPG48756 -> LGP147
+		TPG48756 -> LGP67
+		TPG48756 -> LGP26586
+		TPG48756 -> LGP79
+		TPG48756 -> LGP79
+		TPG48756 -> LGP270
+		TPG48756 -> LGP172
+		TPG48756 -> LGP258
+		TPG48823 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48823", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP49709,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP25508,2),(LGP8372,6)]}"];
+		LGP49709 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49709", genotype="{[(7,1,1,467,1,148),(0,4,0,567,1,172),]}"];
+		TPG48823 -> LGP15397
+		TPG48823 -> LGP4794
+		TPG48823 -> LGP147
+		TPG48823 -> LGP49709
+		TPG48823 -> LGP26586
+		TPG48823 -> LGP79
+		TPG48823 -> LGP79
+		TPG48823 -> LGP270
+		TPG48823 -> LGP172
+		TPG48823 -> LGP25508
+		TPG48823 -> LGP8372
+		TPG48888 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG48888", genotype="{[(LGP15397,9),(LGP4794,1),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP147,6)]}"];
+		TPG48888 -> LGP15397
+		TPG48888 -> LGP4794
+		TPG48888 -> LGP67
+		TPG48888 -> LGP26586
+		TPG48888 -> LGP79
+		TPG48888 -> LGP79
+		TPG48888 -> LGP270
+		TPG48888 -> LGP172
+		TPG48888 -> LGP147
+		TPG49287 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49287", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP25508,2),(LGP49909,5),(LGP258,8),(LGP172,5),(LGP270,7)]}"];
+		LGP49909 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49909", genotype="{[(6,1,1,176,1,433),(0,0,1,199,0,510),]}"];
+		TPG49287 -> LGP23968
+		TPG49287 -> LGP3
+		TPG49287 -> LGP25338
+		TPG49287 -> LGP147
+		TPG49287 -> LGP25508
+		TPG49287 -> LGP49909
+		TPG49287 -> LGP258
+		TPG49287 -> LGP172
+		TPG49287 -> LGP270
+		TPG49442 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49442", genotype="{[(LGP15397,9),(LGP4794,1),(LGP4785,0),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP99,1)]}"];
+		TPG49442 -> LGP15397
+		TPG49442 -> LGP4794
+		TPG49442 -> LGP4785
+		TPG49442 -> LGP147
+		TPG49442 -> LGP67
+		TPG49442 -> LGP26586
+		TPG49442 -> LGP79
+		TPG49442 -> LGP79
+		TPG49442 -> LGP270
+		TPG49442 -> LGP172
+		TPG49442 -> LGP99
+		TPG49478 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49478", genotype="{[(LGP49966,1),(LGP33144,0),(LGP270,7),(LGP270,7),(LGP67,3),(LGP172,5),(LGP147,6),(LGP49979,9),(LGP31937,9),(LGP8372,6),(LGP258,8)]}"];
+		LGP49966 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49966", genotype="{[(0,8,0,171,0,689),]}"];
+		LGP49979 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49979", genotype="{[(4,0,0,716,1,245),(3,0,0,684,1,445),(0,1,1,564,0,155),]}"];
+		TPG49478 -> LGP49966
+		TPG49478 -> LGP33144
+		TPG49478 -> LGP270
+		TPG49478 -> LGP270
+		TPG49478 -> LGP67
+		TPG49478 -> LGP172
+		TPG49478 -> LGP147
+		TPG49478 -> LGP49979
+		TPG49478 -> LGP31937
+		TPG49478 -> LGP8372
+		TPG49478 -> LGP258
+		TPG49507 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49507", genotype="{[(LGP216,1),(LGP37075,9),(LGP79,0),(LGP67,3),(LGP147,6),(LGP49986,8),(LGP270,7),(LGP20398,1),(LGP172,5),(LGP8372,6),(LGP147,6)]}"];
+		LGP49986 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49986", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG49507 -> LGP216
+		TPG49507 -> LGP37075
+		TPG49507 -> LGP79
+		TPG49507 -> LGP67
+		TPG49507 -> LGP147
+		TPG49507 -> LGP49986
+		TPG49507 -> LGP270
+		TPG49507 -> LGP20398
+		TPG49507 -> LGP172
+		TPG49507 -> LGP8372
+		TPG49507 -> LGP147
+		TPG49526 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49526", genotype="{[(LGP99,1),(LGP49992,4),(LGP298,9),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP258,8)]}"];
+		LGP49992 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49992", genotype="{[(0,3,1,531,1,257),]}"];
+		TPG49526 -> LGP99
+		TPG49526 -> LGP49992
+		TPG49526 -> LGP298
+		TPG49526 -> LGP270
+		TPG49526 -> LGP172
+		TPG49526 -> LGP3
+		TPG49526 -> LGP25338
+		TPG49526 -> LGP147
+		TPG49526 -> LGP258
+		TPG49569 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG49569", genotype="{[(LGP99,1),(LGP50006,8),(LGP44206,7),(LGP147,6),(LGP172,5),(LGP38590,0),(LGP298,9),(LGP270,7),(LGP3,3)]}"];
+		LGP50006 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP50006", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG49569 -> LGP99
+		TPG49569 -> LGP50006
+		TPG49569 -> LGP44206
+		TPG49569 -> LGP147
+		TPG49569 -> LGP172
+		TPG49569 -> LGP38590
+		TPG49569 -> LGP298
+		TPG49569 -> LGP270
+		TPG49569 -> LGP3
+		TPG50080 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50080", genotype="{[(LGP15397,9),(LGP4794,1),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP147,6),(LGP147,6)]}"];
+		TPG50080 -> LGP15397
+		TPG50080 -> LGP4794
+		TPG50080 -> LGP67
+		TPG50080 -> LGP26586
+		TPG50080 -> LGP79
+		TPG50080 -> LGP79
+		TPG50080 -> LGP270
+		TPG50080 -> LGP172
+		TPG50080 -> LGP147
+		TPG50080 -> LGP147
+		TPG50118 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50118", genotype="{[(LGP99,1),(LGP44189,8),(LGP44206,7),(LGP147,6),(LGP172,5),(LGP38590,0),(LGP298,9),(LGP258,5),(LGP270,7),(LGP3,3)]}"];
+		TPG50118 -> LGP99
+		TPG50118 -> LGP44189
+		TPG50118 -> LGP44206
+		TPG50118 -> LGP147
+		TPG50118 -> LGP172
+		TPG50118 -> LGP38590
+		TPG50118 -> LGP298
+		TPG50118 -> LGP258
+		TPG50118 -> LGP270
+		TPG50118 -> LGP3
+		TPG50231 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50231", genotype="{[(LGP159,1),(LGP33144,0),(LGP270,7),(LGP270,7),(LGP67,3),(LGP172,5),(LGP147,6),(LGP31937,9),(LGP31937,9),(LGP8372,6),(LGP15397,9)]}"];
+		TPG50231 -> LGP159
+		TPG50231 -> LGP33144
+		TPG50231 -> LGP270
+		TPG50231 -> LGP270
+		TPG50231 -> LGP67
+		TPG50231 -> LGP172
+		TPG50231 -> LGP147
+		TPG50231 -> LGP31937
+		TPG50231 -> LGP31937
+		TPG50231 -> LGP8372
+		TPG50231 -> LGP15397
+		TPG50312 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50312", genotype="{[(LGP99,1),(LGP51165,8),(LGP270,7),(LGP79,0),(LGP34508,9),(LGP67,3),(LGP51355,6),(LGP31,2),(LGP270,1),(LGP147,6)]}"];
+		LGP51165 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51165", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP51355 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51355", genotype="{[(0,7,0,233,1,317)]}"];
+		TPG50312 -> LGP99
+		TPG50312 -> LGP51165
+		TPG50312 -> LGP270
+		TPG50312 -> LGP79
+		TPG50312 -> LGP34508
+		TPG50312 -> LGP67
+		TPG50312 -> LGP51355
+		TPG50312 -> LGP31
+		TPG50312 -> LGP270
+		TPG50312 -> LGP147
+		TPG50408 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50408", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP20398,1)]}"];
+		TPG50408 -> LGP15397
+		TPG50408 -> LGP4794
+		TPG50408 -> LGP147
+		TPG50408 -> LGP67
+		TPG50408 -> LGP26586
+		TPG50408 -> LGP79
+		TPG50408 -> LGP79
+		TPG50408 -> LGP270
+		TPG50408 -> LGP172
+		TPG50408 -> LGP20398
+		TPG50490 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50490", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,2),(LGP270,7),(LGP172,5),(LGP25508,2),(LGP26586,8),(LGP3,3)]}"];
+		TPG50490 -> LGP15397
+		TPG50490 -> LGP4794
+		TPG50490 -> LGP147
+		TPG50490 -> LGP67
+		TPG50490 -> LGP26586
+		TPG50490 -> LGP79
+		TPG50490 -> LGP79
+		TPG50490 -> LGP270
+		TPG50490 -> LGP172
+		TPG50490 -> LGP25508
+		TPG50490 -> LGP26586
+		TPG50490 -> LGP3
+		TPG50528 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50528", genotype="{[(LGP172,5),(LGP20398,1),(LGP8372,6),(LGP22698,8),(LGP67,3),(LGP270,7),(LGP147,6),(LGP20398,1),(LGP174,1),(LGP270,7),(LGP38531,1),(LGP31,2)]}"];
+		TPG50528 -> LGP172
+		TPG50528 -> LGP20398
+		TPG50528 -> LGP8372
+		TPG50528 -> LGP22698
+		TPG50528 -> LGP67
+		TPG50528 -> LGP270
+		TPG50528 -> LGP147
+		TPG50528 -> LGP20398
+		TPG50528 -> LGP174
+		TPG50528 -> LGP270
+		TPG50528 -> LGP38531
+		TPG50528 -> LGP31
+		TPG50557 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50557", genotype="{[(LGP15397,4),(LGP38482,1),(LGP4785,0),(LGP51278,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP270,7),(LGP44206,7)]}"];
+		LGP51278 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51278", genotype="{[(0,8,0,116,1,643),]}"];
+		TPG50557 -> LGP15397
+		TPG50557 -> LGP38482
+		TPG50557 -> LGP4785
+		TPG50557 -> LGP51278
+		TPG50557 -> LGP15398
+		TPG50557 -> LGP147
+		TPG50557 -> LGP79
+		TPG50557 -> LGP8372
+		TPG50557 -> LGP67
+		TPG50557 -> LGP270
+		TPG50557 -> LGP44206
+		TPG50558 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50558", genotype="{[(LGP172,5),(LGP39939,0),(LGP20398,1),(LGP8372,6),(LGP22698,8),(LGP67,3),(LGP270,7),(LGP147,6),(LGP20398,1),(LGP174,1),(LGP270,7),(LGP38531,1),(LGP48326,5)]}"];
+		LGP48326 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP48326", genotype="{[(0,3,1,454,1,165),]}"];
+		TPG50558 -> LGP172
+		TPG50558 -> LGP39939
+		TPG50558 -> LGP20398
+		TPG50558 -> LGP8372
+		TPG50558 -> LGP22698
+		TPG50558 -> LGP67
+		TPG50558 -> LGP270
+		TPG50558 -> LGP147
+		TPG50558 -> LGP20398
+		TPG50558 -> LGP174
+		TPG50558 -> LGP270
+		TPG50558 -> LGP38531
+		TPG50558 -> LGP48326
+		TPG50615 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50615", genotype="{[(LGP216,1),(LGP37075,9),(LGP79,0),(LGP67,3),(LGP147,6),(LGP40125,8),(LGP270,7),(LGP48222,1),(LGP172,5),(LGP79,4),(LGP51391,2)]}"];
+		LGP48222 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP48222", genotype="{[(0,2,1,316,1,132)]}"];
+		LGP51391 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51391", genotype="{[(0,1,1,606,1,37),]}"];
+		TPG50615 -> LGP216
+		TPG50615 -> LGP37075
+		TPG50615 -> LGP79
+		TPG50615 -> LGP67
+		TPG50615 -> LGP147
+		TPG50615 -> LGP40125
+		TPG50615 -> LGP270
+		TPG50615 -> LGP48222
+		TPG50615 -> LGP172
+		TPG50615 -> LGP79
+		TPG50615 -> LGP51391
+		TPG50631 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50631", genotype="{[(LGP99,1),(LGP51315,8),(LGP44206,7),(LGP147,6),(LGP51316,5),(LGP38590,0),(LGP298,9),(LGP51318,5),(LGP270,7),(LGP3,3),(LGP33144,1)]}"];
+		LGP51315 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51315", genotype="{[(0,8,0,116,0,643),]}"];
+		LGP51316 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51316", genotype="{[(3,0,0,745,0,297),(0,0,1,373,0,395),]}"];
+		LGP51318 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51318", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG50631 -> LGP99
+		TPG50631 -> LGP51315
+		TPG50631 -> LGP44206
+		TPG50631 -> LGP147
+		TPG50631 -> LGP51316
+		TPG50631 -> LGP38590
+		TPG50631 -> LGP298
+		TPG50631 -> LGP51318
+		TPG50631 -> LGP270
+		TPG50631 -> LGP3
+		TPG50631 -> LGP33144
+		TPG50658 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50658", genotype="{[(LGP15397,9),(LGP4794,1),(LGP4785,0),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5)]}"];
+		TPG50658 -> LGP15397
+		TPG50658 -> LGP4794
+		TPG50658 -> LGP4785
+		TPG50658 -> LGP147
+		TPG50658 -> LGP67
+		TPG50658 -> LGP26586
+		TPG50658 -> LGP79
+		TPG50658 -> LGP79
+		TPG50658 -> LGP270
+		TPG50658 -> LGP172
+		TPG50689 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50689", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP51347,8),(LGP51348,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP99,1),(LGP26586,8),(LGP147,6)]}"];
+		LGP51347 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51347", genotype="{[(2,1,0,92,1,764),(6,1,1,614,1,8),(3,2,1,412,0,394),(4,1,1,145,0,614),(0,1,0,116,0,643),]}"];
+		LGP51348 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51348", genotype="{[(0,3,1,454,1,165)]}"];
+		TPG50689 -> LGP15397
+		TPG50689 -> LGP4794
+		TPG50689 -> LGP147
+		TPG50689 -> LGP67
+		TPG50689 -> LGP51347
+		TPG50689 -> LGP51348
+		TPG50689 -> LGP79
+		TPG50689 -> LGP270
+		TPG50689 -> LGP172
+		TPG50689 -> LGP99
+		TPG50689 -> LGP26586
+		TPG50689 -> LGP147
+		TPG50691 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50691", genotype="{[(LGP99,1),(LGP44189,8),(LGP44206,7),(LGP147,6),(LGP172,5),(LGP38590,0),(LGP258,5),(LGP3,3),(LGP298,9),(LGP15397,9)]}"];
+		TPG50691 -> LGP99
+		TPG50691 -> LGP44189
+		TPG50691 -> LGP44206
+		TPG50691 -> LGP147
+		TPG50691 -> LGP172
+		TPG50691 -> LGP38590
+		TPG50691 -> LGP258
+		TPG50691 -> LGP3
+		TPG50691 -> LGP298
+		TPG50691 -> LGP15397
+		TPG50762 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50762", genotype="{[(LGP172,5),(LGP39939,0),(LGP20398,1),(LGP8372,6),(LGP22698,8),(LGP67,1),(LGP270,7),(LGP147,6),(LGP20398,1),(LGP174,1),(LGP270,7),(LGP38531,1)]}"];
+		TPG50762 -> LGP172
+		TPG50762 -> LGP39939
+		TPG50762 -> LGP20398
+		TPG50762 -> LGP8372
+		TPG50762 -> LGP22698
+		TPG50762 -> LGP67
+		TPG50762 -> LGP270
+		TPG50762 -> LGP147
+		TPG50762 -> LGP20398
+		TPG50762 -> LGP174
+		TPG50762 -> LGP270
+		TPG50762 -> LGP38531
+		TPG50789 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50789", genotype="{[(LGP99,1),(LGP258,8),(LGP24108,4),(LGP298,9),(LGP270,7),(LGP172,5),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP67,1),(LGP172,5)]}"];
+		TPG50789 -> LGP99
+		TPG50789 -> LGP258
+		TPG50789 -> LGP24108
+		TPG50789 -> LGP298
+		TPG50789 -> LGP270
+		TPG50789 -> LGP172
+		TPG50789 -> LGP3
+		TPG50789 -> LGP25338
+		TPG50789 -> LGP147
+		TPG50789 -> LGP67
+		TPG50789 -> LGP172
+		TPG50828 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50828", genotype="{[(LGP99,1),(LGP50006,8),(LGP44206,7),(LGP147,6),(LGP51429,5),(LGP38590,0),(LGP298,9),(LGP270,7),(LGP3,3),(LGP270,7)]}"];
+		LGP51429 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51429", genotype="{[(6,4,1,707,1,79),(0,0,1,373,0,510),]}"];
+		TPG50828 -> LGP99
+		TPG50828 -> LGP50006
+		TPG50828 -> LGP44206
+		TPG50828 -> LGP147
+		TPG50828 -> LGP51429
+		TPG50828 -> LGP38590
+		TPG50828 -> LGP298
+		TPG50828 -> LGP270
+		TPG50828 -> LGP3
+		TPG50828 -> LGP270
+		TPG50856 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50856", genotype="{[(LGP15397,9),(LGP147,6),(LGP67,2),(LGP51431,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP147,6),(LGP31937,9)]}"];
+		LGP51431 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51431", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG50856 -> LGP15397
+		TPG50856 -> LGP147
+		TPG50856 -> LGP67
+		TPG50856 -> LGP51431
+		TPG50856 -> LGP79
+		TPG50856 -> LGP79
+		TPG50856 -> LGP270
+		TPG50856 -> LGP172
+		TPG50856 -> LGP147
+		TPG50856 -> LGP31937
+		TPG50870 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50870", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP34508,3),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP31,2),(LGP270,1),(LGP67,3)]}"];
+		TPG50870 -> LGP99
+		TPG50870 -> LGP258
+		TPG50870 -> LGP270
+		TPG50870 -> LGP79
+		TPG50870 -> LGP34508
+		TPG50870 -> LGP8372
+		TPG50870 -> LGP67
+		TPG50870 -> LGP147
+		TPG50870 -> LGP31
+		TPG50870 -> LGP270
+		TPG50870 -> LGP67
+		TPG50896 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50896", genotype="{[(LGP23968,1),(LGP3,3),(LGP25338,0),(LGP147,6),(LGP270,7),(LGP38533,5),(LGP258,8),(LGP172,5)]}"];
+		TPG50896 -> LGP23968
+		TPG50896 -> LGP3
+		TPG50896 -> LGP25338
+		TPG50896 -> LGP147
+		TPG50896 -> LGP270
+		TPG50896 -> LGP38533
+		TPG50896 -> LGP258
+		TPG50896 -> LGP172
+		TPG50899 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50899", genotype="{[(LGP216,1),(LGP67,3),(LGP270,7),(LGP14260,0),(LGP8372,6),(LGP258,8),(LGP298,9),(LGP172,5),(LGP147,6),(LGP99,1)]}"];
+		TPG50899 -> LGP216
+		TPG50899 -> LGP67
+		TPG50899 -> LGP270
+		TPG50899 -> LGP14260
+		TPG50899 -> LGP8372
+		TPG50899 -> LGP258
+		TPG50899 -> LGP298
+		TPG50899 -> LGP172
+		TPG50899 -> LGP147
+		TPG50899 -> LGP99
+		TPG50905 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50905", genotype="{[(LGP216,1),(LGP67,3),(LGP270,7),(LGP14260,0),(LGP8372,6),(LGP258,8),(LGP147,1),(LGP298,9),(LGP33251,8),(LGP172,5),(LGP147,6),(LGP25508,9)]}"];
+		LGP33251 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP33251", genotype="{[(0,8,0,116,0,643),]}"];
+		TPG50905 -> LGP216
+		TPG50905 -> LGP67
+		TPG50905 -> LGP270
+		TPG50905 -> LGP14260
+		TPG50905 -> LGP8372
+		TPG50905 -> LGP258
+		TPG50905 -> LGP147
+		TPG50905 -> LGP298
+		TPG50905 -> LGP33251
+		TPG50905 -> LGP172
+		TPG50905 -> LGP147
+		TPG50905 -> LGP25508
+		TPG50924 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50924", genotype="{[(LGP172,5),(LGP46865,0),(LGP20398,1),(LGP22698,8),(LGP147,6),(LGP46866,1),(LGP174,1),(LGP270,7),(LGP38531,1),(LGP3,3),(LGP79,0)]}"];
+		LGP46865 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP46865", genotype="{[(0,3,1,454,1,165),]}"];
+		LGP46866 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP46866", genotype="{[(0,8,0,197,0,195),(4,5,0,616,1,45),(0,2,0,316,1,132)]}"];
+		TPG50924 -> LGP172
+		TPG50924 -> LGP46865
+		TPG50924 -> LGP20398
+		TPG50924 -> LGP22698
+		TPG50924 -> LGP147
+		TPG50924 -> LGP46866
+		TPG50924 -> LGP174
+		TPG50924 -> LGP270
+		TPG50924 -> LGP38531
+		TPG50924 -> LGP3
+		TPG50924 -> LGP79
+		TPG50929 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50929", genotype="{[(LGP172,5),(LGP39939,0),(LGP8372,6),(LGP22698,8),(LGP67,3),(LGP270,7),(LGP147,6),(LGP20398,1),(LGP174,1),(LGP270,7),(LGP38531,1)]}"];
+		TPG50929 -> LGP172
+		TPG50929 -> LGP39939
+		TPG50929 -> LGP8372
+		TPG50929 -> LGP22698
+		TPG50929 -> LGP67
+		TPG50929 -> LGP270
+		TPG50929 -> LGP147
+		TPG50929 -> LGP20398
+		TPG50929 -> LGP174
+		TPG50929 -> LGP270
+		TPG50929 -> LGP38531
+		TPG50957 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50957", genotype="{[(LGP15397,9),(LGP38482,1),(LGP26586,8),(LGP15398,7),(LGP147,6),(LGP79,0),(LGP8372,6),(LGP270,7),(LGP172,5),(LGP99,1)]}"];
+		TPG50957 -> LGP15397
+		TPG50957 -> LGP38482
+		TPG50957 -> LGP26586
+		TPG50957 -> LGP15398
+		TPG50957 -> LGP147
+		TPG50957 -> LGP79
+		TPG50957 -> LGP8372
+		TPG50957 -> LGP270
+		TPG50957 -> LGP172
+		TPG50957 -> LGP99
+		TPG50966 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50966", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP49875,0),(LGP8372,6),(LGP147,6),(LGP147,6),(LGP9440,1),(LGP3,3)]}"];
+		LGP49875 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP49875", genotype="{[(0,3,1,454,1,165),]}"];
+		TPG50966 -> LGP99
+		TPG50966 -> LGP258
+		TPG50966 -> LGP270
+		TPG50966 -> LGP49875
+		TPG50966 -> LGP8372
+		TPG50966 -> LGP147
+		TPG50966 -> LGP147
+		TPG50966 -> LGP9440
+		TPG50966 -> LGP3
+		TPG50999 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG50999", genotype="{[(LGP15397,9),(LGP4794,1),(LGP147,6),(LGP67,3),(LGP26586,8),(LGP79,0),(LGP79,5),(LGP270,7),(LGP172,5),(LGP25508,2),(LGP99,1)]}"];
+		TPG50999 -> LGP15397
+		TPG50999 -> LGP4794
+		TPG50999 -> LGP147
+		TPG50999 -> LGP67
+		TPG50999 -> LGP26586
+		TPG50999 -> LGP79
+		TPG50999 -> LGP79
+		TPG50999 -> LGP270
+		TPG50999 -> LGP172
+		TPG50999 -> LGP25508
+		TPG50999 -> LGP99
+		TPG51019 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG51019", genotype="{[(LGP216,1),(LGP37075,9),(LGP79,0),(LGP67,3),(LGP147,6),(LGP40125,8),(LGP270,7),(LGP172,5),(LGP51528,6),(LGP44297,3),(LGP3,3)]}"];
+		LGP51528 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP51528", genotype="{[(6,8,1,281,0,417),(0,4,0,422,0,734)]}"];
+		TPG51019 -> LGP216
+		TPG51019 -> LGP37075
+		TPG51019 -> LGP79
+		TPG51019 -> LGP67
+		TPG51019 -> LGP147
+		TPG51019 -> LGP40125
+		TPG51019 -> LGP270
+		TPG51019 -> LGP172
+		TPG51019 -> LGP51528
+		TPG51019 -> LGP44297
+		TPG51019 -> LGP3
+		TPG51021 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG51021", genotype="{[(LGP99,1),(LGP258,8),(LGP270,7),(LGP79,0),(LGP8372,6),(LGP67,3),(LGP147,6),(LGP67,3),(LGP31937,9)]}"];
+		TPG51021 -> LGP99
+		TPG51021 -> LGP258
+		TPG51021 -> LGP270
+		TPG51021 -> LGP79
+		TPG51021 -> LGP8372
+		TPG51021 -> LGP67
+		TPG51021 -> LGP147
+		TPG51021 -> LGP67
+		TPG51021 -> LGP31937
+		{ rank= same TPG33759 TPG35128 TPG36491 TPG36777 TPG37556 TPG37948 TPG39411 TPG40411 TPG40419 TPG40486 TPG40600 TPG40937 TPG41110 TPG41606 TPG41708 TPG41878 TPG41993 TPG42950 TPG42999 TPG43016 TPG43054 TPG43055 TPG43075 TPG43312 TPG43569 TPG43776 TPG43799 TPG44399 TPG44427 TPG44528 TPG44642 TPG44773 TPG44825 TPG44828 TPG44943 TPG44962 TPG45152 TPG45281 TPG45317 TPG45334 TPG45811 TPG45842 TPG45918 TPG46189 TPG46353 TPG46365 TPG46446 TPG46570 TPG46588 TPG46692 TPG47197 TPG47245 TPG47250 TPG47708 TPG47722 TPG47758 TPG47956 TPG47977 TPG48025 TPG48139 TPG48643 TPG48652 TPG48756 TPG48823 TPG48888 TPG49287 TPG49442 TPG49478 TPG49507 TPG49526 TPG49569 TPG50080 TPG50118 TPG50231 TPG50312 TPG50408 TPG50490 TPG50528 TPG50557 TPG50558 TPG50615 TPG50631 TPG50658 TPG50689 TPG50691 TPG50762 TPG50789 TPG50828 TPG50856 TPG50870 TPG50896 TPG50899 TPG50905 TPG50924 TPG50929 TPG50957 TPG50966 TPG50999 TPG51019 TPG51021 }
+}

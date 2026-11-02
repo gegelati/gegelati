@@ -44,15 +44,6 @@ TEST(PredictionProblemTest, seed)
     Evaluation::PredictionProblem problem1(dataSet, 3);
     ASSERT_EQ(problem1.getProblemSeed(), 3);
 }
-
-TEST(PredictionProblemTest, maxHash) 
-{
-    Evaluation::DataSet dataSet = createSmallDataSet();
-
-    Evaluation::PredictionProblem problem(dataSet);
-    ASSERT_EQ(problem.maxHash(), problem.getDataSet().size()) << "Max hash should be 2";
-}
-
 TEST(PredictionMetricTest, Constructor) 
 {
     Metrics::PredictionMetric* metric;

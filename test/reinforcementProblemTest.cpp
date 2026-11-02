@@ -11,6 +11,8 @@
 #include "learn/dataSetExamples.h"
 
 
+
+
 TEST(ReinforcementProblemTest, Constructor)
 {
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
@@ -29,6 +31,32 @@ TEST(ReinforcementProblemTest, getEnvironment)
     ASSERT_EQ(&problem.getEnvironment(), environment.get()) << "Returned environment should be the environment used to construct the problem";
 }
 
+
+TEST(ReinforcementProblemTest, computeEvaluationHashes)
+{
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
+    Evaluation::ReinforcementProblem problem(environment);
+
+    std::set<uint64_t> trainingHashes;
+    std::set<uint64_t> validationHashes;
+    std::set<uint64_t> testingHashes;
+
+    ASSERT_NO_THROW(trainingHashes = problem.computeEvaluationHashes(5, 0, Evaluation::Mode::TRAINING, 0)) << "Computing training hashes failed";
+    ASSERT_NO_THROW(validationHashes = problem.computeEvaluationHashes(5, 0, Evaluation::Mode::VALIDATION, 0)) << "Computing validation hashes failed";
+    ASSERT_NO_THROW(testingHashes = problem.computeEvaluationHashes(5, 0, Evaluation::Mode::TESTING, 0)) << "Computing testing hashes failed";
+
+    ASSERT_EQ(trainingHashes.size(), 5) << "Training should contain one hash per iteration";
+    ASSERT_EQ(validationHashes.size(), 5) << "Validation should contain one hash per iteration";
+    ASSERT_EQ(testingHashes.size(), 5) << "Testing should contain one hash per iteration";
+
+    ASSERT_EQ(trainingHashes, problem.computeEvaluationHashes(5, 0, Evaluation::Mode::TRAINING, 0)) << "Training hashes should be deterministic";
+    ASSERT_EQ(validationHashes, problem.computeEvaluationHashes(5, 42, Evaluation::Mode::VALIDATION, 0)) << "Validation hashes should not depend on generation number";
+    ASSERT_EQ(testingHashes, problem.computeEvaluationHashes(5, 42, Evaluation::Mode::TESTING, 0)) << "Testing hashes should not depend on generation number";
+    ASSERT_NE(trainingHashes, problem.computeEvaluationHashes(5, 1, Evaluation::Mode::TRAINING, 0)) << "Training hashes should depend on generation number";
+    ASSERT_NE(validationHashes, problem.computeEvaluationHashes(5, 0, Evaluation::Mode::VALIDATION, 1)) << "Validation hashes should depend on problem seed";
+    ASSERT_NE(validationHashes, problem.computeEvaluationHashes(5, 0, Evaluation::Mode::TESTING, 0)) << "Validation and testing hashes should use different modes";
+}
+
 TEST(ReinforcementProblemTest, dimensions)
 {
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
@@ -40,15 +68,6 @@ TEST(ReinforcementProblemTest, dimensions)
     ASSERT_EQ(problem.getInputDimensions(), environment->getInputDimensions()) << "Input dimensions should match the environment";
     ASSERT_EQ(problem.getOutputDimension(), environment->getOutputDimension()) << "Output dimension should match the environment";
 }
-
-TEST(ReinforcementProblemTest, maxHash) 
-{
-    std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
-    Evaluation::ReinforcementProblem problem(environment);
-
-    ASSERT_EQ(problem.maxHash(), UINT64_MAX) << "Max hash should be super high!";
-}
-
 TEST(ReinforcementProblemTest, extractNoMetric)
 {
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();

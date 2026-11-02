@@ -16,7 +16,9 @@ namespace Evaluation {
 
         protected:
             /// @brief Storage of the data
-            std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> data;
+            std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> trainingData;
+            /// @brief Storage of the data
+            std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> validationgData;
 
             /// Input dimensions
             std::vector<Dimensions::Requirement> inputDimensions;
@@ -65,33 +67,49 @@ namespace Evaluation {
              * 
              * \param[in] inputs the inputs added.
              * \param[in] output the corresponding output
+             * \param[in] training boolean indicating if the training data (or validation) should be considered
              * 
              * \throw if either the inputs or output are not compatible with the dimensions.
              */
-            virtual void addData(std::vector<Data::DataValue> inputs, Data::DataValue output);
+            virtual void addData(std::vector<Data::DataValue> inputs, Data::DataValue output, bool training=true);
 
             /**
              * \brief Remove the data at specified index.
+             * \param[in] index index required.
              */
             virtual void removeData(size_t index);
 
             /**
              * \brief Redefined the output at given index;
+             * \param[in] index index required.
+             * \param[in] output the corresponding output
              */
             virtual void setOutputAt(size_t index, Data::DataValue output);
 
             /**
-             * \brief return the size of the dataset
+             * \brief return the size of the two dataset
              */
             virtual size_t size() const;
 
             /**
+             * \brief return the size of the training dataset
+             */
+            virtual size_t sizeTraining() const;
+
+            /**
+             * \brief return the size of the validation dataset
+             */
+            virtual size_t sizeValidation() const;
+
+            /**
              * \brief Return the inputs at the specified index of the dataset.
+             * \param[in] index index required.
              */
             virtual const std::vector<Data::DataValue>& getInputsAt(size_t index) const;
 
             /**
              * \brief Return the output at the specified index of the dataset.
+             * \param[in] index index required.
              */
             virtual const Data::DataValue& getOutputAt(size_t index) const;
 

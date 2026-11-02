@@ -77,9 +77,11 @@ namespace Evaluation {
         virtual bool isCopyable() const;
 
         /**
-         * \brief Override of Problem method to set the maximum hash to the size of the dataset.
+         * \brief compute the hashes used the evaluation.
          */
-        virtual uint64_t maxHash() const override;
+        virtual std::set<uint64_t> computeEvaluationHashes(
+            uint64_t nbIterations, uint64_t generationNumber, Mode mode,
+            uint64_t problemSeed) const override;
 
         /**
          * \brief get the reference of the dataset.

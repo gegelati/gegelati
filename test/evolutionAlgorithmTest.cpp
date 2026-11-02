@@ -182,7 +182,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
 
-    Evolution::BasicModule module(lgpRep, problem, 100, 100, 3, 4, 10);
+    Evolution::BasicModule module(lgpRep, problem, 100, 100, 3, 0, 4, 10);
     module.addBasiclogger();
     module.evolve(20);
 
@@ -365,7 +365,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP3) {
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
 
-    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 4, 1);
+    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 0, 4, 1);
     module.addBasiclogger();
     module.evolve(20);
 
@@ -382,7 +382,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP4) {
     // Create evaluationAgent
     Evaluation::ReinforcementProblem problem(le, 3);
 
-    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 4, 10);
+    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 0, 4, 10);
     module.addBasiclogger();
     module.evolve(20);
 

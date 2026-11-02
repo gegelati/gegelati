@@ -97,6 +97,10 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
     if(!valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
     }
+    auto it = this->hashed.find(inputSources.at(0).getPtr());
+    if(it != this->hashed.end()) {
+        return it->second.clone();
+    }
 
     return this->representation.execute(*this->genotype, inputSources);
 
@@ -107,6 +111,10 @@ Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSou
     // Individual need to be valid to be executed.
     if(!valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
+    }
+    auto it = this->hashed.find(inputSources.at(0).getPtr());
+    if(it != this->hashed.end()) {
+        return it->second.clone();
     }
     return this->representation.execute(*this->genotype, inputSources);
 }

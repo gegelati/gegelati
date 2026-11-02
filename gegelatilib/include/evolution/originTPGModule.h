@@ -12,6 +12,7 @@
 #include "dimensions/individualArchiveValueGenerator.h"
 
 #include "mutation/nodeTransferMutation.h"
+#include "metrics/outputMetric.h"
 
 #include "evaluation/dataset.h"
 #include "metrics/inputMetric.h"
@@ -143,6 +144,10 @@ namespace Evolution {
              * \param[in] generationNumber the index of the generation
              */
             virtual void setNewBasicLoggerRow(size_t generationNumber) override;
+
+
+
+            
     };
 };
 

@@ -1,3 +1,6 @@
+#ifndef STOPWATCH
+#define STOPWATCH
+
 #include <chrono>
 #include <vector>
 
@@ -73,4 +76,6 @@ class Stopwatch
 
         /// @brief List of checkpoints
         std::vector<double> checkpoints;
-    };
+};
+
+#endif

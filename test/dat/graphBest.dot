@@ -1,0 +1,23 @@
+// File exported with GEGELATI v2.1.0
+// On the 2026-10-30 00:27:12
+// With the File::PopulationDotExporter
+digraph{
+	graph[pad = "0.212, 0.055" bgcolor = lightgray]
+	node[shape=circle style = filled label = ""]
+		TPG31116 [fillcolor="#2db436", shape=box margin=0.03 width=0 height=0, label="TPG31116", genotype="{[(LGP174,1),(LGP79,0),(LGP3,3),(LGP147,6),(LGP31,2),(LGP270,7),(LGP172,5)]}"];
+		LGP174 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP174", genotype="{[]}"];
+		LGP79 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP79", genotype="{[(0,3,1,454,1,165)]}"];
+		LGP3 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP3", genotype="{[(0,7,0,110,0,134),]}"];
+		LGP147 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP147", genotype="{[(0,7,0,44,1,317)]}"];
+		LGP31 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP31", genotype="{[(0,7,0,465,0,177),]}"];
+		LGP270 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP270", genotype="{[(0,1,1,739,1,119),]}"];
+		LGP172 [fillcolor="#922DB4", shape=box margin=0.03 width=0 height=0, label="LGP172", genotype="{[(6,4,1,327,1,79),(0,0,1,373,0,510)]}"];
+		TPG31116 -> LGP174
+		TPG31116 -> LGP79
+		TPG31116 -> LGP3
+		TPG31116 -> LGP147
+		TPG31116 -> LGP31
+		TPG31116 -> LGP270
+		TPG31116 -> LGP172
+		{ rank= same TPG31116 }
+}

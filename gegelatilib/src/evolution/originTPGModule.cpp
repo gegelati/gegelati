@@ -217,7 +217,105 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
 
     std::vector<std::shared_ptr<const Individual>> populationBeforeGen = this->getPopulation();
 
-    BasicModule::doGeneration(generationNumber);
+            /**
+             * \brief TEST DEGUEU SHOULD NOT BE COMMIT */
+    {
+
+        this->stopwatch.checkpoint();
+        // Parent selection 
+        std::vector<std::shared_ptr<const Individual>> parents = this->parentSelection->select(this->individualFitness, this->nbOffspring, this->rng);
+
+        this->stopwatch.checkpoint();
+
+
+        // Reproduce the parents
+        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = this->breeder->reproduce(parents, this->nbOffspring, this->rng);
+
+        this->stopwatch.checkpoint();
+
+        // Mutate the offspring
+        Mutation::mutateIndividualsInParallel(*this->mutation, offspring, *this->generator, this->rng, this->nbThreads);
+
+        this->stopwatch.checkpoint();
+
+        // Evaluate the population
+        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(this->population);
+        evaluatedIndividuals.insert(offspring.begin(), offspring.end());
+
+        
+        {
+            std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> members = this->getMembersOf(evaluatedIndividuals);
+            auto memberTemplate =  std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
+            std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> memberResults =
+                this->evaluator->evaluateIndividuals(members, this->problem, memberTemplate, this->nbTrainingIterations, generationNumber, Evaluation::Mode::TRAINING);
+
+            std::set<uint64_t> inputHashes = this->problem.computeEvaluationHashes(nbTrainingIterations, generationNumber, Evaluation::Mode::TRAINING, this->problem.getProblemSeed());
+            std::vector<uint64_t> realHash;
+            for(const auto& hash: inputHashes) {
+                realHash.push_back(Data::DataValue::getCombinedHash(dynamic_cast<Evaluation::PredictionProblem&>(this->problem).getDataSet().getInputsAt(hash)));
+            }
+            
+
+            for(const auto& pair: memberResults) {
+                std::map<uint64_t, const Metrics::OutputMetric*> metrics = pair.second->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+
+                auto itHashes = inputHashes.begin();
+                auto itMetric = metrics.begin()->second->getOutputs().begin();
+                while(itHashes != inputHashes.end() && itMetric != metrics.begin()->second->getOutputs().end()) {
+                    pair.first->hashed.insert(std::make_pair(
+                        dynamic_cast<Evaluation::PredictionProblem&>(this->problem).getDataSet().getInputsAt(*itHashes).at(0).getPtr(),
+                        itMetric->clone()));
+                    itHashes++;
+                    itMetric++;
+                }
+            }
+        }
+
+        this->stopwatch.checkpoint();
+
+        std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
+            this->evaluator->evaluateIndividuals(evaluatedIndividuals, this->problem, this->metricTemplate, this->nbTrainingIterations, generationNumber, Evaluation::Mode::TRAINING);
+
+            
+        this->stopwatch.checkpoint();
+
+        // Do replacement
+        this->individualFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
+
+        
+        this->stopwatch.checkpoint();
+
+        std::vector<std::shared_ptr<const Individual>> survivors = this->survivingSelection->select(individualFitness, this->sizePopulation, this->rng);
+
+        // Update population
+        this->population.clear();
+        this->population.insert(survivors.begin(), survivors.end());
+
+        // Update metric of population
+        this->populationMetrics.clear();
+        for(const std::shared_ptr<const Individual>& indiv: this->population) {
+            this->populationMetrics.insert(std::make_pair(indiv->getIndividualID(), std::move(evaluationResults.at(indiv))));
+        }
+
+        this->stopwatch.checkpoint();
+        if(this->nbValidationIterations > 0) {
+            evaluationResults = this->evaluator->evaluateIndividuals(this->population, this->problem, this->metricTemplate, this->nbValidationIterations, generationNumber, Evaluation::Mode::VALIDATION);
+            this->validationFitness = this->assigner->assignFitness(evaluationResults, this->fitnessMetricHash);
+            this->stopwatch.checkpoint();
+        }
+
+
+        this->setNewBasicLoggerRow(generationNumber);
+
+        if(this->filePath != "") {
+            std::string path = this->filePath + ((this->oneFileGen) ? std::to_string(generationNumber) : "") + ".dot";
+            File::PopulationDotExporter::exportToFile(path, this->getPopulation());
+        }
+        if(this->filePathBest != "") {
+            std::string path = this->filePathBest + ((this->oneFileGenBest) ? std::to_string(generationNumber) : "") + ".dot";
+            File::PopulationDotExporter::exportToFile(path, {this->individualFitness.begin()->first});
+        }
+    }
 
     if(this->protectAggregated) {
         this->updateProtectedIndividuals(populationBeforeGen);
@@ -232,6 +330,9 @@ void Evolution::OriginTPGModule::doGeneration(size_t generationNumber)
     }
 
 }
+
+
+
 
 std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> Evolution::OriginTPGModule::getAllVertices() const
 {
@@ -320,8 +421,8 @@ void Evolution::OriginTPGModule::setNewBasicLoggerRow(size_t generationNumber)
 
 
     std::vector<double> genCheckpoints = this->stopwatch.getCheckpoints();
-    double mutTime = genCheckpoints.at(3);
-    double evalTime = genCheckpoints.at(4);
+    double mutTime = genCheckpoints.at(4);
+    double evalTime = genCheckpoints.at(5);
     double generationTime = std::accumulate(genCheckpoints.begin(), genCheckpoints.end(), 0.0);
     if(this->nbValidationIterations == 0) {
         for(std::shared_ptr<Log::Basiclogger>& defLogger: this->basicloggers) {

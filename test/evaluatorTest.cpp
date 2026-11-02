@@ -26,30 +26,6 @@ TEST(EvaluatorTest, Constructor)
     ASSERT_NO_THROW(delete evaluator) << "Destruction failed";
 }
 
-TEST(EvaluatorTest, computeEvaluationHashes)
-{
-    Evaluation::Evaluator evaluator;
-
-    std::set<uint64_t> trainingHashes;
-    std::set<uint64_t> validationHashes;
-    std::set<uint64_t> testingHashes;
-
-    ASSERT_NO_THROW(trainingHashes = evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::TRAINING, 0, 1000)) << "Computing training hashes failed";
-    ASSERT_NO_THROW(validationHashes = evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::VALIDATION, 0, 1000)) << "Computing validation hashes failed";
-    ASSERT_NO_THROW(testingHashes = evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::TESTING, 0, 1000)) << "Computing testing hashes failed";
-
-    ASSERT_EQ(trainingHashes.size(), 5) << "Training should contain one hash per iteration";
-    ASSERT_EQ(validationHashes.size(), 5) << "Validation should contain one hash per iteration";
-    ASSERT_EQ(testingHashes.size(), 5) << "Testing should contain one hash per iteration";
-
-    ASSERT_EQ(trainingHashes, evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::TRAINING, 0, 1000)) << "Training hashes should be deterministic";
-    ASSERT_EQ(validationHashes, evaluator.computeEvaluationHashes(5, 42, Evaluation::Mode::VALIDATION, 0, 1000)) << "Validation hashes should not depend on generation number";
-    ASSERT_EQ(testingHashes, evaluator.computeEvaluationHashes(5, 42, Evaluation::Mode::TESTING, 0, 1000)) << "Testing hashes should not depend on generation number";
-    ASSERT_NE(trainingHashes, evaluator.computeEvaluationHashes(5, 1, Evaluation::Mode::TRAINING, 0, 1000)) << "Training hashes should depend on generation number";
-    ASSERT_NE(validationHashes, evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::VALIDATION, 1, 1000)) << "Validation hashes should depend on problem seed";
-    ASSERT_NE(validationHashes, evaluator.computeEvaluationHashes(5, 0, Evaluation::Mode::TESTING, 0, 1000)) << "Validation and testing hashes should use different modes";
-}
-
 
 TEST(EvaluatorTest, evaluateIndividualsOnRL)
 {
@@ -81,7 +57,7 @@ TEST(EvaluatorTest, evaluateIndividualsOnRL)
     std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indiv)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "There should be one output metric for each evaluation hash";
 
-    std::set<uint64_t> expectedHashes = evaluator.computeEvaluationHashes(2, 0, Evaluation::Mode::TESTING, problem.getProblemSeed(), problem.maxHash());
+    std::set<uint64_t> expectedHashes = problem.computeEvaluationHashes(2, 0, Evaluation::Mode::TESTING, problem.getProblemSeed());
     auto it = expectedHashes.begin();
     uint64_t hash0 = *it; it++;
     uint64_t hash1 = *it;
@@ -119,12 +95,12 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
     std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
 
-    ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING)) << "Classification evaluation failed";
+    ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TRAINING)) << "Classification evaluation failed";
     ASSERT_EQ(results.size(), 1) << "There should be one evaluation result";
     ASSERT_TRUE(results.find(indiv) != results.end()) << "The evaluated individual should be present in the results";
     ASSERT_NE(results.at(indiv), nullptr) << "The metric map should not be null";
 
-    std::set<uint64_t> expectedHashes = evaluator.computeEvaluationHashes(2, 0, Evaluation::Mode::TESTING, problem.getProblemSeed(), problem.maxHash());
+    std::set<uint64_t> expectedHashes = problem.computeEvaluationHashes(2, 0, Evaluation::Mode::TRAINING, problem.getProblemSeed());
     ASSERT_EQ(expectedHashes.size(), 2) << "There should be two distinct evaluation hashes";
 
     auto it = expectedHashes.begin();

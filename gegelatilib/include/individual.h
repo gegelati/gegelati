@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
-
+#include <map>
  
 #include "graphBased/genotype.h"
 #include "representations/representation.h"
@@ -47,6 +47,9 @@ protected:
     friend struct ::CounterReset;
 
 public:
+
+    /// \brief Hashes
+    mutable std::map<const void*, Data::DataValue> hashed;
 
     /// Default polymorphic destructor
     virtual ~Individual() = default;

@@ -14,26 +14,13 @@
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software. You can use,
- * modify and/ or redistribute the software under the terms of the CeCILL-C
- * license as circulated by CEA, CNRS and INRIA at the following URL
+ * modify and/or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL:
  * "http://www.cecill.info".
  *
- * As a counterpart to the access to the source code and rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty and the software's author, the holder of the
- * economic rights, and the successive licensors have only limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading, using, modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean that it is complicated to manipulate, and that also
- * therefore means that it is reserved for developers and experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and, more generally, to use and operate it in the
- * same conditions as regards security.
+ * As a counterpart to the rights granted by the license, users are provided
+ * only with a limited warranty. The software's authors and licensors have
+ * limited liability.
  *
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
@@ -41,92 +28,56 @@
 
 /**
  * \file gegelati.h
- * \brief Helper file gathering all headers from the GEGELATI lib to ease their
- * inclusion in apps.
+ * \brief Helper file gathering all current public headers from the GEGELATI
+ * library to ease their inclusion in applications.
  */
+
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#include <util/counterReset.h>
-#include <util/genericComparator.h>
-#include <util/timestamp.h>
-
-
-/* 
-#include <file/parametersParser.h>
-#include <file/graphDotExporter.h>
-#include <file/graphDotImporter.h>
-
-
-#include <learn/evaluationResult.h>
-#include <learn/learningAgent.h>
-#include <learn/learningEnvironment.h>
-#include <learn/learningParameters.h>
-#include <learn/parallelLearningAgent.h>
-
-// #include <learn/adversarialEvaluationResult.h>
-// #include <learn/adversarialJob.h>
-// #include <learn/adversarialLearningAgent.h>
-// #include <learn/adversarialLearningEnvironment.h>
-
-#include <learn/classificationLearningEnvironment.h>
-
-#include <log/cycleDetectionLALogger.h>
-#include <log/laBasicLogger.h>
-#include <log/laLogger.h>
-#include <log/laPolicyStatsLogger.h>
-#include <log/logger.h>
-#include <log/mapElitesArchiveLogger.h>
-
-#include <mutator/mutationParameters.h>
-#include <mutator/rng.h>
-
-
-#include <selector/classificationSelectionMetrics.h>
-#include <selector/classificationSelector.h>
-#include <selector/mapElites/cvtMapElitesArchive.h>
-#include <selector/mapElites/mapElitesArchive.h>
-#include <selector/mapElites/mapElitesDefaultDescriptors.h>
-#include <selector/mapElites/mapElitesDescriptor.h>
-#include <selector/mapElites/mapElitesSelectionMetrics.h>
-#include <selector/mapElites/mapElitesSelector.h>
-#include <selector/selectionContext.h>
-#include <selector/selectionMetrics.h>
-#include <selector/selector.h>
-#include <selector/selectorFactory.h>
-#include <selector/tournamentSelector.h>
-#include <selector/truncationSelector.h>
-
-
-#include <codeGen/codeGenerationExporter.h>
-
-#include <parameters.h>
-#include <outputInfo.h>*/
-
+// Data
 #include <data/constant.h>
 #include <data/dataConcept.h>
 #include <data/dataType.h>
 #include <data/dataValue.h>
 #include <data/dataView.h>
+#include <data/demangle.h>
 #include <data/hash.h>
 
+// Dimensions
 #include <dimensions/activationFunctions.h>
 #include <dimensions/constraint.h>
 #include <dimensions/dataValueGenerator.h>
 #include <dimensions/dimensionFlow.h>
+#include <dimensions/individualArchiveValueGenerator.h>
+#include <dimensions/individualValueGenerator.h>
 #include <dimensions/numericRange.h>
 #include <dimensions/requirement.h>
 
+// Evaluation
+#include <evaluation/dataset.h>
+#include <evaluation/evaluator.h>
+#include <evaluation/parallelEvaluator.h>
+#include <evaluation/predictionProblem.h>
 #include <evaluation/problem.h>
-#include <evaluation/classificationProblem.h>
 #include <evaluation/reinforcementEnvironment.h>
 #include <evaluation/reinforcementProblem.h>
 
-#include <evaluation/metric.h>
-#include <evaluation/rewardsMetric.h>
-#include <metrics/predictionMetric.h>
+// Evolution
+#include <evolution/basicModule.h>
+#include <evolution/module.h>
+#include <evolution/originTPGModule.h>
 
+// File
+#include <file/populationDotExporter.h>
 
+// Fitness assignment
+#include <fitnessAssignment/assigner.h>
+#include <fitnessAssignment/classificationF1Assigner.h>
+#include <fitnessAssignment/defaultAssigner.h>
+#include <fitnessAssignment/noveltySearchAssigner.h>
+
+// Graph-based representation
 #include <graphBased/genotype.h>
 #include <graphBased/genotypeConstraint.h>
 #include <graphBased/genotypeGenerator.h>
@@ -135,27 +86,58 @@
 #include <graphBased/nodeGenerator.h>
 #include <graphBased/nodeGroup.h>
 
-#include <mutation/mutator.h>
-#include <mutation/pointMutator.h>
-
-#include <reproduction/replicator.h>
-#include <reproduction/reproducer.h>
-
-#include <selection/selector.h>
-#include <selection/randomSelector.h>
-#include <selection/truncationSelector.h>
-
-#include <individual.h>
-
-#include <dimensions/activationFunctions.h>
-#include <util/counterReset.h>
-#include <util/genericComparator.h>
-#include <util/timestamp.h>
-
+// Instructions
 #include <instructions/addPrimitiveType.h>
 #include <instructions/instruction.h>
 #include <instructions/lambdaInstruction.h>
 #include <instructions/multByConstant.h>
 #include <instructions/set.h>
 
-#endif
+// Logging
+#include <log/basicLogger.h>
+#include <log/logger.h>
+
+// Metrics
+#include <metrics/inputMetric.h>
+#include <metrics/metric.h>
+#include <metrics/metricMap.h>
+#include <metrics/outputMetric.h>
+#include <metrics/predictionMetric.h>
+#include <metrics/rewardsMetric.h>
+#include <metrics/scalarMetric.h>
+#include <metrics/vectorMetric.h>
+
+// Mutation
+#include <mutation/mutator.h>
+#include <mutation/nodeTransferMutation.h>
+#include <mutation/pointMutator.h>
+
+// Core
+#include <individual.h>
+
+// Representations
+#include <representations/LGP.h>
+#include <representations/representation.h>
+#include <representations/TPG.h>
+
+// Reproduction
+#include <reproduction/replicator.h>
+#include <reproduction/reproducer.h>
+
+// Random number generation
+#include <rng/deterministicRandom.h>
+#include <rng/rng.h>
+
+// Selection
+#include <selection/randomSelector.h>
+#include <selection/selector.h>
+#include <selection/tournamentSelector.h>
+#include <selection/truncationSelector.h>
+
+// Utilities
+#include <util/counterReset.h>
+#include <util/genericComparator.h>
+#include <util/stopwatch.h>
+#include <util/timestamp.h>
+
+#endif // GEGELATI_H

@@ -53,13 +53,6 @@
 
 namespace Evaluation {
     
-    /// @brief Modes
-    enum class Mode
-    {
-        TRAINING,
-        VALIDATION,
-        TESTING
-    };
 
     /**
      * \brief Class used to control the learning steps of a Graph within
@@ -78,14 +71,6 @@ namespace Evaluation {
 
         /// Default destructor for polymorphism
         virtual ~Evaluator() = default;
-
-        /**
-         * \brief compute the hashes used the evaluation.
-         */
-        std::set<uint64_t> computeEvaluationHashes(
-            uint64_t nbIterations, uint64_t generationNumber, Mode mode,
-            uint64_t problemSeed, uint64_t problemMaxHash) const;
-
         /**
          * \brief Evaluate all individual of the representations.
          *

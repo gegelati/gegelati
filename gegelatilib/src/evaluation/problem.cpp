@@ -22,6 +22,30 @@ const Dimensions::Requirement& Evaluation::Problem::getOutputDimension() const
     return this->outputDimension;
 }
 
+std::set<uint64_t> Evaluation::Problem::computeEvaluationHashes(
+  uint64_t nbIterations, uint64_t generationNumber, Mode mode,
+  uint64_t problemSeed) const
+{
+  std::set<uint64_t> hashes;
+
+  // Compute baseHash
+  Data::Hash<uint64_t> hasher;
+  uint64_t baseHash = hasher(static_cast<int>(mode)) ^ hasher(problemSeed);
+  if(mode == Mode::TRAINING) { 
+      // In training, hash should take into consideration the generation number, else not (we don't want validation to change between generations).
+      baseHash = hasher(generationNumber) ^ baseHash;
+  }
+
+  // Compute hash of each iteration.
+  for(size_t idx = 0; idx < nbIterations; idx++) {
+    uint64_t hash = hasher(idx) ^ baseHash;
+    hashes.insert(hash % UINT64_MAX);
+  }
+
+  return hashes;
+}
+
+
 std::string Evaluation::Problem::summary() const
 {
     std::ostringstream result;            
@@ -36,9 +60,4 @@ std::string Evaluation::Problem::summary() const
 uint64_t Evaluation::Problem::getProblemSeed() const 
 {
     return this->problemSeed;
-}
-
-uint64_t Evaluation::Problem::maxHash() const
-{
-    return UINT64_MAX;
 }

@@ -87,9 +87,9 @@ Data::DataValue Representations::TPG::executeGenotype(
     const GraphBased::NodeGroup& group = genotype.getNodeGroup(0);
 
     double maxBid = -std::numeric_limits<double>::infinity();
+    double bid;
     const GraphBased::GPNode* winner = nullptr;
     const GraphBased::GPNode* firstEffective = nullptr;
-    size_t nbBids = 0;
 
     for(size_t idx = 0; idx < group.getSize(); idx++) {
         const GraphBased::GPNode& node = group.getNode(idx);
@@ -101,8 +101,13 @@ Data::DataValue Representations::TPG::executeGenotype(
             winner = &node;
         }
         const std::shared_ptr<const Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Individual>>();
-        double bid = member->execute(inputSources).getScalar<double>();
-        nbBids++;
+        
+        auto it = member->hashed.find(inputSources.at(0).getPtr());
+        if(it != member->hashed.end()) {
+            bid = it->second.getScalar<double>();
+        } else {
+            bid = member->execute(inputSources).getScalar<double>();
+        }
 
         if(!std::isnan(bid) && bid > maxBid) {
             maxBid = bid;

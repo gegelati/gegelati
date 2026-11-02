@@ -56,8 +56,8 @@ std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>,
     }
 
     // Define hashes
-    std::set<uint64_t> hashes = this->computeEvaluationHashes(
-        nbIterations, generationNumber, mode, problem.getProblemSeed(), problem.maxHash());
+    std::set<uint64_t> hashes = problem.computeEvaluationHashes(
+        nbIterations, generationNumber, mode, problem.getProblemSeed());
 
     // Create a copy of Individuals in a queue structure
     std::queue<std::shared_ptr<const Individual>> individualsQueue;

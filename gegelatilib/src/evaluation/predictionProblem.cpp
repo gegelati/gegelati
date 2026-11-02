@@ -12,11 +12,33 @@ bool Evaluation::PredictionProblem::isCopyable() const
   return true;
 }
 
-uint64_t Evaluation::PredictionProblem::maxHash() const
+std::set<uint64_t> Evaluation::PredictionProblem::computeEvaluationHashes(
+  uint64_t nbIterations, uint64_t generationNumber, Mode mode,
+  uint64_t problemSeed) const
 {
-    return this->dataset.size();
-}
+  std::set<uint64_t> hashes;
 
+  // Compute baseHash
+  Data::Hash<uint64_t> hasher;
+  uint64_t baseHash = hasher(static_cast<int>(mode)) ^ hasher(problemSeed);
+  if(mode == Mode::TRAINING) { 
+      // In training, hash should take into consideration the generation number, else not (we don't want validation to change between generations).
+      baseHash = hasher(generationNumber) ^ baseHash;
+  }
+
+  // Compute hash of each iteration.
+  for(size_t idx = 0; idx < nbIterations; idx++) {
+    uint64_t hash = hasher(idx) ^ baseHash;
+    // Avoid the same hashes
+    if(mode == Mode::TRAINING) {
+      hashes.insert(hash % this->dataset.sizeTraining());
+    } else {
+      hashes.insert((hash % this->dataset.sizeValidation()) + this->dataset.sizeTraining());
+    }
+  }
+
+  return hashes;
+}
 const Evaluation::DataSet& Evaluation::PredictionProblem::getDataSet() const
 {
   return this->dataset;

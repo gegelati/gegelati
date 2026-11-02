@@ -18,7 +18,7 @@
 
 #include "file/populationDotExporter.h"
 
-#include "log/basiclogger.h"
+#include "log/basicLogger.h"
 
 
 namespace Evolution {

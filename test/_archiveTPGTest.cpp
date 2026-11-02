@@ -37,8 +37,6 @@
 
 #include "util/counterReset.h"
 #include "file/populationDotExporter.h"
-
-#include "instructions/imageInstructionSet.h"
 // Set all file in comment
 
 class TPGAlgoTest : public ::testing::Test
@@ -89,8 +87,8 @@ class TPGAlgoTest : public ::testing::Test
         mnistSet.add(*(new Instructions::LambdaInstruction<double, double, double>(max)));
         mnistSet.add(*(new Instructions::LambdaInstruction<double, double>(exp)));
         mnistSet.add(*(new Instructions::LambdaInstruction<double, double>(ln)));
-        //mnistSet.add(*(new Instructions::LambdaInstruction<double, const double[3][3]>(sobelMagn)));
-        //mnistSet.add(*(new Instructions::LambdaInstruction<double, const double[3][3]>(sobelDir)));
+        mnistSet.add(*(new Instructions::LambdaInstruction<double, const double[3][3]>(sobelMagn)));
+        mnistSet.add(*(new Instructions::LambdaInstruction<double, const double[3][3]>(sobelDir)));
     
         le = std::make_shared<StickGameWithOpponent>();
     }
@@ -218,7 +216,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
     Representations::LGP lgpRep(dataSet.getInputDimensions(), Data::DataType::type<double>({15}), mnistSet, Data::DataType::type<double>({10}), 1, 20);
     lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
     
-    Evolution::BasicModule module(lgpRep, problem, 50, 450, 500, 4, 10);
+    Evolution::BasicModule module(lgpRep, problem, 50, 450, 500, 0, 4, 10);
     module.addBasiclogger();
     module.evolve(20);
 
@@ -227,18 +225,26 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
 
 TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     mnist::MNIST_dataset<std::vector, std::vector<double>, uint8_t> mnist(mnist::read_dataset<std::vector, std::vector, double, uint8_t>(MNIST_DATA_LOCATION));
-
-    std::vector<std::vector<double>> trainingImages = mnist.training_images;
-    std::vector<uint8_t> trainingLabels = mnist.training_labels;
-
     Dimensions::Requirement inputReq = Dimensions::Requirement(Data::DataType::type<double>({28, 28}));
     Dimensions::Requirement outputReq = Dimensions::Requirement(Data::DataType::type<size_t>());
     Evaluation::DataSet dataSet({inputReq}, outputReq);
+
+    std::vector<std::vector<double>> trainingImages = mnist.training_images;
+    std::vector<uint8_t> trainingLabels = mnist.training_labels;
     for(size_t idx = 0; idx < trainingImages.size(); idx++) {
         std::vector<Data::DataValue> inputs;
         inputs.push_back(Data::DataValue::array2d<std::vector<double>>(trainingImages.at(idx), 28, 28));
         
         dataSet.addData(std::move(inputs), Data::DataValue::scalar<uint64_t>(static_cast<uint64_t>(trainingLabels.at(idx))));
+    }
+
+    std::vector<std::vector<double>> testImages = mnist.test_images;
+    std::vector<uint8_t> testLabels = mnist.test_labels;
+    for(size_t idx = 0; idx < testImages.size(); idx++) {
+        std::vector<Data::DataValue> inputs;
+        inputs.push_back(Data::DataValue::array2d<std::vector<double>>(testImages.at(idx), 28, 28));
+        
+        dataSet.addData(std::move(inputs), Data::DataValue::scalar<uint64_t>(static_cast<uint64_t>(testLabels.at(idx))), false);
     }
 
     // Create evaluationAgent
@@ -252,7 +258,7 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     auto assigner = std::make_shared<FitnessAssignment::ClassificationF1Assigner>();
     auto parentSelector = std::make_shared<Selection::TournamentSelector>(2, true);
 
-    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 500, 1000, 500, 500, 4, 20, 50, true, false, assigner);
+    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 1000, 500, 0, 4, 20, 50, true, false, assigner);
     module.addBasiclogger();
 
     std::string str = "graph";
@@ -261,7 +267,7 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     module.setBestExporter(MNIST_DATA_LOCATION + str, false);
 
 
-    module.evolve(4000);
+    module.evolve(40);
 
     EXPECT_EQ(15954241334055558952U, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     EXPECT_EQ(51691, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
@@ -269,6 +275,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
 
 #ifdef GEGELATI_WITH_OPENCV
 
+
+#include "instructions/imageInstructionSet.h"
 TEST_F(TPGAlgoTest, customEvolutionLGP2D) {
     mnist::MNIST_dataset<std::vector, std::vector<double>, uint8_t> mnist(mnist::read_dataset<std::vector, std::vector, double, uint8_t>(MNIST_DATA_LOCATION));
 
