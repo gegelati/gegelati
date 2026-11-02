@@ -51,9 +51,11 @@
 #include "evaluation/parallelEvaluator.h"
 #include "metrics/rewardsMetric.h"
 
-#include "evolution/basicmodule.h"
-#include "evolution/originTPGModule.h"
-#include "log/logger.h"
+#include "evolution/basicEvolution.h"
+#include "evaluation/dataset.h"
+#include "evolution/originTPGEvolution.h"
+#include "evolution/steps/exportStep.h"
+#include "evolution/steps/logStep.h"
 
 #include "dimensions/individualValueGenerator.h"
 
@@ -67,12 +69,32 @@
 #include "fitnessAssignment/defaultAssigner.h"
 
 #include "util/counterReset.h"
-// Set all file in comment
+
+namespace {
+    /// Register individuals by ID, to find the individuals selected by their ID.
+    void addToIndex(std::unordered_map<uint64_t, std::shared_ptr<const Individual>>& index, const std::vector<std::shared_ptr<const Individual>>& individuals)
+    {
+        for(const std::shared_ptr<const Individual>& individual: individuals) {
+            index.emplace(individual->getIndividualID(), individual);
+        }
+    }
+
+    /// Return the individuals identified by their ID.
+    std::vector<std::shared_ptr<const Individual>> resolve(const std::unordered_map<uint64_t, std::shared_ptr<const Individual>>& index, const std::vector<uint64_t>& ids)
+    {
+        std::vector<std::shared_ptr<const Individual>> individuals;
+        for(uint64_t id: ids) {
+            individuals.push_back(index.at(id));
+        }
+        return individuals;
+    }
+}
 
 class EvolutionAlgorithmTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
+    std::vector<std::unique_ptr<Instructions::Instruction>> instructions;
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le;
 
 
@@ -84,20 +106,15 @@ class EvolutionAlgorithmTest : public ::testing::Test
         auto times = [](double a, int b) -> double { return a * b; };
         auto div = [](int a, double b) -> double { return a / b; };
         
-        set.add(*(new Instructions::LambdaInstruction<double, double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<double, int, double>(minus)));
-        set.add(*(new Instructions::LambdaInstruction<double, double, int>(times)));
-        set.add(*(new Instructions::LambdaInstruction<double, int, double>(div)));
+        instructions.push_back(std::make_unique<Instructions::LambdaInstruction<double, double, double>>(add));
+        instructions.push_back(std::make_unique<Instructions::LambdaInstruction<double, int, double>>(minus));
+        instructions.push_back(std::make_unique<Instructions::LambdaInstruction<double, double, int>>(times));
+        instructions.push_back(std::make_unique<Instructions::LambdaInstruction<double, int, double>>(div));
+        for(const auto& instruction: instructions) {
+            set.add(*instruction);
+        }
     
         le = std::make_shared<StickGameWithOpponent>();
-    }
-
-    virtual void TearDown()
-    {
-        delete (&set.getInstruction(0));
-        delete (&set.getInstruction(1));
-        delete (&set.getInstruction(2));
-        delete (&set.getInstruction(3));
     }
 };
 
@@ -131,43 +148,42 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
     size_t nbOffspring = 100;
 
     // Initialize population
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population(individuals.begin(), individuals.end());
-    individuals.clear();
+    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
+    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<const Individual>> population(individuals.begin(), individuals.end());
+    addToIndex(index, population);
 
     // Initial evaluation
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResults = 
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResults = 
             evaluator.evaluateIndividuals(population, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
+    std::map<uint64_t, double> individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
-
         // Parent selection 
-        std::vector<std::shared_ptr<const Individual>> parents = parentSelection.select(individualFitness, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parents = resolve(index, parentSelection.select(individualFitness, nbOffspring, rng));
 
         // Reproduce the parents
-        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
+        std::vector<std::shared_ptr<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
         // Mutate the offspring
         Mutation::mutateIndividuals(mutator, offspring, lgpRep.getGenotypeGenerator(), rng);
 
         // Evaluate the population
-        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividuals(population);
-        evaluatedIndividuals.insert(offspring.begin(), offspring.end());
+        std::vector<std::shared_ptr<const Individual>> evaluatedIndividuals(population);
+        evaluatedIndividuals.insert(evaluatedIndividuals.end(), offspring.begin(), offspring.end());
+        addToIndex(index, std::vector<std::shared_ptr<const Individual>>(offspring.begin(), offspring.end()));
         evaluationResults = evaluator.evaluateIndividuals(evaluatedIndividuals, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
 
         // Do replacement
         individualFitness = assigner.assignFitness(evaluationResults, Metrics::RewardsMetric::staticHash());
-        std::vector<std::shared_ptr<const Individual>> survivors = survivingSelection.select(individualFitness, sizePopulation, rng);
-        population.clear();
-        population.insert(survivors.begin(), survivors.end());
+        population = resolve(index, survivingSelection.select(individualFitness, sizePopulation, rng));
 
 
         // Print best individual
-        std::cout<<"At gen: "<<idxGen<<" - ID: "<<individualFitness.begin()->first->getIndividualID() 
+        std::cout<<"At gen: "<<idxGen<<" - ID: "<<individualFitness.begin()->first 
         <<" and score: " << individualFitness.begin()->second <<std::endl;
     }
     ASSERT_EQ(1704165046166301501U, rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
@@ -176,17 +192,26 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
 
     // Create representation
-    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
-    lgpRep.addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep.getDimensionFlow().getOutputDimension()));
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    lgpRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep->getDimensionFlow().getOutputDimension()));
     
     // Create evaluationAgent
-    Evaluation::ReinforcementProblem problem(le, 3);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
 
-    Evolution::BasicModule module(lgpRep, problem, 100, 100, 3, 0, 4, 10);
-    module.addBasiclogger();
+    Evolution::BasicEvolution basic;
+    basic.representation = lgpRep;
+    basic.problem = problem;
+    basic.sizePopulation = 100;
+    basic.nbOffspring = 100;
+    basic.nbTrainingIterations = 3;
+    basic.seed = 4;
+    basic.nbThreads = 10;
+    Evolution::Module module = basic.buildModule();
+    module.addStep(std::make_shared<Evolution::LogStep>(std::cout, "Population",
+        std::vector<std::pair<std::string, std::string>>{{"Fit", "Population.trainingFitness"}}));
     module.evolve(20);
 
-    ASSERT_EQ(1704165046166301501U, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(1704165046166301501U, module.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
 TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
@@ -211,75 +236,72 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     Evaluation::ParallelEvaluator evaluator(20);
     std::shared_ptr<Metrics::MetricMapTemplate> metrics 
         = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-    
-
-
 
     size_t sizePopulation = 100;
     size_t nbOffspring = 100;
+    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
+
     // Initialize LGP population
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
-    individualsLGP.clear();
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsLGP = 
+    std::vector<std::shared_ptr<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, lgpRep.getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<const Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
+    addToIndex(index, populationLGP);
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResultsLGP = 
             evaluator.evaluateIndividuals(populationLGP, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
+    std::map<uint64_t, double> individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
 
     // Initialize TPG population
-    std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
+    std::vector<std::shared_ptr<const Individual>> members = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
     tpgRep.setAvailableMembers(members);
 
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, tpgRep.getGenotypeGenerator(), sizePopulation, rng);
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
-    individualsTPG.clear();
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
+    std::vector<std::shared_ptr<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, tpgRep.getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<const Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
+    addToIndex(index, populationTPG);
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResultsTPG = 
             evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, 0, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
+    std::map<uint64_t, double> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         // LGP Evolution : variation
-        std::vector<std::shared_ptr<const Individual>> parentsLGP = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
-        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsLGP = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
+        std::vector<std::shared_ptr<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
         Mutation::mutateIndividuals(mutator, offspringLGP, lgpRep.getGenotypeGenerator(), rng);
         // LGP Evolution : evaluation
-        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsLGP(populationLGP);
-        evaluatedIndividualsLGP.insert(offspringLGP.begin(), offspringLGP.end());
+        std::vector<std::shared_ptr<const Individual>> evaluatedIndividualsLGP(populationLGP);
+        evaluatedIndividualsLGP.insert(evaluatedIndividualsLGP.end(), offspringLGP.begin(), offspringLGP.end());
+        addToIndex(index, std::vector<std::shared_ptr<const Individual>>(offspringLGP.begin(), offspringLGP.end()));
         evaluationResultsLGP = evaluator.evaluateIndividuals(evaluatedIndividualsLGP, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // LGP Evolution : replacement
         individualFitnessLGP = assigner.assignFitness(evaluationResultsLGP, Metrics::RewardsMetric::staticHash());
-        std::vector<std::shared_ptr<const Individual>> survivorsLGP = survivingSelection.select(individualFitnessLGP, sizePopulation, rng);
-        populationLGP.clear();
-        populationLGP.insert(survivorsLGP.begin(), survivorsLGP.end());
+        populationLGP = resolve(index, survivingSelection.select(individualFitnessLGP, sizePopulation, rng));
 
 
         // TPG Evolution : variation
-        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
-        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsTPG = resolve(index, parentSelection.select(individualFitnessTPG, nbOffspring, rng));
+        std::vector<std::shared_ptr<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
 
         
-        std::vector<std::shared_ptr<const Individual>> members = parentSelection.select(individualFitnessLGP, nbOffspring, rng);
-        std::vector<std::shared_ptr<const Individual>> tangleds = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> members = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
+        std::vector<std::shared_ptr<const Individual>> tangleds = resolve(index, parentSelection.select(individualFitnessTPG, nbOffspring, rng));
         tpgRep.setAvailableMembers(members);
         tpgRep.setAvailableTangledIndiv(tangleds);
 
         Mutation::mutateIndividuals(mutator, offspringTPG, tpgRep.getGenotypeGenerator(), rng);
         // TPG Evolution : evaluation
-        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
-        evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
+        std::vector<std::shared_ptr<const Individual>> evaluatedIndividualsTPG(populationTPG);
+        evaluatedIndividualsTPG.insert(evaluatedIndividualsTPG.end(), offspringTPG.begin(), offspringTPG.end());
+        addToIndex(index, std::vector<std::shared_ptr<const Individual>>(offspringTPG.begin(), offspringTPG.end()));
         evaluationResultsTPG = evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // TPG Evolution : replacement
         individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
-        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(individualFitnessTPG, sizePopulation, rng);
-        populationTPG.clear();
-        populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
+        populationTPG = resolve(index, survivingSelection.select(individualFitnessTPG, sizePopulation, rng));
 
 
         // Print best individual
-        std::cout<<"ID: "<<individualFitnessTPG.begin()->first->getIndividualID() 
+        std::cout<<"ID: "<<individualFitnessTPG.begin()->first 
         <<" and score: " << individualFitnessTPG.begin()->second <<std::endl;
     }
 
@@ -321,35 +343,35 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
 
     size_t sizePopulation = 100;
     size_t nbOffspring = 100;
+    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
 
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, customGenerator, sizePopulation, rng);
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
-    individualsTPG.clear();
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluationResultsTPG = 
+    std::vector<std::shared_ptr<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, customGenerator, sizePopulation, rng);
+    std::vector<std::shared_ptr<const Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
+    addToIndex(index, populationTPG);
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResultsTPG = 
             evaluator.evaluateIndividuals(populationTPG, problem, metrics, 3, UINT64_MAX, Evaluation::Mode::TRAINING);
     // Fitness assignment 
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
+    std::map<uint64_t, double> individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
 
     size_t nbGen = 20;
     for (size_t idxGen = 0; idxGen < nbGen; idxGen++) {
 
         // TPG Evolution : variation
-        std::vector<std::shared_ptr<const Individual>> parentsTPG = parentSelection.select(individualFitnessTPG, nbOffspring, rng);
-        std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
+        std::vector<std::shared_ptr<const Individual>> parentsTPG = resolve(index, parentSelection.select(individualFitnessTPG, nbOffspring, rng));
+        std::vector<std::shared_ptr<Individual>> offspringTPG = breeder.reproduce(parentsTPG, nbOffspring, rng);
 
         Mutation::mutateIndividuals(mutator, offspringTPG, customGenerator, rng);
         // TPG Evolution : evaluation
-        std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> evaluatedIndividualsTPG(populationTPG);
-        evaluatedIndividualsTPG.insert(offspringTPG.begin(), offspringTPG.end());
+        std::vector<std::shared_ptr<const Individual>> evaluatedIndividualsTPG(populationTPG);
+        evaluatedIndividualsTPG.insert(evaluatedIndividualsTPG.end(), offspringTPG.begin(), offspringTPG.end());
+        addToIndex(index, std::vector<std::shared_ptr<const Individual>>(offspringTPG.begin(), offspringTPG.end()));
         evaluationResultsTPG = evaluator.evaluateIndividuals(evaluatedIndividualsTPG, problem, metrics, 3, idxGen, Evaluation::Mode::TRAINING);
         // TPG Evolution : replacement
         individualFitnessTPG = assigner.assignFitness(evaluationResultsTPG, Metrics::RewardsMetric::staticHash());
-        std::vector<std::shared_ptr<const Individual>> survivorsTPG = survivingSelection.select(individualFitnessTPG, sizePopulation, rng);
-        populationTPG.clear();
-        populationTPG.insert(survivorsTPG.begin(), survivorsTPG.end());
+        populationTPG = resolve(index, survivingSelection.select(individualFitnessTPG, sizePopulation, rng));
 
         // Print best individual
-        std::cout<<"ID: "<<individualFitnessTPG.begin()->first->getIndividualID() << " and score: " << individualFitnessTPG.begin()->second<<std::endl;
+        std::cout<<"ID: "<<individualFitnessTPG.begin()->first << " and score: " << individualFitnessTPG.begin()->second<<std::endl;
     }
     ASSERT_EQ(Individual::getIndividualIDCounter(), 3585) << "boug boug ";
     
@@ -357,35 +379,167 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
 }
 
 
-TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP3) {
-    // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
-    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
-
-    // Create evaluationAgent
-    Evaluation::ReinforcementProblem problem(le, 3);
-
-    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 0, 4, 1);
-    module.addBasiclogger();
-    module.evolve(20);
-
-    EXPECT_EQ(Individual::getIndividualIDCounter(), 3621) << "boug boug ";
-    EXPECT_EQ(module.getAllVertices().size(), 101) << "BMMEME";
-    EXPECT_EQ(8946111367163773343, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+namespace {
+    // Settings of the TPG evolution of the tests, with the seed 4.
+    Evolution::OriginTPGEvolution makeTPG(std::shared_ptr<const Representations::TPG> tpgRep, std::shared_ptr<const Representations::LGP> lgpRep,
+                                          std::shared_ptr<Evaluation::Problem> problem, size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations)
+    {
+        Evolution::OriginTPGEvolution tpg;
+        tpg.representation = tpgRep;
+        tpg.memberRepresentation = lgpRep;
+        tpg.problem = problem;
+        tpg.sizePopulation = sizePopulation;
+        tpg.nbOffspring = nbOffspring;
+        tpg.nbTrainingIterations = nbTrainingIterations;
+        tpg.seed = 4;
+        return tpg;
+    }
 }
 
-TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP4) {
+TEST_F(EvolutionAlgorithmTest, originTPGPipeline) {
     // Create representations
-    Representations::LGP lgpRep(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
-    Representations::TPG tpgRep(le->getInputDimensions(), 3, 2, 10);
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(le->getInputDimensions(), 3, 2, 10);
 
     // Create evaluationAgent
-    Evaluation::ReinforcementProblem problem(le, 3);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
 
-    Evolution::OriginTPGModule module(tpgRep, lgpRep, problem, 100, 100, 3, 0, 4, 10);
-    module.addBasiclogger();
+    Evolution::Module module = makeTPG(tpgRep, lgpRep, problem, 100, 100, 3).buildModule();
+    const Evolution::Population& population = *module.getPopulations().at(0);
+    module.addStep(std::make_shared<Evolution::LogStep>(std::cout, population.individuals(),
+        std::vector<std::pair<std::string, std::string>>{{"Fit", population.data(Evolution::BasicEvolution().trainingFitnessName)}}, Evolution::tpgLogColumns(population.individuals())));
     module.evolve(20);
 
-    EXPECT_EQ(Individual::getIndividualIDCounter(), 3621) << "boug boug ";
-    EXPECT_EQ(8946111367163773343, module.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    // Pipeline of the preset
+    const std::string summary = module.summary();
+    for(const std::string& stepName: {"CreateArchive", "ParentSelection", "Mutation", "SurvivorSelection", "ProtectAggregated", "UpdateArchive"}) {
+        EXPECT_NE(summary.find(stepName), std::string::npos) << stepName;
+    }
+    EXPECT_EQ(summary.find("CacheMemberOutputs"), std::string::npos) << "Members are only cached for prediction problems";
+
+    // The archive is a data of the population, filled with inputs of the population.
+    const std::shared_ptr<const Evaluation::DataSet> archive = module.getState().getIfAny<Evaluation::DataSet>(population.data(Evolution::OriginTPGEvolution().archiveName));
+    ASSERT_NE(archive, nullptr);
+    EXPECT_GT(archive->size(), 0U);
+    EXPECT_LE(archive->size(), 50U);
+
+    // Every vertex of the graphs is valid, with a number of nodes following the representation.
+    const std::vector<std::shared_ptr<const Individual>> vertices = Evolution::getAllVertices(module.getState().getIndividuals(population.individuals()));
+    ASSERT_FALSE(vertices.empty());
+    for(const std::shared_ptr<const Individual>& vertex: vertices) {
+        EXPECT_TRUE(vertex->isValid());
+        EXPECT_LE(vertex->getGenotype().getNodeGroup(0).getSize(), 10U);
+    }
+    EXPECT_FALSE(Evolution::getMembersOf(vertices).empty());
+    EXPECT_NE(module.getState().bestIndividual(population.individuals(), population.data(Evolution::BasicEvolution().trainingFitnessName)), nullptr);
+}
+
+TEST_F(EvolutionAlgorithmTest, originTPGPipelineIsDeterministicWithThreads) {
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(le->getInputDimensions(), 3, 2, 10);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
+
+    uint64_t lastRng[2];
+    size_t nbIndividuals[2];
+    size_t nbVertices[2];
+    const size_t nbThreads[2] = {1, 10};
+    for(size_t idx = 0; idx < 2; idx++) {
+        CounterReset::counterReset();
+        Evolution::OriginTPGEvolution tpg = makeTPG(tpgRep, lgpRep, problem, 100, 100, 3);
+        tpg.nbThreads = nbThreads[idx];
+        Evolution::Module module = tpg.buildModule();
+        module.evolve(20);
+        lastRng[idx] = module.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX);
+        nbIndividuals[idx] = Individual::getIndividualIDCounter();
+        nbVertices[idx] = Evolution::getAllVertices(module.getState().getIndividuals(module.getPopulations().at(0)->individuals())).size();
+    }
+
+    EXPECT_EQ(lastRng[0], lastRng[1]) << "Evolution should not depend on the number of threads";
+    EXPECT_EQ(nbIndividuals[0], nbIndividuals[1]) << "Evolution should not depend on the number of threads";
+    EXPECT_EQ(nbVertices[0], nbVertices[1]) << "Evolution should not depend on the number of threads";
+}
+
+TEST_F(EvolutionAlgorithmTest, originTPGPipelineProtectsAggregatedVertices) {
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(le->getInputDimensions(), 3, 2, 10);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
+
+    Evolution::OriginTPGEvolution tpg = makeTPG(tpgRep, lgpRep, problem, 50, 100, 3);
+    tpg.archiveSize = 0;
+    Evolution::Module module = tpg.buildModule();
+    const std::shared_ptr<Evolution::ProtectAggregatedStep> protect = module.generationSteps().find<Evolution::ProtectAggregatedStep>("ProtectAggregated");
+    EXPECT_EQ(module.initSteps().find("ProtectAggregated"), protect) << "The same step keeps the protected vertices";
+
+    // After each generation, no root is referenced by another root.
+    size_t nbChecks = 0;
+    const std::string individuals = module.getPopulations().at(0)->individuals();
+    module.addStopCondition([&nbChecks, individuals](const Evolution::EvolutionState& state) {
+        std::set<uint64_t> roots;
+        for(const auto& root: *state.get<std::vector<std::shared_ptr<const Individual>>>(individuals)) {
+            roots.insert(root->getIndividualID());
+        }
+        for(const auto& root: *state.get<std::vector<std::shared_ptr<const Individual>>>(individuals)) {
+            for(const auto& subVertex: Evolution::getSubVertices(*root)) {
+                EXPECT_EQ(roots.count(subVertex->getIndividualID()), 0U) << "A referenced vertex should not be a root";
+            }
+        }
+        nbChecks++;
+        return false;
+    });
+    module.evolve(30);
+    const size_t nbProtected = protect->getNbProtected();
+
+    EXPECT_EQ(nbChecks, 30U);
+    // Every protected vertex is still reachable, through the graphs of the population.
+    const std::vector<std::shared_ptr<const Individual>> roots = module.getState().getIndividuals(individuals);
+    EXPECT_GE(Evolution::getAllVertices(roots).size(), roots.size() + nbProtected);
+}
+
+TEST_F(EvolutionAlgorithmTest, originTPGPipelineWithoutProtection) {
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(le->getInputDimensions(), 3, 2, 10);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
+
+    Evolution::OriginTPGEvolution tpg = makeTPG(tpgRep, lgpRep, problem, 50, 100, 3);
+    tpg.archiveSize = 0;
+    tpg.protectAggregated = false;
+    Evolution::Module module = tpg.buildModule();
+    EXPECT_FALSE(module.generationSteps().has("ProtectAggregated"));
+    EXPECT_FALSE(module.generationSteps().has("UpdateArchive"));
+    EXPECT_FALSE(module.initSteps().has("CreateArchive"));
+    module.evolve(5);
+    EXPECT_EQ(module.getState().getIndividuals(module.getPopulations().at(0)->individuals()).size(), 50U);
+}
+
+TEST_F(EvolutionAlgorithmTest, originTPGSettingsAreChecked) {
+    auto lgpRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(le->getInputDimensions(), 3, 2, 10);
+    auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
+
+    // Order of the steps of the preset.
+    Evolution::OriginTPGEvolution tpg = makeTPG(tpgRep, lgpRep, problem, 20, 20, 2);
+    Evolution::Module module = tpg.buildModule();
+    auto stepNames = [](const Evolution::Pipeline& pipeline) {
+        std::vector<std::string> names;
+        for(const auto& step: pipeline.getSteps()) {
+            names.push_back(step->name());
+        }
+        return names;
+    };
+    EXPECT_EQ(stepNames(module.initSteps()),
+        (std::vector<std::string>{"CreateArchive", "InitPopulation", "InitialEvaluation", "TrainingFitness", "ProtectAggregated", "UpdateArchive"}));
+    EXPECT_EQ(stepNames(module.generationSteps()),
+        (std::vector<std::string>{"ParentSelection", "Reproduction", "Mutation", "TrainingEvaluation", "TrainingFitness", "SurvivorSelection",
+                                  "ProtectAggregated", "UpdateArchive"}));
+    module.evolve(3);
+
+    // The representation must be a TPG, and the members are required.
+    auto policyRep = std::make_shared<Representations::LGP>(le->getInputDimensions(), Data::DataType::type<double>({8}), set, Data::DataType::type<double>({3}), 10, 20);
+    policyRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(policyRep->getDimensionFlow().getOutputDimension()));
+    Evolution::OriginTPGEvolution notTPG = tpg;
+    notTPG.representation = policyRep;
+    EXPECT_THROW(notTPG.buildModule(), std::runtime_error) << "The population is not made of TPG";
+    Evolution::OriginTPGEvolution noMembers = tpg;
+    noMembers.memberRepresentation = nullptr;
+    EXPECT_THROW(noMembers.buildModule(), std::runtime_error) << "The members are required";
 }

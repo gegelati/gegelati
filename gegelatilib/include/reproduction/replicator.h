@@ -35,8 +35,9 @@
          * \param[in] parents the parents reproduced
          * \param[in] nbOffspring the number of offspring created.
          * \param[in] rng Random Number Generator.
+         * \return the offspring, in creation order.
          */
-        virtual std::set<std::shared_ptr<Individual>, SharedLess<Individual>> reproduce(
+        virtual std::vector<std::shared_ptr<Individual>> reproduce(
             std::vector<std::shared_ptr<const Individual>> parents, size_t nbOffspring, RNG::RNG& rng) const override;
 
 

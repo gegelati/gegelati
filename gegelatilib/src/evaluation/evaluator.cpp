@@ -1,7 +1,7 @@
 
 #include "evaluation/evaluator.h"
-std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> Evaluation::Evaluator::evaluateIndividuals(
-  const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
+std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> Evaluation::Evaluator::evaluateIndividuals(
+  const std::vector<std::shared_ptr<const Individual>>& individuals, 
   Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
   size_t nbIterations, uint64_t generationNumber,
   Mode mode) const
@@ -14,14 +14,14 @@ std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>,
   std::set<uint64_t> hashes = problem.computeEvaluationHashes(
     nbIterations, generationNumber, mode, problem.getProblemSeed());
 
-  std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
+  std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
   for(const std::shared_ptr<const Individual>& individual: individuals) {
 
     std::unique_ptr<Metrics::MetricMap> localMetrics = std::make_unique<Metrics::MetricMap>(metricTemplate);
 
     problem.extractMetrics(*individual, *localMetrics, hashes);
 
-    results.insert(std::make_pair(individual, std::move(localMetrics)));
+    results.insert(std::make_pair(individual->getIndividualID(), std::move(localMetrics)));
   }
   return results;
 }

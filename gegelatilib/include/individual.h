@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <unordered_map>
  
 #include "graphBased/genotype.h"
 #include "representations/representation.h"
@@ -32,6 +33,9 @@ protected:
     /// \brief Define if the genotype is valid for the representation
     bool valid = false;
 
+    /// Outputs of the individual stored with cacheOutput, indexed by the address of the first input.
+    mutable std::unordered_map<const void*, Data::DataValue> cachedOutputs;
+
     /**
      * \brief Incremente the individual ID counter and return the new value.
      */
@@ -47,9 +51,6 @@ protected:
     friend struct ::CounterReset;
 
 public:
-
-    /// \brief Hashes
-    mutable std::map<const void*, Data::DataValue> hashed;
 
     /// Default polymorphic destructor
     virtual ~Individual() = default;
@@ -133,8 +134,37 @@ public:
     virtual void updateValidity();
 
     /**
+     * \brief Store the output of the individual on an input, returned by the next executions on this input.
+     *
+     * This is only an optimization, for inputs executed many times (e.g. a member shared by many TPG vertices).
+     * Inputs are identified by the address of their first data: cached outputs are only valid while the inputs stay
+     * at the same address (e.g. the samples of a dataset), and must be cleared before the inputs move or are destroyed.
+     * The cache is also cleared when the genotype changes.
+     * Storing outputs is not thread safe, while reading them concurrently (executing the individual) is.
+     *
+     * \param[in] input address of the first input data (Data::DataView::getPtr).
+     * \param[in] output output of the individual on this input.
+     */
+    void cacheOutput(const void* input, Data::DataValue output) const;
+
+    /**
+     * \brief Return the output cached for an input, or null if there is none (see cacheOutput).
+     *
+     * \param[in] input address of the first input data (Data::DataView::getPtr).
+     */
+    const Data::DataValue* getCachedOutput(const void* input) const;
+
+    /// Remove the outputs cached by cacheOutput.
+    void clearCachedOutputs() const;
+
+    /// Return the number of outputs cached by cacheOutput.
+    size_t getNbCachedOutputs() const;
+
+    /**
      * \brief execute based on the representation
-     * 
+     *
+     * The output is the cached one if there is one for these inputs (see cacheOutput).
+     *
      * \param[in] inputSources input sources on which the individual is executed.
      */
     virtual Data::DataValue execute(const std::vector<Data::DataView>& inputSources) const;

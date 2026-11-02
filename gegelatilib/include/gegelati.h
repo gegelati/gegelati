@@ -64,9 +64,23 @@
 #include <evaluation/reinforcementProblem.h>
 
 // Evolution
-#include <evolution/basicModule.h>
+#include <evolution/basicEvolution.h>
+#include <evolution/evolutionState.h>
 #include <evolution/module.h>
-#include <evolution/originTPGModule.h>
+#include <evolution/originTPGEvolution.h>
+#include <evolution/originTPGSteps.h>
+#include <evolution/pipeline.h>
+#include <evolution/population.h>
+#include <evolution/step.h>
+#include <evolution/steps/assignFitnessStep.h>
+#include <evolution/steps/evaluateStep.h>
+#include <evolution/steps/exportStep.h>
+#include <evolution/steps/initPopulationStep.h>
+#include <evolution/steps/lambdaStep.h>
+#include <evolution/steps/logStep.h>
+#include <evolution/steps/mutateStep.h>
+#include <evolution/steps/reproduceStep.h>
+#include <evolution/steps/selectStep.h>
 
 // File
 #include <file/populationDotExporter.h>
@@ -92,10 +106,6 @@
 #include <instructions/lambdaInstruction.h>
 #include <instructions/multByConstant.h>
 #include <instructions/set.h>
-
-// Logging
-#include <log/basicLogger.h>
-#include <log/logger.h>
 
 // Metrics
 #include <metrics/inputMetric.h>

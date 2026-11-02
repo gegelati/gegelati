@@ -101,13 +101,7 @@ Data::DataValue Representations::TPG::executeGenotype(
             winner = &node;
         }
         const std::shared_ptr<const Individual>& member = node.getValue(0).getScalar<std::shared_ptr<const Individual>>();
-        
-        auto it = member->hashed.find(inputSources.at(0).getPtr());
-        if(it != member->hashed.end()) {
-            bid = it->second.getScalar<double>();
-        } else {
-            bid = member->execute(inputSources).getScalar<double>();
-        }
+        bid = member->execute(inputSources).getScalar<double>();
 
         if(!std::isnan(bid) && bid > maxBid) {
             maxBid = bid;

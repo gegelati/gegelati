@@ -43,6 +43,7 @@
 #include <queue>
 #include <inttypes.h>
 #include <set>
+#include <vector>
 
 #include "rng/rng.h"
 #include "individual.h"
@@ -72,23 +73,22 @@ namespace Evaluation {
         /// Default destructor for polymorphism
         virtual ~Evaluator() = default;
         /**
-         * \brief Evaluate all individual of the representations.
+         * \brief Evaluate all the individuals in a problem.
          *
-         * This method calls the evaluateIndividual method for every individual
-         * of the representations. The method returns a sorted map associating each
-         * individual to its average score.
+         * This method calls the extractMetrics method of the problem for every individual.
+         * The metrics of each individual are stored indexed by the individual ID.
          *
-         * \param[in] individuals The individuals whose genotypes are evaluted.
-         * \param[in] problem problem
-         * \param[in] metricTemplate problem
-         * \param[in] nbIterations problem
+         * \param[in] individuals The individuals whose genotypes are evaluted (must be distinct).
+         * \param[in] problem the problem in which individuals are evaluated.
+         * \param[in] metricTemplate template of the metrics measured.
+         * \param[in] nbIterations number of evaluations of each individual.
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        virtual std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> evaluateIndividuals(
-            const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
+        virtual std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluateIndividuals(
+            const std::vector<std::shared_ptr<const Individual>>& individuals, 
             Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
             size_t nbIterations, uint64_t generationNumber,
             Mode mode) const;

@@ -49,13 +49,13 @@
             /**
              * \brief Compute the descriptor values of the individuals based on the vector metric required
              * 
-             * \param[in] individualMetrics the individuals with their metrics.
+             * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
              * \param[in] metricHash the hash of the required metric.
              * 
              * \return A map of each individual ID with the descriptor values. ID is used to reduce memory coset and increase lisibility
              */
             virtual std::map<uint64_t, std::vector<double>> computeDescriptors(
-                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
                 uint64_t metricHash) const;
             
             /**
@@ -87,11 +87,12 @@
             /**
              * \brief method ranking the individuals based on their average metric value over iterations
              * 
-             * \param[in] individualMetrics the individuals with their metrics.
+             * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
              * \param[in] metricHash the hash of the required metric.
+             * \return the fitness of each individual, indexed by individual ID.
              */
-            virtual std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> assignFitness(
-                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+            virtual std::map<uint64_t, double> assignFitness(
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
                 uint64_t metricHash) const override;
     };
 };

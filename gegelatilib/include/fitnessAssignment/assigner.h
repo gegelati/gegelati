@@ -29,11 +29,12 @@
             /**
              * \brief method setting score to the individuals based on their evaluation metrics
              * 
-             * \param[in] individualMetrics the individuals with their metrics.
+             * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
              * \param[in] metricHash the hash of the required metric.
+             * \return the fitness of each individual, indexed by individual ID.
              */
-            virtual std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> assignFitness(
-                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+            virtual std::map<uint64_t, double> assignFitness(
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
                 uint64_t metricHash = 0) const = 0;
     };
 };

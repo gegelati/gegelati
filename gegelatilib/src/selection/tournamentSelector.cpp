@@ -2,18 +2,18 @@
 
 #include "selection/tournamentSelector.h"
 
-std::vector<std::shared_ptr<const Individual>> Selection::TournamentSelector::select(
-                const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap,
+std::vector<uint64_t> Selection::TournamentSelector::select(
+                const std::map<uint64_t, double>& fitnessMap,
                 size_t nbSelected, RNG::RNG& rng) const
 {
-    std::vector<std::pair<std::shared_ptr<const Individual>, double>> individualFitnesses = getOrderedFitness(fitnessMap, false);
+    std::vector<std::pair<uint64_t, double>> individualFitnesses = getOrderedFitness(fitnessMap, false);
 
     if(this->sizeTournament < 2) {
         throw std::runtime_error("Selection::TournamentSelector::select: Tournament size should be higher than 1");
     }
 
     // Selected individuals
-    std::vector<std::shared_ptr<const Individual>> selected;
+    std::vector<uint64_t> selected;
     
     for(size_t idx = 0; idx < nbSelected; idx++) {
 
@@ -31,7 +31,7 @@ std::vector<std::shared_ptr<const Individual>> Selection::TournamentSelector::se
         // In practice it is the first one thanks to the getOrderedFitness
         size_t bestIndex = *indices.begin();
 
-        std::shared_ptr<const Individual> bestIndiv = individualFitnesses.at(bestIndex).first;
+        uint64_t bestIndiv = individualFitnesses.at(bestIndex).first;
         /// Select best
         selected.push_back(bestIndiv);
 

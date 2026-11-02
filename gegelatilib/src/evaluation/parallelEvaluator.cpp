@@ -6,7 +6,7 @@ void Evaluation::ParallelEvaluator::slaveEvalJobThread(
             Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate, const std::set<uint64_t>& hashes, 
             std::mutex& individualsToProcessMutex,
             std::queue<std::shared_ptr<const Individual>>& individualsQueue, 
-            std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& results,
+            std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& results,
             std::mutex& resultsMutex) const
 {
     
@@ -36,13 +36,13 @@ void Evaluation::ParallelEvaluator::slaveEvalJobThread(
         
         { // Store result Mutual exclusion zone
             std::lock_guard<std::mutex> lock(resultsMutex);
-            results.insert(std::make_pair(individualToProcess, std::move(localMetrics)));
+            results.insert(std::make_pair(individualToProcess->getIndividualID(), std::move(localMetrics)));
         }
     }
 }
 
-std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> Evaluation::ParallelEvaluator::evaluateIndividuals(
-            const std::set<std::shared_ptr<const Individual>, SharedLess<Individual>>& individuals, 
+std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> Evaluation::ParallelEvaluator::evaluateIndividuals(
+            const std::vector<std::shared_ptr<const Individual>>& individuals, 
             Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
             size_t nbIterations, uint64_t generationNumber,
             Mode mode) const
@@ -71,7 +71,7 @@ std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>,
     }
 
     
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
     std::mutex resultsMutex;
     std::mutex individualsToProcessMutex;
 

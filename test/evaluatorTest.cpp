@@ -26,7 +26,6 @@ TEST(EvaluatorTest, Constructor)
     ASSERT_NO_THROW(delete evaluator) << "Destruction failed";
 }
 
-
 TEST(EvaluatorTest, evaluateIndividualsOnRL)
 {
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
@@ -37,24 +36,24 @@ TEST(EvaluatorTest, evaluateIndividualsOnRL)
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
     ASSERT_TRUE(indiv->isValid()) << "Individual should be valid";
+    const uint64_t indivID = indiv->getIndividualID();
 
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals;
-    individuals.insert(indiv);
+    std::vector<std::shared_ptr<const Individual>> individuals{indiv};
 
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
 
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
     ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING)) << "RL evaluation failed";
     ASSERT_EQ(results.size(), 1) << "There should be one evaluation result";
-    ASSERT_TRUE(results.find(indiv) != results.end()) << "The evaluated individual should be present in the results";
-    ASSERT_NE(results.at(indiv), nullptr) << "The metric map should not be null";
+    ASSERT_TRUE(results.find(indivID) != results.end()) << "The evaluated individual should be present in the results";
+    ASSERT_NE(results.at(indivID), nullptr) << "The metric map should not be null";
 
-    std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indiv)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
+    std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indivID)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
     ASSERT_EQ(inputMetrics.size(), 2) << "There should be one input metric for each evaluation hash";
 
-    std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indiv)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+    std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indivID)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "There should be one output metric for each evaluation hash";
 
     std::set<uint64_t> expectedHashes = problem.computeEvaluationHashes(2, 0, Evaluation::Mode::TESTING, problem.getProblemSeed());
@@ -86,19 +85,19 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
     ASSERT_TRUE(indiv->isValid()) << "Individual should be valid";
+    const uint64_t indivID = indiv->getIndividualID();
 
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals;
-    individuals.insert(indiv);
+    std::vector<std::shared_ptr<const Individual>> individuals{indiv};
 
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> results;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
 
     ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TRAINING)) << "Classification evaluation failed";
     ASSERT_EQ(results.size(), 1) << "There should be one evaluation result";
-    ASSERT_TRUE(results.find(indiv) != results.end()) << "The evaluated individual should be present in the results";
-    ASSERT_NE(results.at(indiv), nullptr) << "The metric map should not be null";
+    ASSERT_TRUE(results.find(indivID) != results.end()) << "The evaluated individual should be present in the results";
+    ASSERT_NE(results.at(indivID), nullptr) << "The metric map should not be null";
 
     std::set<uint64_t> expectedHashes = problem.computeEvaluationHashes(2, 0, Evaluation::Mode::TRAINING, problem.getProblemSeed());
     ASSERT_EQ(expectedHashes.size(), 2) << "There should be two distinct evaluation hashes";
@@ -108,12 +107,12 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     it++;
     uint64_t hash1 = *it;
 
-    std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indiv)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
+    std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indivID)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
     ASSERT_EQ(inputMetrics.size(), 2) << "There should be two input metrics";
     ASSERT_TRUE(inputMetrics.find(hash0) != inputMetrics.end()) << "Input metric should contain the first evaluation hash";
     ASSERT_TRUE(inputMetrics.find(hash1) != inputMetrics.end()) << "Input metric should contain the second evaluation hash";
 
-    std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indiv)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+    std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indivID)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
     ASSERT_EQ(outputMetrics.size(), 2) << "There should be two output metrics";
     ASSERT_TRUE(outputMetrics.find(hash0) != outputMetrics.end()) << "Output metric should contain the first evaluation hash";
     ASSERT_TRUE(outputMetrics.find(hash1) != outputMetrics.end()) << "Output metric should contain the second evaluation hash";
@@ -143,8 +142,7 @@ TEST(EvaluatorTest, evaluateIndividualsInvalidArguments)
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
 
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> individuals;
-    individuals.insert(indiv);
+    std::vector<std::shared_ptr<const Individual>> individuals{indiv};
 
     auto emptyMetricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
 
@@ -153,7 +151,7 @@ TEST(EvaluatorTest, evaluateIndividualsInvalidArguments)
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
 
-    std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> emptyIndividuals;
+    std::vector<std::shared_ptr<const Individual>> emptyIndividuals;
 
     ASSERT_THROW(evaluator.evaluateIndividuals(emptyIndividuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING), std::runtime_error) << "Evaluation should fail with an empty set of individuals";
 }

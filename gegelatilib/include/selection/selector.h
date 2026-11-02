@@ -37,23 +37,28 @@
             /**
              * \brief method performing the selection
              * 
-             * \param[in] fitnessMap the individuals containing the scores.
+             * Selection only relies on the scores: individuals are identified by their ID.
+             * 
+             * \param[in] fitnessMap the score of each individual, indexed by individual ID.
              * \param[in] nbSelected the number of individuals to select.
              * \param[in] rng required for selecting
              * 
-             * \return a vector of the selected individuals.
+             * \return the IDs of the selected individuals. An ID can appear several times if the selector allows replacement.
              */
-            virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap,
+            virtual std::vector<uint64_t> select(
+                const std::map<uint64_t, double>& fitnessMap,
                 size_t nbSelected, RNG::RNG& rng) const = 0;
 
             /**
              * \brief Static method to obtain fitness in ascending ordered by default
              * 
-             * \param[in] fitnessMap map ordered by individual IDs.
+             * When two individuals have the same fitness, the one with the lower ID (the older) is considered as higher, in both orders.
+             * 
+             * \param[in] fitnessMap map of the score of each individual, indexed by individual ID.
              * \param[in] ascending boolean indicating if the order is ascending or descending, default True for ascending
+             * \return pairs of individual ID and score, ordered.
              */
-            static std::vector<std::pair<std::shared_ptr<const Individual>, double>> getOrderedFitness(const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap, bool ascending = true);
+            static std::vector<std::pair<uint64_t, double>> getOrderedFitness(const std::map<uint64_t, double>& fitnessMap, bool ascending = true);
     };
 };
 

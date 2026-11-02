@@ -20,14 +20,14 @@
             /**
              * \brief method performing the random selection
              * 
-             * \param[in] fitnessMap the individuals containing the scores.
+             * \param[in] fitnessMap the score of each individual, indexed by individual ID.
              * \param[in] nbSelected the number of individuals to select.
              * \param[in] rng required for selecting
              * 
-             * \return a vector of the selected individuals.
+             * \return the IDs of the selected individuals.
              */
-            virtual std::vector<std::shared_ptr<const Individual>> select(
-                const std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>>& fitnessMap,
+            virtual std::vector<uint64_t> select(
+                const std::map<uint64_t, double>& fitnessMap,
                 size_t nbSelected, RNG::RNG& rng) const override;
     };
 };

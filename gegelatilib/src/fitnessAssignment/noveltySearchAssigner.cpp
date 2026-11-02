@@ -38,13 +38,13 @@ std::vector<double> FitnessAssignment::NoveltySearchAssigner::computeOneDescript
 }
 
 std::map<uint64_t, std::vector<double>> FitnessAssignment::NoveltySearchAssigner::computeDescriptors(
-    const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
     uint64_t metricHash) const
 {
     // Get the average values of each descriptor for each individual
     std::map<uint64_t, std::vector<double>> descriptorValues;
 
-    for (const auto& [individual, metricMap] : individualMetrics){
+    for (const auto& [individualID, metricMap] : individualMetrics){
 
         std::vector<double> currentDescriptorValues;
         if(this->averageFeature) {
@@ -60,7 +60,7 @@ std::map<uint64_t, std::vector<double>> FitnessAssignment::NoveltySearchAssigner
             throw std::runtime_error("FitnessAssignment::NoveltySearchAssigner::computeDescriptors descriptors should always have the same size");
         }
 
-        descriptorValues.insert(std::make_pair(individual->getIndividualID(), std::move(currentDescriptorValues)));
+        descriptorValues.insert(std::make_pair(individualID, std::move(currentDescriptorValues)));
 
     }
 
@@ -149,8 +149,8 @@ std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::computeNove
 
 
 
-std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> FitnessAssignment::NoveltySearchAssigner::assignFitness(
-                const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::assignFitness(
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
                 uint64_t metricHash) const
 {
     std::map<uint64_t, std::vector<double>> descriptorValues = this->computeDescriptors(individualMetrics, metricHash);
@@ -159,13 +159,5 @@ std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> Fitn
 
     std::map<uint64_t, std::vector<uint64_t>> neighbors = this->computeNeighbors(distances);
 
-    std::map<uint64_t, double> noveltyScores = this->computeNoveltyScores(distances, neighbors);
-
-    // Get back to individuals instead of IDs.
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> fitnesses;
-    for(const auto& [indiv, metricMap]: individualMetrics) {
-        fitnesses.insert(std::make_pair(indiv, noveltyScores.at(indiv->getIndividualID())));
-    }
-
-    return std::move(fitnesses);
+    return this->computeNoveltyScores(distances, neighbors);
 }

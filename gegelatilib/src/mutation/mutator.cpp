@@ -36,14 +36,15 @@ std::unique_ptr<GraphBased::Genotype> Mutation::Mutator::initRandomGenotype(cons
     return std::move(genotype);
 }
 
-std::set<std::shared_ptr<Individual>, SharedLess<Individual>> 
+std::vector<std::shared_ptr<Individual>> 
     Mutation::initIndividuals(
         const Mutator& mutator, const Representations::Representation& representation, 
         const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng)
 {
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals;
+    std::vector<std::shared_ptr<Individual>> individuals;
+    individuals.reserve(nbIndividuals);
     for(size_t idx = 0; idx < nbIndividuals; idx++) {
-        individuals.insert(std::make_shared<Individual>(
+        individuals.push_back(std::make_shared<Individual>(
             representation, 
             mutator.initRandomGenotype(generator, rng)
         ));
@@ -51,10 +52,10 @@ std::set<std::shared_ptr<Individual>, SharedLess<Individual>>
     return individuals;
 }
 
-void Mutation::mutateIndividuals(const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng)
+void Mutation::mutateIndividuals(const Mutator& mutator, const std::vector<std::shared_ptr<Individual>>& individuals, const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng)
 {
     std::queue<size_t> rngSeeds;
-    for(const std::shared_ptr<Individual>& indiv: individuals) {
+    for(size_t idx = 0; idx < individuals.size(); idx++) {
         rngSeeds.emplace(rng.getUnsignedInt64(0, UINT64_MAX));
     }
 
@@ -68,7 +69,7 @@ void Mutation::mutateIndividuals(const Mutator& mutator, std::set<std::shared_pt
 
 void Mutation::mutateIndividualsInParallel(
     const Mutator& mutator,
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals,
+    const std::vector<std::shared_ptr<Individual>>& individuals,
     const GraphBased::GenotypeGenerator& generator,
     RNG::RNG& rng,
     size_t maxNbThreads)

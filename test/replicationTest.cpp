@@ -31,7 +31,7 @@ TEST(ReplicationTest, reproduce)
     parents.push_back(std::make_shared<Individual>(rep, genotype1.cloneUniquePtr()));
     parents.push_back(std::make_shared<Individual>(rep, genotype2.cloneUniquePtr()));
 
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>> offspring = reproducer.reproduce(parents, 10, rng);
+    std::vector<std::shared_ptr<Individual>> offspring = reproducer.reproduce(parents, 10, rng);
     int nbIndiv1 = 0;
     int nbIndiv2 = 0;
     ASSERT_EQ(offspring.size(), 10) << "Should have 10 offspring";

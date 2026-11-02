@@ -5,25 +5,28 @@
 
 namespace Mutation {
     /**
-     * \brief Class representing a Mutation.
+     * \brief Point mutation whose added nodes are copies of the nodes of other individuals.
      */
     class NodeTransferMutation : public PointMutator {
 
         protected:
             /// @brief Individuals potentially choosen for the node transfer.
-            std::vector<std::shared_ptr<const Individual>> potentialNodes;
+            std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> potentialNodes;
 
         public:
 
             /// @brief Default constructor
-            NodeTransferMutation(double pMutateNode, double pAddNode = 0.1, double pRemoveNode = 0.0) 
+            NodeTransferMutation(double pMutateNode, double pAddNode = 0.1, double pRemoveNode = 0.0)
             : PointMutator(pMutateNode, pAddNode, pRemoveNode) {};
 
-
             /**
-             * \brief the potential nodes for the next mutations
+             * \brief Set the individuals whose nodes are transferred by the next mutations.
+             *
+             * The list is shared, not copied. Setting it is not thread safe, while mutating concurrently is.
+             *
+             * \param[in] potentialNodes individuals whose nodes can be transferred.
              */
-            virtual void setPotentialNodes(const std::vector<std::shared_ptr<const Individual>>& potentialNodes);
+            void setPotentialNodes(std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> potentialNodes);
 
             /**
              * \brief Override of the initial method to sample and dupplicate a random node in the current potential ones.

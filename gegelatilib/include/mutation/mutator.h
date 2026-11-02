@@ -74,34 +74,40 @@
     };
 
     /**
-     * \brief Initialize a set of individuals
+     * \brief Initialize a list of individuals
      * 
      * \param[in] mutator Mutator method used to initialize the individuals
      * \param[in] representation The representation for which individuals are created.
      * \param[in] generator The generator from which individuals are created.
      * \param[in] nbIndividuals The number of individuals created.
      * \param[in] rng Random Number Generator used in the mutation process.
+     * \return the created individuals, in creation order.
      */
-    std::set<std::shared_ptr<Individual>, SharedLess<Individual>>  initIndividuals(
+    std::vector<std::shared_ptr<Individual>> initIndividuals(
         const Mutator& mutator, const Representations::Representation& representation, 
         const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng);
 
     /**
-     * \brief Mutate a set of individuals
+     * \brief Mutate a list of individuals
+     * 
+     * Mutation seeds are drawn from the rng in the order of the list, so the result only depends on the list order.
      * 
      * \param[in] mutator Mutator method used to mutate the individuals
-     * \param[in] individuals set of individuals mutated.
+     * \param[in] individuals individuals mutated.
+     * \param[in] generator The generator used to mutate the genotypes.
      * \param[in] rng Random Number Generator used in the mutation process.
      */
     void mutateIndividuals(
-        const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals, 
+        const Mutator& mutator, const std::vector<std::shared_ptr<Individual>>& individuals, 
         const GraphBased::GenotypeGenerator& generator, RNG::RNG& rng);
 
     /**
      * \brief Same behavior as above method but in parallel.
+     * 
+     * \param[in] maxNbThreads maximum number of threads used.
      */
     void mutateIndividualsInParallel(
-        const Mutator& mutator, std::set<std::shared_ptr<Individual>, SharedLess<Individual>> individuals,
+        const Mutator& mutator, const std::vector<std::shared_ptr<Individual>>& individuals,
         const GraphBased::GenotypeGenerator& generator,  RNG::RNG& rng, size_t maxNbThreads);
 }; // namespace Mutator
 

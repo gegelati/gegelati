@@ -65,6 +65,7 @@ void Individual::setGenotype(std::unique_ptr<GraphBased::Genotype> genotype)
     }
     this->genotype = std::move(genotype);
     this->valid = isGenotypeValid;
+    this->cachedOutputs.clear();
 }
 
 void Individual::updateValidity()
@@ -91,19 +92,39 @@ std::shared_ptr<Individual> Individual::cloneSharedPtr() const
 }
 
 
+void Individual::cacheOutput(const void* input, Data::DataValue output) const
+{
+    this->cachedOutputs.insert_or_assign(input, std::move(output));
+}
+
+const Data::DataValue* Individual::getCachedOutput(const void* input) const
+{
+    auto it = this->cachedOutputs.find(input);
+    return (it != this->cachedOutputs.end()) ? &it->second : nullptr;
+}
+
+void Individual::clearCachedOutputs() const
+{
+    this->cachedOutputs.clear();
+}
+
+size_t Individual::getNbCachedOutputs() const
+{
+    return this->cachedOutputs.size();
+}
+
 Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {
     // Individual need to be valid to be executed.
     if(!valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
     }
-    auto it = this->hashed.find(inputSources.at(0).getPtr());
-    if(it != this->hashed.end()) {
-        return it->second.clone();
+    if(!inputSources.empty()) {
+        if(const Data::DataValue* cached = this->getCachedOutput(inputSources.front().getPtr())) {
+            return cached->clone();
+        }
     }
-
     return this->representation.execute(*this->genotype, inputSources);
-
 }
 
 Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const
@@ -111,10 +132,6 @@ Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSou
     // Individual need to be valid to be executed.
     if(!valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
-    }
-    auto it = this->hashed.find(inputSources.at(0).getPtr());
-    if(it != this->hashed.end()) {
-        return it->second.clone();
     }
     return this->representation.execute(*this->genotype, inputSources);
 }

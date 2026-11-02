@@ -1,21 +1,14 @@
 #ifndef EVOLUTION_MODULE_H
 #define EVOLUTION_MODULE_H
 
-#include <cstdint>
+#include <functional>
 #include <memory>
-#include <iostream>
 #include <string>
+#include <vector>
 
-#include "individual.h"
-#include "evaluation/evaluator.h"
-#include "representations/representation.h"
-#include "evaluation/problem.h"
-#include "mutation/mutator.h"
-#include "fitnessAssignment/assigner.h"
-#include "selection/selector.h"
-#include "reproduction/replicator.h"
-
-#include "log/logger.h"
+#include "evolution/evolutionState.h"
+#include "evolution/pipeline.h"
+#include "evolution/population.h"
 #include "util/stopwatch.h"
 
 /**
@@ -24,61 +17,169 @@
 namespace Evolution {
 
     /**
-     * \brief abstract class for creating evolution module handling the initialization and generation process of evolutionnary algorithms.
+     * \brief Evolution of one or several populations, defined by two pipelines of steps.
+     *
+     * The initialization pipeline runs once and the generation pipeline runs once per generation,
+     * both on the same EvolutionState. The module only holds the populations, runs the steps, times them,
+     * checks that they can work together, and handles stop conditions. It knows nothing about
+     * the data exchanged by the steps.
+     *
+     * \code
+     * Evolution::Module module(seed);
+     * auto lgp = module.addPopulation(lgpRepresentation, 100, "LGP");
+     * module.addInitStep(std::make_shared<InitPopulationStep>(lgp, mutator));
+     * module.addStep(std::make_shared<SelectStep>(std::vector<std::string>{lgp->individuals()}, lgp->data("fitness"), selector, 100, lgp->data("parents")));
+     * ...
+     * module.evolve(100);
+     * \endcode
+     *
+     * Presets add populations and steps to a module (see BasicEvolution).
      */
     class Module {
-
         protected:
-            /// @brief Loggers of the module
-            std::vector<std::shared_ptr<Log::Logger>> loggers;
+            /// Populations evolved by the module, kept alive with their representation.
+            std::vector<std::shared_ptr<const Population>> populations;
 
-            /// \brief the stopwatch to measure evolution time.
+            /// State shared by the steps.
+            EvolutionState evolutionState;
+
+            /// Steps run once to initialize the evolution.
+            Pipeline initPipeline;
+
+            /// Steps run at each generation.
+            Pipeline generationPipeline;
+
+            /// Seed of the random number generator of the evolution.
+            uint64_t seed;
+
+            /// Indicates if the initialization pipeline was run.
+            bool initialized = false;
+
+            /// Conditions stopping the evolution when one of them is true after a generation.
+            std::vector<std::function<bool(const EvolutionState&)>> stopConditions;
+
+            /// Stopwatch measuring the time of the evolution.
             Stopwatch stopwatch;
 
+            /**
+             * \brief Run all the steps of a pipeline that run during the current generation, and time them.
+             *
+             * \param[in] pipeline the pipeline run.
+             */
+            void runPipeline(const Pipeline& pipeline);
+
+            /**
+             * \brief Check that every step finds the data it requires.
+             *
+             * \throw std::runtime_error if a step requires data that no previous step provides.
+             */
+            void checkPipelines() const;
+
+            /**
+             * \brief Run generations until the requested number is reached or a stop condition is true.
+             *
+             * \param[in] nbGenerations maximum number of generations done.
+             */
+            void runGenerations(size_t nbGenerations);
+
         public:
-            // Default destructor
-            virtual ~Module() = default;
-            Module() = default;
-
-            // Disable copying to avoid accidental copies (use references or pointers instead).
-            Module(const Module&) = delete;
-            Module& operator=(const Module&) = delete;
-
-            /// Add a logger used by this module.
-            void addLogger(std::shared_ptr<Log::Logger> logger);
-
-            /// Get the vectior of attached logger.
-            const std::vector<std::shared_ptr<Log::Logger>>& getLoggers() const;
-
-            /// @brief print the summary of the current evolution 
-            virtual std::string summary() const;
+            /**
+             * \brief Constructor of a module without population nor steps.
+             *
+             * \param[in] seed seed of the random number generator of the evolution.
+             */
+            explicit Module(uint64_t seed = 0) : seed{seed} {}
 
             /**
-             * \brief Initialize the evolution module perform generations.
-             * 
-             * \param[in] nbGenerations the number of generations to perform
+             * \brief Add a population to evolve.
+             *
+             * The population is only described: steps working on it are added afterwards, starting with
+             * an InitPopulationStep creating its individuals.
+             *
+             * \param[in] representation representation of the individuals, kept alive by the module.
+             * \param[in] size number of individuals of the population.
+             * \param[in] name name of the population, used to name its data in the state.
+             * \return the population, to give to the steps working on it.
+             * \throw std::runtime_error if the representation is null, or if the name is empty or already used.
              */
-            virtual void evolve(size_t nbGenerations);
+            std::shared_ptr<const Population> addPopulation(std::shared_ptr<const Representations::Representation> representation, size_t size, std::string name);
+
+            /// Return the populations of the module, in insertion order.
+            const std::vector<std::shared_ptr<const Population>>& getPopulations() const { return this->populations; }
 
             /**
-             * \brief Initialize the evolution
+             * \brief Add a step at the end of the initialization pipeline.
+             *
+             * \param[in] step the added step.
+             * \return the step, to link other steps to it.
              */
-            virtual void initialize() = 0;
+            template <typename T> std::shared_ptr<T> addInitStep(std::shared_ptr<T> step)
+            {
+                this->initPipeline.add(step);
+                return step;
+            }
 
             /**
-             * \brief Perform the required number of generations
-             * 
-             * \param[in] nbGenerations the number of generations to perform
+             * \brief Add a step at the end of the generation pipeline.
+             *
+             * \param[in] step the added step.
+             * \return the step, to link other steps to it.
              */
-            virtual void doGenerations(size_t nbGenerations);
+            template <typename T> std::shared_ptr<T> addStep(std::shared_ptr<T> step)
+            {
+                this->generationPipeline.add(step);
+                return step;
+            }
+
+            /// Return the pipeline run once at the beginning of the evolution, to edit it.
+            Pipeline& initSteps() { return this->initPipeline; }
+
+            /// Return the pipeline run once at the beginning of the evolution.
+            const Pipeline& initSteps() const { return this->initPipeline; }
+
+            /// Return the pipeline run at each generation, to edit it.
+            Pipeline& generationSteps() { return this->generationPipeline; }
+
+            /// Return the pipeline run at each generation.
+            const Pipeline& generationSteps() const { return this->generationPipeline; }
+
+            /// Return the current state of the evolution (individuals, fitness... see EvolutionState::getIndividuals and bestIndividual).
+            EvolutionState& getState() { return this->evolutionState; }
+
+            /// Return the current state of the evolution.
+            const EvolutionState& getState() const { return this->evolutionState; }
 
             /**
-             * \brief Perform one generation
-             * 
-             * \param[in] generationNumber the index of the generation
+             * \brief Add a condition stopping the evolution.
+             *
+             * Conditions are checked after each generation.
+             *
+             * \param[in] condition function returning true when the evolution must stop.
              */
-            virtual void doGeneration(size_t generationNumber) = 0;
+            void addStopCondition(std::function<bool(const EvolutionState&)> condition);
+
+            /**
+             * \brief Check the pipelines, initialize the evolution and run generations.
+             *
+             * \param[in] nbGenerations maximum number of generations done.
+             * \throw std::runtime_error if a step requires data that no previous step provides.
+             */
+            void evolve(size_t nbGenerations);
+
+            /**
+             * \brief Continue the evolution from its current state.
+             *
+             * Contrary to evolve, nothing is initialized: generations go on after the last one done.
+             *
+             * \param[in] nbGenerations maximum number of generations done.
+             * \throw std::runtime_error if the evolution was not initialized.
+             */
+            void resume(size_t nbGenerations);
+
+            /// Return the populations and the pipelines of the module as a printable text.
+            std::string summary() const;
     };
-};
+
+}; // namespace Evolution
 
 #endif // EVOLUTION_MODULE_H

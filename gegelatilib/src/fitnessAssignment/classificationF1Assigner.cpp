@@ -2,15 +2,15 @@
 #include "fitnessAssignment/classificationF1Assigner.h"
 
 
-std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> FitnessAssignment::ClassificationF1Assigner::assignFitness(
-    const std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>>& individualMetrics,
+std::map<uint64_t, double> FitnessAssignment::ClassificationF1Assigner::assignFitness(
+    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
     uint64_t metricHash) const
 {
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> fitnesses;
+    std::map<uint64_t, double> fitnesses;
     size_t numClasses = 0;
 
     // Determine the number of classes across all individuals.
-    for (const auto& [individual, metricMap] : individualMetrics) {
+    for (const auto& [individualID, metricMap] : individualMetrics) {
         const auto scalarMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
         for (const auto& [key, metric] : scalarMetrics) {
             for (const auto& [predictionValue, targetValue] : metric->getPairs()) {
@@ -22,14 +22,14 @@ std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> Fitn
     }
 
     if (numClasses == 0) {
-        for (const auto& [individual, metricMap] : individualMetrics) {
-            fitnesses[individual] = 0.0;
+        for (const auto& [individualID, metricMap] : individualMetrics) {
+            fitnesses[individualID] = 0.0;
         }
         return fitnesses;
     }
 
     // Compute the macro-averaged F1 score for each individual.
-    for (const auto& [individual, metricMap] : individualMetrics) {
+    for (const auto& [individualID, metricMap] : individualMetrics) {
         const auto scalarMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
         std::vector<std::vector<uint64_t>> confusionMatrix(numClasses, std::vector<uint64_t>(numClasses, 0));
 
@@ -69,7 +69,7 @@ std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> Fitn
         }
 
         averageF1Score /= static_cast<double>(numClasses);
-        fitnesses[individual] = averageF1Score;
+        fitnesses[individualID] = averageF1Score;
     }
 
     return fitnesses;

@@ -62,7 +62,7 @@ TEST(NoveltySearchTest, computeDescriptors)
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{0.0}, {0.1}, {0.3}, {1.0}};
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     for(const std::vector<double>& value: descriptorValues) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
@@ -74,7 +74,7 @@ TEST(NoveltySearchTest, computeDescriptors)
         map->extractionEnd(1, *indiv, problem);
         map->extractionEnd(2, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_NO_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric>()->hash())) << "Assigning fitness failed";
@@ -109,7 +109,7 @@ TEST(NoveltySearchTest, computeDescriptorsList)
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<double> descriptorValues{0.0, 0.1, 0.3, 1.0};
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     for(const double& value: descriptorValues) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
@@ -121,7 +121,7 @@ TEST(NoveltySearchTest, computeDescriptorsList)
         map->extractionEnd(1, *indiv, problem);
         map->extractionEnd(2, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_NO_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeScalarMetric>()->hash())) << "Assigning fitness failed";
@@ -159,7 +159,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{}, {1.0}};
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     for(const std::vector<double>& value: descriptorValues) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
@@ -169,7 +169,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
         std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
         map->extractionEnd(0, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric>()->hash()), std::runtime_error) << "Assigning fitness should fail with empty descriptors";
@@ -187,7 +187,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{1.0}, {2.0, 3.0}};
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     for(const std::vector<double>& value: descriptorValues) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
@@ -197,7 +197,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
         std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
         map->extractionEnd(0, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric>()->hash()), std::runtime_error) << "Assigning fitness should fail with different size of descriptors";
@@ -214,7 +214,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
     Evaluation::ReinforcementProblem problem(le);
 
     std::vector<std::vector<double>> descriptorValues{{1.0}, {2.0, 3.0}};
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     bool first = true;
     for(const std::vector<double>& value: descriptorValues) {
@@ -228,7 +228,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
         map->extractionEnd(14, *indiv, problem);
         map->extractionEnd(16, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_THROW(noveltySearch.computeDescriptors(mapResults, std::make_unique<FakeVectorMetric2>()->hash()), std::runtime_error) << "Assigning fitness should fail with different size of descriptors between features";
@@ -373,7 +373,7 @@ TEST(NoveltySearchTest, doSelection)
 
     std::vector<std::vector<double>> descriptorValues{{0.0}, {0.1}, {0.3}, {1.0}};
     std::vector<std::shared_ptr<const Individual>> indivs;
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
 
     for(const std::vector<double>& value: descriptorValues) {
         std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep);
@@ -384,23 +384,23 @@ TEST(NoveltySearchTest, doSelection)
         std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
         map->extractionEnd(0, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_NO_THROW(noveltySearch.assignFitness(mapResults, std::make_unique<FakeVectorMetric>()->hash())) << "Assigning fitness failed";
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> noveltyFitness = noveltySearch.assignFitness(mapResults, std::make_unique<FakeVectorMetric>()->hash());
+    std::map<uint64_t, double> noveltyFitness = noveltySearch.assignFitness(mapResults, std::make_unique<FakeVectorMetric>()->hash());
 
     ASSERT_EQ(noveltyFitness.size(), 4);
     
-    ASSERT_NE(noveltyFitness.find(indivs.at(0)), noveltyFitness.end());
-    ASSERT_NE(noveltyFitness.find(indivs.at(1)), noveltyFitness.end());
-    ASSERT_NE(noveltyFitness.find(indivs.at(2)), noveltyFitness.end());
-    ASSERT_NE(noveltyFitness.find(indivs.at(3)), noveltyFitness.end());
+    ASSERT_NE(noveltyFitness.find(indivs.at(0)->getIndividualID()), noveltyFitness.end());
+    ASSERT_NE(noveltyFitness.find(indivs.at(1)->getIndividualID()), noveltyFitness.end());
+    ASSERT_NE(noveltyFitness.find(indivs.at(2)->getIndividualID()), noveltyFitness.end());
+    ASSERT_NE(noveltyFitness.find(indivs.at(3)->getIndividualID()), noveltyFitness.end());
 
-    ASSERT_NEAR(noveltyFitness.at(indivs.at(0)), (0.1 + 0.3) / 2, 0.00001);
-    ASSERT_NEAR(noveltyFitness.at(indivs.at(1)), (0.1 + 0.2) / 2, 0.00001);
-    ASSERT_NEAR(noveltyFitness.at(indivs.at(2)), (0.2 + 0.3) / 2, 0.00001);
-    ASSERT_NEAR(noveltyFitness.at(indivs.at(3)), (0.9 + 0.7) / 2, 0.00001);
+    ASSERT_NEAR(noveltyFitness.at(indivs.at(0)->getIndividualID()), (0.1 + 0.3) / 2, 0.00001);
+    ASSERT_NEAR(noveltyFitness.at(indivs.at(1)->getIndividualID()), (0.1 + 0.2) / 2, 0.00001);
+    ASSERT_NEAR(noveltyFitness.at(indivs.at(2)->getIndividualID()), (0.2 + 0.3) / 2, 0.00001);
+    ASSERT_NEAR(noveltyFitness.at(indivs.at(3)->getIndividualID()), (0.9 + 0.7) / 2, 0.00001);
 } 
 
 

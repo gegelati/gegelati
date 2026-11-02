@@ -35,7 +35,7 @@ TEST(FitnessAssignmentTest, assignFitness)
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
 
-    std::map<std::shared_ptr<const Individual>, std::unique_ptr<Metrics::MetricMap>, SharedLess<Individual>> mapResults;
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> mapResults;
     
     // Create 200 individuals with scores 0, 1, 2, ..., 199.
     for(size_t idx = 0; idx < 200; idx++) {
@@ -46,16 +46,16 @@ TEST(FitnessAssignmentTest, assignFitness)
         std::unique_ptr<Metrics::MetricMap> map = std::make_unique<Metrics::MetricMap>(mapTemplate);
         map->extractionEnd(0, *indiv, problem);
 
-        mapResults.insert(std::make_pair(indiv, std::move(map)));
+        mapResults.insert(std::make_pair(indiv->getIndividualID(), std::move(map)));
     }
 
     ASSERT_NO_THROW(assigner.assignFitness(mapResults, std::make_unique<FakeMetric>(0.0)->hash())) << "Assigning fitness failed";
 
 
-    std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> fitnessAssigned = assigner.assignFitness(mapResults, std::make_unique<FakeMetric>(0.0)->hash());
+    std::map<uint64_t, double> fitnessAssigned = assigner.assignFitness(mapResults, std::make_unique<FakeMetric>(0.0)->hash());
     auto it = fitnessAssigned.begin();
     for(size_t idx = 0; idx < 200; idx++) {
-        EXPECT_EQ(it->first->getIndividualID(), idx) << "ID should be the same";
+        EXPECT_EQ(it->first, idx) << "ID should be the same";
         EXPECT_EQ(it->second, double(idx)) << "ID should be the same";
 
         it++;
