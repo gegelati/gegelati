@@ -13,7 +13,7 @@ namespace Log {
     class Basiclogger : public Logger
     {
       protected:
-        /// @brief todo  
+        /// @brief Width of each column of the table.
         static constexpr int columnWidth = 14;
 
       public:

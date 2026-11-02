@@ -8,7 +8,8 @@
  namespace FitnessAssignment {
 
     /**
-     * \brief TODO
+     * \brief Assigner using the average of a scalar metric (e.g. the sum of rewards
+     * for reinforcement problems) over all the evaluations as fitness.
      */
     class DefaultAssigner : public Assigner{
         public: 

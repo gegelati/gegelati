@@ -69,7 +69,15 @@ namespace Evaluation {
         virtual ~ParallelEvaluator() = default;
 
         /**
-         * \brief todo
+         * \brief Worker loop evaluating the individuals popped from the queue until it is empty.
+         *
+         * \param[in] problem problem used by this worker to evaluate individuals.
+         * \param[in] metricTemplate template of the metrics measured.
+         * \param[in] hashes hashes identifying the evaluations.
+         * \param[in] individualsToProcessMutex mutex protecting the individuals queue.
+         * \param[in] individualsQueue queue of individuals still to evaluate.
+         * \param[out] results map where the metrics of evaluated individuals are stored.
+         * \param[in] resultsMutex mutex protecting the results map.
          */
         void slaveEvalJobThread(
             Problem& problem, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate, const std::set<uint64_t>& hashes, 
@@ -85,9 +93,9 @@ namespace Evaluation {
          * individual to its average score.
          *
          * \param[in] individuals The individuals whose genotypes are evaluted.
-         * \param[in] problem problem
-         * \param[in] metricTemplate problem
-         * \param[in] nbIterations problem
+         * \param[in] problem the problem in which individuals are evaluated.
+         * \param[in] metricTemplate template of the metrics measured.
+         * \param[in] nbIterations number of evaluations of each individual.
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy

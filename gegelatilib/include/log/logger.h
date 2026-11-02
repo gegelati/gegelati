@@ -20,7 +20,7 @@ namespace Log {
     class Logger
     {
       protected:
-        /// @brief todo
+        /// @brief Stream in which the logger writes.
         std::ostream* output;
 
       public:

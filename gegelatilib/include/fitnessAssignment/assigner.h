@@ -8,7 +8,8 @@
  namespace FitnessAssignment {
 
     /**
-     * \brief TODO
+     * \brief Base class of the methods converting the metrics measured during
+     * evaluations into a scalar fitness value, higher being better.
      */
     class Assigner {
         public: 

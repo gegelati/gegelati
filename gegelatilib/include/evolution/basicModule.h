@@ -39,22 +39,22 @@ namespace Evolution {
 
         protected:
 
-            /// @brief TODO
+            /// @brief Current population of the evolution.
             std::set<std::shared_ptr<const Individual>, SharedLess<Individual>> population;
 
-            /// @brief TODO
+            /// @brief Training fitness of the individuals, as computed by the last fitness assignment.
             std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> individualFitness;
 
-            /// @brief TODO
+            /// @brief Validation fitness of the surviving individuals (only filled if nbValidationIterations > 0).
             std::map<std::shared_ptr<const Individual>, double, SharedLess<Individual>> validationFitness;
 
-            /// @brief TODO
+            /// @brief Metrics measured during the last training evaluation of the population, indexed by individual ID.
             std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> populationMetrics;
 
-            /// @brief TODO
+            /// @brief Representation of the individuals evolved by the module.
             const Representations::Representation& representation;
 
-            /// @brief TODO
+            /// @brief Problem in which the individuals are evaluated.
             Evaluation::Problem& problem;
 
             /// \brief Number of individual kept in the population
@@ -75,46 +75,47 @@ namespace Evolution {
             /// \brief seed of the evolution
             uint64_t seed;
 
-            /// @brief TODO
+            /// @brief Evaluator of the individuals (parallel if more than one thread is allowed).
             std::unique_ptr<Evaluation::Evaluator> evaluator;
 
-            /// @brief TODO
+            /// @brief Method converting the measured metrics into a fitness value.
             std::shared_ptr<FitnessAssignment::Assigner> assigner;
 
-            /// @brief TODO
+            /// @brief Selector choosing the parents of the offspring.
             std::shared_ptr<Selection::Selector> parentSelection;
 
-            /// @brief TODO
+            /// @brief Selector choosing the individuals surviving to the next generation.
             std::shared_ptr<Selection::Selector> survivingSelection;
 
-            /// @brief TODO
+            /// @brief Reproducer creating the offspring from the selected parents.
             std::shared_ptr<Reproduction::Reproducer> breeder;
 
-            /// @brief TODO
+            /// @brief Mutator used to initialize and mutate the genotypes.
             std::shared_ptr<Mutation::Mutator> mutation;
 
-            /// @brief TODO
+            /// @brief Genotype generator used by the mutator (copied from the representation).
             std::unique_ptr<GraphBased::GenotypeGenerator> generator;
 
-            /// @brief Todo
+            /// @brief Template of the metrics measured during evaluations.
             std::shared_ptr<Metrics::MetricMapTemplate> metricTemplate;
 
-            /// @brief Todo
+            /// @brief Hash of the metric used by the assigner to compute the fitness.
             uint64_t fitnessMetricHash;
 
             /// @brief Default loggers
             std::vector<std::shared_ptr<Log::Basiclogger>> basicloggers;
 
-            /// @brief TODO
+            /// @brief Path (without extension) of the exported population. Empty to disable the export.
             std::string filePath = "";
 
-            /// @brief TODO
-            bool oneFileGen;
-            /// @brief TODO
+            /// @brief Indicates if one population file is exported per generation.
+            bool oneFileGen = false;
+
+            /// @brief Path (without extension) of the exported best individual. Empty to disable the export.
             std::string filePathBest = "";
 
-            /// @brief TODO
-            bool oneFileGenBest;
+            /// @brief Indicates if one best individual file is exported per generation.
+            bool oneFileGenBest = false;
 
         public:
 

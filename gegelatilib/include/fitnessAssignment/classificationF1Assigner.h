@@ -10,7 +10,8 @@
  namespace FitnessAssignment {
 
     /**
-     * \brief TODO
+     * \brief Assigner for classification tasks, using the macro-averaged F1 score
+     * computed from the PredictionMetric of each individual as fitness.
      */
     class ClassificationF1Assigner : public Assigner{
         

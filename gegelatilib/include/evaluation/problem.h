@@ -134,7 +134,10 @@ namespace Evaluation {
             uint64_t problemSeed) const;
 
         /**
-         * \brief TODO
+         * \brief Evaluate an individual and store the requested metrics.
+         *
+         * Must be implemented by each problem: it executes the individual on the evaluations
+         * identified by the hashes, and extracts the metrics from the metric map template.
          *
          * \param[in] individual The individual whose genotype is evaluted.
          * \param[in] metrics list of metrics to extract from the individual.

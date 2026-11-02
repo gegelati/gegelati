@@ -9,7 +9,8 @@
  namespace FitnessAssignment {
 
     /**
-     * \brief TODO
+     * \brief Assigner for novelty search: the fitness of an individual is the average
+     * distance between its descriptor and the descriptors of its nearest neighbors.
      */
     class NoveltySearchAssigner : public Assigner{
         protected:

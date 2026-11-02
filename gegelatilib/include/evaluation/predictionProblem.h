@@ -89,7 +89,10 @@ namespace Evaluation {
         virtual const DataSet& getDataSet() const;
 
         /**
-         * \brief TODO
+         * \brief Evaluate the individual on the dataset samples identified by the hashes.
+         *
+         * For each hash, the individual is executed on the corresponding inputs and the metrics
+         * are extracted before and after execution, then once for the whole evaluation.
          */
         virtual void extractMetrics(
             const Individual& individual, Metrics::MetricMap& metrics,

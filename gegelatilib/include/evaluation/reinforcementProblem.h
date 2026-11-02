@@ -58,8 +58,8 @@ namespace Evaluation {
         /**
          * \brief Constructor for Problem.
          * 
-         * \param[in] env TODO
-         * \param[in] problemSeed TODO
+         * \param[in] env the reinforcement environment in which the individuals are evaluated.
+         * \param[in] problemSeed the seed of the problem.
          */
         ReinforcementProblem(
             const std::shared_ptr<Evaluation::ReinforcementEnvironment>& env, uint64_t problemSeed = 0) 
@@ -80,7 +80,10 @@ namespace Evaluation {
         virtual bool isCopyable() const;
 
         /**
-         * \brief TODO
+         * \brief Evaluate the individual with one episode per hash.
+         *
+         * Each episode resets the environment with the hash as seed, then lets the individual
+         * act until the environment is terminal or its maximum number of steps is reached.
          */
         virtual void extractMetrics(
             const Individual& individual, Metrics::MetricMap& metrics,
