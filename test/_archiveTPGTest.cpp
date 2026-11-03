@@ -169,7 +169,7 @@ TEST_F(TPGAlgoTest, mnistTestLGP) {
     size_t nbOffspring = 450;
 
     // Initialize population
-    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, lgpRep->getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), sizePopulation, rng);
     std::vector<std::shared_ptr<const Individual>> population(individuals.begin(), individuals.end());
     std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index = Evolution::makeIndex(population);
 
@@ -193,7 +193,7 @@ TEST_F(TPGAlgoTest, mnistTestLGP) {
         std::vector<std::shared_ptr<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
         // Mutate the offspring
-        Mutation::mutateIndividuals(mutator, offspring, lgpRep->getGenotypeGenerator(), rng);
+        Mutation::mutateIndividuals(mutator, offspring, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), rng);
 
         // Evaluate the population
         std::vector<std::shared_ptr<const Individual>> evaluatedIndividuals(population);
@@ -292,7 +292,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGP3) {
     const Evolution::BasicEvolution::Keys population;
 
     /*auto mutator = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-    const std::shared_ptr<const GraphBased::GenotypeGenerator> generator(lgpRep->getGenotypeGenerator().cloneUniquePtr());
+    const auto generator = std::make_shared<const GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
     auto newMutateStep = std::make_shared<Evolution::MutateStep>(population.offspring, mutator, generator, 10, "Mutation2");
     root->insertAfter(root->find("Mutation"), newMutateStep);*/
 

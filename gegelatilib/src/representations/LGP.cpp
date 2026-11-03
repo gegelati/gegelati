@@ -53,25 +53,6 @@ void Representations::LGP::setGenotypeConstraint()
 
 
 
-void Representations::LGP::setGenotypeGenerator()
-{
-    GraphBased::NodeGenerator instructionNodes;
-
-    // Value Requirements for register
-    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->registersType.totalElements() - 1));
-    
-    // Value requirements for instruction
-    instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->iSet.getNbInstructions() - 1));
-
-    // Value requirements for input type and index
-    for(size_t idx = 0; idx < this->iSet.getMaxNbOperands(); idx++) {
-        instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->dimensionFlow.getInputDimensions().size() + 1 - 1));
-        instructionNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, this->largestAddressSpace - 1));
-    }
-
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(instructionNodes, std::make_pair(this->nbLinesMin, this->nbLinesMax));
-}
-
 void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) const
 {
     if(genotype.getSize() == 0) {

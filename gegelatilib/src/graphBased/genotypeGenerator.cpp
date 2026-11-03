@@ -1,5 +1,17 @@
 #include "graphBased/genotypeGenerator.h"
 
+GraphBased::GenotypeGenerator::GenotypeGenerator(const GenotypeConstraint& constraint)
+{
+    for(size_t idxGroup = 0; idxGroup < constraint.size(); idxGroup++) {
+        const NodeConstraint& nodeConstraint = constraint.getNodeConstraintAt(idxGroup);
+        auto nodeGenerator = std::make_unique<NodeGenerator>();
+        for(size_t idxValue = 0; idxValue < nodeConstraint.size(); idxValue++) {
+            nodeGenerator->addGenerator(nodeConstraint.getConstraintAt(idxValue).makeGenerator());
+        }
+        this->addNodeGenerator(std::move(nodeGenerator), constraint.getRangeAt(idxGroup));
+    }
+}
+
 size_t GraphBased::GenotypeGenerator::size() const
 {
     // NodeGenerator and NodeRanges sizes should always be equal, no security check for lowering complexity.

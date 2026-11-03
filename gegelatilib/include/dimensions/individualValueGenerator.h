@@ -3,6 +3,7 @@
 
 #include "dimensions/dataValueGenerator.h"
 
+#include "graphBased/genotypeGenerator.h"
 #include "mutation/mutator.h"
 #include "representations/representation.h"
 
@@ -16,8 +17,8 @@ namespace Dimensions {
             /// Representation of the mutated individual
             std::shared_ptr<const Representations::Representation> representation;
 
-            /// @brief Generator used to create the individual
-            const GraphBased::GenotypeGenerator& generator;
+            /// @brief Generator used to create the individual, made from the constraint of the representation
+            std::shared_ptr<const GraphBased::GenotypeGenerator> generator;
 
             /// Mutation engine to mutate the genotype
             const Mutation::Mutator& mutator;
@@ -26,8 +27,9 @@ namespace Dimensions {
             /**
              * \brief Constructor for IndividualValueGenerator.
              */
-            IndividualValueGenerator(std::shared_ptr<const Representations::Representation> representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
-            : representation(std::move(representation)), generator{generator}, mutator(mutator) {}
+            IndividualValueGenerator(std::shared_ptr<const Representations::Representation> representation, const Mutation::Mutator& mutator)
+            : representation(std::move(representation)), generator{std::make_shared<const GraphBased::GenotypeGenerator>(this->representation->getGenotypeConstraint())},
+              mutator(mutator) {}
 
             /**
              * \brief Sample method creating a DataValue of type T within the specified range.
@@ -35,7 +37,7 @@ namespace Dimensions {
             virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(
                     representation, 
-                    mutator.initRandomGenotype(generator, rng));
+                    mutator.initRandomGenotype(*generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv);
             }
 
@@ -43,13 +45,13 @@ namespace Dimensions {
                 std::shared_ptr<const Individual> currentIndiv = currentValue.getScalar<std::shared_ptr<const Individual>>();
                 std::shared_ptr<const Individual> mutatedIndiv = std::make_shared<Individual>(
                     representation, 
-                    mutator.mutateGenotype(currentIndiv->getGenotype(), generator, rng));
+                    mutator.mutateGenotype(currentIndiv->getGenotype(), *generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(mutatedIndiv);
             }
 
             /// @brief Inherrit from DataValueGenerator class 
             virtual std::unique_ptr<DataValueGenerator> cloneUniquePtr() const override {
-                return std::make_unique<IndividualValueGenerator>(this->representation, this->generator, this->mutator);
+                return std::make_unique<IndividualValueGenerator>(this->representation, this->mutator);
             }
     };
 };

@@ -62,9 +62,6 @@ namespace Representations {
                                std::string representationColor = "#FFFFFF")
                 : Representation(inputDimensions, outputDimension, representationName, representationColor), output{Data::DataValue::scalar<double>(1)} {
                         this->setGenotypeConstraint();
-                        GraphBased::NodeGenerator ng;
-                        ng.addGenerator(Dimensions::NumericUniformGenerator<int>(0, 0).cloneUniquePtr());
-                        this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(ng, std::make_pair(1, 1));
                     };
 
 

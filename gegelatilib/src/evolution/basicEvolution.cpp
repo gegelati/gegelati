@@ -45,7 +45,8 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
     const std::shared_ptr<Mutation::Mutator> mutator =
         (this->mutation != nullptr) ? this->mutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-    const std::shared_ptr<const GraphBased::GenotypeGenerator> generator(this->representation->getGenotypeGenerator().cloneUniquePtr());
+    const std::shared_ptr<const GraphBased::GenotypeGenerator> generator((this->generator != nullptr) ? this->generator
+                                                                          : std::make_shared<const GraphBased::GenotypeGenerator>(this->representation->getGenotypeConstraint()));
 
     // Step 2: build the modules. The initialization creates and evaluates the population...
     auto initModule = std::make_shared<Module>(this->names.initialization);

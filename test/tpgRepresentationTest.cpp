@@ -43,6 +43,7 @@
 #include <cmath>
 
 #include "representations/TPG.h"
+#include "learn/tpgGenerator.h"
 #include "representations/LGP.h"
 #include "dimensions/numericRange.h"
 
@@ -127,14 +128,26 @@ TEST_F(TPGRepresentationTest, getGenotypeConstraint)
 }
 
 
-TEST_F(TPGRepresentationTest, getGenotypeGenerator)
+TEST_F(TPGRepresentationTest, naiveGenotypeGeneratorHasNoMembers)
+{
+    // The constraint does not describe the members, so their naive values are numbers: a real generator must be given (see tpgGenerator).
+    RNG::RNG rng;
+    auto representation = std::make_shared<Representations::TPG>(std::vector<Dimensions::Requirement>{inputType}, 3, 2, 10);
+    const GraphBased::GenotypeGenerator generator{representation->getGenotypeConstraint()};
+    ASSERT_EQ(generator.size(), 1);
+    ASSERT_TRUE(generator.getNodeGeneratorAt(0).getGeneratorAt(0).initialize(rng).getElementType() == typeid(double));
+    ASSERT_TRUE(generator.getNodeGeneratorAt(0).getGeneratorAt(1).initialize(rng).getScalar<size_t>() < 3);
+}
+
+TEST_F(TPGRepresentationTest, genotypeGenerator)
 {
     RNG::RNG rng;
     rng.getInt32(0, 3); // for random coverage
 
     size_t nbActions = 3;
     auto representation = std::make_shared<Representations::TPG>(std::vector<Dimensions::Requirement>{inputType}, nbActions, 2, 10);
-    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation->getGenotypeGenerator().cloneUniquePtr();
+    const std::vector<std::shared_ptr<const Individual>> none;
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = tpgGenerator(*representation, none, none);
 
     ASSERT_EQ(generator->size(), 1) << "Size of constraint should be 1";
     ASSERT_EQ(generator->getMutationRangeAt(0).first, 2) << "Low range should be 2";
@@ -162,12 +175,7 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
         std::make_shared<Individual>(representation),
     };
 
-    representation->setAvailableMembers(members);
-
-    // Should update generator automatically
-    representation->setAvailableTangledIndiv(tangled);
-
-    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation->getGenotypeGenerator().cloneUniquePtr();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = tpgGenerator(*representation, members, tangled);
     const GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
     for(size_t idx = 0; idx < 1000; idx++) {
         std::shared_ptr<const Individual> member = nodeGenNew.getGeneratorAt(0).initialize(rng).getScalar<std::shared_ptr<const Individual>>();

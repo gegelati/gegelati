@@ -52,6 +52,7 @@
 #include "metrics/rewardsMetric.h"
 
 #include "evolution/basicEvolution.h"
+#include "learn/tpgGenerator.h"
 #include "evaluation/dataset.h"
 #include "evolution/originTPGEvolution.h"
 #include "evolution/steps/exportStep.h"
@@ -150,7 +151,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
 
     // Initialize population
     std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
-    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, lgpRep->getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), sizePopulation, rng);
     std::vector<std::shared_ptr<const Individual>> population(individuals.begin(), individuals.end());
     addToIndex(index, population);
 
@@ -170,7 +171,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP) {
         std::vector<std::shared_ptr<Individual>> offspring = breeder.reproduce(parents, nbOffspring, rng);
 
         // Mutate the offspring
-        Mutation::mutateIndividuals(mutator, offspring, lgpRep->getGenotypeGenerator(), rng);
+        Mutation::mutateIndividuals(mutator, offspring, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), rng);
 
         // Evaluate the population
         std::vector<std::shared_ptr<const Individual>> evaluatedIndividuals(population);
@@ -243,7 +244,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
     std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
 
     // Initialize LGP population
-    std::vector<std::shared_ptr<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, lgpRep->getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<Individual>> individualsLGP = Mutation::initIndividuals(mutator, lgpRep, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), sizePopulation, rng);
     std::vector<std::shared_ptr<const Individual>> populationLGP(individualsLGP.begin(), individualsLGP.end());
     addToIndex(index, populationLGP);
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResultsLGP = 
@@ -253,9 +254,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
 
     // Initialize TPG population
     std::vector<std::shared_ptr<const Individual>> members = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
-    tpgRep->setAvailableMembers(members);
-
-    std::vector<std::shared_ptr<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, tpgRep->getGenotypeGenerator(), sizePopulation, rng);
+    std::vector<std::shared_ptr<Individual>> individualsTPG = Mutation::initIndividuals(mutator, tpgRep, *tpgGenerator(*tpgRep, members, {}), sizePopulation, rng);
     std::vector<std::shared_ptr<const Individual>> populationTPG(individualsTPG.begin(), individualsTPG.end());
     addToIndex(index, populationTPG);
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResultsTPG = 
@@ -269,7 +268,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         // LGP Evolution : variation
         std::vector<std::shared_ptr<const Individual>> parentsLGP = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
         std::vector<std::shared_ptr<Individual>> offspringLGP = breeder.reproduce(parentsLGP, nbOffspring, rng);
-        Mutation::mutateIndividuals(mutator, offspringLGP, lgpRep->getGenotypeGenerator(), rng);
+        Mutation::mutateIndividuals(mutator, offspringLGP, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), rng);
         // LGP Evolution : evaluation
         std::vector<std::shared_ptr<const Individual>> evaluatedIndividualsLGP(populationLGP);
         evaluatedIndividualsLGP.insert(evaluatedIndividualsLGP.end(), offspringLGP.begin(), offspringLGP.end());
@@ -287,10 +286,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP) {
         
         std::vector<std::shared_ptr<const Individual>> members = resolve(index, parentSelection.select(individualFitnessLGP, nbOffspring, rng));
         std::vector<std::shared_ptr<const Individual>> tangleds = resolve(index, parentSelection.select(individualFitnessTPG, nbOffspring, rng));
-        tpgRep->setAvailableMembers(members);
-        tpgRep->setAvailableTangledIndiv(tangleds);
-
-        Mutation::mutateIndividuals(mutator, offspringTPG, tpgRep->getGenotypeGenerator(), rng);
+        Mutation::mutateIndividuals(mutator, offspringTPG, *tpgGenerator(*tpgRep, members, tangleds), rng);
         // TPG Evolution : evaluation
         std::vector<std::shared_ptr<const Individual>> evaluatedIndividualsTPG(populationTPG);
         evaluatedIndividualsTPG.insert(evaluatedIndividualsTPG.end(), offspringTPG.begin(), offspringTPG.end());
@@ -322,7 +318,7 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionTPGPlusLGP2) {
 
     /** CUSTOM GENERATOR **/
     GraphBased::NodeGenerator bidNodes;
-    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(lgpRep, lgpRep->getGenotypeGenerator(), mutator));
+    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(lgpRep, mutator));
     bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, 3 - 1));
     GraphBased::GenotypeGenerator customGenerator(bidNodes, std::make_pair(2U, 10U), std::make_pair(2U, 2U));
     /** CUSTOM GENERATOR **/

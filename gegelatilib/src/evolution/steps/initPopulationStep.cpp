@@ -12,7 +12,7 @@ Evolution::InitPopulationStep::InitPopulationStep(Key<std::vector<std::shared_pt
         throw std::runtime_error("Evolution::InitPopulationStep: the representation and the mutator cannot be null");
     }
     if(this->generator == nullptr) {
-        this->generator = this->representation->getGenotypeGenerator().cloneUniquePtr();
+        this->generator = std::make_shared<const GraphBased::GenotypeGenerator>(this->representation->getGenotypeConstraint());
     }
 }
 

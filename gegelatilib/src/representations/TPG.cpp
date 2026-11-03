@@ -31,56 +31,6 @@ void Representations::TPG::setGenotypeConstraint()
     this->genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>(bidNodes, this->nbMembersMin, this->nbMembersMax);
 }
 
-void Representations::TPG::setGenotypeGenerator()
-{
-   GraphBased::NodeGenerator bidNodes;
-    /* === Value requirements for members === */
-    
-    // Value Requirements for members
-    bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(this->availableMembers));
-
-    /* === Value requirements for actions/Tangled connections === */
-
-    // Action generator
-    Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, this->nbActions - 1);
-    
-    // Add the generator for tangled individuals only if it is not empty
-    if(this->availableForTangled.size() > 0) {
-        // Tangled generator
-        Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>> tangledGenerator(this->availableForTangled);
-
-        // Multi generator
-        Dimensions::MultiGenerator multi;
-        multi.addGenerator(actionGenerator, 0.999);
-        multi.addGenerator(tangledGenerator, 0.001);
-
-        bidNodes.addGenerator(multi);
-    } else {
-        bidNodes.addGenerator(actionGenerator);
-    }
-
-    this->genotypeGenerator = std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, std::make_pair(this->nbMembersMin, this->nbMembersMax));
-}
-
-void Representations::TPG::setAvailableMembers(const std::vector<std::shared_ptr<const Individual>>& members)
-{
-    this->availableMembers.clear();
-    this->availableMembers.insert(this->availableMembers.begin(), members.begin(), members.end());
-}
-
-
-void Representations::TPG::setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Individual>>& tangledIndiv)
-{
-    bool isEmpty = this->availableForTangled.empty();
-    this->availableForTangled.clear();
-    this->availableForTangled.insert(this->availableForTangled.begin(), tangledIndiv.begin(), tangledIndiv.end());
-
-    // If the emptyness value changed, reset the template
-    if((isEmpty != this->availableForTangled.empty())) {
-        this->setGenotypeGenerator();
-    }
-}
-
 Data::DataValue Representations::TPG::executeGenotype(
     const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const
 {

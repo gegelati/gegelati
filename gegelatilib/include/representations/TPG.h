@@ -37,12 +37,6 @@
                 const GraphBased::Genotype& genotype, const std::vector<Data::DataView>& inputSources) const override;
 
 
-            /// @brief Member available for the TPG individuals
-            std::vector<std::shared_ptr<const Individual>> availableMembers;
-
-            /// \brief Individual available for tangled connexions
-            std::vector<std::shared_ptr<const Individual>> availableForTangled;
-
             /// \brief the minimum number of members in the representation.
             size_t nbMembersMin;
             /// \brief the maximum number of members in the representation.
@@ -53,10 +47,6 @@
              */
             virtual void setGenotypeConstraint() override;
 
-            /**
-             * \brief Create the genotype template grammar
-             */
-            virtual void setGenotypeGenerator();
     
         public:
 
@@ -81,7 +71,6 @@
                             this->nbMembersMax = nbMembersMin;
                         }
                         this->setGenotypeConstraint();
-                        this->setGenotypeGenerator();
                     };
 
 
@@ -90,17 +79,6 @@
              */
             const size_t& getNbActions() const;
 
-            /**
-             * Set the current available members
-             */
-            virtual void setAvailableMembers(const std::vector<std::shared_ptr<const Individual>>& members);
-
-            /**
-             * Set the current available individuals for tangled connection.
-             * 
-             * The genotype template is updated if the size of the current list was empty, or if the new one is. (to specify a use of multiGenerator)
-             */
-            virtual void setAvailableTangledIndiv(const std::vector<std::shared_ptr<const Individual>>& tangledIndiv);
 
         };
 }; // namespace LGP_Representation

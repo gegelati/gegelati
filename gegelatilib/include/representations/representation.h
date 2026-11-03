@@ -11,7 +11,6 @@
 #include "iostream"
 
 #include "graphBased/genotypeConstraint.h"
-#include "graphBased/genotypeGenerator.h"
 #include "graphBased/genotype.h"
 
 #include "data/dataValue.h"
@@ -49,9 +48,6 @@
 
         /// @brief Constraint of the genotype
         std::unique_ptr<GraphBased::GenotypeConstraint> genotypeConstraint;
-
-        /// @brief Unique pointer of the genotypeGenerator, as it is fixed during evolution
-        std::unique_ptr<GraphBased::GenotypeGenerator> genotypeGenerator;
 
         /**
          * \brief define the constraints required of the genotype
@@ -118,11 +114,6 @@
          * \brief return the genotype constraint of the representation.
          */
         virtual const GraphBased::GenotypeConstraint& getGenotypeConstraint() const;
-
-        /**
-         * \brief return a unique genotype generator of the representation.
-         */
-        virtual const GraphBased::GenotypeGenerator& getGenotypeGenerator() const;
 
         /**
          * \brief identified wether the genotype is valid faced to the expected node structure of the representation.

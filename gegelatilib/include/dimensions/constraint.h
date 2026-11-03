@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <utility>
 #include "data/dataValue.h"
+#include "dimensions/dataValueGenerator.h"
 
 
 namespace Dimensions {
@@ -42,6 +43,15 @@ namespace Dimensions {
         virtual std::shared_ptr<const Constraint> cloneSharedPtr() const = 0;
         /// \brief Returns a diagnostic description of this constraint.
         virtual std::string toString() const = 0;
+
+        /**
+         * \brief Return the naive generator of the constraint: a generator sampling uniformly the values it accepts.
+         *
+         * \throw std::runtime_error if no generator can be made from the constraint. A better generator must be given then.
+         */
+        virtual std::unique_ptr<DataValueGenerator> makeGenerator() const {
+            throw std::runtime_error("Dimensions::Constraint::makeGenerator: no generator can be made from: " + this->toString());
+        }
 
     };
 

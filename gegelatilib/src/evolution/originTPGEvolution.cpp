@@ -159,9 +159,9 @@ std::unique_ptr<GraphBased::GenotypeGenerator> Evolution::makeVertexGenerator(co
 {
     GraphBased::NodeGenerator bidNodes;
     if(archive != nullptr) {
-        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*archive, memberRepresentation, memberRepresentation->getGenotypeGenerator(), memberMutator));
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*archive, memberRepresentation, memberMutator));
     } else {
-        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, memberRepresentation->getGenotypeGenerator(), memberMutator));
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, memberMutator));
     }
 
     Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, representation.getNbActions() - 1);
@@ -175,7 +175,7 @@ std::unique_ptr<GraphBased::GenotypeGenerator> Evolution::makeVertexGenerator(co
         bidNodes.addGenerator(multi);
     }
 
-    const std::pair<size_t, size_t> mutationRange = representation.getGenotypeGenerator().getMutationRangeAt(0);
+    const std::pair<size_t, size_t> mutationRange = representation.getGenotypeConstraint().getRangeAt(0);
     const std::pair<size_t, size_t> initRange{mutationRange.first, mutationRange.first};
     return std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, mutationRange, initRange);
 }

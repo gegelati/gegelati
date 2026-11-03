@@ -1,6 +1,8 @@
 #ifndef NUMERIC_RANGE_H
 #define NUMERIC_RANGE_H
 
+#include <atomic>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -135,6 +137,20 @@ namespace Dimensions {
         /// \brief Returns a shared deep copy of this range.
         std::shared_ptr<const Constraint> cloneSharedPtr() const override {
             return std::make_shared<const NumericRange<T>>(*this);
+        }
+
+        /**
+         * Inherited from Constraint, samples uniformly in the range. A missing bound takes the value of the other bound, or 0 if both are
+         * missing, so the generator of an unbounded range gives 0. A warning is written once per type.
+         */
+        std::unique_ptr<DataValueGenerator> makeGenerator() const override {
+            static std::atomic<bool> warned{false};
+            if ((!minimum || !maximum) && !warned.exchange(true)) {
+                std::cerr << "Warning: Dimensions::NumericRange::makeGenerator: " << toString()
+                          << " has a missing bound, the generator uses the other bound or 0. Give a generator to get other values." << std::endl;
+            }
+            const T low = minimum.value_or(maximum.value_or(T{}));
+            return std::make_unique<NumericUniformGenerator<T>>(low, maximum.value_or(low));
         }
 
         /// \brief Returns the inclusive bounds as a diagnostic string.

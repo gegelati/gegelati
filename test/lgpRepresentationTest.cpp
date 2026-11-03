@@ -43,6 +43,7 @@
 #include <cmath>
 
 #include "representations/LGP.h"
+#include "graphBased/genotypeGenerator.h"
 
 #include "instructions/lambdaInstruction.h"
 
@@ -111,12 +112,12 @@ TEST_F(LGPRepresentationTest, getGenotypeConstraint)
     ASSERT_TRUE(nodeConstraint.getConstraintAt(5) == Dimensions::NumericRange<size_t>(0, nbRegisters - 1)) << "Should be compatible";
 }
 
-TEST_F(LGPRepresentationTest, getGenotypeGenerator)
+TEST_F(LGPRepresentationTest, naiveGenotypeGenerator)
 {
     Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 5, 10);
     RNG::RNG rng;
 
-    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator().cloneUniquePtr();
+    auto generator = std::make_unique<GraphBased::GenotypeGenerator>(representation.getGenotypeConstraint());
     
     ASSERT_EQ(generator->size(), 1) << "Size of generator should be 1";
     ASSERT_EQ(generator->getMutationRangeAt(0).first, 5) << "Low range should be 5";

@@ -49,10 +49,6 @@
             virtual void setGenotypeConstraint() override;
 
             
-            /**
-             * \brief Create the genotype generator
-             */
-            virtual void setGenotypeGenerator();
 
             /// \brief the minimum number of lines in the representation.
             size_t nbLinesMin;
@@ -111,7 +107,6 @@
 
                 this->setLargestAddressSpace();
                 this->setGenotypeConstraint();
-                this->setGenotypeGenerator();
             };
 
             /**

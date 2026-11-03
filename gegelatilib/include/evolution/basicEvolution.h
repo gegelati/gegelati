@@ -10,6 +10,7 @@
 #include "evolution/key.h"
 #include "evolution/module.h"
 #include "fitnessAssignment/assigner.h"
+#include "graphBased/genotypeGenerator.h"
 #include "metrics/metric.h"
 #include "mutation/mutator.h"
 #include "reproduction/reproducer.h"
@@ -206,6 +207,9 @@ namespace Evolution {
 
         /// Mutator of the offspring, PointMutator(0.2, 0.5, 0.5) if null.
         std::shared_ptr<Mutation::Mutator> mutation = nullptr;
+
+        /// Generator of the genotypes, the naive generator of the constraint of the representation if null.
+        std::shared_ptr<const GraphBased::GenotypeGenerator> generator = nullptr;
 
         /// Metrics measured during the evaluations in addition to the one of the fitness. Each evaluation step uses an empty clone.
         std::vector<std::shared_ptr<const Metrics::Metric>> metrics;

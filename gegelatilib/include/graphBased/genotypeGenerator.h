@@ -2,6 +2,7 @@
 #ifndef GRAPH_BASED_GENOTYPE_GENERATOR_H
 #define GRAPH_BASED_GENOTYPE_GENERATOR_H
 
+#include "graphBased/genotypeConstraint.h"
 #include "graphBased/nodeGenerator.h"
 
  namespace GraphBased {
@@ -58,6 +59,14 @@
                 }
                 nodeGenerators.push_back(std::move(nodeGenerator.cloneUniquePtr()));
             };
+
+            /**
+             * \brief Create the naive generator of a constraint: each value is sampled uniformly in its constraint, each group has the range of the constraint.
+             *
+             * \param[in] constraint the constraint of the genotypes.
+             * \throw std::runtime_error if a value has a constraint without naive generator (see Dimensions::Constraint::makeGenerator).
+             */
+            explicit GenotypeGenerator(const GenotypeConstraint& constraint);
 
             /**
              * \brief return the number of node generator.

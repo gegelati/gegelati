@@ -11,6 +11,7 @@
 #include <queue>
 #include <thread>
 
+#include "graphBased/genotypeGenerator.h"
 #include "individual.h"
 #include "rng/rng.h"
 

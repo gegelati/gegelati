@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "dimensions/dataValueGenerator.h"
+#include "dimensions/numericRange.h"
 
 
 TEST(DataValueGeneratorTest, SamplesValuesWithinRange)
@@ -198,4 +199,39 @@ TEST(DataValueGeneratorTest, ZeroWeightGeneratorIsNeverSelected)
         EXPECT_EQ(value.getScalar<int>(), 1)
             << "A generator with zero weight should never be selected.";
     }
+}
+
+TEST(DataValueGeneratorTest, NaiveGeneratorOfConstraints)
+{
+    RNG::RNG rng;
+
+    // A range gives values inside it.
+    const auto between = Dimensions::NumericRange<size_t>::between(3, 5).makeGenerator();
+    for(size_t idx = 0; idx < 100; idx++) {
+        const size_t value = between->initialize(rng).getScalar<size_t>();
+        ASSERT_TRUE(value >= 3 && value <= 5);
+    }
+
+    // A missing bound takes the other one, or 0.
+    EXPECT_EQ(Dimensions::NumericRange<double>::unbounded().makeGenerator()->initialize(rng).getScalar<double>(), 0.0);
+    EXPECT_EQ(Dimensions::NumericRange<int>::atLeast(5).makeGenerator()->initialize(rng).getScalar<int>(), 5);
+    EXPECT_EQ(Dimensions::NumericRange<int>::atMost(-2).makeGenerator()->initialize(rng).getScalar<int>(), -2);
+
+    // The other constraints have no naive generator.
+    EXPECT_THROW(Dimensions::UnconstrainedData().makeGenerator(), std::runtime_error);
+}
+
+TEST(DataValueGeneratorTest, NaiveGeneratorWarnsOnceForAMissingBound)
+{
+    // A type used by no other test, since the warning is written once per type.
+    testing::internal::CaptureStderr();
+    Dimensions::NumericRange<short>::atLeast(2).makeGenerator();
+    Dimensions::NumericRange<short>::unbounded().makeGenerator();
+    const std::string warnings = testing::internal::GetCapturedStderr();
+    EXPECT_NE(warnings.find("missing bound"), std::string::npos) << warnings;
+    EXPECT_EQ(warnings.find("missing bound"), warnings.rfind("missing bound")) << "Only one warning: " << warnings;
+
+    testing::internal::CaptureStderr();
+    Dimensions::NumericRange<short>::between(1, 2).makeGenerator();
+    EXPECT_TRUE(testing::internal::GetCapturedStderr().empty()) << "No warning when both bounds are given";
 }

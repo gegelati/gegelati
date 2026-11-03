@@ -19,8 +19,8 @@ namespace Dimensions {
             /**
              * \brief Constructor for IndividualValueGenerator.
              */
-            IndividualValueArchiveGenerator(const Evaluation::DataSet& archive, std::shared_ptr<const Representations::Representation> representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
-            : IndividualValueGenerator(std::move(representation), generator, mutator), archive{archive} {}
+            IndividualValueArchiveGenerator(const Evaluation::DataSet& archive, std::shared_ptr<const Representations::Representation> representation, const Mutation::Mutator& mutator)
+            : IndividualValueGenerator(std::move(representation), mutator), archive{archive} {}
 
             /**
              * \brief Mutate the current genotype.
@@ -32,7 +32,7 @@ namespace Dimensions {
                 std::unique_ptr<GraphBased::Genotype> genotype;
                 bool isUnique = false;
                 while(!isUnique) {
-                    genotype = mutator.mutateGenotype(currentIndiv->getGenotype(), generator, rng);
+                    genotype = mutator.mutateGenotype(currentIndiv->getGenotype(), *generator, rng);
                     this->representation->detectIntronNodes(*genotype);
 
                     std::set<size_t> remainingAnswers;
@@ -60,7 +60,7 @@ namespace Dimensions {
 
             /// @brief Inherrit from DataValueGenerator class 
             virtual std::unique_ptr<DataValueGenerator> cloneUniquePtr() const override {
-                return std::make_unique<IndividualValueArchiveGenerator>(this->archive, this->representation, this->generator, this->mutator);
+                return std::make_unique<IndividualValueArchiveGenerator>(this->archive, this->representation, this->mutator);
             }
     };
 };

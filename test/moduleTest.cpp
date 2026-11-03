@@ -91,7 +91,7 @@ class ModuleTest : public ::testing::Test
     // Generator of the genotypes of the representation.
     std::shared_ptr<const GraphBased::GenotypeGenerator> generator() const
     {
-        return std::shared_ptr<const GraphBased::GenotypeGenerator>(lgpRep->getGenotypeGenerator().cloneUniquePtr());
+        return std::make_shared<const GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
     }
 
     // Fill a state with the random individuals of a population and its offspring, ready for the first generation.
