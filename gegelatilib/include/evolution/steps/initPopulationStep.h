@@ -13,7 +13,7 @@
 namespace Evolution {
 
     /**
-     * \brief Step creating the random individuals of a population.
+     * \brief Step creating the random individuals of a population, with the generator found in the data (see CreateGeneratorStep).
      */
     class InitPopulationStep : public Module {
         protected:
@@ -29,8 +29,8 @@ namespace Evolution {
             /// Mutator creating the random genotypes.
             std::shared_ptr<const Mutation::Mutator> mutator;
 
-            /// Generator of the genotypes.
-            std::shared_ptr<const GraphBased::GenotypeGenerator> generator;
+            /// Key of the generator of the genotypes.
+            Key<GraphBased::GenotypeGenerator> generator;
 
         public:
             /**
@@ -40,14 +40,15 @@ namespace Evolution {
              * \param[in] representation representation of the individuals, kept alive by the step.
              * \param[in] size number of individuals created.
              * \param[in] mutator mutator creating the random genotypes.
-             * \param[in] generator generator of the genotypes, the one of the representation if null.
+             * \param[in] generator key of the generator of the genotypes.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the representation or the mutator is null.
              */
             InitPopulationStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
-                               std::shared_ptr<const Mutation::Mutator> mutator, std::shared_ptr<const GraphBased::GenotypeGenerator> generator = nullptr,
-                               std::string name = "InitPopulation");
+                               std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator, std::string name = "InitPopulation");
 
+            /// Inherited from Module
+            virtual std::set<std::string> requiredData() const override;
             /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
             /// Inherited from Module

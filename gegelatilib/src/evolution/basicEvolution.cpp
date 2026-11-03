@@ -8,6 +8,7 @@
 #include "evaluation/predictionProblem.h"
 #include "evaluation/reinforcementProblem.h"
 #include "evolution/steps/assignFitnessStep.h"
+#include "evolution/steps/createGeneratorStep.h"
 #include "evolution/steps/evaluateStep.h"
 #include "evolution/steps/initPopulationStep.h"
 #include "evolution/steps/mutateStep.h"
@@ -45,12 +46,14 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
     const std::shared_ptr<Mutation::Mutator> mutator =
         (this->mutation != nullptr) ? this->mutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-    const std::shared_ptr<const GraphBased::GenotypeGenerator> generator((this->generator != nullptr) ? this->generator
-                                                                          : std::make_shared<const GraphBased::GenotypeGenerator>(this->representation->getGenotypeConstraint()));
 
     // Step 2: build the modules. The initialization creates and evaluates the population...
     auto initModule = std::make_shared<Module>(this->names.initialization);
-    initModule->add(std::make_shared<InitPopulationStep>(keys.individuals, this->representation, this->sizePopulation, mutator, generator, this->names.initPopulationStep));
+    initModule->add((this->generator != nullptr)
+                        ? std::make_shared<CreateGeneratorStep>(keys.generator, [custom = this->generator](const EvolutionData&) { return custom; }, std::set<std::string>{},
+                                                                this->names.createGeneratorStep)
+                        : std::make_shared<CreateGeneratorStep>(keys.generator, this->representation, this->names.createGeneratorStep));
+    initModule->add(std::make_shared<InitPopulationStep>(keys.individuals, this->representation, this->sizePopulation, mutator, keys.generator, this->names.initPopulationStep));
     initModule->add(std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals}, keys.trainingMetrics, this->problem,
                                              evaluator, metricTemplate, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
     this->addFitnessSteps(*initModule, keys, fitnessMetricHash);
@@ -58,7 +61,7 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     // ... then a generation selects parents, creates and mutates the offspring, evaluates them and keeps the best.
     auto evolutionModule = std::make_shared<Module>(this->names.evolution);
     this->addReproductionSteps(*evolutionModule, keys);
-    evolutionModule->add(std::make_shared<MutateStep>(keys.offspring, mutator, generator, this->nbThreads, this->names.mutationStep));
+    evolutionModule->add(std::make_shared<MutateStep>(keys.offspring, mutator, keys.generator, this->nbThreads, this->names.mutationStep));
     evolutionModule->add(std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals, keys.offspring},
                                                    keys.trainingMetrics, this->problem, evaluator, metricTemplate, this->nbTrainingIterations,
                                                    Evaluation::Mode::TRAINING, this->names.trainingEvaluationStep));

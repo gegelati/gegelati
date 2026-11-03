@@ -10,59 +10,19 @@
 #include "representations/TPG.h"
 #include "evolution/originTPGEvolution.h"
 
-Evolution::InitVerticesStep::InitVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
-                                              std::shared_ptr<const Mutation::Mutator> mutator,
-                                              std::shared_ptr<const Representations::Representation> memberRepresentation,
-                                              std::shared_ptr<const Mutation::Mutator> memberMutator, Key<Evaluation::DataSet> archive, std::string name)
-    : Module(std::move(name)), individuals{std::move(individuals)}, representation{std::move(representation)}, size{size}, mutator{std::move(mutator)},
-      memberRepresentation{std::move(memberRepresentation)},
-      memberMutator{std::move(memberMutator)}, archive{std::move(archive)}
+Evolution::MutateVerticesStep::MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<GraphBased::GenotypeGenerator> generator,
+                                                  std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads, std::string name)
+    : Module(std::move(name)), individuals{std::move(individuals)}, roots{std::move(roots)}, generator{std::move(generator)}, mutator{std::move(mutator)},
+      nbThreads{nbThreads}
 {
-    if(this->representation == nullptr || this->mutator == nullptr || this->memberRepresentation == nullptr || this->memberMutator == nullptr) {
-        throw std::runtime_error("Evolution::InitVerticesStep: the representations and the mutators cannot be null");
-    }
-    if(std::dynamic_pointer_cast<const Representations::TPG>(this->representation) == nullptr) {
-        throw std::runtime_error("Evolution::InitVerticesStep: the representation must be a TPG");
-    }
-}
-
-std::set<std::string> Evolution::InitVerticesStep::providedData() const
-{
-    return {this->individuals.name()};
-}
-
-std::string Evolution::InitVerticesStep::details() const
-{
-    return std::to_string(this->size) + " vertices";
-}
-
-void Evolution::InitVerticesStep::apply(EvolutionData& state)
-{
-    const auto& representation = static_cast<const Representations::TPG&>(*this->representation);
-    const std::shared_ptr<const Evaluation::DataSet> archiveData = state.getIfAny(this->archive);
-    const std::unique_ptr<GraphBased::GenotypeGenerator> generator =
-        makeVertexGenerator(representation, this->memberRepresentation, *this->memberMutator, {}, archiveData.get());
-
-    std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(*this->mutator, this->representation, *generator, this->size, state.rng);
-    state.set(this->individuals, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::move(individuals)));
-}
-
-Evolution::MutateVerticesStep::MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<Evaluation::DataSet> archive,
-                                                  std::shared_ptr<const Representations::TPG> representation,
-                                                  std::shared_ptr<Mutation::NodeTransferMutation> mutator,
-                                                  std::shared_ptr<const Representations::Representation> memberRepresentation,
-                                                  std::shared_ptr<const Mutation::Mutator> memberMutator, size_t nbThreads, std::string name)
-    : Module(std::move(name)), individuals{std::move(individuals)}, roots{std::move(roots)}, archive{std::move(archive)}, representation{std::move(representation)},
-      mutator{std::move(mutator)}, memberRepresentation{std::move(memberRepresentation)}, memberMutator{std::move(memberMutator)}, nbThreads{nbThreads}
-{
-    if(this->representation == nullptr || this->mutator == nullptr || this->memberRepresentation == nullptr || this->memberMutator == nullptr) {
-        throw std::runtime_error("Evolution::MutateVerticesStep: the representations and the mutators cannot be null");
+    if(this->mutator == nullptr) {
+        throw std::runtime_error("Evolution::MutateVerticesStep: the mutator cannot be null");
     }
 }
 
 std::set<std::string> Evolution::MutateVerticesStep::requiredData() const
 {
-    return {this->individuals.name(), this->roots.name()};
+    return {this->individuals.name(), this->roots.name(), this->generator.name()};
 }
 
 std::string Evolution::MutateVerticesStep::details() const
@@ -72,15 +32,9 @@ std::string Evolution::MutateVerticesStep::details() const
 
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 {
-    const auto currentRoots = std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(state.getIndividuals(this->roots));
-    const std::vector<std::shared_ptr<const Individual>> vertices = getAllVertices(*currentRoots);
-    const std::shared_ptr<const Evaluation::DataSet> archiveData = state.getIfAny(this->archive);
-    const std::unique_ptr<GraphBased::GenotypeGenerator> generator =
-        makeVertexGenerator(*this->representation, this->memberRepresentation, *this->memberMutator, vertices, archiveData.get());
-
     // The roots are only shared with the mutation while mutating, so the step does not keep them alive.
-    this->mutator->setPotentialNodes(currentRoots);
-    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *generator, state.rng, this->nbThreads);
+    this->mutator->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(state.getIndividuals(this->roots)));
+    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *state.get(this->generator), state.rng, this->nbThreads);
     this->mutator->setPotentialNodes(nullptr);
 }
 

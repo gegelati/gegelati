@@ -12,6 +12,8 @@
 
 
 #include "evolution/steps/evaluateStep.h"
+#include "evolution/steps/initPopulationStep.h"
+#include "evolution/steps/lambdaStep.h"
 #include "evolution/steps/tpgSteps.h"
 
 
@@ -75,13 +77,52 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
         }
     }
 
+    // The generator of the vertices is a data of the evolution, built again by a step: the members are created with the member mutator and
+    // must answer differently from existing ones on the archive if there is one, and nodes may point to the current vertices.
+    const std::set<std::string> archiveName = withArchive ? std::set<std::string>{keys.archive.name()} : std::set<std::string>{};
+    auto makeGeneratorStep = [&](bool fromVertices) {
+        std::set<std::string> required = archiveName;
+        if(fromVertices) {
+            required.insert(keys.individuals.name());
+        }
+        return std::make_shared<LambdaStep>(this->tpgNames.updateGeneratorStep,
+            [keys, tpgRepresentation, memberRepresentation = this->memberRepresentation, memberMutator, fromVertices](EvolutionData& data) {
+                // The member of a node is created with the member mutator, and must answer differently from existing ones on the archive if there is one.
+                GraphBased::NodeGenerator bidNodes;
+                const std::shared_ptr<Evaluation::DataSet> archive = data.getIfAny(keys.archive);
+                if(archive != nullptr) {
+                    bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*archive, memberRepresentation, *memberMutator));
+                } else {
+                    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, *memberMutator));
+                }
+
+                // The destination is an action or, sometimes, one of the current vertices.
+                const std::vector<std::shared_ptr<const Individual>> vertices =
+                    fromVertices ? getAllVertices(data.getIndividuals(keys.individuals)) : std::vector<std::shared_ptr<const Individual>>{};
+                Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRepresentation->getNbActions() - 1);
+                if(vertices.empty()) {
+                    bidNodes.addGenerator(actionGenerator);
+                } else {
+                    Dimensions::MultiGenerator destination;
+                    destination.addGenerator(actionGenerator, 0.995);
+                    destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(vertices), 0.005);
+                    bidNodes.addGenerator(destination);
+                }
+
+                // New vertices start with the minimum number of nodes.
+                const std::pair<size_t, size_t> range = tpgRepresentation->getGenotypeConstraint().getRangeAt(0);
+                data.set(keys.generator, std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, range, std::make_pair(range.first, range.first)));
+            },
+            required, std::set<std::string>{keys.generator.name()});
+    };
+
     // Step 2: build the modules. The initialization creates the archive and the vertices, then evaluates them...
     auto init = std::make_shared<Module>(this->names.initialization);
     if(withArchive) {
         init->add(std::make_shared<CreateArchiveStep>(keys.archive, tpgRepresentation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
     }
-    init->add(std::make_shared<InitVerticesStep>(keys.individuals, this->representation, this->sizePopulation, transfer, this->memberRepresentation,
-                                                 memberMutator, keys.archive, this->names.initPopulationStep));
+    init->add(makeGeneratorStep(false));
+    init->add(std::make_shared<InitPopulationStep>(keys.individuals, this->representation, this->sizePopulation, transfer, keys.generator, this->names.initPopulationStep));
     init->add(std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals}, keys.trainingMetrics, this->problem,
                                              evaluator, initMetrics, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
     this->addFitnessSteps(*init, keys, fitnessMetricHash);
@@ -95,8 +136,8 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
     // ... then a generation, where nodes transferred by the mutation of the offspring are the ones of the current population.
     auto generation = std::make_shared<Module>(this->names.evolution);
     this->addReproductionSteps(*generation, keys);
-    generation->add(std::make_shared<MutateVerticesStep>(keys.offspring, keys.individuals, keys.archive, tpgRepresentation, transfer, this->memberRepresentation,
-                                                         memberMutator, this->nbThreads, this->names.mutationStep));
+    generation->add(makeGeneratorStep(true));
+    generation->add(std::make_shared<MutateVerticesStep>(keys.offspring, keys.individuals, keys.generator, transfer, this->nbThreads, this->names.mutationStep));
     if(const auto predictionProblem = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem)) {
         generation->add(std::make_shared<CacheMemberOutputsStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals, keys.offspring},
                                                                  keys.memberOutputCache, predictionProblem, evaluator, this->nbTrainingIterations,
@@ -149,35 +190,6 @@ namespace {
     // Index of the member in a node, and of the destination in a node.
     constexpr size_t memberValueIndex = 0;
     constexpr size_t destinationValueIndex = 1;
-}
-
-std::unique_ptr<GraphBased::GenotypeGenerator> Evolution::makeVertexGenerator(const Representations::TPG& representation,
-                                                                   std::shared_ptr<const Representations::Representation> memberRepresentation,
-                                                                   const Mutation::Mutator& memberMutator,
-                                                                   const std::vector<std::shared_ptr<const Individual>>& vertices,
-                                                                   const Evaluation::DataSet* archive)
-{
-    GraphBased::NodeGenerator bidNodes;
-    if(archive != nullptr) {
-        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*archive, memberRepresentation, memberMutator));
-    } else {
-        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, memberMutator));
-    }
-
-    Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, representation.getNbActions() - 1);
-    if(vertices.empty()) {
-        bidNodes.addGenerator(actionGenerator);
-    } else {
-        Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>> tangledGenerator(vertices);
-        Dimensions::MultiGenerator multi;
-        multi.addGenerator(actionGenerator, 0.995);
-        multi.addGenerator(tangledGenerator, 0.005);
-        bidNodes.addGenerator(multi);
-    }
-
-    const std::pair<size_t, size_t> mutationRange = representation.getGenotypeConstraint().getRangeAt(0);
-    const std::pair<size_t, size_t> initRange{mutationRange.first, mutationRange.first};
-    return std::make_unique<GraphBased::GenotypeGenerator>(bidNodes, mutationRange, initRange);
 }
 
 std::vector<std::shared_ptr<const Individual>> Evolution::getSubVertices(const Individual& vertex)

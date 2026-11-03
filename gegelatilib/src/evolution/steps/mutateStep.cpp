@@ -2,18 +2,18 @@
 
 #include <stdexcept>
 
-Evolution::MutateStep::MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator,
-                                  std::shared_ptr<const GraphBased::GenotypeGenerator> generator, size_t nbThreads, std::string name)
+Evolution::MutateStep::MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator,
+                                  size_t nbThreads, std::string name)
     : Module(std::move(name)), individuals{std::move(individuals)}, mutator{std::move(mutator)}, generator{std::move(generator)}, nbThreads{nbThreads}
 {
-    if(this->mutator == nullptr || this->generator == nullptr) {
-        throw std::runtime_error("Evolution::MutateStep: the mutator and the generator cannot be null");
+    if(this->mutator == nullptr) {
+        throw std::runtime_error("Evolution::MutateStep: the mutator cannot be null");
     }
 }
 
 std::set<std::string> Evolution::MutateStep::requiredData() const
 {
-    return {this->individuals.name()};
+    return {this->individuals.name(), this->generator.name()};
 }
 
 std::string Evolution::MutateStep::details() const
@@ -23,5 +23,5 @@ std::string Evolution::MutateStep::details() const
 
 void Evolution::MutateStep::apply(EvolutionData& state)
 {
-    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *this->generator, state.rng, this->nbThreads);
+    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *state.get(this->generator), state.rng, this->nbThreads);
 }

@@ -30,6 +30,7 @@
 #include "evolution/steps/exportStep.h"
 #include "evolution/originTPGEvolution.h"
 #include "evolution/steps/logStep.h"
+#include "evolution/steps/createGeneratorStep.h"
 #include "evolution/steps/lambdaStep.h"
 
 #include "mutation/pointMutator.h"
@@ -352,14 +353,15 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     config.memberRepresentation = lgpRep;
     config.problem = problem;
     auto root = config.build();
-    const Evolution::BasicEvolution::Keys population;
-    root->add(std::make_shared<Evolution::LogStep>(std::cout, population.individuals, loggedFitness(*root), Evolution::tpgLogColumns(population.individuals)));
+    Evolution::Key<std::vector<std::shared_ptr<Individual>>> population(config.names.population);
+    Evolution::Key<std::map<uint64_t, double>> populationFitness(config.names.trainingFitness);
+    root->add(std::make_shared<Evolution::LogStep>(std::cout, population, loggedFitness(*root), Evolution::tpgLogColumns(population)));
     std::cout<<root->summary()<<std::endl;
 
     std::string str = "graph";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false));
+    root->add(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
+    root->add(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, populationFitness));
 
 
     Evolution::EvolutionData data = root->evolve(40, 4);
@@ -368,6 +370,111 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     EXPECT_EQ(60137, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 
     std::cout<<data.summary()<<std::endl;
+}
+
+TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
+    mnist::MNIST_dataset<std::vector, std::vector<double>, uint8_t> mnist(mnist::read_dataset<std::vector, std::vector, double, uint8_t>(MNIST_DATA_LOCATION));
+    Dimensions::Requirement inputReq = Dimensions::Requirement(Data::DataType::type<double>({28, 28}));
+
+    // The TPG classifies the digits. The LGP evolves on its own on the same images, with a double to predict since its individuals
+    // are the bidders of the TPG (there is no regression problem, so the equality of the metric rarely holds: the evolution of the LGP is mainly a plumbing check).
+    Evaluation::DataSet dataSet({inputReq}, Dimensions::Requirement(Data::DataType::type<size_t>()));
+    Evaluation::DataSet lgpDataSet({inputReq}, Dimensions::Requirement(Data::DataType::type<double>()));
+    for(size_t idx = 0; idx < mnist.training_images.size(); idx++) {
+        std::vector<Data::DataValue> inputs;
+        inputs.push_back(Data::DataValue::array2d<std::vector<double>>(mnist.training_images.at(idx), 28, 28));
+        std::vector<Data::DataValue> lgpInputs;
+        lgpInputs.push_back(Data::DataValue::array2d<std::vector<double>>(mnist.training_images.at(idx), 28, 28));
+        dataSet.addData(std::move(inputs), Data::DataValue::scalar<uint64_t>(static_cast<uint64_t>(mnist.training_labels.at(idx))));
+        lgpDataSet.addData(std::move(lgpInputs), Data::DataValue::scalar<double>(static_cast<double>(mnist.training_labels.at(idx))));
+    }
+
+    auto lgpRep = std::make_shared<Representations::LGP>(dataSet.getInputDimensions(), Data::DataType::type<double>({8}), mnistSet, Data::DataType::type<double>({1}), 1, 20);
+    auto tpgRep = std::make_shared<Representations::TPG>(dataSet.getInputDimensions(), 10, 2, 20);
+
+    Evolution::BasicEvolution lgp;
+    lgp.representation = lgpRep;
+    lgp.problem = std::make_shared<Evaluation::PredictionProblem>(lgpDataSet, 500);
+    lgp.sizePopulation = 100;
+    lgp.nbOffspring = 1000;
+    lgp.nbTrainingIterations = 40;
+    lgp.nbThreads = 20;
+    lgp.names.population = "LGP";
+    lgp.names.parents = "LGP.parents";
+    lgp.names.offspring = "LGP.offspring";
+    lgp.names.trainingMetrics = "LGP.trainingMetrics";
+    lgp.names.trainingFitness = "LGP.trainingFitness";
+    lgp.names.generator = "LGP.generator";
+    lgp.names.evolution = "LGP";
+
+    Evolution::BasicEvolution tpg;
+    tpg.representation = tpgRep;
+    tpg.problem = std::make_shared<Evaluation::PredictionProblem>(dataSet, 500);
+    tpg.sizePopulation = 100;
+    tpg.nbOffspring = 1000;
+    tpg.nbTrainingIterations = 40;
+    tpg.nbThreads = 20;
+    tpg.names.population = "TPG";
+    tpg.names.parents = "TPG.parents";
+    tpg.names.offspring = "TPG.offspring";
+    tpg.names.trainingMetrics = "TPG.trainingMetrics";
+    tpg.names.trainingFitness = "TPG.trainingFitness";
+    tpg.names.evolution = "TPG";
+    tpg.names.generator = "TPG.generator";
+
+    // Before the TPG is created or mutated, a step builds its generator: the members are the current individuals of the LGP,
+    // and the destinations are actions or the current individuals of the TPG (none at the beginning).
+    const Evolution::BasicEvolution::Keys lgpKeys(lgp.names);
+    const Evolution::BasicEvolution::Keys tpgKeys(tpg.names);
+    auto makeGeneratorStep = [&]() {
+        return std::make_shared<Evolution::LambdaStep>("TPGGenerator", [tpgRep, lgpKeys, tpgKeys](Evolution::EvolutionData& data) {
+            // The member of a node is one of the current individuals of the LGP.
+            const std::vector<std::shared_ptr<const Individual>> members = data.getIndividuals(lgpKeys.individuals);
+            GraphBased::NodeGenerator bidNodes;
+            bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(members));
+
+            // The destination is an action or, sometimes, one of the current individuals of the TPG (none at the beginning).
+            const std::vector<std::shared_ptr<const Individual>> tangled = data.getIndividuals(tpgKeys.individuals);
+            Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRep->getNbActions() - 1);
+            if(tangled.empty()) {
+                bidNodes.addGenerator(actionGenerator);
+            } else {
+                Dimensions::MultiGenerator destination;
+                destination.addGenerator(actionGenerator, 0.995);
+                destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(tangled), 0.005);
+                bidNodes.addGenerator(destination);
+            }
+            data.set(tpgKeys.generator, std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, tpgRep->getGenotypeConstraint().getRangeAt(0)));
+        }, std::set<std::string>{lgp.names.population}, std::set<std::string>{tpg.names.generator});
+    };
+
+    // The LGP does a generation, then the TPG does one. Its generator replaces the naive one of its initialization, and is created again before its mutation.
+    auto root = std::make_shared<Evolution::Module>("Evolution");
+    root->add(lgp.build());
+    auto tpgModule = tpg.build();
+    tpgModule->getInitialization()->replace(tpgModule->getInitialization()->find("CreateGenerator"), makeGeneratorStep());
+    tpgModule->insertBefore(tpgModule->find("Mutation"), makeGeneratorStep());
+    tpgModule->add(std::make_shared<Evolution::LogStep>(std::cout, tpgKeys.individuals,
+        std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{{"Fit", tpgKeys.trainingFitness}}, Evolution::tpgLogColumns(tpgKeys.individuals)));
+    root->add(tpgModule);
+    std::cout << root->summary() << std::endl;
+
+    Evolution::EvolutionData data = root->evolve(40, 4);
+    std::cout << data.summary() << std::endl;
+
+    EXPECT_EQ(data.nbGenerationsDone, 40U);
+    EXPECT_EQ(data.getIndividuals(lgpKeys.individuals).size(), lgp.sizePopulation);
+    const std::vector<std::shared_ptr<const Individual>> roots = data.getIndividuals(tpgKeys.individuals);
+    ASSERT_EQ(roots.size(), tpg.sizePopulation);
+    EXPECT_TRUE(data.isUpToDate(tpgKeys.trainingFitness));
+
+    // The nodes of the TPG bid with individuals of the LGP.
+    for(const auto& vertex: roots) {
+        const GraphBased::NodeGroup& group = vertex->getGenotype().getNodeGroup(0);
+        for(size_t idx = 0; idx < group.getSize(); idx++) {
+            EXPECT_EQ(&group.getNode(idx).getValue(0).getScalar<std::shared_ptr<const Individual>>()->getRepresentation(), lgpRep.get());
+        }
+    }
 }
 
 TEST_F(TPGAlgoTest, customEvolutionTPG3) {

@@ -15,6 +15,7 @@
 #include "evolution/steps/exportStep.h"
 #include "evolution/steps/logStep.h"
 #include "evolution/steps/assignFitnessStep.h"
+#include "evolution/steps/createGeneratorStep.h"
 #include "evolution/steps/evaluateStep.h"
 #include "evolution/steps/initPopulationStep.h"
 #include "evolution/steps/lambdaStep.h"
@@ -88,17 +89,21 @@ class ModuleTest : public ::testing::Test
         return makeEvolution(sizePopulation, nbOffspring, nbTrainingIterations, nbValidationIterations, nbThreads, validationPeriod).build();
     }
 
-    // Generator of the genotypes of the representation.
-    std::shared_ptr<const GraphBased::GenotypeGenerator> generator() const
+    // Key of the generator of the genotypes in the tests of the steps.
+    const Evolution::Key<GraphBased::GenotypeGenerator> generatorKey{"Generator"};
+
+    // Store the generator of the representation in a state, as the first step of a preset does.
+    void setGenerator(Evolution::EvolutionData& state) const
     {
-        return std::make_shared<const GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
+        state.set(generatorKey, std::make_shared<GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint()));
     }
 
     // Fill a state with the random individuals of a population and its offspring, ready for the first generation.
     void initPopulation(Evolution::EvolutionData& state, const Evolution::BasicEvolution::Keys& population, size_t nbOffspring) const
     {
         state.reset(0);
-        Evolution::InitPopulationStep(population.individuals, lgpRep, 10, std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5), generator()).apply(state);
+        setGenerator(state);
+        Evolution::InitPopulationStep(population.individuals, lgpRep, 10, std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5), generatorKey).apply(state);
         state.generation = 0;
         Evolution::ReproduceStep(population.individuals, std::make_shared<Reproduction::Replicator>(), nbOffspring, population.offspring).apply(state);
     }
@@ -181,7 +186,7 @@ TEST_F(ModuleTest, insertSecondMutation)
     // A second mutation after the first one, then a custom step counting the generations.
     size_t nbCalls = 0;
     auto secondMutation = std::make_shared<Evolution::MutateStep>(population.offspring, std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5),
-                                                                  generator(), 1, "SecondMutation");
+                                                                  population.generator, 1, "SecondMutation");
     (*root)
         .insertAfter(root->find("Mutation"), secondMutation)
         .insertAfter(secondMutation, std::make_shared<Evolution::LambdaStep>("Count", [&nbCalls](Evolution::EvolutionData&) { nbCalls++; }));
@@ -514,21 +519,22 @@ TEST_F(ModuleTest, mutationComponentsAreRequired)
     const auto offspring = population.offspring;
     auto mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5);
 
-    // Components are fixed objects, only the mutated individuals are data of the state.
-    Evolution::MutateStep mutate(offspring, mutator, generator());
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name()}));
-    EXPECT_THROW(Evolution::MutateStep(offspring, nullptr, generator()), std::runtime_error);
-    EXPECT_THROW(Evolution::MutateStep(offspring, mutator, nullptr), std::runtime_error);
+    // Components are fixed objects, only the mutated individuals and the generator are data of the state.
+    Evolution::MutateStep mutate(offspring, mutator, generatorKey);
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name(), generatorKey.name()}));
+    EXPECT_THROW(Evolution::MutateStep(offspring, nullptr, generatorKey), std::runtime_error);
 
-    // The population is created with the generator of its representation if none is given.
-    Evolution::InitPopulationStep init(population.individuals, lgpRep, 10, mutator);
-    EXPECT_TRUE(init.requiredData().empty());
+    // The population is created with the generator found in the data.
+    Evolution::InitPopulationStep init(population.individuals, lgpRep, 10, mutator, generatorKey);
+    EXPECT_EQ(init.requiredData(), (std::set<std::string>{generatorKey.name()}));
     EXPECT_EQ(init.providedData(), (std::set<std::string>{population.individuals.name()}));
-    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, lgpRep, 10, nullptr), std::runtime_error);
-    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, nullptr, 10, mutator), std::runtime_error);
+    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, lgpRep, 10, nullptr, generatorKey), std::runtime_error);
+    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, nullptr, 10, mutator, generatorKey), std::runtime_error);
 
     Evolution::EvolutionData state;
     state.reset(0);
+    EXPECT_THROW(init.apply(state), std::runtime_error) << "No generator in the data";
+    setGenerator(state);
     ASSERT_NO_THROW(init.apply(state));
     EXPECT_EQ(state.getIndividuals(population.individuals).size(), 10U);
 }
@@ -551,7 +557,8 @@ TEST_F(ModuleTest, twoPopulations)
         auto assign = std::make_shared<Evolution::AssignFitnessStep>(metrics, fitness, std::make_shared<FitnessAssignment::DefaultAssigner>(),
                                                                       Metrics::RewardsMetric::staticHash());
 
-        init->add(std::make_shared<Evolution::InitPopulationStep>(individuals, lgpRep, size, mutator));
+        init->add(std::make_shared<Evolution::CreateGeneratorStep>(population.generator, lgpRep));
+        init->add(std::make_shared<Evolution::InitPopulationStep>(individuals, lgpRep, size, mutator, population.generator));
         init->add(std::make_shared<Evolution::EvaluateStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals}, metrics, problem,
                                                                      std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2));
         init->add(assign);
@@ -559,7 +566,7 @@ TEST_F(ModuleTest, twoPopulations)
         root->add(std::make_shared<Evolution::SelectStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals}, fitness,
                                                                std::make_shared<Selection::RandomSelector>(true), nbOffspring, parents));
         root->add(std::make_shared<Evolution::ReproduceStep>(parents, std::make_shared<Reproduction::Replicator>(), nbOffspring, offspring));
-        root->add(std::make_shared<Evolution::MutateStep>(offspring, mutator, generator()));
+        root->add(std::make_shared<Evolution::MutateStep>(offspring, mutator, population.generator));
         root->add(std::make_shared<Evolution::EvaluateStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals, offspring}, metrics, problem,
                                                                  std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2));
         root->add(assign);
@@ -747,11 +754,11 @@ TEST_F(ModuleTest, mutateStep)
     for(size_t nbThreads: {2, 3}) {
         Evolution::EvolutionData state;
         initPopulation(state, population, 20);
-        Evolution::MutateStep step(offspring, mutator, generator(), nbThreads);
+        Evolution::MutateStep step(offspring, mutator, generatorKey, nbThreads);
         EXPECT_EQ(step.name(), "Mutate");
         EXPECT_EQ(step.getIndividuals(), offspring);
         EXPECT_EQ(step.getNbThreads(), nbThreads);
-        EXPECT_EQ(step.requiredData(), (std::set<std::string>{offspring.name()}));
+        EXPECT_EQ(step.requiredData(), (std::set<std::string>{offspring.name(), generatorKey.name()}));
         EXPECT_TRUE(step.providedData().empty()) << "Offspring are mutated in place";
         ASSERT_NO_THROW(step.apply(state));
 
@@ -1019,4 +1026,62 @@ TEST_F(ModuleTest, namesAreSettings)
     EXPECT_EQ(data.get(keys.parents)->size(), 10U);
     EXPECT_EQ(data.getIndividuals(keys.individuals).size(), 10U);
     EXPECT_FALSE(data.has(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Parents")));
+}
+
+TEST_F(ModuleTest, createGeneratorStep)
+{
+    const Evolution::Key<GraphBased::GenotypeGenerator> key("Generator");
+    Evolution::EvolutionData state;
+
+    // The naive generator of a representation.
+    Evolution::CreateGeneratorStep naive(key, lgpRep);
+    EXPECT_EQ(naive.name(), "CreateGenerator");
+    EXPECT_TRUE(naive.requiredData().empty());
+    EXPECT_EQ(naive.providedData(), (std::set<std::string>{key.name()}));
+    naive.apply(state);
+    ASSERT_TRUE(state.has(key));
+    EXPECT_EQ(state.get(key)->size(), 1U);
+    EXPECT_THROW(Evolution::CreateGeneratorStep(key, std::shared_ptr<const Representations::Representation>()), std::runtime_error);
+
+    // A generator built from the data, again each time the step runs.
+    size_t nbCalls = 0;
+    Evolution::CreateGeneratorStep fromData(key, [this, &nbCalls](const Evolution::EvolutionData&) {
+        nbCalls++;
+        return std::make_shared<GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
+    }, std::set<std::string>{"Pool"}, "FromData");
+    EXPECT_EQ(fromData.name(), "FromData");
+    EXPECT_EQ(fromData.requiredData(), (std::set<std::string>{"Pool"}));
+    fromData.apply(state);
+    fromData.apply(state);
+    EXPECT_EQ(nbCalls, 2U);
+    EXPECT_THROW(Evolution::CreateGeneratorStep(key, std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const Evolution::EvolutionData&)>()), std::runtime_error);
+    Evolution::CreateGeneratorStep nothing(key, [](const Evolution::EvolutionData&) { return std::shared_ptr<GraphBased::GenotypeGenerator>(); });
+    EXPECT_THROW(nothing.apply(state), std::runtime_error) << "A step must create a generator";
+}
+
+TEST_F(ModuleTest, presetCreatesTheGenerator)
+{
+    // The preset creates the generator first, once, from its settings.
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
+    const Evolution::BasicEvolution::Keys keys(evolution.names);
+    auto module = evolution.build();
+    EXPECT_EQ(module->getInitialization()->getSteps().front()->name(), "CreateGenerator");
+    EXPECT_FALSE(module->has("CreateGenerator")) << "Only in the initialization";
+    Evolution::EvolutionData data = module->evolve(2);
+    EXPECT_TRUE(data.has(keys.generator));
+
+    // A generator given in the settings is the one found in the data.
+    evolution.generator = std::make_shared<GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
+    Evolution::EvolutionData custom = evolution.build()->evolve(1);
+    EXPECT_EQ(custom.get(keys.generator), evolution.generator);
+
+    // Updating the generator is adding a step: the steps creating and mutating the population read it from the data.
+    auto updated = makeEvolution(10, 10, 2).build();
+    size_t nbCreations = 0;
+    updated->insertBefore(updated->find("Mutation"), std::make_shared<Evolution::CreateGeneratorStep>(keys.generator, [this, &nbCreations](const Evolution::EvolutionData&) {
+        nbCreations++;
+        return std::make_shared<GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
+    }, std::set<std::string>{}, "UpdateGenerator"));
+    updated->evolve(3);
+    EXPECT_EQ(nbCreations, 3U);
 }

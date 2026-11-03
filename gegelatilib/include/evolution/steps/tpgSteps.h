@@ -21,69 +21,11 @@
 namespace Evolution {
 
     /**
-     * \brief Step creating the random vertices of a population of roots.
-     *
-     * New vertices have the minimum number of nodes of the TPG representation and no tangled connection.
-     * Their members are created with the member mutator, and must answer differently from existing ones on the archive
-     * if a previous step created it (see CreateArchiveStep).
-     */
-    class InitVerticesStep : public Module {
-        protected:
-            /// Key of the created vertices.
-            Key<std::vector<std::shared_ptr<Individual>>> individuals;
-
-            /// Representation of the vertices, a TPG.
-            std::shared_ptr<const Representations::Representation> representation;
-
-            /// Number of vertices created.
-            size_t size;
-
-            /// Mutator creating the random genotypes of the vertices.
-            std::shared_ptr<const Mutation::Mutator> mutator;
-
-            /// Representation of the members.
-            std::shared_ptr<const Representations::Representation> memberRepresentation;
-
-            /// Mutator creating the random genotypes of the members.
-            std::shared_ptr<const Mutation::Mutator> memberMutator;
-
-            /// Name of the archive, an Evaluation::DataSet, used if it exists.
-            Key<Evaluation::DataSet> archive;
-
-        public:
-            /**
-             * \brief Constructor.
-             *
-             * \param[in] individuals key of the created vertices.
-             * \param[in] representation representation of the vertices, it must be a TPG.
-             * \param[in] size number of vertices created.
-             * \param[in] mutator mutator creating the random genotypes of the vertices.
-             * \param[in] memberRepresentation representation of the members.
-             * \param[in] memberMutator mutator creating the random genotypes of the members.
-             * \param[in] archive name of the archive, an Evaluation::DataSet, used if it exists.
-             * \param[in] name name of the step.
-             * \throw std::runtime_error if a component is null or the representation is not a TPG.
-             */
-            InitVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
-                             std::shared_ptr<const Mutation::Mutator> mutator,
-                             std::shared_ptr<const Representations::Representation> memberRepresentation, std::shared_ptr<const Mutation::Mutator> memberMutator,
-                             Key<Evaluation::DataSet> archive, std::string name = "InitVertices");
-
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
-            /// Inherited from Module
-            virtual std::string details() const override;
-            /// Inherited from Module
-            virtual void apply(EvolutionData& state) override;
-    };
-
-    /**
-     * \brief Step mutating TPG vertices.
+     * \brief Step mutating TPG vertices with the generator found in the data.
      *
      * Added nodes are copies of the nodes of the current roots: the step gives the roots to its NodeTransferMutation
-     * before mutating, without copying the mutation. Mutated nodes may get a tangled connection towards any current vertex,
-     * and their members are mutated with the member mutator (and must answer differently from existing ones on the archive,
-     * if a previous step created it).
+     * before mutating, without copying the mutation. The generator is a data of the evolution, built again from the current
+     * vertices by a previous step (see OriginTPGEvolution).
      */
     class MutateVerticesStep : public Module {
         protected:
@@ -93,20 +35,11 @@ namespace Evolution {
             /// Name of the current roots, a list of individuals.
             Key<std::vector<std::shared_ptr<Individual>>> roots;
 
-            /// Name of the archive, an Evaluation::DataSet, used if it exists.
-            Key<Evaluation::DataSet> archive;
-
-            /// Representation of the vertices.
-            std::shared_ptr<const Representations::TPG> representation;
+            /// Key of the generator of the genotypes.
+            Key<GraphBased::GenotypeGenerator> generator;
 
             /// Mutation of the vertices, transferring the nodes of the roots.
             std::shared_ptr<Mutation::NodeTransferMutation> mutator;
-
-            /// Representation of the members.
-            std::shared_ptr<const Representations::Representation> memberRepresentation;
-
-            /// Mutator of the members.
-            std::shared_ptr<const Mutation::Mutator> memberMutator;
 
             /// Maximum number of threads used to mutate.
             size_t nbThreads;
@@ -117,18 +50,14 @@ namespace Evolution {
              *
              * \param[in] individuals name of the mutated vertices, a list of mutable individuals (e.g. offspring).
              * \param[in] roots name of the current roots, a list of individuals (e.g. the individuals of a population).
-             * \param[in] archive name of the archive, an Evaluation::DataSet, used if it exists.
-             * \param[in] representation representation of the vertices.
+             * \param[in] generator key of the generator of the genotypes.
              * \param[in] mutator mutation of the vertices, its potential nodes are set by the step.
-             * \param[in] memberRepresentation representation of the members.
-             * \param[in] memberMutator mutator of the members.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
-             * \throw std::runtime_error if a component is null.
+             * \throw std::runtime_error if the mutator is null.
              */
-            MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<Evaluation::DataSet> archive, std::shared_ptr<const Representations::TPG> representation,
-                               std::shared_ptr<Mutation::NodeTransferMutation> mutator, std::shared_ptr<const Representations::Representation> memberRepresentation,
-                               std::shared_ptr<const Mutation::Mutator> memberMutator, size_t nbThreads = 1, std::string name = "MutateVertices");
+            MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<GraphBased::GenotypeGenerator> generator,
+                               std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads = 1, std::string name = "MutateVertices");
 
             /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;

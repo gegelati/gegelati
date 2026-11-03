@@ -77,14 +77,14 @@ namespace Dimensions {
     template <typename T>
     class ListUniformGenerator : public DataValueGenerator {
         protected:
-            /// \brief Possible values to sample
-            const std::vector<T>& values;
+            /// \brief Possible values to sample, copied so the generator can be kept after the list given
+            std::vector<T> values;
 
         public:
             /**
              * \brief Constructor for ListUniformGenerator.
              * 
-             * \param[in] values a vector of references to the possible values to sample from.
+             * \param[in] values the possible values to sample from, copied.
              */
             ListUniformGenerator(const std::vector<T>& values) : values(values) {}
 

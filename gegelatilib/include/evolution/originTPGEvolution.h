@@ -12,6 +12,7 @@
 #include "evolution/steps/logStep.h"
 #include "mutation/nodeTransferMutation.h"
 #include "representations/TPG.h"
+#include "dimensions/dataValueGenerator.h"
 #include "graphBased/genotypeGenerator.h"
 #include "individual.h"
 #include "mutation/mutator.h"
@@ -41,25 +42,6 @@ namespace Evolution {
      * \return the members, ordered by ID and without duplicates.
      */
     std::vector<std::shared_ptr<const Individual>> getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices);
-
-    /**
-     * \brief Create the generator of the genotypes of the vertices.
-     *
-     * Members are created from the archive if there is one, and destinations are actions or, if there are vertices,
-     * tangled connections towards them. The number of nodes follows the TPG representation, but new vertices start with the minimum.
-     * The generator keeps references to its arguments: they must outlive it.
-     *
-     * \param[in] representation the TPG representation of the vertices.
-     * \param[in] memberRepresentation representation of the members.
-     * \param[in] memberMutator mutator creating the members.
-     * \param[in] vertices the vertices that can be reached by tangled connections.
-     * \param[in] archive archive on which members must answer differently from existing ones, null if there is none.
-     */
-    std::unique_ptr<GraphBased::GenotypeGenerator> makeVertexGenerator(const Representations::TPG& representation,
-                                                                       std::shared_ptr<const Representations::Representation> memberRepresentation,
-                                                                       const Mutation::Mutator& memberMutator,
-                                                                       const std::vector<std::shared_ptr<const Individual>>& vertices,
-                                                                       const Evaluation::DataSet* archive);
 
     /**
      * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding steps.
@@ -114,6 +96,9 @@ namespace Evolution {
             /// Data: the aggregators of the protected vertices.
             std::string aggregators = "aggregators";
 
+            /// Data: the generator of the genotypes of the vertices, built again at each generation.
+            std::string generator = "generator";
+
             /// Step creating the archive.
             std::string createArchiveStep = "CreateArchive";
 
@@ -125,6 +110,9 @@ namespace Evolution {
 
             /// Step updating the archive.
             std::string updateArchiveStep = "UpdateArchive";
+
+            /// Step building the generator of the genotypes of the vertices.
+            std::string updateGeneratorStep = "UpdateGenerator";
         };
 
         /**
@@ -139,7 +127,7 @@ namespace Evolution {
             /// Create the keys of some names.
             Keys(const Names& names, const TPGNames& tpgNames)
                 : BasicEvolution::Keys(names), archive(tpgNames.archive), memberOutputCache(tpgNames.memberOutputCache),
-                  protectedVertices(tpgNames.protectedVertices), aggregators(tpgNames.aggregators)
+                  protectedVertices(tpgNames.protectedVertices), aggregators(tpgNames.aggregators), generator(tpgNames.generator)
             {
             }
 
@@ -154,6 +142,9 @@ namespace Evolution {
 
             /// Aggregators of the protected vertices.
             Key<std::map<uint64_t, std::set<uint64_t>>> aggregators;
+
+            /// Generator of the genotypes of the vertices.
+            Key<GraphBased::GenotypeGenerator> generator;
         };
 
         /// Names of the data and of the steps added by the TPG evolution, changeable before build.

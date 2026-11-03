@@ -12,7 +12,7 @@
 namespace Evolution {
 
     /**
-     * \brief Step mutating individuals.
+     * \brief Step mutating individuals, with the generator found in the data (see CreateGeneratorStep).
      */
     class MutateStep : public Module {
         protected:
@@ -22,8 +22,8 @@ namespace Evolution {
             /// Mutator applied to the individuals.
             std::shared_ptr<const Mutation::Mutator> mutator;
 
-            /// Generator of the genotypes values.
-            std::shared_ptr<const GraphBased::GenotypeGenerator> generator;
+            /// Key of the generator of the genotypes values.
+            Key<GraphBased::GenotypeGenerator> generator;
 
             /// Maximum number of threads used to mutate.
             size_t nbThreads;
@@ -34,12 +34,12 @@ namespace Evolution {
              *
              * \param[in] individuals name of the mutated individuals, a list of mutable individuals (e.g. offspring).
              * \param[in] mutator mutator applied to the individuals.
-             * \param[in] generator generator of the genotypes values.
+             * \param[in] generator key of the generator of the genotypes values.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the mutator or the generator is null.
+             * \throw std::runtime_error if the mutator is null.
              */
-            MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator, std::shared_ptr<const GraphBased::GenotypeGenerator> generator,
+            MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator,
                        size_t nbThreads = 1, std::string name = "Mutate");
 
             /// Return the name of the mutated individuals.

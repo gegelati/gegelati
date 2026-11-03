@@ -527,9 +527,9 @@ TEST_F(EvolutionAlgorithmTest, originTPGSettingsAreChecked) {
         return names;
     };
     EXPECT_EQ(stepNames(*root->getInitialization()),
-        (std::vector<std::string>{"CreateArchive", "InitPopulation", "InitialEvaluation", "TrainingFitness", "ProtectAggregated", "UpdateArchive"}));
+        (std::vector<std::string>{"CreateArchive", "UpdateGenerator", "InitPopulation", "InitialEvaluation", "TrainingFitness", "ProtectAggregated", "UpdateArchive"}));
     EXPECT_EQ(stepNames(*root),
-        (std::vector<std::string>{"ParentSelection", "Reproduction", "Mutation", "TrainingEvaluation", "TrainingFitness", "SurvivorSelection",
+        (std::vector<std::string>{"ParentSelection", "Reproduction", "UpdateGenerator", "Mutation", "TrainingEvaluation", "TrainingFitness", "SurvivorSelection",
                                   "ProtectAggregated", "UpdateArchive"}));
     root->resume(state, 3);
 

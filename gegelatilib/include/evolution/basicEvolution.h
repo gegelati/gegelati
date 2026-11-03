@@ -80,6 +80,9 @@ namespace Evolution {
             /// Data: the fitness of the validation.
             std::string validationFitness = "validationFitness";
 
+            /// Data: the generator of the genotypes, created by CreateGeneratorStep and read by the steps creating and mutating the population.
+            std::string generator = "generator";
+
             /// Module of the evolution, holding the steps of a generation and the initialization.
             std::string evolution = "Evolution";
 
@@ -118,6 +121,9 @@ namespace Evolution {
 
             /// Step computing the validation fitness.
             std::string validationFitnessStep = "ValidationFitness";
+
+            /// Step creating the generator of the genotypes.
+            std::string createGeneratorStep = "CreateGenerator";
         };
 
         /**
@@ -134,7 +140,7 @@ namespace Evolution {
             explicit Keys(const Names& names)
                 : individuals(names.population), parents(names.parents), offspring(names.offspring), trainingMetrics(names.trainingMetrics),
                   validationMetrics(names.validationMetrics), trainingFitness(names.trainingFitness), parentFitness(names.parentFitness),
-                  validationFitness(names.validationFitness)
+                  validationFitness(names.validationFitness), generator(names.generator)
             {
             }
 
@@ -161,6 +167,9 @@ namespace Evolution {
 
             /// Fitness of the validation.
             Key<std::map<uint64_t, double>> validationFitness;
+
+            /// Generator of the genotypes.
+            Key<GraphBased::GenotypeGenerator> generator;
         };
 
         /// Representation of the evolved individuals, required.
@@ -208,8 +217,8 @@ namespace Evolution {
         /// Mutator of the offspring, PointMutator(0.2, 0.5, 0.5) if null.
         std::shared_ptr<Mutation::Mutator> mutation = nullptr;
 
-        /// Generator of the genotypes, the naive generator of the constraint of the representation if null.
-        std::shared_ptr<const GraphBased::GenotypeGenerator> generator = nullptr;
+        /// Generator of the genotypes, the naive generator of the constraint of the representation if null. It is created once by the first step of the initialization.
+        std::shared_ptr<GraphBased::GenotypeGenerator> generator = nullptr;
 
         /// Metrics measured during the evaluations in addition to the one of the fitness. Each evaluation step uses an empty clone.
         std::vector<std::shared_ptr<const Metrics::Metric>> metrics;

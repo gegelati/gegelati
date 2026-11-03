@@ -303,30 +303,17 @@ TEST_F(TPGStepsTest, cachedOutputsAreClearedWithTheGenotype)
     EXPECT_EQ(member->getCachedOutput(&input), nullptr) << "Outputs of the previous genotype are not valid anymore";
 }
 
-TEST_F(TPGStepsTest, vertexSteps)
+TEST_F(TPGStepsTest, mutateVerticesStep)
 {
-    const std::vector<Dimensions::Requirement> inputs{Dimensions::Requirement(Data::DataType::type<double>())};
-    auto tpg = std::make_shared<Representations::TPG>(inputs, 3, 2, 10);
-    auto memberRep = std::make_shared<Representations::FakeRepresentation>(inputs, Dimensions::Requirement(Data::DataType::type<double>()));
     auto transfer = std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
-    auto memberMutator = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     const Evolution::BasicEvolution::Keys vertices(namesOf("Vertices"));
     const auto offspring = vertices.offspring;
-    const auto archive = archiveKey;
+    const Evolution::Key<GraphBased::GenotypeGenerator> generatorKey("VertexGenerator");
 
-    // The vertices are created from the archive if it exists, so it is not required.
-    Evolution::InitVerticesStep init(vertices.individuals, tpg, 5, transfer, memberRep, memberMutator, archive);
-    EXPECT_EQ(init.name(), "InitVertices");
-    EXPECT_TRUE(init.requiredData().empty());
-    EXPECT_EQ(init.providedData(), (std::set<std::string>{vertices.individuals.name()}));
-    EXPECT_THROW(Evolution::InitVerticesStep(roots.individuals, std::make_shared<Representations::FakeRepresentation>(), 3, transfer, memberRep, memberMutator, archive), std::runtime_error) << "The roots are not TPG vertices";
-    EXPECT_THROW(Evolution::InitVerticesStep(vertices.individuals, tpg, 5, transfer, nullptr, memberMutator, archive), std::runtime_error);
-
-    // Mutated vertices transfer the nodes of the roots.
-    Evolution::MutateVerticesStep mutate(offspring, vertices.individuals, archive, tpg, transfer, memberRep, memberMutator, 2);
+    // Mutated vertices transfer the nodes of the roots, with the generator found in the data.
+    Evolution::MutateVerticesStep mutate(offspring, vertices.individuals, generatorKey, transfer, 2);
     EXPECT_EQ(mutate.name(), "MutateVertices");
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name(), vertices.individuals.name()}));
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name(), vertices.individuals.name(), generatorKey.name()}));
     EXPECT_TRUE(mutate.providedData().empty()) << "Vertices are mutated in place";
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, archive, nullptr, transfer, memberRep, memberMutator), std::runtime_error);
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, archive, tpg, nullptr, memberRep, memberMutator), std::runtime_error);
+    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, generatorKey, nullptr), std::runtime_error);
 }

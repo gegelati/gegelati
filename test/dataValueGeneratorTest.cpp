@@ -78,8 +78,11 @@ TEST(DataValueGeneratorTest, SamplesOnlyValuesFromList)
             << "Generated value should be one of the configured values.";
     }
 
+    // The generator has its own copy of the values.
     values.clear();
-    ASSERT_THROW(generator.initialize(rng), std::runtime_error) << "should fail to sampled empty list";
+    EXPECT_NO_THROW(generator.initialize(rng)) << "the generator does not depend on the list it was built from";
+    const std::vector<std::string> empty;
+    ASSERT_THROW(Dimensions::ListUniformGenerator<std::string>(empty).initialize(rng), std::runtime_error) << "should fail to sampled empty list";
 }
 
 TEST(DataValueGeneratorTest, CanSampleFromSingleValueList)

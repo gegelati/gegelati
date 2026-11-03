@@ -17,6 +17,7 @@ inline Evolution::BasicEvolution::Names namesOf(const std::string& population)
     names.trainingFitness = population + ".trainingFitness";
     names.parentFitness = population + ".parentFitness";
     names.validationFitness = population + ".validationFitness";
+    names.generator = population + ".generator";
     names.evolution = population;
     return names;
 }
