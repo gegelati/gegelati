@@ -5,14 +5,14 @@
 #include <utility>
 
 #include "evaluation/parallelEvaluator.h"
+#include "evaluation/predictionProblem.h"
+#include "evaluation/reinforcementProblem.h"
 #include "evolution/steps/assignFitnessStep.h"
 #include "evolution/steps/evaluateStep.h"
 #include "evolution/steps/initPopulationStep.h"
 #include "evolution/steps/mutateStep.h"
 #include "evolution/steps/reproduceStep.h"
 #include "evolution/steps/selectStep.h"
-#include "evaluation/predictionProblem.h"
-#include "evaluation/reinforcementProblem.h"
 #include "fitnessAssignment/defaultAssigner.h"
 #include "metrics/predictionMetric.h"
 #include "metrics/rewardsMetric.h"
@@ -35,41 +35,38 @@ namespace {
     }
 }
 
-Evolution::Module Evolution::BasicEvolution::buildModule() const
-{
-    Module module(this->seed);
-    this->addTo(module);
-    return module;
-}
-
-void Evolution::BasicEvolution::addTo(Module& module) const
+std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
 {
     this->checkSettings();
-    const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
+
+    // Step 1: from the settings, create what the modules need.
+    const Keys keys(this->names);
     const auto [metricTemplate, fitnessMetricHash] = this->makeMetrics(*this->problem);
-    const std::shared_ptr<Mutation::Mutator> usedMutation =
+    const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
+    const std::shared_ptr<Mutation::Mutator> mutator =
         (this->mutation != nullptr) ? this->mutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     const std::shared_ptr<const GraphBased::GenotypeGenerator> generator(this->representation->getGenotypeGenerator().cloneUniquePtr());
 
-    const std::shared_ptr<const Population> population = module.addPopulation(this->representation, this->sizePopulation, this->populationName);
-    const std::string individuals = population->individuals();
-    const std::string offspring = population->data(this->offspringName);
-    const std::string trainingMetrics = population->data(this->trainingMetricsName);
+    // Step 2: build the modules. The initialization creates and evaluates the population...
+    auto initModule = std::make_shared<Module>(this->names.initialization);
+    initModule->add(std::make_shared<InitPopulationStep>(keys.individuals, this->representation, this->sizePopulation, mutator, generator, this->names.initPopulationStep));
+    initModule->add(std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals}, keys.trainingMetrics, this->problem,
+                                             evaluator, metricTemplate, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
+    this->addFitnessSteps(*initModule, keys, fitnessMetricHash);
 
-    // Initialization.
-    module.addInitStep(std::make_shared<InitPopulationStep>(population, usedMutation, generator));
-    module.addInitStep(std::make_shared<EvaluateStep>(std::vector<std::string>{individuals}, trainingMetrics, this->problem, evaluator, metricTemplate,
-                                                      this->nbTrainingIterations, Evaluation::Mode::TRAINING, "InitialEvaluation"));
-    this->addFitnessSteps(module, *population, fitnessMetricHash, true);
+    // ... then a generation selects parents, creates and mutates the offspring, evaluates them and keeps the best.
+    auto evolutionModule = std::make_shared<Module>(this->names.evolution);
+    this->addReproductionSteps(*evolutionModule, keys);
+    evolutionModule->add(std::make_shared<MutateStep>(keys.offspring, mutator, generator, this->nbThreads, this->names.mutationStep));
+    evolutionModule->add(std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals, keys.offspring},
+                                                   keys.trainingMetrics, this->problem, evaluator, metricTemplate, this->nbTrainingIterations,
+                                                   Evaluation::Mode::TRAINING, this->names.trainingEvaluationStep));
+    this->addFitnessSteps(*evolutionModule, keys, fitnessMetricHash);
+    this->addSurvivalStep(*evolutionModule, keys);
+    this->addValidationSteps(*evolutionModule, keys, evaluator);
 
-    // Generation.
-    this->addReproductionSteps(module, *population);
-    module.addStep(std::make_shared<MutateStep>(offspring, usedMutation, generator, this->nbThreads, "Mutation"));
-    module.addStep(std::make_shared<EvaluateStep>(std::vector<std::string>{individuals, offspring}, trainingMetrics, this->problem, evaluator, metricTemplate,
-                                                  this->nbTrainingIterations, Evaluation::Mode::TRAINING, "TrainingEvaluation"));
-    this->addFitnessSteps(module, *population, fitnessMetricHash, false);
-    this->addSurvivalStep(module, *population);
-    this->addValidationSteps(module, *population, evaluator);
+    evolutionModule->setInitialization(initModule);
+    return evolutionModule;
 }
 
 void Evolution::BasicEvolution::checkSettings() const
@@ -123,68 +120,54 @@ std::shared_ptr<FitnessAssignment::Assigner> Evolution::BasicEvolution::usedAssi
     return (this->assigner != nullptr) ? this->assigner : std::make_shared<FitnessAssignment::DefaultAssigner>();
 }
 
-void Evolution::BasicEvolution::addFitnessSteps(Module& module, const Population& population, uint64_t metricHash, bool atInitialization) const
+void Evolution::BasicEvolution::addFitnessSteps(Module& step, const Keys& keys, uint64_t metricHash) const
 {
-    std::vector<std::shared_ptr<Step>> steps;
-    steps.push_back(std::make_shared<AssignFitnessStep>(
-        population.data(this->trainingMetricsName),
-        population.data(this->trainingFitnessName),
-        this->usedAssigner(),
-        metricHash,
-        "TrainingFitness"));
+    step.add(std::make_shared<AssignFitnessStep>(keys.trainingMetrics, keys.trainingFitness, this->usedAssigner(), metricHash,
+                                                     this->names.trainingFitnessStep));
     // Parents are selected with their own fitness, computed for the initial population and at each generation.
     if(this->parentAssigner != nullptr) {
-        steps.push_back(
-            std::make_shared<AssignFitnessStep>(
-                population.data(this->trainingMetricsName), population.data(this->parentFitnessName), this->parentAssigner, metricHash, "ParentFitness"));
-    }
-
-    for(const std::shared_ptr<Step>& step: steps) {
-        if(atInitialization) {
-            module.addInitStep(step);
-        } else {
-            module.addStep(step);
-        }
+        step.add(std::make_shared<AssignFitnessStep>(keys.trainingMetrics, keys.parentFitness, this->parentAssigner, metricHash,
+                                                         this->names.parentFitnessStep));
     }
 }
 
-void Evolution::BasicEvolution::addReproductionSteps(Module& module, const Population& population) const
+void Evolution::BasicEvolution::addReproductionSteps(Module& step, const Keys& keys) const
 {
     const std::shared_ptr<Selection::Selector> selector =
         (this->parentSelection != nullptr) ? this->parentSelection : std::make_shared<Selection::RandomSelector>(true);
     const std::shared_ptr<Reproduction::Reproducer> reproducer =
         (this->breeder != nullptr) ? this->breeder : std::make_shared<Reproduction::Replicator>();
-    const std::string parents = population.data(this->parentsName);
+    const auto& fitness = (this->parentAssigner != nullptr) ? keys.parentFitness : keys.trainingFitness;
 
-    module.addStep(std::make_shared<SelectStep>(std::vector<std::string>{population.individuals()},
-                                                population.data((this->parentAssigner != nullptr) ? this->parentFitnessName : this->trainingFitnessName),
-                                                selector, this->nbOffspring, parents, false, "ParentSelection"));
-    module.addStep(std::make_shared<ReproduceStep>(parents, reproducer, this->nbOffspring, population.data(this->offspringName), "Reproduction"));
+    step.add(std::make_shared<SelectStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals}, fitness, selector,
+                                              this->nbOffspring, keys.parents, false, this->names.parentSelectionStep));
+    step.add(std::make_shared<ReproduceStep>(keys.parents, reproducer, this->nbOffspring, keys.offspring, this->names.reproductionStep));
 }
 
-void Evolution::BasicEvolution::addSurvivalStep(Module& module, const Population& population) const
+void Evolution::BasicEvolution::addSurvivalStep(Module& step, const Keys& keys) const
 {
     const std::shared_ptr<Selection::Selector> selector =
         (this->survivingSelection != nullptr) ? this->survivingSelection : std::make_shared<Selection::TruncationSelector>();
-    module.addStep(std::make_shared<SelectStep>(std::vector<std::string>{population.individuals(), population.data(this->offspringName)}, population.data(this->trainingFitnessName),
-                                                selector, this->sizePopulation, population.individuals(), true, "SurvivorSelection"));
+    step.add(std::make_shared<SelectStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals, keys.offspring},
+                                              keys.trainingFitness, selector, this->sizePopulation, keys.individuals, true, this->names.survivorSelectionStep));
 }
 
-void Evolution::BasicEvolution::addValidationSteps(Module& module, const Population& population, std::shared_ptr<Evaluation::Evaluator> evaluator) const
+void Evolution::BasicEvolution::addValidationSteps(Module& step, const Keys& keys, std::shared_ptr<Evaluation::Evaluator> evaluator) const
 {
     if(this->nbValidationIterations == 0) {
         return;
     }
     const std::shared_ptr<Evaluation::Problem> evaluatedProblem = (this->validationProblem != nullptr) ? this->validationProblem : this->problem;
     const auto [metricTemplate, metricHash] = this->makeMetrics(*evaluatedProblem);
-    const std::string validationMetrics = population.data(this->validationMetricsName);
 
-    auto evaluate = module.addStep(std::make_shared<EvaluateStep>(std::vector<std::string>{population.individuals()}, validationMetrics, evaluatedProblem,
-                                                                  std::move(evaluator), metricTemplate, this->nbValidationIterations,
-                                                                  Evaluation::Mode::VALIDATION, "ValidationEvaluation"));
-    auto assign = module.addStep(std::make_shared<AssignFitnessStep>(validationMetrics, population.data(this->validationFitnessName),
-                                                                     (this->validationAssigner != nullptr) ? this->validationAssigner : this->usedAssigner(),
-                                                                     metricHash, "ValidationFitness"));
+    auto evaluate = std::make_shared<EvaluateStep>(std::vector<Key<std::vector<std::shared_ptr<Individual>>>>{keys.individuals},
+                                                   keys.validationMetrics, evaluatedProblem, std::move(evaluator), metricTemplate,
+                                                   this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->names.validationEvaluationStep);
+    auto assign = std::make_shared<AssignFitnessStep>(keys.validationMetrics, keys.validationFitness,
+                                                      (this->validationAssigner != nullptr) ? this->validationAssigner : this->usedAssigner(), metricHash,
+                                                      this->names.validationFitnessStep);
     evaluate->setPeriod(this->validationPeriod);
     assign->setPeriod(this->validationPeriod);
+    step.add(evaluate);
+    step.add(assign);
 }

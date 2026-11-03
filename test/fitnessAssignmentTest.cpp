@@ -30,7 +30,7 @@ TEST(FitnessAssignmentTest, assignFitness)
 {
     CounterReset::counterReset();
     FitnessAssignment::DefaultAssigner assigner;
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);

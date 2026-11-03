@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 
-#include "evolution/step.h"
+#include "evolution/module.h"
 #include "reproduction/reproducer.h"
 
 namespace Evolution {
@@ -13,10 +13,10 @@ namespace Evolution {
     /**
      * \brief Step creating offspring from parents.
      */
-    class ReproduceStep : public Step {
+    class ReproduceStep : public Module {
         protected:
             /// Name of the parents.
-            std::string parents;
+            Key<std::vector<std::shared_ptr<Individual>>> parents;
 
             /// Reproducer creating the offspring.
             std::shared_ptr<const Reproduction::Reproducer> reproducer;
@@ -25,7 +25,7 @@ namespace Evolution {
             size_t nbOffspring;
 
             /// Name of the created offspring.
-            std::string offspring;
+            Key<std::vector<std::shared_ptr<Individual>>> offspring;
 
         public:
             /**
@@ -37,18 +37,18 @@ namespace Evolution {
              * \param[in] offspring name of the created offspring, a list of mutable individuals.
              * \param[in] name name of the step.
              */
-            ReproduceStep(std::string parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, std::string offspring,
+            ReproduceStep(Key<std::vector<std::shared_ptr<Individual>>> parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, Key<std::vector<std::shared_ptr<Individual>>> offspring,
                           std::string name = "Reproduce")
-                : Step(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)} {}
+                : Module(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)} {}
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

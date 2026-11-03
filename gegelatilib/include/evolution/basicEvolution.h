@@ -7,18 +7,18 @@
 #include <vector>
 
 #include "evaluation/evaluator.h"
+#include "evolution/key.h"
 #include "evolution/module.h"
-#include "evolution/population.h"
 #include "fitnessAssignment/assigner.h"
+#include "metrics/metric.h"
 #include "mutation/mutator.h"
 #include "reproduction/reproducer.h"
 #include "selection/selector.h"
-#include "metrics/metric.h"
 
 namespace Evolution {
 
     /**
-     * \brief Settings of the classic evolutionary flow of one population, building the corresponding module.
+     * \brief Settings of the classic evolutionary flow of one population, building the corresponding steps.
      *
      * \code
      * Evolution::BasicEvolution basic;
@@ -26,20 +26,142 @@ namespace Evolution {
      * basic.problem = problem;
      * basic.sizePopulation = 100;
      * basic.nbOffspring = 100;
-     * Evolution::Module module = basic.buildModule();
-     * auto mutation = module.generationSteps().find<MutateStep>("Mutation");
+     * std::shared_ptr<Evolution::Module> population = basic.build();
+     * auto mutation = population->find<MutateStep>("Mutation");
+     * Evolution::EvolutionData data = population->evolve(100, seed);
      * \endcode
      *
      * Initialization steps: InitPopulation, InitialEvaluation, TrainingFitness (and ParentFitness).
      * Generation steps: ParentSelection, Reproduction, Mutation, TrainingEvaluation, TrainingFitness (and ParentFitness),
      * SurvivorSelection, then ValidationEvaluation and ValidationFitness if validation iterations are requested.
-     * The data exchanged by the steps are data of the population, whose names are settings (e.g. trainingFitnessName),
-     * so other steps can read them: population.data(basic.trainingFitnessName).
+     * The steps of the generation are a module named by names.evolution, whose initialization is the initialization steps
+     * (see build). It can be edited, repeated or run every few generations, and added to the steps of other evolutions.
      *
      * Null components are replaced by the defaults: random parent selection, truncation survival,
      * replication, point mutation, and the average of the rewards (or the accuracy) as fitness.
      */
     struct BasicEvolution {
+        /**
+         * \brief Names of the data and of the steps of the evolution, all of them changeable before build.
+         *
+         * The data are identified by their names (see Key), the steps are labelled by theirs (summaries, Module::find).
+         * The default names are generic ("Population", "Parents"...). To run several evolutions together, give each one its own
+         * names, and change any of them as needed:
+         * \code
+         * second.names.population = "SecondPopulation";
+         * second.names.parents = "SecondParents";
+         * second.names.mutationStep = "Variation";
+         * \endcode
+         */
+        struct Names {
+
+            /// Data: the individuals of the population.
+            std::string population = "Population";
+
+            /// Data: the parents selected at each generation.
+            std::string parents = "Parents";
+
+            /// Data: the offspring created at each generation.
+            std::string offspring = "Offspring";
+
+            /// Data: the metrics of the training evaluations.
+            std::string trainingMetrics = "trainingMetrics";
+
+            /// Data: the metrics of the validation evaluations.
+            std::string validationMetrics = "validationMetrics";
+
+            /// Data: the fitness of the training.
+            std::string trainingFitness = "trainingFitness";
+
+            /// Data: the fitness of the parent selection, used when a parentAssigner is set.
+            std::string parentFitness = "parentFitness";
+
+            /// Data: the fitness of the validation.
+            std::string validationFitness = "validationFitness";
+
+            /// Module of the evolution, holding the steps of a generation and the initialization.
+            std::string evolution = "Evolution";
+
+            /// Module holding the steps of the initialization.
+            std::string initialization = "Initialization";
+
+            /// Step creating the individuals.
+            std::string initPopulationStep = "InitPopulation";
+
+            /// Step evaluating the individuals created.
+            std::string initialEvaluationStep = "InitialEvaluation";
+
+            /// Step computing the training fitness.
+            std::string trainingFitnessStep = "TrainingFitness";
+
+            /// Step computing the fitness of the parent selection.
+            std::string parentFitnessStep = "ParentFitness";
+
+            /// Step selecting the parents.
+            std::string parentSelectionStep = "ParentSelection";
+
+            /// Step creating the offspring.
+            std::string reproductionStep = "Reproduction";
+
+            /// Step mutating the offspring.
+            std::string mutationStep = "Mutation";
+
+            /// Step evaluating the individuals and the offspring in training mode.
+            std::string trainingEvaluationStep = "TrainingEvaluation";
+
+            /// Step selecting the survivors.
+            std::string survivorSelectionStep = "SurvivorSelection";
+
+            /// Step evaluating the individuals in validation mode.
+            std::string validationEvaluationStep = "ValidationEvaluation";
+
+            /// Step computing the validation fitness.
+            std::string validationFitnessStep = "ValidationFitness";
+        };
+
+        /**
+         * \brief Keys of the data exchanged by the steps of the evolution, the names being typed.
+         *
+         * build() creates them from the names of the settings. Create them the same way to read the data of the
+         * evolution once it ran, or from another step.
+         */
+        struct Keys {
+            /// Create the keys of the default names.
+            Keys() : Keys(Names()) {}
+
+            /// Create the keys of some names.
+            explicit Keys(const Names& names)
+                : individuals(names.population), parents(names.parents), offspring(names.offspring), trainingMetrics(names.trainingMetrics),
+                  validationMetrics(names.validationMetrics), trainingFitness(names.trainingFitness), parentFitness(names.parentFitness),
+                  validationFitness(names.validationFitness)
+            {
+            }
+
+            /// Individuals of the population.
+            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+
+            /// Parents selected at each generation.
+            Key<std::vector<std::shared_ptr<Individual>>> parents;
+
+            /// Offspring created at each generation.
+            Key<std::vector<std::shared_ptr<Individual>>> offspring;
+
+            /// Metrics of the training evaluations.
+            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> trainingMetrics;
+
+            /// Metrics of the validation evaluations.
+            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> validationMetrics;
+
+            /// Fitness of the training.
+            Key<std::map<uint64_t, double>> trainingFitness;
+
+            /// Fitness of the parent selection when a parentAssigner is set.
+            Key<std::map<uint64_t, double>> parentFitness;
+
+            /// Fitness of the validation.
+            Key<std::map<uint64_t, double>> validationFitness;
+        };
+
         /// Representation of the evolved individuals, required.
         std::shared_ptr<const Representations::Representation> representation = nullptr;
 
@@ -55,37 +177,13 @@ namespace Evolution {
         /// Number of evaluations of each individual in training mode.
         size_t nbTrainingIterations = 1;
 
-        /// Name of the population.
-        std::string populationName = "Population";
-
-        /// Name of the selected parents, a data of the population.
-        std::string parentsName = "parents";
-
-        /// Name of the offspring, a data of the population.
-        std::string offspringName = "offspring";
-
-        /// Name of the metrics of the training evaluations, a data of the population.
-        std::string trainingMetricsName = "trainingMetrics";
-
-        /// Name of the fitness of the training, a data of the population.
-        std::string trainingFitnessName = "trainingFitness";
-
-        /// Name of the fitness of the parent selection when a parentAssigner is set, a data of the population.
-        std::string parentFitnessName = "parentFitness";
-
-        /// Name of the metrics of the validation evaluations, a data of the population.
-        std::string validationMetricsName = "validationMetrics";
-
-        /// Name of the fitness of the validation, a data of the population.
-        std::string validationFitnessName = "validationFitness";
-
-        /// Seed of the module built by buildModule.
-        uint64_t seed = 0;
+        /// Names of the data and of the steps, changeable before build.
+        Names names;
 
         /// Number of evaluations of each individual in validation mode, zero to disable the validation.
         size_t nbValidationIterations = 0;
 
-        /// Number of generations between two validations (see EvolutionState::isUpToDate).
+        /// Number of generations between two validations (see EvolutionData::isUpToDate).
         size_t validationPeriod = 1;
 
         /// Number of threads authorized.
@@ -122,22 +220,18 @@ namespace Evolution {
         virtual ~BasicEvolution() = default;
 
         /**
-         * \brief Build a module with the population and the steps of the evolution.
+         * \brief Build the module of the evolution: the steps of a generation, with the initialization.
          *
-         * \return the module, with the seed of the settings.
-         * \throw std::runtime_error if a required setting is missing or the settings are not compatible (see addTo).
-         */
-        Module buildModule() const;
-
-        /**
-         * \brief Add the population and the steps of the evolution to a module, e.g. next to other populations.
+         * It goes in two steps. First the settings are read to create what the modules need: the keys of the data
+         * (from the names), the metrics, the evaluator and the default components. Then the modules are
+         * built: the initialization steps, and the steps of a generation which has them as its initialization.
+         * The result can be edited, evolved, or added to the modules of other evolutions (see Module::evolve).
          *
-         * \param[in,out] module the module receiving the population and the steps.
+         * \return the module, named by names.evolution.
          * \throw std::runtime_error if the representation or the problem is null, if a size is zero, if they are not compatible,
-         * if a problem is neither a prediction nor a reinforcement problem, if the validation period is zero,
-         * or if the module already has a population with the same name.
+         * if a problem is neither a prediction nor a reinforcement problem, or if the validation period is zero.
          */
-        virtual void addTo(Module& module) const;
+        virtual std::shared_ptr<Module> build() const;
 
       protected:
         /// Throw if a required setting is missing or the settings are not compatible.
@@ -155,37 +249,36 @@ namespace Evolution {
         /**
          * \brief Add the steps computing the training fitness (and the parent fitness) from the training metrics.
          *
-         * \param[in,out] module the module receiving the steps.
-         * \param[in] population the evolved population.
+         * \param[in,out] step the step receiving the steps.
+         * \param[in] keys the keys of the data of the population.
          * \param[in] metricHash hash of the metric from which the fitness is computed.
-         * \param[in] atInitialization indicates if the steps are added to the initialization, or to each generation.
          */
-        void addFitnessSteps(Module& module, const Population& population, uint64_t metricHash, bool atInitialization) const;
+        void addFitnessSteps(Module& step, const Keys& keys, uint64_t metricHash) const;
 
         /**
-         * \brief Add the steps selecting the parents and reproducing them, at the end of each generation.
+         * \brief Add the steps selecting the parents and reproducing them.
          *
-         * \param[in,out] module the module receiving the steps.
-         * \param[in] population the evolved population.
+         * \param[in,out] step the step receiving the steps.
+         * \param[in] keys the keys of the data of the population.
          */
-        void addReproductionSteps(Module& module, const Population& population) const;
+        void addReproductionSteps(Module& step, const Keys& keys) const;
 
         /**
-         * \brief Add the step selecting the survivors among the population and its offspring, at the end of each generation.
+         * \brief Add the step selecting the survivors among the population and its offspring.
          *
-         * \param[in,out] module the module receiving the step.
-         * \param[in] population the evolved population.
+         * \param[in,out] step the step receiving the step.
+         * \param[in] keys the keys of the data of the population.
          */
-        void addSurvivalStep(Module& module, const Population& population) const;
+        void addSurvivalStep(Module& step, const Keys& keys) const;
 
         /**
-         * \brief Add the steps of the validation, if requested, at the end of each generation.
+         * \brief Add the steps of the validation, if requested.
          *
-         * \param[in,out] module the module receiving the steps.
-         * \param[in] population the evolved population.
+         * \param[in,out] step the step receiving the steps.
+         * \param[in] keys the keys of the data of the population.
          * \param[in] evaluator evaluator running the evaluations.
          */
-        void addValidationSteps(Module& module, const Population& population, std::shared_ptr<Evaluation::Evaluator> evaluator) const;
+        void addValidationSteps(Module& step, const Keys& keys, std::shared_ptr<Evaluation::Evaluator> evaluator) const;
     };
 
 }; // namespace Evolution

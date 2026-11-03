@@ -1,91 +1,322 @@
 #include "evolution/module.h"
 
-#include <chrono>
-#include <stdexcept>
+#include <algorithm>
+#include <atomic>
+#include <sstream>
 
-std::shared_ptr<const Evolution::Population> Evolution::Module::addPopulation(std::shared_ptr<const Representations::Representation> representation, size_t size, std::string name)
+#include "util/stopwatch.h"
+
+namespace {
+    std::string listNames(const std::set<std::string>& names)
+    {
+        std::string result;
+        for(const std::string& name: names) {
+            result += (result.empty() ? "" : ", ") + name;
+        }
+        return result;
+    }
+
+    // Text of a module in the tree: name, parameters, period and repetitions.
+    std::string label(const Evolution::Module& module)
+    {
+        std::string details = module.details();
+        if(module.getPeriod() > 1) {
+            details += (details.empty() ? "" : ", ") + std::string("every ") + std::to_string(module.getPeriod()) + " generations";
+        }
+        return module.name() + (details.empty() ? "" : " (" + details + ")");
+    }
+
+    // Data required and provided by a leaf, written next to it in the tree.
+    std::string dataText(const Evolution::Module& module)
+    {
+        std::string text;
+        if(!module.requiredData().empty()) {
+            text += "requires: " + listNames(module.requiredData());
+        }
+        if(!module.providedData().empty()) {
+            text += std::string(text.empty() ? "" : " | ") + "provides: " + listNames(module.providedData());
+        }
+        return text;
+    }
+}
+
+Evolution::Module::Module(std::string name) : stepName{std::move(name)}
 {
-    for(const std::shared_ptr<const Population>& population: this->populations) {
-        if(population->name() == name) {
-            throw std::runtime_error("Evolution::Module::addPopulation: a population is already named '" + name + "'");
+    static std::atomic<uint64_t> nbSteps{0};
+    this->stepId = nbSteps++;
+}
+
+void Evolution::Module::setPeriod(size_t period)
+{
+    if(period == 0) {
+        throw std::runtime_error("Evolution::Module::setPeriod: the period must be positive");
+    }
+    this->period = period;
+}
+
+Evolution::Module* Evolution::Module::ownerOf(const std::shared_ptr<Module>& step, size_t& index)
+{
+    for(size_t idx = 0; idx < this->steps.size(); idx++) {
+        if(this->steps.at(idx) == step) {
+            index = idx;
+            return this;
         }
     }
-    this->populations.push_back(std::make_shared<const Population>(std::move(representation), size, std::move(name)));
-    return this->populations.back();
+    for(const std::shared_ptr<Module>& nested: this->steps) {
+        if(Module* owner = nested->ownerOf(step, index)) {
+            return owner;
+        }
+    }
+    return nullptr;
 }
 
-void Evolution::Module::addStopCondition(std::function<bool(const EvolutionState&)> condition)
+Evolution::Module& Evolution::Module::checkedOwnerOf(const std::shared_ptr<Module>& step, size_t& index)
 {
-    this->stopConditions.push_back(std::move(condition));
+    Module* owner = this->ownerOf(step, index);
+    if(owner == nullptr) {
+        throw std::runtime_error("Evolution::Module: the step '" + (step == nullptr ? std::string("null") : step->name()) + "' is not in the step '"
+                                 + this->stepName + "'");
+    }
+    return *owner;
 }
 
-void Evolution::Module::runPipeline(const Pipeline& pipeline)
+std::shared_ptr<Evolution::Module> Evolution::Module::findStep(const std::string& name) const
 {
-    for(const std::shared_ptr<Step>& step: pipeline.getSteps()) {
-        if(!step->runsAt(this->evolutionState.generation)) {
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        if(step->name() == name) {
+            return step;
+        }
+    }
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        if(std::shared_ptr<Module> found = step->findStep(name)) {
+            return found;
+        }
+    }
+    return nullptr;
+}
+
+bool Evolution::Module::has(const std::string& name) const
+{
+    return this->findStep(name) != nullptr;
+}
+
+Evolution::Module& Evolution::Module::add(std::shared_ptr<Module> step)
+{
+    if(step == nullptr) {
+        throw std::runtime_error("Evolution::Module::add: cannot add a null step");
+    }
+    this->steps.push_back(std::move(step));
+    return *this;
+}
+
+Evolution::Module& Evolution::Module::insertBefore(const std::shared_ptr<Module>& position, std::shared_ptr<Module> step)
+{
+    if(step == nullptr) {
+        throw std::runtime_error("Evolution::Module::insertBefore: cannot insert a null step");
+    }
+    size_t index = 0;
+    Module& owner = this->checkedOwnerOf(position, index);
+    owner.steps.insert(owner.steps.begin() + index, std::move(step));
+    return *this;
+}
+
+Evolution::Module& Evolution::Module::insertAfter(const std::shared_ptr<Module>& position, std::shared_ptr<Module> step)
+{
+    if(step == nullptr) {
+        throw std::runtime_error("Evolution::Module::insertAfter: cannot insert a null step");
+    }
+    size_t index = 0;
+    Module& owner = this->checkedOwnerOf(position, index);
+    owner.steps.insert(owner.steps.begin() + index + 1, std::move(step));
+    return *this;
+}
+
+Evolution::Module& Evolution::Module::replace(const std::shared_ptr<Module>& replaced, std::shared_ptr<Module> step)
+{
+    if(step == nullptr) {
+        throw std::runtime_error("Evolution::Module::replace: cannot replace by a null step");
+    }
+    size_t index = 0;
+    Module& owner = this->checkedOwnerOf(replaced, index);
+    owner.steps.at(index) = std::move(step);
+    return *this;
+}
+
+Evolution::Module& Evolution::Module::remove(const std::shared_ptr<Module>& removed)
+{
+    size_t index = 0;
+    Module& owner = this->checkedOwnerOf(removed, index);
+    owner.steps.erase(owner.steps.begin() + index);
+    return *this;
+}
+
+std::set<std::string> Evolution::Module::requiredData() const
+{
+    std::set<std::string> required;
+    std::set<std::string> provided;
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        for(const std::string& name: step->requiredData()) {
+            if(provided.find(name) == provided.end()) {
+                required.insert(name);
+            }
+        }
+        for(const std::string& name: step->providedData()) {
+            provided.insert(name);
+        }
+    }
+    return required;
+}
+
+std::set<std::string> Evolution::Module::providedData() const
+{
+    std::set<std::string> provided;
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        for(const std::string& name: step->providedData()) {
+            provided.insert(name);
+        }
+    }
+    return provided;
+}
+
+void Evolution::Module::checkData(std::set<std::string>& available, const std::string& where) const
+{
+    if(!this->steps.empty()) {
+        for(const std::shared_ptr<Module>& step: this->steps) {
+            step->checkData(available, where);
+        }
+        return;
+    }
+    for(const std::string& name: this->requiredData()) {
+        if(available.find(name) == available.end()) {
+            throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' of the " + where + " requires " + name
+                                     + ", which no previous step provides");
+        }
+    }
+    for(const std::string& name: this->providedData()) {
+        available.insert(name);
+    }
+}
+
+void Evolution::Module::apply(EvolutionData& state)
+{
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        if(!step->runsAt(state.generation)) {
             continue;
         }
-        this->evolutionState.elapsedSeconds = this->stopwatch.elapsed();
-
-        const auto start = std::chrono::steady_clock::now();
-        step->apply(this->evolutionState);
-        const std::chrono::duration<double> duration = std::chrono::steady_clock::now() - start;
-
-        this->evolutionState.stepTimes.emplace_back(step->name(), duration.count());
+        const Stopwatch stopwatch;
+        step->apply(state);
+        step->lastDuration = stopwatch.elapsed();
     }
-    this->evolutionState.elapsedSeconds = this->stopwatch.elapsed();
 }
 
-void Evolution::Module::checkPipelines() const
+void Evolution::Module::initialize(EvolutionData& state)
 {
-    std::set<std::string> available;
-    this->initPipeline.checkData(available, "initialization");
-    this->generationPipeline.checkData(available, "generation");
+    if(state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
+        if(this->initialization != nullptr) {
+            const uint64_t generation = state.generation;
+            state.generation = EvolutionData::initGeneration;
+            this->initialization->apply(state);
+            state.generation = generation;
+        }
+        state.initializedSteps.insert(this->stepId);
+    }
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        step->initialize(state);
+    }
+}
+
+void Evolution::Module::checkInitialization(const EvolutionData& state, std::set<std::string>& available) const
+{
+    if(this->initialization != nullptr && state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
+        this->initialization->checkData(available, "initialization of '" + this->stepName + "'");
+    }
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        step->checkInitialization(state, available);
+    }
+}
+
+Evolution::EvolutionData Evolution::Module::evolve(size_t nbGenerations, uint64_t seed)
+{
+    EvolutionData data(seed);
+    this->resume(data, nbGenerations);
+    return data;
+}
+
+void Evolution::Module::resume(EvolutionData& state, size_t nbGenerations)
+{
+    std::set<std::string> available = state.dataNames();
+    this->checkInitialization(state, available);
+    this->checkData(available, "generations");
+
+    this->initialize(state);
+    for(size_t idx = 0; idx < nbGenerations; idx++) {
+        state.generation = state.nbGenerationsDone;
+        this->apply(state);
+        state.nbGenerationsDone++;
+    }
+}
+
+void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data) const
+{
+    const size_t nbItems = this->steps.size() + ((this->initialization != nullptr) ? 1 : 0);
+    size_t idxItem = 0;
+
+    // The initialization comes first, then the modules in their order of execution.
+    if(this->initialization != nullptr) {
+        const bool last = (++idxItem == nbItems);
+        std::string left = prefix + (last ? "`- " : "|- ") + "initialization";
+        if(data != nullptr) {
+            left += (data->initializedSteps.find(this->stepId) != data->initializedSteps.end()) ? " [done]" : " [pending]";
+        }
+        if(this->initialization->steps.empty()) {
+            rows.emplace_back(left + ": " + label(*this->initialization), dataText(*this->initialization));
+        } else {
+            rows.emplace_back(left, "");
+            this->initialization->collectRows(rows, prefix + (last ? "   " : "|  "), data);
+        }
+    }
+    for(const std::shared_ptr<Module>& step: this->steps) {
+        const bool last = (++idxItem == nbItems);
+        rows.emplace_back(prefix + (last ? "`- " : "|- ") + label(*step), step->steps.empty() ? dataText(*step) : "");
+        step->collectRows(rows, prefix + (last ? "   " : "|  "), data);
+    }
+}
+
+std::string Evolution::Module::summary(const EvolutionData* data) const
+{
+    std::vector<std::pair<std::string, std::string>> rows;
+    rows.emplace_back(label(*this), "");
+    this->collectRows(rows, "", data);
+
+    // Data of the leaves are aligned in a column.
+    size_t width = 0;
+    for(const auto& [left, right]: rows) {
+        if(!right.empty()) {
+            width = std::max(width, left.size());
+        }
+    }
+    width = std::min<size_t>(width, 70);
+
+    std::ostringstream result;
+    for(const auto& [left, right]: rows) {
+        result << left;
+        if(!right.empty()) {
+            result << std::string((left.size() < width) ? width - left.size() : 0, ' ') << "  " << right;
+        }
+        result << std::string(1, 10);
+    }
+    if(data != nullptr) {
+        result << std::string(1, 10) << data->summary();
+    }
+    return result.str();
 }
 
 std::string Evolution::Module::summary() const
 {
-    std::string populations = "Populations:\n";
-    for(const std::shared_ptr<const Population>& population: this->populations) {
-        populations += "  " + population->name() + " (" + std::to_string(population->getSize()) + " individuals)\n";
-    }
-    return populations + "Initialization steps:\n" + this->initPipeline.summary() + "Generation steps:\n" + this->generationPipeline.summary();
+    return this->summary(nullptr);
 }
 
-void Evolution::Module::evolve(size_t nbGenerations)
+std::string Evolution::Module::summary(const EvolutionData& data) const
 {
-    this->initialized = false;
-    this->checkPipelines();
-    this->stopwatch.reset();
-    this->evolutionState.reset(this->seed);
-    this->runPipeline(this->initPipeline);
-    this->initialized = true;
-
-    this->runGenerations(nbGenerations);
-}
-
-void Evolution::Module::resume(size_t nbGenerations)
-{
-    if(!this->initialized) {
-        throw std::runtime_error("Evolution::Module::resume: the evolution must be initialized first (see evolve)");
-    }
-    this->runGenerations(nbGenerations);
-}
-
-void Evolution::Module::runGenerations(size_t nbGenerations)
-{
-    for(size_t idx = 0; idx < nbGenerations; idx++) {
-        this->stopwatch.checkpointReset();
-
-        this->evolutionState.generation = this->evolutionState.nbGenerationsDone;
-        this->evolutionState.stepTimes.clear();
-        this->runPipeline(this->generationPipeline);
-        this->evolutionState.nbGenerationsDone++;
-
-        for(const std::function<bool(const EvolutionState&)>& condition: this->stopConditions) {
-            if(condition(this->evolutionState)) {
-                return;
-            }
-        }
-    }
+    return this->summary(&data);
 }

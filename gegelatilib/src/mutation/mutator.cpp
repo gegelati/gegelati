@@ -38,7 +38,7 @@ std::unique_ptr<GraphBased::Genotype> Mutation::Mutator::initRandomGenotype(cons
 
 std::vector<std::shared_ptr<Individual>> 
     Mutation::initIndividuals(
-        const Mutator& mutator, const Representations::Representation& representation, 
+        const Mutator& mutator, std::shared_ptr<const Representations::Representation> representation, 
         const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng)
 {
     std::vector<std::shared_ptr<Individual>> individuals;

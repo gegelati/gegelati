@@ -73,7 +73,7 @@ TEST(ReinforcementProblemTest, extractNoMetric)
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
     ASSERT_TRUE(indiv.isValid()) << "Individual should be valid";
@@ -89,7 +89,7 @@ TEST(ReinforcementProblemTest, extractOneMetric)
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -117,7 +117,7 @@ TEST(ReinforcementProblemTest, extractMultiMetric)
     std::shared_ptr<Evaluation::ReinforcementEnvironment> environment = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(environment);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -194,7 +194,7 @@ TEST(RewardsMetricTest, extract)
     Metrics::RewardsMetric metric;
 
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 

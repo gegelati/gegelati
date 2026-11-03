@@ -48,7 +48,7 @@ size_t Individual::getSize() const
 
 const Representations::Representation& Individual::getRepresentation() const
 {
-    return this->representation;
+    return *this->representation;
 }
 
 const GraphBased::Genotype& Individual::getGenotype() const
@@ -59,9 +59,9 @@ const GraphBased::Genotype& Individual::getGenotype() const
 void Individual::setGenotype(std::unique_ptr<GraphBased::Genotype> genotype)
 {
     // Introns can only be detected on a genotype valid for the representation.
-    const bool isGenotypeValid = this->representation.isValid(*genotype);
+    const bool isGenotypeValid = this->representation->isValid(*genotype);
     if(isGenotypeValid) {
-        this->representation.detectIntronNodes(*genotype);
+        this->representation->detectIntronNodes(*genotype);
     }
     this->genotype = std::move(genotype);
     this->valid = isGenotypeValid;
@@ -70,7 +70,7 @@ void Individual::setGenotype(std::unique_ptr<GraphBased::Genotype> genotype)
 
 void Individual::updateValidity()
 {
-    this->valid = this->representation.isValid(*this->genotype);
+    this->valid = this->representation->isValid(*this->genotype);
 }
        
 bool Individual::isValid() const
@@ -117,23 +117,23 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
 {
     // Individual need to be valid to be executed.
     if(!valid){
-        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getRepresentationName() + ")");
     }
     if(!inputSources.empty()) {
         if(const Data::DataValue* cached = this->getCachedOutput(inputSources.front().getPtr())) {
             return cached->clone();
         }
     }
-    return this->representation.execute(*this->genotype, inputSources);
+    return this->representation->execute(*this->genotype, inputSources);
 }
 
 Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const
 {
     // Individual need to be valid to be executed.
     if(!valid){
-        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation.getRepresentationName() + ")");
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getRepresentationName() + ")");
     }
-    return this->representation.execute(*this->genotype, inputSources);
+    return this->representation->execute(*this->genotype, inputSources);
 }
 
 bool operator<(const Individual& a, const Individual& b)

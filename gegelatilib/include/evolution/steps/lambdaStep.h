@@ -5,17 +5,17 @@
 #include <set>
 #include <string>
 
-#include "evolution/step.h"
+#include "evolution/module.h"
 
 namespace Evolution {
 
     /**
      * \brief Step running a user function, to add custom behaviors without writing a class.
      */
-    class LambdaStep : public Step {
+    class LambdaStep : public Module {
         protected:
             /// Function run by the step.
-            std::function<void(EvolutionState&)> function;
+            std::function<void(EvolutionData&)> function;
 
             /// Data required by the function.
             std::set<std::string> required;
@@ -32,16 +32,16 @@ namespace Evolution {
              * \param[in] required data required by the function.
              * \param[in] provided data filled or updated by the function.
              */
-            LambdaStep(std::string name, std::function<void(EvolutionState&)> function, std::set<std::string> required = {},
+            LambdaStep(std::string name, std::function<void(EvolutionData&)> function, std::set<std::string> required = {},
                        std::set<std::string> provided = {})
-                : Step(std::move(name)), function{std::move(function)}, required{std::move(required)}, provided{std::move(provided)} {}
+                : Module(std::move(name)), function{std::move(function)}, required{std::move(required)}, provided{std::move(provided)} {}
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

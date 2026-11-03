@@ -51,7 +51,7 @@
 class IndividualTest : public ::testing::Test
 {
   protected:
-    Representations::FakeRepresentation fakeRep;
+    std::shared_ptr<Representations::FakeRepresentation> fakeRep = std::make_shared<Representations::FakeRepresentation>();
     virtual void SetUp()
     {
         CounterReset::counterReset();

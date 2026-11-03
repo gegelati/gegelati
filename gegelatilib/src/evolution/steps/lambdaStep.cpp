@@ -10,7 +10,7 @@ std::set<std::string> Evolution::LambdaStep::providedData() const
     return this->provided;
 }
 
-void Evolution::LambdaStep::apply(EvolutionState& state)
+void Evolution::LambdaStep::apply(EvolutionData& state)
 {
     this->function(state);
 }

@@ -9,9 +9,9 @@
 std::set<std::string> Evolution::ExportStep::requiredData() const
 {
     if(this->bestFitness.has_value()) {
-        return {this->individuals, *this->bestFitness};
+        return {this->individuals.name(), this->bestFitness->name()};
     }
-    return {this->individuals};
+    return {this->individuals.name()};
 }
 
 std::string Evolution::ExportStep::details() const
@@ -19,9 +19,9 @@ std::string Evolution::ExportStep::details() const
     return this->filePath + (this->oneFilePerGeneration ? "<generation>" : "") + ".dot";
 }
 
-void Evolution::ExportStep::apply(EvolutionState& state)
+void Evolution::ExportStep::apply(EvolutionData& state)
 {
-    if(state.generation == EvolutionState::initGeneration) {
+    if(state.generation == EvolutionData::initGeneration) {
         return;
     }
 
@@ -33,8 +33,7 @@ void Evolution::ExportStep::apply(EvolutionState& state)
         }
         exported.push_back(best);
     } else {
-        const std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> individuals = state.get<std::vector<std::shared_ptr<const Individual>>>(this->individuals);
-        exported.insert(exported.end(), individuals->begin(), individuals->end());
+        exported = state.getIndividuals(this->individuals);
     }
 
     const std::string path = this->filePath + (this->oneFilePerGeneration ? std::to_string(state.generation) : "") + ".dot";

@@ -77,7 +77,7 @@ TEST(MetricTest, extractAfterExecution) {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -187,7 +187,7 @@ TEST(MetricMapTest, extract)
 
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -230,7 +230,7 @@ TEST(MetricMapTest, getMetrics)
 
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -263,7 +263,7 @@ TEST(MetricMapTest, getMetricsWrongType)
 
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -283,7 +283,7 @@ TEST(MetricMapTest, merge)
 
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -388,7 +388,7 @@ TEST(MetricMapTest, toString)
 
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 

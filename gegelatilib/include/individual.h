@@ -24,8 +24,8 @@ protected:
     /// \brief Genotype of the individual.
     std::unique_ptr<const GraphBased::Genotype> genotype;
 
-    /// @brief Representation of the individual.
-    const Representations::Representation& representation;
+    /// @brief Representation of the individual, shared by the individuals of a same population.
+    std::shared_ptr<const Representations::Representation> representation;
 
     /// Unique ID of the individual.
     uint64_t individualID;
@@ -68,11 +68,11 @@ public:
     /**
      * \brief Constructor for the Individual.
      * 
-     * \param[in] representation characterizing the individual
+     * \param[in] representation characterizing the individual, kept alive by the individual
      * \param[in] genotype the genotype set to the individual. Default is empty
      */
-    Individual(const Representations::Representation& representation, std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>()) 
-        : representation{representation}, individualID(incrementeCounter()) {
+    Individual(std::shared_ptr<const Representations::Representation> representation, std::unique_ptr<GraphBased::Genotype> genotype = std::make_unique<GraphBased::Genotype>()) 
+        : representation{std::move(representation)}, individualID(incrementeCounter()) {
             this->setGenotype(std::move(genotype));
             };
 

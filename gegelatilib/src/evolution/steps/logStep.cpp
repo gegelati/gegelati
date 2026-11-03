@@ -6,6 +6,8 @@
 #include <memory>
 #include <numeric>
 
+#include "evolution/steps/lambdaStep.h"
+
 namespace {
     struct FitnessStats {
         double min = std::nan("");
@@ -37,21 +39,24 @@ namespace {
 }
 
 
-Evolution::LogStep::LogStep(std::ostream& output, std::string individuals, std::vector<std::pair<std::string, std::string>> fitnesses, std::vector<Column> columns,
+Evolution::LogStep::LogStep(std::ostream& output, Key<std::vector<std::shared_ptr<Individual>>> individuals, std::vector<std::pair<std::string, Key<std::map<uint64_t, double>>>> fitnesses, std::vector<Column> columns,
                             std::string name)
-    : Step(std::move(name)), output{&output}, individuals{std::move(individuals)}, fitnesses{std::move(fitnesses)}, columns{std::move(columns)}
+    : Module(std::move(name)), output{&output}, individuals{std::move(individuals)}, fitnesses{std::move(fitnesses)}, columns{std::move(columns)}, stopwatch{std::make_shared<Stopwatch>()}
 {
+    // The times of the table start with the initialization of the step, whenever the evolution starts again.
+    const std::shared_ptr<Stopwatch> started = this->stopwatch;
+    this->initialization = std::make_shared<LambdaStep>("StartStopwatch", [started](EvolutionData&) { started->reset(); });
     if(this->columns.empty()) {
-        const std::string logged = this->individuals;
-        this->columns.push_back(Column{"Pop_Size", [logged](const EvolutionState& state) { return state.get<std::vector<std::shared_ptr<const Individual>>>(logged)->size(); }});
+        const Key<std::vector<std::shared_ptr<Individual>>> logged = this->individuals;
+        this->columns.push_back(Column{"Pop_Size", [logged](const EvolutionData& state) { return state.getIndividuals(logged).size(); }});
     }
 }
 
 std::set<std::string> Evolution::LogStep::requiredData() const
 {
-    std::set<std::string> required{this->individuals};
+    std::set<std::string> required{this->individuals.name()};
     for(const auto& [prefix, fitness]: this->fitnesses) {
-        required.insert(fitness);
+        required.insert(fitness.name());
     }
     return required;
 }
@@ -70,9 +75,9 @@ void Evolution::LogStep::writeHeader()
     this->headerWritten = true;
 }
 
-void Evolution::LogStep::apply(EvolutionState& state)
+void Evolution::LogStep::apply(EvolutionData& state)
 {
-    if(state.generation == EvolutionState::initGeneration) {
+    if(state.generation == EvolutionData::initGeneration) {
         return;
     }
     if(!this->headerWritten || state.generation == 0) {
@@ -84,17 +89,17 @@ void Evolution::LogStep::apply(EvolutionState& state)
         *this->output << std::setw(columnWidth) << column.value(state);
     }
 
-    const std::vector<std::shared_ptr<const Individual>>& logged = *state.get<std::vector<std::shared_ptr<const Individual>>>(this->individuals);
+    const std::vector<std::shared_ptr<const Individual>> logged = state.getIndividuals(this->individuals);
     for(const auto& [prefix, fitness]: this->fitnesses) {
         if(state.isUpToDate(fitness)) {
-            const FitnessStats stats = computeStats(logged, *state.get<std::map<uint64_t, double>>(fitness));
+            const FitnessStats stats = computeStats(logged, *state.get(fitness));
             *this->output << std::setw(columnWidth) << stats.min << std::setw(columnWidth) << stats.average << std::setw(columnWidth) << stats.max;
         } else {
             *this->output << std::setw(columnWidth) << "-" << std::setw(columnWidth) << "-" << std::setw(columnWidth) << "-";
         }
     }
 
-    const double generationTime = std::accumulate(state.stepTimes.begin(), state.stepTimes.end(), 0.0,
-        [](double sum, const std::pair<std::string, double>& stepTime) { return sum + stepTime.second; });
-    *this->output << std::setw(columnWidth) << generationTime << std::setw(columnWidth) << state.elapsedSeconds << std::endl;
+    this->stopwatch->checkpoint();
+    const double generationTime = this->stopwatch->getCheckpoints().back();
+    *this->output << std::setw(columnWidth) << generationTime << std::setw(columnWidth) << this->stopwatch->elapsed() << std::endl;
 }

@@ -64,7 +64,7 @@ TEST(PredictionMetricTest, extractAfterExecution) {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
 
@@ -99,8 +99,8 @@ TEST(PredictionProblemTest, extractNoMetric) {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
-    rep.output = Data::DataValue::scalar<int>(0);
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    rep->output = Data::DataValue::scalar<int>(0);
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
     ASSERT_TRUE(indiv.isValid()) << "Should be valid";
@@ -116,8 +116,8 @@ TEST(PredictionProblemTest, extractOneMetric) {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
-    rep.output = Data::DataValue::scalar<int>(0);
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    rep->output = Data::DataValue::scalar<int>(0);
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
     ASSERT_TRUE(indiv.isValid()) << "Should be valid";
@@ -141,8 +141,8 @@ TEST(PredictionProblemTest, extractMultiMetrics) {
 
     Evaluation::PredictionProblem problem(dataSet);
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
-    rep.output = Data::DataValue::scalar<int>(0);
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    rep->output = Data::DataValue::scalar<int>(0);
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     Individual indiv(rep, std::move(genotype));
     ASSERT_TRUE(indiv.isValid()) << "Should be balid";

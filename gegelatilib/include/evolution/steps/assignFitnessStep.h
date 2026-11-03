@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 
-#include "evolution/step.h"
+#include "evolution/module.h"
 #include "fitnessAssignment/assigner.h"
 
 namespace Evolution {
@@ -13,13 +13,13 @@ namespace Evolution {
     /**
      * \brief Step converting metrics into fitness.
      */
-    class AssignFitnessStep : public Step {
+    class AssignFitnessStep : public Module {
         protected:
             /// Name of the metrics read.
-            std::string metrics;
+            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics;
 
             /// Name of the computed fitness.
-            std::string fitness;
+            Key<std::map<uint64_t, double>> fitness;
 
             /// Assigner computing the fitness.
             std::shared_ptr<const FitnessAssignment::Assigner> assigner;
@@ -31,27 +31,27 @@ namespace Evolution {
             /**
              * \brief Constructor.
              *
-             * \param[in] metrics name of the metrics read, a metrics map.
-             * \param[in] fitness name of the computed fitness, a fitness map.
+             * \param[in] metrics key of the metrics read.
+             * \param[in] fitness key of the computed fitness.
              * \param[in] assigner assigner computing the fitness.
              * \param[in] metricHash hash of the metric from which the fitness is computed.
              * \param[in] name name of the step.
              */
-            AssignFitnessStep(std::string metrics, std::string fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
+            AssignFitnessStep(Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
                               std::string name = "AssignFitness")
-                : Step(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash} {}
+                : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash} {}
 
-            /// Return the name of the computed fitness.
-            const std::string& getFitness() const { return this->fitness; }
+            /// Return the key of the computed fitness.
+            const Key<std::map<uint64_t, double>>& getFitness() const { return this->fitness; }
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

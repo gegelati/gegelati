@@ -11,6 +11,7 @@
 
 #include "evaluation/reinforcementProblem.h"
 #include "evolution/basicEvolution.h"
+#include "learn/populationNames.h"
 #include "evolution/steps/exportStep.h"
 #include "evolution/steps/logStep.h"
 #include "evolution/steps/assignFitnessStep.h"
@@ -66,7 +67,7 @@ class ModuleTest : public ::testing::Test
 
     // Settings of the basic evolution, on the representation and the problem of the fixture.
     Evolution::BasicEvolution makeEvolution(size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations,
-                                            size_t nbValidationIterations = 0, uint64_t seed = 0, size_t nbThreads = 1, size_t validationPeriod = 1)
+                                            size_t nbValidationIterations = 0, size_t nbThreads = 1, size_t validationPeriod = 1)
     {
         Evolution::BasicEvolution evolution;
         evolution.representation = lgpRep;
@@ -76,16 +77,15 @@ class ModuleTest : public ::testing::Test
         evolution.nbTrainingIterations = nbTrainingIterations;
         evolution.nbValidationIterations = nbValidationIterations;
         evolution.validationPeriod = validationPeriod;
-        evolution.seed = seed;
         evolution.nbThreads = nbThreads;
         return evolution;
     }
 
-    // Module of the basic evolution, see makeEvolution.
-    Evolution::Module makeModule(size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations,
-                                         size_t nbValidationIterations = 0, uint64_t seed = 0, size_t nbThreads = 1, size_t validationPeriod = 1)
+    // Steps of the basic evolution, see makeEvolution.
+    std::shared_ptr<Evolution::Module> makeSteps(size_t sizePopulation, size_t nbOffspring, size_t nbTrainingIterations, size_t nbValidationIterations = 0,
+                                               size_t nbThreads = 1, size_t validationPeriod = 1)
     {
-        return makeEvolution(sizePopulation, nbOffspring, nbTrainingIterations, nbValidationIterations, seed, nbThreads, validationPeriod).buildModule();
+        return makeEvolution(sizePopulation, nbOffspring, nbTrainingIterations, nbValidationIterations, nbThreads, validationPeriod).build();
     }
 
     // Generator of the genotypes of the representation.
@@ -95,21 +95,21 @@ class ModuleTest : public ::testing::Test
     }
 
     // Fill a state with the random individuals of a population and its offspring, ready for the first generation.
-    void initPopulation(Evolution::EvolutionState& state, const std::shared_ptr<const Evolution::Population>& population, size_t nbOffspring) const
+    void initPopulation(Evolution::EvolutionData& state, const Evolution::BasicEvolution::Keys& population, size_t nbOffspring) const
     {
         state.reset(0);
-        Evolution::InitPopulationStep(population, std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5), generator()).apply(state);
+        Evolution::InitPopulationStep(population.individuals, lgpRep, 10, std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5), generator()).apply(state);
         state.generation = 0;
-        Evolution::ReproduceStep(population->individuals(), std::make_shared<Reproduction::Replicator>(), nbOffspring, population->data("offspring")).apply(state);
+        Evolution::ReproduceStep(population.individuals, std::make_shared<Reproduction::Replicator>(), nbOffspring, population.offspring).apply(state);
     }
 
     // Evaluate the individuals of a population and compute their fitness, see initPopulation.
-    void evaluatePopulation(Evolution::EvolutionState& state, const Evolution::Population& population) const
+    void evaluatePopulation(Evolution::EvolutionData& state, const Evolution::BasicEvolution::Keys& population) const
     {
         auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-        Evolution::EvaluateStep({population.individuals()}, population.data("metrics"), problem, std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2)
+        Evolution::EvaluateStep({population.individuals}, population.trainingMetrics, problem, std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2)
             .apply(state);
-        Evolution::AssignFitnessStep(population.data("metrics"), population.data("fitness"), std::make_shared<FitnessAssignment::DefaultAssigner>(),
+        Evolution::AssignFitnessStep(population.trainingMetrics, population.trainingFitness, std::make_shared<FitnessAssignment::DefaultAssigner>(),
                                      Metrics::RewardsMetric::staticHash())
             .apply(state);
     }
@@ -117,41 +117,42 @@ class ModuleTest : public ::testing::Test
 
 TEST_F(ModuleTest, classicFlow)
 {
-    Evolution::Module module = makeModule(100, 100, 3, 0, 4, 10);
-    module.evolve(20);
+    auto root = makeSteps(100, 100, 3, 0, 10);
+    Evolution::EvolutionData state(4);
+    root->resume(state, 20);
 
-    const Evolution::Population& population = *module.getPopulations().at(0);
-    const Evolution::EvolutionState& state = module.getState();
+    const Evolution::BasicEvolution::Keys population;
     EXPECT_EQ(state.nbGenerationsDone, 20U);
-    const std::vector<std::shared_ptr<const Individual>> individuals = module.getState().getIndividuals(population.individuals());
+    const std::vector<std::shared_ptr<const Individual>> individuals = state.getIndividuals(population.individuals);
     EXPECT_EQ(individuals.size(), 100U);
-    EXPECT_EQ(state.get<std::vector<std::shared_ptr<const Individual>>>(population.data(defaults.parentsName))->size(), 100U);
-    EXPECT_EQ(state.get<std::vector<std::shared_ptr<Individual>>>(population.data(defaults.offspringName))->size(), 100U);
+    EXPECT_EQ(state.get(population.parents)->size(), 100U);
+    EXPECT_EQ(state.get(population.offspring)->size(), 100U);
 
     // The fitness and metrics are the ones of the last evaluation, of the population and of the offspring.
-    const std::map<uint64_t, double>& fitness = *state.get<std::map<uint64_t, double>>(population.data(defaults.trainingFitnessName));
+    const std::map<uint64_t, double>& fitness = *state.get(population.trainingFitness);
     EXPECT_EQ(fitness.size(), 200U);
-    EXPECT_EQ((state.get<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(population.data(defaults.trainingMetricsName))->size()), 200U);
+    EXPECT_EQ((state.get(population.trainingMetrics)->size()), 200U);
 
     // The best individual is in the population, with the highest fitness of the population.
-    std::shared_ptr<const Individual> best = module.getState().bestIndividual(population.individuals(), population.data(defaults.trainingFitnessName));
+    std::shared_ptr<const Individual> best = state.bestIndividual(population.individuals, population.trainingFitness);
     ASSERT_NE(best, nullptr);
     EXPECT_NE(std::find(individuals.begin(), individuals.end(), best), individuals.end());
     for(const std::shared_ptr<const Individual>& individual: individuals) {
         EXPECT_LE(fitness.at(individual->getIndividualID()), fitness.at(best->getIndividualID()));
     }
 
-    ASSERT_EQ(1704165046166301501U, module.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "determinism";
+    ASSERT_EQ(1704165046166301501U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "determinism";
 }
 
 TEST_F(ModuleTest, summary)
 {
-    Evolution::Module module = makeModule(10, 10, 3, 2);
-    const std::string summary = module.summary();
-    for(const std::string& text: {"Population (10 individuals)", "InitPopulation", "InitialEvaluation", "ParentSelection (10 from Population to Population.parents)",
+    auto root = makeSteps(10, 10, 3, 2);
+    Evolution::EvolutionData state;
+    const std::string summary = root->summary();
+    for(const std::string& text: {"InitPopulation", "InitialEvaluation", "ParentSelection (10 from Population to Parents)",
                                   "Reproduction", "Mutation", "TrainingEvaluation (training, 3 iterations)",
-                                  "SurvivorSelection (10 distinct from Population, Population.offspring to Population)",
-                                  "ValidationEvaluation (validation, 2 iterations)", "ValidationFitness (Population.validationMetrics to Population.validationFitness)"}) {
+                                  "SurvivorSelection (10 distinct from Population, Offspring to Population)",
+                                  "ValidationEvaluation (validation, 2 iterations)", "ValidationFitness (validationMetrics to validationFitness)"}) {
         EXPECT_NE(summary.find(text), std::string::npos) << text << "\n" << summary;
     }
 }
@@ -159,64 +160,67 @@ TEST_F(ModuleTest, summary)
 TEST_F(ModuleTest, settingsAreChecked)
 {
     Evolution::BasicEvolution evolution;
-    EXPECT_THROW(evolution.buildModule(), std::runtime_error) << "No representation nor problem";
+    EXPECT_THROW(evolution.build(), std::runtime_error) << "No representation nor problem";
     evolution.representation = lgpRep;
     evolution.problem = problem;
-    EXPECT_THROW(evolution.buildModule(), std::runtime_error) << "No population size";
+    EXPECT_THROW(evolution.build(), std::runtime_error) << "No population size";
     evolution.sizePopulation = 10;
     evolution.nbOffspring = 10;
-    EXPECT_NO_THROW(evolution.buildModule());
+    EXPECT_NO_THROW(evolution.build());
     evolution.nbValidationIterations = 2;
     evolution.validationPeriod = 0;
-    EXPECT_THROW(evolution.buildModule(), std::runtime_error) << "The validation period cannot be zero";
+    EXPECT_THROW(evolution.build(), std::runtime_error) << "The validation period cannot be zero";
 }
 
 TEST_F(ModuleTest, insertSecondMutation)
 {
-    Evolution::Module module = makeModule(20, 20, 2, 0, 4);
-    const Evolution::Population& population = *module.getPopulations().at(0);
+    auto root = makeSteps(20, 20, 2);
+    Evolution::EvolutionData state(4);
+    const Evolution::BasicEvolution::Keys population;
 
     // A second mutation after the first one, then a custom step counting the generations.
     size_t nbCalls = 0;
-    auto secondMutation = std::make_shared<Evolution::MutateStep>(population.data(defaults.offspringName), std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5),
+    auto secondMutation = std::make_shared<Evolution::MutateStep>(population.offspring, std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5),
                                                                   generator(), 1, "SecondMutation");
-    module.generationSteps()
-        .insertAfter(module.generationSteps().find("Mutation"), secondMutation)
-        .insertAfter(secondMutation, std::make_shared<Evolution::LambdaStep>("Count", [&nbCalls](Evolution::EvolutionState&) { nbCalls++; }));
-    ASSERT_EQ(module.generationSteps().size(), 8);
+    (*root)
+        .insertAfter(root->find("Mutation"), secondMutation)
+        .insertAfter(secondMutation, std::make_shared<Evolution::LambdaStep>("Count", [&nbCalls](Evolution::EvolutionData&) { nbCalls++; }));
+    ASSERT_EQ(root->size(), 8) << "The preset is one step holding the steps of a generation";
 
-    module.evolve(5);
-    EXPECT_EQ(nbCalls, 5);
-    for(const auto& individual: module.getState().getIndividuals(population.individuals())) {
+    root->resume(state, 5);
+    EXPECT_EQ(nbCalls, 5U);
+    for(const auto& individual: state.getIndividuals(population.individuals)) {
         EXPECT_TRUE(individual->isValid());
     }
 
-    // Time of each step is recorded.
-    EXPECT_EQ(module.getState().stepTimes.size(), 8);
-    EXPECT_EQ(module.getState().stepTimes.at(3).first, "SecondMutation");
+    // Each step knows how long it took, and a step holding steps lasts at least as long as them.
+    EXPECT_GT(secondMutation->getLastDuration(), 0.0);
+    EXPECT_GT(root->find("Mutation")->getLastDuration(), 0.0);
+    EXPECT_EQ(Evolution::LambdaStep("Unused", [](Evolution::EvolutionData&) {}).getLastDuration(), 0.0) << "Zero until the step ran";
 }
 
 TEST_F(ModuleTest, editPipeline)
 {
-    Evolution::Module module = makeModule(10, 10, 2);
-    Evolution::Pipeline& steps = module.generationSteps();
-    auto unknown = std::make_shared<Evolution::LambdaStep>("Unknown", [](Evolution::EvolutionState&) {});
+    auto root = makeSteps(10, 10, 2);
+    Evolution::EvolutionData state;
+    Evolution::Module& steps = *root;
+    auto unknown = std::make_shared<Evolution::LambdaStep>("Unknown", [](Evolution::EvolutionData&) {});
     const std::shared_ptr<Evolution::MutateStep> mutation = steps.find<Evolution::MutateStep>("Mutation");
 
     EXPECT_TRUE(steps.has("Mutation"));
     EXPECT_FALSE(steps.has("Unknown"));
-    EXPECT_FALSE(steps.has("InitPopulation")) << "Only in the initialization pipeline";
+    EXPECT_FALSE(steps.has("InitPopulation")) << "Only in the initialization";
     EXPECT_THROW(steps.find("Unknown"), std::runtime_error);
     EXPECT_THROW(steps.find<Evolution::SelectStep>("Mutation"), std::runtime_error) << "Not a selection";
-    EXPECT_THROW(steps.insertAfter(unknown, std::make_shared<Evolution::LambdaStep>("Step", [](Evolution::EvolutionState&) {})), std::runtime_error);
+    EXPECT_THROW(steps.insertAfter(unknown, std::make_shared<Evolution::LambdaStep>("Step", [](Evolution::EvolutionData&) {})), std::runtime_error);
     EXPECT_THROW(steps.insertBefore(mutation, nullptr), std::runtime_error);
 
     // Steps are found by address, so names can be shared.
-    auto before = std::make_shared<Evolution::LambdaStep>("Mutation", [](Evolution::EvolutionState&) {});
+    auto before = std::make_shared<Evolution::LambdaStep>("Mutation", [](Evolution::EvolutionData&) {});
     steps.insertBefore(mutation, before);
     EXPECT_EQ(steps.getSteps().at(2), before);
     EXPECT_EQ(steps.getSteps().at(3), mutation);
-    auto replaced = std::make_shared<Evolution::LambdaStep>("Replaced", [](Evolution::EvolutionState&) {});
+    auto replaced = std::make_shared<Evolution::LambdaStep>("Replaced", [](Evolution::EvolutionData&) {});
     steps.replace(before, replaced);
     EXPECT_EQ(steps.getSteps().at(2), replaced);
     steps.remove(replaced);
@@ -226,55 +230,67 @@ TEST_F(ModuleTest, editPipeline)
 
 TEST_F(ModuleTest, misorderedPipelineIsRejected)
 {
-    Evolution::Module module = makeModule(10, 10, 2);
-    module.generationSteps().remove(module.generationSteps().find("ParentSelection"));
+    auto root = makeSteps(10, 10, 2);
+    Evolution::EvolutionData state;
+    root->remove(root->find("ParentSelection"));
 
     // The reproduction now has no parents.
-    EXPECT_THROW(module.evolve(1), std::runtime_error);
+    EXPECT_THROW(root->resume(state, 1), std::runtime_error);
 }
 
-TEST_F(ModuleTest, resume)
+TEST_F(ModuleTest, evolveContinues)
 {
-    Evolution::Module reference = makeModule(20, 20, 2, 0, 4);
-    reference.evolve(5);
+    // Evolving again continues the same evolution, as long as the state is not reset.
+    auto reference = makeSteps(20, 20, 2);
+    Evolution::EvolutionData referenceState(4);
+    reference->resume(referenceState, 5);
 
-    Evolution::Module resumed = makeModule(20, 20, 2, 0, 4);
-    EXPECT_THROW(resumed.resume(1), std::runtime_error);
-    resumed.evolve(3);
-    resumed.resume(2);
+    auto continued = makeSteps(20, 20, 2);
+    Evolution::EvolutionData state(4);
+    continued->resume(state, 3);
+    continued->resume(state, 2);
 
-    EXPECT_EQ(resumed.getState().nbGenerationsDone, 5);
-    EXPECT_EQ(reference.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX), resumed.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX));
+    EXPECT_EQ(state.nbGenerationsDone, 5U);
+    EXPECT_EQ(referenceState.rng.uniformSample<uint64_t>(0, UINT64_MAX), state.rng.uniformSample<uint64_t>(0, UINT64_MAX));
+
+    // A reset starts again from the initialization.
+    state.reset(4);
+    continued->resume(state, 5);
+    EXPECT_EQ(state.nbGenerationsDone, 5U);
+    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 20U);
 }
 
-TEST_F(ModuleTest, stopCondition)
+TEST_F(ModuleTest, customStopIsALoop)
 {
-    Evolution::Module module = makeModule(10, 10, 2);
-    module.addStopCondition([](const Evolution::EvolutionState& state) { return state.generation >= 2; });
-    module.evolve(10);
-    EXPECT_EQ(module.getState().nbGenerationsDone, 3);
+    // Stopping is the business of the caller: it evolves one generation at a time.
+    auto root = makeSteps(10, 10, 2);
+    Evolution::EvolutionData state;
+    while(state.nbGenerationsDone == 0 || state.generation < 2) {
+        root->resume(state, 1);
+    }
+    EXPECT_EQ(state.nbGenerationsDone, 3U);
 }
 
 TEST_F(ModuleTest, validationAndLogger)
 {
-    Evolution::Module module = makeModule(10, 10, 2, 2, 4, 1, 2);
-    const Evolution::Population& population = *module.getPopulations().at(0);
-    const std::string validationFitness = module.generationSteps().find<Evolution::AssignFitnessStep>("ValidationFitness")->getFitness();
-    EXPECT_EQ(validationFitness, population.data(defaults.validationFitnessName));
+    auto root = makeSteps(10, 10, 2, 2, 1, 2);
+    Evolution::EvolutionData state(4);
+    const Evolution::BasicEvolution::Keys population;
+    const auto validationFitness = root->find<Evolution::AssignFitnessStep>("ValidationFitness")->getFitness();
+    EXPECT_EQ(validationFitness, (population.validationFitness));
 
     std::ostringstream output;
-    module.addStep(std::make_shared<Evolution::LogStep>(output, population.individuals(), std::vector<std::pair<std::string, std::string>>{
-        {"Fit", population.data(defaults.trainingFitnessName)}, {"Val", validationFitness}}));
-    module.evolve(4);
+    root->add(std::make_shared<Evolution::LogStep>(output, population.individuals, std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{
+        {"Fit", population.trainingFitness}, {"Val", validationFitness}}));
+    root->resume(state, 4);
 
     const std::string log = output.str();
     EXPECT_NE(log.find("Val_Avg"), std::string::npos);
 
     // Validation ran on generations 0 and 2 only.
-    const Evolution::EvolutionState& state = module.getState();
-    EXPECT_FALSE((state.get<std::map<uint64_t, double>>(validationFitness)->empty()));
+    EXPECT_FALSE((state.get(validationFitness)->empty()));
     EXPECT_FALSE(state.isUpToDate(validationFitness));
-    EXPECT_TRUE(state.isUpToDate(population.data(defaults.trainingFitnessName)));
+    EXPECT_TRUE(state.isUpToDate(population.trainingFitness));
 
     // Rows of generations 1 and 3 show "-" instead of the older validation values.
     std::istringstream lines(log);
@@ -283,8 +299,8 @@ TEST_F(ModuleTest, validationAndLogger)
         nbRowsWithoutValidation += (line.find(" -") != std::string::npos) ? 1 : 0;
     }
     EXPECT_EQ(nbRowsWithoutValidation, 2U);
-    EXPECT_NE(module.summary().find("(validation, 2 iterations, every 2 generations)"), std::string::npos) << module.summary();
-    EXPECT_THROW(module.generationSteps().find("ValidationEvaluation")->setPeriod(0), std::runtime_error);
+    EXPECT_NE(root->summary().find("(validation, 2 iterations, every 2 generations)"), std::string::npos) << root->summary();
+    EXPECT_THROW(root->find("ValidationEvaluation")->setPeriod(0), std::runtime_error);
 }
 
 TEST_F(ModuleTest, validationWithItsOwnProblemAndAssigner)
@@ -293,51 +309,54 @@ TEST_F(ModuleTest, validationWithItsOwnProblemAndAssigner)
     Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2, 3);
     evolution.validationProblem = validationProblem;
     evolution.validationAssigner = std::make_shared<FitnessAssignment::DefaultAssigner>();
-    Evolution::Module module = evolution.buildModule();
-    const Evolution::Population& population = *module.getPopulations().at(0);
+    auto root = evolution.build();
+    Evolution::EvolutionData state;
+    const Evolution::BasicEvolution::Keys population;
 
-    const std::shared_ptr<Evolution::EvaluateStep> validation = module.generationSteps().find<Evolution::EvaluateStep>("ValidationEvaluation");
+    const std::shared_ptr<Evolution::EvaluateStep> validation = root->find<Evolution::EvaluateStep>("ValidationEvaluation");
     EXPECT_EQ(validation->getProblem(), validationProblem);
     EXPECT_EQ(validation->getMode(), Evaluation::Mode::VALIDATION);
-    EXPECT_EQ(module.generationSteps().find<Evolution::EvaluateStep>("TrainingEvaluation")->getProblem().get(), problem.get());
-    module.evolve(2);
+    EXPECT_EQ(root->find<Evolution::EvaluateStep>("TrainingEvaluation")->getProblem().get(), problem.get());
+    root->resume(state, 2);
 
-    EXPECT_EQ((module.getState().get<std::map<uint64_t, double>>(population.data(defaults.validationFitnessName))->size()), 10U);
-    EXPECT_NE(module.getState().bestIndividual(population.individuals(), population.data(defaults.validationFitnessName)), nullptr);
+    EXPECT_EQ((state.get(population.validationFitness)->size()), 10U);
+    EXPECT_NE(state.bestIndividual(population.individuals, population.validationFitness), nullptr);
 }
 
 TEST_F(ModuleTest, parentsWithTheirOwnFitness)
 {
     Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
     evolution.parentAssigner = std::make_shared<FitnessAssignment::DefaultAssigner>();
-    Evolution::Module module = evolution.buildModule();
-    const Evolution::Population& population = *module.getPopulations().at(0);
+    auto root = evolution.build();
+    Evolution::EvolutionData state;
+    const Evolution::BasicEvolution::Keys population;
 
-    EXPECT_EQ(module.generationSteps().find("ParentSelection")->requiredData().count(population.data(defaults.parentFitnessName)), 1U);
-    EXPECT_TRUE(module.initSteps().has("ParentFitness")) << "Parents of the first generation need it";
-    EXPECT_NE(module.summary().find("ParentFitness (Population.trainingMetrics to Population.parentFitness)"), std::string::npos);
+    EXPECT_EQ(root->find("ParentSelection")->requiredData().count(population.parentFitness.name()), 1U);
+    EXPECT_TRUE(root->getInitialization()->has("ParentFitness")) << "Parents of the first generation need it";
+    EXPECT_NE(root->summary().find("ParentFitness (trainingMetrics to parentFitness)"), std::string::npos);
 
-    module.evolve(3);
-    EXPECT_TRUE(module.getState().isUpToDate(population.data(defaults.parentFitnessName)));
+    root->resume(state, 3);
+    EXPECT_TRUE(state.isUpToDate(population.parentFitness));
 
     // Without the parent fitness, the parents cannot be selected.
-    module.initSteps().remove(module.initSteps().find("ParentFitness"));
-    module.generationSteps().remove(module.generationSteps().find("ParentFitness"));
-    EXPECT_THROW(module.evolve(1), std::runtime_error);
+    root->getInitialization()->remove(root->getInitialization()->find("ParentFitness"));
+    root->remove(root->find("ParentFitness"));
+    state.reset(0);
+    EXPECT_THROW(root->resume(state, 1), std::runtime_error);
 }
 
 TEST_F(ModuleTest, selectionIsGeneric)
 {
-    Evolution::EvolutionState state;
-    auto a = std::make_shared<Individual>(*lgpRep);
-    auto b = std::make_shared<Individual>(*lgpRep);
-    auto c = std::make_shared<Individual>(*lgpRep);
-    auto other = std::make_shared<Individual>(*lgpRep);
-    const std::string listA("A");
-    const std::string listB("B");
-    const std::string fitness("Fitness");
-    const std::string selected("Selected");
-    state.set(listA, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(std::vector<std::shared_ptr<const Individual>>{c, a}));
+    Evolution::EvolutionData state;
+    auto a = std::make_shared<Individual>(lgpRep);
+    auto b = std::make_shared<Individual>(lgpRep);
+    auto c = std::make_shared<Individual>(lgpRep);
+    auto other = std::make_shared<Individual>(lgpRep);
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> listA("A");
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> listB("B");
+    const Evolution::Key<std::map<uint64_t, double>> fitness("Fitness");
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> selected("Selected");
+    state.set(listA, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{c, a}));
     state.set(listB, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{b}));
     state.set(fitness, std::make_shared<std::map<uint64_t, double>>(std::map<uint64_t, double>{
         {a->getIndividualID(), 3.0}, {b->getIndividualID(), 2.0}, {c->getIndividualID(), 1.0}, {other->getIndividualID(), 10.0}}));
@@ -345,32 +364,34 @@ TEST_F(ModuleTest, selectionIsGeneric)
     // The best candidates are kept once each, ordered by ID: the fitness of non candidates is ignored.
     Evolution::SelectStep distinct({listA, listB}, fitness, std::make_shared<Selection::TruncationSelector>(), 2, selected, true, "Best");
     EXPECT_EQ(distinct.name(), "Best");
-    EXPECT_EQ(distinct.requiredData(), (std::set<std::string>{listA, listB, fitness}));
+    EXPECT_EQ(distinct.requiredData(), (std::set<std::string>{listA.name(), listB.name(), fitness.name()}));
     distinct.apply(state);
-    EXPECT_EQ(*state.get<std::vector<std::shared_ptr<const Individual>>>(selected), (std::vector<std::shared_ptr<const Individual>>{a, b}));
+    EXPECT_EQ(state.getIndividuals(selected), (std::vector<std::shared_ptr<const Individual>>{a, b}));
 
     // A selection can replace one of its candidate lists, and keep duplicates.
     Evolution::SelectStep withDuplicates({listA}, fitness, std::make_shared<Selection::RandomSelector>(true), 5, listA);
     EXPECT_EQ(withDuplicates.name(), "Select");
     withDuplicates.apply(state);
-    EXPECT_EQ(state.get<std::vector<std::shared_ptr<const Individual>>>(listA)->size(), 5U);
+    EXPECT_EQ(state.get(listA)->size(), 5U);
     EXPECT_THROW(Evolution::SelectStep({}, fitness, std::make_shared<Selection::TruncationSelector>(), 2, selected), std::runtime_error);
 }
 
 TEST_F(ModuleTest, loggerColumns)
 {
-    Evolution::Module module = makeModule(10, 10, 2);
-    const Evolution::Population& population = *module.getPopulations().at(0);
-    const std::string offspring = population.data(defaults.offspringName);
+    auto root = makeSteps(10, 10, 2);
+    Evolution::EvolutionData state;
+    const Evolution::BasicEvolution::Keys population;
+    const auto offspring = population.offspring;
     std::ostringstream output;
-    module.addStep(std::make_shared<Evolution::LogStep>(output, population.individuals(),
-        std::vector<std::pair<std::string, std::string>>{{"Fit", population.data(defaults.trainingFitnessName)}},
-        std::vector<Evolution::LogStep::Column>{{"Nb_Offspring", [offspring](const Evolution::EvolutionState& state) {
-            const auto children = state.getIfAny<std::vector<std::shared_ptr<Individual>>>(offspring);
+    root->add(std::make_shared<Evolution::LogStep>(output, population.individuals,
+        std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{{"Fit", population.trainingFitness}},
+        std::vector<Evolution::LogStep::Column>{{"Nb_Offspring", [offspring](const Evolution::EvolutionData& state) {
+            const auto children = state.getIfAny(offspring);
             return (children == nullptr) ? size_t{0} : children->size();
         }}}));
-    module.evolve(2);
-    module.evolve(1);
+    root->resume(state, 2);
+    state.reset(0);
+    root->resume(state, 1);
 
     // Only the given fitness, the custom column instead of the population size, and one header per evolution.
     const std::string log = output.str();
@@ -386,64 +407,65 @@ TEST_F(ModuleTest, loggerColumns)
 
 TEST_F(ModuleTest, stepsOfThePreset)
 {
-    Evolution::Module module = makeModule(10, 10, 3);
-    const Evolution::Population& population = *module.getPopulations().at(0);
-    const auto evaluation = module.generationSteps().find<Evolution::EvaluateStep>("TrainingEvaluation");
+    auto root = makeSteps(10, 10, 3);
+    Evolution::EvolutionData state;
+    const Evolution::BasicEvolution::Keys population;
+    const auto evaluation = root->find<Evolution::EvaluateStep>("TrainingEvaluation");
     EXPECT_EQ(evaluation->getNbIterations(), 3U);
-    EXPECT_EQ(evaluation->getEvaluated(), (std::vector<std::string>{population.individuals(), population.data(defaults.offspringName)}));
-    EXPECT_EQ(module.initSteps().find<Evolution::EvaluateStep>("InitialEvaluation")->getEvaluated(), (std::vector<std::string>{population.individuals()}));
-    EXPECT_EQ(evaluation->getMetrics(), population.data(defaults.trainingMetricsName));
-    EXPECT_TRUE(module.initSteps().has("TrainingFitness"));
-    EXPECT_TRUE(module.generationSteps().has("TrainingFitness"));
-    EXPECT_FALSE(module.generationSteps().has("ValidationEvaluation"));
-    EXPECT_EQ(module.initSteps().find<Evolution::InitPopulationStep>("InitPopulation")->getPopulation(), module.getPopulations().at(0));
+    EXPECT_EQ(evaluation->getEvaluated(), (std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{population.individuals, population.offspring}));
+    EXPECT_EQ(root->getInitialization()->find<Evolution::EvaluateStep>("InitialEvaluation")->getEvaluated(), (std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{population.individuals}));
+    EXPECT_EQ(evaluation->getMetrics(), (population.trainingMetrics));
+    EXPECT_TRUE(root->getInitialization()->has("TrainingFitness"));
+    EXPECT_TRUE(root->has("TrainingFitness"));
+    EXPECT_FALSE(root->has("ValidationEvaluation"));
 }
 
 TEST_F(ModuleTest, parentsComeFromPopulation)
 {
-    Evolution::Module module = makeModule(20, 20, 2, 0, 4);
-    const std::string individuals = module.getPopulations().at(0)->individuals();
-    const std::string parents = module.getPopulations().at(0)->data(defaults.parentsName);
+    auto root = makeSteps(20, 20, 2);
+    Evolution::EvolutionData state(4);
+    const auto individuals = Evolution::BasicEvolution::Keys().individuals;
+    const auto parents = Evolution::BasicEvolution::Keys().parents;
 
     // Individuals discarded by the survival must not be selected as parents anymore.
     size_t nbParentsChecked = 0;
-    module.generationSteps().insertAfter(module.generationSteps().find("ParentSelection"), std::make_shared<Evolution::LambdaStep>("CheckParents",
-        [&nbParentsChecked, individuals, parents](Evolution::EvolutionState& state) {
-            const std::vector<std::shared_ptr<const Individual>>& current = *state.get<std::vector<std::shared_ptr<const Individual>>>(individuals);
-            for(const auto& parent: *state.get<std::vector<std::shared_ptr<const Individual>>>(parents)) {
+    root->insertAfter(root->find("ParentSelection"), std::make_shared<Evolution::LambdaStep>("CheckParents",
+        [&nbParentsChecked, individuals, parents](Evolution::EvolutionData& state) {
+            const std::vector<std::shared_ptr<const Individual>> current = state.getIndividuals(individuals);
+            for(const auto& parent: *state.get(parents)) {
                 EXPECT_NE(std::find(current.begin(), current.end(), parent), current.end());
                 nbParentsChecked++;
             }
         }));
-    module.evolve(10);
+    root->resume(state, 10);
     EXPECT_EQ(nbParentsChecked, 200U);
 }
 
 namespace {
     // Custom name of the tests.
-    const std::string Counter{"Counter"};
+    const Evolution::Key<int> Counter{"Counter"};
 }
 
 TEST_F(ModuleTest, stateEntries)
 {
-    Evolution::EvolutionState state;
+    Evolution::EvolutionData state;
     EXPECT_FALSE(state.has(Counter));
-    EXPECT_THROW(state.get<int>(Counter), std::runtime_error);
+    EXPECT_THROW(state.get(Counter), std::runtime_error);
 
     state.set(Counter, std::make_shared<int>(3));
     ASSERT_TRUE(state.has(Counter));
-    EXPECT_EQ(*state.get<int>(Counter), 3);
-    EXPECT_EQ(*state.get<int>("Counter"), 3) << "Data are identified by their name";
-    EXPECT_THROW(state.get<double>(Counter), std::runtime_error) << "The entry is not a double";
-    EXPECT_EQ(state.getIfAny<int>("Other"), nullptr);
+    EXPECT_EQ(*state.get(Counter), 3);
+    EXPECT_EQ(*state.get(Evolution::Key<int>("Counter")), 3) << "Keys are identified by their name";
+    EXPECT_THROW(state.get(Evolution::Key<double>("Counter")), std::runtime_error) << "The entry is not a double";
+    EXPECT_EQ(state.getIfAny(Evolution::Key<int>("Other")), nullptr);
 
-    const Evolution::EvolutionState& constState = state;
-    EXPECT_EQ(*constState.get<int>(Counter), 3);
+    const Evolution::EvolutionData& constState = state;
+    EXPECT_EQ(*constState.get(Counter), 3);
 
     // Entries record the generation in which they are stored, not when they are modified.
     state.generation = 4;
     EXPECT_FALSE(state.isUpToDate(Counter));
-    (*state.get<int>(Counter))++;
+    (*state.get(Counter))++;
     EXPECT_FALSE(state.isUpToDate(Counter));
     state.set(Counter, std::make_shared<int>(5));
     EXPECT_TRUE(state.isUpToDate(Counter));
@@ -452,15 +474,20 @@ TEST_F(ModuleTest, stateEntries)
     EXPECT_FALSE(state.has(Counter));
     EXPECT_FALSE(state.isUpToDate(Counter));
 
-    // Individuals are read from both kinds of lists, and an absent list is empty.
-    auto individual = std::make_shared<Individual>(*lgpRep);
-    state.set("Constant", std::make_shared<std::vector<std::shared_ptr<const Individual>>>(std::vector<std::shared_ptr<const Individual>>{individual}));
-    state.set("Mutable", std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{individual}));
-    EXPECT_EQ(state.getIndividuals("Constant"), (std::vector<std::shared_ptr<const Individual>>{individual}));
-    EXPECT_EQ(state.getIndividuals("Mutable"), (std::vector<std::shared_ptr<const Individual>>{individual}));
-    EXPECT_TRUE(state.getIndividuals("Absent").empty());
+    // Individuals are read from lists, an absent list is empty, and several lists are concatenated.
+    auto individual = std::make_shared<Individual>(lgpRep);
+    auto other = std::make_shared<Individual>(lgpRep);
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> first("First");
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> second("Second");
+    state.set(first, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{individual}));
+    state.set(second, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{other}));
+    EXPECT_EQ(state.getIndividuals(first), (std::vector<std::shared_ptr<const Individual>>{individual}));
+    EXPECT_EQ(state.getIndividuals({first, second}), (std::vector<std::shared_ptr<const Individual>>{individual, other}));
+    EXPECT_TRUE(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Absent")).empty());
     state.set(Counter, std::make_shared<int>(4));
-    EXPECT_THROW(state.getIndividuals(Counter), std::runtime_error) << "The counter is not a list of individuals";
+    EXPECT_THROW(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>(Counter.name())), std::runtime_error) << "The counter is not a list of individuals";
+    EXPECT_THROW(state.get(Evolution::Key<double>(Counter.name())), std::runtime_error) << "A key of the wrong type is refused at runtime too, when built from a name";
+    EXPECT_EQ(*state.get(Evolution::Key<int>(Counter.name())), 4) << "Keys are names with a type";
 
     state.reset(0);
     EXPECT_FALSE(state.has(Counter)) << "A new evolution starts without entries";
@@ -468,120 +495,178 @@ TEST_F(ModuleTest, stateEntries)
 
 TEST_F(ModuleTest, customDataAreChecked)
 {
-    Evolution::Module module = makeModule(10, 10, 2);
-    module.addStep(std::make_shared<Evolution::LambdaStep>("Increment",
-        [](Evolution::EvolutionState& state) { (*state.get<int>(Counter))++; }, std::set<std::string>{Counter}, std::set<std::string>{Counter}));
-    EXPECT_THROW(module.evolve(1), std::runtime_error) << "No step creates the counter";
+    auto root = makeSteps(10, 10, 2);
+    Evolution::EvolutionData state;
+    root->add(std::make_shared<Evolution::LambdaStep>("Increment",
+        [](Evolution::EvolutionData& state) { (*state.get(Counter))++; }, std::set<std::string>{Counter.name()}, std::set<std::string>{Counter.name()}));
+    EXPECT_THROW(root->resume(state, 1), std::runtime_error) << "No step creates the counter";
 
-    module.addInitStep(std::make_shared<Evolution::LambdaStep>("CreateCounter",
-        [](Evolution::EvolutionState& state) { state.set(Counter, std::make_shared<int>(0)); }, std::set<std::string>{}, std::set<std::string>{Counter}));
-    module.evolve(3);
-    EXPECT_EQ(*module.getState().get<int>(Counter), 3);
-    EXPECT_NE(module.summary().find("provides: Counter"), std::string::npos);
+    root->getInitialization()->add(std::make_shared<Evolution::LambdaStep>("CreateCounter",
+        [](Evolution::EvolutionData& state) { state.set(Counter, std::make_shared<int>(0)); }, std::set<std::string>{}, std::set<std::string>{Counter.name()}));
+    root->resume(state, 3);
+    EXPECT_EQ(*state.get(Counter), 3);
+    EXPECT_NE(root->summary().find("provides: Counter"), std::string::npos);
 }
 
 TEST_F(ModuleTest, mutationComponentsAreRequired)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    const std::string offspring = population->data(defaults.offspringName);
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    const auto offspring = population.offspring;
     auto mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5);
 
     // Components are fixed objects, only the mutated individuals are data of the state.
     Evolution::MutateStep mutate(offspring, mutator, generator());
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring}));
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name()}));
     EXPECT_THROW(Evolution::MutateStep(offspring, nullptr, generator()), std::runtime_error);
     EXPECT_THROW(Evolution::MutateStep(offspring, mutator, nullptr), std::runtime_error);
 
     // The population is created with the generator of its representation if none is given.
-    Evolution::InitPopulationStep init(population, mutator);
+    Evolution::InitPopulationStep init(population.individuals, lgpRep, 10, mutator);
     EXPECT_TRUE(init.requiredData().empty());
-    EXPECT_EQ(init.providedData(), (std::set<std::string>{population->individuals()}));
-    EXPECT_THROW(Evolution::InitPopulationStep(population, nullptr), std::runtime_error);
-    EXPECT_THROW(Evolution::InitPopulationStep(nullptr, mutator), std::runtime_error);
+    EXPECT_EQ(init.providedData(), (std::set<std::string>{population.individuals.name()}));
+    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, lgpRep, 10, nullptr), std::runtime_error);
+    EXPECT_THROW(Evolution::InitPopulationStep(population.individuals, nullptr, 10, mutator), std::runtime_error);
 
-    Evolution::EvolutionState state;
+    Evolution::EvolutionData state;
     state.reset(0);
     ASSERT_NO_THROW(init.apply(state));
-    EXPECT_EQ(state.getIndividuals(population->individuals()).size(), 10U);
+    EXPECT_EQ(state.getIndividuals(population.individuals).size(), 10U);
 }
 
 TEST_F(ModuleTest, twoPopulations)
 {
-    // A module built from scratch, evolving two populations with the same kind of steps.
-    Evolution::Module module(4);
+    // Steps built from scratch, evolving two populations with the same kind of steps.
+    auto root = std::make_shared<Evolution::Module>("Evolution");
+    auto init = std::make_shared<Evolution::Module>("Initialization");
+    root->setInitialization(init);
+    Evolution::EvolutionData state(4);
     auto mutator = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
-    auto addClassicSteps = [&](const std::shared_ptr<const Evolution::Population>& population, size_t nbOffspring) {
-        const std::string individuals = population->individuals();
-        const std::string parents = population->data(defaults.parentsName);
-        const std::string offspring = population->data(defaults.offspringName);
-        const std::string metrics = population->data("metrics");
-        const std::string fitness = population->data("fitness");
+    auto addClassicSteps = [&](const Evolution::BasicEvolution::Keys& population, size_t size, size_t nbOffspring) {
+        const auto individuals = population.individuals;
+        const auto parents = population.parents;
+        const auto offspring = population.offspring;
+        const auto metrics = population.trainingMetrics;
+        const auto fitness = population.trainingFitness;
         auto assign = std::make_shared<Evolution::AssignFitnessStep>(metrics, fitness, std::make_shared<FitnessAssignment::DefaultAssigner>(),
                                                                       Metrics::RewardsMetric::staticHash());
 
-        module.addInitStep(std::make_shared<Evolution::InitPopulationStep>(population, mutator));
-        module.addInitStep(std::make_shared<Evolution::EvaluateStep>(std::vector<std::string>{individuals}, metrics, problem,
+        init->add(std::make_shared<Evolution::InitPopulationStep>(individuals, lgpRep, size, mutator));
+        init->add(std::make_shared<Evolution::EvaluateStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals}, metrics, problem,
                                                                      std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2));
-        module.addInitStep(assign);
+        init->add(assign);
 
-        module.addStep(std::make_shared<Evolution::SelectStep>(std::vector<std::string>{individuals}, fitness,
+        root->add(std::make_shared<Evolution::SelectStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals}, fitness,
                                                                std::make_shared<Selection::RandomSelector>(true), nbOffspring, parents));
-        module.addStep(std::make_shared<Evolution::ReproduceStep>(parents, std::make_shared<Reproduction::Replicator>(), nbOffspring, offspring));
-        module.addStep(std::make_shared<Evolution::MutateStep>(offspring, mutator, generator()));
-        module.addStep(std::make_shared<Evolution::EvaluateStep>(std::vector<std::string>{individuals, offspring}, metrics, problem,
+        root->add(std::make_shared<Evolution::ReproduceStep>(parents, std::make_shared<Reproduction::Replicator>(), nbOffspring, offspring));
+        root->add(std::make_shared<Evolution::MutateStep>(offspring, mutator, generator()));
+        root->add(std::make_shared<Evolution::EvaluateStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals, offspring}, metrics, problem,
                                                                  std::make_shared<Evaluation::Evaluator>(), metricTemplate, 2));
-        module.addStep(assign);
-        module.addStep(std::make_shared<Evolution::SelectStep>(std::vector<std::string>{individuals, offspring}, fitness,
-                                                               std::make_shared<Selection::TruncationSelector>(), population->getSize(), individuals, true));
+        root->add(assign);
+        root->add(std::make_shared<Evolution::SelectStep>(std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{individuals, offspring}, fitness,
+                                                               std::make_shared<Selection::TruncationSelector>(), size, individuals, true));
         return assign;
     };
 
-    auto populationA = module.addPopulation(lgpRep, 10, "A");
-    auto populationB = module.addPopulation(lgpRep, 6, "B");
-    EXPECT_THROW(module.addPopulation(lgpRep, 6, "A"), std::runtime_error) << "Names are unique";
-    addClassicSteps(populationA, 10);
-    auto assignB = addClassicSteps(populationB, 4);
+    const Evolution::BasicEvolution::Keys populationA(namesOf("A"));
+    const Evolution::BasicEvolution::Keys populationB(namesOf("B"));
+    addClassicSteps(populationA, 10, 10);
+    auto assignB = addClassicSteps(populationB, 6, 4);
 
-    const std::string summary = module.summary();
-    for(const std::string& text: {"A (10 individuals)", "B (6 individuals)", "A.fitness", "B.fitness", "B.parents"}) {
+    const std::string summary = root->summary();
+    for(const std::string& text: {"A.trainingFitness", "B.trainingFitness", "B.parents"}) {
         EXPECT_NE(summary.find(text), std::string::npos) << text;
     }
-    module.evolve(3);
+    root->resume(state, 3);
 
-    const std::vector<std::shared_ptr<const Individual>> individualsA = module.getState().getIndividuals(populationA->individuals());
-    const std::vector<std::shared_ptr<const Individual>> individualsB = module.getState().getIndividuals(populationB->individuals());
+    const std::vector<std::shared_ptr<const Individual>> individualsA = state.getIndividuals(populationA.individuals);
+    const std::vector<std::shared_ptr<const Individual>> individualsB = state.getIndividuals(populationB.individuals);
     EXPECT_EQ(individualsA.size(), 10U);
     EXPECT_EQ(individualsB.size(), 6U);
     for(const auto& individual: individualsB) {
         EXPECT_EQ(std::find(individualsA.begin(), individualsA.end(), individual), individualsA.end()) << "The populations are separate";
     }
-    EXPECT_NE(module.getState().bestIndividual(populationB->individuals(), populationB->data("fitness")), nullptr);
+    EXPECT_NE(state.bestIndividual(populationB.individuals, populationB.trainingFitness), nullptr);
 
     // Steps of the second population are checked like the others.
-    module.initSteps().remove(assignB);
-    module.generationSteps().remove(assignB);
-    EXPECT_THROW(module.evolve(1), std::runtime_error) << "No fitness for the second population";
+    init->remove(assignB);
+    root->remove(assignB);
+    state.reset(4);
+    EXPECT_THROW(root->resume(state, 1), std::runtime_error) << "No fitness for the second population";
 }
 
-TEST_F(ModuleTest, presetsShareAModule)
+TEST_F(ModuleTest, presetsShareARoot)
 {
-    // Two basic evolutions in the same module, with different population names.
-    Evolution::Module module(4);
+    // Two basic evolutions in the same root step, with different population names.
+    auto root = std::make_shared<Evolution::Module>("Evolution");
+    Evolution::EvolutionData state(4);
     Evolution::BasicEvolution first = makeEvolution(10, 10, 2);
-    first.populationName = "First";
-    first.addTo(module);
+    first.names = namesOf("First");
+    root->add(first.build());
     Evolution::BasicEvolution second = makeEvolution(6, 6, 2);
-    second.populationName = "Second";
-    second.addTo(module);
-    EXPECT_THROW(second.addTo(module), std::runtime_error) << "The population name is taken";
+    second.names = namesOf("Second");
+    root->add(second.build());
 
-    module.evolve(2);
-    EXPECT_EQ(module.getState().getIndividuals("First").size(), 10U);
-    EXPECT_EQ(module.getState().getIndividuals("Second").size(), 6U);
+    root->resume(state, 2);
+    EXPECT_EQ(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("First")).size(), 10U);
+    EXPECT_EQ(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Second")).size(), 6U);
 }
 
-TEST_F(ModuleTest, moduleOwnsTheProblemAndThePopulations)
+TEST_F(ModuleTest, evolutionAddedLater)
+{
+    // A second population joins after a few generations of the first one, without initializing the first one again.
+    auto root = std::make_shared<Evolution::Module>("Evolution");
+    Evolution::EvolutionData state(4);
+    Evolution::BasicEvolution first = makeEvolution(10, 10, 2);
+    first.names = namesOf("First");
+    const std::shared_ptr<Evolution::Module> firstSteps = first.build();
+    size_t nbInitializations = 0;
+    firstSteps->getInitialization()->add(std::make_shared<Evolution::LambdaStep>("CountInitializations", [&nbInitializations](Evolution::EvolutionData&) { nbInitializations++; }));
+    root->add(firstSteps);
+
+    root->resume(state, 3);
+    const Evolution::Key<std::vector<std::shared_ptr<Individual>>> secondIndividuals("Second");
+    EXPECT_FALSE(state.has(secondIndividuals));
+
+    Evolution::BasicEvolution second = makeEvolution(6, 6, 2);
+    second.names = namesOf("Second");
+    root->add(second.build());
+    root->resume(state, 2);
+
+    EXPECT_EQ(nbInitializations, 1U) << "The first population is initialized once";
+    EXPECT_EQ(state.nbGenerationsDone, 5U);
+    EXPECT_EQ(state.getIndividuals(secondIndividuals).size(), 6U);
+    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("First")).individuals).size(), 10U);
+
+    // The new steps are checked against the data already in the state: a population needing data nobody makes is refused.
+    root->add(std::make_shared<Evolution::LambdaStep>("NeedsCounter", [](Evolution::EvolutionData&) {}, std::set<std::string>{Counter.name()}));
+    EXPECT_THROW(root->resume(state, 1), std::runtime_error);
+    EXPECT_EQ(state.nbGenerationsDone, 5U) << "Nothing ran";
+}
+
+TEST_F(ModuleTest, leafInitialization)
+{
+    // Any step can have an initialization, which runs once before it first runs, in the initialization generation.
+    Evolution::EvolutionData state;
+    auto step = std::make_shared<Evolution::LambdaStep>("Increment", [](Evolution::EvolutionData& state) { (*state.get(Counter))++; },
+                                                        std::set<std::string>{Counter.name()}, std::set<std::string>{Counter.name()});
+    uint64_t generationOfInitialization = 0;
+    step->setInitialization(std::make_shared<Evolution::LambdaStep>("Create", [&generationOfInitialization](Evolution::EvolutionData& state) {
+        generationOfInitialization = state.generation;
+        state.set(Counter, std::make_shared<int>(10));
+    }, std::set<std::string>{}, std::set<std::string>{Counter.name()}));
+    Evolution::Module root("Root");
+    root.add(step);
+
+    root.resume(state, 2);
+    root.resume(state, 1);
+    EXPECT_EQ(*state.get(Counter), 13);
+    EXPECT_EQ(generationOfInitialization, Evolution::EvolutionData::initGeneration);
+    EXPECT_NE(root.summary().find("initialization:"), std::string::npos) << root.summary();
+    EXPECT_EQ(state.generation, 2U) << "The generation is the one running after the initialization";
+}
+
+TEST_F(ModuleTest, stepsOwnTheProblemAndTheRepresentation)
 {
     auto ownedProblem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
     std::weak_ptr<Evaluation::ReinforcementProblem> weakProblem = ownedProblem;
@@ -590,51 +675,57 @@ TEST_F(ModuleTest, moduleOwnsTheProblemAndThePopulations)
     ownedRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(ownedRep->getDimensionFlow().getOutputDimension()));
     std::weak_ptr<Representations::LGP> weakRep = ownedRep;
 
-    Evolution::Module module = [&]() {
+    std::shared_ptr<Evolution::Module> root = [&]() {
         Evolution::BasicEvolution evolution;
         evolution.representation = std::move(ownedRep);
         evolution.problem = std::move(ownedProblem);
         evolution.sizePopulation = 10;
         evolution.nbOffspring = 10;
-        return evolution.buildModule();
+        return evolution.build();
     }();
+    Evolution::EvolutionData state;
     EXPECT_FALSE(weakProblem.expired()) << "The steps keep the problem alive";
-    module.evolve(2);
+    root->resume(state, 2);
 
-    // The individuals only reference the representation, which their population keeps alive.
-    module.initSteps() = Evolution::Pipeline();
-    module.generationSteps() = Evolution::Pipeline();
-    EXPECT_FALSE(weakRep.expired()) << "The module keeps the representation of its population alive";
-    EXPECT_EQ(module.getState().getIndividuals(module.getPopulations().at(0)->individuals()).size(), 10U);
+    // The individuals keep their representation alive, even without the steps.
+    root.reset();
+    EXPECT_TRUE(weakProblem.expired());
+    EXPECT_FALSE(weakRep.expired()) << "The individuals keep the representation alive";
+    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 10U);
+
+    // Nothing keeps the representation once the individuals are gone.
+    state.reset(0);
+    EXPECT_TRUE(weakRep.expired());
 }
 
-TEST_F(ModuleTest, moduleIsMovable)
+TEST_F(ModuleTest, stepsAreMovable)
 {
-    Evolution::Module built = makeModule(20, 20, 2, 0, 4);
-    Evolution::Module moved = std::move(built);
-    moved.evolve(5);
+    Evolution::Module moved = std::move(*makeSteps(20, 20, 2));
+    Evolution::EvolutionData state(4);
+    moved.resume(state, 5);
 
-    Evolution::Module reference = makeModule(20, 20, 2, 0, 4);
-    reference.evolve(5);
-    EXPECT_EQ(moved.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX), reference.getState().rng.uniformSample<uint64_t>(0, UINT64_MAX));
+    auto reference = makeSteps(20, 20, 2);
+    Evolution::EvolutionData referenceState(4);
+    reference->resume(referenceState, 5);
+    EXPECT_EQ(state.rng.uniformSample<uint64_t>(0, UINT64_MAX), referenceState.rng.uniformSample<uint64_t>(0, UINT64_MAX));
 }
 
 TEST_F(ModuleTest, reproduceStep)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    Evolution::EvolutionState state;
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    Evolution::EvolutionData state;
     initPopulation(state, population, 0);
-    const std::string offspring = population->data("offspring");
+    const auto offspring = population.offspring;
 
-    Evolution::ReproduceStep step(population->individuals(), std::make_shared<Reproduction::Replicator>(), 25, offspring);
+    Evolution::ReproduceStep step(population.individuals, std::make_shared<Reproduction::Replicator>(), 25, offspring);
     EXPECT_EQ(step.name(), "Reproduce");
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{population->individuals()}));
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{offspring}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{population.individuals.name()}));
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{offspring.name()}));
     ASSERT_NO_THROW(step.apply(state));
 
     // Offspring are new individuals copying the parents, which stay in the population.
-    const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population->individuals());
-    const std::vector<std::shared_ptr<Individual>>& children = *state.get<std::vector<std::shared_ptr<Individual>>>(offspring);
+    const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population.individuals);
+    const std::vector<std::shared_ptr<Individual>>& children = *state.get(offspring);
     EXPECT_EQ(parents.size(), 10U);
     ASSERT_EQ(children.size(), 25U);
     for(const std::shared_ptr<Individual>& child: children) {
@@ -647,26 +738,26 @@ TEST_F(ModuleTest, reproduceStep)
 
 TEST_F(ModuleTest, mutateStep)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    const std::string offspring = population->data("offspring");
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    const auto offspring = population.offspring;
     auto mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5);
 
     // The same offspring mutated by several threads.
     std::vector<std::vector<std::shared_ptr<Individual>>> mutated;
     for(size_t nbThreads: {2, 3}) {
-        Evolution::EvolutionState state;
+        Evolution::EvolutionData state;
         initPopulation(state, population, 20);
         Evolution::MutateStep step(offspring, mutator, generator(), nbThreads);
         EXPECT_EQ(step.name(), "Mutate");
         EXPECT_EQ(step.getIndividuals(), offspring);
         EXPECT_EQ(step.getNbThreads(), nbThreads);
-        EXPECT_EQ(step.requiredData(), (std::set<std::string>{offspring}));
+        EXPECT_EQ(step.requiredData(), (std::set<std::string>{offspring.name()}));
         EXPECT_TRUE(step.providedData().empty()) << "Offspring are mutated in place";
         ASSERT_NO_THROW(step.apply(state));
 
         // Offspring are not copies of their parents anymore, and remain valid.
-        const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population->individuals());
-        const std::vector<std::shared_ptr<Individual>>& children = *state.get<std::vector<std::shared_ptr<Individual>>>(offspring);
+        const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population.individuals);
+        const std::vector<std::shared_ptr<Individual>>& children = *state.get(offspring);
         size_t nbChanged = 0;
         for(const std::shared_ptr<Individual>& child: children) {
             EXPECT_TRUE(child->isValid());
@@ -688,26 +779,26 @@ TEST_F(ModuleTest, mutateStep)
 
 TEST_F(ModuleTest, evaluateStep)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    Evolution::EvolutionState state;
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    Evolution::EvolutionData state;
     initPopulation(state, population, 5);
-    const std::string offspring = population->data("offspring");
-    const std::string metrics = population->data("metrics");
+    const auto offspring = population.offspring;
+    const auto metrics = population.trainingMetrics;
     auto evaluator = std::make_shared<Evaluation::Evaluator>();
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>());
 
     EXPECT_THROW(Evolution::EvaluateStep({offspring}, metrics, nullptr, evaluator, metricTemplate, 2), std::runtime_error);
-    Evolution::EvaluateStep step({population->individuals(), offspring}, metrics, problem, evaluator, metricTemplate, 2, Evaluation::Mode::VALIDATION);
+    Evolution::EvaluateStep step({population.individuals, offspring}, metrics, problem, evaluator, metricTemplate, 2, Evaluation::Mode::VALIDATION);
     EXPECT_EQ(step.name(), "Evaluate");
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{population->individuals(), offspring}));
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{metrics}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{population.individuals.name(), offspring.name()}));
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{metrics.name()}));
     EXPECT_EQ(step.details(), "validation, 2 iterations");
     ASSERT_NO_THROW(step.apply(state));
 
     // Metrics of the individuals of both lists, constant and mutable, indexed by ID.
-    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& results = *state.get<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(metrics);
+    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& results = *state.get(metrics);
     EXPECT_EQ(results.size(), 15U);
-    for(const std::string& list: {population->individuals(), offspring}) {
+    for(const Evolution::Key<std::vector<std::shared_ptr<Individual>>>& list: std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{population.individuals, offspring}) {
         for(const std::shared_ptr<const Individual>& individual: state.getIndividuals(list)) {
             ASSERT_EQ(results.count(individual->getIndividualID()), 1U);
             EXPECT_FALSE(results.at(individual->getIndividualID())->getMetricValues<Metrics::RewardsMetric>(Metrics::RewardsMetric::staticHash()).empty());
@@ -718,24 +809,24 @@ TEST_F(ModuleTest, evaluateStep)
 
 TEST_F(ModuleTest, assignFitnessStep)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    Evolution::EvolutionState state;
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    Evolution::EvolutionData state;
     initPopulation(state, population, 0);
-    evaluatePopulation(state, *population);
-    const std::string metrics = population->data("metrics");
-    const std::string fitness = population->data("otherFitness");
+    evaluatePopulation(state, population);
+    const auto metrics = population.trainingMetrics;
+    const auto fitness = population.parentFitness;
 
     Evolution::AssignFitnessStep step(metrics, fitness, std::make_shared<FitnessAssignment::DefaultAssigner>(), Metrics::RewardsMetric::staticHash());
     EXPECT_EQ(step.name(), "AssignFitness");
     EXPECT_EQ(step.getFitness(), fitness);
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{metrics}));
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{fitness}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{metrics.name()}));
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{fitness.name()}));
     ASSERT_NO_THROW(step.apply(state));
 
     // One fitness per evaluated individual, and the best individual has the highest one.
-    const std::map<uint64_t, double>& values = *state.get<std::map<uint64_t, double>>(fitness);
+    const std::map<uint64_t, double>& values = *state.get(fitness);
     EXPECT_EQ(values.size(), 10U);
-    const std::shared_ptr<const Individual> best = state.bestIndividual(population->individuals(), fitness);
+    const std::shared_ptr<const Individual> best = state.bestIndividual(population.individuals, fitness);
     ASSERT_NE(best, nullptr);
     for(const auto& [id, value]: values) {
         EXPECT_LE(value, values.at(best->getIndividualID()));
@@ -744,25 +835,25 @@ TEST_F(ModuleTest, assignFitnessStep)
 
 TEST_F(ModuleTest, exportStep)
 {
-    auto population = std::make_shared<const Evolution::Population>(lgpRep, 10, "P");
-    Evolution::EvolutionState state;
+    const Evolution::BasicEvolution::Keys population(namesOf("P"));
+    Evolution::EvolutionData state;
     initPopulation(state, population, 0);
-    evaluatePopulation(state, *population);
+    evaluatePopulation(state, population);
     const std::string path = (std::filesystem::temp_directory_path() / "gegelati_export_step").string();
-    const std::string fitness = population->data("fitness");
+    const auto fitness = population.trainingFitness;
 
-    Evolution::ExportStep all(population->individuals(), path + "_all", true);
-    Evolution::ExportStep best(population->individuals(), path + "_best", false, fitness);
+    Evolution::ExportStep all(population.individuals, path + "_all", true);
+    Evolution::ExportStep best(population.individuals, path + "_best", false, fitness);
     EXPECT_EQ(all.name(), "Export");
     EXPECT_EQ(all.details(), path + "_all<generation>.dot");
-    EXPECT_EQ(all.requiredData(), (std::set<std::string>{population->individuals()}));
-    EXPECT_EQ(best.requiredData(), (std::set<std::string>{population->individuals(), fitness}));
+    EXPECT_EQ(all.requiredData(), (std::set<std::string>{population.individuals.name()}));
+    EXPECT_EQ(best.requiredData(), (std::set<std::string>{population.individuals.name(), fitness.name()}));
     EXPECT_TRUE(all.providedData().empty());
 
     // Nothing is exported during the initialization.
     std::filesystem::remove(path + "_all3.dot");
     std::filesystem::remove(path + "_best.dot");
-    state.generation = Evolution::EvolutionState::initGeneration;
+    state.generation = Evolution::EvolutionData::initGeneration;
     ASSERT_NO_THROW(all.apply(state));
     EXPECT_FALSE(std::filesystem::exists(path + "_all3.dot"));
 
@@ -776,4 +867,156 @@ TEST_F(ModuleTest, exportStep)
 
     std::filesystem::remove(path + "_all3.dot");
     std::filesystem::remove(path + "_best.dot");
+}
+
+TEST_F(ModuleTest, nestedSteps)
+{
+    // A step holds steps: they nest, can be repeated, and are searched and edited from the root.
+    Evolution::Module root("Root");
+    Evolution::EvolutionData state(1);
+    const Evolution::Key<int> counter("Counter");
+    auto increment = [counter](Evolution::EvolutionData& state) { (*state.get(counter))++; };
+    auto first = std::make_shared<Evolution::LambdaStep>("Increment", increment, std::set<std::string>{counter.name()}, std::set<std::string>{counter.name()});
+    auto inner = std::make_shared<Evolution::Module>("Inner");
+    inner->add(first);
+
+    root.setInitialization(std::make_shared<Evolution::LambdaStep>("Create", [counter](Evolution::EvolutionData& state) { state.set(counter, std::make_shared<int>(0)); },
+                                                                   std::set<std::string>{}, std::set<std::string>{counter.name()}));
+    root.add(inner);
+    EXPECT_EQ(root.size(), 1U);
+    EXPECT_TRUE(root.has("Increment")) << "Steps of nested steps are found";
+    EXPECT_EQ(root.find("Increment"), first);
+
+    // Steps of nested steps are edited from the root.
+    auto second = std::make_shared<Evolution::LambdaStep>("Second", increment, std::set<std::string>{counter.name()}, std::set<std::string>{counter.name()});
+    root.insertAfter(first, second);
+    EXPECT_EQ(inner->size(), 2U);
+
+    const std::string summary = root.summary();
+    EXPECT_NE(summary.find("initialization: Create"), std::string::npos) << summary;
+    EXPECT_NE(summary.find(std::string("`- Inner") + std::string(1, 10) + "   |- Increment"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("   `- Second"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("requires: Counter | provides: Counter"), std::string::npos) << summary;
+
+    root.resume(state, 2);
+    EXPECT_EQ(*state.get(counter), 2 * 2) << "Two generations, two steps";
+    EXPECT_GE(inner->getLastDuration(), first->getLastDuration() + second->getLastDuration()) << "The container includes its steps";
+
+    root.remove(first);
+    EXPECT_EQ(inner->size(), 1U);
+}
+
+TEST_F(ModuleTest, nestedStepsAreChecked)
+{
+    Evolution::Module root("Root");
+    Evolution::EvolutionData state(1);
+    const Evolution::Key<int> counter("Counter");
+    auto inner = std::make_shared<Evolution::Module>("Inner");
+    inner->add(std::make_shared<Evolution::LambdaStep>("NeedsCounter", [](Evolution::EvolutionData&) {}, std::set<std::string>{counter.name()}));
+    root.add(inner);
+    try {
+        root.resume(state, 1);
+        FAIL() << "The nested step requires data that nothing provides";
+    } catch(const std::runtime_error& error) {
+        EXPECT_NE(std::string(error.what()).find("NeedsCounter"), std::string::npos) << error.what();
+    }
+
+    // Data provided by the initialization are available in the nested step.
+    root.setInitialization(std::make_shared<Evolution::LambdaStep>("Create", [counter](Evolution::EvolutionData& state) { state.set(counter, std::make_shared<int>(0)); },
+                                                                   std::set<std::string>{}, std::set<std::string>{counter.name()}));
+    EXPECT_NO_THROW(root.resume(state, 1));
+}
+
+TEST_F(ModuleTest, presetRunEveryOtherGeneration)
+{
+    // The generation of the second population runs every second generation of the first one.
+    auto root = std::make_shared<Evolution::Module>("Evolution");
+    Evolution::EvolutionData state(4);
+    Evolution::BasicEvolution first = makeEvolution(10, 10, 2);
+    first.names = namesOf("First");
+    Evolution::BasicEvolution second = makeEvolution(6, 6, 2);
+    second.names = namesOf("Second");
+
+    root->add(first.build());
+    const std::shared_ptr<Evolution::Module> slow = second.build();
+    slow->setPeriod(2);
+    size_t nbRuns = 0;
+    slow->add(std::make_shared<Evolution::LambdaStep>("CountRuns", [&nbRuns](Evolution::EvolutionData&) { nbRuns++; }));
+    root->add(slow);
+
+    root->resume(state, 4);
+    EXPECT_EQ(nbRuns, 2U) << "Generations 0 and 2";
+    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("First")).individuals).size(), 10U);
+    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("Second")).individuals).size(), 6U);
+    EXPECT_NE(root->summary().find("Second (every 2 generations)"), std::string::npos) << root->summary();
+}
+
+TEST_F(ModuleTest, evolveCreatesTheDataAndResumeContinues)
+{
+    // evolve starts a new evolution and returns its data, resume goes on with the data of an evolution.
+    auto module = makeSteps(20, 20, 2);
+    Evolution::EvolutionData data = module->evolve(3, 4);
+    EXPECT_EQ(data.nbGenerationsDone, 3U);
+    EXPECT_EQ(data.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 20U);
+    module->resume(data, 2);
+    EXPECT_EQ(data.nbGenerationsDone, 5U);
+
+    // The same evolution in one go, and a new evolution does not depend on the previous one.
+    Evolution::EvolutionData reference = makeSteps(20, 20, 2)->evolve(5, 4);
+    EXPECT_EQ(data.rng.uniformSample<uint64_t>(0, UINT64_MAX), reference.rng.uniformSample<uint64_t>(0, UINT64_MAX));
+    EXPECT_EQ(module->evolve(1).nbGenerationsDone, 1U);
+    EXPECT_EQ(data.nbGenerationsDone, 5U) << "The data of the first evolution are untouched";
+}
+
+TEST_F(ModuleTest, summaryShowsTheDataOfTheEvolution)
+{
+    // Validation every second generation: its fitness is older than the others after two generations.
+    auto module = makeSteps(10, 10, 2, 2, 1, 2);
+    Evolution::EvolutionData data(4);
+
+    std::string summary = module->summary(data);
+    EXPECT_NE(summary.find("initialization [pending]"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("(empty)"), std::string::npos) << summary;
+
+    module->resume(data, 2);
+    summary = module->summary(data);
+    EXPECT_NE(summary.find("initialization [done]"), std::string::npos) << summary;
+    EXPECT_EQ(summary.find("[pending]"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("Data after 2 generation(s):"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("Parents"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("10 elements"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("up to date"), std::string::npos) << summary;
+    EXPECT_NE(summary.find("stored at generation 0"), std::string::npos) << "The validation fitness is older: " << summary;
+
+    // Numbers are shown with their value.
+    data.set(Counter, std::make_shared<int>(7));
+    EXPECT_NE(data.summary().find("Counter"), std::string::npos);
+    EXPECT_NE(data.summary().find("7"), std::string::npos);
+}
+
+TEST_F(ModuleTest, namesAreSettings)
+{
+    // Every name is a setting, changed before the build. Data and steps are found under their new names.
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
+    EXPECT_EQ(Evolution::BasicEvolution::Keys(evolution.names).parents.name(), "Parents") << "The names have defaults";
+    evolution.names = namesOf("Pool");
+    evolution.names.parents = "MatingPool";
+    evolution.names.mutationStep = "Variation";
+    evolution.names.initialEvaluationStep = "FirstEvaluation";
+    evolution.names.initialization = "Start";
+
+    auto module = evolution.build();
+    EXPECT_EQ(module->name(), "Pool");
+    EXPECT_TRUE(module->has("Variation"));
+    EXPECT_FALSE(module->has("Mutation"));
+    EXPECT_TRUE(module->getInitialization()->has("FirstEvaluation"));
+    EXPECT_EQ(module->getInitialization()->name(), "Start");
+
+    Evolution::EvolutionData data = module->evolve(2);
+    const Evolution::BasicEvolution::Keys keys(evolution.names);
+    EXPECT_EQ(keys.parents.name(), "MatingPool");
+    EXPECT_EQ(keys.offspring.name(), "Pool.offspring");
+    EXPECT_EQ(data.get(keys.parents)->size(), 10U);
+    EXPECT_EQ(data.getIndividuals(keys.individuals).size(), 10U);
+    EXPECT_FALSE(data.has(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Parents")));
 }

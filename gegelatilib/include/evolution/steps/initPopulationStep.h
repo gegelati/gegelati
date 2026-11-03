@@ -5,8 +5,8 @@
 #include <set>
 #include <string>
 
-#include "evolution/population.h"
-#include "evolution/step.h"
+#include "representations/representation.h"
+#include "evolution/module.h"
 #include "graphBased/genotypeGenerator.h"
 #include "mutation/mutator.h"
 
@@ -15,10 +15,16 @@ namespace Evolution {
     /**
      * \brief Step creating the random individuals of a population.
      */
-    class InitPopulationStep : public Step {
+    class InitPopulationStep : public Module {
         protected:
-            /// Created population.
-            std::shared_ptr<const Population> population;
+            /// Individuals created.
+            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+
+            /// Representation of the individuals.
+            std::shared_ptr<const Representations::Representation> representation;
+
+            /// Number of individuals created.
+            size_t size;
 
             /// Mutator creating the random genotypes.
             std::shared_ptr<const Mutation::Mutator> mutator;
@@ -30,24 +36,24 @@ namespace Evolution {
             /**
              * \brief Constructor.
              *
-             * \param[in] population created population, its size and representation are used.
+             * \param[in] individuals key of the created individuals.
+             * \param[in] representation representation of the individuals, kept alive by the step.
+             * \param[in] size number of individuals created.
              * \param[in] mutator mutator creating the random genotypes.
-             * \param[in] generator generator of the genotypes, the one of the representation of the population if null.
+             * \param[in] generator generator of the genotypes, the one of the representation if null.
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the population or the mutator is null.
+             * \throw std::runtime_error if the representation or the mutator is null.
              */
-            InitPopulationStep(std::shared_ptr<const Population> population, std::shared_ptr<const Mutation::Mutator> mutator,
-                               std::shared_ptr<const GraphBased::GenotypeGenerator> generator = nullptr, std::string name = "InitPopulation");
+            InitPopulationStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
+                               std::shared_ptr<const Mutation::Mutator> mutator, std::shared_ptr<const GraphBased::GenotypeGenerator> generator = nullptr,
+                               std::string name = "InitPopulation");
 
-            /// Return the created population.
-            const std::shared_ptr<const Population>& getPopulation() const { return this->population; }
-
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

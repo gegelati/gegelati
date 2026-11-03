@@ -65,13 +65,10 @@
 
 // Evolution
 #include <evolution/basicEvolution.h>
-#include <evolution/evolutionState.h>
-#include <evolution/module.h>
+#include <evolution/evolutionData.h>
+#include <evolution/key.h>
 #include <evolution/originTPGEvolution.h>
-#include <evolution/originTPGSteps.h>
-#include <evolution/pipeline.h>
-#include <evolution/population.h>
-#include <evolution/step.h>
+#include <evolution/module.h>
 #include <evolution/steps/assignFitnessStep.h>
 #include <evolution/steps/evaluateStep.h>
 #include <evolution/steps/exportStep.h>
@@ -81,6 +78,7 @@
 #include <evolution/steps/mutateStep.h>
 #include <evolution/steps/reproduceStep.h>
 #include <evolution/steps/selectStep.h>
+#include <evolution/steps/tpgSteps.h>
 
 // File
 #include <file/populationDotExporter.h>

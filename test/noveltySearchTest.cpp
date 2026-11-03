@@ -56,7 +56,7 @@ TEST(NoveltySearchTest, computeDescriptors)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
@@ -103,7 +103,7 @@ TEST(NoveltySearchTest, computeDescriptorsList)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2, false);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
@@ -153,7 +153,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
@@ -181,7 +181,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
@@ -208,7 +208,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
@@ -366,7 +366,7 @@ TEST(NoveltySearchTest, doSelection)
     CounterReset::counterReset();
     FitnessAssignment::NoveltySearchAssigner noveltySearch(2);
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);

@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 
+#include "evolution/basicEvolution.h"
+#include "learn/populationNames.h"
 #include "evolution/module.h"
-#include "evolution/originTPGSteps.h"
+#include "evolution/originTPGEvolution.h"
+#include "evolution/steps/tpgSteps.h"
 #include "evaluation/predictionProblem.h"
 #include "metrics/inputMetric.h"
 #include "mutation/pointMutator.h"
@@ -21,8 +24,8 @@ namespace {
         return std::make_unique<GraphBased::GPNode>(values);
     }
 
-    std::shared_ptr<const Individual> makeVertex(const Representations::Representation& rep, const std::shared_ptr<const Individual>& member,
-                                                 const std::vector<std::shared_ptr<const Individual>>& destinations)
+    std::shared_ptr<Individual> makeVertex(std::shared_ptr<const Representations::Representation> rep, const std::shared_ptr<const Individual>& member,
+                                           const std::vector<std::shared_ptr<const Individual>>& destinations)
     {
         auto group = std::make_unique<GraphBased::NodeGroup>();
         for(const std::shared_ptr<const Individual>& destination: destinations) {
@@ -31,7 +34,7 @@ namespace {
         return std::make_shared<Individual>(rep, GraphBased::Genotype::singleGroupGenotype(std::move(group)));
     }
 
-    std::shared_ptr<const Individual> makeLeaf(const Representations::Representation& rep, const std::shared_ptr<const Individual>& member)
+    std::shared_ptr<Individual> makeLeaf(std::shared_ptr<const Representations::Representation> rep, const std::shared_ptr<const Individual>& member)
     {
         auto group = std::make_unique<GraphBased::NodeGroup>();
         group->addNode(makeNode(member, Data::DataValue::scalar<size_t>(0)));
@@ -51,51 +54,72 @@ namespace {
 class TPGStepsTest : public ::testing::Test
 {
   protected:
-    Representations::FakeRepresentation rep;
+    std::shared_ptr<Representations::FakeRepresentation> rep = std::make_shared<Representations::FakeRepresentation>();
     std::shared_ptr<const Individual> member;
-    std::shared_ptr<const Evolution::Population> roots;
+    // Keys of the population of roots.
+    const Evolution::BasicEvolution::Keys roots{namesOf("Roots")};
+
+    // Keys of data of the steps.
+    const Evolution::Key<Evaluation::DataSet> archiveKey{"archive"};
+    const Evolution::Key<std::vector<std::shared_ptr<const Individual>>> cacheKey{"cache"};
+    const Evolution::Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedKey{"protectedVertices"};
+    const Evolution::Key<std::map<uint64_t, std::set<uint64_t>>> aggregatorsKey{"aggregators"};
 
     virtual void SetUp()
     {
         CounterReset::counterReset();
         member = std::make_shared<Individual>(rep);
-        roots = std::make_shared<const Evolution::Population>(std::make_shared<Representations::FakeRepresentation>(), 3, "Roots");
     }
 
     // Replace the individuals of the population of roots.
-    void setRoots(Evolution::EvolutionState& state, const std::vector<std::shared_ptr<const Individual>>& individuals) const
+    void setRoots(Evolution::EvolutionData& state, const std::vector<std::shared_ptr<Individual>>& individuals) const
     {
-        state.set(this->roots->individuals(), std::make_shared<std::vector<std::shared_ptr<const Individual>>>(individuals));
+        state.set(this->roots.individuals, std::make_shared<std::vector<std::shared_ptr<Individual>>>(individuals));
+    }
+
+    // Number of vertices protected by a ProtectAggregatedStep.
+    size_t nbProtected(const Evolution::EvolutionData& state) const
+    {
+        return state.get(this->protectedKey)->size();
+    }
+
+    // Initialize the data of a ProtectAggregatedStep, as the initialization of an evolution does.
+    void initProtection(Evolution::ProtectAggregatedStep& step, Evolution::EvolutionData& state) const
+    {
+        const uint64_t generation = state.generation;
+        state.generation = Evolution::EvolutionData::initGeneration;
+        step.apply(state);
+        state.generation = generation;
     }
 
     // Individuals of the population of roots.
-    const std::vector<std::shared_ptr<const Individual>>& rootsOf(const Evolution::EvolutionState& state) const
+    std::vector<std::shared_ptr<const Individual>> rootsOf(const Evolution::EvolutionData& state) const
     {
-        return *state.get<std::vector<std::shared_ptr<const Individual>>>(this->roots->individuals());
+        return state.getIndividuals(this->roots.individuals);
     }
 
     // State where the roots have a "fitness", and empty "metrics".
-    Evolution::EvolutionState makeState(const std::vector<std::shared_ptr<const Individual>>& individuals) const
+    Evolution::EvolutionData makeState(const std::vector<std::shared_ptr<Individual>>& individuals) const
     {
-        Evolution::EvolutionState state;
+        Evolution::EvolutionData state;
         state.generation = 0;
         this->setRoots(state, individuals);
         auto fitness = std::make_shared<std::map<uint64_t, double>>();
         for(const std::shared_ptr<const Individual>& individual: individuals) {
             (*fitness)[individual->getIndividualID()] = 1.0;
         }
-        state.set(this->roots->data("fitness"), fitness);
-        state.set(this->roots->data("metrics"), std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>());
+        state.set(this->roots.trainingFitness, fitness);
+        state.set(this->roots.trainingMetrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>());
         return state;
     }
 };
 
 TEST_F(TPGStepsTest, graphHelpers)
 {
-    std::shared_ptr<const Individual> leaf1 = makeLeaf(rep, member);
-    std::shared_ptr<const Individual> leaf2 = makeLeaf(rep, member);
-    std::shared_ptr<const Individual> vertexA = makeVertex(rep, member, {leaf2, leaf1, leaf2});
-    std::shared_ptr<const Individual> vertexB = makeVertex(rep, member, {vertexA});
+    std::shared_ptr<Individual> leaf1 = makeLeaf(rep, member);
+    std::shared_ptr<Individual> leaf2 = makeLeaf(rep, member);
+    std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf2, leaf1, leaf2});
+    std::shared_ptr<Individual> vertexB = makeVertex(rep, member, {vertexA});
 
     // Direct references, without duplicates and ordered by ID.
     EXPECT_EQ(idsOf(Evolution::getSubVertices(*vertexA)), (std::vector<uint64_t>{leaf1->getIndividualID(), leaf2->getIndividualID()}));
@@ -114,95 +138,109 @@ TEST_F(TPGStepsTest, graphHelpers)
 
 TEST_F(TPGStepsTest, protectAggregated)
 {
-    std::shared_ptr<const Individual> leaf1 = makeLeaf(rep, member);
-    std::shared_ptr<const Individual> leaf2 = makeLeaf(rep, member);
-    std::shared_ptr<const Individual> vertexA = makeVertex(rep, member, {leaf1});
+    std::shared_ptr<Individual> leaf1 = makeLeaf(rep, member);
+    std::shared_ptr<Individual> leaf2 = makeLeaf(rep, member);
+    std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf1});
 
-    Evolution::ProtectAggregatedStep step(roots->individuals());
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{roots->individuals()}));
-    Evolution::EvolutionState state = makeState({leaf1, leaf2, vertexA});
+    Evolution::ProtectAggregatedStep step{roots.individuals, protectedKey, aggregatorsKey};
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{roots.individuals.name(), protectedKey.name(), aggregatorsKey.name()}));
+    Evolution::EvolutionData state = makeState({leaf1, leaf2, vertexA});
+    EXPECT_THROW(step.apply(state), std::runtime_error) << "The protection must be initialized first";
+    initProtection(step, state);
     ASSERT_NO_THROW(step.apply(state));
 
     // The leaf referenced by A is not a root anymore.
     EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{leaf2->getIndividualID(), vertexA->getIndividualID()}));
-    EXPECT_EQ(step.getNbProtected(), 1U);
+    EXPECT_EQ(nbProtected(state), 1U);
 
     // Nothing changes while the aggregator is alive.
     ASSERT_NO_THROW(step.apply(state));
     EXPECT_EQ(rootsOf(state).size(), 2U);
-    EXPECT_EQ(step.getNbProtected(), 1U);
+    EXPECT_EQ(nbProtected(state), 1U);
 
     // The aggregator disappears: the leaf comes back, ordered by ID.
     setRoots(state, {leaf2});
     ASSERT_NO_THROW(step.apply(state));
     EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{leaf1->getIndividualID(), leaf2->getIndividualID()}));
-    EXPECT_EQ(step.getNbProtected(), 0U);
+    EXPECT_EQ(nbProtected(state), 0U);
 
     // A new evolution forgets the protected vertices.
     setRoots(state, {leaf1, vertexA});
     step.apply(state);
-    EXPECT_EQ(step.getNbProtected(), 1U);
-    state.generation = Evolution::EvolutionState::initGeneration;
+    EXPECT_EQ(nbProtected(state), 1U);
+    state.generation = Evolution::EvolutionData::initGeneration;
     step.apply(state);
-    EXPECT_EQ(step.getNbProtected(), 0U);
+    EXPECT_EQ(nbProtected(state), 0U);
+
+    // The protected vertices are data of the state, the step keeps nothing: another step object continues the evolution.
+    state.generation = 0;
+    setRoots(state, {leaf1, vertexA});
+    step.apply(state);
+    Evolution::ProtectAggregatedStep otherStep{roots.individuals, protectedKey, aggregatorsKey};
+    EXPECT_EQ(nbProtected(state), 1U);
+    setRoots(state, {leaf2});
+    otherStep.apply(state);
+    EXPECT_EQ(nbProtected(state), 0U) << "The leaf comes back when its aggregator disappears";
+    EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{leaf1->getIndividualID(), leaf2->getIndividualID()}));
 }
 
 TEST_F(TPGStepsTest, protectAggregatedChains)
 {
-    std::shared_ptr<const Individual> leaf = makeLeaf(rep, member);
-    std::shared_ptr<const Individual> vertexA = makeVertex(rep, member, {leaf});
-    std::shared_ptr<const Individual> vertexB = makeVertex(rep, member, {vertexA});
+    std::shared_ptr<Individual> leaf = makeLeaf(rep, member);
+    std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf});
+    std::shared_ptr<Individual> vertexB = makeVertex(rep, member, {vertexA});
 
-    Evolution::ProtectAggregatedStep step(roots->individuals());
-    Evolution::EvolutionState state = makeState({leaf, vertexA, vertexB});
+    Evolution::ProtectAggregatedStep step{roots.individuals, protectedKey, aggregatorsKey};
+    Evolution::EvolutionData state = makeState({leaf, vertexA, vertexB});
+    initProtection(step, state);
     step.apply(state);
 
     // Only the top of the chain is a root, but the whole chain stays protected while it lives.
     EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{vertexB->getIndividualID()}));
-    EXPECT_EQ(step.getNbProtected(), 2U);
+    EXPECT_EQ(nbProtected(state), 2U);
     step.apply(state);
-    EXPECT_EQ(step.getNbProtected(), 2U);
+    EXPECT_EQ(nbProtected(state), 2U);
     EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{vertexB->getIndividualID()}));
 
     // When the top dies, A comes back as a root with its own protected leaf.
     setRoots(state, {});
     step.apply(state);
     EXPECT_EQ(idsOf(rootsOf(state)), (std::vector<uint64_t>{vertexA->getIndividualID()}));
-    EXPECT_EQ(step.getNbProtected(), 1U);
+    EXPECT_EQ(nbProtected(state), 1U);
 }
 
 TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
 {
-    Evolution::CreateArchiveStep create(roots->data("archive"), {Dimensions::Requirement(Data::DataType::type<int>({2}))});
-    Evolution::UpdateArchiveStep update(roots->individuals(), roots->data("metrics"), roots->data("archive"), 10, false);
-    EXPECT_EQ(create.providedData(), (std::set<std::string>{roots->data("archive")}));
-    EXPECT_EQ(update.requiredData().count(roots->data("archive")), 1U);
+    Evolution::CreateArchiveStep create(archiveKey, {Dimensions::Requirement(Data::DataType::type<int>({2}))});
+    Evolution::UpdateArchiveStep update(roots.individuals, roots.trainingMetrics, archiveKey, 10, false);
+    EXPECT_EQ(create.providedData(), (std::set<std::string>{archiveKey.name()}));
+    EXPECT_EQ(update.requiredData().count(archiveKey.name()), 1U);
 
-    Evolution::EvolutionState state;
-    state.generation = Evolution::EvolutionState::initGeneration;
+    Evolution::EvolutionData state;
+    state.generation = Evolution::EvolutionData::initGeneration;
     EXPECT_THROW(update.apply(state), std::runtime_error) << "The archive must be created first";
 
     ASSERT_NO_THROW(create.apply(state));
-    const std::shared_ptr<Evaluation::DataSet> archive = state.get<Evaluation::DataSet>(roots->data("archive"));
+    const std::shared_ptr<Evaluation::DataSet> archive = state.get(archiveKey);
     ASSERT_NE(archive, nullptr);
     EXPECT_THROW(update.apply(state), std::runtime_error) << "The update samples the metrics of the population";
     setRoots(state, {});
-    state.set(roots->data("metrics"), std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>());
+    state.set(roots.trainingMetrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>());
 
     // Nothing to sample from an empty population.
     ASSERT_NO_THROW(update.apply(state));
     EXPECT_EQ(archive->size(), 0U);
 
     // Later generations of a fixed archive only update answers, which is nothing for an empty archive.
-    Evolution::UpdateArchiveStep fixed(roots->individuals(), roots->data("metrics"), roots->data("archive"), 10, true);
+    Evolution::UpdateArchiveStep fixed(roots.individuals, roots.trainingMetrics, archiveKey, 10, true);
     state.generation = 3;
     ASSERT_NO_THROW(fixed.apply(state));
-    EXPECT_EQ(state.get<Evaluation::DataSet>(roots->data("archive")), archive);
+    EXPECT_EQ(state.get(archiveKey), archive);
     EXPECT_EQ(archive->size(), 0U);
 
     // A new evolution starts without archive.
     state.reset(0);
-    EXPECT_FALSE(state.has(roots->data("archive")));
+    EXPECT_FALSE(state.has(archiveKey));
 }
 
 TEST_F(TPGStepsTest, cacheMemberOutputs)
@@ -211,20 +249,20 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
     auto problem = std::make_shared<Evaluation::PredictionProblem>(dataSet);
 
     // Members output a constant, whatever the sample.
-    Representations::FakeRepresentation memberRep(problem->getInputDimensions(), Dimensions::Requirement(Data::DataType::type<double>()));
+    auto memberRep = std::make_shared<Representations::FakeRepresentation>(problem->getInputDimensions(), Dimensions::Requirement(Data::DataType::type<double>()));
     std::shared_ptr<const Individual> cachedMember = std::make_shared<Individual>(memberRep,
         GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0})));
     ASSERT_TRUE(cachedMember->isValid());
-    std::shared_ptr<const Individual> vertex = makeLeaf(rep, cachedMember);
+    std::shared_ptr<Individual> vertex = makeLeaf(rep, cachedMember);
 
     // The members of the roots and of the offspring are cached.
-    const std::string offspring = roots->data("offspring");
-    Evolution::CacheMemberOutputsStep step({roots->individuals(), offspring}, roots->data("cache"), problem, std::make_shared<Evaluation::Evaluator>(), 2);
-    Evolution::EvolutionState state = makeState({vertex});
+    const auto offspring = roots.offspring;
+    Evolution::CacheMemberOutputsStep step({roots.individuals, offspring}, cacheKey, problem, std::make_shared<Evaluation::Evaluator>(), 2);
+    Evolution::EvolutionData state = makeState({vertex});
     state.set(offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>());
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots->individuals(), offspring}));
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{roots->data("cache")}));
-    EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, roots->data("cache"), nullptr, std::make_shared<Evaluation::Evaluator>(), 2), std::runtime_error);
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.individuals.name(), offspring.name()}));
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey.name()}));
+    EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, cacheKey, nullptr, std::make_shared<Evaluation::Evaluator>(), 2), std::runtime_error);
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
     ASSERT_NO_THROW(step.apply(state));
@@ -242,18 +280,18 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
     EXPECT_EQ(cachedMember->getCachedOutput(nullptr), nullptr);
 
     // The cached members are a data of the population, and the next run clears their outputs.
-    ASSERT_TRUE(state.has(roots->data("cache")));
-    EXPECT_EQ(state.get<std::vector<std::shared_ptr<const Individual>>>(roots->data("cache"))->size(), 1U);
+    ASSERT_TRUE(state.has(cacheKey));
+    EXPECT_EQ(state.get(cacheKey)->size(), 1U);
     setRoots(state, {});
     ASSERT_NO_THROW(step.apply(state));
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
-    EXPECT_TRUE(state.get<std::vector<std::shared_ptr<const Individual>>>(roots->data("cache"))->empty());
+    EXPECT_TRUE(state.get(cacheKey)->empty());
 }
 
 TEST_F(TPGStepsTest, cachedOutputsAreClearedWithTheGenotype)
 {
-    Representations::FakeRepresentation memberRep(std::vector<Dimensions::Requirement>{Dimensions::Requirement(Data::DataType::type<double>())},
-                                                  Dimensions::Requirement(Data::DataType::type<double>()));
+    auto memberRep = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{Dimensions::Requirement(Data::DataType::type<double>())},
+                                                                          Dimensions::Requirement(Data::DataType::type<double>()));
     auto member = std::make_shared<Individual>(memberRep, GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0})));
     const double input = 0.0;
 
@@ -272,23 +310,23 @@ TEST_F(TPGStepsTest, vertexSteps)
     auto memberRep = std::make_shared<Representations::FakeRepresentation>(inputs, Dimensions::Requirement(Data::DataType::type<double>()));
     auto transfer = std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
     auto memberMutator = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-    auto vertices = std::make_shared<const Evolution::Population>(tpg, 5, "Vertices");
-    const std::string offspring = vertices->data("offspring");
-    const std::string archive = vertices->data("archive");
+    const Evolution::BasicEvolution::Keys vertices(namesOf("Vertices"));
+    const auto offspring = vertices.offspring;
+    const auto archive = archiveKey;
 
     // The vertices are created from the archive if it exists, so it is not required.
-    Evolution::InitVerticesStep init(vertices, transfer, memberRep, memberMutator, archive);
+    Evolution::InitVerticesStep init(vertices.individuals, tpg, 5, transfer, memberRep, memberMutator, archive);
     EXPECT_EQ(init.name(), "InitVertices");
     EXPECT_TRUE(init.requiredData().empty());
-    EXPECT_EQ(init.providedData(), (std::set<std::string>{vertices->individuals()}));
-    EXPECT_THROW(Evolution::InitVerticesStep(roots, transfer, memberRep, memberMutator, archive), std::runtime_error) << "The roots are not TPG vertices";
-    EXPECT_THROW(Evolution::InitVerticesStep(vertices, transfer, nullptr, memberMutator, archive), std::runtime_error);
+    EXPECT_EQ(init.providedData(), (std::set<std::string>{vertices.individuals.name()}));
+    EXPECT_THROW(Evolution::InitVerticesStep(roots.individuals, std::make_shared<Representations::FakeRepresentation>(), 3, transfer, memberRep, memberMutator, archive), std::runtime_error) << "The roots are not TPG vertices";
+    EXPECT_THROW(Evolution::InitVerticesStep(vertices.individuals, tpg, 5, transfer, nullptr, memberMutator, archive), std::runtime_error);
 
     // Mutated vertices transfer the nodes of the roots.
-    Evolution::MutateVerticesStep mutate(offspring, vertices->individuals(), archive, tpg, transfer, memberRep, memberMutator, 2);
+    Evolution::MutateVerticesStep mutate(offspring, vertices.individuals, archive, tpg, transfer, memberRep, memberMutator, 2);
     EXPECT_EQ(mutate.name(), "MutateVertices");
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring, vertices->individuals()}));
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name(), vertices.individuals.name()}));
     EXPECT_TRUE(mutate.providedData().empty()) << "Vertices are mutated in place";
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices->individuals(), archive, nullptr, transfer, memberRep, memberMutator), std::runtime_error);
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices->individuals(), archive, tpg, nullptr, memberRep, memberMutator), std::runtime_error);
+    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, archive, nullptr, transfer, memberRep, memberMutator), std::runtime_error);
+    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, archive, tpg, nullptr, memberRep, memberMutator), std::runtime_error);
 }

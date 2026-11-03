@@ -27,7 +27,7 @@ class Stopwatch
         }
 
         /**
-         * @brief Resets the stopwatch and clears all pending checkpoints.
+         * @brief Restarts the measure of the next checkpoint and clears all pending checkpoints, without resetting the total elapsed time.
          */
         void checkpointReset() { 
             this->lastCheckpoint = now(); 
@@ -43,8 +43,8 @@ class Stopwatch
             this->lastCheckpoint = current; }
 
         /**
-         * @brief Returns all pending checkpoint durations in milliseconds and removes them.
-         * @return Checkpoint durations in chronological order, expressed in milliseconds.
+         * @brief Returns all pending checkpoint durations in seconds and removes them.
+         * @return Checkpoint durations in chronological order, expressed in seconds.
          */
         std::vector<double> getCheckpoints() { 
             std::vector<double> result; 
@@ -53,8 +53,8 @@ class Stopwatch
         }
 
         /**
-         * @brief Returns the total elapsed time since the last reset, in milliseconds.
-         * @return Elapsed time in milliseconds.
+         * @brief Returns the total elapsed time since the last reset, in seconds.
+         * @return Elapsed time in seconds.
          */
         double elapsed() const { 
             return std::chrono::duration<double, std::milli>(now() - this->start).count() / 1000; 

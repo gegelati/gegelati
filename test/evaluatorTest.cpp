@@ -32,7 +32,7 @@ TEST(EvaluatorTest, evaluateIndividualsOnRL)
     Evaluation::ReinforcementProblem problem(le);
     Evaluation::Evaluator evaluator;
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
     ASSERT_TRUE(indiv->isValid()) << "Individual should be valid";
@@ -80,8 +80,8 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     Evaluation::PredictionProblem problem(dataSet);
     Evaluation::Evaluator evaluator;
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
-    rep.output = Data::DataValue::scalar<int>(0);
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    rep->output = Data::DataValue::scalar<int>(0);
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
     ASSERT_TRUE(indiv->isValid()) << "Individual should be valid";
@@ -138,7 +138,7 @@ TEST(EvaluatorTest, evaluateIndividualsInvalidArguments)
     Evaluation::PredictionProblem problem(dataSet);
     Evaluation::Evaluator evaluator;
 
-    Representations::FakeRepresentation rep(problem.getInputDimensions(), problem.getOutputDimension());
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
     std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(rep, std::move(genotype));
 

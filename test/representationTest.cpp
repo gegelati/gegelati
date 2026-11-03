@@ -127,51 +127,51 @@ TEST_F(RepresentationTest, isValid)
 {
     Dimensions::Requirement customOutput = Dimensions::Requirement(Data::DataType::type<size_t>(), Dimensions::NumericRange<size_t>::between(1, 1));
     Dimensions::Requirement customInput = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-10, 10));
-    Representations::FakeRepresentation representation({customInput}, customOutput);
-    std::unique_ptr<GraphBased::GenotypeConstraint>& genotypeConstraint = representation.getGenotypeConstraintMut();
+    auto representation = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput}, customOutput);
+    std::unique_ptr<GraphBased::GenotypeConstraint>& genotypeConstraint = representation->getGenotypeConstraintMut();
     GraphBased::Genotype genotype;
 
     genotypeConstraint = nullptr;
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should not be valid";
 
     genotypeConstraint = std::make_unique<GraphBased::GenotypeConstraint>();
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid with empty genotypeConstraint";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid with empty genotypeConstraint";
 
     GraphBased::NodeConstraint constraint0;
     constraint0.addConstraint(Dimensions::UnconstrainedData());
     genotypeConstraint->addNodeConstraint(constraint0, 2);
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should not be valid";
 
     genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     GraphBased::NodeGroup& group = genotype.getNodeGroup(0);
     group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid";
     group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid";
     group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<float>{1.2f}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid";
 
     group.removeNode(2);
     group.removeNode(1);
     group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6, 2.5}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid";
     
     group.removeNode(1);
     group.addNode(std::make_unique<GraphBased::GPNode>(std::vector<double>{2.6}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid again";
 
     GraphBased::NodeConstraint constraint1;
     constraint1.addConstraint(Dimensions::NumericRange<size_t>::between(1, 1));
     genotypeConstraint->addNodeConstraint(constraint1, 1, 5);
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid anymore";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid anymore";
 
     genotype.addNodeGroup(std::make_unique<GraphBased::NodeGroup>());
     GraphBased::NodeGroup& group2 = genotype.getNodeGroup(1);
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid again";
     
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be valid again";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be valid again";
     group2.removeNode(1);
 
 
@@ -183,7 +183,7 @@ TEST_F(RepresentationTest, isValid)
     ASSERT_TRUE(individual->isValid()) << "Individual should be valid!!";
 
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid again";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid again";
     group2.removeNode(1);
 
 
@@ -196,62 +196,62 @@ TEST_F(RepresentationTest, isValid)
     {
         // Wrong output type of individual
         Dimensions::Requirement customOutput1 = Dimensions::Requirement(Data::DataType::type<size_t>(),Dimensions::NumericRange<size_t>::between(0, 2));
-        Representations::FakeRepresentation representation2({customInput}, customOutput1);
+        auto representation2 = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput}, customOutput1);
         std::shared_ptr<Individual> individual2 = std::make_shared<Individual>(representation2);
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
         ASSERT_TRUE(individual2->isValid()) << "Individual should be valid!!";
     
         group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual2}));
-        ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
+        ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid";
         group2.removeNode(1);
     }
 
     {
         // Too big but good output type of individual
         Dimensions::Requirement customOutput1 = Dimensions::Requirement(Data::DataType::type<size_t>({3}), Dimensions::NumericRange<size_t>::between(1, 1));
-        Representations::FakeRepresentation representation2({customInput}, customOutput1);
+        auto representation2 = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput}, customOutput1);
         std::shared_ptr<Individual> individual2 = std::make_shared<Individual>(representation2);
         individual2->setGenotype(boringGenotype->cloneUniquePtr());
         ASSERT_TRUE(individual2->isValid()) << "Individual should be valid!!";
         group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual2}));
-        ASSERT_TRUE(representation.isValid(genotype)) << "Should be not valid";
+        ASSERT_TRUE(representation->isValid(genotype)) << "Should be not valid";
         group2.removeNode(1);
     }
 
     // Wrong intput type of individuals
     Dimensions::Requirement customInput1 = Dimensions::Requirement(Data::DataType::type<double>({8}));
-    Representations::FakeRepresentation representation3({customInput1}, customOutput);
+    auto representation3 = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput1}, customOutput);
     std::shared_ptr<Individual> individual3 = std::make_shared<Individual>(representation3);
     individual3->setGenotype(boringGenotype->cloneUniquePtr());
     ASSERT_TRUE(individual3->isValid()) << "Individual should be valid!!";
 
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual3}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be not valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be not valid";
     group2.removeNode(1);
 
     
     // Good intput type of individuals, even if smaller
     Dimensions::Requirement customInput2 = Dimensions::Requirement(Data::DataType::type<double>({3}), Dimensions::NumericRange<double>::between(-20, 20));
-    Representations::FakeRepresentation representation4({customInput2}, customOutput);
+    auto representation4 = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput2}, customOutput);
     std::shared_ptr<Individual> individual4 = std::make_shared<Individual>(representation4);
     individual4->setGenotype(boringGenotype->cloneUniquePtr());
     individual4->updateValidity();
     ASSERT_TRUE(individual4->isValid()) << "Individual should be valid!!";
 
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual4}));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Should be valid";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Should be valid";
     group2.removeNode(1);
 
     // wrong range should not work
     Dimensions::Requirement customInput3 = Dimensions::Requirement(Data::DataType::type<double>({4}), Dimensions::NumericRange<double>::between(-5, 5));
-    Representations::FakeRepresentation representation5({customInput3}, customOutput);
+    auto representation5 = std::make_shared<Representations::FakeRepresentation>(std::vector<Dimensions::Requirement>{customInput3}, customOutput);
     std::shared_ptr<Individual> individual5 = std::make_shared<Individual>(representation5);
     individual5->setGenotype(boringGenotype->cloneUniquePtr());
     individual5->updateValidity();
     ASSERT_TRUE(individual5->isValid()) << "Individual should be valid!!";
 
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual5}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should be valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should be valid";
     group2.removeNode(1);
 
     boringGenotype->addNodeGroup(boringGroup->cloneUniquePtr());
@@ -259,7 +259,7 @@ TEST_F(RepresentationTest, isValid)
     ASSERT_FALSE(individual4->isValid()) << "Individual should not be valid!!";
 
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<std::shared_ptr<const Individual>>{individual4}));
-    ASSERT_FALSE(representation.isValid(genotype)) << "Should not be valid";
+    ASSERT_FALSE(representation->isValid(genotype)) << "Should not be valid";
     group2.removeNode(1);
 }
 

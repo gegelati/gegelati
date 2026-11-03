@@ -19,8 +19,8 @@ namespace Dimensions {
             /**
              * \brief Constructor for IndividualValueGenerator.
              */
-            IndividualValueArchiveGenerator(const Evaluation::DataSet& archive, const Representations::Representation& representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
-            : IndividualValueGenerator(representation, generator, mutator), archive{archive} {}
+            IndividualValueArchiveGenerator(const Evaluation::DataSet& archive, std::shared_ptr<const Representations::Representation> representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
+            : IndividualValueGenerator(std::move(representation), generator, mutator), archive{archive} {}
 
             /**
              * \brief Mutate the current genotype.
@@ -33,7 +33,7 @@ namespace Dimensions {
                 bool isUnique = false;
                 while(!isUnique) {
                     genotype = mutator.mutateGenotype(currentIndiv->getGenotype(), generator, rng);
-                    this->representation.detectIntronNodes(*genotype);
+                    this->representation->detectIntronNodes(*genotype);
 
                     std::set<size_t> remainingAnswers;
                     for(size_t idxAnswer = 0; idxAnswer < nbAnswers; idxAnswer ++) {
@@ -41,7 +41,7 @@ namespace Dimensions {
                     }
 
                     for(size_t idxInput = 0; idxInput < this->archive.size() && !remainingAnswers.empty(); idxInput++) {
-                        double currentOutput = this->representation.execute(*genotype, this->archive.getInputsAt(idxInput)).getScalar<double>();
+                        double currentOutput = this->representation->execute(*genotype, this->archive.getInputsAt(idxInput)).getScalar<double>();
                         std::shared_ptr<const double[]> archiveOutputs = this->archive.getOutputAt(idxInput).getData<double>();
                         for(auto it = remainingAnswers.begin(); it != remainingAnswers.end(); ){
                             if(currentOutput == archiveOutputs[*it]) {

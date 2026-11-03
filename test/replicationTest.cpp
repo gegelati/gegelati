@@ -22,7 +22,7 @@ TEST(ReplicationTest, reproduce)
     group2.addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{6, 5, 4}));
     genotype2.addNodeGroup(group2.cloneUniquePtr());
 
-    Representations::FakeRepresentation rep;
+    auto rep = std::make_shared<Representations::FakeRepresentation>();
     RNG::RNG rng;
 
     Reproduction::Replicator reproducer;

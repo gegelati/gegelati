@@ -5,17 +5,17 @@
 #include <string>
 #include <utility>
 
-#include "evolution/step.h"
+#include "evolution/module.h"
 
 namespace Evolution {
 
     /**
      * \brief Step exporting a list of individuals, or only its best individual, to a .dot file.
      */
-    class ExportStep : public Step {
+    class ExportStep : public Module {
         protected:
             /// Name of the exported individuals.
-            std::string individuals;
+            Key<std::vector<std::shared_ptr<Individual>>> individuals;
 
             /// Path of the file, without extension.
             std::string filePath;
@@ -24,7 +24,7 @@ namespace Evolution {
             bool oneFilePerGeneration;
 
             /// Name of the fitness ranking the individuals to only export the best one, none to export them all.
-            std::optional<std::string> bestFitness;
+            std::optional<Key<std::map<uint64_t, double>>> bestFitness;
 
         public:
             /**
@@ -36,17 +36,17 @@ namespace Evolution {
              * \param[in] bestFitness name of a fitness to only export the best individual, none to export them all.
              * \param[in] name name of the step.
              */
-            ExportStep(std::string individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<std::string> bestFitness = std::nullopt,
+            ExportStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<Key<std::map<uint64_t, double>>> bestFitness = std::nullopt,
                        std::string name = "Export")
-                : Step(std::move(name)), individuals{std::move(individuals)}, filePath{std::move(filePath)},
+                : Module(std::move(name)), individuals{std::move(individuals)}, filePath{std::move(filePath)},
                   oneFilePerGeneration{oneFilePerGeneration}, bestFitness{std::move(bestFitness)} {}
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

@@ -54,7 +54,7 @@ class GPNodeTest : public ::testing::Test
 {
   protected:
 
-    Representations::FakeRepresentation rep;
+    std::shared_ptr<Representations::FakeRepresentation> rep = std::make_shared<Representations::FakeRepresentation>();
 
     virtual void SetUp()
     {

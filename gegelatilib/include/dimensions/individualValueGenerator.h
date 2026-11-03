@@ -14,7 +14,7 @@ namespace Dimensions {
     class IndividualValueGenerator : public DataValueGenerator {
         protected:
             /// Representation of the mutated individual
-            const Representations::Representation& representation;
+            std::shared_ptr<const Representations::Representation> representation;
 
             /// @brief Generator used to create the individual
             const GraphBased::GenotypeGenerator& generator;
@@ -26,8 +26,8 @@ namespace Dimensions {
             /**
              * \brief Constructor for IndividualValueGenerator.
              */
-            IndividualValueGenerator(const Representations::Representation& representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
-            : representation(representation), generator{generator}, mutator(mutator) {}
+            IndividualValueGenerator(std::shared_ptr<const Representations::Representation> representation, const GraphBased::GenotypeGenerator& generator, const Mutation::Mutator& mutator) 
+            : representation(std::move(representation)), generator{generator}, mutator(mutator) {}
 
             /**
              * \brief Sample method creating a DataValue of type T within the specified range.

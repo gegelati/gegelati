@@ -1,20 +1,68 @@
 #ifndef EVOLUTION_ORIGIN_TPG_EVOLUTION_H
 #define EVOLUTION_ORIGIN_TPG_EVOLUTION_H
 
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
+#include "evaluation/dataset.h"
 #include "evolution/basicEvolution.h"
-#include "evolution/originTPGSteps.h"
 #include "evolution/steps/logStep.h"
 #include "mutation/nodeTransferMutation.h"
 #include "representations/TPG.h"
+#include "graphBased/genotypeGenerator.h"
+#include "individual.h"
+#include "mutation/mutator.h"
 
 namespace Evolution {
 
     /**
-     * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding module.
+     * \brief Return the vertices directly referenced as destination by the nodes of a TPG vertex.
+     *
+     * \param[in] vertex the TPG vertex.
+     * \return the referenced vertices, ordered by ID and without duplicates.
+     */
+    std::vector<std::shared_ptr<const Individual>> getSubVertices(const Individual& vertex);
+
+    /**
+     * \brief Return the roots and all the vertices reachable from them through tangled connections.
+     *
+     * \param[in] roots the roots of the graphs.
+     * \return the vertices, ordered by ID and without duplicates.
+     */
+    std::vector<std::shared_ptr<const Individual>> getAllVertices(const std::vector<std::shared_ptr<const Individual>>& roots);
+
+    /**
+     * \brief Return the members used by the nodes of TPG vertices.
+     *
+     * \param[in] vertices the TPG vertices.
+     * \return the members, ordered by ID and without duplicates.
+     */
+    std::vector<std::shared_ptr<const Individual>> getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices);
+
+    /**
+     * \brief Create the generator of the genotypes of the vertices.
+     *
+     * Members are created from the archive if there is one, and destinations are actions or, if there are vertices,
+     * tangled connections towards them. The number of nodes follows the TPG representation, but new vertices start with the minimum.
+     * The generator keeps references to its arguments: they must outlive it.
+     *
+     * \param[in] representation the TPG representation of the vertices.
+     * \param[in] memberRepresentation representation of the members.
+     * \param[in] memberMutator mutator creating the members.
+     * \param[in] vertices the vertices that can be reached by tangled connections.
+     * \param[in] archive archive on which members must answer differently from existing ones, null if there is none.
+     */
+    std::unique_ptr<GraphBased::GenotypeGenerator> makeVertexGenerator(const Representations::TPG& representation,
+                                                                       std::shared_ptr<const Representations::Representation> memberRepresentation,
+                                                                       const Mutation::Mutator& memberMutator,
+                                                                       const std::vector<std::shared_ptr<const Individual>>& vertices,
+                                                                       const Evaluation::DataSet* archive);
+
+    /**
+     * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding steps.
      *
      * Vertices are TPG individuals (BasicEvolution::representation must be a Representations::TPG) bidding through members
      * of another representation (e.g. LGP). The flow is the one of BasicEvolution, with the following changes:
@@ -39,14 +87,8 @@ namespace Evolution {
         /// Indicates if the inputs of the archive are fixed after the initialization (e.g. for classification).
         bool isArchiveFixed = false;
 
-        /// Name of the archive, a data of the population.
-        std::string archiveName = "memberArchive";
-
         /// Indicates if the vertices referenced by others are removed from the population.
         bool protectAggregated = true;
-
-        /// Name of the list of members whose outputs are cached, a data of the population.
-        std::string cacheName = "memberOutputCache";
 
         /// Mutator of the vertices, NodeTransferMutation(0.1, 0.7, 0.7) if null.
         std::shared_ptr<Mutation::NodeTransferMutation> nodeTransfer = nullptr;
@@ -55,20 +97,94 @@ namespace Evolution {
         std::shared_ptr<Mutation::Mutator> memberMutation = nullptr;
 
         /**
-         * \brief Inherited from BasicEvolution, adds the population of roots and the steps of the TPG evolution.
+         * \brief Names of the data and of the steps added by the TPG evolution, all of them changeable before build.
+         *
+         * Like for BasicEvolution::Names, give each evolution its own names to run several together.
+         */
+        struct TPGNames {
+            /// Data: the archive of inputs and of the answers of the members.
+            std::string archive = "memberArchive";
+
+            /// Data: the members whose outputs are cached.
+            std::string memberOutputCache = "memberOutputCache";
+
+            /// Data: the vertices removed from the roots by the protection.
+            std::string protectedVertices = "protectedVertices";
+
+            /// Data: the aggregators of the protected vertices.
+            std::string aggregators = "aggregators";
+
+            /// Step creating the archive.
+            std::string createArchiveStep = "CreateArchive";
+
+            /// Step caching the outputs of the members.
+            std::string cacheMemberOutputsStep = "CacheMemberOutputs";
+
+            /// Step protecting the vertices referenced by others.
+            std::string protectAggregatedStep = "ProtectAggregated";
+
+            /// Step updating the archive.
+            std::string updateArchiveStep = "UpdateArchive";
+        };
+
+        /**
+         * \brief Keys of the data of the evolution: the ones of BasicEvolution and the data of the TPG steps.
+         *
+         * build() creates them from the names of the settings. Create them the same way to read the data once it ran.
+         */
+        struct Keys : public BasicEvolution::Keys {
+            /// Create the keys of the default names.
+            Keys() : Keys(Names(), TPGNames()) {}
+
+            /// Create the keys of some names.
+            Keys(const Names& names, const TPGNames& tpgNames)
+                : BasicEvolution::Keys(names), archive(tpgNames.archive), memberOutputCache(tpgNames.memberOutputCache),
+                  protectedVertices(tpgNames.protectedVertices), aggregators(tpgNames.aggregators)
+            {
+            }
+
+            /// Archive of inputs and of the answers of the members.
+            Key<Evaluation::DataSet> archive;
+
+            /// Members whose outputs are cached.
+            Key<std::vector<std::shared_ptr<const Individual>>> memberOutputCache;
+
+            /// Vertices removed from the roots by the protection.
+            Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedVertices;
+
+            /// Aggregators of the protected vertices.
+            Key<std::map<uint64_t, std::set<uint64_t>>> aggregators;
+        };
+
+        /// Names of the data and of the steps added by the TPG evolution, changeable before build.
+        TPGNames tpgNames;
+
+        /**
+         * \brief Inherited from BasicEvolution, builds the module of the TPG evolution.
+         *
+         * Like for BasicEvolution, the settings are read first to create what the modules need, then the modules are built: the
+         * initialization creates the archive and the vertices, a generation protects the aggregated vertices and updates the archive.
          *
          * \throw std::runtime_error if a required setting is missing, if the representation is not a TPG,
          * or if the representations and the problem are not compatible.
          */
-        virtual void addTo(Module& module) const override;
+        virtual std::shared_ptr<Module> build() const override;
+
+      protected:
+        /**
+         * \brief Throw if the settings of the TPG evolution are missing or not compatible.
+         *
+         * \return the representation of the vertices.
+         */
+        std::shared_ptr<const Representations::TPG> checkTPGSettings() const;
     };
 
     /**
      * \brief Columns of LogStep showing the number of vertices and members of graphs.
      *
-     * \param[in] roots name of the roots of the graphs (e.g. the individuals of a population).
+     * \param[in] roots key of the roots of the graphs (e.g. the individuals of a population).
      */
-    std::vector<LogStep::Column> tpgLogColumns(const std::string& roots);
+    std::vector<LogStep::Column> tpgLogColumns(const Key<std::vector<std::shared_ptr<Individual>>>& roots);
 
 }; // namespace Evolution
 

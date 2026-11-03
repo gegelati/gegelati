@@ -56,7 +56,7 @@ class TPGRepresentationTest : public ::testing::Test
   protected:
     Instructions::Set set;
 
-    Representations::Representation* memberRepresentation;
+    std::shared_ptr<Representations::Representation> memberRepresentation;
 
     Dimensions::Requirement inputType;
 
@@ -75,7 +75,7 @@ class TPGRepresentationTest : public ::testing::Test
 
         inputType = Dimensions::Requirement(Data::DataType::type<double>({4}));
 
-        memberRepresentation = new Representations::LGP({inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 1, 10);
+        memberRepresentation = std::make_shared<Representations::LGP>(std::vector<Dimensions::Requirement>{inputType}, Data::DataType::type<double>({8}), set, Data::DataType::type<double>({1}), 1, 10);
     }
 
     virtual void TearDown()
@@ -84,7 +84,7 @@ class TPGRepresentationTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
-        delete memberRepresentation;
+        memberRepresentation = nullptr;
     }
 };
 
@@ -133,8 +133,8 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
     rng.getInt32(0, 3); // for random coverage
 
     size_t nbActions = 3;
-    Representations::TPG representation({inputType}, nbActions, 2, 10);
-    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation.getGenotypeGenerator().cloneUniquePtr();
+    auto representation = std::make_shared<Representations::TPG>(std::vector<Dimensions::Requirement>{inputType}, nbActions, 2, 10);
+    std::unique_ptr<GraphBased::GenotypeGenerator> generator = representation->getGenotypeGenerator().cloneUniquePtr();
 
     ASSERT_EQ(generator->size(), 1) << "Size of constraint should be 1";
     ASSERT_EQ(generator->getMutationRangeAt(0).first, 2) << "Low range should be 2";
@@ -152,9 +152,9 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 
     
     std::vector<std::shared_ptr<const Individual>> members = {
-        std::make_shared<Individual>(*memberRepresentation),
-        std::make_shared<Individual>(*memberRepresentation),
-        std::make_shared<Individual>(*memberRepresentation)
+        std::make_shared<Individual>(memberRepresentation),
+        std::make_shared<Individual>(memberRepresentation),
+        std::make_shared<Individual>(memberRepresentation)
     };
 
     std::vector<std::shared_ptr<const Individual>> tangled = {
@@ -162,12 +162,12 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
         std::make_shared<Individual>(representation),
     };
 
-    representation.setAvailableMembers(members);
+    representation->setAvailableMembers(members);
 
     // Should update generator automatically
-    representation.setAvailableTangledIndiv(tangled);
+    representation->setAvailableTangledIndiv(tangled);
 
-    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation.getGenotypeGenerator().cloneUniquePtr();
+    std::unique_ptr<GraphBased::GenotypeGenerator> generatorNew = representation->getGenotypeGenerator().cloneUniquePtr();
     const GraphBased::NodeGenerator& nodeGenNew = generatorNew->getNodeGeneratorAt(0);
     for(size_t idx = 0; idx < 1000; idx++) {
         std::shared_ptr<const Individual> member = nodeGenNew.getGeneratorAt(0).initialize(rng).getScalar<std::shared_ptr<const Individual>>();
@@ -187,11 +187,11 @@ TEST_F(TPGRepresentationTest, getGenotypeGenerator)
 TEST_F(TPGRepresentationTest, executeIndividual)
 {
     Data::DataValue inputSource = Data::DataValue::array1d<double[4]>({1.0, 1.5, 2.0, -1.0});
-    Representations::TPG representation({inputType}, 3, 2, 10);
+    auto representation = std::make_shared<Representations::TPG>(std::vector<Dimensions::Requirement>{inputType}, 3, 2, 10);
 
 
     // create lgp members.
-    std::shared_ptr<Individual> member0 = std::make_shared<Individual>(*memberRepresentation);
+    std::shared_ptr<Individual> member0 = std::make_shared<Individual>(memberRepresentation);
     std::unique_ptr<GraphBased::Genotype> memberGenotype0 = std::make_unique<GraphBased::Genotype>();
     std::unique_ptr<GraphBased::NodeGroup> memberGroup0 = std::make_unique<GraphBased::NodeGroup>();
     
@@ -201,7 +201,7 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     member0->setGenotype(std::move(memberGenotype0));
     ASSERT_TRUE(member0->isValid()) << "Member should be valid";
 
-    std::shared_ptr<Individual> member1 = std::make_shared<Individual>(*memberRepresentation);
+    std::shared_ptr<Individual> member1 = std::make_shared<Individual>(memberRepresentation);
     std::unique_ptr<GraphBased::Genotype> memberGenotype1 = std::make_unique<GraphBased::Genotype>();
     std::unique_ptr<GraphBased::NodeGroup> memberGroup1 = std::make_unique<GraphBased::NodeGroup>();
     
@@ -212,7 +212,7 @@ TEST_F(TPGRepresentationTest, executeIndividual)
     ASSERT_TRUE(member1->isValid()) << "Member should be valid";
 
 
-    std::shared_ptr<Individual> member2 = std::make_shared<Individual>(*memberRepresentation);
+    std::shared_ptr<Individual> member2 = std::make_shared<Individual>(memberRepresentation);
     std::unique_ptr<GraphBased::Genotype> memberGenotype2 = std::make_unique<GraphBased::Genotype>();
     std::unique_ptr<GraphBased::NodeGroup> memberGroup2 = std::make_unique<GraphBased::NodeGroup>();
     
@@ -261,17 +261,17 @@ TEST_F(TPGRepresentationTest, executeIndividual)
 
     
     genotype.addNodeGroup(std::move(group));
-    ASSERT_TRUE(representation.isValid(genotype)) << "Individual should be valid";
+    ASSERT_TRUE(representation->isValid(genotype)) << "Individual should be valid";
 
     size_t output;
     ASSERT_NO_THROW(output = tangledIndiv->execute({inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
     ASSERT_EQ(output, 1) << "Value is not correct.";
-    ASSERT_NO_THROW(output = representation.execute(genotype, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
+    ASSERT_NO_THROW(output = representation->execute(genotype, {inputSource.view()}).getScalar<size_t>()) << "Execution of individual failed.";
     ASSERT_EQ(output, 1) << "Value is not correct.";
 
-    std::cout<<representation.summary()<<std::endl;
+    std::cout<<representation->summary()<<std::endl;
 
-    std::unique_ptr<Representations::Representation> clone = representation.cloneUniquePtr();
-    ASSERT_EQ(representation.summary(), clone->summary()) << "Summaries should be equal";
-    ASSERT_EQ(representation.execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
+    std::unique_ptr<Representations::Representation> clone = representation->cloneUniquePtr();
+    ASSERT_EQ(representation->summary(), clone->summary()) << "Summaries should be equal";
+    ASSERT_EQ(representation->execute(genotype, {inputSource.view()}), clone->execute(genotype, {inputSource.view()})) << "Execution returns should be equal";
 }

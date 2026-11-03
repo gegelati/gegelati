@@ -8,7 +8,7 @@
 
 #include "evaluation/evaluator.h"
 #include "evaluation/problem.h"
-#include "evolution/step.h"
+#include "evolution/module.h"
 #include "metrics/metricMap.h"
 
 namespace Evolution {
@@ -16,13 +16,13 @@ namespace Evolution {
     /**
      * \brief Step evaluating individuals in a problem.
      */
-    class EvaluateStep : public Step {
+    class EvaluateStep : public Module {
         protected:
             /// Names of the lists of evaluated individuals.
-            std::vector<std::string> evaluated;
+            std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated;
 
             /// Name of the measured metrics.
-            std::string metrics;
+            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics;
 
             /// Problem in which the individuals are evaluated.
             std::shared_ptr<Evaluation::Problem> problem;
@@ -53,15 +53,15 @@ namespace Evolution {
              * \param[in] name name of the step (e.g. "ValidationEvaluation").
              * \throw std::runtime_error if the problem is null.
              */
-            EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::shared_ptr<Evaluation::Problem> problem,
+            EvaluateStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated, Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, std::shared_ptr<Evaluation::Problem> problem,
                          std::shared_ptr<const Evaluation::Evaluator> evaluator, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
                          size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, std::string name = "Evaluate");
 
             /// Return the names of the lists of evaluated individuals.
-            const std::vector<std::string>& getEvaluated() const { return this->evaluated; }
+            const std::vector<Key<std::vector<std::shared_ptr<Individual>>>>& getEvaluated() const { return this->evaluated; }
 
             /// Return the name of the measured metrics.
-            const std::string& getMetrics() const { return this->metrics; }
+            const Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>& getMetrics() const { return this->metrics; }
 
             /// Return the problem in which the individuals are evaluated.
             std::shared_ptr<Evaluation::Problem> getProblem() const { return this->problem; }
@@ -78,14 +78,14 @@ namespace Evolution {
             /// Return the evaluation mode.
             Evaluation::Mode getMode() const { return this->mode; }
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> providedData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

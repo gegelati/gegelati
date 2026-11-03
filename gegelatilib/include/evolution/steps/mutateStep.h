@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 
-#include "evolution/step.h"
+#include "evolution/module.h"
 #include "graphBased/genotypeGenerator.h"
 #include "mutation/mutator.h"
 
@@ -14,10 +14,10 @@ namespace Evolution {
     /**
      * \brief Step mutating individuals.
      */
-    class MutateStep : public Step {
+    class MutateStep : public Module {
         protected:
             /// Name of the mutated individuals.
-            std::string individuals;
+            Key<std::vector<std::shared_ptr<Individual>>> individuals;
 
             /// Mutator applied to the individuals.
             std::shared_ptr<const Mutation::Mutator> mutator;
@@ -39,21 +39,21 @@ namespace Evolution {
              * \param[in] name name of the step.
              * \throw std::runtime_error if the mutator or the generator is null.
              */
-            MutateStep(std::string individuals, std::shared_ptr<const Mutation::Mutator> mutator, std::shared_ptr<const GraphBased::GenotypeGenerator> generator,
+            MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator, std::shared_ptr<const GraphBased::GenotypeGenerator> generator,
                        size_t nbThreads = 1, std::string name = "Mutate");
 
             /// Return the name of the mutated individuals.
-            const std::string& getIndividuals() const { return this->individuals; }
+            const Key<std::vector<std::shared_ptr<Individual>>>& getIndividuals() const { return this->individuals; }
 
             /// Return the maximum number of threads used to mutate.
             size_t getNbThreads() const { return this->nbThreads; }
 
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Step
+            /// Inherited from Module
             virtual std::string details() const override;
-            /// Inherited from Step
-            virtual void apply(EvolutionState& state) override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
     };
 
 }; // namespace Evolution

@@ -84,7 +84,7 @@
      * \return the created individuals, in creation order.
      */
     std::vector<std::shared_ptr<Individual>> initIndividuals(
-        const Mutator& mutator, const Representations::Representation& representation, 
+        const Mutator& mutator, std::shared_ptr<const Representations::Representation> representation, 
         const GraphBased::GenotypeGenerator& generator, size_t nbIndividuals, RNG::RNG& rng);
 
     /**
