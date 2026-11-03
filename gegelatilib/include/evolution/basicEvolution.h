@@ -1,6 +1,7 @@
 #ifndef EVOLUTION_BASIC_EVOLUTION_H
 #define EVOLUTION_BASIC_EVOLUTION_H
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
@@ -9,6 +10,7 @@
 #include "evaluation/evaluator.h"
 #include "evolution/key.h"
 #include "evolution/module.h"
+#include "evolution/steps/logStep.h"
 #include "fitnessAssignment/assigner.h"
 #include "graphBased/genotypeGenerator.h"
 #include "metrics/metric.h"
@@ -124,6 +126,9 @@ namespace Evolution {
 
             /// Step creating the generator of the genotypes.
             std::string createGeneratorStep = "CreateGenerator";
+
+            /// Step writing the log of the evolution.
+            std::string logStep = "Log";
         };
 
         /**
@@ -196,6 +201,9 @@ namespace Evolution {
         /// Number of generations between two validations (see EvolutionData::isUpToDate).
         size_t validationPeriod = 1;
 
+        /// Stream receiving the log of the evolution at each generation (see logColumns), the console by default, null for no log. It must outlive the evolution.
+        std::ostream* logOutput = &std::cout;
+
         /// Number of threads authorized.
         size_t nbThreads = 1;
 
@@ -246,9 +254,22 @@ namespace Evolution {
          */
         virtual std::shared_ptr<Module> build() const;
 
+        /**
+         * \brief Columns of the log of the evolution, made from its names and settings.
+         *
+         * They show the size of the population, its training fitness and, if validation is requested, its validation fitness.
+         * Add, remove or replace columns to customize the log, then give them to a LogStep.
+         *
+         * \return the columns.
+         */
+        virtual std::vector<LogStep::Column> logColumns() const;
+
       protected:
         /// Throw if a required setting is missing or the settings are not compatible.
         void checkSettings() const;
+
+        /// Add the step writing the log of the evolution, the last step of a generation, if logOutput is set.
+        void addLogStep(Module& step) const;
 
         /// Return the metrics measured in a problem, and the hash of the metric of the fitness, which depends on the kind of problem.
         std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> makeMetrics(const Evaluation::Problem& evaluatedProblem) const;

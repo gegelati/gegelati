@@ -79,6 +79,7 @@ class ModuleTest : public ::testing::Test
         evolution.nbValidationIterations = nbValidationIterations;
         evolution.validationPeriod = validationPeriod;
         evolution.nbThreads = nbThreads;
+        evolution.logOutput = nullptr;
         return evolution;
     }
 
@@ -278,15 +279,15 @@ TEST_F(ModuleTest, customStopIsALoop)
 
 TEST_F(ModuleTest, validationAndLogger)
 {
-    auto root = makeSteps(10, 10, 2, 2, 1, 2);
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2, 2, 1, 2);
+    auto root = evolution.build();
     Evolution::EvolutionData state(4);
     const Evolution::BasicEvolution::Keys population;
     const auto validationFitness = root->find<Evolution::AssignFitnessStep>("ValidationFitness")->getFitness();
     EXPECT_EQ(validationFitness, (population.validationFitness));
 
     std::ostringstream output;
-    root->add(std::make_shared<Evolution::LogStep>(output, population.individuals, std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{
-        {"Fit", population.trainingFitness}, {"Val", validationFitness}}));
+    root->add(std::make_shared<Evolution::LogStep>(output, evolution.logColumns()));
     root->resume(state, 4);
 
     const std::string log = output.str();
@@ -383,31 +384,74 @@ TEST_F(ModuleTest, selectionIsGeneric)
 
 TEST_F(ModuleTest, loggerColumns)
 {
-    auto root = makeSteps(10, 10, 2);
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
+    auto root = evolution.build();
     Evolution::EvolutionData state;
     const Evolution::BasicEvolution::Keys population;
     const auto offspring = population.offspring;
+
+    // The columns of the preset, and a custom one.
+    std::vector<Evolution::LogStep::Column> columns = evolution.logColumns();
+    columns.push_back({"Nb_Offspring", [offspring](const Evolution::EvolutionData& data) {
+        const auto children = data.getIfAny(offspring);
+        return (children == nullptr) ? 0.0 : static_cast<double>(children->size());
+    }, 0});
     std::ostringstream output;
-    root->add(std::make_shared<Evolution::LogStep>(output, population.individuals,
-        std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{{"Fit", population.trainingFitness}},
-        std::vector<Evolution::LogStep::Column>{{"Nb_Offspring", [offspring](const Evolution::EvolutionData& state) {
-            const auto children = state.getIfAny(offspring);
-            return (children == nullptr) ? size_t{0} : children->size();
-        }}}));
+    root->add(std::make_shared<Evolution::LogStep>(output, columns));
     root->resume(state, 2);
     state.reset(0);
     root->resume(state, 1);
 
-    // Only the given fitness, the custom column instead of the population size, and one header per evolution.
+    // The training fitness without the validation, the custom column, and one header per evolution.
     const std::string log = output.str();
     EXPECT_NE(log.find("Fit_Avg"), std::string::npos);
+    EXPECT_NE(log.find("Pop_Size"), std::string::npos);
     EXPECT_EQ(log.find("Val_Avg"), std::string::npos);
-    EXPECT_EQ(log.find("Pop_Size"), std::string::npos);
     size_t nbHeaders = 0;
     for(size_t pos = log.find("Nb_Offspring"); pos != std::string::npos; pos = log.find("Nb_Offspring", pos + 1)) {
         nbHeaders++;
     }
     EXPECT_EQ(nbHeaders, 2U);
+}
+
+TEST_F(ModuleTest, loggerSeparator)
+{
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
+    auto root = evolution.build();
+
+    // One log aligned for the console, and one written for another tool: the columns of the preset and the time of each step, separated by ";".
+    std::vector<Evolution::LogStep::Column> csvColumns = evolution.logColumns();
+    const std::vector<Evolution::LogStep::Column> times = Evolution::stepTimeColumns(*root);
+    csvColumns.insert(csvColumns.end(), times.begin(), times.end());
+    std::ostringstream table;
+    std::ostringstream csv;
+    auto tableLog = std::make_shared<Evolution::LogStep>(table, evolution.logColumns());
+    tableLog->setColumnWidth(10);
+    root->add(tableLog);
+    root->add(std::make_shared<Evolution::LogStep>(csv, csvColumns, ";", "CsvLog"));
+    root->evolve(3);
+
+    // The table is aligned in columns of 10 characters.
+    std::istringstream tableLines(table.str());
+    std::string line;
+    std::getline(tableLines, line);
+    EXPECT_EQ(line.find(';'), std::string::npos);
+    EXPECT_EQ(line.size() % 10, 0U) << line;
+
+    // The csv has no padding, the same number of fields on each line, and the steps heading.
+    std::istringstream csvLines(csv.str());
+    std::getline(csvLines, line);
+    EXPECT_EQ(line.substr(0, 12), "Gen;Pop_Size") << line;
+    EXPECT_NE(line.find(";Mutation;"), std::string::npos) << line;
+    EXPECT_EQ(line.substr(line.size() - 14), ";T_Gen;T_Total") << line;
+    EXPECT_EQ(line.find("  "), std::string::npos);
+    const auto nbSeparators = std::count(line.begin(), line.end(), ';');
+    size_t nbRows = 0;
+    while(std::getline(csvLines, line)) {
+        EXPECT_EQ(std::count(line.begin(), line.end(), ';'), nbSeparators) << line;
+        nbRows++;
+    }
+    EXPECT_EQ(nbRows, 3U);
 }
 
 TEST_F(ModuleTest, stepsOfThePreset)
@@ -1084,4 +1128,54 @@ TEST_F(ModuleTest, presetCreatesTheGenerator)
     }, std::set<std::string>{}, "UpdateGenerator"));
     updated->evolve(3);
     EXPECT_EQ(nbCreations, 3U);
+}
+
+TEST_F(ModuleTest, loggerCustomColumns)
+{
+    Evolution::BasicEvolution evolution = makeEvolution(20, 20, 2);
+    auto root = evolution.build();
+    const Evolution::BasicEvolution::Keys population;
+
+    // The time of the evaluation alone (the log adds the time of the generation), the training fitness, and the fitness of the 3 best individuals.
+    const auto evaluation = root->find("TrainingEvaluation");
+    std::vector<Evolution::LogStep::Column> columns{{"T_Eval", [evaluation](const Evolution::EvolutionData&) { return evaluation->getLastDuration(); }, 4}};
+    const std::vector<Evolution::LogStep::Column> fitness = Evolution::fitnessColumns("Fit", population.individuals, population.trainingFitness);
+    columns.insert(columns.end(), fitness.begin(), fitness.end());
+    for(size_t rank = 0; rank < 3; rank++) {
+        columns.push_back({"Best" + std::to_string(rank + 1), [population, rank](const Evolution::EvolutionData& data) {
+            std::vector<double> values;
+            const auto fitnessOfIndividuals = data.getIfAny(population.trainingFitness);
+            for(const auto& individual: data.getIndividuals(population.individuals)) {
+                const auto found = (fitnessOfIndividuals == nullptr) ? std::map<uint64_t, double>::const_iterator() : fitnessOfIndividuals->find(individual->getIndividualID());
+                if(fitnessOfIndividuals != nullptr && found != fitnessOfIndividuals->end()) {
+                    values.push_back(found->second);
+                }
+            }
+            std::sort(values.begin(), values.end(), std::greater<double>());
+            return (rank < values.size()) ? values.at(rank) : std::nan("");
+        }});
+    }
+    std::ostringstream output;
+    root->add(std::make_shared<Evolution::LogStep>(output, columns));
+    root->evolve(3, 4);
+
+    // The heading has the custom columns and the time of the generation, and the best fitnesses are sorted and the first one is the maximum.
+    std::istringstream lines(output.str());
+    std::string heading;
+    std::getline(lines, heading);
+    for(const std::string& name: {"T_Eval", "Fit_Avg", "Best1", "Best3", "T_Gen"}) {
+        EXPECT_NE(heading.find(name), std::string::npos) << name;
+    }
+    std::string last;
+    for(std::string line; std::getline(lines, line);) {
+        last = line;
+    }
+    std::istringstream fields(last);
+    std::string generation;
+    double timeEvaluation, min, average, max, best1, best2, best3;
+    fields >> generation >> timeEvaluation >> min >> average >> max >> best1 >> best2 >> best3;
+    EXPECT_EQ(generation, "2");
+    EXPECT_GE(best1, best2);
+    EXPECT_GE(best2, best3);
+    EXPECT_EQ(best1, max);
 }

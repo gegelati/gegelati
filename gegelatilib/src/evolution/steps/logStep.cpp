@@ -3,76 +3,58 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
-#include <memory>
 #include <numeric>
+#include <sstream>
 
 #include "evolution/steps/lambdaStep.h"
 
 namespace {
-    struct FitnessStats {
-        double min = std::nan("");
-        double average = std::nan("");
-        double max = std::nan("");
-    };
-
-    // Statistics of a fitness of individuals, nan if no individual has a fitness.
-    FitnessStats computeStats(const std::vector<std::shared_ptr<const Individual>>& individuals, const std::map<uint64_t, double>& fitness)
+    // Fitness of the individuals that have one, empty if it was not computed during the current generation.
+    std::vector<double> fitnessOf(const Evolution::EvolutionData& state, const Evolution::Key<std::vector<std::shared_ptr<Individual>>>& individuals,
+                                  const Evolution::Key<std::map<uint64_t, double>>& fitness)
     {
-        FitnessStats stats;
-        size_t count = 0;
-        double sum = 0.0;
-        for(const std::shared_ptr<const Individual>& individual: individuals) {
-            auto it = fitness.find(individual->getIndividualID());
-            if(it == fitness.end()) {
-                continue;
+        std::vector<double> values;
+        if(state.isUpToDate(fitness)) {
+            for(const std::shared_ptr<const Individual>& individual: state.getIndividuals(individuals)) {
+                const auto found = state.get(fitness)->find(individual->getIndividualID());
+                if(found != state.get(fitness)->end()) {
+                    values.push_back(found->second);
+                }
             }
-            stats.min = (count == 0) ? it->second : std::min(stats.min, it->second);
-            stats.max = (count == 0) ? it->second : std::max(stats.max, it->second);
-            sum += it->second;
-            count++;
         }
-        if(count > 0) {
-            stats.average = sum / static_cast<double>(count);
+        return values;
+    }
+
+    // Text of a value, "-" if it is not a number.
+    std::string format(double value, int precision)
+    {
+        if(std::isnan(value)) {
+            return "-";
         }
-        return stats;
+        std::ostringstream text;
+        text << std::fixed << std::setprecision(precision) << value;
+        return text.str();
     }
 }
 
-
-Evolution::LogStep::LogStep(std::ostream& output, Key<std::vector<std::shared_ptr<Individual>>> individuals, std::vector<std::pair<std::string, Key<std::map<uint64_t, double>>>> fitnesses, std::vector<Column> columns,
-                            std::string name)
-    : Module(std::move(name)), output{&output}, individuals{std::move(individuals)}, fitnesses{std::move(fitnesses)}, columns{std::move(columns)}, stopwatch{std::make_shared<Stopwatch>()}
+Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name)
+    : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}, stopwatch{std::make_shared<Stopwatch>()}
 {
-    // The times of the table start with the initialization of the step, whenever the evolution starts again.
+    // The times of the log start with the initialization of the step, whenever the evolution starts again.
     const std::shared_ptr<Stopwatch> started = this->stopwatch;
     this->initialization = std::make_shared<LambdaStep>("StartStopwatch", [started](EvolutionData&) { started->reset(); });
-    if(this->columns.empty()) {
-        const Key<std::vector<std::shared_ptr<Individual>>> logged = this->individuals;
-        this->columns.push_back(Column{"Pop_Size", [logged](const EvolutionData& state) { return state.getIndividuals(logged).size(); }});
-    }
 }
 
-std::set<std::string> Evolution::LogStep::requiredData() const
+void Evolution::LogStep::writeLine(const std::vector<std::string>& texts)
 {
-    std::set<std::string> required{this->individuals.name()};
-    for(const auto& [prefix, fitness]: this->fitnesses) {
-        required.insert(fitness.name());
+    for(size_t idx = 0; idx < texts.size(); idx++) {
+        if(this->separator.empty()) {
+            *this->output << std::right << std::setw(static_cast<int>(this->columnWidth)) << texts.at(idx);
+        } else {
+            *this->output << ((idx > 0) ? this->separator : "") << texts.at(idx);
+        }
     }
-    return required;
-}
-
-void Evolution::LogStep::writeHeader()
-{
-    *this->output << std::setprecision(2) << std::fixed << std::right;
-    *this->output << std::setw(columnWidth) << "Gen";
-    for(const Column& column: this->columns) {
-        *this->output << std::setw(columnWidth) << column.name;
-    }
-    for(const auto& [prefix, fitness]: this->fitnesses) {
-        *this->output << std::setw(columnWidth) << prefix + "_Min" << std::setw(columnWidth) << prefix + "_Avg" << std::setw(columnWidth) << prefix + "_Max";
-    }
-    *this->output << std::setw(columnWidth) << "T_Gen" << std::setw(columnWidth) << "T_Total" << std::endl;
-    this->headerWritten = true;
+    *this->output << std::endl;
 }
 
 void Evolution::LogStep::apply(EvolutionData& state)
@@ -81,25 +63,57 @@ void Evolution::LogStep::apply(EvolutionData& state)
         return;
     }
     if(!this->headerWritten || state.generation == 0) {
-        this->writeHeader();
+        std::vector<std::string> headings{"Gen"};
+        for(const Column& column: this->columns) {
+            headings.push_back(column.name);
+        }
+        headings.insert(headings.end(), {"T_Gen", "T_Total"});
+        this->writeLine(headings);
+        this->headerWritten = true;
     }
 
-    *this->output << std::setw(columnWidth) << state.generation;
+    std::vector<std::string> values{std::to_string(state.generation)};
     for(const Column& column: this->columns) {
-        *this->output << std::setw(columnWidth) << column.value(state);
+        values.push_back(format(column.value(state), column.precision));
     }
+    this->stopwatch->checkpoint();
+    values.push_back(format(this->stopwatch->getCheckpoints().back(), 2));
+    values.push_back(format(this->stopwatch->elapsed(), 2));
+    this->writeLine(values);
+}
 
-    const std::vector<std::shared_ptr<const Individual>> logged = state.getIndividuals(this->individuals);
-    for(const auto& [prefix, fitness]: this->fitnesses) {
-        if(state.isUpToDate(fitness)) {
-            const FitnessStats stats = computeStats(logged, *state.get(fitness));
-            *this->output << std::setw(columnWidth) << stats.min << std::setw(columnWidth) << stats.average << std::setw(columnWidth) << stats.max;
+Evolution::LogStep::Column Evolution::sizeColumn(const Key<std::vector<std::shared_ptr<Individual>>>& individuals, std::string name)
+{
+    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.getIndividuals(individuals).size()); }, 0};
+}
+
+std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::string& prefix, const Key<std::vector<std::shared_ptr<Individual>>>& individuals,
+                                                                  const Key<std::map<uint64_t, double>>& fitness)
+{
+    return {{prefix + "_Min", [individuals, fitness](const EvolutionData& state) {
+                const std::vector<double> values = fitnessOf(state, individuals, fitness);
+                return values.empty() ? std::nan("") : *std::min_element(values.begin(), values.end());
+            }},
+            {prefix + "_Avg", [individuals, fitness](const EvolutionData& state) {
+                const std::vector<double> values = fitnessOf(state, individuals, fitness);
+                return values.empty() ? std::nan("") : std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
+            }},
+            {prefix + "_Max", [individuals, fitness](const EvolutionData& state) {
+                const std::vector<double> values = fitnessOf(state, individuals, fitness);
+                return values.empty() ? std::nan("") : *std::max_element(values.begin(), values.end());
+            }}};
+}
+
+std::vector<Evolution::LogStep::Column> Evolution::stepTimeColumns(const Module& module)
+{
+    std::vector<LogStep::Column> columns;
+    for(const std::shared_ptr<Module>& step: module.getSteps()) {
+        if(step->size() == 0) {
+            columns.push_back({step->name(), [step](const EvolutionData&) { return step->getLastDuration(); }, 4});
         } else {
-            *this->output << std::setw(columnWidth) << "-" << std::setw(columnWidth) << "-" << std::setw(columnWidth) << "-";
+            const std::vector<LogStep::Column> nested = stepTimeColumns(*step);
+            columns.insert(columns.end(), nested.begin(), nested.end());
         }
     }
-
-    this->stopwatch->checkpoint();
-    const double generationTime = this->stopwatch->getCheckpoints().back();
-    *this->output << std::setw(columnWidth) << generationTime << std::setw(columnWidth) << this->stopwatch->elapsed() << std::endl;
+    return columns;
 }

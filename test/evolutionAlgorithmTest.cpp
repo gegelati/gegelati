@@ -209,8 +209,6 @@ TEST_F(EvolutionAlgorithmTest, customEvolutionLGP2) {
     basic.nbThreads = 10;
     auto root = basic.build();
     Evolution::EvolutionData state(4);
-    root->add(std::make_shared<Evolution::LogStep>(std::cout, Evolution::BasicEvolution::Keys().individuals,
-        std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{{"Fit", Evolution::BasicEvolution::Keys().trainingFitness}}));
     root->resume(state, 20);
 
     ASSERT_EQ(1704165046166301501U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
@@ -400,11 +398,10 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipeline) {
     // Create evaluationAgent
     auto problem = std::make_shared<Evaluation::ReinforcementProblem>(le, 3);
 
-    auto root = makeTPG(tpgRep, lgpRep, problem, 100, 100, 3).build();
+    const Evolution::OriginTPGEvolution tpg = makeTPG(tpgRep, lgpRep, problem, 100, 100, 3);
+    auto root = tpg.build();
     Evolution::EvolutionData state(4);
     const Evolution::BasicEvolution::Keys population;
-    root->add(std::make_shared<Evolution::LogStep>(std::cout, population.individuals,
-        std::vector<std::pair<std::string, Evolution::Key<std::map<uint64_t, double>>>>{{"Fit", population.trainingFitness}}, Evolution::tpgLogColumns(population.individuals)));
     root->resume(state, 20);
 
     // Steps of the preset
@@ -530,7 +527,7 @@ TEST_F(EvolutionAlgorithmTest, originTPGSettingsAreChecked) {
         (std::vector<std::string>{"CreateArchive", "UpdateGenerator", "InitPopulation", "InitialEvaluation", "TrainingFitness", "ProtectAggregated", "UpdateArchive"}));
     EXPECT_EQ(stepNames(*root),
         (std::vector<std::string>{"ParentSelection", "Reproduction", "UpdateGenerator", "Mutation", "TrainingEvaluation", "TrainingFitness", "SurvivorSelection",
-                                  "ProtectAggregated", "UpdateArchive"}));
+                                  "ProtectAggregated", "UpdateArchive", "Log"}));
     root->resume(state, 3);
 
     // The representation must be a TPG, and the members are required.

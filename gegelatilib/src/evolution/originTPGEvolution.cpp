@@ -155,19 +155,26 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
         generation->add(std::make_shared<UpdateArchiveStep>(keys.individuals, keys.trainingMetrics, keys.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
     this->addValidationSteps(*generation, keys, evaluator);
+    this->addLogStep(*generation);
 
     generation->setInitialization(init);
     return generation;
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::tpgLogColumns(const Key<std::vector<std::shared_ptr<Individual>>>& roots)
+std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolution::logColumns() const
 {
-    return {
-        {"NbVertex", [roots](const EvolutionData& state) { return Evolution::getAllVertices(state.getIndividuals(roots)).size(); }},
-        {"NbMember", [roots](const EvolutionData& state) { return Evolution::getMembersOf(Evolution::getAllVertices(state.getIndividuals(roots))).size(); }}};
+    std::vector<LogStep::Column> columns = BasicEvolution::logColumns();
+    const Key<std::vector<std::shared_ptr<Individual>>> roots(this->names.population);
+    columns.insert(columns.begin() + 1, {"NbVertex", [roots](const EvolutionData& state) { return static_cast<double>(getAllVertices(state.getIndividuals(roots)).size()); }, 0});
+    columns.insert(columns.begin() + 2, {"NbMember", [roots](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(state.getIndividuals(roots))).size()); }, 0});
+    return columns;
 }
 
 namespace {
+    // Index of the member in a node, and of the destination in a node.
+    constexpr size_t memberValueIndex = 0;
+    constexpr size_t destinationValueIndex = 1;
+
     // Individuals referenced by the value at a given index of the nodes of the first node group.
     std::vector<std::shared_ptr<const Individual>> getReferencedBy(const Individual& vertex, size_t idxValue)
     {
@@ -186,10 +193,6 @@ namespace {
         }
         return result;
     }
-
-    // Index of the member in a node, and of the destination in a node.
-    constexpr size_t memberValueIndex = 0;
-    constexpr size_t destinationValueIndex = 1;
 }
 
 std::vector<std::shared_ptr<const Individual>> Evolution::getSubVertices(const Individual& vertex)

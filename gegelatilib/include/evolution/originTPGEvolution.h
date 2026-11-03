@@ -161,6 +161,9 @@ namespace Evolution {
          */
         virtual std::shared_ptr<Module> build() const override;
 
+        /// Inherited from BasicEvolution, adds the number of vertices and of members of the graphs of the population.
+        virtual std::vector<LogStep::Column> logColumns() const override;
+
       protected:
         /**
          * \brief Throw if the settings of the TPG evolution are missing or not compatible.
@@ -169,13 +172,6 @@ namespace Evolution {
          */
         std::shared_ptr<const Representations::TPG> checkTPGSettings() const;
     };
-
-    /**
-     * \brief Columns of LogStep showing the number of vertices and members of graphs.
-     *
-     * \param[in] roots key of the roots of the graphs (e.g. the individuals of a population).
-     */
-    std::vector<LogStep::Column> tpgLogColumns(const Key<std::vector<std::shared_ptr<Individual>>>& roots);
 
 }; // namespace Evolution
 

@@ -68,9 +68,29 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     this->addFitnessSteps(*evolutionModule, keys, fitnessMetricHash);
     this->addSurvivalStep(*evolutionModule, keys);
     this->addValidationSteps(*evolutionModule, keys, evaluator);
+    this->addLogStep(*evolutionModule);
 
     evolutionModule->setInitialization(initModule);
     return evolutionModule;
+}
+
+std::vector<Evolution::LogStep::Column> Evolution::BasicEvolution::logColumns() const
+{
+    const Keys keys(this->names);
+    std::vector<LogStep::Column> columns{sizeColumn(keys.individuals)};
+    const auto add = [&columns](const std::vector<LogStep::Column>& more) { columns.insert(columns.end(), more.begin(), more.end()); };
+    add(fitnessColumns("Fit", keys.individuals, keys.trainingFitness));
+    if(this->nbValidationIterations > 0) {
+        add(fitnessColumns("Val", keys.individuals, keys.validationFitness));
+    }
+    return columns;
+}
+
+void Evolution::BasicEvolution::addLogStep(Module& step) const
+{
+    if(this->logOutput != nullptr) {
+        step.add(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep));
+    }
 }
 
 void Evolution::BasicEvolution::checkSettings() const

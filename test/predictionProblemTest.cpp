@@ -176,3 +176,12 @@ TEST(PredictionProblemTest, extractMultiMetrics) {
     ASSERT_EQ(inputs.at(1)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
 }
 
+TEST(PredictionProblemTest, noDataToEvaluateOn)
+{
+    // The small dataset only has training data: sampling validation data must fail with an error, not divide by zero.
+    Evaluation::DataSet dataSet = createSmallDataSet();
+    Evaluation::PredictionProblem problem(dataSet);
+    EXPECT_NO_THROW(problem.computeEvaluationHashes(3, 0, Evaluation::Mode::TRAINING, 0));
+    EXPECT_THROW(problem.computeEvaluationHashes(3, 0, Evaluation::Mode::VALIDATION, 0), std::runtime_error);
+    EXPECT_NO_THROW(problem.computeEvaluationHashes(0, 0, Evaluation::Mode::VALIDATION, 0)) << "Nothing is sampled";
+}

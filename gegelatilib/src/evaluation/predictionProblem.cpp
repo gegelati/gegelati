@@ -18,6 +18,11 @@ std::set<uint64_t> Evaluation::PredictionProblem::computeEvaluationHashes(
 {
   std::set<uint64_t> hashes;
 
+  // Samples are drawn in the data of the mode, so there must be some.
+  if(nbIterations > 0 && ((mode == Mode::TRAINING) ? this->dataset.sizeTraining() : this->dataset.sizeValidation()) == 0) {
+    throw std::runtime_error(std::string("Evaluation::PredictionProblem: the dataset has no ") + ((mode == Mode::TRAINING) ? "training" : "validation") + " data to evaluate on");
+  }
+
   // Compute baseHash
   Data::Hash<uint64_t> hasher;
   uint64_t baseHash = hasher(static_cast<int>(mode)) ^ hasher(problemSeed);
