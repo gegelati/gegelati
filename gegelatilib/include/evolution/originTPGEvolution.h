@@ -115,38 +115,6 @@ namespace Evolution {
             std::string updateGeneratorStep = "UpdateGenerator";
         };
 
-        /**
-         * \brief Keys of the data of the evolution: the ones of BasicEvolution and the data of the TPG steps.
-         *
-         * build() creates them from the names of the settings. Create them the same way to read the data once it ran.
-         */
-        struct Keys : public BasicEvolution::Keys {
-            /// Create the keys of the default names.
-            Keys() : Keys(Names(), TPGNames()) {}
-
-            /// Create the keys of some names.
-            Keys(const Names& names, const TPGNames& tpgNames)
-                : BasicEvolution::Keys(names), archive(tpgNames.archive), memberOutputCache(tpgNames.memberOutputCache),
-                  protectedVertices(tpgNames.protectedVertices), aggregators(tpgNames.aggregators), generator(tpgNames.generator)
-            {
-            }
-
-            /// Archive of inputs and of the answers of the members.
-            Key<Evaluation::DataSet> archive;
-
-            /// Members whose outputs are cached.
-            Key<std::vector<std::shared_ptr<const Individual>>> memberOutputCache;
-
-            /// Vertices removed from the roots by the protection.
-            Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedVertices;
-
-            /// Aggregators of the protected vertices.
-            Key<std::map<uint64_t, std::set<uint64_t>>> aggregators;
-
-            /// Generator of the genotypes of the vertices.
-            Key<GraphBased::GenotypeGenerator> generator;
-        };
-
         /// Names of the data and of the steps added by the TPG evolution, changeable before build.
         TPGNames tpgNames;
 

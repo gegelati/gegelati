@@ -150,63 +150,41 @@ Evolution::Module& Evolution::Module::remove(const std::shared_ptr<Module>& remo
     return *this;
 }
 
-std::vector<Evolution::KeyBase> Evolution::Module::requiredKeys() const
+std::set<std::string> Evolution::Module::requiredData() const
 {
     if(this->steps.empty()) {
-        return this->requiredKeyList;
+        return this->requiredList;
     }
-    std::vector<KeyBase> required;
+    std::set<std::string> required;
     std::set<std::string> provided;
-    std::set<std::string> listed;
     for(const std::shared_ptr<Module>& step: this->steps) {
-        for(const KeyBase& key: step->requiredKeys()) {
-            if(provided.find(key.name()) == provided.end() && listed.insert(key.name()).second) {
-                required.push_back(key);
+        for(const std::string& name: step->requiredData()) {
+            if(provided.find(name) == provided.end()) {
+                required.insert(name);
             }
         }
-        for(const KeyBase& key: step->providedKeys()) {
-            provided.insert(key.name());
+        for(const std::string& name: step->providedData()) {
+            provided.insert(name);
         }
     }
     return required;
 }
 
-std::vector<Evolution::KeyBase> Evolution::Module::providedKeys() const
+std::set<std::string> Evolution::Module::providedData() const
 {
     if(this->steps.empty()) {
-        return this->providedKeyList;
+        return this->providedList;
     }
-    std::vector<KeyBase> provided;
-    std::set<std::string> listed;
+    std::set<std::string> provided;
     for(const std::shared_ptr<Module>& step: this->steps) {
-        for(const KeyBase& key: step->providedKeys()) {
-            if(listed.insert(key.name()).second) {
-                provided.push_back(key);
-            }
+        for(const std::string& name: step->providedData()) {
+            provided.insert(name);
         }
     }
     return provided;
 }
 
-std::set<std::string> Evolution::Module::requiredData() const
-{
-    std::set<std::string> names;
-    for(const KeyBase& key: this->requiredKeys()) {
-        names.insert(key.name());
-    }
-    return names;
-}
-
-std::set<std::string> Evolution::Module::providedData() const
-{
-    std::set<std::string> names;
-    for(const KeyBase& key: this->providedKeys()) {
-        names.insert(key.name());
-    }
-    return names;
-}
-
-void Evolution::Module::checkData(std::map<std::string, std::type_index>& available, const std::string& where) const
+void Evolution::Module::checkData(std::set<std::string>& available, const std::string& where) const
 {
     if(!this->steps.empty()) {
         for(const std::shared_ptr<Module>& step: this->steps) {
@@ -214,29 +192,14 @@ void Evolution::Module::checkData(std::map<std::string, std::type_index>& availa
         }
         return;
     }
-    for(const KeyBase& key: this->requiredKeys()) {
-        const auto found = available.find(key.name());
-        if(found == available.end()) {
-            throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' of the " + where + " requires " + key.name()
+    for(const std::string& name: this->requiredData()) {
+        if(available.find(name) == available.end()) {
+            throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' of the " + where + " requires " + name
                                      + ", which no previous step provides");
         }
-        if(key.isTyped() && found->second != std::type_index(typeid(void)) && found->second != key.type()) {
-            throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' of the " + where + " requires " + key.name() + " as a "
-                                     + Data::demangle(key.type().name()) + ", but it is provided as a " + Data::demangle(found->second.name()));
-        }
     }
-    for(const KeyBase& key: this->providedKeys()) {
-        const auto found = available.find(key.name());
-        if(found == available.end()) {
-            available.emplace(key.name(), key.type());
-        } else if(!key.isTyped()) {
-            continue;
-        } else if(found->second == std::type_index(typeid(void))) {
-            found->second = key.type();
-        } else if(found->second != key.type()) {
-            throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' of the " + where + " provides " + key.name() + " as a "
-                                     + Data::demangle(key.type().name()) + ", but it is provided as a " + Data::demangle(found->second.name()));
-        }
+    for(const std::string& name: this->providedData()) {
+        available.insert(name);
     }
 }
 
@@ -268,7 +231,7 @@ void Evolution::Module::initialize(EvolutionData& state)
     }
 }
 
-void Evolution::Module::checkInitialization(const EvolutionData& state, std::map<std::string, std::type_index>& available) const
+void Evolution::Module::checkInitialization(const EvolutionData& state, std::set<std::string>& available) const
 {
     if(this->initialization != nullptr && state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
         this->initialization->checkData(available, "initialization of '" + this->stepName + "'");
@@ -287,7 +250,7 @@ Evolution::EvolutionData Evolution::Module::evolve(size_t nbGenerations, uint64_
 
 void Evolution::Module::resume(EvolutionData& state, size_t nbGenerations)
 {
-    std::map<std::string, std::type_index> available = state.dataTypes();
+    std::set<std::string> available = state.dataNames();
     this->checkInitialization(state, available);
     this->checkData(available, "generations");
 

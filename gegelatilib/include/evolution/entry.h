@@ -15,7 +15,7 @@ namespace Evolution {
      * \brief Data stored in an EvolutionData, whatever its type.
      *
      * It knows the generation in which the data was stored, the type of the data, and how to describe it in summaries.
-     * The data itself is in Entry<T>, which EvolutionData gets back through the Key<T> used to store it.
+     * The data itself is in Entry<T>, which EvolutionData gets back by the type T given when the data is read.
      */
     class EntryBase {
       public:

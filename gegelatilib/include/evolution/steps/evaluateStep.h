@@ -20,10 +20,10 @@ namespace Evolution {
     class EvaluateStep : public Module {
         protected:
             /// Names of the lists of evaluated individuals.
-            std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated;
+            std::vector<std::string> evaluated;
 
             /// Name of the measured metrics.
-            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics;
+            std::string metrics;
 
             /// Problem in which the individuals are evaluated.
             std::shared_ptr<Evaluation::Problem> problem;
@@ -54,15 +54,15 @@ namespace Evolution {
              * \param[in] name name of the step (e.g. "ValidationEvaluation").
              * \throw std::runtime_error if the problem is null.
              */
-            EvaluateStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated, Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, std::shared_ptr<Evaluation::Problem> problem,
+            EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::shared_ptr<Evaluation::Problem> problem,
                          std::shared_ptr<const Evaluation::Evaluator> evaluator, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
                          size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, std::string name = "Evaluate");
 
             /// Return the names of the lists of evaluated individuals.
-            const std::vector<Key<std::vector<std::shared_ptr<Individual>>>>& getEvaluated() const { return this->evaluated; }
+            const std::vector<std::string>& getEvaluated() const { return this->evaluated; }
 
             /// Return the name of the measured metrics.
-            const Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>& getMetrics() const { return this->metrics; }
+            const std::string& getMetrics() const { return this->metrics; }
 
             /// Return the problem in which the individuals are evaluated.
             std::shared_ptr<Evaluation::Problem> getProblem() const { return this->problem; }

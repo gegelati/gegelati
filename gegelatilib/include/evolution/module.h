@@ -59,17 +59,17 @@ namespace Evolution {
             /// Identifier of the step, used by the state to remember the steps it initialized.
             uint64_t stepId;
 
-            /// Keys of the data required by the step itself (see require), not by the steps it holds.
-            std::vector<KeyBase> requiredKeyList;
+            /// Names of the data required by the step itself (see require), not by the steps it holds.
+            std::set<std::string> requiredList;
 
-            /// Keys of the data filled or updated by the step itself (see provide), not by the steps it holds.
-            std::vector<KeyBase> providedKeyList;
+            /// Names of the data filled or updated by the step itself (see provide), not by the steps it holds.
+            std::set<std::string> providedList;
 
             /// Declare a data that must be filled before the step runs. Meant to be called by the constructor of a step.
-            void require(const KeyBase& key) { this->requiredKeyList.push_back(key); }
+            void require(const std::string& name) { this->requiredList.insert(name); }
 
             /// Declare a data filled or updated by the step. Meant to be called by the constructor of a step.
-            void provide(const KeyBase& key) { this->providedKeyList.push_back(key); }
+            void provide(const std::string& name) { this->providedList.insert(name); }
 
             /// Duration in seconds of the last run of the step by its container.
             double lastDuration = 0.0;
@@ -261,20 +261,13 @@ namespace Evolution {
             size_t size() const { return this->steps.size(); }
 
             /**
-             * \brief Return the keys of the data of the state that must be filled before this step runs.
+             * \brief Return the names of the data of the state that must be filled before this step runs.
              *
-             * A step returns the keys it declared with require. For a container, it is the data required by a step and not provided by a previous one. The keys carry the
-             * type of the data, which checkData verifies.
+             * A step returns the names it declared with require. For a container, it is the data required by a step and not provided by a previous one.
              */
-            std::vector<KeyBase> requiredKeys() const;
-
-            /// Return the keys of the data of the state filled or updated by this step (for a container, by its steps).
-            std::vector<KeyBase> providedKeys() const;
-
-            /// Return the names of the data required by this step (see requiredKeys).
             std::set<std::string> requiredData() const;
 
-            /// Return the names of the data filled or updated by this step (see providedKeys).
+            /// Return the names of the data of the state filled or updated by this step (for a container, by its steps).
             std::set<std::string> providedData() const;
 
             /// Return an optional one line description of the parameters of the step, used in summaries.
@@ -285,11 +278,11 @@ namespace Evolution {
              *
              * A container checks its steps one by one.
              *
-             * \param[in,out] available names and types of the data already filled, updated with the data provided by the step.
+             * \param[in,out] available names of the data already filled, updated with the data provided by the step.
              * \param[in] where location of the step used in the error message (e.g. "generation").
-             * \throw std::runtime_error if the step requires data that no previous step provides, or provided with another type.
+             * \throw std::runtime_error if the step requires data that no previous step provides.
              */
-            virtual void checkData(std::map<std::string, std::type_index>& available, const std::string& where) const;
+            virtual void checkData(std::set<std::string>& available, const std::string& where) const;
 
             /**
              * \brief Run the step.
@@ -353,7 +346,7 @@ namespace Evolution {
 
         private:
             /// Check the initializations that were not run on a state yet.
-            void checkInitialization(const EvolutionData& state, std::map<std::string, std::type_index>& available) const;
+            void checkInitialization(const EvolutionData& state, std::set<std::string>& available) const;
 
             /// Return the tree of the modules, then the data if given.
             std::string summary(const EvolutionData* data) const;

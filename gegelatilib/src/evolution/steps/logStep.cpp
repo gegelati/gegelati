@@ -10,14 +10,14 @@
 
 namespace {
     // Fitness of the individuals that have one, empty if it was not computed during the current generation.
-    std::vector<double> fitnessOf(const Evolution::EvolutionData& state, const Evolution::Key<std::vector<std::shared_ptr<Individual>>>& individuals,
-                                  const Evolution::Key<std::map<uint64_t, double>>& fitness)
+    std::vector<double> fitnessOf(const Evolution::EvolutionData& state, const std::string& individuals,
+                                  const std::string& fitness)
     {
         std::vector<double> values;
         if(state.isUpToDate(fitness)) {
-            for(const std::shared_ptr<Individual>& individual: *state.get(individuals)) {
-                const auto found = state.get(fitness)->find(individual->getIndividualID());
-                if(found != state.get(fitness)->end()) {
+            for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(individuals)) {
+                const auto found = state.get<std::map<uint64_t, double>>(fitness)->find(individual->getIndividualID());
+                if(found != state.get<std::map<uint64_t, double>>(fitness)->end()) {
                     values.push_back(found->second);
                 }
             }
@@ -82,13 +82,13 @@ void Evolution::LogStep::apply(EvolutionData& state)
     this->writeLine(values);
 }
 
-Evolution::LogStep::Column Evolution::sizeColumn(const Key<std::vector<std::shared_ptr<Individual>>>& individuals, std::string name)
+Evolution::LogStep::Column Evolution::sizeColumn(const std::string& individuals, std::string name)
 {
-    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.has(individuals) ? state.get(individuals)->size() : 0); }, 0};
+    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.has(individuals) ? state.get<std::vector<std::shared_ptr<Individual>>>(individuals)->size() : 0); }, 0};
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::string& prefix, const Key<std::vector<std::shared_ptr<Individual>>>& individuals,
-                                                                  const Key<std::map<uint64_t, double>>& fitness)
+std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::string& prefix, const std::string& individuals,
+                                                                  const std::string& fitness)
 {
     return {{prefix + "_Min", [individuals, fitness](const EvolutionData& state) {
                 const std::vector<double> values = fitnessOf(state, individuals, fitness);

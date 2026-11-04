@@ -16,7 +16,7 @@ namespace Evolution {
     class ExportStep : public Module {
         protected:
             /// Name of the exported individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+            std::string individuals;
 
             /// Path of the file, without extension.
             std::string filePath;
@@ -25,7 +25,7 @@ namespace Evolution {
             bool oneFilePerGeneration;
 
             /// Name of the fitness ranking the individuals to only export the best one, none to export them all.
-            std::optional<Key<std::map<uint64_t, double>>> bestFitness;
+            std::optional<std::string> bestFitness;
 
         public:
             /**
@@ -37,7 +37,7 @@ namespace Evolution {
              * \param[in] bestFitness name of a fitness to only export the best individual, none to export them all.
              * \param[in] name name of the step.
              */
-            ExportStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<Key<std::map<uint64_t, double>>> bestFitness = std::nullopt,
+            ExportStep(std::string individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<std::string> bestFitness = std::nullopt,
                        std::string name = "Export")
                 : Module(std::move(name)), individuals{std::move(individuals)}, filePath{std::move(filePath)},
                   oneFilePerGeneration{oneFilePerGeneration}, bestFitness{std::move(bestFitness)}

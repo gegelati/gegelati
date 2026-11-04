@@ -17,10 +17,10 @@ namespace Evolution {
     class AssignFitnessStep : public Module {
         protected:
             /// Name of the metrics read.
-            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics;
+            std::string metrics;
 
             /// Name of the computed fitness.
-            Key<std::map<uint64_t, double>> fitness;
+            std::string fitness;
 
             /// Assigner computing the fitness.
             std::shared_ptr<const FitnessAssignment::Assigner> assigner;
@@ -32,13 +32,13 @@ namespace Evolution {
             /**
              * \brief Constructor.
              *
-             * \param[in] metrics key of the metrics read.
-             * \param[in] fitness key of the computed fitness.
+             * \param[in] metrics name of the metrics read.
+             * \param[in] fitness name of the computed fitness.
              * \param[in] assigner assigner computing the fitness.
              * \param[in] metricHash hash of the metric from which the fitness is computed.
              * \param[in] name name of the step.
              */
-            AssignFitnessStep(Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
+            AssignFitnessStep(std::string metrics, std::string fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
                               std::string name = "AssignFitness")
                 : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash}
             {
@@ -46,8 +46,8 @@ namespace Evolution {
                 this->provide(this->fitness);
             }
 
-            /// Return the key of the computed fitness.
-            const Key<std::map<uint64_t, double>>& getFitness() const { return this->fitness; }
+            /// Return the name of the computed fitness.
+            const std::string& getFitness() const { return this->fitness; }
 
             /// Inherited from Module
             virtual std::string details() const override;

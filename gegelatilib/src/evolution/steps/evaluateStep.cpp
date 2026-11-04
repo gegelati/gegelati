@@ -14,13 +14,13 @@ namespace {
 }
 
 
-Evolution::EvaluateStep::EvaluateStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated, Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, std::shared_ptr<Evaluation::Problem> problem,
+Evolution::EvaluateStep::EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::shared_ptr<Evaluation::Problem> problem,
                                       std::shared_ptr<const Evaluation::Evaluator> evaluator, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
                                       size_t nbIterations, Evaluation::Mode mode, std::string name)
     : Module(std::move(name)), evaluated{std::move(evaluated)}, metrics{std::move(metrics)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
       metricTemplate{std::move(metricTemplate)}, nbIterations{nbIterations}, mode{mode}
 {
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+    for(const std::string& key: this->evaluated) {
         this->require(key);
     }
     this->provide(this->metrics);
@@ -38,8 +38,8 @@ void Evolution::EvaluateStep::apply(EvolutionData& state)
 {
     // The evaluated lists are evaluated together, as individuals that cannot be modified.
     std::vector<std::shared_ptr<const Individual>> individuals;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
-        const std::vector<std::shared_ptr<Individual>>& list = *state.get(key);
+    for(const std::string& key: this->evaluated) {
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
         individuals.insert(individuals.end(), list.begin(), list.end());
     }
     state.set(this->metrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->evaluator->evaluateIndividuals(

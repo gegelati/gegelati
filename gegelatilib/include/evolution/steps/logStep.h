@@ -95,10 +95,10 @@ namespace Evolution {
     /**
      * \brief Column showing the number of individuals of a list (a population, the offspring...).
      *
-     * \param[in] individuals key of the list of individuals.
+     * \param[in] individuals name of the list of individuals.
      * \param[in] name heading of the column.
      */
-    LogStep::Column sizeColumn(const Key<std::vector<std::shared_ptr<Individual>>>& individuals, std::string name = "Pop_Size");
+    LogStep::Column sizeColumn(const std::string& individuals, std::string name = "Pop_Size");
 
     /**
      * \brief Columns showing the minimum, the average and the maximum of a fitness over a list of individuals.
@@ -106,11 +106,11 @@ namespace Evolution {
      * The values are not shown when the fitness was not computed during the current generation.
      *
      * \param[in] prefix prefix of the headings, e.g. "Fit" gives Fit_Min, Fit_Avg and Fit_Max.
-     * \param[in] individuals key of the list of individuals.
-     * \param[in] fitness key of the fitness of the individuals.
+     * \param[in] individuals name of the list of individuals.
+     * \param[in] fitness name of the fitness of the individuals.
      */
-    std::vector<LogStep::Column> fitnessColumns(const std::string& prefix, const Key<std::vector<std::shared_ptr<Individual>>>& individuals,
-                                                const Key<std::map<uint64_t, double>>& fitness);
+    std::vector<LogStep::Column> fitnessColumns(const std::string& prefix, const std::string& individuals,
+                                                const std::string& fitness);
 
     /**
      * \brief Columns showing the duration in seconds of the last run of each step of a module (see Module::getLastDuration).

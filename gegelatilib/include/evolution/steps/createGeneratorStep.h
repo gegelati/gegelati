@@ -20,8 +20,8 @@ namespace Evolution {
      */
     class CreateGeneratorStep : public Module {
         protected:
-            /// Key of the created generator.
-            Key<GraphBased::GenotypeGenerator> generator;
+            /// Name of the created generator.
+            std::string generator;
 
             /// Function building the generator from the data.
             std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const EvolutionData&)> build;
@@ -30,24 +30,24 @@ namespace Evolution {
             /**
              * \brief Constructor of the naive generator of a representation, sampling the values of its constraint.
              *
-             * \param[in] generator key of the created generator.
+             * \param[in] generator name of the created generator.
              * \param[in] representation representation whose constraint is sampled, kept alive by the step.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the representation is null.
              */
-            CreateGeneratorStep(Key<GraphBased::GenotypeGenerator> generator, std::shared_ptr<const Representations::Representation> representation,
+            CreateGeneratorStep(std::string generator, std::shared_ptr<const Representations::Representation> representation,
                                 std::string name = "CreateGenerator");
 
             /**
              * \brief Constructor of a generator built from the data.
              *
-             * \param[in] generator key of the created generator.
+             * \param[in] generator name of the created generator.
              * \param[in] build function building the generator from the data, called each time the step runs.
              * \param[in] required names of the data read by the function, checked before the evolution runs.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the function is empty.
              */
-            CreateGeneratorStep(Key<GraphBased::GenotypeGenerator> generator,
+            CreateGeneratorStep(std::string generator,
                                 std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const EvolutionData&)> build,
                                 std::set<std::string> required = {}, std::string name = "CreateGenerator");
 

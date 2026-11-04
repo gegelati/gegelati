@@ -12,7 +12,7 @@
 #include "representations/TPG.h"
 #include "evolution/originTPGEvolution.h"
 
-Evolution::MutateVerticesStep::MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<GraphBased::GenotypeGenerator> generator,
+Evolution::MutateVerticesStep::MutateVerticesStep(std::string individuals, std::string roots, std::string generator,
                                                   std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads, std::string name)
     : Module(std::move(name)), individuals{std::move(individuals)}, roots{std::move(roots)}, generator{std::move(generator)}, mutator{std::move(mutator)},
       nbThreads{nbThreads}
@@ -27,24 +27,24 @@ Evolution::MutateVerticesStep::MutateVerticesStep(Key<std::vector<std::shared_pt
 
 std::string Evolution::MutateVerticesStep::details() const
 {
-    return this->individuals.name() + ", nodes of " + this->roots.name() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 {
     // The roots are only shared with the mutation while mutating, so the step does not keep them alive.
-    const std::vector<std::shared_ptr<Individual>>& roots = *state.get(this->roots);
+    const std::vector<std::shared_ptr<Individual>>& roots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->roots);
     this->mutator->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(roots.begin(), roots.end()));
-    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *state.get(this->generator), state.rng, this->nbThreads);
+    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get<std::vector<std::shared_ptr<Individual>>>(this->individuals), *state.get<GraphBased::GenotypeGenerator>(this->generator), state.rng, this->nbThreads);
     this->mutator->setPotentialNodes(nullptr);
 }
 
-Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated, Key<std::vector<std::shared_ptr<const Individual>>> cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
                                                           std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, std::string name)
     : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
       nbIterations{nbIterations}
 {
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+    for(const std::string& key: this->evaluated) {
         this->require(key);
     }
     this->provide(this->cache);
@@ -61,15 +61,15 @@ std::string Evolution::CacheMemberOutputsStep::details() const
 void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 {
     // Outputs cached at the previous run are for samples of a previous generation.
-    if(const std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> cached = state.getIfAny(this->cache)) {
+    if(const std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> cached = state.getIfAny<std::vector<std::shared_ptr<const Individual>>>(this->cache)) {
         for(const std::shared_ptr<const Individual>& member: *cached) {
             member->clearCachedOutputs();
         }
     }
 
     std::vector<std::shared_ptr<const Individual>> candidates;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
-        const std::vector<std::shared_ptr<Individual>>& list = *state.get(key);
+    for(const std::string& key: this->evaluated) {
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
         candidates.insert(candidates.end(), list.begin(), list.end());
     }
     const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(candidates);
@@ -109,7 +109,7 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 void Evolution::CreateArchiveStep::apply(EvolutionData& state)
 {
     // Each answer of the archive is an array with the answer of each member.
-    state.set(this->archive, std::make_shared<Evaluation::DataSet>(this->inputRequirements, Dimensions::Requirement(Data::DataType::type<double>({1}))));
+    state.add(this->archive, std::make_shared<Evaluation::DataSet>(this->inputRequirements, Dimensions::Requirement(Data::DataType::type<double>({1}))));
 }
 
 std::string Evolution::UpdateArchiveStep::details() const
@@ -133,11 +133,11 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
     }
 
     // Distinct inputs measured during the evaluation of the roots, indexed by their hash.
-    const std::vector<std::shared_ptr<Individual>>& mutableRoots = *state.get(this->roots);
+    const std::vector<std::shared_ptr<Individual>>& mutableRoots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->roots);
     const std::vector<std::shared_ptr<const Individual>> roots(mutableRoots.begin(), mutableRoots.end());
     const std::unordered_map<uint64_t, std::shared_ptr<const Individual>> rootIndex = Util::makeIndex(roots);
     std::map<uint64_t, std::vector<Data::DataValue>> allInputs;
-    for(auto& [id, metricMap]: *state.get(this->metrics)) {
+    for(auto& [id, metricMap]: *state.get<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->metrics)) {
         if(rootIndex.count(id) == 0) {
             continue;
         }
@@ -183,7 +183,7 @@ void Evolution::UpdateArchiveStep::updateArchiveOutputs(EvolutionData& state, Ev
         return;
     }
 
-    const std::vector<std::shared_ptr<Individual>>& roots = *state.get(this->roots);
+    const std::vector<std::shared_ptr<Individual>>& roots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->roots);
     const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end())));
     for(size_t idx = 0; idx < archive.size(); idx++) {
         archive.setOutputAt(idx, computeMemberAnswer(archive.getInputsAt(idx), members));
@@ -192,7 +192,7 @@ void Evolution::UpdateArchiveStep::updateArchiveOutputs(EvolutionData& state, Ev
 
 void Evolution::UpdateArchiveStep::apply(EvolutionData& state)
 {
-    const std::shared_ptr<Evaluation::DataSet> archive = state.get(this->archive);
+    const std::shared_ptr<Evaluation::DataSet> archive = state.get<Evaluation::DataSet>(this->archive);
 
     if(this->isArchiveFixed && state.generation != EvolutionData::initGeneration) {
         this->updateArchiveOutputs(state, *archive);
@@ -205,14 +205,14 @@ void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)
 {
     // A new evolution starts without protected vertices.
     if(state.generation == EvolutionData::initGeneration) {
-        state.set(this->protectedVertices, std::make_shared<std::map<uint64_t, std::shared_ptr<Individual>>>());
-        state.set(this->aggregators, std::make_shared<std::map<uint64_t, std::set<uint64_t>>>());
+        state.add(this->protectedVertices, std::make_shared<std::map<uint64_t, std::shared_ptr<Individual>>>());
+        state.add(this->aggregators, std::make_shared<std::map<uint64_t, std::set<uint64_t>>>());
         return;
     }
-    std::map<uint64_t, std::shared_ptr<Individual>>& protectedVertices = *state.get(this->protectedVertices);
-    std::map<uint64_t, std::set<uint64_t>>& aggregators = *state.get(this->aggregators);
+    std::map<uint64_t, std::shared_ptr<Individual>>& protectedVertices = *state.get<std::map<uint64_t, std::shared_ptr<Individual>>>(this->protectedVertices);
+    std::map<uint64_t, std::set<uint64_t>>& aggregators = *state.get<std::map<uint64_t, std::set<uint64_t>>>(this->aggregators);
 
-    std::vector<std::shared_ptr<Individual>> roots(*state.get(this->roots));
+    std::vector<std::shared_ptr<Individual>> roots(*state.get<std::vector<std::shared_ptr<Individual>>>(this->roots));
     const auto constRoots = [&roots]() { return std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()); };
 
     // Aggregators still alive are the ones reachable from the roots.

@@ -19,7 +19,7 @@ namespace Evolution {
     class InitPopulationStep : public Module {
         protected:
             /// Individuals created.
-            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+            std::string individuals;
 
             /// Representation of the individuals.
             std::shared_ptr<const Representations::Representation> representation;
@@ -30,23 +30,23 @@ namespace Evolution {
             /// Mutator creating the random genotypes.
             std::shared_ptr<const Mutation::Mutator> mutator;
 
-            /// Key of the generator of the genotypes.
-            Key<GraphBased::GenotypeGenerator> generator;
+            /// Name of the generator of the genotypes.
+            std::string generator;
 
         public:
             /**
              * \brief Constructor.
              *
-             * \param[in] individuals key of the created individuals.
+             * \param[in] individuals name of the created individuals.
              * \param[in] representation representation of the individuals, kept alive by the step.
              * \param[in] size number of individuals created.
              * \param[in] mutator mutator creating the random genotypes.
-             * \param[in] generator key of the generator of the genotypes.
+             * \param[in] generator name of the generator of the genotypes.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the representation or the mutator is null.
              */
-            InitPopulationStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
-                               std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator, std::string name = "InitPopulation");
+            InitPopulationStep(std::string individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
+                               std::shared_ptr<const Mutation::Mutator> mutator, std::string generator, std::string name = "InitPopulation");
 
             /// Inherited from Module
             virtual std::string details() const override;

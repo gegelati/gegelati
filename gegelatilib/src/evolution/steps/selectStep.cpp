@@ -4,24 +4,24 @@
 
 namespace {
     // Names of lists, separated by commas.
-    std::string namesOf(const std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>& lists)
+    std::string namesOf(const std::vector<std::string>& lists)
     {
         std::string names;
-        for(const Evolution::Key<std::vector<std::shared_ptr<Individual>>>& list: lists) {
-            names += (names.empty() ? "" : ", ") + list.name();
+        for(const std::string& list: lists) {
+            names += (names.empty() ? "" : ", ") + list;
         }
         return names;
     }
 }
 
 
-Evolution::SelectStep::SelectStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> candidates, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
-                                  Key<std::vector<std::shared_ptr<Individual>>> selected, bool distinct, std::string name)
+Evolution::SelectStep::SelectStep(std::vector<std::string> candidates, std::string fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
+                                  std::string selected, bool distinct, std::string name)
     : Module(std::move(name)), candidates{std::move(candidates)}, fitness{std::move(fitness)}, selector{std::move(selector)}, nbSelected{nbSelected},
       selected{std::move(selected)}, distinct{distinct}
 {
     this->require(this->fitness);
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->candidates) {
+    for(const std::string& key: this->candidates) {
         this->require(key);
     }
     this->provide(this->selected);
@@ -33,21 +33,21 @@ Evolution::SelectStep::SelectStep(std::vector<Key<std::vector<std::shared_ptr<In
 std::string Evolution::SelectStep::details() const
 {
     return std::to_string(this->nbSelected) + (this->distinct ? " distinct" : "") + " from " + namesOf(this->candidates)
-        + " to " + this->selected.name();
+        + " to " + this->selected;
 }
 
 void Evolution::SelectStep::apply(EvolutionData& state)
 {
     std::unordered_map<uint64_t, std::shared_ptr<Individual>> index;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& candidate: this->candidates) {
-        for(const std::shared_ptr<Individual>& individual: *state.get(candidate)) {
+    for(const std::string& candidate: this->candidates) {
+        for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(candidate)) {
             index.emplace(individual->getIndividualID(), individual);
         }
     }
 
     // Only the fitness of the candidates is used.
     std::map<uint64_t, double> candidatesFitness;
-    for(const auto& [id, value]: *state.get(this->fitness)) {
+    for(const auto& [id, value]: *state.get<std::map<uint64_t, double>>(this->fitness)) {
         if(index.count(id) > 0) {
             candidatesFitness.emplace_hint(candidatesFitness.end(), id, value);
         }

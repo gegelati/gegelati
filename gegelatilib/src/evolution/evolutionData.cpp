@@ -22,15 +22,6 @@ std::set<std::string> Evolution::EvolutionData::dataNames() const
     return names;
 }
 
-std::map<std::string, std::type_index> Evolution::EvolutionData::dataTypes() const
-{
-    std::map<std::string, std::type_index> types;
-    for(const auto& entry: this->data) {
-        types.emplace(entry.first, entry.second->type());
-    }
-    return types;
-}
-
 std::string Evolution::EvolutionData::summary() const
 {
     std::ostringstream result;

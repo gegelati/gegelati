@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-Evolution::CreateGeneratorStep::CreateGeneratorStep(Key<GraphBased::GenotypeGenerator> generator,
+Evolution::CreateGeneratorStep::CreateGeneratorStep(std::string generator,
                                                     std::shared_ptr<const Representations::Representation> representation, std::string name)
     : CreateGeneratorStep(std::move(generator),
                           [representation](const EvolutionData&) { return std::make_shared<GraphBased::GenotypeGenerator>(representation->getGenotypeConstraint()); },
@@ -13,7 +13,7 @@ Evolution::CreateGeneratorStep::CreateGeneratorStep(Key<GraphBased::GenotypeGene
     }
 }
 
-Evolution::CreateGeneratorStep::CreateGeneratorStep(Key<GraphBased::GenotypeGenerator> generator,
+Evolution::CreateGeneratorStep::CreateGeneratorStep(std::string generator,
                                                     std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const EvolutionData&)> build,
                                                     std::set<std::string> required, std::string name)
     : Module(std::move(name)), generator{std::move(generator)}, build{std::move(build)}
@@ -29,7 +29,7 @@ Evolution::CreateGeneratorStep::CreateGeneratorStep(Key<GraphBased::GenotypeGene
 
 std::string Evolution::CreateGeneratorStep::details() const
 {
-    return this->generator.name();
+    return this->generator;
 }
 
 void Evolution::CreateGeneratorStep::apply(EvolutionData& state)
@@ -38,5 +38,10 @@ void Evolution::CreateGeneratorStep::apply(EvolutionData& state)
     if(created == nullptr) {
         throw std::runtime_error("Evolution::CreateGeneratorStep: the function building the generator returned null");
     }
-    state.set(this->generator, std::move(created));
+    // The generator is created by the initialization, then replaced when the step runs again.
+    if(state.generation == EvolutionData::initGeneration) {
+        state.add(this->generator, std::move(created));
+    } else {
+        state.set(this->generator, std::move(created));
+    }
 }

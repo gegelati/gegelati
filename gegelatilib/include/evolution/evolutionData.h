@@ -14,7 +14,6 @@
 
 #include "data/demangle.h"
 #include "evolution/entry.h"
-#include "evolution/key.h"
 #include "rng/rng.h"
 
 namespace Evolution {
@@ -23,13 +22,14 @@ namespace Evolution {
      * \brief The data of an evolution: what the modules of an evolution produce and exchange.
      *
      * It is shared by all the modules of an evolution. Apart from the generation counters and the random number
-     * generator, everything is a data identified by a typed Key: individuals of the populations,
-     * parents, offspring, metrics, fitness, and any data the user modules exchange. The data are only accessed through
-     * keys. Data that only one module needs (e.g. its parameters) should stay inside that module.
+     * generator, everything is a data identified by a name: individuals of the populations, parents, offspring,
+     * metrics, fitness, and any data the user modules exchange. The type of a data is given when it is stored and
+     * when it is read: the modules know the type of what they read and write, and a wrong type throws when it is
+     * read. Data that only one module needs (e.g. its parameters) should stay inside that module.
      *
      * Each data is stored in an Entry that records the generation in which it was stored (see isUpToDate), so a reader
      * can tell whether a result is from the current generation. Modifying a data in place keeps its generation.
-     * summary() lists the data with their size and generation.
+     * summary() lists the data with their type, size and generation.
      */
     struct EvolutionData {
         /// Generation number used while the initialization steps are running.
@@ -64,97 +64,113 @@ namespace Evolution {
         /// Return the names of the data of the state.
         std::set<std::string> dataNames() const;
 
-        /// Return the types of the data of the state, by name. The type of a data is the T of its Key<T>.
-        std::map<std::string, std::type_index> dataTypes() const;
-
         /**
-         * \brief Store a data, replacing the previous one, with the current generation.
+         * \brief Create a data, with the current generation.
          *
-         * \tparam T type of the data, given by the key.
-         * \param[in] key the key of the data.
+         * It is for the steps creating a data, so that two steps (e.g. of two evolutions given the same names) cannot create the same one.
+         *
+         * \tparam T type of the data, deduced from the value.
+         * \param[in] name the name of the data.
          * \param[in] value the stored value, shared with the caller.
+         * \throw std::runtime_error if there is already a data with this name.
          */
-        template <typename T> void set(const Key<T>& key, std::shared_ptr<T> value)
+        template <typename T> void add(const std::string& name, std::shared_ptr<T> value)
         {
-            this->data[key.name()] = std::make_shared<const Entry<T>>(std::move(value), this->generation);
+            if(this->has(name)) {
+                throw std::runtime_error("Evolution::EvolutionData::add: a data named " + name + " already exists");
+            }
+            this->set(name, std::move(value));
         }
 
         /**
-         * \brief Return the data stored under a key.
+         * \brief Store a data, replacing the previous one if there is one, with the current generation.
          *
-         * \tparam T type of the data, given by the key.
-         * \param[in] key the key of the data.
-         * \throw std::runtime_error if there is no data.
+         * \tparam T type of the data, deduced from the value.
+         * \param[in] name the name of the data.
+         * \param[in] value the stored value, shared with the caller.
          */
-        template <typename T> std::shared_ptr<T> get(const Key<T>& key)
+        template <typename T> void set(const std::string& name, std::shared_ptr<T> value)
         {
-            return this->find<T>(key.name());
+            this->data[name] = std::make_shared<const Entry<T>>(std::move(value), this->generation);
+        }
+
+        /**
+         * \brief Return the data stored under a name.
+         *
+         * \tparam T type of the data.
+         * \param[in] name the name of the data.
+         * \throw std::runtime_error if there is no data, or if it is not a T.
+         */
+        template <typename T> std::shared_ptr<T> get(const std::string& name)
+        {
+            return this->find<T>(name);
         }
 
         /// See get.
-        template <typename T> std::shared_ptr<const T> get(const Key<T>& key) const
+        template <typename T> std::shared_ptr<const T> get(const std::string& name) const
         {
-            return this->find<T>(key.name());
+            return this->find<T>(name);
         }
 
         /**
-         * \brief Return the data stored under a key, or null if there is none.
+         * \brief Return the data stored under a name, or null if there is none.
          *
-         * \tparam T type of the data, given by the key.
-         * \param[in] key the key of the data.
+         * \tparam T type of the data.
+         * \param[in] name the name of the data.
+         * \throw std::runtime_error if there is a data which is not a T.
          */
-        template <typename T> std::shared_ptr<T> getIfAny(const Key<T>& key)
+        template <typename T> std::shared_ptr<T> getIfAny(const std::string& name)
         {
-            return this->has(key) ? this->find<T>(key.name()) : nullptr;
+            return this->has(name) ? this->find<T>(name) : nullptr;
         }
 
         /// See getIfAny.
-        template <typename T> std::shared_ptr<const T> getIfAny(const Key<T>& key) const
+        template <typename T> std::shared_ptr<const T> getIfAny(const std::string& name) const
         {
-            return this->has(key) ? this->find<T>(key.name()) : nullptr;
+            return this->has(name) ? this->find<T>(name) : nullptr;
         }
 
         /**
-         * \brief Return true if a data is stored under the key.
+         * \brief Return true if a data is stored under the name.
          *
-         * \param[in] key the key of the data.
+         * \param[in] name the name of the data.
          */
-        template <typename T> bool has(const Key<T>& key) const
+        bool has(const std::string& name) const
         {
-            return this->data.find(key.name()) != this->data.end();
+            return this->data.find(name) != this->data.end();
         }
 
         /**
-         * \brief Remove the data stored under the key, if any.
+         * \brief Remove the data stored under the name, if any.
          *
-         * \param[in] key the key of the data.
+         * \param[in] name the name of the data.
          */
-        template <typename T> void erase(const Key<T>& key)
+        void erase(const std::string& name)
         {
-            this->data.erase(key.name());
+            this->data.erase(name);
         }
 
         /**
          * \brief Return true if the data was stored during the current generation.
          *
-         * \param[in] key the key of the data.
+         * \param[in] name the name of the data.
          * \return false if there is no data.
          */
-        template <typename T> bool isUpToDate(const Key<T>& key) const
+        bool isUpToDate(const std::string& name) const
         {
-            auto it = this->data.find(key.name());
+            auto it = this->data.find(name);
             return it != this->data.end() && it->second->generation() == this->generation;
         }
 
         /**
-         * \brief Return a printable table of the data: name, size or value, and generation in which it was stored.
+         * \brief Return a printable table of the data: name, type, size or value, and generation in which it was stored.
          *
          * Data stored during the current generation are "up to date", the others show their generation.
          */
         std::string summary() const;
 
       private:
-        /// Data stored by the steps, by name of their key.
+        /// Data stored by the steps, by name.
         std::map<std::string, std::shared_ptr<const EntryBase>> data;
 
         /// Return the data with a name, checking its existence and type.
@@ -165,7 +181,8 @@ namespace Evolution {
                 throw std::runtime_error("Evolution::EvolutionData::get: no data named " + name);
             }
             if(it->second->type() != std::type_index(typeid(T))) {
-                throw std::runtime_error("Evolution::EvolutionData::get: data " + name + " is not a " + Data::demangle(typeid(T).name()));
+                throw std::runtime_error("Evolution::EvolutionData::get: data " + name + " is not a " + Data::demangle(typeid(T).name()) + " but a "
+                                         + Data::demangle(it->second->type().name()));
             }
             return static_cast<const Entry<T>&>(*it->second).value();
         }

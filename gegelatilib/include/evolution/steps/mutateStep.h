@@ -18,13 +18,13 @@ namespace Evolution {
     class MutateStep : public Module {
         protected:
             /// Name of the mutated individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+            std::string individuals;
 
             /// Mutator applied to the individuals.
             std::shared_ptr<const Mutation::Mutator> mutator;
 
-            /// Key of the generator of the genotypes values.
-            Key<GraphBased::GenotypeGenerator> generator;
+            /// Name of the generator of the genotypes values.
+            std::string generator;
 
             /// Maximum number of threads used to mutate.
             size_t nbThreads;
@@ -35,16 +35,16 @@ namespace Evolution {
              *
              * \param[in] individuals name of the mutated individuals, a list of mutable individuals (e.g. offspring).
              * \param[in] mutator mutator applied to the individuals.
-             * \param[in] generator key of the generator of the genotypes values.
+             * \param[in] generator name of the generator of the genotypes values.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the mutator is null.
              */
-            MutateStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator,
+            MutateStep(std::string individuals, std::shared_ptr<const Mutation::Mutator> mutator, std::string generator,
                        size_t nbThreads = 1, std::string name = "Mutate");
 
             /// Return the name of the mutated individuals.
-            const Key<std::vector<std::shared_ptr<Individual>>>& getIndividuals() const { return this->individuals; }
+            const std::string& getIndividuals() const { return this->individuals; }
 
             /// Return the maximum number of threads used to mutate.
             size_t getNbThreads() const { return this->nbThreads; }

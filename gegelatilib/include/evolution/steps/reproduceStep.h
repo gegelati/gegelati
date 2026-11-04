@@ -17,10 +17,10 @@ namespace Evolution {
     class ReproduceStep : public Module {
         protected:
             /// Name of the parents.
-            Key<std::vector<std::shared_ptr<Individual>>> parents;
+            std::string parents;
 
             /// Name of the created offspring.
-            Key<std::vector<std::shared_ptr<Individual>>> offspring;
+            std::string offspring;
 
             /// Reproducer creating the offspring.
             std::shared_ptr<const Reproduction::Reproducer> reproducer;
@@ -38,7 +38,7 @@ namespace Evolution {
              * \param[in] offspring name of the created offspring, a list of mutable individuals.
              * \param[in] name name of the step.
              */
-            ReproduceStep(Key<std::vector<std::shared_ptr<Individual>>> parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, Key<std::vector<std::shared_ptr<Individual>>> offspring,
+            ReproduceStep(std::string parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, std::string offspring,
                           std::string name = "Reproduce")
                 : Module(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)}
             {

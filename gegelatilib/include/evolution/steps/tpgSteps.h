@@ -13,7 +13,6 @@
 #include "evaluation/predictionProblem.h"
 #include "individual.h"
 #include "metrics/metricMap.h"
-#include "evolution/key.h"
 #include "evolution/module.h"
 #include "mutation/mutator.h"
 #include "mutation/nodeTransferMutation.h"
@@ -32,13 +31,13 @@ namespace Evolution {
     class MutateVerticesStep : public Module {
         protected:
             /// Name of the mutated vertices, a list of mutable individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> individuals;
+            std::string individuals;
 
             /// Name of the current roots, a list of individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> roots;
+            std::string roots;
 
-            /// Key of the generator of the genotypes.
-            Key<GraphBased::GenotypeGenerator> generator;
+            /// Name of the generator of the genotypes.
+            std::string generator;
 
             /// Mutation of the vertices, transferring the nodes of the roots.
             std::shared_ptr<Mutation::NodeTransferMutation> mutator;
@@ -52,13 +51,13 @@ namespace Evolution {
              *
              * \param[in] individuals name of the mutated vertices, a list of mutable individuals (e.g. offspring).
              * \param[in] roots name of the current roots, a list of individuals (e.g. the individuals of a population).
-             * \param[in] generator key of the generator of the genotypes.
+             * \param[in] generator name of the generator of the genotypes.
              * \param[in] mutator mutation of the vertices, its potential nodes are set by the step.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the mutator is null.
              */
-            MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<GraphBased::GenotypeGenerator> generator,
+            MutateVerticesStep(std::string individuals, std::string roots, std::string generator,
                                std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads = 1, std::string name = "MutateVertices");
 
             /// Inherited from Module
@@ -81,10 +80,10 @@ namespace Evolution {
     class CacheMemberOutputsStep : public Module {
         protected:
             /// Names of the lists of individuals about to be evaluated.
-            std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated;
+            std::vector<std::string> evaluated;
 
             /// Name of the cached members, a list of individuals.
-            Key<std::vector<std::shared_ptr<const Individual>>> cache;
+            std::string cache;
 
             /// Problem in which members are evaluated.
             std::shared_ptr<Evaluation::PredictionProblem> problem;
@@ -107,7 +106,7 @@ namespace Evolution {
              * \param[in] name name of the step.
              * \throw std::runtime_error if the problem is null.
              */
-            CacheMemberOutputsStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> evaluated, Key<std::vector<std::shared_ptr<const Individual>>> cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+            CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
                                    std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, std::string name = "CacheMemberOutputs");
 
             /// Inherited from Module
@@ -124,7 +123,7 @@ namespace Evolution {
     class CreateArchiveStep : public Module {
         protected:
             /// Name of the created archive, an Evaluation::DataSet.
-            Key<Evaluation::DataSet> archive;
+            std::string archive;
 
             /// Requirements of the inputs stored in the archive.
             std::vector<Dimensions::Requirement> inputRequirements;
@@ -137,7 +136,7 @@ namespace Evolution {
              * \param[in] inputRequirements requirements of the inputs stored in the archive.
              * \param[in] name name of the step.
              */
-            CreateArchiveStep(Key<Evaluation::DataSet> archive, std::vector<Dimensions::Requirement> inputRequirements, std::string name = "CreateArchive")
+            CreateArchiveStep(std::string archive, std::vector<Dimensions::Requirement> inputRequirements, std::string name = "CreateArchive")
                 : Module(std::move(name)), archive{std::move(archive)}, inputRequirements{std::move(inputRequirements)}
             {
                 this->provide(this->archive);
@@ -160,13 +159,13 @@ namespace Evolution {
     class UpdateArchiveStep : public Module {
         protected:
             /// Name of the roots whose members answer, a list of individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> roots;
+            std::string roots;
 
             /// Name of the metrics from which inputs are sampled, a metrics map.
-            Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics;
+            std::string metrics;
 
             /// Name of the updated archive, an Evaluation::DataSet.
-            Key<Evaluation::DataSet> archive;
+            std::string archive;
 
             /// Maximum number of samples stored in the archive.
             size_t archiveSize;
@@ -200,7 +199,7 @@ namespace Evolution {
              * \param[in] isArchiveFixed indicates if the inputs of the archive are fixed after the initialization.
              * \param[in] name name of the step.
              */
-            UpdateArchiveStep(Key<std::vector<std::shared_ptr<Individual>>> roots, Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, Key<Evaluation::DataSet> archive, size_t archiveSize, bool isArchiveFixed, std::string name = "UpdateArchive")
+            UpdateArchiveStep(std::string roots, std::string metrics, std::string archive, size_t archiveSize, bool isArchiveFixed, std::string name = "UpdateArchive")
                 : Module(std::move(name)), roots{std::move(roots)}, metrics{std::move(metrics)}, archive{std::move(archive)},
                   archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
             {
@@ -228,26 +227,26 @@ namespace Evolution {
      */
     class ProtectAggregatedStep : public Module {
         protected:
-            /// Key of the roots, a list of individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> roots;
+            /// Name of the roots, a list of individuals.
+            std::string roots;
 
-            /// Key of the protected vertices, indexed by ID.
-            Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedVertices;
+            /// Name of the protected vertices, indexed by ID.
+            std::string protectedVertices;
 
-            /// Key of the IDs of the aggregators of each protected vertex.
-            Key<std::map<uint64_t, std::set<uint64_t>>> aggregators;
+            /// Name of the IDs of the aggregators of each protected vertex.
+            std::string aggregators;
 
         public:
             /**
              * \brief Constructor.
              *
-             * \param[in] roots key of the roots, a list of individuals (e.g. the individuals of a population).
-             * \param[in] protectedVertices key of the protected vertices, created by the step during the initialization.
-             * \param[in] aggregators key of the aggregators of the protected vertices, created by the step during the initialization.
+             * \param[in] roots name of the roots, a list of individuals (e.g. the individuals of a population).
+             * \param[in] protectedVertices name of the protected vertices, created by the step during the initialization.
+             * \param[in] aggregators name of the aggregators of the protected vertices, created by the step during the initialization.
              * \param[in] name name of the step.
              */
-            ProtectAggregatedStep(Key<std::vector<std::shared_ptr<Individual>>> roots, Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedVertices,
-                                  Key<std::map<uint64_t, std::set<uint64_t>>> aggregators, std::string name = "ProtectAggregated")
+            ProtectAggregatedStep(std::string roots, std::string protectedVertices,
+                                  std::string aggregators, std::string name = "ProtectAggregated")
                 : Module(std::move(name)), roots{std::move(roots)}, protectedVertices{std::move(protectedVertices)}, aggregators{std::move(aggregators)}
             {
                 this->require(this->roots);

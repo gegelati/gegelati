@@ -22,10 +22,10 @@ namespace Evolution {
     class SelectStep : public Module {
         protected:
             /// Names of the lists of candidates.
-            std::vector<Key<std::vector<std::shared_ptr<Individual>>>> candidates;
+            std::vector<std::string> candidates;
 
             /// Name of the fitness used by the selector.
-            Key<std::map<uint64_t, double>> fitness;
+            std::string fitness;
 
             /// Selector choosing the individuals.
             std::shared_ptr<const Selection::Selector> selector;
@@ -34,7 +34,7 @@ namespace Evolution {
             size_t nbSelected;
 
             /// Name of the selected individuals, a list of individuals.
-            Key<std::vector<std::shared_ptr<Individual>>> selected;
+            std::string selected;
 
             /// Indicates if each individual is kept at most once, the selected ones being ordered by ID.
             bool distinct;
@@ -52,8 +52,8 @@ namespace Evolution {
              * \param[in] name name of the step (e.g. "ParentSelection").
              * \throw std::runtime_error if there is no candidates or the selector is null.
              */
-            SelectStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> candidates, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
-                       Key<std::vector<std::shared_ptr<Individual>>> selected, bool distinct = false, std::string name = "Select");
+            SelectStep(std::vector<std::string> candidates, std::string fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
+                       std::string selected, bool distinct = false, std::string name = "Select");
 
             /// Inherited from Module
             virtual std::string details() const override;

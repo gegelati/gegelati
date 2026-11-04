@@ -245,7 +245,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
     config.problem = problem;
     auto root = config.build();
     Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolution::Keys population;
+    const Evolution::BasicEvolution::Names population;
     root->resume(state, 20);
 
     ASSERT_EQ(18013509966814137868U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
@@ -282,7 +282,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGP3) {
     config.problem = problem;
     auto root = config.build();
     Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolution::Keys population;
+    const Evolution::BasicEvolution::Names population;
 
     /*auto mutator = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     const auto generator = std::make_shared<const GraphBased::GenotypeGenerator>(lgpRep->getGenotypeConstraint());
@@ -344,8 +344,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     config.memberRepresentation = lgpRep;
     config.problem = problem;
     auto root = config.build();
-    Evolution::Key<std::vector<std::shared_ptr<Individual>>> population(config.names.population);
-    Evolution::Key<std::map<uint64_t, double>> populationFitness(config.names.trainingFitness);
+    const std::string population(config.names.population);
+    const std::string populationFitness(config.names.trainingFitness);
     std::cout<<root->summary()<<std::endl;
 
     std::string str = "graph";
@@ -424,17 +424,17 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
 
     // Before the TPG is created or mutated, a step builds its generator: the members are the current individuals of the LGP,
     // and the destinations are actions or the current individuals of the TPG (none at the beginning).
-    const Evolution::BasicEvolution::Keys lgpKeys(lgp.names);
-    const Evolution::BasicEvolution::Keys tpgKeys(tpg.names);
+    const Evolution::BasicEvolution::Names lgpKeys(lgp.names);
+    const Evolution::BasicEvolution::Names tpgKeys(tpg.names);
     auto makeGeneratorStep = [&]() {
         return std::make_shared<Evolution::LambdaStep>("TPGGenerator", [tpgRep, lgpKeys, tpgKeys](Evolution::EvolutionData& data) {
             // The member of a node is one of the current individuals of the LGP.
-            const std::vector<std::shared_ptr<const Individual>> members = constIndividuals(*data.get(lgpKeys.individuals));
+            const std::vector<std::shared_ptr<const Individual>> members = constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(lgpKeys.population));
             GraphBased::NodeGenerator bidNodes;
             bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(members));
 
             // The destination is an action or, sometimes, one of the current individuals of the TPG (none at the beginning).
-            const auto tpgIndividuals = data.getIfAny(tpgKeys.individuals);
+            const auto tpgIndividuals = data.getIfAny<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population);
             const std::vector<std::shared_ptr<const Individual>> tangled = (tpgIndividuals == nullptr) ? std::vector<std::shared_ptr<const Individual>>{} : constIndividuals(*tpgIndividuals);
             Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRep->getNbActions() - 1);
             if(tangled.empty()) {
@@ -457,14 +457,14 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     tpgModule->insertBefore(tpgModule->find("Mutation"), makeGeneratorStep());
 
     // The outputs of the members (the LGP individuals) on the samples of the evaluation are computed once, whatever the number of vertices using them.
-    const Evolution::Key<std::vector<std::shared_ptr<const Individual>>> cacheKey("TPG.memberOutputCache");
+    const std::string cacheKey("TPG.memberOutputCache");
     tpgModule->insertAfter(tpgModule->find("Mutation"), std::make_shared<Evolution::CacheMemberOutputsStep>(
-        std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{tpgKeys.individuals, tpgKeys.offspring}, cacheKey, tpgProblem,
+        std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem,
         std::make_shared<Evaluation::ParallelEvaluator>(tpg.nbThreads), tpg.nbTrainingIterations));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
     columns.insert(columns.begin() + 1, {"NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
-        const auto roots = data.getIfAny(tpgKeys.individuals);
+        const auto roots = data.getIfAny<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population);
         return (roots == nullptr) ? 0.0 : static_cast<double>(Evolution::getAllVertices(constIndividuals(*roots)).size());
     }, 0});
     std::ostringstream csv;
@@ -483,15 +483,15 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
 
     EXPECT_EQ(data.nbGenerationsDone, 40U);
     EXPECT_NE(csv.str().find("Gen;Pop_Size;NbVertex;Fit_Min"), std::string::npos);
-    EXPECT_EQ(constIndividuals(*data.get(lgpKeys.individuals)).size(), lgp.sizePopulation);
-    const std::vector<std::shared_ptr<const Individual>> roots = constIndividuals(*data.get(tpgKeys.individuals));
+    EXPECT_EQ(constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(lgpKeys.population)).size(), lgp.sizePopulation);
+    const std::vector<std::shared_ptr<const Individual>> roots = constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population));
     ASSERT_EQ(roots.size(), tpg.sizePopulation);
     EXPECT_TRUE(data.isUpToDate(tpgKeys.trainingFitness));
 
     // The cache holds the members used by the TPG, which are individuals of the LGP.
     ASSERT_TRUE(data.has(cacheKey));
-    EXPECT_FALSE(data.get(cacheKey)->empty());
-    for(const auto& member: *data.get(cacheKey)) {
+    EXPECT_FALSE(data.get<std::vector<std::shared_ptr<const Individual>>>(cacheKey)->empty());
+    for(const auto& member: *data.get<std::vector<std::shared_ptr<const Individual>>>(cacheKey)) {
         EXPECT_EQ(&member->getRepresentation(), lgpRep.get());
     }
 
@@ -555,13 +555,13 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     auto root = config.build();
     Evolution::EvolutionData state(4);
     root->remove(root->findStep("CacheMemberOutputs"));
-    const Evolution::BasicEvolution::Keys population;
+    const Evolution::BasicEvolution::Names population;
     std::cout<<root->summary()<<std::endl;
 
     std::string str = "graph";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
 
 
     root->resume(state, 40);
@@ -615,11 +615,11 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2D) {
     config.problem = problem;
     auto root = config.build();
     Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolution::Keys population;
+    const Evolution::BasicEvolution::Names population;
     std::string str = "graphLGP";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
     str = "graphLGPBest";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
     root->resume(state, 200);
 
     ASSERT_EQ(13253408461481353746U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
@@ -673,12 +673,12 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     config.problem = problem;
     auto root = config.build();
     Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolution::Keys population;
+    const Evolution::BasicEvolution::Names population;
 
     std::string str = "graph";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    root->add(std::make_shared<Evolution::ExportStep>(population.individuals, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
+    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
 
 
     root->resume(state, 10000);

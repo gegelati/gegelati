@@ -59,13 +59,13 @@ class TPGStepsTest : public ::testing::Test
     std::shared_ptr<Representations::FakeRepresentation> rep = std::make_shared<Representations::FakeRepresentation>();
     std::shared_ptr<const Individual> member;
     // Keys of the population of roots.
-    const Evolution::BasicEvolution::Keys roots{namesOf("Roots")};
+    const Evolution::BasicEvolution::Names roots{namesOf("Roots")};
 
     // Keys of data of the steps.
-    const Evolution::Key<Evaluation::DataSet> archiveKey{"archive"};
-    const Evolution::Key<std::vector<std::shared_ptr<const Individual>>> cacheKey{"cache"};
-    const Evolution::Key<std::map<uint64_t, std::shared_ptr<Individual>>> protectedKey{"protectedVertices"};
-    const Evolution::Key<std::map<uint64_t, std::set<uint64_t>>> aggregatorsKey{"aggregators"};
+    const std::string archiveKey{"archive"};
+    const std::string cacheKey{"cache"};
+    const std::string protectedKey{"protectedVertices"};
+    const std::string aggregatorsKey{"aggregators"};
 
     virtual void SetUp()
     {
@@ -76,13 +76,13 @@ class TPGStepsTest : public ::testing::Test
     // Replace the individuals of the population of roots.
     void setRoots(Evolution::EvolutionData& state, const std::vector<std::shared_ptr<Individual>>& individuals) const
     {
-        state.set(this->roots.individuals, std::make_shared<std::vector<std::shared_ptr<Individual>>>(individuals));
+        state.set(this->roots.population, std::make_shared<std::vector<std::shared_ptr<Individual>>>(individuals));
     }
 
     // Number of vertices protected by a ProtectAggregatedStep.
     size_t nbProtected(const Evolution::EvolutionData& state) const
     {
-        return state.get(this->protectedKey)->size();
+        return state.get<std::map<uint64_t, std::shared_ptr<Individual>>>(this->protectedKey)->size();
     }
 
     // Initialize the data of a ProtectAggregatedStep, as the initialization of an evolution does.
@@ -90,14 +90,16 @@ class TPGStepsTest : public ::testing::Test
     {
         const uint64_t generation = state.generation;
         state.generation = Evolution::EvolutionData::initGeneration;
-        step.apply(state);
+        state.erase(protectedKey);
+    state.erase(aggregatorsKey);
+    step.apply(state);
         state.generation = generation;
     }
 
     // Individuals of the population of roots.
     std::vector<std::shared_ptr<const Individual>> rootsOf(const Evolution::EvolutionData& state) const
     {
-        return constIndividuals(*state.get(this->roots.individuals));
+        return constIndividuals(*state.get<std::vector<std::shared_ptr<Individual>>>(this->roots.population));
     }
 
     // State where the roots have a "fitness", and empty "metrics".
@@ -144,8 +146,8 @@ TEST_F(TPGStepsTest, protectAggregated)
     std::shared_ptr<Individual> leaf2 = makeLeaf(rep, member);
     std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf1});
 
-    Evolution::ProtectAggregatedStep step{roots.individuals, protectedKey, aggregatorsKey};
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{roots.individuals.name(), protectedKey.name(), aggregatorsKey.name()}));
+    Evolution::ProtectAggregatedStep step{roots.population, protectedKey, aggregatorsKey};
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{roots.population, protectedKey, aggregatorsKey}));
     Evolution::EvolutionData state = makeState({leaf1, leaf2, vertexA});
     EXPECT_THROW(step.apply(state), std::runtime_error) << "The protection must be initialized first";
     initProtection(step, state);
@@ -171,6 +173,8 @@ TEST_F(TPGStepsTest, protectAggregated)
     step.apply(state);
     EXPECT_EQ(nbProtected(state), 1U);
     state.generation = Evolution::EvolutionData::initGeneration;
+    state.erase(protectedKey);
+    state.erase(aggregatorsKey);
     step.apply(state);
     EXPECT_EQ(nbProtected(state), 0U);
 
@@ -178,7 +182,7 @@ TEST_F(TPGStepsTest, protectAggregated)
     state.generation = 0;
     setRoots(state, {leaf1, vertexA});
     step.apply(state);
-    Evolution::ProtectAggregatedStep otherStep{roots.individuals, protectedKey, aggregatorsKey};
+    Evolution::ProtectAggregatedStep otherStep{roots.population, protectedKey, aggregatorsKey};
     EXPECT_EQ(nbProtected(state), 1U);
     setRoots(state, {leaf2});
     otherStep.apply(state);
@@ -192,7 +196,7 @@ TEST_F(TPGStepsTest, protectAggregatedChains)
     std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf});
     std::shared_ptr<Individual> vertexB = makeVertex(rep, member, {vertexA});
 
-    Evolution::ProtectAggregatedStep step{roots.individuals, protectedKey, aggregatorsKey};
+    Evolution::ProtectAggregatedStep step{roots.population, protectedKey, aggregatorsKey};
     Evolution::EvolutionData state = makeState({leaf, vertexA, vertexB});
     initProtection(step, state);
     step.apply(state);
@@ -214,16 +218,16 @@ TEST_F(TPGStepsTest, protectAggregatedChains)
 TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
 {
     Evolution::CreateArchiveStep create(archiveKey, {Dimensions::Requirement(Data::DataType::type<int>({2}))});
-    Evolution::UpdateArchiveStep update(roots.individuals, roots.trainingMetrics, archiveKey, 10, false);
-    EXPECT_EQ(create.providedData(), (std::set<std::string>{archiveKey.name()}));
-    EXPECT_EQ(update.requiredData().count(archiveKey.name()), 1U);
+    Evolution::UpdateArchiveStep update(roots.population, roots.trainingMetrics, archiveKey, 10, false);
+    EXPECT_EQ(create.providedData(), (std::set<std::string>{archiveKey}));
+    EXPECT_EQ(update.requiredData().count(archiveKey), 1U);
 
     Evolution::EvolutionData state;
     state.generation = Evolution::EvolutionData::initGeneration;
     EXPECT_THROW(update.apply(state), std::runtime_error) << "The archive must be created first";
 
     ASSERT_NO_THROW(create.apply(state));
-    const std::shared_ptr<Evaluation::DataSet> archive = state.get(archiveKey);
+    const std::shared_ptr<Evaluation::DataSet> archive = state.get<Evaluation::DataSet>(archiveKey);
     ASSERT_NE(archive, nullptr);
     EXPECT_THROW(update.apply(state), std::runtime_error) << "The update samples the metrics of the population";
     setRoots(state, {});
@@ -234,10 +238,10 @@ TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
     EXPECT_EQ(archive->size(), 0U);
 
     // Later generations of a fixed archive only update answers, which is nothing for an empty archive.
-    Evolution::UpdateArchiveStep fixed(roots.individuals, roots.trainingMetrics, archiveKey, 10, true);
+    Evolution::UpdateArchiveStep fixed(roots.population, roots.trainingMetrics, archiveKey, 10, true);
     state.generation = 3;
     ASSERT_NO_THROW(fixed.apply(state));
-    EXPECT_EQ(state.get(archiveKey), archive);
+    EXPECT_EQ(state.get<Evaluation::DataSet>(archiveKey), archive);
     EXPECT_EQ(archive->size(), 0U);
 
     // A new evolution starts without archive.
@@ -259,11 +263,11 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
 
     // The members of the roots and of the offspring are cached.
     const auto offspring = roots.offspring;
-    Evolution::CacheMemberOutputsStep step({roots.individuals, offspring}, cacheKey, problem, std::make_shared<Evaluation::Evaluator>(), 2);
+    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem, std::make_shared<Evaluation::Evaluator>(), 2);
     Evolution::EvolutionData state = makeState({vertex});
     state.set(offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>());
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.individuals.name(), offspring.name()}));
-    EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey.name()}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring}));
+    EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey}));
     EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, cacheKey, nullptr, std::make_shared<Evaluation::Evaluator>(), 2), std::runtime_error);
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
@@ -283,11 +287,11 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
 
     // The cached members are a data of the population, and the next run clears their outputs.
     ASSERT_TRUE(state.has(cacheKey));
-    EXPECT_EQ(state.get(cacheKey)->size(), 1U);
+    EXPECT_EQ(state.get<std::vector<std::shared_ptr<const Individual>>>(cacheKey)->size(), 1U);
     setRoots(state, {});
     ASSERT_NO_THROW(step.apply(state));
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
-    EXPECT_TRUE(state.get(cacheKey)->empty());
+    EXPECT_TRUE(state.get<std::vector<std::shared_ptr<const Individual>>>(cacheKey)->empty());
 }
 
 TEST_F(TPGStepsTest, cachedOutputsAreClearedWithTheGenotype)
@@ -308,14 +312,14 @@ TEST_F(TPGStepsTest, cachedOutputsAreClearedWithTheGenotype)
 TEST_F(TPGStepsTest, mutateVerticesStep)
 {
     auto transfer = std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
-    const Evolution::BasicEvolution::Keys vertices(namesOf("Vertices"));
+    const Evolution::BasicEvolution::Names vertices(namesOf("Vertices"));
     const auto offspring = vertices.offspring;
-    const Evolution::Key<GraphBased::GenotypeGenerator> generatorKey("VertexGenerator");
+    const std::string generatorKey("VertexGenerator");
 
     // Mutated vertices transfer the nodes of the roots, with the generator found in the data.
-    Evolution::MutateVerticesStep mutate(offspring, vertices.individuals, generatorKey, transfer, 2);
+    Evolution::MutateVerticesStep mutate(offspring, vertices.population, generatorKey, transfer, 2);
     EXPECT_EQ(mutate.name(), "MutateVertices");
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring.name(), vertices.individuals.name(), generatorKey.name()}));
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring, vertices.population, generatorKey}));
     EXPECT_TRUE(mutate.providedData().empty()) << "Vertices are mutated in place";
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.individuals, generatorKey, nullptr), std::runtime_error);
+    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.population, generatorKey, nullptr), std::runtime_error);
 }

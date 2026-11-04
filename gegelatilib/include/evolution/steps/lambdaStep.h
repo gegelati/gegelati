@@ -23,30 +23,14 @@ namespace Evolution {
              *
              * \param[in] name name of the step.
              * \param[in] function function run by the step.
-             * \param[in] required keys of the data required by the function (typed keys have their type checked).
-             * \param[in] provided keys of the data filled or updated by the function.
-             */
-            LambdaStep(std::string name, std::function<void(EvolutionData&)> function, std::vector<KeyBase> required = {},
-                       std::vector<KeyBase> provided = {})
-                : Module(std::move(name)), function{std::move(function)}
-            {
-                this->requiredKeyList = std::move(required);
-                this->providedKeyList = std::move(provided);
-            }
-
-            /**
-             * \brief Constructor with untyped data, given by their names.
-             *
-             * \param[in] name name of the step.
-             * \param[in] function function run by the step.
              * \param[in] required names of the data required by the function.
              * \param[in] provided names of the data filled or updated by the function.
              */
-            LambdaStep(std::string name, std::function<void(EvolutionData&)> function, std::set<std::string> required, std::set<std::string> provided = {})
+            LambdaStep(std::string name, std::function<void(EvolutionData&)> function, std::set<std::string> required = {}, std::set<std::string> provided = {})
                 : Module(std::move(name)), function{std::move(function)}
             {
-                this->requiredKeyList.assign(required.begin(), required.end());
-                this->providedKeyList.assign(provided.begin(), provided.end());
+                this->requiredList = std::move(required);
+                this->providedList = std::move(provided);
             }
 
             /// Inherited from Module
