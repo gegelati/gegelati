@@ -92,7 +92,7 @@ namespace Data {
         template <typename T>
         static DataValue array1d(std::unique_ptr<T[]> values, size_t count) {
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>{count}),
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), Extents{count}),
                 DataType::type<T>({count})
             );
         }
@@ -108,7 +108,7 @@ namespace Data {
         template <typename T>
         static DataValue array(std::unique_ptr<T[]> values, std::initializer_list<size_t> shape) {
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>(shape)),
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), Extents(shape)),
                 DataType::type<T>(shape)
             );
         }
@@ -137,7 +137,7 @@ namespace Data {
             auto ptr = std::make_unique<T[]>(total);
             std::copy(std::begin(range), std::end(range), ptr.get());
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>(shape)),
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), Extents(shape)),
                 std::move(type)
             );
         }
@@ -174,7 +174,7 @@ namespace Data {
 
             // Return as DataValue
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{count}),
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), Extents{count}),
                 DataType::type<T>({count})
             );
         }
@@ -206,7 +206,7 @@ namespace Data {
             return DataValue(
                 std::make_unique<detail::ArrayModel<T>>(
                     std::move(ptr),
-                    std::vector<size_t>(type.dimensions.begin(), type.dimensions.begin() + type.rank)),
+                    type.dimensions),
                 DataType::type<T>(type.dimensions)
             );
         }
@@ -223,7 +223,7 @@ namespace Data {
         template <typename T>
         static DataValue array2d(std::unique_ptr<T[]> values, size_t rows, size_t cols) {
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(values), std::vector<size_t>{rows, cols}),
+                std::make_unique<detail::ArrayModel<T>>(std::move(values), Extents{rows, cols}),
                 DataType::type<T>({rows, cols})
             );
         }
@@ -253,7 +253,7 @@ namespace Data {
             auto ptr = std::make_unique<T[]>(total);
             std::copy(std::begin(range), std::end(range), ptr.get());
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{rows, cols}),
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), Extents{rows, cols}),
                 DataType::type<T>({rows, cols})
             );
         }
@@ -305,7 +305,7 @@ namespace Data {
             }
 
             return DataValue(
-                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), std::vector<size_t>{rows, cols}),
+                std::make_unique<detail::ArrayModel<T>>(std::move(ptr), Extents{rows, cols}),
                 DataType::type<T>({rows, cols})
             );
         }
@@ -318,7 +318,7 @@ namespace Data {
          * \return A zero-initialized owning value.
          * \throws std::invalid_argument If the requested rank is unsupported.
          */
-        static DataValue zeros(const std::vector<size_t>& dims)
+        static DataValue zeros(const Extents& dims)
         {
             static_assert(std::is_arithmetic_v<T>,
                 "ActivationFunctions::Zero value requires arithmetic values.");
@@ -373,7 +373,7 @@ namespace Data {
          * \throws std::invalid_argument If the requested rank is unsupported.
          */
         static DataValue zeros(std::initializer_list<size_t> dims) {
-            return zeros<T>(std::vector<size_t>(dims));
+            return zeros<T>(Extents(dims));
         }
 
 
@@ -408,7 +408,7 @@ namespace Data {
             }
 
             const T* src = static_cast<const T*>(storage->data());
-            const size_t base = getType().sourceOffset + getType().sourceOffsetOf(address);
+            const size_t base = getType().offsetOf(address);
 
             if (requested.rank == 0) {
                 return DataValue::scalar<T>(src[base]);
@@ -421,7 +421,7 @@ namespace Data {
             return DataValue(
                 std::make_unique<detail::ArrayModel<T>>(
                     std::move(buffer),
-                    std::vector<size_t>(requested.dimensions.begin(), requested.dimensions.begin() + requested.rank)),
+                    requested.dimensions),
                 DataType::type<T>(requested.dimensions)
             );
         }
@@ -461,7 +461,7 @@ namespace Data {
             }
 
             T* dst = static_cast<T*>(storage->data());
-            size_t absOffset = this->type.sourceOffset + address;
+            size_t absOffset = address;
             dst[absOffset] = value;
         }
 
@@ -510,7 +510,7 @@ namespace Data {
 
             // Apply conversion
             size_t count = source.getType().totalElements();
-            std::shared_ptr<const S[]> data = source.getData<S>();
+            auto data = source.getData<S>();
             std::vector<D> values(count);
             for (size_t idx = 0; idx < count; ++idx) {
                 values[idx] = static_cast<D>(data[idx]);

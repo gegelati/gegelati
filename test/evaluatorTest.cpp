@@ -118,12 +118,12 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     ASSERT_TRUE(outputMetrics.find(hash1) != outputMetrics.end()) << "Output metric should contain the second evaluation hash";
 
     ASSERT_EQ(inputMetrics.at(hash0)->getInputs().size(), 1) << "Classification input metric should contain one input";
-    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0)->size(), 1) << "Classification input metric should contain one data source value";
-    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0)->at(0), dataSet.getInputsAt(hash0).at(0)) << "Input values should be equal";
+    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0).size(), 1) << "Classification input metric should contain one data source value";
+    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0).at(0), dataSet.getInputsAt(hash0).at(0)) << "Input values should be equal";
 
     ASSERT_EQ(inputMetrics.at(hash1)->getInputs().size(), 1) << "Classification input metric should contain one input";
-    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0)->size(), 1) << "Classification input metric should contain one data source value";
-    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0)->at(0), dataSet.getInputsAt(hash1).at(0)) << "Input values should be equal";
+    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0).size(), 1) << "Classification input metric should contain one data source value";
+    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0).at(0), dataSet.getInputsAt(hash1).at(0)) << "Input values should be equal";
 
     ASSERT_EQ(outputMetrics.at(hash0)->getOutputs().size(), 1) << "Classification output metric should contain one output";
     ASSERT_EQ(outputMetrics.at(hash0)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Output value should be equal";

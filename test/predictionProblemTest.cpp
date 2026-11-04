@@ -171,9 +171,9 @@ TEST(PredictionProblemTest, extractMultiMetrics) {
     ASSERT_EQ(inputMetrics.size(), 1) << "Should have a single metric for the whole loop";
     const auto& inputs = inputMetrics.begin()->second->getInputs();
     ASSERT_EQ(inputs.size(), 2) << "One input set per hash";
-    ASSERT_EQ(inputs.at(0)->size(), 1) << "Dataset should have only one source";
-    ASSERT_EQ(inputs.at(0)->at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
-    ASSERT_EQ(inputs.at(1)->at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
+    ASSERT_EQ(inputs.at(0).size(), 1) << "Dataset should have only one source";
+    ASSERT_EQ(inputs.at(0).at(0), Data::DataValue::array1d<int[2]>({1, 2})) << "Values should be equal";
+    ASSERT_EQ(inputs.at(1).at(0), Data::DataValue::array1d<int[2]>({3, 4})) << "Values should be equal";
 }
 
 TEST(PredictionProblemTest, noDataToEvaluateOn)

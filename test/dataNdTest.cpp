@@ -23,7 +23,7 @@ TEST(DataNdTest, TypeRankAndSize)
     Data::DataType type = Data::DataType::type<int>({2, 3, 4});
     EXPECT_EQ(3, type.rank);
     EXPECT_EQ(24u, type.totalElements());
-    EXPECT_EQ(24u, type.sourceTotalElements());
+    EXPECT_EQ((Data::Extents{12, 4, 1}), type.strides);
     EXPECT_NO_THROW(Data::DataType::type<int>({1, 1, 1, 1, 1, 1, 1}));
 }
 
@@ -56,7 +56,8 @@ TEST(DataNdTest, SubViewOnTensor)
     Data::DataValue tensor = makeTensor();
     Data::DataView whole = tensor.view();
     Data::DataView sub = whole.getSubView(Data::DataType::type<int>({1, 2, 2}), 1 * 12 + 1 * 4 + 1);
-    EXPECT_EQ(17u, sub.getSourceOffset());
+    EXPECT_EQ(17, static_cast<const int*>(sub.getPtr()) - static_cast<const int*>(whole.getPtr())) << "The window starts at the element 17 of the tensor.";
+    EXPECT_EQ((Data::Extents{12, 4, 1}), sub.getStrides()) << "The window keeps the strides of the tensor.";
     auto data = sub.getData<int>();
     EXPECT_EQ(17, data[0]);
     EXPECT_EQ(18, data[1]);
@@ -77,7 +78,8 @@ TEST(DataNdTest, SubViewNonSquareMatrix)
     Data::DataValue matrix = Data::DataValue::array(values, {3, 5});
     Data::DataView view = matrix.view();
     Data::DataView sub = view.getSubView(Data::DataType::type<int>({2, 2}), 1 * 5 + 2);
-    EXPECT_EQ(7u, sub.getSourceOffset());
+    EXPECT_EQ(7, static_cast<const int*>(sub.getPtr()) - static_cast<const int*>(view.getPtr())) << "The window starts at the element 7 of the matrix.";
+    EXPECT_EQ((Data::Extents{5, 1}), sub.getStrides());
     auto data = sub.getData<int>();
     EXPECT_EQ(7, data[0]);
     EXPECT_EQ(8, data[1]);

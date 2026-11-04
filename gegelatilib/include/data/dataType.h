@@ -1,17 +1,18 @@
 /**
  * @file dataType.h
- * \brief Defines DataType, a descriptor for the shape, type, and source context of data.
+ * \brief Defines DataType, the descriptor of the shape, element type and memory layout of data.
  *
- * DataType is a **self-contained** descriptor that encapsulates:
- * 1. **Shape**: Rank (0=scalar, 1=1D, 2=2D) and dimensions.
- * 2. **Type**: `std::type_info` and element size (for pointer arithmetic).
- * 3. **Source Context**: For sub-views, stores the original source's shape and offset.
+ * A DataType describes N-dimensional data stored in memory, in the same way as a numpy array does:
+ * - the **shape** (`dimensions`): how many elements there are along each axis,
+ * - the **layout** (`strides`): how many elements to skip in memory to move by one along each axis,
+ * - the **element type**.
  *
- * This design allows DataView and DataValue to contain **only a data pointer and a DataType**,
- * while still supporting:
- * - Type safety (via elementType).
- * - Bounds safety (via sourceDimensions and sourceOffset).
- * - Sub-array extraction (via getSubView).
+ * DataView and DataValue only hold a data pointer and a DataType. Because the layout is stored in the strides,
+ * a sub-view (a window inside a bigger array) is just the same pointer moved to the window origin and a
+ * DataType with the window dimensions and the strides of the source: no information about the source is needed.
+ *
+ * DataType is a plain value (no heap allocation, trivially copyable), because views are created and copied
+ * constantly while the individuals are executed.
  */
 
 #ifndef DATA_TYPE_H
@@ -21,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -38,85 +40,156 @@ namespace Data {
     }
 
     /**
-     * \brief Descriptor of a typed view or value, including shape and source context.
+     * \brief List of at most Capacity sizes (the extents or the strides of the axes of a DataType).
      *
-     * `DataType` is the metadata object carried by `DataView` and `DataValue`.
-     * It answers three questions about the memory it describes:
+     * It behaves like a small std::vector<size_t> that never allocates. It converts implicitly from
+     * std::vector<size_t> and from a braced list, so `DataType::type<double>({2, 3})` works.
+     */
+    class Extents {
+      public:
+        /// Maximum number of axes of a DataType.
+        static constexpr size_t Capacity = 8;
+
+        /// Empty list.
+        Extents() = default;
+
+        /// List of the given values. \throw std::length_error if there are more than Capacity values.
+        Extents(std::initializer_list<size_t> values) { this->assign(values.begin(), values.end()); }
+
+        /// List of the given values. \throw std::length_error if there are more than Capacity values.
+        Extents(const std::vector<size_t>& values) { this->assign(values.begin(), values.end()); }
+
+        /// Number of values.
+        size_t size() const noexcept { return this->count; }
+
+        /// Return true if there is no value.
+        bool empty() const noexcept { return this->count == 0; }
+
+        /// Value at an index (not checked).
+        size_t& operator[](size_t index) noexcept { return this->values[index]; }
+
+        /// Value at an index (not checked).
+        const size_t& operator[](size_t index) const noexcept { return this->values[index]; }
+
+        /// Iterator on the first value.
+        const size_t* begin() const noexcept { return this->values.data(); }
+
+        /// Iterator after the last value.
+        const size_t* end() const noexcept { return this->values.data() + this->count; }
+
+        /// Iterator on the first value.
+        size_t* begin() noexcept { return this->values.data(); }
+
+        /// Iterator after the last value.
+        size_t* end() noexcept { return this->values.data() + this->count; }
+
+        /// Change the number of values, new values being zero. \throw std::length_error if it is more than Capacity.
+        void resize(size_t newSize) {
+            if (newSize > Capacity) {
+                throw std::length_error("Data::Extents: at most " + std::to_string(Capacity) + " axes are supported.");
+            }
+            for (size_t idx = this->count; idx < newSize; ++idx) {
+                this->values[idx] = 0;
+            }
+            this->count = newSize;
+        }
+
+        /// Copy of the values in a std::vector.
+        std::vector<size_t> toVector() const { return std::vector<size_t>(this->begin(), this->end()); }
+
+        /// Same number of values, and same values.
+        bool operator==(const Extents& other) const noexcept {
+            if (this->count != other.count) {
+                return false;
+            }
+            for (size_t idx = 0; idx < this->count; ++idx) {
+                if (this->values[idx] != other.values[idx]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// Different number of values, or different values.
+        bool operator!=(const Extents& other) const noexcept { return !(*this == other); }
+
+      private:
+        template <typename Iterator> void assign(Iterator first, Iterator last) {
+            this->count = 0;
+            this->resize(static_cast<size_t>(std::distance(first, last)));
+            size_t idx = 0;
+            for (; first != last; ++first) {
+                this->values[idx++] = *first;
+            }
+        }
+
+        std::array<size_t, Capacity> values{};
+        size_t count = 0;
+    };
+
+    /**
+     * \brief Descriptor of a typed view or value: shape, memory layout and element type.
      *
-     * 1. What is the logical shape of the view? (`rank`, `dimensions`)
-     * 2. What element type does the memory store? (`elementType`, `elementSize`)
-     * 3. If this is a sub-view, where does it come from in the original source?
-     *    (`sourceRank`, `sourceDimensions`, `sourceOffset`)
+     * ### Shape and layout
+     * - `rank` is the number of axes: 0 for a scalar, 1 for an array, 2 for a matrix...
+     * - `dimensions[k]` is the number of elements along axis k.
+     * - `strides[k]` is the distance in memory, in elements, between two neighbours along axis k.
      *
-     * The class is intentionally lightweight and type-erased: it stores runtime type
-     * information and dimensional metadata, but it does not own the underlying buffer.
-     * This allows consumers to validate operations such as typed reads, sub-view creation,
-     * and row-major indexing without having to duplicate the full data layout in every class.
+     * The element at coordinates (c0, c1, ..., cN) is at `c0 * strides[0] + c1 * strides[1] + ... + cN * strides[N]`
+     * elements from the origin of the data.
      *
-     * ### Shape model
-     * - Rank 0: scalar
-     * - Rank 1: 1D array
-     * - Rank 2: 2D array
-     * - Rank N: N-dimensional array
+     * A value stored in one block of memory is **row-major**: the last axis moves by one element, and each
+     * previous axis moves by the size of everything after it. For `dimensions = {2, 3}`: `strides = {3, 1}`.
      *
-     * For 1D arrays, `dimensions = {size, 0, ...}`. For 2D arrays, `dimensions = {rows, cols, 0, ...}`.
-     * All linear indexing is done in row-major order.
+     * ```
+     *   memory:  a b c d e f            dimensions = {2, 3}    strides = {3, 1}
+     *   matrix:  [a b c]                a = (0,0) -> 0*3 + 0*1 = 0
+     *            [d e f]                e = (1,1) -> 1*3 + 1*1 = 4
+     * ```
      *
-     * ### Source context
-     * For top-level objects, `sourceRank`, `sourceDimensions`, and `sourceOffset` match the
-     * same data as the current view. For sub-views, they still point to the original buffer,
-     * which allows algorithms to compute a valid window inside the source without losing the
-     * original coordinate system.
+     * A sub-view is a window inside bigger data. It has the **strides of the data** and its own dimensions.
+     * For the window of 2x2 starting at `b`, `dimensions = {2, 2}` and `strides = {3, 1}`: the second row of the
+     * window starts 3 elements after the first, and the window is not contiguous in memory (b c . e f).
      *
-     * A typical example:
-     * - source: `double[8]`
-     * - view: `double[4]` at offset 1
-     * - the view describes a window covering elements 1, 2, 3, 4 of the source.
+     * ```
+     *   [a b c]      window:   [b c]     dimensions = {2, 2}   strides = {3, 1}
+     *   [d e f]                [e f]     origin = b
+     * ```
      *
-     * @note `sourceOffset` is expressed in elements, not bytes, and for 2D arrays it follows
-     * row-major linearization: offset = row * width + col.
+     * ### Addresses
+     * An address is a linear index among the elements of a view, in row-major order of its own dimensions
+     * (`offsetOf` gives the position in memory). It is how the genotypes choose a window in an array.
+     *
+     * ### Element type
+     * `elementType` and `elementSize` tell what the memory stores. Strides and sizes are in elements.
      */
     struct DataType {
 
-        /// \brief Highest rank supported by the fixed-size stack storage of \ref forEachRun.
-        static constexpr size_t MaxRank = 8;
+        /// Maximum number of axes.
+        static constexpr size_t MaxRank = Extents::Capacity;
 
-        // --- Shape of THIS view ---
-        /// \brief Number of dimensions (0=scalar, 1=1D array, 2=2D array).
+        /// Number of axes: 0 for a scalar.
         uint8_t rank = 0;
 
-        /// \brief Extent of each dimension. For 1D: [size, 0, ...]. For 2D: [height, width, 0, ...].
-        std::vector<size_t> dimensions;
+        /// Number of elements along each axis (`rank` values).
+        Extents dimensions;
 
-        // --- Type information ---
-        /// \brief Runtime type of the elements (e.g., `typeid(double)`).
+        /// Distance in memory, in elements, between two neighbours along each axis (`rank` values).
+        Extents strides;
+
+        /// Type of the elements, null if unknown.
         const std::type_info* elementType = nullptr;
 
-        /// \brief Size of each element in bytes (e.g., `sizeof(double)`).
+        /// Size in bytes of an element.
         size_t elementSize = 0;
-
-        // --- Source context (for sub-views) ---
-        /// \brief Rank of the original source (for top-level, equals `rank`).
-        uint8_t sourceRank = 0;
-
-        /// \brief Dimensions of the original source (for top-level, equals `dimensions`).
-        std::vector<size_t> sourceDimensions{};
-
-        /// \brief Linear offset (in **elements**) from the start of the source.
-        /// For top-level, this is 0. For sub-views, this is the starting index in the source.
-        size_t sourceOffset = 0;
 
         // --- Constructors ---
 
-        /**
-         * \brief Default constructor (invalid DataType).
-         */
+        /// Default descriptor: a scalar without type.
         DataType() = default;
 
         /**
-         * \brief static constructor creating a scalar.
-         *
-         * \tparam T The element type of the array.
+         * \brief Descriptor of a scalar of type T.
          */
         template <typename T>
         static DataType type() {
@@ -124,252 +197,200 @@ namespace Data {
             dt.elementType = &typeid(T);
             dt.elementSize = sizeof(T);
             return dt;
-        } 
-
+        }
 
         /**
-         * \brief Builds a descriptor for a row-major N-dimensional array.
+         * \brief Descriptor of an array of type T stored in one block of memory (row-major).
          *
-         * \tparam T The element type of the array.
-         * \param[in] dims Extent of each dimension.
+         * \param[in] dims Number of elements along each axis, at most MaxRank axes.
+         * \throw std::length_error if there are more than MaxRank axes.
          */
         template <typename T>
-        static DataType type(const std::vector<size_t>& dims){
-
+        static DataType type(const Extents& dims) {
             DataType dt;
-            
-            dt.rank = dims.size();
+            dt.rank = static_cast<uint8_t>(dims.size());
             dt.dimensions = dims;
+            dt.strides = rowMajorStrides(dims);
             dt.elementType = &typeid(T);
             dt.elementSize = sizeof(T);
-            dt.sourceRank = dims.size();
-            dt.sourceDimensions = dims;
-
             return dt;
         }
-        /**
-         * \brief Creates metadata for a sub-view while preserving source provenance.
-         *
-         * The source shape and offset are retained so pointer arithmetic can be reconstructed.
-         * \param[in] viewShape Shape and element type of the sub-view.
-         * \param[in] source Metadata of the original source.
-         * \param[in] offset Linear source offset in elements.
-         * \return Metadata describing the sub-view.
-         */
-        static DataType subView(DataType viewShape, const DataType& source, size_t offset);
-
-        // --- Helpers ---
-        /// Extent of the requested shape along axis k of a type of rank `rank` (leading axes count as 1).
-        size_t requestedExtent(const Data::DataType& requested, size_t rank, size_t k) const noexcept;
 
         /**
-         * \brief Returns the element offset, from the start of this view, of the sub-view located at address.
+         * \brief Strides of an array of the given dimensions stored in one block of memory (row-major).
          *
-         * The address is the row-major linear index of the sub-view origin within this view's own
-         * dimensions. The result takes the strides of the underlying source into account, so it
-         * differs from the address for strided sub-views.
+         * For example `{2, 3, 4}` gives `{12, 4, 1}`.
          */
-        size_t sourceOffsetOf(size_t address) const noexcept;
+        static Extents rowMajorStrides(const Extents& dims);
 
-        /** \brief Returns true when the elements of this view are contiguous in memory. */
+        /**
+         * \brief Descriptor of a window inside data described by `source`.
+         *
+         * The window has the dimensions of `requested` and the strides of the last axes of `source`
+         * (a window of rank 2 in data of rank 3 is a 2D slice, with the strides of the last 2 axes).
+         *
+         * \param[in] requested Dimensions and element type of the window, its rank must not exceed the rank of source.
+         * \param[in] source Descriptor of the data containing the window.
+         * \return Descriptor of the window. The pointer of the window is the pointer of the source moved by `source.offsetOf(address)`.
+         */
+        static DataType subView(const DataType& requested, const DataType& source);
+
+        // --- Size and layout ---
+
+        /// Number of elements of the view (1 for a scalar).
+        size_t totalElements() const noexcept;
+
+        /**
+         * \brief Number of elements between the first and the last element of the view in memory, both included.
+         *
+         * It is `totalElements()` for contiguous data, more for a window inside bigger data. It is the size
+         * of the memory to copy to get a copy of the view that keeps the same layout.
+         */
+        size_t memorySpan() const noexcept;
+
+        /**
+         * \brief Return true if the elements of the view follow each other in memory with no gap.
+         */
         bool isContiguous() const noexcept;
 
         /**
-         * \brief Calls fn(srcOffset, blockOffset, runLength) for each contiguous run of a block.
+         * \brief Position in memory, in elements from the origin of the view, of the element at an address.
          *
-         * The block (shape given by `block`) starts at element `baseOffset` of this descriptor's
-         * source, laid out with this descriptor's source strides. Runs follow the last axis of the
-         * block, and `blockOffset` is the position of the run in the block's own row-major order.
+         * The address is split into one coordinate per axis (last axis first), then each coordinate is
+         * multiplied by the stride of its axis. For `dimensions = {2, 2}` and `strides = {3, 1}`, address 3
+         * is the coordinates (1, 1), so the position is `1 * 3 + 1 * 1 = 4`.
+         *
+         * The address must be smaller than totalElements().
+         */
+        size_t offsetOf(size_t address) const noexcept;
+
+        /**
+         * \brief Call a function for each run of consecutive elements of a block of this layout.
+         *
+         * The block is a window of this view, with the dimensions of `block`, and it follows the strides of this
+         * view along its axes (the last axes of this view). The elements of the block are visited in row-major
+         * order, grouped in the longest runs that are consecutive in memory: a block that is contiguous in
+         * memory is one run, otherwise there is one run per line of the block (or more when the last axes are contiguous).
+         *
+         * \param[in] block Dimensions of the block, its rank must not exceed the rank of this view.
+         * \param[in] baseOffset Position in memory of the first element of the block.
+         * \param[in] fn Called as `fn(memoryOffset, blockOffset, length)` for each run: the run covers
+         *               `length` elements starting at position `memoryOffset` in memory, and they are the
+         *               elements `blockOffset ... blockOffset + length - 1` of the block read as a flat array.
          */
         template <typename F>
         void forEachRun(const DataType& block, size_t baseOffset, F&& fn) const
         {
-            const size_t blockRank = block.rank;
-
-            // A scalar always contains exactly one element.
-            if (blockRank == 0) {
+            // A scalar block is one element.
+            if (block.rank == 0) {
                 fn(baseOffset, size_t{0}, size_t{1});
                 return;
             }
+            if (block.rank > this->rank) {
+                throw std::invalid_argument("DataType::forEachRun: the block has more axes than the view.");
+            }
 
             const size_t total = block.totalElements();
-
-            // An empty block has nothing to copy.
             if (total == 0) {
                 return;
             }
 
-            // When the block rank exceeds the source rank, preserve the
-            // direct-addressing convention used by sourceOffsetOf().
-            if (blockRank > sourceRank) {
-                fn(baseOffset, size_t{0}, total);
-                return;
+            // The axes of the block are the last axes of this view: block axis k is the axis (firstAxis + k) of this view.
+            const size_t firstAxis = this->rank - block.rank;
+            auto strideOf = [&](size_t blockAxis) { return this->strides[firstAxis + blockAxis]; };
+
+            // Group the last axes of the block that follow each other in memory into one run.
+            // An axis follows the previous ones when its stride is the length of the run built so far.
+            // The axes that are not grouped are walked one step at a time.
+            size_t runLength = 1;
+            size_t nbWalkedAxes = block.rank;
+            while (nbWalkedAxes > 0 && (block.dimensions[nbWalkedAxes - 1] == 1 || strideOf(nbWalkedAxes - 1) == runLength)) {
+                runLength *= block.dimensions[nbWalkedAxes - 1];
+                --nbWalkedAxes;
             }
 
-            const size_t axisOffset = sourceRank - blockRank;
+            // Walk the remaining axes like an odometer: advance the last one, and carry to the previous one when it wraps.
+            std::array<size_t, MaxRank> coordinate{};
+            size_t memoryOffset = baseOffset;
+            const size_t nbRuns = total / runLength;
+            for (size_t run = 0; run < nbRuns; ++run) {
+                fn(memoryOffset, run * runLength, runLength);
 
-            // A block is contiguous when every axis except the first spans
-            // the complete corresponding source dimension.
-            //
-            // The first axis may be shorter: consecutive rows are still
-            // contiguous when all trailing dimensions are fully covered.
-            bool contiguous = true;
-
-            for (size_t k = 1; k < blockRank; ++k) {
-                if (block.dimensions[k] !=
-                    sourceDimensions[axisOffset + k]) {
-                    contiguous = false;
-                    break;
-                }
-            }
-
-            // Fast path: the entire block is one contiguous memory region.
-            if (contiguous) {
-                fn(baseOffset, size_t{0}, total);
-                return;
-            }
-
-            // The last dimension is always copied as one contiguous run.
-            const size_t run = block.dimensions[blockRank - 1];
-
-            // Number of runs along all preceding dimensions.
-            const size_t runs = total / run;
-            const size_t iterRank = blockRank - 1;
-
-            // Fixed-size stack storage avoids heap allocations per invocation.
-            // Strided iteration is only possible up to MaxRank axes: fail loudly
-            // rather than writing past the end of the arrays below.
-            if (blockRank > MaxRank) {
-                throw std::length_error(
-                    "DataType::forEachRun: block rank exceeds DataType::MaxRank.");
-            }
-
-            std::array<size_t, MaxRank> index{};
-            std::array<size_t, MaxRank> strides;
-
-            // Compute the source stride associated with each block dimension.
-            // The last dimension has stride 1 in row-major storage.
-            size_t stride = 1;
-
-            for (size_t k = blockRank; k-- > 0;) {
-                strides[k] = stride;
-                stride *= sourceDimensions[axisOffset + k];
-            }
-
-            size_t srcOffset = baseOffset;
-
-            for (size_t i = 0; i < runs; ++i) {
-                // Emit one contiguous run.
-                fn(srcOffset, i * run, run);
-
-                // Advance the multidimensional index using an odometer.
-                // Avoid division and modulo in the main iteration loop.
-                for (size_t k = iterRank; k-- > 0;) {
-                    ++index[k];
-
-                    if (index[k] < block.dimensions[k]) {
-                        // No rollover: advance one source stride.
-                        srcOffset += strides[k];
+                for (size_t axis = nbWalkedAxes; axis-- > 0;) {
+                    ++coordinate[axis];
+                    memoryOffset += strideOf(axis);
+                    if (coordinate[axis] < block.dimensions[axis]) {
                         break;
                     }
-
-                    // Rollover: reset this coordinate and rewind its stride.
-                    index[k] = 0;
-                    srcOffset -=
-                        (block.dimensions[k] - 1) * strides[k];
-
-                    // Carry into the preceding dimension.
+                    // This axis wrapped: go back to its start, and advance the previous axis.
+                    memoryOffset -= coordinate[axis] * strideOf(axis);
+                    coordinate[axis] = 0;
                 }
             }
         }
 
-        /** \brief Returns the number of elements in this descriptor. */
-        size_t totalElements() const noexcept;
-
-        /** \brief Returns the number of elements in the original source. */
-        size_t sourceTotalElements() const noexcept;
+        // --- Addressing of windows ---
 
         /**
-         * \brief Checks whether a requested descriptor can fit inside this descriptor.
+         * \brief Return true if a window of the requested shape and type fits in this view at an address.
          *
-         * This is the descriptor-level compatibility check: it verifies whether a requested
-         * view can be placed at a given linear offset inside the current view's own memory
-         * layout, without crossing the current view boundaries and without mixing element types.
+         * The window must have the same element type, not more axes than this view, and stay inside the
+         * view along every axis. The shape of the window is aligned with the last axes of this view.
          *
-         * The check is intentionally self-contained and does not depend on any external source
-         * provenance. The source metadata is preserved for bookkeeping, but the validity test is
-         * performed against the current descriptor itself.
-         *
-         * \param[in] requested The descriptor to be placed inside this descriptor.
-         * \param[in] offset Linear offset, in elements, relative to the start of this descriptor.
-         * \return `true` if the requested view fits in the current descriptor, otherwise `false`.
+         * \param[in] requested The window.
+         * \param[in] address Address of the first element of the window, in row-major order of this view.
          */
-        bool canFitIn(const DataType& requested, size_t offset = 0) const noexcept;
+        bool canFitIn(const DataType& requested, size_t address = 0) const noexcept;
 
         /**
-         * \brief Return the address space reachable by the requested type inside this descriptor.
-         * 
-         * For example if this descriptor is an array of size 8, and the requested is an array of size 4, the address space should be 5 (It can access indices 0, 1, 2, 3 and 4, but 5, 6, and 7 would be out of bound)
-         * 
-         * \param[in] requested The descriptor to be placed inside this descriptor.
+         * \brief Number of addresses at which a window of the requested type fits in this view.
+         *
+         * For example if this view is an array of size 8, and the window is an array of size 4, there are
+         * 5 addresses (0 to 4): the others would be out of bounds. It is 0 if the element types differ.
          */
         size_t getAddressSpace(const DataType& requested) const noexcept;
 
         /**
-         * \brief Get the valid address for non-contiguous 2d array.
-         * 
-         * \param[in] requested The descriptor to be placed inside this descriptor.
-         * \param[in] address Address to scale.
+         * \brief Convert an address among the positions where the window fits into an address of this view.
+         *
+         * In a 2D view of 5 columns, a window of 2 columns fits at 4 of the 5 columns of each line: the
+         * address 4 among valid positions is the first column of the second line, which is the address 5 of the view.
+         *
+         * \param[in] requested The window.
+         * \param[in] address Address among the valid positions, smaller than getAddressSpace(requested).
          */
-        size_t getValidAddress(const Data::DataType& requested, const size_t address) const noexcept;
+        size_t getValidAddress(const DataType& requested, const size_t address) const noexcept;
 
         /**
-         * \brief Compares two descriptors while ignoring source context.
+         * \brief Extent along an axis of the requested window, aligned with the last axes of a view of `rank` axes.
          *
-         * \param[in] other Descriptor to compare with.
-         * \return `true` when shape, element type, and element size match.
-         *
-         * Two DataTypes are considered identical if they describe the same view shape and
-         * the same element type/size. The provenance of the underlying source is intentionally
-         * not part of this comparison.
+         * Axes of the view that the window does not cover count for 1. A scalar window is 1 everywhere.
+         */
+        size_t requestedExtent(const DataType& requested, size_t rank, size_t k) const noexcept;
+
+        // --- Comparison ---
+
+        /**
+         * \brief Same rank, dimensions and element type. The layout (strides) is not compared.
          */
         bool operator==(const DataType& other) const noexcept;
 
-        /**
-         * \brief Compares two descriptors while ignoring source context.
-         *
-         * \param[in] other Descriptor to compare with.
-         * \return `true` when the descriptors differ.
-         */
+        /// Different rank, dimensions or element type.
         bool operator!=(const DataType& other) const noexcept;
 
-        /**
-         * \brief Compares two descriptors including the source provenance metadata.
-         *
-         * This is stricter than `operator==`: two views with the same logical shape and type but
-         * different source origins are not considered equal in this comparison.
-         *
-         * \param[in] other Descriptor to compare with.
-         * \return `true` when logical metadata and source metadata match.
-         */
-        bool equalsWithSource(const DataType& other) const noexcept;
+        /// Same as operator==, and same strides.
+        bool equalsWithLayout(const DataType& other) const noexcept;
 
-        /**
-         * \brief Renders the descriptor as a debug-friendly string.
-         *
-         * The output is primarily intended for diagnostics and testing; it prints both the
-         * local view metadata and the preserved source metadata.
-         */
+        // --- Printing ---
+
+        /// Full description, for debugging and error messages.
         std::string toString() const;
 
-        /** \brief Renders the descriptor in a compact model-summary format. */
+        /// Short description, e.g. `'double[2, 3]'`.
         std::string summary() const;
-
     };
 
-    /**
-     * \brief operator for printing
-     */
+    /// Print the full description of a DataType (see DataType::toString).
     inline std::ostream& operator<<(std::ostream& os, const DataType type) {
         return os << type.toString();
     }

@@ -103,7 +103,7 @@ namespace Dimensions
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Apply tanh transformation
                 size_t count = value.getType().totalElements();
-                std::shared_ptr<const T[]> data = value.getData<T>();
+                auto data = value.getData<T>();
                 std::vector<T> values(count);
                 for (size_t idx = 0; idx < count; ++idx) {
                     values[idx] = static_cast<T>(std::tanh(data[idx]));
@@ -155,7 +155,7 @@ namespace Dimensions
             virtual Data::DataValue execute(const Data::DataValue& value) const override {
                 // Find argmax index
                 size_t count = value.getType().totalElements();
-                std::shared_ptr<const T[]> data = value.getData<T>();
+                auto data = value.getData<T>();
                 size_t index = 0;
                 T max = data[0];
 
@@ -303,7 +303,8 @@ namespace Dimensions
                 // Validate axes and derive the actual output shape.
                 Data::DataType resultType = makeOutputType(inputType, axes_);
 
-                const T* data = value.getData<T>().get();
+                const auto elements = value.getData<T>(); // Keeps the elements alive while they are read.
+                const T* data = elements.get();
 
                 // Global sum.
                 if (axes_.empty()) {

@@ -36,7 +36,8 @@ void Evaluation::DataSet::removeData(size_t index)
     throw std::runtime_error("Evaluation::DataSet::removeData: index out of dataset range");
   }
   if(index >= this->sizeTraining()) {
-    this->validationgData.erase(this->validationgData.begin() + index - this->sizeTraining());
+    this->validationgData.erase(this->validationgData.begin() + (index - this->sizeTraining()));
+    return;
   }
   this->trainingData.erase(this->trainingData.begin() + index);
 }
@@ -48,6 +49,7 @@ void Evaluation::DataSet::setOutputAt(size_t index, Data::DataValue output)
   }
   if(index >= this->sizeTraining()) {
     this->validationgData.at(index - this->sizeTraining()).second = std::move(output);
+    return;
   }
   this->trainingData.at(index).second = std::move(output);
 }

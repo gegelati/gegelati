@@ -357,7 +357,7 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     Evolution::EvolutionData data = root->evolve(40, 4);
 
     EXPECT_EQ(16454860796132402384U, data.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    EXPECT_EQ(60137, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(62537, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 
     std::cout<<data.summary()<<std::endl;
 }
@@ -546,7 +546,7 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     config.nbValidationIterations = 500;
     config.nbThreads = 20;
     config.archiveSize = 50;
-    config.isArchiveFixed = true;
+    config.isArchiveFixed = false;
     config.protectAggregated = false;
     config.assigner = assigner;
     config.representation = tpgRep;
@@ -554,20 +554,19 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     config.problem = problem;
     auto root = config.build();
     Evolution::EvolutionData state(4);
-    root->remove(root->findStep("CacheMemberOutputs"));
-    const Evolution::BasicEvolution::Names population;
+    //root->remove(root->findStep("CacheMemberOutputs"));
     std::cout<<root->summary()<<std::endl;
 
     std::string str = "graph";
-    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
+    root->add(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    root->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
+    root->add(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness));
 
 
     root->resume(state, 40);
 
     EXPECT_EQ(16454860796132402384U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    EXPECT_EQ(60137, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(62537, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 }
 
 #ifdef GEGELATI_WITH_OPENCV

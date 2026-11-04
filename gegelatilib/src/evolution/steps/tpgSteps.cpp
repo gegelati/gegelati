@@ -145,11 +145,11 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
             metricMap->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
 
         for(const auto& [featureHash, inputMetric]: inputMetrics) {
-            for(const std::shared_ptr<const std::vector<Data::DataValue>>& inputsStep: inputMetric->getInputs()) {
-                const uint64_t inputsHash = Data::DataValue::getCombinedHash(*inputsStep);
+            for(const std::vector<Data::DataValue>& inputsStep: inputMetric->getInputs()) {
+                const uint64_t inputsHash = Data::DataValue::getCombinedHash(inputsStep);
                 if(allInputs.find(inputsHash) == allInputs.end()) {
                     std::vector<Data::DataValue> inputsClone;
-                    for(const Data::DataValue& input: *inputsStep) {
+                    for(const Data::DataValue& input: inputsStep) {
                         inputsClone.push_back(input.clone());
                     }
                     allInputs.insert(std::make_pair(inputsHash, std::move(inputsClone)));

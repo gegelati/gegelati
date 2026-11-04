@@ -1,58 +1,89 @@
 #include "data/dataType.h"
 
-Data::DataType Data::DataType::subView(
-    DataType viewShape,
-    const DataType& source,
-    size_t offset
-) {
-    // Create a new logical view without changing the underlying source layout.
-    DataType dt;
-
-    dt.rank = viewShape.rank;
-    dt.dimensions = viewShape.dimensions;
-    dt.elementType = viewShape.elementType;
-    dt.elementSize = viewShape.elementSize;
-
-    // Preserve the dimensions of the original source so that the view can
-    // translate its logical addresses into addresses in the original data.
-    dt.sourceRank = source.sourceRank;
-    dt.sourceDimensions = source.sourceDimensions;
-
-    // Store the starting offset of this view within its source.
-    dt.sourceOffset = offset;
-
-    return dt;
+Data::Extents Data::DataType::rowMajorStrides(const Extents& dims)
+{
+    // The last axis moves by one element, and each previous axis by the size of everything after it.
+    Extents strides = dims;
+    size_t stride = 1;
+    for (size_t axis = dims.size(); axis-- > 0;) {
+        strides[axis] = stride;
+        stride *= dims[axis];
+    }
+    return strides;
 }
 
-size_t Data::DataType::totalElements() const noexcept {
-    // A scalar (rank == 0) contains exactly one element.
-    size_t total = 1;
+Data::DataType Data::DataType::subView(const DataType& requested, const DataType& source)
+{
+    if (requested.rank > source.rank) {
+        throw std::invalid_argument("DataType::subView: the window has more axes than the source.");
+    }
 
-    // Multiply the dimensions to obtain the total number of logical elements.
+    DataType window;
+    window.rank = requested.rank;
+    window.dimensions = requested.dimensions;
+    window.elementType = requested.elementType;
+    window.elementSize = requested.elementSize;
+
+    // The window axes are the last axes of the source, so they move in memory like the last axes of the source.
+    window.strides.resize(requested.rank);
+    const size_t firstAxis = source.rank - requested.rank;
+    for (size_t axis = 0; axis < requested.rank; ++axis) {
+        window.strides[axis] = source.strides[firstAxis + axis];
+    }
+    return window;
+}
+
+size_t Data::DataType::totalElements() const noexcept
+{
+    // A scalar (rank 0) is one element.
+    size_t total = 1;
     for (size_t axis = 0; axis < this->rank; ++axis) {
         total *= this->dimensions[axis];
     }
-
     return total;
 }
 
-size_t Data::DataType::sourceTotalElements() const noexcept {
-    // A scalar source contains exactly one element.
-    size_t total = 1;
-
-    // Compute the number of elements in the original source layout.
-    for (size_t axis = 0; axis < this->sourceRank; ++axis) {
-        total *= this->sourceDimensions[axis];
+size_t Data::DataType::memorySpan() const noexcept
+{
+    if (this->totalElements() == 0) {
+        return 0;
     }
-
-    return total;
+    // The last element is at the coordinates (dimensions - 1) on every axis.
+    size_t lastOffset = 0;
+    for (size_t axis = 0; axis < this->rank; ++axis) {
+        lastOffset += (this->dimensions[axis] - 1) * this->strides[axis];
+    }
+    return lastOffset + 1;
 }
 
-size_t Data::DataType::requestedExtent(
-    const Data::DataType& requested,
-    size_t rank,
-    size_t k
-) const noexcept {
+bool Data::DataType::isContiguous() const noexcept
+{
+    // Going from the last axis to the first, each axis must move by the size of all the axes after it.
+    // An axis of size 1 never moves, so its stride does not matter.
+    size_t expectedStride = 1;
+    for (size_t axis = this->rank; axis-- > 0;) {
+        if (this->dimensions[axis] != 1 && this->strides[axis] != expectedStride) {
+            return false;
+        }
+        expectedStride *= this->dimensions[axis];
+    }
+    return true;
+}
+
+size_t Data::DataType::offsetOf(size_t address) const noexcept
+{
+    // Split the address into one coordinate per axis, starting with the last axis,
+    // and add the distance in memory of each coordinate.
+    size_t offset = 0;
+    for (size_t axis = this->rank; axis-- > 0;) {
+        offset += (address % this->dimensions[axis]) * this->strides[axis];
+        address /= this->dimensions[axis];
+    }
+    return offset;
+}
+
+size_t Data::DataType::requestedExtent(const Data::DataType& requested, size_t rank, size_t k) const noexcept
+{
     // A scalar request occupies one element along every axis.
     if (requested.rank == 0) {
         return 1;
@@ -66,97 +97,26 @@ size_t Data::DataType::requestedExtent(
         return 1;
     }
 
-    // Translate the current axis into the corresponding requested axis.
-    size_t requestedAxis = k - padding;
-
-    return requested.dimensions[requestedAxis];
+    return requested.dimensions[k - padding];
 }
 
-size_t Data::DataType::sourceOffsetOf(size_t address) const noexcept {
-    // One-dimensional views use the same linear address as their source.
-    // If the source has fewer dimensions, no multidimensional mapping is done.
-    if (this->rank <= 1 || this->sourceRank < this->rank) {
-        return address;
-    }
-
-    // Align the view's axes with the trailing axes of the original source.
-    // For example, a rank-2 view of a rank-3 source uses source axes 1 and 2.
-    size_t axisOffset = this->sourceRank - this->rank;
-
-    // Convert the linear address into coordinates, starting from the last axis.
-    size_t remaining = address;
-
-    // Accumulate the corresponding linear address in the source layout.
-    size_t result = 0;
-
-    // The last axis has stride 1 in row-major layout.
-    // Each preceding axis has a stride equal to the product of the source
-    // dimensions that follow it.
-    size_t stride = 1;
-
-    // Visit the axes in reverse order to extract coordinates from the
-    // least significant (last) axis toward the first axis.
-    for (size_t axisCount = this->rank; axisCount > 0; --axisCount) {
-        size_t axis = axisCount - 1;
-
-        // Extract this axis's coordinate from the remaining linear address.
-        size_t coordinate = remaining % this->dimensions[axis];
-
-        // Remove the coordinate we just extracted.
-        remaining /= this->dimensions[axis];
-
-        // Convert the coordinate into its contribution to the source address.
-        result += coordinate * stride;
-
-        // Advance the stride to the next source axis.
-        stride *= this->sourceDimensions[axisOffset + axis];
-    }
-
-    return result;
-}
-
-bool Data::DataType::isContiguous() const noexcept {
-    // Scalars and one-dimensional views are contiguous by definition here.
-    // A view whose rank exceeds the source rank also uses direct addressing.
-    if (this->rank <= 1 || this->sourceRank < this->rank) {
-        return true;
-    }
-
-    // Align the view's axes with the corresponding trailing source axes.
-    size_t axisOffset = this->sourceRank - this->rank;
-
-    // The last axis is contiguous if its logical dimension matches its
-    // source dimension. Every preceding axis must also match for this
-    // view to occupy a contiguous region in the source layout.
-    for (size_t axis = 1; axis < this->rank; ++axis) {
-        if (this->dimensions[axis] != this->sourceDimensions[axisOffset + axis]) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool Data::DataType::canFitIn(
-    const DataType& requested,
-    size_t offset
-) const noexcept {
-    // A scalar can only contain another scalar at offset zero.
+bool Data::DataType::canFitIn(const DataType& requested, size_t address) const noexcept
+{
+    // A scalar can only contain another scalar at address zero.
     if (this->rank == 0) {
-        return requested.rank == 0 && offset == 0;
+        return requested.rank == 0 && address == 0;
     }
 
-    // A request cannot have more dimensions than the shape it must fit into.
+    // A request cannot have more axes than the shape it must fit into.
     if (requested.rank > this->rank) {
         return false;
     }
 
-    // Interpret the linear offset as a multidimensional coordinate.
-    // Coordinates are extracted from the last axis toward the first axis.
-    size_t remaining = offset;
+    // Split the address into one coordinate per axis, starting with the last axis,
+    // and check that the window stays inside the view along each of them.
+    size_t remaining = address;
 
-    for (size_t axisCount = this->rank; axisCount > 0; --axisCount) {
-        size_t axis = axisCount - 1;
+    for (size_t axis = this->rank; axis-- > 0;) {
         size_t dimension = this->dimensions[axis];
 
         // Avoid division or modulo by zero for an empty dimension.
@@ -164,27 +124,21 @@ bool Data::DataType::canFitIn(
             return false;
         }
 
-        // Extract the coordinate of the requested window along this axis.
         size_t coordinate = remaining % dimension;
-
-        // Remove this axis's coordinate before processing the preceding axis.
         remaining /= dimension;
 
-        // The requested shape is aligned to the trailing axes of this shape.
         size_t extent = this->requestedExtent(requested, this->rank, axis);
-
-        // The requested window must not extend beyond this axis's boundary.
         if (coordinate + extent > dimension) {
             return false;
         }
     }
 
-    // If anything remains, the offset was outside the representable range
-    // of coordinates for this shape.
+    // If anything remains, the address was outside the view.
     return remaining == 0;
 }
 
-size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept {
+size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept
+{
     // A request is invalid if either element type is missing, the types differ,
     // or the requested shape cannot fit at the origin of this shape.
     if (this->elementType == nullptr ||
@@ -194,124 +148,96 @@ size_t Data::DataType::getAddressSpace(const DataType& requested) const noexcept
         return 0;
     }
 
-    // A scalar has only one possible starting position.
+    // A scalar has only one possible position.
     if (this->rank == 0) {
         return 1;
     }
 
-    // Count the number of valid starting coordinates along every axis.
-    // For a dimension of size D and a requested extent of E, there are
-    // D - E + 1 possible starting positions.
+    // Along an axis of size D with a window of size E, the window can start at D - E + 1 positions.
+    // The positions of the axes combine by multiplication.
     size_t space = 1;
-
     for (size_t axis = 0; axis < this->rank; ++axis) {
-        size_t dimension = this->dimensions[axis];
         size_t extent = this->requestedExtent(requested, this->rank, axis);
-        size_t positions = dimension - extent + 1;
-
-        // Multiply the number of choices along each axis to get the total
-        // number of valid starting positions in the multidimensional shape.
-        space *= positions;
+        space *= this->dimensions[axis] - extent + 1;
     }
-
     return space;
 }
 
-size_t Data::DataType::getValidAddress(
-    const Data::DataType& requested,
-    const size_t address
-) const noexcept {
-    // For a one-dimensional shape, or a scalar request, keep the address
-    // unchanged, as in the original implementation.
+size_t Data::DataType::getValidAddress(const Data::DataType& requested, const size_t address) const noexcept
+{
+    // For a one-dimensional shape, or a scalar request, every address is valid as it is.
     if (this->rank < 2 || requested.rank == 0) {
         return address;
     }
 
-    // Convert the address from the compact space of valid window positions
-    // into a linear address in the full logical shape.
+    // Split the address, which counts the positions where the window fits, into one coordinate per axis
+    // (last axis first), and rebuild the address in the full shape from these coordinates.
     size_t remaining = address;
-
-    // Accumulate the resulting linear address in row-major order.
     size_t result = 0;
+    size_t stride = 1; // Size of everything after the axis in the full shape.
 
-    // Start with the stride of the last axis.
-    size_t stride = 1;
-
-    // Decode the compact address from the last axis toward the first axis.
-    for (size_t axisCount = this->rank; axisCount > 0; --axisCount) {
-        size_t axis = axisCount - 1;
-
-        // Determine how much of the requested window occupies this axis.
+    for (size_t axis = this->rank; axis-- > 0;) {
         size_t extent = this->requestedExtent(requested, this->rank, axis);
 
-        // An oversized window cannot be mapped to a valid starting position.
+        // An oversized window cannot be mapped to a valid position.
         if (extent > this->dimensions[axis]) {
             return address;
         }
 
-        // The number of valid starting coordinates along this axis.
-        // For example, a dimension of 5 and an extent of 2 allow 4 positions.
-        size_t allowed = this->dimensions[axis] - extent + 1;
+        // The window can start at this many positions along the axis (a dimension of 5 and a window of 2 give 4).
+        size_t positions = this->dimensions[axis] - extent + 1;
 
-        // Decode this axis's coordinate from the compact address.
-        size_t coordinate = remaining % allowed;
-
-        // Remove the decoded coordinate before processing the preceding axis.
-        remaining /= allowed;
-
-        // Convert this coordinate to its contribution to the full-shape
-        // linear address. The stride uses the full dimension, not 'allowed'.
-        result += coordinate * stride;
-
-        // Move the stride to the preceding axis in the full logical shape.
+        result += (remaining % positions) * stride;
+        remaining /= positions;
         stride *= this->dimensions[axis];
     }
 
     return result;
 }
 
-bool Data::DataType::operator==(const DataType& other) const noexcept {
-    // Two data types are equal when their logical shapes and element types
-    // match. The source layout and source offset are deliberately ignored.
+bool Data::DataType::operator==(const DataType& other) const noexcept
+{
+    // Two data types are equal when their logical shapes and element types match. The layout is ignored.
     return this->rank == other.rank &&
            this->dimensions == other.dimensions &&
            sameElementType(*this->elementType, *other.elementType) &&
            this->elementSize == other.elementSize;
 }
 
-bool Data::DataType::operator!=(const DataType& other) const noexcept {
-    // Inequality is the logical inverse of equality.
+bool Data::DataType::operator!=(const DataType& other) const noexcept
+{
     return !(*this == other);
 }
 
-bool Data::DataType::equalsWithSource(const DataType& other) const noexcept {
-    // Compare both the logical data type and the metadata describing where
-    // the view comes from in the original source.
-    return *this == other &&
-           this->sourceRank == other.sourceRank &&
-           this->sourceDimensions == other.sourceDimensions &&
-           this->sourceOffset == other.sourceOffset;
+bool Data::DataType::equalsWithLayout(const DataType& other) const noexcept
+{
+    return *this == other && this->strides == other.strides;
 }
 
-std::string Data::DataType::toString() const {
+namespace {
+    // Print a list like [2, 3].
+    void printList(std::ostringstream& oss, const Data::Extents& list)
+    {
+        oss << "[";
+        for (size_t idx = 0; idx < list.size(); ++idx) {
+            if (idx > 0) {
+                oss << ", ";
+            }
+            oss << list[idx];
+        }
+        oss << "]";
+    }
+}
+
+std::string Data::DataType::toString() const
+{
     std::ostringstream oss;
 
-    // Start printing the complete metadata representation.
-    oss << "DataType{"
-        << "rank=" << static_cast<int>(this->rank)
-        << ", dimensions=[";
-
-    // Print the logical dimensions in axis order.
-    for (size_t axis = 0; axis < this->rank; ++axis) {
-        if (axis > 0) {
-            oss << ", ";
-        }
-
-        oss << this->dimensions[axis];
-    }
-
-    oss << "]"
-        << ", elementType=";
+    oss << "DataType{rank=" << static_cast<int>(this->rank) << ", dimensions=";
+    printList(oss, this->dimensions);
+    oss << ", strides=";
+    printList(oss, this->strides);
+    oss << ", elementType=";
 
     // Print the element type's demangled name when available.
     if (this->elementType != nullptr) {
@@ -320,28 +246,12 @@ std::string Data::DataType::toString() const {
         oss << "null";
     }
 
-    oss << ", elementSize=" << this->elementSize
-        << ", sourceRank=" << static_cast<int>(this->sourceRank)
-        << ", sourceDimensions=[";
-
-    // Print the dimensions of the original source layout.
-    for (size_t axis = 0; axis < this->sourceRank; ++axis) {
-        if (axis > 0) {
-            oss << ", ";
-        }
-
-        oss << this->sourceDimensions[axis];
-    }
-
-    // Finish with the offset of this view within its source.
-    oss << "]"
-        << ", sourceOffset=" << this->sourceOffset
-        << "}";
-
+    oss << ", elementSize=" << this->elementSize << "}";
     return oss.str();
 }
 
-std::string Data::DataType::summary() const {
+std::string Data::DataType::summary() const
+{
     std::ostringstream oss;
 
     // Begin with the element type, or use a fallback if it is unavailable.
@@ -355,14 +265,8 @@ std::string Data::DataType::summary() const {
     if (this->rank == 0) {
         oss << " scalar'";
     } else {
-        // Print the dimensions in order, for example [2, 3, 4].
-        oss << "[" << this->dimensions[0];
-
-        for (size_t axis = 1; axis < this->rank; ++axis) {
-            oss << ", " << this->dimensions[axis];
-        }
-
-        oss << "]'";
+        printList(oss, this->dimensions);
+        oss << "'";
     }
 
     return oss.str();

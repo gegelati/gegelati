@@ -42,7 +42,7 @@ namespace Dimensions {
 
                     for(size_t idxInput = 0; idxInput < this->archive.size() && !remainingAnswers.empty(); idxInput++) {
                         double currentOutput = this->representation->execute(*genotype, this->archive.getInputsAt(idxInput)).getScalar<double>();
-                        std::shared_ptr<const double[]> archiveOutputs = this->archive.getOutputAt(idxInput).getData<double>();
+                        auto archiveOutputs = this->archive.getOutputAt(idxInput).getData<double>();
                         for(auto it = remainingAnswers.begin(); it != remainingAnswers.end(); ){
                             if(currentOutput == archiveOutputs[*it]) {
                                 it++;

@@ -38,7 +38,7 @@ void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) 
     }
 
     // Copy the source value run by run, respecting the strides of the destination layout.
-    const size_t base = type.sourceOffset + type.sourceOffsetOf(address);
+    const size_t base = type.offsetOf(address);
     const size_t elementSize = type.elementSize;
 
     const char* src = static_cast<const char*>(value.storage->data());

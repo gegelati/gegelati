@@ -24,9 +24,7 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     ASSERT_NO_THROW(Data::DataView(values.data(), Data::DataType::type<int>({values.size()})));
     EXPECT_EQ(oneDView.getRank(), 1u);
     EXPECT_EQ(oneDView.getDimensions()[0], static_cast<size_t>(values.size()));
-    EXPECT_EQ(oneDView.getSourceRank(), 1u);
-    EXPECT_EQ(oneDView.getSourceDimensions()[0], static_cast<size_t>(values.size()));
-    EXPECT_EQ(oneDView.getSourceOffset(), 0u);
+    EXPECT_EQ(oneDView.getStrides()[0], 1u);
     EXPECT_TRUE(oneDView);
 
     std::shared_ptr<const int[]> oneDPtr = nullptr;
@@ -42,9 +40,8 @@ TEST(DataViewTest, ConstructorAndAccessorsHandleScalar1DAnd2DViews)
     EXPECT_EQ(twoDView.getRank(), 2u);
     EXPECT_EQ(twoDView.getDimensions()[0], 2u);
     EXPECT_EQ(twoDView.getDimensions()[1], 3u);
-    EXPECT_EQ(twoDView.getSourceRank(), 2u);
-    EXPECT_EQ(twoDView.getSourceDimensions()[0], 2u);
-    EXPECT_EQ(twoDView.getSourceDimensions()[1], 3u);
+    EXPECT_EQ(twoDView.getStrides()[0], 3u);
+    EXPECT_EQ(twoDView.getStrides()[1], 1u);
 
     std::shared_ptr<const int[]> twoDPtr = nullptr;
     ASSERT_NO_THROW(twoDPtr = twoDView.getData<int>());
@@ -304,7 +301,7 @@ TEST(DataViewTest, ToStringContainsViewAndTypeInformation)
     EXPECT_NE(text.find("DataType{"), std::string::npos);
     EXPECT_NE(text.find("rank=2"), std::string::npos);
     EXPECT_NE(text.find("dimensions=[2, 3]"), std::string::npos);
-    EXPECT_NE(text.find("sourceRank=2"), std::string::npos);
+    EXPECT_NE(text.find("strides=[3, 1]"), std::string::npos);
     ASSERT_NO_THROW(std::cout<<view<<std::endl);
 }
 
@@ -399,9 +396,7 @@ TEST(DataViewTest, deepClone)
     EXPECT_EQ(type.dimensions, view.getDimensions());
     EXPECT_EQ(type.elementType, &typeid(int));
     EXPECT_EQ(type.elementSize, sizeof(int));
-    EXPECT_EQ(type.sourceRank, view.getSourceRank());
-    EXPECT_EQ(type.sourceDimensions, view.getSourceDimensions());
-    EXPECT_EQ(type.sourceOffset, view.getSourceOffset());
+    EXPECT_EQ(type.strides, view.getStrides());
 
     const int* clonedData =
         reinterpret_cast<const int*>(storage.get());
@@ -442,9 +437,7 @@ TEST(DataViewTest, deepClonePreserves2DSourceLayout)
 
     EXPECT_EQ(type.rank, subView.getRank());
     EXPECT_EQ(type.dimensions, subView.getDimensions());
-    EXPECT_EQ(type.sourceRank, subView.getSourceRank());
-    EXPECT_EQ(type.sourceDimensions, subView.getSourceDimensions());
-    EXPECT_EQ(type.sourceOffset, subView.getSourceOffset());
+    EXPECT_EQ(type.strides, subView.getStrides()) << "The clone keeps the layout of the window.";
     EXPECT_EQ(type.elementType, &typeid(int));
     EXPECT_EQ(type.elementSize, sizeof(int));
 

@@ -101,7 +101,12 @@ namespace Data {
         /**
          * \brief Returns the dimensions of THIS view.
          */
-        const std::vector<size_t>& getDimensions() const noexcept { return type.dimensions; }
+        const Extents& getDimensions() const noexcept { return type.dimensions; }
+
+        /**
+         * \brief Returns the strides of THIS view: the distance in memory, in elements, between two neighbours along each axis.
+         */
+        const Extents& getStrides() const noexcept { return type.strides; }
 
         /**
          * \brief Returns the element type of the viewed data.
@@ -112,21 +117,6 @@ namespace Data {
          * \brief Returns the size of each element in bytes.
          */
         size_t getElementSize() const noexcept { return type.elementSize; }
-
-        /**
-         * \brief Returns the source's rank.
-         */
-        uint8_t getSourceRank() const noexcept { return type.sourceRank; }
-
-        /**
-         * \brief Returns the source's dimensions.
-         */
-        const std::vector<size_t>& getSourceDimensions() const noexcept { return type.sourceDimensions; }
-
-        /**
-         * \brief Returns the linear offset (in elements) in the source.
-         */
-        size_t getSourceOffset() const noexcept { return type.sourceOffset; }
 
         // --- Sub-View Extraction ---
 
@@ -223,7 +213,7 @@ namespace Data {
          * with the returned pointer); otherwise the view memory is borrowed
          * with no allocation.
          *
-         * The result converts to a std::shared_ptr<const T[]> if needed.
+         * The result is a pointer to the elements: keep it alive while they are read.
          *
          * \tparam T The element type of the data.
          * \return A pointer to the first element of the array.

@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "data/dataType.h"
+
 namespace Data {
 
     namespace detail {
@@ -134,7 +136,7 @@ namespace Data {
             /**
              * \brief Extent of each axis (its size is the rank).
              */
-            std::vector<size_t> shape;
+            Extents shape;
 
             /**
              * \brief Constructs an N-dimensional array storage model.
@@ -142,7 +144,7 @@ namespace Data {
              * \param[in] v Buffer owning the array elements.
              * \param[in] s Extent of each axis; the buffer holds their product.
              */
-            ArrayModel(std::unique_ptr<T[]> v, std::vector<size_t> s)
+            ArrayModel(std::unique_ptr<T[]> v, Extents s)
                 : values(std::move(v)), count(1), shape(std::move(s)) {
                 for (size_t extent : shape) {
                     count *= extent;
