@@ -1,6 +1,9 @@
 
 #include "fitnessAssignment/noveltySearchAssigner.h"
 
+#include <cmath>
+#include <limits>
+
 std::vector<double> FitnessAssignment::NoveltySearchAssigner::computeOneDescriptorAvgVector(
     const std::map<uint64_t, const Metrics::VectorMetric*>& vectorMetrics) const
 {
@@ -85,6 +88,12 @@ std::map<uint64_t, std::map<uint64_t, double>> FitnessAssignment::NoveltySearchA
             }
             distance = std::sqrt(distance);
 
+            // A descriptor with a NaN or an infinite value (e.g. the output of a program computing a log or a division) has no meaningful
+            // distance: it is infinite, so that it is never a nearest neighbor (and the sort of the neighbors is well defined).
+            if(!std::isfinite(distance)) {
+                distance = std::numeric_limits<double>::infinity();
+            }
+
             distancesX.insert(std::make_pair(indivY, distance));
         }
         distances.insert(std::make_pair(indivX, std::move(distancesX)));
@@ -130,16 +139,22 @@ std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::computeNove
 
     for(const auto& [indivX, neighborsX] : neighbors) {
 
-        double novelty = 0.0;
-
-        for(const uint64_t& indivY : neighborsX) {
-            novelty += distances.at(indivX).at(indivY);
-        }
-
         if(neighborsX.empty()) {
             throw std::runtime_error("FitnessAssignment::NoveltySearchAssigner::computeNoveltyScores list of neighbors should not be empty");
         }
-        novelty /= static_cast<double>(neighborsX.size());
+
+        // Infinite distances (see computeDistances) are ignored: they are the last neighbors, taken only when there are not enough finite ones.
+        // An individual without any finite distance is the worst one (zero novelty), it must not be the most novel.
+        double novelty = 0.0;
+        size_t nbFinite = 0;
+        for(const uint64_t& indivY : neighborsX) {
+            const double distance = distances.at(indivX).at(indivY);
+            if(std::isfinite(distance)) {
+                novelty += distance;
+                nbFinite++;
+            }
+        }
+        novelty = (nbFinite > 0) ? novelty / static_cast<double>(nbFinite) : 0.0;
 
         noveltyScores.insert(std::make_pair(indivX, novelty));
     }
