@@ -7,19 +7,11 @@ Evolution::InitPopulationStep::InitPopulationStep(Key<std::vector<std::shared_pt
     : Module(std::move(name)), individuals{std::move(individuals)}, representation{std::move(representation)}, size{size}, mutator{std::move(mutator)},
       generator{std::move(generator)}
 {
+    this->require(this->generator);
+    this->provide(this->individuals);
     if(this->representation == nullptr || this->mutator == nullptr) {
         throw std::runtime_error("Evolution::InitPopulationStep: the representation and the mutator cannot be null");
     }
-}
-
-std::set<std::string> Evolution::InitPopulationStep::requiredData() const
-{
-    return {this->generator.name()};
-}
-
-std::set<std::string> Evolution::InitPopulationStep::providedData() const
-{
-    return {this->individuals.name()};
 }
 
 std::string Evolution::InitPopulationStep::details() const

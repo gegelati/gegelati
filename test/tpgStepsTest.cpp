@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include "evolutionTestHelpers.h"
+#include "util/individualUtils.h"
 #include <algorithm>
 
 #include "evolution/basicEvolution.h"
@@ -95,7 +97,7 @@ class TPGStepsTest : public ::testing::Test
     // Individuals of the population of roots.
     std::vector<std::shared_ptr<const Individual>> rootsOf(const Evolution::EvolutionData& state) const
     {
-        return state.getIndividuals(this->roots.individuals);
+        return constIndividuals(*state.get(this->roots.individuals));
     }
 
     // State where the roots have a "fitness", and empty "metrics".

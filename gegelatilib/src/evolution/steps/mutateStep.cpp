@@ -6,14 +6,11 @@ Evolution::MutateStep::MutateStep(Key<std::vector<std::shared_ptr<Individual>>> 
                                   size_t nbThreads, std::string name)
     : Module(std::move(name)), individuals{std::move(individuals)}, mutator{std::move(mutator)}, generator{std::move(generator)}, nbThreads{nbThreads}
 {
+    this->require(this->individuals);
+    this->require(this->generator);
     if(this->mutator == nullptr) {
         throw std::runtime_error("Evolution::MutateStep: the mutator cannot be null");
     }
-}
-
-std::set<std::string> Evolution::MutateStep::requiredData() const
-{
-    return {this->individuals.name(), this->generator.name()};
 }
 
 std::string Evolution::MutateStep::details() const

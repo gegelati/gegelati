@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "evaluation/evaluator.h"
+#include "individual.h"
+#include "metrics/metricMap.h"
 #include "evolution/key.h"
 #include "evolution/module.h"
 #include "evolution/steps/logStep.h"

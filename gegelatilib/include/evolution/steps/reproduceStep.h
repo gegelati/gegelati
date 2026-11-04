@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 
+#include "individual.h"
 #include "evolution/module.h"
 #include "reproduction/reproducer.h"
 
@@ -18,14 +19,14 @@ namespace Evolution {
             /// Name of the parents.
             Key<std::vector<std::shared_ptr<Individual>>> parents;
 
+            /// Name of the created offspring.
+            Key<std::vector<std::shared_ptr<Individual>>> offspring;
+
             /// Reproducer creating the offspring.
             std::shared_ptr<const Reproduction::Reproducer> reproducer;
 
             /// Number of offspring created.
             size_t nbOffspring;
-
-            /// Name of the created offspring.
-            Key<std::vector<std::shared_ptr<Individual>>> offspring;
 
         public:
             /**
@@ -39,12 +40,12 @@ namespace Evolution {
              */
             ReproduceStep(Key<std::vector<std::shared_ptr<Individual>>> parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, Key<std::vector<std::shared_ptr<Individual>>> offspring,
                           std::string name = "Reproduce")
-                : Module(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)} {}
+                : Module(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)}
+            {
+                this->require(this->parents);
+                this->provide(this->offspring);
+            }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

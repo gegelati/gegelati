@@ -4,15 +4,8 @@
 #include <vector>
 
 #include "file/populationDotExporter.h"
+#include "util/individualUtils.h"
 
-
-std::set<std::string> Evolution::ExportStep::requiredData() const
-{
-    if(this->bestFitness.has_value()) {
-        return {this->individuals.name(), this->bestFitness->name()};
-    }
-    return {this->individuals.name()};
-}
 
 std::string Evolution::ExportStep::details() const
 {
@@ -27,13 +20,17 @@ void Evolution::ExportStep::apply(EvolutionData& state)
 
     std::vector<std::shared_ptr<const Individual>> exported;
     if(this->bestFitness.has_value()) {
-        std::shared_ptr<const Individual> best = state.bestIndividual(this->individuals, *this->bestFitness);
+        const std::shared_ptr<const std::map<uint64_t, double>> fitness = state.getIfAny(*this->bestFitness);
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get(this->individuals);
+        const std::shared_ptr<const Individual> best =
+            (fitness == nullptr) ? nullptr : Util::bestIndividual(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end()), *fitness);
         if(best == nullptr) {
             return;
         }
         exported.push_back(best);
     } else {
-        exported = state.getIndividuals(this->individuals);
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get(this->individuals);
+        exported.assign(list.begin(), list.end());
     }
 
     const std::string path = this->filePath + (this->oneFilePerGeneration ? std::to_string(state.generation) : "") + ".dot";

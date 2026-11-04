@@ -20,23 +20,14 @@ Evolution::SelectStep::SelectStep(std::vector<Key<std::vector<std::shared_ptr<In
     : Module(std::move(name)), candidates{std::move(candidates)}, fitness{std::move(fitness)}, selector{std::move(selector)}, nbSelected{nbSelected},
       selected{std::move(selected)}, distinct{distinct}
 {
+    this->require(this->fitness);
+    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->candidates) {
+        this->require(key);
+    }
+    this->provide(this->selected);
     if(this->candidates.empty() || this->selector == nullptr) {
         throw std::runtime_error("Evolution::SelectStep: the candidates cannot be empty and the selector cannot be null");
     }
-}
-
-std::set<std::string> Evolution::SelectStep::requiredData() const
-{
-    std::set<std::string> required{this->fitness.name()};
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->candidates) {
-        required.insert(key.name());
-    }
-    return required;
-}
-
-std::set<std::string> Evolution::SelectStep::providedData() const
-{
-    return {this->selected.name()};
 }
 
 std::string Evolution::SelectStep::details() const

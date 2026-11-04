@@ -15,7 +15,7 @@ namespace {
     {
         std::vector<double> values;
         if(state.isUpToDate(fitness)) {
-            for(const std::shared_ptr<const Individual>& individual: state.getIndividuals(individuals)) {
+            for(const std::shared_ptr<Individual>& individual: *state.get(individuals)) {
                 const auto found = state.get(fitness)->find(individual->getIndividualID());
                 if(found != state.get(fitness)->end()) {
                     values.push_back(found->second);
@@ -84,7 +84,7 @@ void Evolution::LogStep::apply(EvolutionData& state)
 
 Evolution::LogStep::Column Evolution::sizeColumn(const Key<std::vector<std::shared_ptr<Individual>>>& individuals, std::string name)
 {
-    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.getIndividuals(individuals).size()); }, 0};
+    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.has(individuals) ? state.get(individuals)->size() : 0); }, 0};
 }
 
 std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::string& prefix, const Key<std::vector<std::shared_ptr<Individual>>>& individuals,

@@ -1,16 +1,6 @@
 #include "evolution/steps/reproduceStep.h"
 
 
-std::set<std::string> Evolution::ReproduceStep::requiredData() const
-{
-    return {this->parents.name()};
-}
-
-std::set<std::string> Evolution::ReproduceStep::providedData() const
-{
-    return {this->offspring.name()};
-}
-
 std::string Evolution::ReproduceStep::details() const
 {
     return std::to_string(this->nbOffspring) + " from " + this->parents.name() + " to " + this->offspring.name();
@@ -18,6 +8,7 @@ std::string Evolution::ReproduceStep::details() const
 
 void Evolution::ReproduceStep::apply(EvolutionData& state)
 {
+    const std::vector<std::shared_ptr<Individual>>& parents = *state.get(this->parents);
     state.set(this->offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>(
-        this->reproducer->reproduce(state.getIndividuals(this->parents), this->nbOffspring, state.rng)));
+        this->reproducer->reproduce(std::vector<std::shared_ptr<const Individual>>(parents.begin(), parents.end()), this->nbOffspring, state.rng)));
 }

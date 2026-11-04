@@ -98,7 +98,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
 
                 // The destination is an action or, sometimes, one of the current vertices.
                 const std::vector<std::shared_ptr<const Individual>> vertices =
-                    fromVertices ? getAllVertices(data.getIndividuals(keys.individuals)) : std::vector<std::shared_ptr<const Individual>>{};
+                    fromVertices ? getAllVertices(std::vector<std::shared_ptr<const Individual>>(data.get(keys.individuals)->begin(), data.get(keys.individuals)->end())) : std::vector<std::shared_ptr<const Individual>>{};
                 Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRepresentation->getNbActions() - 1);
                 if(vertices.empty()) {
                     bidNodes.addGenerator(actionGenerator);
@@ -165,8 +165,16 @@ std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolution::logColumn
 {
     std::vector<LogStep::Column> columns = BasicEvolution::logColumns();
     const Key<std::vector<std::shared_ptr<Individual>>> roots(this->names.population);
-    columns.insert(columns.begin() + 1, {"NbVertex", [roots](const EvolutionData& state) { return static_cast<double>(getAllVertices(state.getIndividuals(roots)).size()); }, 0});
-    columns.insert(columns.begin() + 2, {"NbMember", [roots](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(state.getIndividuals(roots))).size()); }, 0});
+    // The roots may not exist yet when a column is computed: there is then no vertex.
+    const auto rootsOf = [roots](const EvolutionData& state) {
+        std::vector<std::shared_ptr<const Individual>> result;
+        if(const auto list = state.getIfAny(roots)) {
+            result.assign(list->begin(), list->end());
+        }
+        return result;
+    };
+    columns.insert(columns.begin() + 1, {"NbVertex", [rootsOf](const EvolutionData& state) { return static_cast<double>(getAllVertices(rootsOf(state)).size()); }, 0});
+    columns.insert(columns.begin() + 2, {"NbMember", [rootsOf](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(rootsOf(state))).size()); }, 0});
     return columns;
 }
 

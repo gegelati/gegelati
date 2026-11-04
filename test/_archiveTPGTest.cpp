@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <fstream>
 #include <gtest/gtest.h>
+#include "evolutionTestHelpers.h"
+#include "util/individualUtils.h"
 #include <numeric>
 
 #include "instructions/set.h"
@@ -163,7 +165,7 @@ TEST_F(TPGAlgoTest, mnistTestLGP) {
     // Initialize population
     std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(mutator, lgpRep, GraphBased::GenotypeGenerator(lgpRep->getGenotypeConstraint()), sizePopulation, rng);
     std::vector<std::shared_ptr<const Individual>> population(individuals.begin(), individuals.end());
-    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index = Evolution::makeIndex(population);
+    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index = Util::makeIndex(population);
 
     // Initial evaluation
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> evaluationResults = 
@@ -427,12 +429,13 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     auto makeGeneratorStep = [&]() {
         return std::make_shared<Evolution::LambdaStep>("TPGGenerator", [tpgRep, lgpKeys, tpgKeys](Evolution::EvolutionData& data) {
             // The member of a node is one of the current individuals of the LGP.
-            const std::vector<std::shared_ptr<const Individual>> members = data.getIndividuals(lgpKeys.individuals);
+            const std::vector<std::shared_ptr<const Individual>> members = constIndividuals(*data.get(lgpKeys.individuals));
             GraphBased::NodeGenerator bidNodes;
             bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(members));
 
             // The destination is an action or, sometimes, one of the current individuals of the TPG (none at the beginning).
-            const std::vector<std::shared_ptr<const Individual>> tangled = data.getIndividuals(tpgKeys.individuals);
+            const auto tpgIndividuals = data.getIfAny(tpgKeys.individuals);
+            const std::vector<std::shared_ptr<const Individual>> tangled = (tpgIndividuals == nullptr) ? std::vector<std::shared_ptr<const Individual>>{} : constIndividuals(*tpgIndividuals);
             Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRep->getNbActions() - 1);
             if(tangled.empty()) {
                 bidNodes.addGenerator(actionGenerator);
@@ -461,7 +464,8 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
     columns.insert(columns.begin() + 1, {"NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
-        return static_cast<double>(Evolution::getAllVertices(data.getIndividuals(tpgKeys.individuals)).size());
+        const auto roots = data.getIfAny(tpgKeys.individuals);
+        return (roots == nullptr) ? 0.0 : static_cast<double>(Evolution::getAllVertices(constIndividuals(*roots)).size());
     }, 0});
     std::ostringstream csv;
     const std::vector<Evolution::LogStep::Column> times = Evolution::stepTimeColumns(*tpgModule);
@@ -479,8 +483,8 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
 
     EXPECT_EQ(data.nbGenerationsDone, 40U);
     EXPECT_NE(csv.str().find("Gen;Pop_Size;NbVertex;Fit_Min"), std::string::npos);
-    EXPECT_EQ(data.getIndividuals(lgpKeys.individuals).size(), lgp.sizePopulation);
-    const std::vector<std::shared_ptr<const Individual>> roots = data.getIndividuals(tpgKeys.individuals);
+    EXPECT_EQ(constIndividuals(*data.get(lgpKeys.individuals)).size(), lgp.sizePopulation);
+    const std::vector<std::shared_ptr<const Individual>> roots = constIndividuals(*data.get(tpgKeys.individuals));
     ASSERT_EQ(roots.size(), tpg.sizePopulation);
     EXPECT_TRUE(data.isUpToDate(tpgKeys.trainingFitness));
 

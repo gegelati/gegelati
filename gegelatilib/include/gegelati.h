@@ -65,6 +65,7 @@
 
 // Evolution
 #include <evolution/basicEvolution.h>
+#include <evolution/entry.h>
 #include <evolution/evolutionData.h>
 #include <evolution/key.h>
 #include <evolution/originTPGEvolution.h>
@@ -146,6 +147,7 @@
 // Utilities
 #include <util/counterReset.h>
 #include <util/genericComparator.h>
+#include <util/individualUtils.h>
 #include <util/stopwatch.h>
 #include <util/timestamp.h>
 

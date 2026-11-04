@@ -39,6 +39,8 @@
 #include <algorithm>
 #include <fstream>
 #include <gtest/gtest.h>
+#include "evolutionTestHelpers.h"
+#include "util/individualUtils.h"
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -418,14 +420,14 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipeline) {
     EXPECT_LE(archive->size(), 50U);
 
     // Every vertex of the graphs is valid, with a number of nodes following the representation.
-    const std::vector<std::shared_ptr<const Individual>> vertices = Evolution::getAllVertices(state.getIndividuals(population.individuals));
+    const std::vector<std::shared_ptr<const Individual>> vertices = Evolution::getAllVertices(constIndividuals(*state.get(population.individuals)));
     ASSERT_FALSE(vertices.empty());
     for(const std::shared_ptr<const Individual>& vertex: vertices) {
         EXPECT_TRUE(vertex->isValid());
         EXPECT_LE(vertex->getGenotype().getNodeGroup(0).getSize(), 10U);
     }
     EXPECT_FALSE(Evolution::getMembersOf(vertices).empty());
-    EXPECT_NE(state.bestIndividual(population.individuals, population.trainingFitness), nullptr);
+    EXPECT_NE(Util::bestIndividual(constIndividuals(*state.get(population.individuals)), *state.get(population.trainingFitness)), nullptr);
 }
 
 TEST_F(EvolutionAlgorithmTest, originTPGPipelineIsDeterministicWithThreads) {
@@ -446,7 +448,7 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipelineIsDeterministicWithThreads) {
         root->resume(state, 20);
         lastRng[idx] = state.rng.uniformSample<uint64_t>(0, UINT64_MAX);
         nbIndividuals[idx] = Individual::getIndividualIDCounter();
-        nbVertices[idx] = Evolution::getAllVertices(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals)).size();
+        nbVertices[idx] = Evolution::getAllVertices(constIndividuals(*state.get(Evolution::BasicEvolution::Keys().individuals))).size();
     }
 
     EXPECT_EQ(lastRng[0], lastRng[1]) << "Evolution should not depend on the number of threads";
@@ -486,7 +488,7 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipelineProtectsAggregatedVertices) {
 
     EXPECT_EQ(nbChecks, 30U);
     // Every protected vertex is still reachable, through the graphs of the population.
-    const std::vector<std::shared_ptr<const Individual>> roots = state.getIndividuals(individuals);
+    const std::vector<std::shared_ptr<const Individual>> roots = constIndividuals(*state.get(individuals));
     EXPECT_GE(Evolution::getAllVertices(roots).size(), roots.size() + nbProtected);
 }
 
@@ -504,7 +506,7 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipelineWithoutProtection) {
     EXPECT_FALSE(root->has("UpdateArchive"));
     EXPECT_FALSE(root->getInitialization()->has("CreateArchive"));
     root->resume(state, 5);
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 50U);
+    EXPECT_EQ(constIndividuals(*state.get(Evolution::BasicEvolution::Keys().individuals)).size(), 50U);
 }
 
 TEST_F(EvolutionAlgorithmTest, originTPGSettingsAreChecked) {

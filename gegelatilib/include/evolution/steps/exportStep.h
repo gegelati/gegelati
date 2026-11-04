@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 
+#include "individual.h"
 #include "evolution/module.h"
 
 namespace Evolution {
@@ -39,10 +40,14 @@ namespace Evolution {
             ExportStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<Key<std::map<uint64_t, double>>> bestFitness = std::nullopt,
                        std::string name = "Export")
                 : Module(std::move(name)), individuals{std::move(individuals)}, filePath{std::move(filePath)},
-                  oneFilePerGeneration{oneFilePerGeneration}, bestFitness{std::move(bestFitness)} {}
+                  oneFilePerGeneration{oneFilePerGeneration}, bestFitness{std::move(bestFitness)}
+            {
+                this->require(this->individuals);
+                if(this->bestFitness.has_value()) {
+                    this->require(*this->bestFitness);
+                }
+            }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

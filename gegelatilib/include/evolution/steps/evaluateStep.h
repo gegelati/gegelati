@@ -8,6 +8,7 @@
 
 #include "evaluation/evaluator.h"
 #include "evaluation/problem.h"
+#include "individual.h"
 #include "evolution/module.h"
 #include "metrics/metricMap.h"
 
@@ -78,10 +79,6 @@ namespace Evolution {
             /// Return the evaluation mode.
             Evaluation::Mode getMode() const { return this->mode; }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

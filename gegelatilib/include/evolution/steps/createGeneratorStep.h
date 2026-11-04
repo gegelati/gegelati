@@ -26,9 +26,6 @@ namespace Evolution {
             /// Function building the generator from the data.
             std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const EvolutionData&)> build;
 
-            /// Names of the data read by the function.
-            std::set<std::string> required;
-
         public:
             /**
              * \brief Constructor of the naive generator of a representation, sampling the values of its constraint.
@@ -54,10 +51,6 @@ namespace Evolution {
                                 std::function<std::shared_ptr<GraphBased::GenotypeGenerator>(const EvolutionData&)> build,
                                 std::set<std::string> required = {}, std::string name = "CreateGenerator");
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+
+#include "util/individualUtils.h"
 #include <unordered_map>
 
 #include "metrics/inputMetric.h"
@@ -15,14 +17,12 @@ Evolution::MutateVerticesStep::MutateVerticesStep(Key<std::vector<std::shared_pt
     : Module(std::move(name)), individuals{std::move(individuals)}, roots{std::move(roots)}, generator{std::move(generator)}, mutator{std::move(mutator)},
       nbThreads{nbThreads}
 {
+    this->require(this->individuals);
+    this->require(this->roots);
+    this->require(this->generator);
     if(this->mutator == nullptr) {
         throw std::runtime_error("Evolution::MutateVerticesStep: the mutator cannot be null");
     }
-}
-
-std::set<std::string> Evolution::MutateVerticesStep::requiredData() const
-{
-    return {this->individuals.name(), this->roots.name(), this->generator.name()};
 }
 
 std::string Evolution::MutateVerticesStep::details() const
@@ -33,7 +33,8 @@ std::string Evolution::MutateVerticesStep::details() const
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 {
     // The roots are only shared with the mutation while mutating, so the step does not keep them alive.
-    this->mutator->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(state.getIndividuals(this->roots)));
+    const std::vector<std::shared_ptr<Individual>>& roots = *state.get(this->roots);
+    this->mutator->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(roots.begin(), roots.end()));
     Mutation::mutateIndividualsInParallel(*this->mutator, *state.get(this->individuals), *state.get(this->generator), state.rng, this->nbThreads);
     this->mutator->setPotentialNodes(nullptr);
 }
@@ -43,23 +44,13 @@ Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<Key<std::v
     : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
       nbIterations{nbIterations}
 {
+    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+        this->require(key);
+    }
+    this->provide(this->cache);
     if(this->problem == nullptr) {
         throw std::runtime_error("Evolution::CacheMemberOutputsStep: the problem cannot be null");
     }
-}
-
-std::set<std::string> Evolution::CacheMemberOutputsStep::requiredData() const
-{
-    std::set<std::string> required;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
-        required.insert(key.name());
-    }
-    return required;
-}
-
-std::set<std::string> Evolution::CacheMemberOutputsStep::providedData() const
-{
-    return {this->cache.name()};
 }
 
 std::string Evolution::CacheMemberOutputsStep::details() const
@@ -76,7 +67,11 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
         }
     }
 
-    const std::vector<std::shared_ptr<const Individual>> candidates = state.getIndividuals(this->evaluated);
+    std::vector<std::shared_ptr<const Individual>> candidates;
+    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get(key);
+        candidates.insert(candidates.end(), list.begin(), list.end());
+    }
     const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(candidates);
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
     if(members.empty()) {
@@ -111,25 +106,10 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
     }
 }
 
-std::set<std::string> Evolution::CreateArchiveStep::providedData() const
-{
-    return {this->archive.name()};
-}
-
 void Evolution::CreateArchiveStep::apply(EvolutionData& state)
 {
     // Each answer of the archive is an array with the answer of each member.
     state.set(this->archive, std::make_shared<Evaluation::DataSet>(this->inputRequirements, Dimensions::Requirement(Data::DataType::type<double>({1}))));
-}
-
-std::set<std::string> Evolution::UpdateArchiveStep::requiredData() const
-{
-    return {this->roots.name(), this->metrics.name(), this->archive.name()};
-}
-
-std::set<std::string> Evolution::UpdateArchiveStep::providedData() const
-{
-    return {this->archive.name()};
 }
 
 std::string Evolution::UpdateArchiveStep::details() const
@@ -153,8 +133,9 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
     }
 
     // Distinct inputs measured during the evaluation of the roots, indexed by their hash.
-    const std::vector<std::shared_ptr<const Individual>> roots = state.getIndividuals(this->roots);
-    const std::unordered_map<uint64_t, std::shared_ptr<const Individual>> rootIndex = makeIndex(roots);
+    const std::vector<std::shared_ptr<Individual>>& mutableRoots = *state.get(this->roots);
+    const std::vector<std::shared_ptr<const Individual>> roots(mutableRoots.begin(), mutableRoots.end());
+    const std::unordered_map<uint64_t, std::shared_ptr<const Individual>> rootIndex = Util::makeIndex(roots);
     std::map<uint64_t, std::vector<Data::DataValue>> allInputs;
     for(auto& [id, metricMap]: *state.get(this->metrics)) {
         if(rootIndex.count(id) == 0) {
@@ -202,7 +183,8 @@ void Evolution::UpdateArchiveStep::updateArchiveOutputs(EvolutionData& state, Ev
         return;
     }
 
-    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(state.getIndividuals(this->roots)));
+    const std::vector<std::shared_ptr<Individual>>& roots = *state.get(this->roots);
+    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end())));
     for(size_t idx = 0; idx < archive.size(); idx++) {
         archive.setOutputAt(idx, computeMemberAnswer(archive.getInputsAt(idx), members));
     }
@@ -217,16 +199,6 @@ void Evolution::UpdateArchiveStep::apply(EvolutionData& state)
     } else {
         this->updateArchive(state, *archive);
     }
-}
-
-std::set<std::string> Evolution::ProtectAggregatedStep::requiredData() const
-{
-    return {this->roots.name()};
-}
-
-std::set<std::string> Evolution::ProtectAggregatedStep::providedData() const
-{
-    return {this->roots.name(), this->protectedVertices.name(), this->aggregators.name()};
 }
 
 void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)

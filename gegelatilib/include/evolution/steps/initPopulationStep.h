@@ -6,6 +6,7 @@
 #include <string>
 
 #include "representations/representation.h"
+#include "individual.h"
 #include "evolution/module.h"
 #include "graphBased/genotypeGenerator.h"
 #include "mutation/mutator.h"
@@ -47,10 +48,6 @@ namespace Evolution {
             InitPopulationStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, std::shared_ptr<const Representations::Representation> representation, size_t size,
                                std::shared_ptr<const Mutation::Mutator> mutator, Key<GraphBased::GenotypeGenerator> generator, std::string name = "InitPopulation");
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

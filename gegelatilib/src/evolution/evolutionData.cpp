@@ -1,18 +1,8 @@
 #include "evolution/evolutionData.h"
 
 #include <algorithm>
-#include <cmath>
 #include <sstream>
-
-std::unordered_map<uint64_t, std::shared_ptr<const Individual>> Evolution::makeIndex(const std::vector<std::shared_ptr<const Individual>>& individuals)
-{
-    std::unordered_map<uint64_t, std::shared_ptr<const Individual>> index;
-    index.reserve(individuals.size());
-    for(const std::shared_ptr<const Individual>& individual: individuals) {
-        index.emplace(individual->getIndividualID(), individual);
-    }
-    return index;
-}
+#include <vector>
 
 void Evolution::EvolutionData::reset(uint64_t seed)
 {
@@ -32,47 +22,13 @@ std::set<std::string> Evolution::EvolutionData::dataNames() const
     return names;
 }
 
-std::vector<std::shared_ptr<const Individual>> Evolution::EvolutionData::getIndividuals(const Key<std::vector<std::shared_ptr<Individual>>>& key) const
+std::map<std::string, std::type_index> Evolution::EvolutionData::dataTypes() const
 {
-    const std::shared_ptr<const std::vector<std::shared_ptr<Individual>>> individuals = this->getIfAny(key);
-    if(individuals == nullptr) {
-        return {};
+    std::map<std::string, std::type_index> types;
+    for(const auto& entry: this->data) {
+        types.emplace(entry.first, entry.second->type());
     }
-    return std::vector<std::shared_ptr<const Individual>>(individuals->begin(), individuals->end());
-}
-
-std::vector<std::shared_ptr<const Individual>> Evolution::EvolutionData::getIndividuals(const std::vector<Key<std::vector<std::shared_ptr<Individual>>>>& keys) const
-{
-    std::vector<std::shared_ptr<const Individual>> individuals;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: keys) {
-        const std::vector<std::shared_ptr<const Individual>> list = this->getIndividuals(key);
-        individuals.insert(individuals.end(), list.begin(), list.end());
-    }
-    return individuals;
-}
-
-std::shared_ptr<const Individual> Evolution::EvolutionData::bestIndividual(const Key<std::vector<std::shared_ptr<Individual>>>& individuals,
-                                                                            const Key<std::map<uint64_t, double>>& fitness) const
-{
-    const std::shared_ptr<const std::map<uint64_t, double>> fitnessMap = this->getIfAny(fitness);
-    if(fitnessMap == nullptr) {
-        return nullptr;
-    }
-
-    // The highest fitness wins, then the lowest ID. Individuals without fitness are ignored.
-    std::shared_ptr<const Individual> best = nullptr;
-    double bestFitness = 0.0;
-    for(const std::shared_ptr<const Individual>& individual: this->getIndividuals(individuals)) {
-        const auto found = fitnessMap->find(individual->getIndividualID());
-        if(found == fitnessMap->end() || std::isnan(found->second)) {
-            continue;
-        }
-        if(best == nullptr || found->second > bestFitness || (found->second == bestFitness && individual->getIndividualID() < best->getIndividualID())) {
-            best = individual;
-            bestFitness = found->second;
-        }
-    }
-    return best;
+    return types;
 }
 
 std::string Evolution::EvolutionData::summary() const
@@ -85,21 +41,31 @@ std::string Evolution::EvolutionData::summary() const
     }
 
     std::vector<std::vector<std::string>> rows;
-    std::vector<size_t> widths(2, 0);
+    // Columns: name, type, content, age. All but the last are padded to align.
+    std::vector<size_t> widths(3, 0);
+    constexpr size_t maxTypeSize = 50;
     for(const auto& [name, entry]: this->data) {
-        std::string age = "stored at generation " + std::to_string(entry.generation);
-        if(entry.generation == this->generation) {
+        std::string age = "stored at generation " + std::to_string(entry->generation());
+        if(entry->generation() == this->generation) {
             age = "up to date";
-        } else if(entry.generation == initGeneration) {
+        } else if(entry->generation() == initGeneration) {
             age = "stored at initialization";
         }
-        rows.push_back({name, (entry.describe == nullptr) ? "" : entry.describe(), age});
-        widths[0] = std::max(widths[0], rows.back()[0].size());
-        widths[1] = std::max(widths[1], rows.back()[1].size());
+        std::string type = Data::demangle(entry->type().name());
+        if(type.size() > maxTypeSize) {
+            type = type.substr(0, maxTypeSize - 3) + "...";
+        }
+        rows.push_back({name, type, entry->describe(), age});
+        for(size_t idx = 0; idx < widths.size(); idx++) {
+            widths[idx] = std::max(widths[idx], rows.back()[idx].size());
+        }
     }
     for(const std::vector<std::string>& row: rows) {
-        result << "  " << row[0] << std::string(widths[0] - row[0].size(), ' ') << "  " << row[1] << std::string(widths[1] - row[1].size(), ' ') << "  " << row[2]
-               << std::string(1, 10);
+        result << " ";
+        for(size_t idx = 0; idx < row.size(); idx++) {
+            result << " " << row[idx] << ((idx < widths.size()) ? std::string(widths[idx] - row[idx].size(), ' ') : "") << " ";
+        }
+        result << std::string(1, 10);
     }
     return result.str();
 }

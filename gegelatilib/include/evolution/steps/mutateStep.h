@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 
+#include "individual.h"
 #include "evolution/module.h"
 #include "graphBased/genotypeGenerator.h"
 #include "mutation/mutator.h"
@@ -48,8 +49,6 @@ namespace Evolution {
             /// Return the maximum number of threads used to mutate.
             size_t getNbThreads() const { return this->nbThreads; }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "individual.h"
 #include "evolution/module.h"
 #include "selection/selector.h"
 
@@ -54,10 +55,6 @@ namespace Evolution {
             SelectStep(std::vector<Key<std::vector<std::shared_ptr<Individual>>>> candidates, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
                        Key<std::vector<std::shared_ptr<Individual>>> selected, bool distinct = false, std::string name = "Select");
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

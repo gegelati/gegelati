@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 
+#include "metrics/metricMap.h"
 #include "evolution/module.h"
 #include "fitnessAssignment/assigner.h"
 
@@ -39,15 +40,15 @@ namespace Evolution {
              */
             AssignFitnessStep(Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, Key<std::map<uint64_t, double>> fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
                               std::string name = "AssignFitness")
-                : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash} {}
+                : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash}
+            {
+                this->require(this->metrics);
+                this->provide(this->fitness);
+            }
 
             /// Return the key of the computed fitness.
             const Key<std::map<uint64_t, double>>& getFitness() const { return this->fitness; }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module

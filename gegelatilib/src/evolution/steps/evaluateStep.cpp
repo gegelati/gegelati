@@ -20,23 +20,13 @@ Evolution::EvaluateStep::EvaluateStep(std::vector<Key<std::vector<std::shared_pt
     : Module(std::move(name)), evaluated{std::move(evaluated)}, metrics{std::move(metrics)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
       metricTemplate{std::move(metricTemplate)}, nbIterations{nbIterations}, mode{mode}
 {
+    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+        this->require(key);
+    }
+    this->provide(this->metrics);
     if(this->problem == nullptr) {
         throw std::runtime_error("Evolution::EvaluateStep: the problem cannot be null");
     }
-}
-
-std::set<std::string> Evolution::EvaluateStep::requiredData() const
-{
-    std::set<std::string> required;
-    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
-        required.insert(key.name());
-    }
-    return required;
-}
-
-std::set<std::string> Evolution::EvaluateStep::providedData() const
-{
-    return {this->metrics.name()};
 }
 
 std::string Evolution::EvaluateStep::details() const
@@ -46,6 +36,12 @@ std::string Evolution::EvaluateStep::details() const
 
 void Evolution::EvaluateStep::apply(EvolutionData& state)
 {
+    // The evaluated lists are evaluated together, as individuals that cannot be modified.
+    std::vector<std::shared_ptr<const Individual>> individuals;
+    for(const Key<std::vector<std::shared_ptr<Individual>>>& key: this->evaluated) {
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get(key);
+        individuals.insert(individuals.end(), list.begin(), list.end());
+    }
     state.set(this->metrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->evaluator->evaluateIndividuals(
-        state.getIndividuals(this->evaluated), *this->problem, this->metricTemplate, this->nbIterations, state.generation, this->mode)));
+        individuals, *this->problem, this->metricTemplate, this->nbIterations, state.generation, this->mode)));
 }

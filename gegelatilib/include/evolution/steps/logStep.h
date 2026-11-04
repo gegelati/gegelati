@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "individual.h"
 #include "evolution/module.h"
 #include "util/stopwatch.h"
 

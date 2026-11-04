@@ -11,6 +11,8 @@
 #include "evaluation/dataset.h"
 #include "evaluation/evaluator.h"
 #include "evaluation/predictionProblem.h"
+#include "individual.h"
+#include "metrics/metricMap.h"
 #include "evolution/key.h"
 #include "evolution/module.h"
 #include "mutation/mutator.h"
@@ -59,8 +61,6 @@ namespace Evolution {
             MutateVerticesStep(Key<std::vector<std::shared_ptr<Individual>>> individuals, Key<std::vector<std::shared_ptr<Individual>>> roots, Key<GraphBased::GenotypeGenerator> generator,
                                std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads = 1, std::string name = "MutateVertices");
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module
@@ -111,10 +111,6 @@ namespace Evolution {
                                    std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, std::string name = "CacheMemberOutputs");
 
             /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
-            /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
@@ -142,10 +138,11 @@ namespace Evolution {
              * \param[in] name name of the step.
              */
             CreateArchiveStep(Key<Evaluation::DataSet> archive, std::vector<Dimensions::Requirement> inputRequirements, std::string name = "CreateArchive")
-                : Module(std::move(name)), archive{std::move(archive)}, inputRequirements{std::move(inputRequirements)} {}
+                : Module(std::move(name)), archive{std::move(archive)}, inputRequirements{std::move(inputRequirements)}
+            {
+                this->provide(this->archive);
+            }
 
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
     };
@@ -205,12 +202,14 @@ namespace Evolution {
              */
             UpdateArchiveStep(Key<std::vector<std::shared_ptr<Individual>>> roots, Key<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>> metrics, Key<Evaluation::DataSet> archive, size_t archiveSize, bool isArchiveFixed, std::string name = "UpdateArchive")
                 : Module(std::move(name)), roots{std::move(roots)}, metrics{std::move(metrics)}, archive{std::move(archive)},
-                  archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed} {}
+                  archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
+            {
+                this->require(this->roots);
+                this->require(this->metrics);
+                this->require(this->archive);
+                this->provide(this->archive);
+            }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual std::string details() const override;
             /// Inherited from Module
@@ -251,12 +250,12 @@ namespace Evolution {
                                   Key<std::map<uint64_t, std::set<uint64_t>>> aggregators, std::string name = "ProtectAggregated")
                 : Module(std::move(name)), roots{std::move(roots)}, protectedVertices{std::move(protectedVertices)}, aggregators{std::move(aggregators)}
             {
+                this->require(this->roots);
+                this->provide(this->roots);
+                this->provide(this->protectedVertices);
+                this->provide(this->aggregators);
             }
 
-            /// Inherited from Module
-            virtual std::set<std::string> requiredData() const override;
-            /// Inherited from Module
-            virtual std::set<std::string> providedData() const override;
             /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
     };

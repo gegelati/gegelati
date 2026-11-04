@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include "evolutionTestHelpers.h"
+#include "util/individualUtils.h"
 #include <algorithm>
 #include <filesystem>
 #include <memory>
@@ -129,7 +131,7 @@ TEST_F(ModuleTest, classicFlow)
 
     const Evolution::BasicEvolution::Keys population;
     EXPECT_EQ(state.nbGenerationsDone, 20U);
-    const std::vector<std::shared_ptr<const Individual>> individuals = state.getIndividuals(population.individuals);
+    const std::vector<std::shared_ptr<const Individual>> individuals = constIndividuals(*state.get(population.individuals));
     EXPECT_EQ(individuals.size(), 100U);
     EXPECT_EQ(state.get(population.parents)->size(), 100U);
     EXPECT_EQ(state.get(population.offspring)->size(), 100U);
@@ -140,7 +142,7 @@ TEST_F(ModuleTest, classicFlow)
     EXPECT_EQ((state.get(population.trainingMetrics)->size()), 200U);
 
     // The best individual is in the population, with the highest fitness of the population.
-    std::shared_ptr<const Individual> best = state.bestIndividual(population.individuals, population.trainingFitness);
+    std::shared_ptr<const Individual> best = Util::bestIndividual(constIndividuals(*state.get(population.individuals)), *state.get(population.trainingFitness));
     ASSERT_NE(best, nullptr);
     EXPECT_NE(std::find(individuals.begin(), individuals.end(), best), individuals.end());
     for(const std::shared_ptr<const Individual>& individual: individuals) {
@@ -195,7 +197,7 @@ TEST_F(ModuleTest, insertSecondMutation)
 
     root->resume(state, 5);
     EXPECT_EQ(nbCalls, 5U);
-    for(const auto& individual: state.getIndividuals(population.individuals)) {
+    for(const auto& individual: constIndividuals(*state.get(population.individuals))) {
         EXPECT_TRUE(individual->isValid());
     }
 
@@ -263,7 +265,7 @@ TEST_F(ModuleTest, evolveContinues)
     state.reset(4);
     continued->resume(state, 5);
     EXPECT_EQ(state.nbGenerationsDone, 5U);
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 20U);
+    EXPECT_EQ(constIndividuals(*state.get(Evolution::BasicEvolution::Keys().individuals)).size(), 20U);
 }
 
 TEST_F(ModuleTest, customStopIsALoop)
@@ -326,7 +328,7 @@ TEST_F(ModuleTest, validationWithItsOwnProblemAndAssigner)
     root->resume(state, 2);
 
     EXPECT_EQ((state.get(population.validationFitness)->size()), 10U);
-    EXPECT_NE(state.bestIndividual(population.individuals, population.validationFitness), nullptr);
+    EXPECT_NE(Util::bestIndividual(constIndividuals(*state.get(population.individuals)), *state.get(population.validationFitness)), nullptr);
 }
 
 TEST_F(ModuleTest, parentsWithTheirOwnFitness)
@@ -372,7 +374,7 @@ TEST_F(ModuleTest, selectionIsGeneric)
     EXPECT_EQ(distinct.name(), "Best");
     EXPECT_EQ(distinct.requiredData(), (std::set<std::string>{listA.name(), listB.name(), fitness.name()}));
     distinct.apply(state);
-    EXPECT_EQ(state.getIndividuals(selected), (std::vector<std::shared_ptr<const Individual>>{a, b}));
+    EXPECT_EQ(constIndividuals(*state.get(selected)), (std::vector<std::shared_ptr<const Individual>>{a, b}));
 
     // A selection can replace one of its candidate lists, and keep duplicates.
     Evolution::SelectStep withDuplicates({listA}, fitness, std::make_shared<Selection::RandomSelector>(true), 5, listA);
@@ -480,7 +482,7 @@ TEST_F(ModuleTest, parentsComeFromPopulation)
     size_t nbParentsChecked = 0;
     root->insertAfter(root->find("ParentSelection"), std::make_shared<Evolution::LambdaStep>("CheckParents",
         [&nbParentsChecked, individuals, parents](Evolution::EvolutionData& state) {
-            const std::vector<std::shared_ptr<const Individual>> current = state.getIndividuals(individuals);
+            const std::vector<std::shared_ptr<const Individual>> current = constIndividuals(*state.get(individuals));
             for(const auto& parent: *state.get(parents)) {
                 EXPECT_NE(std::find(current.begin(), current.end(), parent), current.end());
                 nbParentsChecked++;
@@ -523,18 +525,18 @@ TEST_F(ModuleTest, stateEntries)
     EXPECT_FALSE(state.has(Counter));
     EXPECT_FALSE(state.isUpToDate(Counter));
 
-    // Individuals are read from lists, an absent list is empty, and several lists are concatenated.
+    // Individuals are stored in lists identified by keys, and the algorithms of the library take them as individuals that cannot be modified.
     auto individual = std::make_shared<Individual>(lgpRep);
     auto other = std::make_shared<Individual>(lgpRep);
     const Evolution::Key<std::vector<std::shared_ptr<Individual>>> first("First");
     const Evolution::Key<std::vector<std::shared_ptr<Individual>>> second("Second");
     state.set(first, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{individual}));
     state.set(second, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::vector<std::shared_ptr<Individual>>{other}));
-    EXPECT_EQ(state.getIndividuals(first), (std::vector<std::shared_ptr<const Individual>>{individual}));
-    EXPECT_EQ(state.getIndividuals({first, second}), (std::vector<std::shared_ptr<const Individual>>{individual, other}));
-    EXPECT_TRUE(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Absent")).empty());
+    EXPECT_EQ(constIndividuals(*state.get(first)), (std::vector<std::shared_ptr<const Individual>>{individual}));
+    EXPECT_FALSE(state.has(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Absent")));
+    EXPECT_THROW(state.get(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Absent")), std::runtime_error);
     state.set(Counter, std::make_shared<int>(4));
-    EXPECT_THROW(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>(Counter.name())), std::runtime_error) << "The counter is not a list of individuals";
+    EXPECT_THROW(constIndividuals(*state.get(Evolution::Key<std::vector<std::shared_ptr<Individual>>>(Counter.name()))), std::runtime_error) << "The counter is not a list of individuals";
     EXPECT_THROW(state.get(Evolution::Key<double>(Counter.name())), std::runtime_error) << "A key of the wrong type is refused at runtime too, when built from a name";
     EXPECT_EQ(*state.get(Evolution::Key<int>(Counter.name())), 4) << "Keys are names with a type";
 
@@ -580,7 +582,7 @@ TEST_F(ModuleTest, mutationComponentsAreRequired)
     EXPECT_THROW(init.apply(state), std::runtime_error) << "No generator in the data";
     setGenerator(state);
     ASSERT_NO_THROW(init.apply(state));
-    EXPECT_EQ(state.getIndividuals(population.individuals).size(), 10U);
+    EXPECT_EQ(constIndividuals(*state.get(population.individuals)).size(), 10U);
 }
 
 TEST_F(ModuleTest, twoPopulations)
@@ -630,14 +632,14 @@ TEST_F(ModuleTest, twoPopulations)
     }
     root->resume(state, 3);
 
-    const std::vector<std::shared_ptr<const Individual>> individualsA = state.getIndividuals(populationA.individuals);
-    const std::vector<std::shared_ptr<const Individual>> individualsB = state.getIndividuals(populationB.individuals);
+    const std::vector<std::shared_ptr<const Individual>> individualsA = constIndividuals(*state.get(populationA.individuals));
+    const std::vector<std::shared_ptr<const Individual>> individualsB = constIndividuals(*state.get(populationB.individuals));
     EXPECT_EQ(individualsA.size(), 10U);
     EXPECT_EQ(individualsB.size(), 6U);
     for(const auto& individual: individualsB) {
         EXPECT_EQ(std::find(individualsA.begin(), individualsA.end(), individual), individualsA.end()) << "The populations are separate";
     }
-    EXPECT_NE(state.bestIndividual(populationB.individuals, populationB.trainingFitness), nullptr);
+    EXPECT_NE(Util::bestIndividual(constIndividuals(*state.get(populationB.individuals)), *state.get(populationB.trainingFitness)), nullptr);
 
     // Steps of the second population are checked like the others.
     init->remove(assignB);
@@ -659,8 +661,8 @@ TEST_F(ModuleTest, presetsShareARoot)
     root->add(second.build());
 
     root->resume(state, 2);
-    EXPECT_EQ(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("First")).size(), 10U);
-    EXPECT_EQ(state.getIndividuals(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Second")).size(), 6U);
+    EXPECT_EQ(constIndividuals(*state.get(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("First"))).size(), 10U);
+    EXPECT_EQ(constIndividuals(*state.get(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Second"))).size(), 6U);
 }
 
 TEST_F(ModuleTest, evolutionAddedLater)
@@ -686,13 +688,40 @@ TEST_F(ModuleTest, evolutionAddedLater)
 
     EXPECT_EQ(nbInitializations, 1U) << "The first population is initialized once";
     EXPECT_EQ(state.nbGenerationsDone, 5U);
-    EXPECT_EQ(state.getIndividuals(secondIndividuals).size(), 6U);
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("First")).individuals).size(), 10U);
+    EXPECT_EQ(constIndividuals(*state.get(secondIndividuals)).size(), 6U);
+    EXPECT_EQ(state.get(Evolution::BasicEvolution::Keys(namesOf("First")).individuals)->size(), 10U);
 
     // The new steps are checked against the data already in the state: a population needing data nobody makes is refused.
     root->add(std::make_shared<Evolution::LambdaStep>("NeedsCounter", [](Evolution::EvolutionData&) {}, std::set<std::string>{Counter.name()}));
     EXPECT_THROW(root->resume(state, 1), std::runtime_error);
     EXPECT_EQ(state.nbGenerationsDone, 5U) << "Nothing ran";
+}
+
+TEST_F(ModuleTest, dataTypesAreChecked)
+{
+    // Keys of the same name with different types are refused before anything runs.
+    const Evolution::Key<int> asInt("Shared");
+    const Evolution::Key<double> asDouble("Shared");
+    auto noop = [](Evolution::EvolutionData&) {};
+
+    Evolution::Module wrong("Wrong");
+    wrong.add(std::make_shared<Evolution::LambdaStep>("Provide", noop, std::vector<Evolution::KeyBase>{}, std::vector<Evolution::KeyBase>{asInt}));
+    wrong.add(std::make_shared<Evolution::LambdaStep>("Require", noop, std::vector<Evolution::KeyBase>{asDouble}));
+    EXPECT_THROW(wrong.evolve(1), std::runtime_error);
+
+    // The same type, or an untyped name, is accepted.
+    Evolution::Module right("Right");
+    right.add(std::make_shared<Evolution::LambdaStep>("Provide", noop, std::vector<Evolution::KeyBase>{}, std::vector<Evolution::KeyBase>{asInt}));
+    right.add(std::make_shared<Evolution::LambdaStep>("Require", noop, std::vector<Evolution::KeyBase>{asInt}));
+    right.add(std::make_shared<Evolution::LambdaStep>("RequireByName", noop, std::set<std::string>{"Shared"}));
+    EXPECT_NO_THROW(right.evolve(1));
+
+    // The type of the data already in the state is checked too.
+    Evolution::EvolutionData state;
+    state.set(asInt, std::make_shared<int>(1));
+    Evolution::Module needsDouble("NeedsDouble");
+    needsDouble.add(std::make_shared<Evolution::LambdaStep>("Require", noop, std::vector<Evolution::KeyBase>{asDouble}));
+    EXPECT_THROW(needsDouble.resume(state, 1), std::runtime_error);
 }
 
 TEST_F(ModuleTest, leafInitialization)
@@ -742,7 +771,7 @@ TEST_F(ModuleTest, stepsOwnTheProblemAndTheRepresentation)
     root.reset();
     EXPECT_TRUE(weakProblem.expired());
     EXPECT_FALSE(weakRep.expired()) << "The individuals keep the representation alive";
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 10U);
+    EXPECT_EQ(constIndividuals(*state.get(Evolution::BasicEvolution::Keys().individuals)).size(), 10U);
 
     // Nothing keeps the representation once the individuals are gone.
     state.reset(0);
@@ -775,7 +804,7 @@ TEST_F(ModuleTest, reproduceStep)
     ASSERT_NO_THROW(step.apply(state));
 
     // Offspring are new individuals copying the parents, which stay in the population.
-    const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population.individuals);
+    const std::vector<std::shared_ptr<const Individual>> parents = constIndividuals(*state.get(population.individuals));
     const std::vector<std::shared_ptr<Individual>>& children = *state.get(offspring);
     EXPECT_EQ(parents.size(), 10U);
     ASSERT_EQ(children.size(), 25U);
@@ -807,7 +836,7 @@ TEST_F(ModuleTest, mutateStep)
         ASSERT_NO_THROW(step.apply(state));
 
         // Offspring are not copies of their parents anymore, and remain valid.
-        const std::vector<std::shared_ptr<const Individual>> parents = state.getIndividuals(population.individuals);
+        const std::vector<std::shared_ptr<const Individual>> parents = constIndividuals(*state.get(population.individuals));
         const std::vector<std::shared_ptr<Individual>>& children = *state.get(offspring);
         size_t nbChanged = 0;
         for(const std::shared_ptr<Individual>& child: children) {
@@ -850,7 +879,7 @@ TEST_F(ModuleTest, evaluateStep)
     const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& results = *state.get(metrics);
     EXPECT_EQ(results.size(), 15U);
     for(const Evolution::Key<std::vector<std::shared_ptr<Individual>>>& list: std::vector<Evolution::Key<std::vector<std::shared_ptr<Individual>>>>{population.individuals, offspring}) {
-        for(const std::shared_ptr<const Individual>& individual: state.getIndividuals(list)) {
+        for(const std::shared_ptr<const Individual>& individual: constIndividuals(*state.get(list))) {
             ASSERT_EQ(results.count(individual->getIndividualID()), 1U);
             EXPECT_FALSE(results.at(individual->getIndividualID())->getMetricValues<Metrics::RewardsMetric>(Metrics::RewardsMetric::staticHash()).empty());
         }
@@ -877,7 +906,7 @@ TEST_F(ModuleTest, assignFitnessStep)
     // One fitness per evaluated individual, and the best individual has the highest one.
     const std::map<uint64_t, double>& values = *state.get(fitness);
     EXPECT_EQ(values.size(), 10U);
-    const std::shared_ptr<const Individual> best = state.bestIndividual(population.individuals, fitness);
+    const std::shared_ptr<const Individual> best = Util::bestIndividual(constIndividuals(*state.get(population.individuals)), *state.get(fitness));
     ASSERT_NE(best, nullptr);
     for(const auto& [id, value]: values) {
         EXPECT_LE(value, values.at(best->getIndividualID()));
@@ -997,8 +1026,8 @@ TEST_F(ModuleTest, presetRunEveryOtherGeneration)
 
     root->resume(state, 4);
     EXPECT_EQ(nbRuns, 2U) << "Generations 0 and 2";
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("First")).individuals).size(), 10U);
-    EXPECT_EQ(state.getIndividuals(Evolution::BasicEvolution::Keys(namesOf("Second")).individuals).size(), 6U);
+    EXPECT_EQ(state.get(Evolution::BasicEvolution::Keys(namesOf("First")).individuals)->size(), 10U);
+    EXPECT_EQ(state.get(Evolution::BasicEvolution::Keys(namesOf("Second")).individuals)->size(), 6U);
     EXPECT_NE(root->summary().find("Second (every 2 generations)"), std::string::npos) << root->summary();
 }
 
@@ -1008,7 +1037,7 @@ TEST_F(ModuleTest, evolveCreatesTheDataAndResumeContinues)
     auto module = makeSteps(20, 20, 2);
     Evolution::EvolutionData data = module->evolve(3, 4);
     EXPECT_EQ(data.nbGenerationsDone, 3U);
-    EXPECT_EQ(data.getIndividuals(Evolution::BasicEvolution::Keys().individuals).size(), 20U);
+    EXPECT_EQ(constIndividuals(*data.get(Evolution::BasicEvolution::Keys().individuals)).size(), 20U);
     module->resume(data, 2);
     EXPECT_EQ(data.nbGenerationsDone, 5U);
 
@@ -1068,7 +1097,7 @@ TEST_F(ModuleTest, namesAreSettings)
     EXPECT_EQ(keys.parents.name(), "MatingPool");
     EXPECT_EQ(keys.offspring.name(), "Pool.offspring");
     EXPECT_EQ(data.get(keys.parents)->size(), 10U);
-    EXPECT_EQ(data.getIndividuals(keys.individuals).size(), 10U);
+    EXPECT_EQ(constIndividuals(*data.get(keys.individuals)).size(), 10U);
     EXPECT_FALSE(data.has(Evolution::Key<std::vector<std::shared_ptr<Individual>>>("Parents")));
 }
 
@@ -1145,7 +1174,7 @@ TEST_F(ModuleTest, loggerCustomColumns)
         columns.push_back({"Best" + std::to_string(rank + 1), [population, rank](const Evolution::EvolutionData& data) {
             std::vector<double> values;
             const auto fitnessOfIndividuals = data.getIfAny(population.trainingFitness);
-            for(const auto& individual: data.getIndividuals(population.individuals)) {
+            for(const auto& individual: constIndividuals(*data.get(population.individuals))) {
                 const auto found = (fitnessOfIndividuals == nullptr) ? std::map<uint64_t, double>::const_iterator() : fitnessOfIndividuals->find(individual->getIndividualID());
                 if(fitnessOfIndividuals != nullptr && found != fitnessOfIndividuals->end()) {
                     values.push_back(found->second);
