@@ -61,8 +61,8 @@ std::string Evolution::CacheMemberOutputsStep::details() const
 void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 {
     // Outputs cached at the previous run are for samples of a previous generation.
-    if(const std::shared_ptr<const std::vector<std::shared_ptr<const Individual>>> cached = state.getIfAny<std::vector<std::shared_ptr<const Individual>>>(this->cache)) {
-        for(const std::shared_ptr<const Individual>& member: *cached) {
+    if(state.has(this->cache)) {
+        for(const std::shared_ptr<const Individual>& member: *state.get<std::vector<std::shared_ptr<const Individual>>>(this->cache)) {
             member->clearCachedOutputs();
         }
     }

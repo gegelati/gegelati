@@ -20,10 +20,9 @@ void Evolution::ExportStep::apply(EvolutionData& state)
 
     std::vector<std::shared_ptr<const Individual>> exported;
     if(this->bestFitness.has_value()) {
-        const std::shared_ptr<const std::map<uint64_t, double>> fitness = state.getIfAny<std::map<uint64_t, double>>(*this->bestFitness);
         const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(this->individuals);
         const std::shared_ptr<const Individual> best =
-            (fitness == nullptr) ? nullptr : Util::bestIndividual(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end()), *fitness);
+            (!state.has(*this->bestFitness)) ? nullptr : Util::bestIndividual(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end()), *state.get<std::map<uint64_t, double>>(*this->bestFitness));
         if(best == nullptr) {
             return;
         }

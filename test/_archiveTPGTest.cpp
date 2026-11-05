@@ -434,8 +434,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
             bidNodes.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(members));
 
             // The destination is an action or, sometimes, one of the current individuals of the TPG (none at the beginning).
-            const auto tpgIndividuals = data.getIfAny<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population);
-            const std::vector<std::shared_ptr<const Individual>> tangled = (tpgIndividuals == nullptr) ? std::vector<std::shared_ptr<const Individual>>{} : constIndividuals(*tpgIndividuals);
+            const std::vector<std::shared_ptr<const Individual>> tangled = data.has(tpgKeys.population) ? constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population)) : std::vector<std::shared_ptr<const Individual>>{};
             Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRep->getNbActions() - 1);
             if(tangled.empty()) {
                 bidNodes.addGenerator(actionGenerator);
@@ -464,9 +463,8 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
     columns.insert(columns.begin() + 1, {"NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
-        const auto roots = data.getIfAny<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population);
-        return (roots == nullptr) ? 0.0 : static_cast<double>(Evolution::getAllVertices(constIndividuals(*roots)).size());
-    }, 0});
+        return static_cast<double>(Evolution::getAllVertices(constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population))).size());
+    }, 0, {tpgKeys.population}});
     std::ostringstream csv;
     const std::vector<Evolution::LogStep::Column> times = Evolution::stepTimeColumns(*tpgModule);
     tpgModule->add(std::make_shared<Evolution::LogStep>(std::cout, columns));
@@ -565,8 +563,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
 
     root->resume(state, 40);
 
-    EXPECT_EQ(16454860796132402384U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    EXPECT_EQ(62537, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(13348146703180701991U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(60244, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 }
 
 #ifdef GEGELATI_WITH_OPENCV

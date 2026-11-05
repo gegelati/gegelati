@@ -414,8 +414,8 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipeline) {
     EXPECT_EQ(summary.find("CacheMemberOutputs"), std::string::npos) << "Members are only cached for prediction problems";
 
     // The archive is a data of the population, filled with inputs of the population.
-    const std::shared_ptr<const Evaluation::DataSet> archive = state.getIfAny<Evaluation::DataSet>(Evolution::OriginTPGEvolution::TPGNames().archive);
-    ASSERT_NE(archive, nullptr);
+    ASSERT_TRUE(state.has(Evolution::OriginTPGEvolution::TPGNames().archive));
+    const std::shared_ptr<const Evaluation::DataSet> archive = state.get<Evaluation::DataSet>(Evolution::OriginTPGEvolution::TPGNames().archive);
     EXPECT_GT(archive->size(), 0U);
     EXPECT_LE(archive->size(), 50U);
 

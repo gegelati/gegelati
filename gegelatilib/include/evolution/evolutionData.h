@@ -113,24 +113,6 @@ namespace Evolution {
         }
 
         /**
-         * \brief Return the data stored under a name, or null if there is none.
-         *
-         * \tparam T type of the data.
-         * \param[in] name the name of the data.
-         * \throw std::runtime_error if there is a data which is not a T.
-         */
-        template <typename T> std::shared_ptr<T> getIfAny(const std::string& name)
-        {
-            return this->has(name) ? this->find<T>(name) : nullptr;
-        }
-
-        /// See getIfAny.
-        template <typename T> std::shared_ptr<const T> getIfAny(const std::string& name) const
-        {
-            return this->has(name) ? this->find<T>(name) : nullptr;
-        }
-
-        /**
          * \brief Return true if a data is stored under the name.
          *
          * \param[in] name the name of the data.

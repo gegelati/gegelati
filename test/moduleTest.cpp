@@ -520,7 +520,8 @@ TEST_F(ModuleTest, stateEntries)
     EXPECT_EQ(*state.get<int>(Counter), 3);
     EXPECT_EQ(*state.get<int>("Counter"), 3) << "Keys are identified by their name";
     EXPECT_THROW(state.get<double>("Counter"), std::runtime_error) << "The entry is not a double";
-    EXPECT_EQ(state.getIfAny<int>("Other"), nullptr);
+    EXPECT_FALSE(state.has("Other"));
+    EXPECT_THROW(state.get<int>("Other"), std::runtime_error) << "There is no such entry";
 
     const Evolution::EvolutionData& constState = state;
     EXPECT_EQ(*constState.get<int>(Counter), 3);
@@ -1194,10 +1195,10 @@ TEST_F(ModuleTest, loggerCustomColumns)
     for(size_t rank = 0; rank < 3; rank++) {
         columns.push_back({"Best" + std::to_string(rank + 1), [population, rank](const Evolution::EvolutionData& data) {
             std::vector<double> values;
-            const auto fitnessOfIndividuals = data.getIfAny<std::map<uint64_t, double>>(population.trainingFitness);
+            const auto fitnessOfIndividuals = data.get<std::map<uint64_t, double>>(population.trainingFitness);
             for(const auto& individual: constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(population.population))) {
-                const auto found = (fitnessOfIndividuals == nullptr) ? std::map<uint64_t, double>::const_iterator() : fitnessOfIndividuals->find(individual->getIndividualID());
-                if(fitnessOfIndividuals != nullptr && found != fitnessOfIndividuals->end()) {
+                const auto found = fitnessOfIndividuals->find(individual->getIndividualID());
+                if(found != fitnessOfIndividuals->end()) {
                     values.push_back(found->second);
                 }
             }

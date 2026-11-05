@@ -89,9 +89,8 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
              memberRepresentation = this->memberRepresentation, memberMutator, fromVertices](EvolutionData& data) {
                 // The member of a node is created with the member mutator, and must answer differently from existing ones on the archive if there is one.
                 GraphBased::NodeGenerator bidNodes;
-                const std::shared_ptr<Evaluation::DataSet> archive = data.getIfAny<Evaluation::DataSet>(archiveName);
-                if(archive != nullptr) {
-                    bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*archive, memberRepresentation, *memberMutator));
+                if(data.has(archiveName)) {
+                    bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*data.get<Evaluation::DataSet>(archiveName), memberRepresentation, *memberMutator));
                 } else {
                     bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, *memberMutator));
                 }
