@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,9 @@ namespace Evolution {
      * A row starts with the generation, then has one value per column given, then the time since the previous row and since the
      * initialization of the step. The header is written before the row of generation 0, and before the first row written by the step.
      *
-     * A column is a name and a function computing a number from the data. A value that is not a number (e.g. a fitness that was not
+     * A column is a name and a function computing a number from the data, and the names of the data it reads. These are required by the
+     * log step, like the data of any step, so the evolution checks that an initialization or a previous step provides them and the
+     * function can read them without testing they exist. A value that is not a number (e.g. a fitness that was not
      * computed during the generation, like a periodic validation) is written "-". Ready-made columns exist for the usual data
      * (sizeColumn, fitnessColumns, stepTimeColumns) and the presets list their own (BasicEvolution::logColumns).
      *
@@ -29,7 +32,7 @@ namespace Evolution {
      *
      * \code
      * std::vector<LogStep::Column> columns = evolution.logColumns();
-     * columns.push_back({"Offspring", [offspring](const EvolutionData& data) { return data.get(offspring)->size(); }, 0});
+     * columns.push_back({"Offspring", [offspring](const EvolutionData& data) { return data.get<std::vector<std::shared_ptr<Individual>>>(offspring)->size(); }, 0, {offspring}});
      * module->add(std::make_shared<LogStep>(std::cout, columns));
      * module->add(std::make_shared<LogStep>(file, stepTimeColumns(*module), ";"));
      * \endcode
@@ -46,6 +49,9 @@ namespace Evolution {
 
                 /// Number of digits after the decimal point, zero for counts.
                 int precision = 2;
+
+                /// Names of the data read by the function, required by the log step so that the evolution checks they are provided.
+                std::set<std::string> required = {};
             };
 
         protected:

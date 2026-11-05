@@ -40,6 +40,10 @@ namespace {
 Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name)
     : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}, stopwatch{std::make_shared<Stopwatch>()}
 {
+    for(const Column& column: this->columns) {
+        this->requiredList.insert(column.required.begin(), column.required.end());
+    }
+
     // The times of the log start with the initialization of the step, whenever the evolution starts again.
     const std::shared_ptr<Stopwatch> started = this->stopwatch;
     this->initialization = std::make_shared<LambdaStep>("StartStopwatch", [started](EvolutionData&) { started->reset(); });
@@ -84,7 +88,7 @@ void Evolution::LogStep::apply(EvolutionData& state)
 
 Evolution::LogStep::Column Evolution::sizeColumn(const std::string& individuals, std::string name)
 {
-    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.has(individuals) ? state.get<std::vector<std::shared_ptr<Individual>>>(individuals)->size() : 0); }, 0};
+    return {std::move(name), [individuals](const EvolutionData& state) { return static_cast<double>(state.get<std::vector<std::shared_ptr<Individual>>>(individuals)->size()); }, 0, {individuals}};
 }
 
 std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::string& prefix, const std::string& individuals,
@@ -93,15 +97,15 @@ std::vector<Evolution::LogStep::Column> Evolution::fitnessColumns(const std::str
     return {{prefix + "_Min", [individuals, fitness](const EvolutionData& state) {
                 const std::vector<double> values = fitnessOf(state, individuals, fitness);
                 return values.empty() ? std::nan("") : *std::min_element(values.begin(), values.end());
-            }},
+            }, 2, {individuals, fitness}},
             {prefix + "_Avg", [individuals, fitness](const EvolutionData& state) {
                 const std::vector<double> values = fitnessOf(state, individuals, fitness);
                 return values.empty() ? std::nan("") : std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
-            }},
+            }, 2, {individuals, fitness}},
             {prefix + "_Max", [individuals, fitness](const EvolutionData& state) {
                 const std::vector<double> values = fitnessOf(state, individuals, fitness);
                 return values.empty() ? std::nan("") : *std::max_element(values.begin(), values.end());
-            }}};
+            }, 2, {individuals, fitness}}};
 }
 
 std::vector<Evolution::LogStep::Column> Evolution::stepTimeColumns(const Module& module)

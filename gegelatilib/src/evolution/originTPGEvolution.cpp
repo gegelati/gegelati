@@ -167,16 +167,12 @@ std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolution::logColumn
 {
     std::vector<LogStep::Column> columns = BasicEvolution::logColumns();
     const std::string roots(this->names.population);
-    // The roots may not exist yet when a column is computed: there is then no vertex.
     const auto rootsOf = [roots](const EvolutionData& state) {
-        std::vector<std::shared_ptr<const Individual>> result;
-        if(const auto list = state.getIfAny<std::vector<std::shared_ptr<Individual>>>(roots)) {
-            result.assign(list->begin(), list->end());
-        }
-        return result;
+        const auto list = state.get<std::vector<std::shared_ptr<Individual>>>(roots);
+        return std::vector<std::shared_ptr<const Individual>>(list->begin(), list->end());
     };
-    columns.insert(columns.begin() + 1, {"NbVertex", [rootsOf](const EvolutionData& state) { return static_cast<double>(getAllVertices(rootsOf(state)).size()); }, 0});
-    columns.insert(columns.begin() + 2, {"NbMember", [rootsOf](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(rootsOf(state))).size()); }, 0});
+    columns.insert(columns.begin() + 1, {"NbVertex", [rootsOf](const EvolutionData& state) { return static_cast<double>(getAllVertices(rootsOf(state)).size()); }, 0, {roots}});
+    columns.insert(columns.begin() + 2, {"NbMember", [rootsOf](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(rootsOf(state))).size()); }, 0, {roots}});
     return columns;
 }
 

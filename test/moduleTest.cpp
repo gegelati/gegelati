@@ -395,9 +395,8 @@ TEST_F(ModuleTest, loggerColumns)
     // The columns of the preset, and a custom one.
     std::vector<Evolution::LogStep::Column> columns = evolution.logColumns();
     columns.push_back({"Nb_Offspring", [offspring](const Evolution::EvolutionData& data) {
-        const auto children = data.getIfAny<std::vector<std::shared_ptr<Individual>>>(offspring);
-        return (children == nullptr) ? 0.0 : static_cast<double>(children->size());
-    }, 0});
+        return static_cast<double>(data.get<std::vector<std::shared_ptr<Individual>>>(offspring)->size());
+    }, 0, {offspring}});
     std::ostringstream output;
     root->add(std::make_shared<Evolution::LogStep>(output, columns));
     root->resume(state, 2);
@@ -414,6 +413,19 @@ TEST_F(ModuleTest, loggerColumns)
         nbHeaders++;
     }
     EXPECT_EQ(nbHeaders, 2U);
+}
+
+TEST_F(ModuleTest, loggerRequiresColumnData)
+{
+    Evolution::BasicEvolution evolution = makeEvolution(10, 10, 2);
+    auto root = evolution.build();
+    std::ostringstream output;
+
+    // The log requires the data of its columns, so the evolution refuses a column reading what no step provides.
+    auto log = std::make_shared<Evolution::LogStep>(output, std::vector<Evolution::LogStep::Column>{Evolution::sizeColumn("Nowhere")});
+    EXPECT_EQ(log->requiredData(), std::set<std::string>{"Nowhere"});
+    root->add(log);
+    EXPECT_THROW(root->evolve(1), std::runtime_error);
 }
 
 TEST_F(ModuleTest, loggerSeparator)
