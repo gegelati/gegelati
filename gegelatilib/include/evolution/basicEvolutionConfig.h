@@ -25,12 +25,12 @@ namespace Evolution {
      * \brief Settings of the classic evolutionary flow of one population, building the corresponding steps.
      *
      * \code
-     * Evolution::BasicEvolution basic;
+     * Evolution::BasicEvolutionConfig basic;
      * basic.representation = representation;
      * basic.problem = problem;
      * basic.sizePopulation = 100;
      * basic.nbOffspring = 100;
-     * std::shared_ptr<Evolution::Module> population = basic.build();
+     * std::shared_ptr<Evolution::Module> population = basic.buildModule();
      * auto mutation = population->find<MutateStep>("Mutation");
      * Evolution::EvolutionData data = population->evolve(100, seed);
      * \endcode
@@ -39,12 +39,12 @@ namespace Evolution {
      * Generation steps: ParentSelection, Reproduction, Mutation, TrainingEvaluation, TrainingFitness (and ParentFitness),
      * SurvivorSelection, then ValidationEvaluation and ValidationFitness if validation iterations are requested.
      * The steps of the generation are a module named by names.evolution, whose initialization is the initialization steps
-     * (see build). It can be edited, repeated or run every few generations, and added to the steps of other evolutions.
+     * (see buildModule). It can be edited, repeated or run every few generations, and added to the steps of other evolutions.
      *
      * Null components are replaced by the defaults: random parent selection, truncation survival,
      * replication, point mutation, and the average of the rewards (or the accuracy) as fitness.
      */
-    struct BasicEvolution {
+    struct BasicEvolutionConfig {
         /**
          * \brief Names of the data and of the steps of the evolution, all of them changeable before build.
          *
@@ -85,6 +85,9 @@ namespace Evolution {
 
             /// Data: the generator of the genotypes, created by CreateGeneratorStep and read by the steps creating and mutating the population.
             std::string generator = "generator";
+
+            /// Data: the stopwatch of the evolution, started first by the initialization and read by the log (shared by the evolutions using the same name).
+            std::string stopwatch = "Stopwatch";
 
             /// Module of the evolution, holding the steps of a generation and the initialization.
             std::string evolution = "Evolution";
@@ -193,7 +196,7 @@ namespace Evolution {
         std::shared_ptr<FitnessAssignment::Assigner> validationAssigner = nullptr;
 
         /// Default polymorphic destructor.
-        virtual ~BasicEvolution() = default;
+        virtual ~BasicEvolutionConfig() = default;
 
         /**
          * \brief Build the module of the evolution: the steps of a generation, with the initialization.
@@ -207,7 +210,7 @@ namespace Evolution {
          * \throw std::runtime_error if the representation or the problem is null, if a size is zero, if they are not compatible,
          * if a problem is neither a prediction nor a reinforcement problem, or if the validation period is zero.
          */
-        virtual std::shared_ptr<Module> build() const;
+        virtual std::shared_ptr<Module> buildModule() const;
 
         /**
          * \brief Columns of the log of the evolution, made from its names and settings.

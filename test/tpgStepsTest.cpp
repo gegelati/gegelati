@@ -3,10 +3,10 @@
 #include "util/individualUtils.h"
 #include <algorithm>
 
-#include "evolution/basicEvolution.h"
+#include "evolution/basicEvolutionConfig.h"
 #include "learn/populationNames.h"
 #include "evolution/module.h"
-#include "evolution/originTPGEvolution.h"
+#include "evolution/originTPGEvolutionConfig.h"
 #include "evolution/steps/tpgSteps.h"
 #include "evaluation/predictionProblem.h"
 #include "metrics/inputMetric.h"
@@ -59,7 +59,7 @@ class TPGStepsTest : public ::testing::Test
     std::shared_ptr<Representations::FakeRepresentation> rep = std::make_shared<Representations::FakeRepresentation>();
     std::shared_ptr<const Individual> member;
     // Keys of the population of roots.
-    const Evolution::BasicEvolution::Names roots{namesOf("Roots")};
+    const Evolution::BasicEvolutionConfig::Names roots{namesOf("Roots")};
 
     // Keys of data of the steps.
     const std::string archiveKey{"archive"};
@@ -106,7 +106,7 @@ class TPGStepsTest : public ::testing::Test
     Evolution::EvolutionData makeState(const std::vector<std::shared_ptr<Individual>>& individuals) const
     {
         Evolution::EvolutionData state;
-        state.generation = 0;
+        state.generation = 1;
         this->setRoots(state, individuals);
         auto fitness = std::make_shared<std::map<uint64_t, double>>();
         for(const std::shared_ptr<const Individual>& individual: individuals) {
@@ -179,7 +179,7 @@ TEST_F(TPGStepsTest, protectAggregated)
     EXPECT_EQ(nbProtected(state), 0U);
 
     // The protected vertices are data of the state, the step keeps nothing: another step object continues the evolution.
-    state.generation = 0;
+    state.generation = 1;
     setRoots(state, {leaf1, vertexA});
     step.apply(state);
     Evolution::ProtectAggregatedStep otherStep{roots.population, protectedKey, aggregatorsKey};
@@ -312,7 +312,7 @@ TEST_F(TPGStepsTest, cachedOutputsAreClearedWithTheGenotype)
 TEST_F(TPGStepsTest, mutateVerticesStep)
 {
     auto transfer = std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
-    const Evolution::BasicEvolution::Names vertices(namesOf("Vertices"));
+    const Evolution::BasicEvolutionConfig::Names vertices(namesOf("Vertices"));
     const auto offspring = vertices.offspring;
     const std::string generatorKey("VertexGenerator");
 

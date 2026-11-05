@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "evaluation/dataset.h"
-#include "evolution/basicEvolution.h"
+#include "evolution/basicEvolutionConfig.h"
 #include "evolution/steps/logStep.h"
 #include "mutation/nodeTransferMutation.h"
 #include "representations/TPG.h"
@@ -46,12 +46,12 @@ namespace Evolution {
     /**
      * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding steps.
      *
-     * Vertices are TPG individuals (BasicEvolution::representation must be a Representations::TPG) bidding through members
-     * of another representation (e.g. LGP). The flow is the one of BasicEvolution, with the following changes:
+     * Vertices are TPG individuals (BasicEvolutionConfig::representation must be a Representations::TPG) bidding through members
+     * of another representation (e.g. LGP). The flow is the one of BasicEvolutionConfig, with the following changes:
      *  - Vertices are mutated by a NodeTransferMutation transferring nodes of the current population, and the generator of the
      *    genotypes depends on the evolution: tangled connections towards any current vertex are proposed, and members are mutated
      *    with the member mutation. The range of the number of nodes is the one of the TPG representation, and new vertices start
-     *    with the minimum. BasicEvolution::mutation is not used.
+     *    with the minimum. BasicEvolutionConfig::mutation is not used.
      *  - CacheMemberOutputs (after Mutation), only for prediction problems, executes each member once per sample.
      *  - ProtectAggregated (after TrainingFitness at initialization, after SurvivorSelection at each generation) removes from
      *    the population the vertices referenced by others.
@@ -59,7 +59,7 @@ namespace Evolution {
      *    members must answer differently from existing ones, and UpdateArchive (after the protection) maintains it from the inputs
      *    measured by the training evaluations. A fixed archive only measures the inputs during the evaluation of the initialization.
      */
-    struct OriginTPGEvolution : public BasicEvolution {
+    struct OriginTPGEvolutionConfig : public BasicEvolutionConfig {
         /// Representation of the members, its output must be a double, required.
         std::shared_ptr<const Representations::Representation> memberRepresentation = nullptr;
 
@@ -81,7 +81,7 @@ namespace Evolution {
         /**
          * \brief Names of the data and of the steps added by the TPG evolution, all of them changeable before build.
          *
-         * Like for BasicEvolution::Names, give each evolution its own names to run several together.
+         * Like for BasicEvolutionConfig::Names, give each evolution its own names to run several together.
          */
         struct TPGNames {
             /// Data: the archive of inputs and of the answers of the members.
@@ -119,17 +119,17 @@ namespace Evolution {
         TPGNames tpgNames;
 
         /**
-         * \brief Inherited from BasicEvolution, builds the module of the TPG evolution.
+         * \brief Inherited from BasicEvolutionConfig, builds the module of the TPG evolution.
          *
-         * Like for BasicEvolution, the settings are read first to create what the modules need, then the modules are built: the
+         * Like for BasicEvolutionConfig, the settings are read first to create what the modules need, then the modules are built: the
          * initialization creates the archive and the vertices, a generation protects the aggregated vertices and updates the archive.
          *
          * \throw std::runtime_error if a required setting is missing, if the representation is not a TPG,
          * or if the representations and the problem are not compatible.
          */
-        virtual std::shared_ptr<Module> build() const override;
+        virtual std::shared_ptr<Module> buildModule() const override;
 
-        /// Inherited from BasicEvolution, adds the number of vertices and of members of the graphs of the population.
+        /// Inherited from BasicEvolutionConfig, adds the number of vertices and of members of the graphs of the population.
         virtual std::vector<LogStep::Column> logColumns() const override;
 
       protected:

@@ -256,7 +256,7 @@ void Evolution::Module::resume(EvolutionData& state, size_t nbGenerations)
 
     this->initialize(state);
     for(size_t idx = 0; idx < nbGenerations; idx++) {
-        state.generation = state.nbGenerationsDone;
+        state.generation = state.nbGenerationsDone + 1;
         this->apply(state);
         state.nbGenerationsDone++;
     }

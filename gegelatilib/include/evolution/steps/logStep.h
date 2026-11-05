@@ -18,14 +18,17 @@ namespace Evolution {
     /**
      * \brief Step writing the progress of the evolution: one row per generation, made of columns.
      *
-     * A row starts with the generation, then has one value per column given, then the time since the previous row and since the
-     * initialization of the step. The header is written before the row of generation 0, and before the first row written by the step.
+     * A row starts with the generation, then has one value per column given, then the time since the previous row and since the start of the
+     * stopwatch of the evolution (a data, see startStopwatchStep, so the time of the generation 0 is the one of the initialization).
+     * The initialization of the step writes the row of the initial state, the generation 0, so the log starts with the initial population.
+     * The header is written before the row of generation 0, and before the first row written by the step.
      *
      * A column is a name and a function computing a number from the data, and the names of the data it reads. These are required by the
      * log step, like the data of any step, so the evolution checks that an initialization or a previous step provides them and the
-     * function can read them without testing they exist. A value that is not a number (e.g. a fitness that was not
+     * function can read them without testing they exist, except in the row of the initial state where a column whose data do not exist yet
+     * (e.g. the offspring) is written "-". A value that is not a number (e.g. a fitness that was not
      * computed during the generation, like a periodic validation) is written "-". Ready-made columns exist for the usual data
-     * (sizeColumn, fitnessColumns, stepTimeColumns) and the presets list their own (BasicEvolution::logColumns).
+     * (sizeColumn, fitnessColumns, stepTimeColumns) and the presets list their own (BasicEvolutionConfig::logColumns).
      *
      * By default the values are aligned in columns of a given width, to read them in a console. With a separator (e.g. ";") they are
      * only separated by it, to write a file (e.g. a CSV) read by another tool. Several log steps can write to different streams.
@@ -67,14 +70,20 @@ namespace Evolution {
             /// Width of the columns when there is no separator.
             size_t columnWidth = 14;
 
-            /// Measures the times of the log, shared with the initialization of the step that starts it.
-            std::shared_ptr<Stopwatch> stopwatch;
+            /// Name of the data holding the stopwatch of the evolution (see startStopwatchStep).
+            std::string stopwatchName;
+
+            /// Time of the evolution at the previous row, to give the time of each generation.
+            double previousTime = 0.0;
 
             /// Indicates if the header was written.
             bool headerWritten = false;
 
             /// Write a line made of the given texts.
             void writeLine(const std::vector<std::string>& texts);
+
+            /// Write the row of a generation, with the header before the first row and the row of the generation 0.
+            void writeRow(const EvolutionData& state, uint64_t generation);
 
         public:
             /**
@@ -84,8 +93,10 @@ namespace Evolution {
              * \param[in] columns columns written after the generation.
              * \param[in] separator separator of the values, empty to align the values in columns (see setColumnWidth).
              * \param[in] name name of the step.
+             * \param[in] stopwatch name of the data holding the stopwatch of the evolution, required (see startStopwatchStep).
              */
-            LogStep(std::ostream& output, std::vector<Column> columns, std::string separator = "", std::string name = "Log");
+            LogStep(std::ostream& output, std::vector<Column> columns, std::string separator = "", std::string name = "Log",
+                    std::string stopwatch = "Stopwatch");
 
             /**
              * \brief Set the width of the columns, used when there is no separator.
@@ -97,6 +108,16 @@ namespace Evolution {
             /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
     };
+
+    /**
+     * \brief Step starting the stopwatch of the evolution, a data like any other, for the steps timing the evolution (see LogStep).
+     *
+     * It is meant to be the first step of an initialization, so that the time of the generation 0 is the one of the whole
+     * initialization. A stopwatch already started (e.g. by another evolution of the same module) is kept.
+     *
+     * \param[in] stopwatch name of the data holding the stopwatch.
+     */
+    std::shared_ptr<Module> startStopwatchStep(const std::string& stopwatch = "Stopwatch");
 
     /**
      * \brief Column showing the number of individuals of a list (a population, the offspring...).

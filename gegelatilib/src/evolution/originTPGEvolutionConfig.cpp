@@ -1,4 +1,4 @@
-#include "evolution/originTPGEvolution.h"
+#include "evolution/originTPGEvolutionConfig.h"
 
 #include <stdexcept>
 #include <map>
@@ -24,39 +24,39 @@
 
 namespace {
     // Mutator of the vertices, the default one if none is set.
-    std::shared_ptr<Mutation::NodeTransferMutation> usedTransfer(const Evolution::OriginTPGEvolution& evolution)
+    std::shared_ptr<Mutation::NodeTransferMutation> usedTransfer(const Evolution::OriginTPGEvolutionConfig& evolution)
     {
         return (evolution.nodeTransfer != nullptr) ? evolution.nodeTransfer : std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
     }
 
     // Mutator of the members, the default one if none is set.
-    std::shared_ptr<const Mutation::Mutator> usedMemberMutator(const Evolution::OriginTPGEvolution& evolution)
+    std::shared_ptr<const Mutation::Mutator> usedMemberMutator(const Evolution::OriginTPGEvolutionConfig& evolution)
     {
         return (evolution.memberMutation != nullptr) ? evolution.memberMutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
     }
 }
 
-std::shared_ptr<const Representations::TPG> Evolution::OriginTPGEvolution::checkTPGSettings() const
+std::shared_ptr<const Representations::TPG> Evolution::OriginTPGEvolutionConfig::checkTPGSettings() const
 {
     this->checkSettings();
     const auto tpgRepresentation = std::dynamic_pointer_cast<const Representations::TPG>(this->representation);
     if(tpgRepresentation == nullptr) {
-        throw std::runtime_error("Evolution::OriginTPGEvolution: the representation must be a TPG");
+        throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation must be a TPG");
     }
     if(this->memberRepresentation == nullptr) {
-        throw std::runtime_error("Evolution::OriginTPGEvolution: the representation of the members must be set");
+        throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation of the members must be set");
     }
     if(!Dimensions::DimensionFlow::acceptsRequirements(tpgRepresentation->getDimensionFlow().getInputDimensions(),
                                                        this->memberRepresentation->getDimensionFlow().getInputDimensions())) {
-        throw std::runtime_error("Evolution::OriginTPGEvolution: input requirements not compatible between the TPG and the members");
+        throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: input requirements not compatible between the TPG and the members");
     }
     if(!this->memberRepresentation->getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement(Data::DataType::type<double>()))) {
-        throw std::runtime_error("Evolution::OriginTPGEvolution: the members must output a double");
+        throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the members must output a double");
     }
     return tpgRepresentation;
 }
 
-std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
+std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildModule() const
 {
     const auto tpgRepresentation = this->checkTPGSettings();
 
@@ -119,6 +119,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
 
     // Step 2: build the modules. The initialization creates the archive and the vertices, then evaluates them...
     auto init = std::make_shared<Module>(this->names.initialization);
+    init->add(startStopwatchStep(this->names.stopwatch));
     if(withArchive) {
         init->add(std::make_shared<CreateArchiveStep>(this->tpgNames.archive, tpgRepresentation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
     }
@@ -133,6 +134,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
     if(withArchive) {
         init->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
+    this->addValidationSteps(*init, evaluator);
 
     // ... then a generation, where nodes transferred by the mutation of the offspring are the ones of the current population.
     auto generation = std::make_shared<Module>(this->names.evolution);
@@ -162,9 +164,9 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolution::build() const
     return generation;
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolution::logColumns() const
+std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolutionConfig::logColumns() const
 {
-    std::vector<LogStep::Column> columns = BasicEvolution::logColumns();
+    std::vector<LogStep::Column> columns = BasicEvolutionConfig::logColumns();
     const std::string roots(this->names.population);
     const auto rootsOf = [roots](const EvolutionData& state) {
         const auto list = state.get<std::vector<std::shared_ptr<Individual>>>(roots);

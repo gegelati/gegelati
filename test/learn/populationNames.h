@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "evolution/basicEvolution.h"
+#include "evolution/basicEvolutionConfig.h"
 
 /// Names of a population for the tests: the default names of the data, prefixed by the name of the population.
-inline Evolution::BasicEvolution::Names namesOf(const std::string& population)
+inline Evolution::BasicEvolutionConfig::Names namesOf(const std::string& population)
 {
-    Evolution::BasicEvolution::Names names;
+    Evolution::BasicEvolutionConfig::Names names;
     names.population = population;
     names.parents = population + ".parents";
     names.offspring = population + ".offspring";

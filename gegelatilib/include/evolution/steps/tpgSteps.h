@@ -26,7 +26,7 @@ namespace Evolution {
      *
      * Added nodes are copies of the nodes of the current roots: the step gives the roots to its NodeTransferMutation
      * before mutating, without copying the mutation. The generator is a data of the evolution, built again from the current
-     * vertices by a previous step (see OriginTPGEvolution).
+     * vertices by a previous step (see OriginTPGEvolutionConfig).
      */
     class MutateVerticesStep : public Module {
         protected:

@@ -32,13 +32,13 @@ namespace Evolution {
      * summary() lists the data with their type, size and generation.
      */
     struct EvolutionData {
-        /// Generation number used while the initialization steps are running.
-        static constexpr uint64_t initGeneration = std::numeric_limits<uint64_t>::max();
+        /// Generation number of the initialization: the generation 0 is the initial state, the first evolved generation is the 1.
+        static constexpr uint64_t initGeneration = 0;
 
-        /// Index of the generation currently running, or initGeneration during the initialization.
+        /// Index of the generation currently running, initGeneration during the initialization.
         uint64_t generation = initGeneration;
 
-        /// Number of generations already done since the initialization.
+        /// Number of generations already done since the initialization (the initialization is not counted).
         uint64_t nbGenerationsDone = 0;
 
         /// Random number generator of the evolution.

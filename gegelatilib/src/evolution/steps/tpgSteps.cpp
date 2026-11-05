@@ -10,7 +10,7 @@
 #include "metrics/inputMetric.h"
 #include "metrics/outputMetric.h"
 #include "representations/TPG.h"
-#include "evolution/originTPGEvolution.h"
+#include "evolution/originTPGEvolutionConfig.h"
 
 Evolution::MutateVerticesStep::MutateVerticesStep(std::string individuals, std::string roots, std::string generator,
                                                   std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads, std::string name)

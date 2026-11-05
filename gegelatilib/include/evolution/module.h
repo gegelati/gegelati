@@ -34,9 +34,9 @@ namespace Evolution {
      *
      * \code
      * auto module = std::make_shared<Module>("Evolution");
-     * module->add(lgp.build());
+     * module->add(lgp.buildModule());
      * module->add(std::make_shared<LambdaStep>("Link", link, required, provided));
-     * module->add(tpg.build());
+     * module->add(tpg.buildModule());
      * EvolutionData data = module->evolve(100);
      * module->resume(data, 50);
      * std::cout << module->summary(data);
@@ -126,7 +126,7 @@ namespace Evolution {
             /**
              * \brief Run the step only once every few generations (e.g. a costly evaluation).
              *
-             * The step runs on generations 0, period, 2 * period... and always during the initialization.
+             * The step runs on generations 0 (the initialization), period, 2 * period...
              * Data written by the step are therefore older than the current generation most of the time
              * (see EvolutionData::isUpToDate).
              *
@@ -145,7 +145,7 @@ namespace Evolution {
              */
             bool runsAt(uint64_t generation) const
             {
-                return generation == EvolutionData::initGeneration || generation % this->period == 0;
+                return generation % this->period == 0;
             }
 
             /**

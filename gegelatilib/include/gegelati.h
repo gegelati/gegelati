@@ -64,10 +64,10 @@
 #include <evaluation/reinforcementProblem.h>
 
 // Evolution
-#include <evolution/basicEvolution.h>
+#include <evolution/basicEvolutionConfig.h>
 #include <evolution/entry.h>
 #include <evolution/evolutionData.h>
-#include <evolution/originTPGEvolution.h>
+#include <evolution/originTPGEvolutionConfig.h>
 #include <evolution/module.h>
 #include <evolution/steps/assignFitnessStep.h>
 #include <evolution/steps/createGeneratorStep.h>

@@ -1,4 +1,4 @@
-#include "evolution/basicEvolution.h"
+#include "evolution/basicEvolutionConfig.h"
 
 #include <stdexcept>
 #include <tuple>
@@ -27,16 +27,16 @@ namespace {
     void checkCompatible(const Representations::Representation& representation, const Evaluation::Problem& problem)
     {
         if(!Dimensions::DimensionFlow::acceptsRequirements(problem.getInputDimensions(), representation.getDimensionFlow().getInputDimensions())) {
-            throw std::runtime_error("Evolution::BasicEvolution: input requirements not compatible between representation and problem");
+            throw std::runtime_error("Evolution::BasicEvolutionConfig: input requirements not compatible between representation and problem");
         }
         if(!representation.getDimensionFlow().getOutputDimension().isCompatibleWith(problem.getOutputDimension())) {
-            throw std::runtime_error("Evolution::BasicEvolution: output requirements not compatible between representation and problem ("
+            throw std::runtime_error("Evolution::BasicEvolutionConfig: output requirements not compatible between representation and problem ("
                 + representation.getDimensionFlow().getOutputDimension().toString() + " =/= " + problem.getOutputDimension().toString() + ")");
         }
     }
 }
 
-std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
+std::shared_ptr<Evolution::Module> Evolution::BasicEvolutionConfig::buildModule() const
 {
     this->checkSettings();
 
@@ -48,6 +48,7 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
 
     // Step 2: build the modules. The initialization creates and evaluates the population...
     auto initModule = std::make_shared<Module>(this->names.initialization);
+    initModule->add(startStopwatchStep(this->names.stopwatch));
     initModule->add((this->generator != nullptr)
                         ? std::make_shared<CreateGeneratorStep>(this->names.generator, [custom = this->generator](const EvolutionData&) { return custom; }, std::set<std::string>{},
                                                                 this->names.createGeneratorStep)
@@ -56,6 +57,7 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     initModule->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population}, this->names.trainingMetrics, this->problem,
                                              evaluator, metricTemplate, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
     this->addFitnessSteps(*initModule, fitnessMetricHash);
+    this->addValidationSteps(*initModule, evaluator);
 
     // ... then a generation selects parents, creates and mutates the offspring, evaluates them and keeps the best.
     auto evolutionModule = std::make_shared<Module>(this->names.evolution);
@@ -73,7 +75,7 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolution::build() const
     return evolutionModule;
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::BasicEvolution::logColumns() const
+std::vector<Evolution::LogStep::Column> Evolution::BasicEvolutionConfig::logColumns() const
 {
     std::vector<LogStep::Column> columns{sizeColumn(this->names.population)};
     const auto add = [&columns](const std::vector<LogStep::Column>& more) { columns.insert(columns.end(), more.begin(), more.end()); };
@@ -84,23 +86,23 @@ std::vector<Evolution::LogStep::Column> Evolution::BasicEvolution::logColumns() 
     return columns;
 }
 
-void Evolution::BasicEvolution::addLogStep(Module& step) const
+void Evolution::BasicEvolutionConfig::addLogStep(Module& step) const
 {
     if(this->logOutput != nullptr) {
-        step.add(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep));
+        step.add(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep, this->names.stopwatch));
     }
 }
 
-void Evolution::BasicEvolution::checkSettings() const
+void Evolution::BasicEvolutionConfig::checkSettings() const
 {
     if(this->representation == nullptr || this->problem == nullptr) {
-        throw std::runtime_error("Evolution::BasicEvolution: the representation and the problem must be set");
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: the representation and the problem must be set");
     }
     if(this->sizePopulation == 0 || this->nbOffspring == 0) {
-        throw std::runtime_error("Evolution::BasicEvolution: the size of the population and the number of offspring must be set");
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: the size of the population and the number of offspring must be set");
     }
     if(this->validationPeriod == 0) {
-        throw std::runtime_error("Evolution::BasicEvolution: the validation period cannot be zero");
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: the validation period cannot be zero");
     }
     checkCompatible(*this->representation, *this->problem);
     this->makeMetrics(*this->problem);
@@ -110,7 +112,7 @@ void Evolution::BasicEvolution::checkSettings() const
     }
 }
 
-std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> Evolution::BasicEvolution::makeMetrics(const Evaluation::Problem& evaluatedProblem) const
+std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> Evolution::BasicEvolutionConfig::makeMetrics(const Evaluation::Problem& evaluatedProblem) const
 {
     std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> result;
     if(dynamic_cast<const Evaluation::PredictionProblem*>(&evaluatedProblem) != nullptr) {
@@ -118,18 +120,18 @@ std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> Evolution::Basi
     } else if(dynamic_cast<const Evaluation::ReinforcementProblem*>(&evaluatedProblem) != nullptr) {
         result = {std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::RewardsMetric>()), Metrics::RewardsMetric::staticHash()};
     } else {
-        throw std::runtime_error("Evolution::BasicEvolution: the problems must be PredictionProblem or ReinforcementProblem");
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: the problems must be PredictionProblem or ReinforcementProblem");
     }
     for(const std::shared_ptr<const Metrics::Metric>& metric: this->metrics) {
         if(metric == nullptr) {
-            throw std::runtime_error("Evolution::BasicEvolution: the metrics cannot be null");
+            throw std::runtime_error("Evolution::BasicEvolutionConfig: the metrics cannot be null");
         }
         result.first->addRequiredMetric(metric->cloneEmptyPtr());
     }
     return result;
 }
 
-std::shared_ptr<Evaluation::Evaluator> Evolution::BasicEvolution::makeEvaluator() const
+std::shared_ptr<Evaluation::Evaluator> Evolution::BasicEvolutionConfig::makeEvaluator() const
 {
     if(this->nbThreads > 1) {
         return std::make_shared<Evaluation::ParallelEvaluator>(this->nbThreads);
@@ -137,12 +139,12 @@ std::shared_ptr<Evaluation::Evaluator> Evolution::BasicEvolution::makeEvaluator(
     return std::make_shared<Evaluation::Evaluator>();
 }
 
-std::shared_ptr<FitnessAssignment::Assigner> Evolution::BasicEvolution::usedAssigner() const
+std::shared_ptr<FitnessAssignment::Assigner> Evolution::BasicEvolutionConfig::usedAssigner() const
 {
     return (this->assigner != nullptr) ? this->assigner : std::make_shared<FitnessAssignment::DefaultAssigner>();
 }
 
-void Evolution::BasicEvolution::addFitnessSteps(Module& step, uint64_t metricHash) const
+void Evolution::BasicEvolutionConfig::addFitnessSteps(Module& step, uint64_t metricHash) const
 {
     step.add(std::make_shared<AssignFitnessStep>(this->names.trainingMetrics, this->names.trainingFitness, this->usedAssigner(), metricHash,
                                                      this->names.trainingFitnessStep));
@@ -153,7 +155,7 @@ void Evolution::BasicEvolution::addFitnessSteps(Module& step, uint64_t metricHas
     }
 }
 
-void Evolution::BasicEvolution::addReproductionSteps(Module& step) const
+void Evolution::BasicEvolutionConfig::addReproductionSteps(Module& step) const
 {
     const std::shared_ptr<Selection::Selector> selector =
         (this->parentSelection != nullptr) ? this->parentSelection : std::make_shared<Selection::RandomSelector>(true);
@@ -166,7 +168,7 @@ void Evolution::BasicEvolution::addReproductionSteps(Module& step) const
     step.add(std::make_shared<ReproduceStep>(this->names.parents, reproducer, this->nbOffspring, this->names.offspring, this->names.reproductionStep));
 }
 
-void Evolution::BasicEvolution::addSurvivalStep(Module& step) const
+void Evolution::BasicEvolutionConfig::addSurvivalStep(Module& step) const
 {
     const std::shared_ptr<Selection::Selector> selector =
         (this->survivingSelection != nullptr) ? this->survivingSelection : std::make_shared<Selection::TruncationSelector>();
@@ -174,7 +176,7 @@ void Evolution::BasicEvolution::addSurvivalStep(Module& step) const
                                               this->names.trainingFitness, selector, this->sizePopulation, this->names.population, true, this->names.survivorSelectionStep));
 }
 
-void Evolution::BasicEvolution::addValidationSteps(Module& step, std::shared_ptr<Evaluation::Evaluator> evaluator) const
+void Evolution::BasicEvolutionConfig::addValidationSteps(Module& step, std::shared_ptr<Evaluation::Evaluator> evaluator) const
 {
     if(this->nbValidationIterations == 0) {
         return;

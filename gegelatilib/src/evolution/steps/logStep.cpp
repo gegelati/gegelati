@@ -37,16 +37,26 @@ namespace {
     }
 }
 
-Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name)
-    : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}, stopwatch{std::make_shared<Stopwatch>()}
+Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name, std::string stopwatch)
+    : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}, stopwatchName{std::move(stopwatch)}
 {
+    this->requiredList.insert(this->stopwatchName);
     for(const Column& column: this->columns) {
         this->requiredList.insert(column.required.begin(), column.required.end());
     }
 
-    // The times of the log start with the initialization of the step, whenever the evolution starts again.
-    const std::shared_ptr<Stopwatch> started = this->stopwatch;
-    this->initialization = std::make_shared<LambdaStep>("StartStopwatch", [started](EvolutionData&) { started->reset(); });
+    // The initialization of the step writes the row of the initial state (the generations done so far, zero for a new evolution).
+    this->initialization = std::make_shared<LambdaStep>("WriteInitialState", [this](EvolutionData& state) { this->writeRow(state, state.nbGenerationsDone); },
+                                                        std::set<std::string>{this->stopwatchName});
+}
+
+std::shared_ptr<Evolution::Module> Evolution::startStopwatchStep(const std::string& stopwatch)
+{
+    return std::make_shared<LambdaStep>("StartStopwatch", [stopwatch](EvolutionData& state) {
+        if(!state.has(stopwatch)) {
+            state.add(stopwatch, std::make_shared<Stopwatch>());
+        }
+    }, std::set<std::string>{}, std::set<std::string>{stopwatch});
 }
 
 void Evolution::LogStep::writeLine(const std::vector<std::string>& texts)
@@ -61,12 +71,9 @@ void Evolution::LogStep::writeLine(const std::vector<std::string>& texts)
     *this->output << std::endl;
 }
 
-void Evolution::LogStep::apply(EvolutionData& state)
+void Evolution::LogStep::writeRow(const EvolutionData& state, uint64_t generation)
 {
-    if(state.generation == EvolutionData::initGeneration) {
-        return;
-    }
-    if(!this->headerWritten || state.generation == 0) {
+    if(!this->headerWritten || generation == 0) {
         std::vector<std::string> headings{"Gen"};
         for(const Column& column: this->columns) {
             headings.push_back(column.name);
@@ -76,14 +83,22 @@ void Evolution::LogStep::apply(EvolutionData& state)
         this->headerWritten = true;
     }
 
-    std::vector<std::string> values{std::to_string(state.generation)};
+    std::vector<std::string> values{std::to_string(generation)};
     for(const Column& column: this->columns) {
-        values.push_back(format(column.value(state), column.precision));
+        // The data of a column may not exist yet in the initial state (e.g. the offspring).
+        const bool available = std::all_of(column.required.begin(), column.required.end(), [&state](const std::string& name) { return state.has(name); });
+        values.push_back(format(available ? column.value(state) : std::nan(""), column.precision));
     }
-    this->stopwatch->checkpoint();
-    values.push_back(format(this->stopwatch->getCheckpoints().back(), 2));
-    values.push_back(format(this->stopwatch->elapsed(), 2));
+    const double time = state.get<Stopwatch>(this->stopwatchName)->elapsed();
+    values.push_back(format(time - ((generation == 0) ? 0.0 : this->previousTime), 2));
+    values.push_back(format(time, 2));
+    this->previousTime = time;
     this->writeLine(values);
+}
+
+void Evolution::LogStep::apply(EvolutionData& state)
+{
+    this->writeRow(state, state.generation);
 }
 
 Evolution::LogStep::Column Evolution::sizeColumn(const std::string& individuals, std::string name)
