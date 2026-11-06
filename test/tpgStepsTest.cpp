@@ -140,6 +140,35 @@ TEST_F(TPGStepsTest, graphHelpers)
     EXPECT_EQ(members.at(0), member);
 }
 
+TEST_F(TPGStepsTest, sharedVerticesByHeight)
+{
+    std::shared_ptr<Individual> leaf = makeLeaf(rep, member);
+    std::shared_ptr<Individual> vertexA = makeVertex(rep, member, {leaf});
+    std::shared_ptr<Individual> vertexB = makeVertex(rep, member, {leaf});
+    std::shared_ptr<Individual> vertexC = makeVertex(rep, member, {vertexA});
+    using Layers = std::vector<std::vector<uint64_t>>;
+    const auto layersOf = [](const std::vector<std::shared_ptr<const Individual>>& evaluated) {
+        Layers ids;
+        for(const auto& layer: Evolution::CacheVertexOutputsStep::getSharedVerticesByHeight(evaluated)) {
+            ids.push_back(idsOf(layer));
+        }
+        return ids;
+    };
+
+    // Vertices executed once per sample are not cached.
+    EXPECT_TRUE(layersOf({vertexC}).empty());
+    EXPECT_TRUE(layersOf({}).empty());
+
+    // The leaf is reached by two vertices.
+    EXPECT_EQ(layersOf({vertexA, vertexB}), (Layers{{leaf->getIndividualID()}}));
+
+    // A is reached by C and evaluated itself: it comes after the leaf it points to, which A and B share.
+    EXPECT_EQ(layersOf({vertexA, vertexB, vertexC}), (Layers{{leaf->getIndividualID()}, {vertexA->getIndividualID()}}));
+
+    // A vertex referenced by a single vertex is cached only if it is also evaluated, and it is never in the layer of its sub-vertices.
+    EXPECT_EQ(layersOf({vertexC, vertexA}), (Layers{{}, {vertexA->getIndividualID()}}));
+}
+
 TEST_F(TPGStepsTest, protectAggregated)
 {
     std::shared_ptr<Individual> leaf1 = makeLeaf(rep, member);

@@ -53,6 +53,10 @@ namespace Evolution {
      *    with the member mutation. The range of the number of nodes is the one of the TPG representation, and new vertices start
      *    with the minimum. BasicEvolutionConfig::mutation is not used.
      *  - CacheMemberOutputs (after Mutation), only for prediction problems, executes each member once per sample.
+     *  - CacheVertexOutputs (after CacheMemberOutputs), only for prediction problems, executes once per sample each vertex shared
+     *    by several individuals, layer by layer from the lowest vertices.
+     *  - If the validation is used and its problem is a prediction problem, ValidationCacheMemberOutputs and
+     *    ValidationCacheVertexOutputs do the same before the validation evaluation, with the same period, for the population.
      *  - ProtectAggregated (after TrainingFitness at initialization, after SurvivorSelection at each generation) removes from
      *    the population the vertices referenced by others.
      *  - If the archive size is positive, CreateArchive (first step of the initialization) creates an archive on which mutated
@@ -90,6 +94,15 @@ namespace Evolution {
             /// Data: the members whose outputs are cached.
             std::string memberOutputCache = "memberOutputCache";
 
+            /// Data: the vertices whose outputs are cached.
+            std::string vertexOutputCache = "vertexOutputCache";
+
+            /// Data: the members whose outputs are cached for the validation.
+            std::string validationMemberOutputCache = "validationMemberOutputCache";
+
+            /// Data: the vertices whose outputs are cached for the validation.
+            std::string validationVertexOutputCache = "validationVertexOutputCache";
+
             /// Data: the vertices removed from the roots by the protection.
             std::string protectedVertices = "protectedVertices";
 
@@ -104,6 +117,13 @@ namespace Evolution {
 
             /// Step caching the outputs of the members.
             std::string cacheMemberOutputsStep = "CacheMemberOutputs";
+
+            /// Step caching the outputs of the vertices shared by several individuals.
+            std::string cacheVertexOutputsStep = "CacheVertexOutputs";
+
+            /// Steps caching the outputs of the members and of the shared vertices for the validation.
+            std::string validationCacheMemberOutputsStep = "ValidationCacheMemberOutputs";
+            std::string validationCacheVertexOutputsStep = "ValidationCacheVertexOutputs";
 
             /// Step protecting the vertices referenced by others.
             std::string protectAggregatedStep = "ProtectAggregated";

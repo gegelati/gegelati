@@ -66,7 +66,7 @@ std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> Evaluation::ParallelEval
     }
 
     std::vector<std::unique_ptr<Problem>> cloneProblems;
-    for(size_t idx = 0; idx < this->maxNbThreads; idx++) {
+    for(size_t idx = 0; idx < this->maxNbThreads - 1; idx++) {
         cloneProblems.push_back(problem.cloneUniquePtr());
     }
 

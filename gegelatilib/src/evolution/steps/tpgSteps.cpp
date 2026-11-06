@@ -40,9 +40,9 @@ void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 }
 
 Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                                          std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, std::string name)
+                                                          std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode, std::string name)
     : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
-      nbIterations{nbIterations}
+      nbIterations{nbIterations}, mode{mode}
 {
     for(const std::string& key: this->evaluated) {
         this->require(key);
@@ -58,52 +58,176 @@ std::string Evolution::CacheMemberOutputsStep::details() const
     return std::to_string(this->nbIterations) + " samples";
 }
 
+namespace {
+    // Execute the individuals once on the samples of the evaluation and cache their outputs in them (Individual::cacheOutput).
+    // Individuals whose own sub-individuals are already cached run faster, so callers order them accordingly.
+    void cacheOutputsOf(const std::vector<std::shared_ptr<const Individual>>& individuals, Evaluation::PredictionProblem& problem,
+                        const Evaluation::Evaluator& evaluator, size_t nbIterations, uint64_t generation, Evaluation::Mode mode)
+    {
+        if(individuals.empty()) {
+            return;
+        }
+
+        auto outputTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
+        std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results =
+            evaluator.evaluateIndividuals(individuals, problem, outputTemplate, nbIterations, generation, mode);
+
+        // Hashes are the indices of the samples, and are iterated in the same order as the outputs were measured.
+        const std::set<uint64_t> hashes = problem.computeEvaluationHashes(nbIterations, generation, mode, problem.getProblemSeed());
+        const Evaluation::DataSet& dataset = problem.getDataSet();
+
+        for(const std::shared_ptr<const Individual>& individual: individuals) {
+            std::map<uint64_t, const Metrics::OutputMetric*> metrics =
+                results.at(individual->getIndividualID())->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+            if(metrics.empty()) {
+                continue;
+            }
+
+            const std::vector<Data::DataValue>& outputs = metrics.begin()->second->getOutputs();
+            size_t idxOutput = 0;
+            for(uint64_t hash: hashes) {
+                if(idxOutput >= outputs.size()) {
+                    break;
+                }
+                individual->cacheOutput(dataset.getInputsAt(hash).at(0).getPtr(), outputs.at(idxOutput).clone());
+                idxOutput++;
+            }
+        }
+    }
+
+    // Gather the individuals of the lists of the state.
+    std::vector<std::shared_ptr<const Individual>> gatherIndividuals(const Evolution::EvolutionData& state, const std::vector<std::string>& keys)
+    {
+        std::vector<std::shared_ptr<const Individual>> gathered;
+        for(const std::string& key: keys) {
+            const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
+            gathered.insert(gathered.end(), list.begin(), list.end());
+        }
+        return gathered;
+    }
+
+    // Clear the outputs cached at the previous run: they are for samples of a previous generation.
+    void clearPreviousCache(const Evolution::EvolutionData& state, const std::string& cache)
+    {
+        if(state.has(cache)) {
+            for(const std::shared_ptr<const Individual>& cached: *state.get<std::vector<std::shared_ptr<const Individual>>>(cache)) {
+                cached->clearCachedOutputs();
+            }
+        }
+    }
+}
+
 void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 {
-    // Outputs cached at the previous run are for samples of a previous generation.
-    if(state.has(this->cache)) {
-        for(const std::shared_ptr<const Individual>& member: *state.get<std::vector<std::shared_ptr<const Individual>>>(this->cache)) {
-            member->clearCachedOutputs();
+    clearPreviousCache(state, this->cache);
+
+    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(gatherIndividuals(state, this->evaluated));
+    state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
+    cacheOutputsOf(members, *this->problem, *this->evaluator, this->nbIterations, state.generation, this->mode);
+}
+
+Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+                                                          std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode, std::string name)
+    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
+      nbIterations{nbIterations}, mode{mode}
+{
+    for(const std::string& key: this->evaluated) {
+        this->require(key);
+    }
+    this->provide(this->cache);
+    if(this->problem == nullptr) {
+        throw std::runtime_error("Evolution::CacheVertexOutputsStep: the problem cannot be null");
+    }
+}
+
+std::string Evolution::CacheVertexOutputsStep::details() const
+{
+    return std::to_string(this->nbIterations) + " samples";
+}
+
+std::vector<std::vector<std::shared_ptr<const Individual>>> Evolution::CacheVertexOutputsStep::getSharedVerticesByHeight(
+    const std::vector<std::shared_ptr<const Individual>>& evaluated)
+{
+    const std::vector<std::shared_ptr<const Individual>> vertices = getAllVertices(evaluated);
+
+    // Number of executions of a vertex for a sample: once as an evaluated individual, and once per vertex referencing it.
+    std::unordered_map<uint64_t, size_t> nbExecutions;
+    std::unordered_map<uint64_t, std::vector<std::shared_ptr<const Individual>>> subVertices;
+    for(const std::shared_ptr<const Individual>& vertex: evaluated) {
+        nbExecutions[vertex->getIndividualID()]++;
+    }
+    for(const std::shared_ptr<const Individual>& vertex: vertices) {
+        std::vector<std::shared_ptr<const Individual>>& subs = subVertices[vertex->getIndividualID()];
+        subs = getSubVertices(*vertex);
+        for(const std::shared_ptr<const Individual>& sub: subs) {
+            nbExecutions[sub->getIndividualID()]++;
         }
     }
 
-    std::vector<std::shared_ptr<const Individual>> candidates;
-    for(const std::string& key: this->evaluated) {
-        const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
-        candidates.insert(candidates.end(), list.begin(), list.end());
+    // Height of a vertex: 0 if it only points to actions, else one more than its highest sub-vertex.
+    // Vertices are visited iteratively (depth-first, children before parents), so deep graphs cannot overflow the stack.
+    std::unordered_map<uint64_t, size_t> heights;
+    std::set<uint64_t> inProgress;
+    for(const std::shared_ptr<const Individual>& start: vertices) {
+        std::vector<std::pair<std::shared_ptr<const Individual>, size_t>> stack{{start, 0}};
+        while(!stack.empty()) {
+            const std::shared_ptr<const Individual> vertex = stack.back().first;
+            const uint64_t id = vertex->getIndividualID();
+            if(heights.count(id) > 0) {
+                stack.pop_back();
+                continue;
+            }
+            const std::vector<std::shared_ptr<const Individual>>& subs = subVertices.at(id);
+            size_t& nextSub = stack.back().second;
+            if(nextSub == 0) {
+                if(!inProgress.insert(id).second) {
+                    throw std::runtime_error("Evolution::CacheVertexOutputsStep: a cycle was found in the graph");
+                }
+            }
+            if(nextSub < subs.size()) {
+                const std::shared_ptr<const Individual> sub = subs.at(nextSub++);
+                if(heights.count(sub->getIndividualID()) == 0) {
+                    stack.emplace_back(sub, 0);
+                }
+                continue;
+            }
+            size_t height = 0;
+            for(const std::shared_ptr<const Individual>& sub: subs) {
+                height = std::max(height, heights.at(sub->getIndividualID()) + 1);
+            }
+            heights[id] = height;
+            inProgress.erase(id);
+            stack.pop_back();
+        }
     }
-    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(candidates);
-    state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
-    if(members.empty()) {
-        return;
-    }
 
-    auto memberTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
-    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> memberResults = this->evaluator->evaluateIndividuals(
-        members, *this->problem, memberTemplate, this->nbIterations, state.generation, Evaluation::Mode::TRAINING);
-
-    // Hashes are the indices of the samples, and are iterated in the same order as the outputs were measured.
-    const std::set<uint64_t> hashes = this->problem->computeEvaluationHashes(
-        this->nbIterations, state.generation, Evaluation::Mode::TRAINING, this->problem->getProblemSeed());
-    const Evaluation::DataSet& dataset = this->problem->getDataSet();
-
-    for(const std::shared_ptr<const Individual>& member: members) {
-        std::map<uint64_t, const Metrics::OutputMetric*> metrics =
-            memberResults.at(member->getIndividualID())->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
-        if(metrics.empty()) {
+    // Only vertices executed several times for a sample gain from the cache.
+    std::vector<std::vector<std::shared_ptr<const Individual>>> layers;
+    for(const std::shared_ptr<const Individual>& vertex: vertices) {
+        if(nbExecutions.at(vertex->getIndividualID()) < 2) {
             continue;
         }
-
-        const std::vector<Data::DataValue>& outputs = metrics.begin()->second->getOutputs();
-        size_t idxOutput = 0;
-        for(uint64_t hash: hashes) {
-            if(idxOutput >= outputs.size()) {
-                break;
-            }
-            member->cacheOutput(dataset.getInputsAt(hash).at(0).getPtr(), outputs.at(idxOutput).clone());
-            idxOutput++;
+        const size_t height = heights.at(vertex->getIndividualID());
+        if(layers.size() <= height) {
+            layers.resize(height + 1);
         }
+        layers.at(height).push_back(vertex);
     }
+    return layers;
+}
+
+void Evolution::CacheVertexOutputsStep::apply(EvolutionData& state)
+{
+    clearPreviousCache(state, this->cache);
+
+    // Layers are executed from the lowest one: the shared vertices they point to have their outputs cached already,
+    // so each vertex only costs the bids of its own nodes.
+    std::vector<std::shared_ptr<const Individual>> cached;
+    for(const std::vector<std::shared_ptr<const Individual>>& layer: getSharedVerticesByHeight(gatherIndividuals(state, this->evaluated))) {
+        cacheOutputsOf(layer, *this->problem, *this->evaluator, this->nbIterations, state.generation, this->mode);
+        cached.insert(cached.end(), layer.begin(), layer.end());
+    }
+    state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(std::move(cached)));
 }
 
 void Evolution::CreateArchiveStep::apply(EvolutionData& state)

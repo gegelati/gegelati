@@ -135,6 +135,9 @@ namespace Evolution {
             std::string logStep = "Log";
         };
 
+        /// Names of the data and of the steps, changeable before build.
+        Names names;
+
         /// Representation of the evolved individuals, required.
         std::shared_ptr<const Representations::Representation> representation = nullptr;
 
@@ -149,9 +152,6 @@ namespace Evolution {
 
         /// Number of evaluations of each individual in training mode.
         size_t nbTrainingIterations = 1;
-
-        /// Names of the data and of the steps, changeable before build.
-        Names names;
 
         /// Number of evaluations of each individual in validation mode, zero to disable the validation.
         size_t nbValidationIterations = 0;

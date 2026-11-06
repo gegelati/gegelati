@@ -117,6 +117,33 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
             required, std::set<std::string>{this->tpgNames.generator});
     };
 
+    // Outputs of the members, then of the vertices shared by several individuals, are computed once per sample before an evaluation.
+    auto addCacheSteps = [](Module& module, const std::vector<std::string>& evaluated, const std::shared_ptr<Evaluation::PredictionProblem>& predictionProblem,
+                            const std::shared_ptr<Evaluation::Evaluator>& cacheEvaluator, size_t nbIterations, Evaluation::Mode mode,
+                            const std::string& memberCache, const std::string& vertexCache, const std::string& memberStep, const std::string& vertexStep,
+                            size_t period) {
+        auto members = std::make_shared<CacheMemberOutputsStep>(evaluated, memberCache, predictionProblem, cacheEvaluator, nbIterations, mode, memberStep);
+        auto vertices = std::make_shared<CacheVertexOutputsStep>(evaluated, vertexCache, predictionProblem, cacheEvaluator, nbIterations, mode, vertexStep);
+        members->setPeriod(period);
+        vertices->setPeriod(period);
+        module.add(members);
+        module.add(vertices);
+    };
+
+    // The validation evaluates the population as often as the validation period says, and has its own caches.
+    auto addValidationCacheSteps = [&](Module& module) {
+        if(this->nbValidationIterations == 0) {
+            return;
+        }
+        const auto validated = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(
+            (this->validationProblem != nullptr) ? this->validationProblem : this->problem);
+        if(validated != nullptr) {
+            addCacheSteps(module, std::vector<std::string>{this->names.population}, validated, evaluator, this->nbValidationIterations,
+                          Evaluation::Mode::VALIDATION, this->tpgNames.validationMemberOutputCache, this->tpgNames.validationVertexOutputCache,
+                          this->tpgNames.validationCacheMemberOutputsStep, this->tpgNames.validationCacheVertexOutputsStep, this->validationPeriod);
+        }
+    };
+
     // Step 2: build the modules. The initialization creates the archive and the vertices, then evaluates them...
     auto init = std::make_shared<Module>(this->names.initialization);
     init->add(startStopwatchStep(this->names.stopwatch));
@@ -134,6 +161,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     if(withArchive) {
         init->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
+    addValidationCacheSteps(*init);
     this->addValidationSteps(*init, evaluator);
 
     // ... then a generation, where nodes transferred by the mutation of the offspring are the ones of the current population.
@@ -142,9 +170,9 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     generation->add(makeGeneratorStep(true));
     generation->add(std::make_shared<MutateVerticesStep>(this->names.offspring, this->names.population, this->tpgNames.generator, transfer, this->nbThreads, this->names.mutationStep));
     if(const auto predictionProblem = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem)) {
-        generation->add(std::make_shared<CacheMemberOutputsStep>(std::vector<std::string>{this->names.population, this->names.offspring},
-                                                                 this->tpgNames.memberOutputCache, predictionProblem, evaluator, this->nbTrainingIterations,
-                                                                 this->tpgNames.cacheMemberOutputsStep));
+        addCacheSteps(*generation, std::vector<std::string>{this->names.population, this->names.offspring}, predictionProblem, evaluator,
+                      this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->tpgNames.memberOutputCache, this->tpgNames.vertexOutputCache,
+                      this->tpgNames.cacheMemberOutputsStep, this->tpgNames.cacheVertexOutputsStep, 1);
     }
     generation->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population, this->names.offspring},
                                                    this->names.trainingMetrics, this->problem, evaluator, generationMetrics, this->nbTrainingIterations,
@@ -157,6 +185,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     if(withArchive) {
         generation->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
+    addValidationCacheSteps(*generation);
     this->addValidationSteps(*generation, evaluator);
     this->addLogStep(*generation);
 

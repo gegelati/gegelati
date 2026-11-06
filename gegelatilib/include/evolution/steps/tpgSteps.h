@@ -94,6 +94,9 @@ namespace Evolution {
             /// Number of samples of the evaluation.
             size_t nbIterations;
 
+            /// Evaluation mode, given to the problem: the outputs are cached for the samples of this mode.
+            Evaluation::Mode mode;
+
         public:
             /**
              * \brief Constructor.
@@ -103,11 +106,83 @@ namespace Evolution {
              * \param[in] problem problem in which members are evaluated.
              * \param[in] evaluator evaluator running the evaluations.
              * \param[in] nbIterations number of samples of the evaluation.
+             * \param[in] mode evaluation mode, given to the problem.
              * \param[in] name name of the step.
              * \throw std::runtime_error if the problem is null.
              */
             CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                   std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, std::string name = "CacheMemberOutputs");
+                                   std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING,
+                                   std::string name = "CacheMemberOutputs");
+
+            /// Inherited from Module
+            virtual std::string details() const override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
+    };
+
+    /**
+     * \brief Step caching the outputs of the vertices shared by several individuals on the samples of a dataset.
+     *
+     * A vertex referenced by several vertices (or by a vertex and the evaluated individuals) would be executed several times
+     * for the same sample. Its output, the action it leads to, is cached in the vertex (Individual::cacheOutput) after a single execution.
+     * Vertices executed once per sample are not cached, since there would be no gain.
+     *
+     * Vertices are executed layer by layer, from the ones pointing only to actions to the ones with the highest sub-graphs
+     * (see getSharedVerticesByHeight), so that cached vertices are used by the layers above and each vertex costs only the bids of its own nodes.
+     * Ordering the vertices is linear in the number of vertices and edges, negligible compared to the executions on the samples.
+     * Run CacheMemberOutputsStep first, so that bids are cached as well. This is only an optimization: results are unchanged.
+     *
+     * The cached vertices are a data of the state, and their outputs are cleared at the next run of the step.
+     * Outputs are indexed by the address of the samples: the dataset of the problem must outlive the individuals.
+     */
+    class CacheVertexOutputsStep : public Module {
+        protected:
+            /// Names of the lists of individuals about to be evaluated.
+            std::vector<std::string> evaluated;
+
+            /// Name of the cached vertices, a list of individuals.
+            std::string cache;
+
+            /// Problem in which vertices are evaluated.
+            std::shared_ptr<Evaluation::PredictionProblem> problem;
+
+            /// Evaluator running the evaluations.
+            std::shared_ptr<const Evaluation::Evaluator> evaluator;
+
+            /// Number of samples of the evaluation.
+            size_t nbIterations;
+
+            /// Evaluation mode, given to the problem: the outputs are cached for the samples of this mode.
+            Evaluation::Mode mode;
+
+        public:
+            /**
+             * \brief Constructor.
+             *
+             * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
+             * \param[in] cache name of the cached vertices, a list of individuals.
+             * \param[in] problem problem in which vertices are evaluated.
+             * \param[in] evaluator evaluator running the evaluations.
+             * \param[in] nbIterations number of samples of the evaluation.
+             * \param[in] mode evaluation mode, given to the problem.
+             * \param[in] name name of the step.
+             * \throw std::runtime_error if the problem is null.
+             */
+            CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+                                   std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING,
+                                   std::string name = "CacheVertexOutputs");
+
+            /**
+             * \brief Return the vertices executed several times per sample, grouped by height.
+             *
+             * The height of a vertex is 0 if it points only to actions, else one more than the highest of its sub-vertices.
+             * A vertex is executed several times if it is evaluated and referenced, or referenced by several vertices.
+             *
+             * \param[in] evaluated the individuals about to be evaluated.
+             * \return the layers of vertices, from height 0 up; a layer can be empty.
+             * \throw std::runtime_error if the graph has a cycle.
+             */
+            static std::vector<std::vector<std::shared_ptr<const Individual>>> getSharedVerticesByHeight(const std::vector<std::shared_ptr<const Individual>>& evaluated);
 
             /// Inherited from Module
             virtual std::string details() const override;
@@ -206,7 +281,6 @@ namespace Evolution {
                 this->require(this->roots);
                 this->require(this->metrics);
                 this->require(this->archive);
-                this->provide(this->archive);
             }
 
             /// Inherited from Module

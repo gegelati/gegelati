@@ -34,7 +34,7 @@ std::string Evolution::EvolutionData::summary() const
     std::vector<std::vector<std::string>> rows;
     // Columns: name, type, content, age. All but the last are padded to align.
     std::vector<size_t> widths(3, 0);
-    constexpr size_t maxTypeSize = 50;
+    constexpr size_t maxTypeSize = 70;
     for(const auto& [name, entry]: this->data) {
         std::string age = "stored at generation " + std::to_string(entry->generation());
         if(entry->generation() == this->generation) {
