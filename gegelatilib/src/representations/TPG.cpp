@@ -8,7 +8,7 @@ std::unique_ptr<Representations::Representation> Representations::TPG::cloneOnly
     auto clone = std::make_unique<Representations::TPG>(
         this->dimensionFlow.getInputDimensions(), this->nbActions,
         this->nbMembersMin, this->nbMembersMax,
-        this->representationName, this->representationColor
+        this->getName(), this->representationColor
     );
     return clone;
 }

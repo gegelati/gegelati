@@ -8,7 +8,7 @@ std::unique_ptr<Representations::Representation> Representations::LGP::cloneOnly
         this->dimensionFlow.getInputDimensions(), this->registersType,
         this->iSet, this->outputRegistersType,
         this->nbLinesMin, this->nbLinesMax,
-        this->representationName, this->representationColor
+        this->getName(), this->representationColor
     );
     return clone;
 }

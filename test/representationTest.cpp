@@ -82,12 +82,12 @@ TEST_F(RepresentationTest, Constructor)
 TEST_F(RepresentationTest, getSet)
 {
     Representations::FakeRepresentation representation({inputType}, outputType);
-    ASSERT_EQ(representation.getRepresentationName(), "FakeRepresentation") << "Param value got unexpected value";
+    ASSERT_EQ(representation.getName(), "FakeRepresentation") << "Param value got unexpected value";
     ASSERT_EQ(representation.getRepresentationColor(), "#FFFFFF") << "Param value got unexpected value";
 
     Representations::FakeRepresentation customRep({inputType}, outputType, "CustomRep", "#123456");
     
-    ASSERT_EQ(customRep.getRepresentationName(), "CustomRep") << "Param value got unexpected value";
+    ASSERT_EQ(customRep.getName(), "CustomRep") << "Param value got unexpected value";
     ASSERT_EQ(customRep.getRepresentationColor(), "#123456") << "Param value got unexpected value";
     ASSERT_NO_THROW(customRep.getGenotypeConstraint()) << "Getting genotype constraint should not fail";
 }

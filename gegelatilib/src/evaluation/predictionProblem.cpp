@@ -4,7 +4,7 @@
 
 std::unique_ptr<Evaluation::Problem> Evaluation::PredictionProblem::cloneUniquePtr() const
 {
-  return std::make_unique<Evaluation::PredictionProblem>(this->dataset, this->problemSeed, this->problemName);
+  return std::make_unique<Evaluation::PredictionProblem>(this->dataset, this->problemSeed, this->getName());
 }
 
 bool Evaluation::PredictionProblem::isCopyable() const

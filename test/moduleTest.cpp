@@ -1108,14 +1108,14 @@ TEST_F(ModuleTest, initializeCreatesTheDataAndEvolveContinues)
 TEST_F(ModuleTest, componentsDescribeThemselves)
 {
     // The core steps show these descriptions in the summary.
-    EXPECT_EQ(Selection::RandomSelector(true).getSelectorName(), "RandomSelector");
-    EXPECT_EQ(Selection::TournamentSelector(3).getSelectorName(), "TournamentSelector");
-    EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5).getMutatorName(), "PointMutator");
-    EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7).getMutatorName(), "NodeTransferMutation");
-    EXPECT_EQ(Reproduction::Replicator().getReproducerName(), "Replicator");
-    EXPECT_EQ(FitnessAssignment::DefaultAssigner().getAssignerName(), "DefaultAssigner");
-    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, std::make_shared<Descriptors::AverageVectorDescriptor>(0)).getAssignerName(), "NoveltySearchAssigner");
-    EXPECT_EQ(Descriptors::AverageVectorDescriptor(0).getDescriptorName(), "AverageVectorDescriptor");
+    EXPECT_EQ(Selection::RandomSelector(true).getName(), "RandomSelector");
+    EXPECT_EQ(Selection::TournamentSelector(3).getName(), "TournamentSelector");
+    EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5).getName(), "PointMutator");
+    EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7).getName(), "NodeTransferMutation");
+    EXPECT_EQ(Reproduction::Replicator().getName(), "Replicator");
+    EXPECT_EQ(FitnessAssignment::DefaultAssigner().getName(), "DefaultAssigner");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, std::make_shared<Descriptors::AverageVectorDescriptor>(0)).getName(), "NoveltySearchAssigner");
+    EXPECT_EQ(Descriptors::AverageVectorDescriptor(0).getName(), "AverageVectorDescriptor");
 
     // And so do the steps using them.
     auto mutate = makeSteps(10, 10, 2)->find("Mutation");
@@ -1128,28 +1128,41 @@ TEST_F(ModuleTest, componentsCanBeNamed)
 {
     // The name is only for printing: two components of the same class can be told apart in a summary.
     auto descriptor = std::make_shared<Descriptors::AverageVectorDescriptor>(0, "OutputsOnTheArchive");
-    EXPECT_EQ(descriptor->getDescriptorName(), "OutputsOnTheArchive");
-    EXPECT_EQ(Descriptors::ScalarListDescriptor(0, "PerImage").getDescriptorName(), "PerImage");
+    EXPECT_EQ(descriptor->getName(), "OutputsOnTheArchive");
+    EXPECT_EQ(Descriptors::ScalarListDescriptor(0, "PerImage").getName(), "PerImage");
 
-    EXPECT_EQ(Selection::RandomSelector(true, "RandomParents").getSelectorName(), "RandomParents");
-    EXPECT_EQ(Selection::TournamentSelector(3, true, "Small").getSelectorName(), "Small");
-    EXPECT_EQ(Selection::TournamentSelector(8, true, "Big").getSelectorName(), "Big");
-    EXPECT_EQ(Selection::TournamentSelector(8, false).getSelectorName(), "TournamentSelector");
-    EXPECT_EQ(Selection::TruncationSelector("Best").getSelectorName(), "Best");
-    EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5, "Gentle").getMutatorName(), "Gentle");
-    EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7, "Transfer").getMutatorName(), "Transfer");
-    EXPECT_EQ(Reproduction::Replicator("Copy").getReproducerName(), "Copy");
-    EXPECT_EQ(FitnessAssignment::DefaultAssigner("Reward").getAssignerName(), "Reward");
-    EXPECT_EQ(FitnessAssignment::ClassificationF1Assigner("F1").getAssignerName(), "F1");
-    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor, "Novelty").getAssignerName(), "Novelty");
-    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor).getAssignerName(), "NoveltySearchAssigner");
+    EXPECT_EQ(Selection::RandomSelector(true, "RandomParents").getName(), "RandomParents");
+    EXPECT_EQ(Selection::TournamentSelector(3, true, "Small").getName(), "Small");
+    EXPECT_EQ(Selection::TournamentSelector(8, true, "Big").getName(), "Big");
+    EXPECT_EQ(Selection::TournamentSelector(8, false).getName(), "TournamentSelector");
+    EXPECT_EQ(Selection::TruncationSelector("Best").getName(), "Best");
+    EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5, "Gentle").getName(), "Gentle");
+    EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7, "Transfer").getName(), "Transfer");
+    EXPECT_EQ(Reproduction::Replicator("Copy").getName(), "Copy");
+    EXPECT_EQ(FitnessAssignment::DefaultAssigner("Reward").getName(), "Reward");
+    EXPECT_EQ(FitnessAssignment::ClassificationF1Assigner("F1").getName(), "F1");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor, "Novelty").getName(), "Novelty");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor).getName(), "NoveltySearchAssigner");
 
     std::shared_ptr<Evaluation::ReinforcementEnvironment> game = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem named(game, 0, "Sticks");
-    EXPECT_EQ(named.getProblemName(), "Sticks");
+    EXPECT_EQ(named.getName(), "Sticks");
     ASSERT_TRUE(named.isCopyable());
-    EXPECT_EQ(named.cloneUniquePtr()->getProblemName(), "Sticks") << "A clone keeps the name";
-    EXPECT_EQ(Evaluation::ReinforcementProblem(game).getProblemName(), "ReinforcementProblem");
+    EXPECT_EQ(named.cloneUniquePtr()->getName(), "Sticks") << "A clone keeps the name";
+    EXPECT_EQ(Evaluation::ReinforcementProblem(game).getName(), "ReinforcementProblem");
+
+    // The details have the parameters, the name alone is the default.
+    EXPECT_EQ(Selection::TournamentSelector(3, true, "Small").getDetails(), "Small(size 3, with replacement)");
+    EXPECT_EQ(Selection::TournamentSelector(8, false).getDetails(), "TournamentSelector(size 8, without replacement)");
+    EXPECT_EQ(Selection::RandomSelector(false, "Rnd").getDetails(), "Rnd(without replacement)");
+    EXPECT_EQ(Selection::TruncationSelector("Best").getDetails(), "Best") << "No parameter, so the details are the name";
+    EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5, "Gentle").getDetails(), "Gentle(mutate 0.2, add 0.5, remove 0.5)");
+    EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7).getDetails(), "NodeTransferMutation(mutate 0.1, add 0.7, remove 0.7)");
+    EXPECT_EQ(Reproduction::Replicator("Copy").getDetails(), "Copy");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor, "Novelty").getDetails(), "Novelty(15 neighbors, OutputsOnTheArchive)");
+    std::ostringstream streamed;
+    streamed << Selection::TournamentSelector(3, true, "Small") << " / " << *descriptor;
+    EXPECT_EQ(streamed.str(), "Small / OutputsOnTheArchive") << "Streaming an object writes its name, not its details";
 
     // The steps print the names they are given.
     Evolution::SelectStep small({"A"}, "fitness", std::make_shared<Selection::TournamentSelector>(3, true, "Small"), 2, "B");

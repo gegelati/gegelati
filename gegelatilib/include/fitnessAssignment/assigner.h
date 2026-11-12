@@ -3,6 +3,7 @@
 #define FITNESS_ASSIGNMENT_H
 
 #include "individual.h"
+#include "util/named.h"
 #include "metrics/metricMap.h"
 
  namespace FitnessAssignment {
@@ -11,11 +12,7 @@
      * \brief Base class of the methods converting the metrics measured during
      * evaluations into a scalar fitness value, higher being better.
      */
-    class Assigner {
-        protected:
-            /// Name of the assigner.
-            std::string assignerName;
-
+    class Assigner : public Util::Named {
         public: 
 
             /// Default polymorphic destructor
@@ -24,12 +21,9 @@
             /**
              * \brief Default constructor
              *
-             * \param[in] assignerName name of the assigner.
+             * \param[in] name name of the assigner, only used to print it (see Util::Named).
              */
-            Assigner(std::string assignerName = "Assigner") : assignerName{std::move(assignerName)} {};
-
-            /// Return the name of the assigner.
-            const std::string& getAssignerName() const { return this->assignerName; }
+            Assigner(std::string name = "Assigner") : Util::Named(std::move(name)) {};
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Assigner(const Assigner&) = delete;

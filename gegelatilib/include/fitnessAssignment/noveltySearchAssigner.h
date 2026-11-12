@@ -44,6 +44,12 @@
             /// Return the descriptor.
             const Descriptors::Descriptor& getDescriptor() const { return *this->descriptor; }
 
+            /// Inherited from Named, adds the number of neighbors and the details of the descriptor.
+            virtual std::string getDetails() const override
+            {
+                return this->getName() + "(" + std::to_string(this->nbNeighbors) + " neighbors, " + this->descriptor->getDetails() + ")";
+            }
+
 
             /**
              * \brief Compute the descriptor values of the individuals with the descriptor.

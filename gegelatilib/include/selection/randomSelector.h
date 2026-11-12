@@ -22,6 +22,9 @@
              */
             RandomSelector(bool replacement, std::string name = "RandomSelector") : Selector(replacement, std::move(name)) {}
 
+            /// Inherited from Named, adds the replacement.
+            virtual std::string getDetails() const override { return this->getName() + (this->replacement ? "(with replacement)" : "(without replacement)"); }
+
             /**
              * \brief method performing the random selection
              * 

@@ -6,20 +6,18 @@
 #include <algorithm>
 
 #include "individual.h"
+#include "util/named.h"
 
  namespace Selection {
 
     /**
      * \brief Class representing the selection mechanism of the evolution algorithm, that can be used either for parents selection, surviving selection or anything else requiring selection.
      */
-    class Selector {
+    class Selector : public Util::Named {
 
         protected:          
             /// Boolean indicating wether this selection mechanism allows replacement.  
             bool replacement;
-
-            /// Name of the selector.
-            std::string selectorName;
 
         public: 
 
@@ -30,12 +28,9 @@
              * \brief Default constructor
              * 
              * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.
-             * \param[in] selectorName name of the selector.
+             * \param[in] name name of the selector, only used to print it (see Util::Named).
              */
-            Selector(bool replacement, std::string selectorName = "Selector") : replacement{replacement}, selectorName{std::move(selectorName)} {};
-
-            /// Return the name of the selector.
-            const std::string& getSelectorName() const { return this->selectorName; }
+            Selector(bool replacement, std::string name = "Selector") : Util::Named(std::move(name)), replacement{replacement} {};
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Selector(const Selector&) = delete;

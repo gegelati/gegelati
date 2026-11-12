@@ -16,6 +16,7 @@
 #include "data/dataValue.h"
 #include "dimensions/dimensionFlow.h"
 #include "dimensions/activationFunctions.h"
+#include "util/named.h"
 
  namespace Representations {
     /**
@@ -23,12 +24,10 @@
      *
      * Available representations are TPG, MAPLE, and LGP
      */
-    class Representation
+    class Representation : public Util::Named
     {
       protected:
 
-        /// Name of the representation.
-        std::string representationName = "";
         /// Color of the representation.
         std::string representationColor = "";
 
@@ -77,7 +76,7 @@
             const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension,
             std::string representationName = "Representation", 
             std::string representationColor = "#000000")
-               : representationName(representationName), 
+               : Util::Named(representationName),
                  representationColor(representationColor), dimensionFlow{inputDimensions} {
 
                 // Add layer
@@ -88,10 +87,6 @@
         Representation(const Representation&) = delete;
         Representation& operator=(const Representation&) = delete;
 
-        /**
-         * \brief Return the name of the representation.
-         */
-        std::string getRepresentationName() const { return this->representationName; }
         /**
          * \brief Return the color of the representation.
          */

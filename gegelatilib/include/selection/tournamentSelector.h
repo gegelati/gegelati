@@ -30,6 +30,12 @@
             /// A name given in place of the replacement flag would silently convert to a bool: write TournamentSelector(size, true, "name").
             TournamentSelector(size_t sizeTournament, const char* name) = delete;
 
+            /// Inherited from Named, adds the size of the tournaments and the replacement.
+            virtual std::string getDetails() const override
+            {
+                return this->getName() + "(size " + std::to_string(this->sizeTournament) + (this->replacement ? ", with replacement)" : ", without replacement)");
+            }
+
 
             /**
              * \brief method performing the truncation selection

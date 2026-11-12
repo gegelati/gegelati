@@ -47,6 +47,9 @@
         PointMutator(double pMutateNode, double pAddNode = 0.0, double pRemoveNode = 0.0, std::string name = "PointMutator")
             : Mutator(std::move(name)), pMutateNode{pMutateNode}, pAddNode{pAddNode}, pRemoveNode{pRemoveNode} {};
 
+        /// Inherited from Named, adds the probabilities of the mutations.
+        virtual std::string getDetails() const override;
+
 
         /**
          * \brief return a mutated copy of a GPNode

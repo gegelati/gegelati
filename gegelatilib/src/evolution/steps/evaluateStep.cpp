@@ -20,7 +20,7 @@ Evolution::EvaluateStep::EvaluateStep(std::vector<std::string> evaluated, std::s
 
 std::string Evolution::EvaluateStep::details() const
 {
-    return Evaluation::modeName(this->mode) + ", " + std::to_string(this->nbIterations) + " iterations, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return Evaluation::modeName(this->mode) + ", " + std::to_string(this->nbIterations) + " iterations, " + this->problem->getName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::EvaluateStep::apply(EvolutionData& state)

@@ -7,6 +7,7 @@
 
 #include "dimensions/numericRange.h"
 #include "metrics/metricMap.h"
+#include "util/named.h"
 
 namespace Descriptors {
 
@@ -18,13 +19,10 @@ namespace Descriptors {
      * so they can be unbounded. The dimension of the descriptor is the number of ranges. It depends on the metrics
      * (e.g. the number of features), so it is given for a metric map.
      */
-    class Descriptor {
+    class Descriptor : public Util::Named {
       protected:
         /// \brief Hash of the metric the descriptor is computed from.
         uint64_t metricHash;
-
-        /// \brief Name of the descriptor.
-        std::string descriptorName;
 
         /**
          * \brief Smallest range containing two ranges: a bound is missing if it is missing in one of them.
@@ -43,12 +41,9 @@ namespace Descriptors {
       public:
         /**
          * \param[in] metricHash the hash of the metric the descriptor is computed from.
-         * \param[in] descriptorName name of the descriptor.
+         * \param[in] name name of the descriptor, only used to print it (see Util::Named).
          */
-        explicit Descriptor(uint64_t metricHash, std::string descriptorName = "Descriptor") : metricHash{metricHash}, descriptorName{std::move(descriptorName)} {};
-
-        /// \brief Return the name of the descriptor.
-        const std::string& getDescriptorName() const { return this->descriptorName; }
+        explicit Descriptor(uint64_t metricHash, std::string name = "Descriptor") : Util::Named(std::move(name)), metricHash{metricHash} {};
 
         /// Default polymorphic destructor
         virtual ~Descriptor() = default;

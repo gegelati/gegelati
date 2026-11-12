@@ -15,7 +15,7 @@ Evolution::MutateStep::MutateStep(std::string individuals, std::shared_ptr<const
 
 std::string Evolution::MutateStep::details() const
 {
-    return this->mutator->getMutatorName() + ", " + this->individuals + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return this->mutator->getName() + ", " + this->individuals + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateStep::apply(EvolutionData& state)

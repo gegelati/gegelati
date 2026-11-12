@@ -5,17 +5,16 @@
 #include <set>
 
 #include "individual.h"
+#include "util/named.h"
 
 
  namespace Reproduction {
     /**
      * \brief Class representing a Reproduction.
      */
-    class Reproducer
+    class Reproducer : public Util::Named
     {
     protected:
-        /// Name of the reproducer.
-        std::string reproducerName;
 
     public:
 
@@ -29,12 +28,9 @@
         /**
          * \brief Main Reproducer constructor.
          *
-         * \param[in] reproducerName name of the reproducer.
+         * \param[in] name name of the reproducer, only used to print it (see Util::Named).
          */
-        Reproducer(std::string reproducerName = "Reproducer") : reproducerName{std::move(reproducerName)} {};
-
-        /// Return the name of the reproducer.
-        const std::string& getReproducerName() const { return this->reproducerName; }
+        Reproducer(std::string name = "Reproducer") : Util::Named(std::move(name)) {};
 
         /**
          * \brief Basic reproduction method replicating individuals

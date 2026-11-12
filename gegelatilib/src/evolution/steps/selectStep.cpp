@@ -24,7 +24,7 @@ std::string Evolution::SelectStep::details() const
     for(const std::string& name: this->candidates) {
         names += (names.empty() ? "" : ", ") + name;
     }
-    return this->selector->getSelectorName() + ", " + std::to_string(this->nbSelected) + (this->distinct ? " distinct" : "") + " from " + names
+    return this->selector->getName() + ", " + std::to_string(this->nbSelected) + (this->distinct ? " distinct" : "") + " from " + names
         + " to " + this->selected;
 }
 

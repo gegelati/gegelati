@@ -1,5 +1,7 @@
 #include "mutation/pointMutator.h"
 
+#include <sstream>
+
 
 void Mutation::PointMutator::mutateNode(GraphBased::GPNode& node, const GraphBased::NodeGenerator& nodeGenerator, RNG::RNG& rng) const
 {
@@ -61,4 +63,11 @@ std::unique_ptr<GraphBased::Genotype> Mutation::PointMutator::mutateGenotype(con
         }
     }
     return std::move(mutatedGenotype);
+}
+
+std::string Mutation::PointMutator::getDetails() const
+{
+    std::ostringstream text;
+    text << this->getName() << "(mutate " << this->pMutateNode << ", add " << this->pAddNode << ", remove " << this->pRemoveNode << ")";
+    return text.str();
 }

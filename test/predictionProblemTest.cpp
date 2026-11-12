@@ -38,11 +38,11 @@ TEST(PredictionProblemTest, dimensions)
 TEST(PredictionProblemTest, name)
 {
     Evaluation::DataSet dataSet = createSmallDataSet();
-    ASSERT_EQ(Evaluation::PredictionProblem(dataSet).getProblemName(), "PredictionProblem");
+    ASSERT_EQ(Evaluation::PredictionProblem(dataSet).getName(), "PredictionProblem");
 
     Evaluation::PredictionProblem problem(dataSet, 3, "SmallDataSet");
-    ASSERT_EQ(problem.getProblemName(), "SmallDataSet");
-    ASSERT_EQ(problem.cloneUniquePtr()->getProblemName(), "SmallDataSet") << "A clone keeps the name";
+    ASSERT_EQ(problem.getName(), "SmallDataSet");
+    ASSERT_EQ(problem.cloneUniquePtr()->getName(), "SmallDataSet") << "A clone keeps the name";
 }
 
 TEST(PredictionProblemTest, seed) 

@@ -53,6 +53,13 @@
             /// @brief clone pattern 
             virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override;
 
+            /// Inherited from Named, adds the number of actions and of members.
+            virtual std::string getDetails() const override
+            {
+                return this->getName() + "(" + std::to_string(this->nbActions) + " actions, " + std::to_string(this->nbMembersMin) + " to "
+                       + std::to_string(this->nbMembersMax) + " members)";
+            }
+
             /**
              * \brief Main Representation constructor.
              * 

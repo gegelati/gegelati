@@ -117,7 +117,7 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
 {
     // Individual need to be valid to be executed.
     if(!valid){
-        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getRepresentationName() + ")");
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getName() + ")");
     }
     if(!inputSources.empty()) {
         if(const Data::DataValue* cached = this->getCachedOutput(inputSources.front().getPtr())) {
@@ -131,7 +131,7 @@ Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSou
 {
     // Individual need to be valid to be executed.
     if(!valid){
-        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getRepresentationName() + ")");
+        throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getName() + ")");
     }
     return this->representation->execute(*this->genotype, inputSources);
 }

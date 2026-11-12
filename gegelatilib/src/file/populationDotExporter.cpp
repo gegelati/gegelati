@@ -10,7 +10,7 @@ bool File::PopulationDotExporter::isIndividual(const Data::DataValue& value) {
 }
 
 std::string File::PopulationDotExporter::nodeName(const Individual* individual) {
-    return individual->getRepresentation().getRepresentationName() + std::to_string(individual->getIndividualID());
+    return individual->getRepresentation().getName() + std::to_string(individual->getIndividualID());
 }
 
 std::string File::PopulationDotExporter::escape(const std::string& text) {

@@ -27,7 +27,7 @@ Evolution::MutateVerticesStep::MutateVerticesStep(std::string individuals, std::
 
 std::string Evolution::MutateVerticesStep::details() const
 {
-    return this->mutator->getMutatorName() + ", " + this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return this->mutator->getName() + ", " + this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
@@ -55,7 +55,7 @@ Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::strin
 
 std::string Evolution::CacheMemberOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem->getName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 // Execute the individuals once on the samples of the evaluation and cache their outputs in them (Individual::cacheOutput).
@@ -140,7 +140,7 @@ Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::strin
 
 std::string Evolution::CacheVertexOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem->getName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 std::vector<std::vector<std::shared_ptr<const Individual>>> Evolution::CacheVertexOutputsStep::getSharedVerticesByHeight(

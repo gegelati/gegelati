@@ -64,6 +64,13 @@ namespace Evaluation {
         PredictionProblem(const DataSet& dataset, uint64_t problemSeed = 0, std::string name = "PredictionProblem")
             : Problem(dataset.getInputDimensions(), dataset.getOutputDimension(), problemSeed, std::move(name)), dataset{dataset} {};
 
+        /// Inherited from Named, adds the number of samples of the dataset.
+        virtual std::string getDetails() const override
+        {
+            return this->getName() + "(" + std::to_string(this->dataset.sizeTraining()) + " training and "
+                   + std::to_string(this->dataset.sizeValidation()) + " validation samples)";
+        }
+
         /// Default destructor for polymorphism
         virtual ~PredictionProblem() = default;
         

@@ -13,6 +13,7 @@
 
 #include "graphBased/genotypeGenerator.h"
 #include "individual.h"
+#include "util/named.h"
 #include "rng/rng.h"
 
 
@@ -20,11 +21,9 @@
     /**
      * \brief Class representing a Mutator.
      */
-    class Mutator
+    class Mutator : public Util::Named
     {
     protected:
-        /// Name of the mutator.
-        std::string mutatorName;
 
     public:
 
@@ -38,12 +37,9 @@
         /**
          * \brief Main Mutator constructor.
          *
-         * \param[in] mutatorName name of the mutator.
+         * \param[in] name name of the mutator, only used to print it (see Util::Named).
          */
-        Mutator(std::string mutatorName = "Mutator") : mutatorName{std::move(mutatorName)} {};
-
-        /// Return the name of the mutator.
-        const std::string& getMutatorName() const { return this->mutatorName; }
+        Mutator(std::string name = "Mutator") : Util::Named(std::move(name)) {};
 
         /**
          * \brief Create a random Node.

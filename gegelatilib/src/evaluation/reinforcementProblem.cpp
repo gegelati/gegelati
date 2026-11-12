@@ -6,7 +6,7 @@
 std::unique_ptr<Evaluation::Problem> Evaluation::ReinforcementProblem::cloneUniquePtr() const
 {
   if(this->env->isCopyable()) {
-    return std::make_unique<Evaluation::ReinforcementProblem>(this->env->cloneSharedPtr(), this->problemSeed, this->problemName);
+    return std::make_unique<Evaluation::ReinforcementProblem>(this->env->cloneSharedPtr(), this->problemSeed, this->getName());
   } else {
     throw std::runtime_error("Evaluation::ReinforcementProblem::cloneUniquePtr: Cannot clone problem with unclonable environment");
   }

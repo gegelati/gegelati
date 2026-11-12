@@ -72,6 +72,13 @@
             /// @brief clone pattern 
             virtual std::unique_ptr<Representation> cloneOnlyRepresentation() const override;
 
+            /// Inherited from Named, adds the number of lines and of registers.
+            virtual std::string getDetails() const override
+            {
+                return this->getName() + "(" + std::to_string(this->nbLinesMin) + " to " + std::to_string(this->nbLinesMax) + " lines, "
+                       + std::to_string(this->registersType.totalElements()) + " registers)";
+            }
+
             /**
              * \brief Main Representation constructor.x
              * 
