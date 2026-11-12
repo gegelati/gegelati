@@ -14,7 +14,7 @@ void GraphBased::NodeConstraint::addConstraint(const Dimensions::Constraint& con
 const Dimensions::Constraint& GraphBased::NodeConstraint::getConstraintAt(size_t idxValue) const
 {
     if(idxValue >= this->constraints.size()) {
-        throw std::runtime_error("Node:NodeRequirements:getRequirementAt: index out of bounds.");
+        throw std::runtime_error("GraphBased::NodeConstraint::getConstraintAt: index out of bounds.");
     }
     return *this->constraints.at(idxValue);
 }

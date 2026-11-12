@@ -8,7 +8,8 @@
 namespace Dimensions {
 
     /**
-     * \brief Class generating a DataValue of numeric type T sampled unfiromly within a specified range.
+     * \brief Generator of individuals (e.g. the members of a TPG) whose mutated individuals behave differently, on the
+     * inputs of the archive, from all the members whose answers are stored in the archive.
      */
     class IndividualValueArchiveGenerator : public IndividualValueGenerator {
         protected:
@@ -17,13 +18,13 @@ namespace Dimensions {
 
         public:
             /**
-             * \brief Constructor for IndividualValueGenerator.
+             * \brief Constructor for IndividualValueArchiveGenerator.
              */
             IndividualValueArchiveGenerator(const Evaluation::DataSet& archive, std::shared_ptr<const Representations::Representation> representation, const Mutation::Mutator& mutator)
             : IndividualValueGenerator(std::move(representation), mutator), archive{archive} {}
 
             /**
-             * \brief Mutate the current genotype.
+             * \brief Mutate the individual until its answers on the archive differ from the ones stored in the archive.
              */
             virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> currentIndiv = currentValue.getScalar<std::shared_ptr<const Individual>>();
@@ -32,7 +33,7 @@ namespace Dimensions {
                 std::unique_ptr<GraphBased::Genotype> genotype;
                 bool isUnique = false;
                 while(!isUnique) {
-                    genotype = mutator.mutateGenotype(currentIndiv->getGenotype(), *generator, rng);
+                    genotype = this->mutator.mutateGenotype(currentIndiv->getGenotype(), *this->generator, rng);
                     this->representation->detectIntronNodes(*genotype);
 
                     std::set<size_t> remainingAnswers;
@@ -54,7 +55,7 @@ namespace Dimensions {
 
                     isUnique = remainingAnswers.empty();
                 }
-                std::shared_ptr<const Individual> mutatedIndiv = std::make_shared<Individual>(representation, std::move(genotype));
+                std::shared_ptr<const Individual> mutatedIndiv = std::make_shared<Individual>(this->representation, std::move(genotype));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(mutatedIndiv);
             }
 
@@ -65,4 +66,4 @@ namespace Dimensions {
     };
 };
 
-#endif // DATA_VALUE_GENERATOR_H
+#endif // INDIVIDUAL_VALUE_ARCHIVE_GENERATOR_H

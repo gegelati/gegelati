@@ -17,12 +17,7 @@ namespace Dimensions {
 
 
     /**
-     * \brief Inclusive numeric bounds for one element type.
-     *
-     * Bounds are stored as T, rather than converted to a common type. This is important
-     * for integer types whose values cannot be represented exactly by floating point.
-     * 
-     * A value is accepted if it is contained in the ranges OR EQUAL to the ranges 
+     * \brief Abstract constraint on the values a data can take (e.g. a NumericRange), checked on top of its DataType.
      */
     struct Constraint {
         /// \brief Destroys the constraint through its polymorphic interface.
@@ -67,7 +62,7 @@ namespace Dimensions {
         /**
          * \brief Return true if the consumer is compatible with the current constraint.
          * 
-         * For Unconstrainted, return true only if the consumer is unconstrained too.
+         * For Unconstrained data, return true only if the consumer is unconstrained too.
          * 
          * \param[in] consumer the constraint checked
          */
@@ -97,22 +92,20 @@ namespace Dimensions {
     /**
      * \brief operator for printing
      */
-    inline std::ostream& operator<<(std::ostream& os, const Constraint& cosntraint) {
-        return os << cosntraint.toString();
+    inline std::ostream& operator<<(std::ostream& os, const Constraint& constraint) {
+        return os << constraint.toString();
     }
 
     
     /**
-     * \brief Comparison function to enable sorting of Individual with
-     * STL.
+     * \brief Return true if both constraints are equal (see Constraint::equals).
      */
     inline bool operator==(const Constraint& a, const Constraint& b) {
         return a.equals(b);
     }
 
     /**
-     * \brief Comparison function to enable sorting of Individual with
-     * STL.
+     * \brief Return true if the constraints differ (see Constraint::equals).
      */
     inline bool operator!=(const Constraint& a, const Constraint& b){
         return !(a == b);

@@ -48,23 +48,23 @@ bool Instructions::Set::add(const Instruction& instruction)
 
 unsigned int Instructions::Set::getNbInstructions() const
 {
-    return (unsigned int)instructions.size();
+    return (unsigned int)this->instructions.size();
 }
 
 const Instructions::Instruction& Instructions::Set::getInstruction(
     const uint64_t i) const
 {
-    return instructions.at(i).get();
+    return this->instructions.at(i).get();
 }
 
 unsigned int Instructions::Set::getMaxNbOperands() const
 {
-    unsigned int res = 0;
+    unsigned int maxNbOperands = 0;
     for (const Instructions::Instruction& instruction : this->instructions) {
-        unsigned int nb = instruction.getNbOperands();
-        res = (nb > res) ? nb : res;
+        unsigned int nbOperands = instruction.getNbOperands();
+        maxNbOperands = (nbOperands > maxNbOperands) ? nbOperands : maxNbOperands;
     }
-    return res;
+    return maxNbOperands;
 }
 
 Instructions::Set Instructions::Set::filterInstructionSet(const std::vector<Data::DataType>& inputRequirements, const Data::DataType& outputRequirement) const
@@ -73,7 +73,7 @@ Instructions::Set Instructions::Set::filterInstructionSet(const std::vector<Data
         throw std::runtime_error("Instructions::Set::filterInstructionSet: cannot filter with empty requirements list.");
     }
     Set filteredSet;
-    for (const Instructions::Instruction& instruction : instructions) {
+    for (const Instructions::Instruction& instruction : this->instructions) {
         if(instruction.handleInputTypes(inputRequirements) && instruction.handleOutputType(outputRequirement)) {
             filteredSet.add(instruction);
         }

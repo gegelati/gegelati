@@ -51,11 +51,11 @@
 namespace Instructions {
     /**
      * \brief This abstract class is the base class for any instruction to be
-     * used in a Program.
+     * used in a program (e.g. the lines of an LGP).
      *
      * An Instruction declares a list of operands it needs to be executed.
-     * This information will be used to fetch the required operands from
-     * any ProgramLine, and to ensure the compatibility of the type of the
+     * This information is used to fetch the required operands from
+     * the lines of a program, and to ensure the compatibility of the type of the
      * fetched operands with the instruction before executing it.
      */
     class Instruction
@@ -156,7 +156,7 @@ namespace Instructions {
         /**
          * \brief Get the list of operand types needed by the Instruction.
          *
-         * \return a const reference on the list of operand type_info of the
+         * \return a const reference on the list of operand DataType of the
          * Instruction.
          */
         const std::vector<Data::DataType>&
@@ -180,8 +180,7 @@ namespace Instructions {
          * \brief Check if a given vector contains elements whose types
          * corresponds to the types of the Instruction operands.
          *
-         * \param[in] arguments a const list of shared pointers to any type of
-         * object. (not doable at compile time)
+         * \param[in] arguments the operands, as views.
          */
         virtual bool checkOperandTypes(
           const std::vector<Data::DataView>& arguments) const;
@@ -190,8 +189,8 @@ namespace Instructions {
          * \brief Execute the Instruction for the given arguments.
          *
          * Derived class should implement their own behavior for this method. In
-         * case of invalid arguments, for type or number or value
-         * reason, this method should always return 0.0.
+         * case of invalid arguments (type or number), this method throws
+         * std::invalid_argument.
          *
          * \param[in] args the vector of typed, borrowed DataView operands.
          * \return an owning typed DataValue result.

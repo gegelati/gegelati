@@ -25,7 +25,7 @@ namespace Data {
     * The implementation deliberately separates the public API from the type-erased
      * storage model:
      * - the public class exposes factories and typed accessors,
-     * - the storage logic lives in DataConcept and concrete models (scalar, 1D, 2D),
+     * - the storage logic lives in DataConcept and concrete models (a scalar or an N-dimensional array),
      * - non-template behavior is kept in the .cpp companion when needed.
      */
     class DataValue : public DataView {
@@ -101,9 +101,9 @@ namespace Data {
          * \brief Creates a DataValue owning an N-dimensional array (row-major).
          *
          * \param[in] values Buffer owning the data (takes ownership), holding the product of the extents.
-         * \param[in] shape Extent of each axis (1 to DataType::MAX_RANK axes).
+         * \param[in] shape Extent of each axis (1 to DataType::MaxRank axes).
          * \return A DataValue owning the array.
-         * \throws std::invalid_argument If the rank is not supported.
+         * \throws std::length_error If there are more than DataType::MaxRank axes.
          */
         template <typename T>
         static DataValue array(std::unique_ptr<T[]> values, std::initializer_list<size_t> shape) {
@@ -117,9 +117,10 @@ namespace Data {
          * \brief Creates a DataValue owning an N-dimensional array (row-major) from a flat range.
          *
          * \param[in] range Flat data, whose size must equal the product of the extents.
-         * \param[in] shape Extent of each axis (1 to DataType::MAX_RANK axes).
+         * \param[in] shape Extent of each axis (1 to DataType::MaxRank axes).
          * \return A DataValue owning a copy of the data.
-         * \throws std::invalid_argument If the size does not match the shape or the rank is not supported.
+         * \throws std::invalid_argument If the size does not match the shape.
+         * \throws std::length_error If there are more than DataType::MaxRank axes.
          */
         template <typename Range>
         static DataValue array(const Range& range, std::initializer_list<size_t> shape) {
@@ -183,7 +184,7 @@ namespace Data {
          * \brief Creates a DataValue of the given shape from a flat range (row-major).
          *
          * \param[in] range Flat data, whose size must equal type.totalElements().
-         * \param[in] type Requested shape (rank 0 to DataType::MAX_RANK); only rank and dimensions are used.
+         * \param[in] type Requested shape (rank 0 to DataType::MaxRank); only rank and dimensions are used.
          * \return A DataValue owning a copy of the data.
          * \throws std::invalid_argument If the size does not match the shape.
          */
@@ -273,7 +274,7 @@ namespace Data {
 
             if (outer_begin == outer_end) {
                 throw std::invalid_argument(
-                    "DataValue::array2dFromRows failed: outer range is empty; no DataValue was created."
+                    "DataValue::array2d failed: outer range is empty; no DataValue was created."
                 );
             }
 
@@ -290,7 +291,7 @@ namespace Data {
                 size_t current_cols = std::distance(std::begin(*it), std::end(*it));
                 if (current_cols != cols) {
                     throw std::invalid_argument(
-                        "DataValue::array2dFromRows failed: all inner ranges must have the same size. "
+                        "DataValue::array2d failed: all inner ranges must have the same size. "
                         "Expected " + std::to_string(cols) + ", got " + std::to_string(current_cols) + "."
                     );
                 }
@@ -316,12 +317,11 @@ namespace Data {
          * \tparam T Element type used for storage.
          * \param[in] dims Dimensions of the required value.
          * \return A zero-initialized owning value.
-         * \throws std::invalid_argument If the requested rank is unsupported.
          */
         static DataValue zeros(const Extents& dims)
         {
             static_assert(std::is_arithmetic_v<T>,
-                "ActivationFunctions::Zero value requires arithmetic values.");
+                "DataValue::zeros requires an arithmetic element type.");
 
             if (dims.empty()) {
                 return DataValue::scalar<T>(T{});
@@ -343,12 +343,11 @@ namespace Data {
          * \brief Creates a zero-initialized scalar value.
          * \tparam T Element type used for storage.
          * \return A zero-initialized owning value.
-         * \throws std::invalid_argument If the requested rank is unsupported.
          */
         static DataValue zeros()
         {
             static_assert(std::is_arithmetic_v<T>,
-                "ActivationFunctions::Zero value requires arithmetic values.");
+                "DataValue::zeros requires an arithmetic element type.");
             return DataValue::scalar<T>(T{});
         }
 
@@ -358,7 +357,6 @@ namespace Data {
          * \tparam T Element type used for storage.
          * \param[in] type Dimensions of the required value.
          * \return A zero-initialized owning value.
-         * \throws std::invalid_argument If the requested rank is unsupported.
          */
         static DataValue zeros(const DataType& type) {
             return zeros<T>(type.dimensions);
@@ -370,7 +368,7 @@ namespace Data {
          * \tparam T Element type used for storage.
          * \param[in] dims Dimensions of the required value.
          * \return A zero-initialized owning value.
-         * \throws std::invalid_argument If the requested rank is unsupported.
+         * \throws std::length_error If there are more than DataType::MaxRank axes.
          */
         static DataValue zeros(std::initializer_list<size_t> dims) {
             return zeros<T>(Extents(dims));
@@ -392,7 +390,7 @@ namespace Data {
          */
         template <typename T>
         DataValue getSubValue(DataType requested, size_t address) const {
-            if (*getType().elementType != typeid(T)) {
+            if (*this->getType().elementType != typeid(T)) {
                 throw std::runtime_error(
                     "DataValue::getSubValue failed: requested element type does not match the value.\n"
                     "Value:\n" + this->toString() + "\n"
@@ -407,15 +405,15 @@ namespace Data {
                 );
             }
 
-            const T* src = static_cast<const T*>(storage->data());
-            const size_t base = getType().offsetOf(address);
+            const T* src = static_cast<const T*>(this->storage->data());
+            const size_t base = this->getType().offsetOf(address);
 
             if (requested.rank == 0) {
                 return DataValue::scalar<T>(src[base]);
             }
 
             auto buffer = std::make_unique<T[]>(requested.totalElements());
-            getType().forEachRun(requested, base, [&](size_t srcOffset, size_t dstOffset, size_t length) {
+            this->getType().forEachRun(requested, base, [&](size_t srcOffset, size_t dstOffset, size_t length) {
                 std::copy(src + srcOffset, src + srcOffset + length, buffer.get() + dstOffset);
             });
             return DataValue(
@@ -443,8 +441,8 @@ namespace Data {
          */
         template <typename T>
         void setScalarAt(T value, size_t address) {
-            const std::type_info* et = this->type.elementType;
-            bool fits = et != nullptr && sameElementType(*et, typeid(T));
+            const std::type_info* elementType = this->type.elementType;
+            bool fits = elementType != nullptr && sameElementType(*elementType, typeid(T));
             if (fits) {
                 switch (this->type.rank) {
                 case 0: fits = (address == 0); break;
@@ -460,9 +458,8 @@ namespace Data {
                 );
             }
 
-            T* dst = static_cast<T*>(storage->data());
-            size_t absOffset = address;
-            dst[absOffset] = value;
+            T* dst = static_cast<T*>(this->storage->data());
+            dst[address] = value;
         }
 
         /** \brief Checks whether the owned buffer and view pointer are valid. */
@@ -487,17 +484,12 @@ namespace Data {
         Data::DataView view() const;
 
         /**
-         * \brief Converts numeric elements and optionally repairs them with a constraint.
-         *
-         * Conversion is performed first. If `constraint` is supplied and does not
-         * accept the converted value, its virtual conversion method repairs the value.
+         * \brief Converts the numeric elements of a value to another numeric type.
          *
          * \tparam S Numeric source type.
          * \tparam D Numeric destination type.
          * \param[in] source Source value to convert.
          * \return A new owning value with the same rank and dimensions.
-         * \throws std::invalid_argument If the source or destination is nonnumeric,
-         * the rank is unsupported, or the constraint returns no value.
          */
         template <typename S, typename D>
         static DataValue convertNumericValue(const DataValue& source) {

@@ -49,7 +49,7 @@
 namespace Instructions {
 
     /**
-     * \brief Templace class for making casting from Instruction to MultByConst
+     * \brief Template class for making casting from Instruction to MultByConst
      * easier. This is usefull because MultByConstant can use multiple types,
      * and avoid having to cast in each specific possible usage of multByConst.
      */
@@ -67,7 +67,7 @@ namespace Instructions {
     class MultByConstant : public Instruction, public IAbstractMultByConstant
     {
         static_assert(std::is_fundamental<T>::value,
-                      "Template class MultByConstParam<> can only be used for "
+                      "Template class MultByConstant<> can only be used for "
                       "primitive types.");
 #ifdef CODE_GENERATION
       public:
@@ -83,7 +83,7 @@ namespace Instructions {
       public:
 #ifndef CODE_GENERATION
         /**
-         *  \brief Constructor for the MultByConstParam class.
+         *  \brief Constructor for the MultByConstant class.
          */
         MultByConstant();
 #endif // CODE_GENERATION
@@ -109,8 +109,8 @@ namespace Instructions {
     MultByConstant<T>::MultByConstant(const std::string& printTemplate)
         : Instruction(printTemplate)
     {
-        setUpOutput();
-        setUpOperand();
+        this->setUpOutput();
+        this->setUpOperand();
     }
 
 #endif // CODE_GENERATION
@@ -118,8 +118,8 @@ namespace Instructions {
 #ifndef CODE_GENERATION
     template <class T> MultByConstant<T>::MultByConstant() : Instruction()
     {
-        setUpOutput();
-        setUpOperand();
+        this->setUpOutput();
+        this->setUpOperand();
     }
 #endif // CODE_GENERATION
     template <class T>

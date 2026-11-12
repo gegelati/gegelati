@@ -29,15 +29,15 @@ Data::DataView Data::DataView::getSubView(const DataType& requested, size_t addr
     );
 }
 
-void Data::DataView::canBeAccess(const std::type_info& type) const {
+void Data::DataView::canBeAccess(const std::type_info& requestedType) const {
     if (!this->ptr) {
         throw std::runtime_error(
             "DataView access failed: the view has no data pointer.\n" + this->toString()
         );
     }
-    if (!sameElementType(*this->type.elementType, type)) {
+    if (!sameElementType(*this->type.elementType, requestedType)) {
         throw std::runtime_error(
-            "DataView access failed: requested element type " + std::string(type.name()) +
+            "DataView access failed: requested element type " + std::string(requestedType.name()) +
             " does not match stored element type " + std::string(this->type.elementType->name()) + ".\n" +
             this->toString()
         );
@@ -47,12 +47,12 @@ void Data::DataView::canBeAccess(const std::type_info& type) const {
 std::unique_ptr<std::byte[]> Data::DataView::deepPtrClone() const
 {
     // Copy the memory covered by the view, from its first to its last element. The layout is kept by the clone.
-    const size_t bytes = type.memorySpan() * type.elementSize;
+    const size_t bytes = this->type.memorySpan() * this->type.elementSize;
 
     auto storage = std::make_unique<std::byte[]>(bytes);
 
     const auto* source =
-        static_cast<const std::byte*>(ptr);
+        static_cast<const std::byte*>(this->ptr);
 
     std::memcpy(storage.get(), source, bytes);
 
@@ -93,8 +93,8 @@ std::string Data::DataView::toString(std::string prefix) const {
     std::ostringstream oss;
 
     oss << prefix << "DataView{\n"
-        << prefix << "\tPointer   = " << ptr << ",\n"
-        << prefix << "\tDataType  = " << type.toString() << "\n"
+        << prefix << "\tPointer   = " << this->ptr << ",\n"
+        << prefix << "\tDataType  = " << this->type.toString() << "\n"
         << prefix << "}";
 
     return oss.str();

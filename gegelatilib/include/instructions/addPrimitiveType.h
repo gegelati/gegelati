@@ -94,8 +94,8 @@ namespace Instructions {
 #ifndef CODE_GENERATION
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
     {
-        setUpOutput();
-        setUpOperand();
+        this->setUpOutput();
+        this->setUpOperand();
     }
 #endif // CODE_GENERATION
     template <class T>
@@ -115,8 +115,8 @@ namespace Instructions {
     AddPrimitiveType<T>::AddPrimitiveType(const std::string& printTemplate)
         : Instruction(printTemplate)
     {
-        setUpOutput();
-        setUpOperand();
+        this->setUpOutput();
+        this->setUpOperand();
     }
 #endif // CODE_GENERATION
 

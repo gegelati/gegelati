@@ -15,10 +15,10 @@ namespace Evaluation {
     class DataSet {
 
         protected:
-            /// @brief Storage of the data
+            /// @brief Training samples: the inputs and the expected output of each sample.
             std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> trainingData;
-            /// @brief Storage of the data
-            std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> validationgData;
+            /// @brief Validation samples: the inputs and the expected output of each sample.
+            std::vector<std::pair<std::vector<Data::DataValue>, Data::DataValue>> validationData;
 
             /// Input dimensions
             std::vector<Dimensions::Requirement> inputDimensions;
@@ -53,12 +53,12 @@ namespace Evaluation {
                 };
 
             /**
-             * \brief get the input dimensions of the Problem.
+             * \brief get the input dimensions of the dataset.
              */
             virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
             /**
-             * \brief get the output dimension of the Problem.
+             * \brief get the output dimension of the dataset.
              */
             virtual const Dimensions::Requirement& getOutputDimension() const;
 
@@ -69,7 +69,7 @@ namespace Evaluation {
              * \param[in] output the corresponding output
              * \param[in] training boolean indicating if the training data (or validation) should be considered
              * 
-             * \throw if either the inputs or output are not compatible with the dimensions.
+             * \throw std::runtime_error if either the inputs or output are not compatible with the dimensions.
              */
             virtual void addData(std::vector<Data::DataValue> inputs, Data::DataValue output, bool training=true);
 

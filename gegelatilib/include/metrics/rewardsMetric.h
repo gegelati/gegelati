@@ -11,7 +11,7 @@
 namespace Metrics {
 
     /**
-     * \brief Abstract class to extract any metrics from either the individual or the environment during an evaluation run.
+     * \brief Metric summing the rewards given by a reinforcement environment during an evaluation.
      */
     class RewardsMetric: public ScalarMetric
     {
@@ -29,7 +29,7 @@ namespace Metrics {
         virtual std::unique_ptr<Metric> cloneEmptyPtr() const override;
 
         /**
-         * \brief if currentHash == Hash, extract reward, else set currentHash to hash and return (we don't extract reward at step 0)
+         * \brief Add the reward of the last action, given by the environment before each step.
          *
          * \param[in] hash unique hash identifying the evaluation.
          * \param[in] individual the individual performing a step.
@@ -60,7 +60,7 @@ namespace Metrics {
         virtual std::string toString(std::string prefix = "") const override;
 
         /**
-         * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
+         * \brief return the static hash of a rewards metric (equal for all rewards metrics since there is no hyperparameter)
          */
         static uint64_t staticHash();
     };

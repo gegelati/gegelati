@@ -23,8 +23,6 @@ namespace Dimensions {
      * comparison operators on arbitrary DataType values.
      */
     class Requirement {
-    public:
-
     private:
         /// \brief Structural type required by this requirement.
         Data::DataType dataType;
@@ -47,7 +45,6 @@ namespace Dimensions {
          * \brief Creates a requirement with a value constraint.
          * \param[in] dataType Required shape and element type.
          * \param[in] constraint Constraint that values must satisfy.
-         * \throws std::invalid_argument If the constraint cannot be cloned.
          */
         Requirement(Data::DataType dataType, const Constraint& constraint)
             : dataType(std::move(dataType)), constraint(constraint.cloneSharedPtr()) {}
@@ -62,7 +59,7 @@ namespace Dimensions {
 
         /** \brief Returns the required shape and element type. */
         const Data::DataType& getDataType() const noexcept {
-            return dataType;
+            return this->dataType;
         }
 
         /**
@@ -72,15 +69,15 @@ namespace Dimensions {
          */
         bool accepts(const Data::DataView& view) const {
             return view.getElementType() == *this->dataType.elementType && 
-                   view.getType().canFitIn(dataType) && 
-                   constraint->accepts(view);
+                   view.getType().canFitIn(this->dataType) &&
+                   this->constraint->accepts(view);
         }
 
         /** \brief Checks whether this producer requirement satisfies a consumer requirement. */
         bool isCompatibleWith(const Requirement& consumer) const noexcept {
-            return *dataType.elementType == *consumer.getDataType().elementType && 
-                   dataType.canFitIn(consumer.dataType, 0) &&
-                   constraint->isCompatibleWith(*consumer.constraint);
+            return *this->dataType.elementType == *consumer.getDataType().elementType &&
+                   this->dataType.canFitIn(consumer.dataType, 0) &&
+                   this->constraint->isCompatibleWith(*consumer.constraint);
         }
 
         /** \brief Compares both structural type and value constraint.
@@ -88,7 +85,7 @@ namespace Dimensions {
          * \return `true` when both requirements are equivalent.
          */
         bool operator==(const Requirement& other) const noexcept {
-            return dataType == other.dataType && constraint->equals(*other.constraint);
+            return this->dataType == other.dataType && this->constraint->equals(*other.constraint);
         }
 
         /** \brief Checks whether two requirements differ.
@@ -101,17 +98,17 @@ namespace Dimensions {
 
         /** \brief Returns the value constraint associated with this requirement. */
         const Constraint& getConstraint() const noexcept {
-            return *constraint;
+            return *this->constraint;
         }
 
         /** \brief Returns a diagnostic string containing the type and constraint. */
         std::string toString() const {
-            return "Requirement{\n\t" + dataType.toString() + ",\n\tRequirement: " + constraint->toString() + "\n}";
+            return "Requirement{\n\t" + this->dataType.toString() + ",\n\tRequirement: " + this->constraint->toString() + "\n}";
         }
 
         /** \brief Renders the requirement in a compact model-summary format. */
         std::string summary() const {
-            return dataType.summary() + " in " + constraint->toString();
+            return this->dataType.summary() + " in " + this->constraint->toString();
         }
 
         /**
@@ -150,6 +147,6 @@ namespace Dimensions {
     }
 
 
-} // namespace Data
+} // namespace Dimensions
 
 #endif // DATA_REQUIREMENT_H

@@ -65,7 +65,7 @@ void Evaluation::PredictionProblem::extractMetrics(
     // Extract before execution (ex: for time measurement)
     metrics.extractBeforeExecution(hash, individual, inputSources, *this);
 
-    // excute indiviudal
+    // Execute the individual
     Data::DataValue executionReturn = individual.execute(inputSources);
 
     // extract after execution

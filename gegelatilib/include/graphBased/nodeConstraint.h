@@ -8,9 +8,9 @@
  namespace GraphBased {
 
     /**
-     * \brief class representation the constraint of a GPNode.
-     * 
-     * The class is essentially composed on a vector of constraints and a vector of generators.
+     * \brief class representing the constraint of a GPNode.
+     *
+     * The class is essentially composed of a vector of constraints, one per value of the node.
      */
     class NodeConstraint {
 
@@ -27,16 +27,16 @@
 
 
             /**
-             * @brief Add a new constraint and generator to the constraint.
-             * 
-             * \param constraint the constraint to add to the constraint.
+             * @brief Add the constraint of the next value of the node.
+             *
+             * \param constraint the constraint added.
              */
             void addConstraint(std::shared_ptr<const Dimensions::Constraint> constraint);
 
             /**
-             * @brief Add a new constraint and generator to the constraint.
-             * 
-             * \param constraint the constraint to add to the constraint.
+             * @brief Add the constraint of the next value of the node.
+             *
+             * \param constraint the constraint added.
              */
             void addConstraint(const Dimensions::Constraint& constraint);
 
@@ -53,7 +53,7 @@
             size_t size() const;
 
             /**
-             * \brief Clone method returning the same shared pointer of constraints and dupplicated unique pointer of generators
+             * \brief Clone method sharing the constraints.
              */
             std::unique_ptr<NodeConstraint> cloneUniquePtr() const;
     };

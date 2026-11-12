@@ -84,7 +84,7 @@ struct CounterReset;
              * Create a GPNode with uniform type T.
              * 
              * \tparam T Element type used the node values.
-             * \param[in] valuesTyped the integer values of the GPNode.
+             * \param[in] valuesTyped the values of the GPNode.
              * \param[in] isIntron wether the node is intron or not, default value is false.
              */
             template <typename T>
@@ -96,7 +96,7 @@ struct CounterReset;
             };
 
             /**
-             * \brief return the ID of the GPNode.
+             * \brief Return the current value of the GPNode ID counter, the ID of the next GPNode.
              */
             static size_t getGPNodeIDCounter();
             

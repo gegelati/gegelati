@@ -37,23 +37,23 @@
 
 void RNG::RNG::setSeed(uint64_t seed)
 {
-    engine->seed(seed);
+    this->engine->seed(seed);
 }
 
 uint64_t RNG::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
 {
     uniform_int_distribution<uint64_t> distribution(min, max);
-    return distribution(*engine);
+    return distribution(*this->engine);
 }
 
 int32_t RNG::RNG::getInt32(int32_t min, int32_t max)
 {
     uniform_int_distribution<int32_t> distribution(min, max);
-    return distribution(*engine);
+    return distribution(*this->engine);
 }
 
 double RNG::RNG::getDouble(double min, double max)
 {
     uniform_real_distribution<double> distribution(min, max);
-    return distribution(*engine);
+    return distribution(*this->engine);
 }

@@ -128,7 +128,7 @@ bool Instruction::isPrintable() const
 
 const std::string& Instruction::getPrintTemplate() const
 {
-    return printTemplate;
+    return this->printTemplate;
 }
 
 std::string Instruction::getPrintablePrimitiveOperandType(

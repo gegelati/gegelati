@@ -25,7 +25,7 @@ void Metrics::RewardsMetric::extractionEnd(
     const Evaluation::Problem& problem) 
 {
     if(dynamic_cast<const Evaluation::ReinforcementProblem*>(&problem) == nullptr) {
-        throw std::runtime_error ("Metrics::RewardsMetric::extractionEndAndComputeMetric: feature can only be extracted on a reinforcementProblem");
+        throw std::runtime_error ("Metrics::RewardsMetric::extractionEnd: feature can only be extracted on a reinforcementProblem");
     }
     this->values[0] += dynamic_cast<const Evaluation::ReinforcementProblem&>(problem).getEnvironment().getLastReward();
 }

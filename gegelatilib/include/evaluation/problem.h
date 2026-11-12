@@ -51,7 +51,7 @@
 
 namespace Evaluation {
 
-    /// @brief Modes
+    /// @brief Mode of an evaluation: the data (or the conditions) used by the problem.
     enum class Mode
     {
         TRAINING,
@@ -66,8 +66,7 @@ namespace Evaluation {
      */
     std::string modeName(Mode mode);
     /**
-     * \brief Class used to control the learning steps of a Graph within
-     * a given Problem.
+     * \brief Base class of the problems in which the individuals are evaluated (e.g. a prediction on a dataset, or a reinforcement environment).
      */
     class Problem : public Util::Named
     {
@@ -109,7 +108,7 @@ namespace Evaluation {
 
         /**
          * \brief Can the Problem be copy constructed to evaluate
-         * several LearningAgent in parallel.
+         * several individuals in parallel.
          *
          * \return true if the Problem can be copied and run in
          * parallel. Default implementation returns false.
@@ -117,12 +116,12 @@ namespace Evaluation {
         virtual bool isCopyable() const;
 
         /**
-         * \brief get the input dimensions of the EvaluationAgent.
+         * \brief get the input dimensions of the problem.
          */
         virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
-         * \brief get the output dimension of the EvaluationAgent.
+         * \brief get the output dimension of the problem.
          */
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
@@ -137,7 +136,7 @@ namespace Evaluation {
         uint64_t getProblemSeed() const;    
 
         /**
-         * \brief compute the hashes used the evaluation.
+         * \brief Compute the hashes identifying the evaluations of an individual, one per iteration.
          */
         virtual std::set<uint64_t> computeEvaluationHashes(
             uint64_t nbIterations, uint64_t generationNumber, Mode mode,
@@ -149,7 +148,7 @@ namespace Evaluation {
          * Must be implemented by each problem: it executes the individual on the evaluations
          * identified by the hashes, and extracts the metrics from the metric map template.
          *
-         * \param[in] individual The individual whose genotype is evaluted.
+         * \param[in] individual The individual whose genotype is evaluated.
          * \param[in] metrics list of metrics to extract from the individual.
          * \param[in] hashes list of hash to use to set the seed of the evaluation
          */
@@ -158,6 +157,6 @@ namespace Evaluation {
             const std::set<uint64_t>& hashes) const = 0;
 
     };
-}; // namespace Learn
+}; // namespace Evaluation
 
 #endif

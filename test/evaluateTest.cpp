@@ -95,7 +95,6 @@ TEST(EvaluateTest, evaluateIndividualsOnClassif)
     uint64_t hash0 = *it;
     it++;
     uint64_t hash1 = *it;
-
     std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indivID)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
     ASSERT_EQ(inputMetrics.size(), 2) << "There should be two input metrics";
     ASSERT_TRUE(inputMetrics.find(hash0) != inputMetrics.end()) << "Input metric should contain the first evaluation hash";

@@ -6,7 +6,7 @@
  namespace Selection {
 
     /**
-     * \brief Class representing the mu plus lambda selection mechanism used for surviving selection
+     * \brief Selector choosing random individuals, whatever their fitness.
      */
     class RandomSelector : public Selector {
 

@@ -145,7 +145,7 @@ Data::DataValue Representations::LGP::executeGenotype(
 
         size_t nbOperands = instruction.getNbOperands();
         for(size_t idxOp = 0; idxOp < nbOperands; idxOp++){
-            size_t nodeIndex = idxOp * 2 + 2; // +2 is to ignore output and function index, then times too for both type and index
+            size_t nodeIndex = idxOp * 2 + 2; // +2 is to ignore output and function index, then times two for both type and index
     
             size_t inputType = node.getValue(nodeIndex).getScalar<size_t>();
             size_t inputIndex = node.getValue(nodeIndex + 1).getScalar<size_t>();
@@ -172,18 +172,6 @@ Data::DataValue Representations::LGP::executeGenotype(
     }
 
 
-    // GetOutput
-    //Data::DataValue output = registers.getSubValue<double>(Data::DataType::array1d<double>(this->nbOutputRegisters), 0);
-    
-    
-    // Replace Nan values by -inf.
-    /*std::shared_ptr<const double[]> values = registers.getData<double>();
-    for(size_t idx = 0; idx < this->nbOutputRegisters; idx++) {
-        if(std::isnan(values[idx])) {
-            registers.setScalarAt<double>(-std::numeric_limits<double>::infinity(), idx);
-        }
-    }*/
-    
-    // Return value of first register
+    // Return the output registers
     return registers.getSubValue<double>(this->outputRegistersType, 0);
 }

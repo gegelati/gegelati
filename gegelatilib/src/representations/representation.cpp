@@ -16,7 +16,7 @@ void Representations::Representation::addOutputFunction(std::unique_ptr<Dimensio
 {
     this->dimensionFlow.addLayer(function->name(), function->inputDimensions(), function->outputDimension());
     if(!this->dimensionFlow.isValid()) {
-        throw std::runtime_error("Representations::Representation::addOutputFunction: Function " + function->name() +" cannot be add to current flow: " + this->dimensionFlow.summary());
+        throw std::runtime_error("Representations::Representation::addOutputFunction: Function " + function->name() +" cannot be added to current flow: " + this->dimensionFlow.summary());
     }
     this->outputFunctions.push_back(std::move(function));
     

@@ -82,7 +82,7 @@ size_t Data::DataType::offsetOf(size_t address) const noexcept
     return offset;
 }
 
-size_t Data::DataType::requestedExtent(const Data::DataType& requested, size_t rank, size_t k) const noexcept
+size_t Data::DataType::requestedExtent(const Data::DataType& requested, size_t rank, size_t axis) const noexcept
 {
     // A scalar request occupies one element along every axis.
     if (requested.rank == 0) {
@@ -93,11 +93,11 @@ size_t Data::DataType::requestedExtent(const Data::DataType& requested, size_t r
     // For example, [3, 4] aligned with [2, 3, 4] becomes [1, 3, 4].
     size_t padding = rank - requested.rank;
 
-    if (k < padding) {
+    if (axis < padding) {
         return 1;
     }
 
-    return requested.dimensions[k - padding];
+    return requested.dimensions[axis - padding];
 }
 
 bool Data::DataType::canFitIn(const DataType& requested, size_t address) const noexcept

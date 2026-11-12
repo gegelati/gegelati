@@ -59,7 +59,7 @@ Data::DataValue Representations::TPG::executeGenotype(
         }
     }
 
-    // Same as before: when no bid beats -inf, the first effective node wins (at() throws if none).
+    // When no bid beats -inf, the first effective node wins. A genotype without effective node cannot be executed.
     if(firstEffective == nullptr) {
         throw std::out_of_range("Representations::TPG::executeGenotype: no effective node.");
     }

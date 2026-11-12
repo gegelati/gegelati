@@ -14,7 +14,7 @@ class Stopwatch
          * @brief Constructs a stopwatch and starts measuring elapsed time.
          */
         Stopwatch() { 
-            reset(); 
+            this->reset(); 
         }
 
         /**

@@ -37,7 +37,7 @@ void GraphBased::NodeGroup::removeNode(size_t index)
 void GraphBased::NodeGroup::setNode(std::unique_ptr<GPNode> node, size_t index)
 {
     if(index >= this->getSize()){
-        throw std::runtime_error("GraphBased::NodeGroup::getMutableNode: index out of range.");
+        throw std::runtime_error("GraphBased::NodeGroup::setNode: index out of range.");
     }
     this->nodes[index] = std::move(node);
 }

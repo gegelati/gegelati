@@ -126,10 +126,10 @@ namespace RNG {
           // If type is float, use uniform real, else uniform int
           if constexpr (std::is_floating_point_v<T>) {
               uniform_real_distribution<T> distribution(min, max);
-              return distribution(*engine);
+              return distribution(*this->engine);
           } else {
               uniform_int_distribution<T> distribution(min, max);
-              return distribution(*engine);
+              return distribution(*this->engine);
           }
         }
     };

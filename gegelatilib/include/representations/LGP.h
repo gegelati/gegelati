@@ -11,7 +11,7 @@
  namespace Representations {
 
     /**
-     * \brief Abstract class representing a LGP
+     * \brief Linear Genetic Programming representation: a genotype is a list of instructions writing in registers.
      */
     class LGP : public Representation
     {
@@ -20,10 +20,10 @@
             /// Instruction Set used by the LGP
             Instructions::Set iSet;
 
-            /// The number of registers required to output a value.
+            /// Type of the registers output by the LGP (the first registers).
             Data::DataType outputRegistersType;
 
-            /// The register values dupplicated during LGP individual execution
+            /// Type of the registers, the memory written by the instructions during an execution.
             Data::DataType registersType;
 
             /**
@@ -80,16 +80,16 @@
             }
 
             /**
-             * \brief Main Representation constructor.x
+             * \brief Main LGP constructor.
              * 
              * \param[in] inputDimensions for the representation
              * \param[in] registersType the register used by the LGP.
              * \param[in] iSet the Instruction Set used by the LGP.
-             * \param[in] outputRegistersType number of output registers to create the outputDimension
+             * \param[in] outputRegistersType type of the output registers, the output of the LGP.
              * \param[in] nbLinesMin the minimum number of lines in the representation.
              * \param[in] nbLinesMax the maximum number of lines in the representation.
              * \param[in] representationName name of the representation used.
-             * \param[in] representationColor name of the representation used.
+             * \param[in] representationColor color of the representation in the dot files.
              */
             LGP(const std::vector<Dimensions::Requirement>& inputDimensions, const Data::DataType& registersType, const Instructions::Set& iSet, const Data::DataType& outputRegistersType, size_t nbLinesMin, size_t nbLinesMax = 0, std::string representationName = "LGP", std::string representationColor = "#922DB4")
                 : Representation(
@@ -122,7 +122,7 @@
             void detectIntronNodes(GraphBased::Genotype& genotype) const override;
 
     };
-}; // namespace LGP_Representation
+}; // namespace Representations
 
 
-#endif // REPRESENTATION_LGP_H
+#endif // REPRESENTATIONS_LGP_H

@@ -19,7 +19,7 @@ Data::DataValue Data::DataValue::clone() const
 
 
 void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) {
-    if (!Data::sameElementType(*type.elementType, *value.type.elementType)) {
+    if (!Data::sameElementType(*this->type.elementType, *value.type.elementType)) {
         throw std::runtime_error(
             "Data::DataValue::setSubValue failed: source and destination element types differ.\n"
             "Destination:\n" + this->toString() + "\n"
@@ -38,13 +38,13 @@ void Data::DataValue::setSubValue(const Data::DataValue& value, size_t address) 
     }
 
     // Copy the source value run by run, respecting the strides of the destination layout.
-    const size_t base = type.offsetOf(address);
-    const size_t elementSize = type.elementSize;
+    const size_t base = this->type.offsetOf(address);
+    const size_t elementSize = this->type.elementSize;
 
     const char* src = static_cast<const char*>(value.storage->data());
-    char* dst = static_cast<char*>(storage->data());
+    char* dst = static_cast<char*>(this->storage->data());
 
-    type.forEachRun(requested, base, [&](size_t dstOffset, size_t srcOffset, size_t length) {
+    this->type.forEachRun(requested, base, [&](size_t dstOffset, size_t srcOffset, size_t length) {
         std::copy(
             src + srcOffset * elementSize,
             src + (srcOffset + length) * elementSize,
@@ -57,7 +57,7 @@ std::string Data::DataValue::toString(std::string prefix) const {
 
     std::ostringstream oss;
     oss << prefix << "Data::DataValue{\n"
-        << prefix << "\tValue     = " << storage->toString() << "\n"
+        << prefix << "\tValue     = " << this->storage->toString() << "\n"
         << prefix << "\tDataType  =  " << this->type.toString() <<",\n"
         << prefix << "}";
 
@@ -66,16 +66,16 @@ std::string Data::DataValue::toString(std::string prefix) const {
 
 std::string Data::DataValue::toShortString(std::string prefix) const {
     std::ostringstream oss;
-    oss << prefix << "Data=" <<storage->toString()<< ", type=" << DEMANGLE_TYPEID_NAME(this->getElementType().name()) << "";
+    oss << prefix << "Data=" << this->storage->toString() << ", type=" << DEMANGLE_TYPEID_NAME(this->getElementType().name()) << "";
     return oss.str();
 }
 
 std::string Data::DataValue::toValueString() const {
-    return storage->toString();
+    return this->storage->toString();
 }
 
 Data::DataValue::operator bool() const noexcept {
-    return static_cast<bool>(storage);
+    return static_cast<bool>(this->storage);
 }
 
 bool Data::DataValue::operator==(const Data::DataValue& other) const noexcept

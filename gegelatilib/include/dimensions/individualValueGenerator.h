@@ -10,7 +10,8 @@
 namespace Dimensions {
 
     /**
-     * \brief Class generating a DataValue of numeric type T sampled unfiromly within a specified range.
+     * \brief Generator of individuals as values of nodes (e.g. the members of a TPG): a new value is a random individual
+     * of a representation, and a mutation mutates the genotype of the individual.
      */
     class IndividualValueGenerator : public DataValueGenerator {
         protected:
@@ -32,20 +33,20 @@ namespace Dimensions {
               mutator(mutator) {}
 
             /**
-             * \brief Sample method creating a DataValue of type T within the specified range.
+             * \brief Create a random individual of the representation.
              */
             virtual Data::DataValue initialize(RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> indiv = std::make_shared<Individual>(
-                    representation, 
-                    mutator.initRandomGenotype(*generator, rng));
+                    this->representation,
+                    this->mutator.initRandomGenotype(*this->generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(indiv);
             }
 
             virtual Data::DataValue mutate(const Data::DataValue& currentValue, RNG::RNG& rng) const override {
                 std::shared_ptr<const Individual> currentIndiv = currentValue.getScalar<std::shared_ptr<const Individual>>();
                 std::shared_ptr<const Individual> mutatedIndiv = std::make_shared<Individual>(
-                    representation, 
-                    mutator.mutateGenotype(currentIndiv->getGenotype(), *generator, rng));
+                    this->representation,
+                    this->mutator.mutateGenotype(currentIndiv->getGenotype(), *this->generator, rng));
                 return Data::DataValue::scalar<std::shared_ptr<const Individual>>(mutatedIndiv);
             }
 
@@ -56,4 +57,4 @@ namespace Dimensions {
     };
 };
 
-#endif // DATA_VALUE_GENERATOR_H
+#endif // INDIVIDUAL_VALUE_GENERATOR_H

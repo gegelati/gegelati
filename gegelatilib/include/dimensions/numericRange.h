@@ -83,8 +83,8 @@ namespace Dimensions {
          * \return `true` when the value is accepted.
          */
         bool contains(const T& value) const noexcept {
-            return (!minimum || value >= *minimum) &&
-                   (!maximum || value <= *maximum);
+            return (!this->minimum || value >= *this->minimum) &&
+                   (!this->maximum || value <= *this->maximum);
         }
 
         /** \brief Checks whether every element in a view is within this range.
@@ -98,12 +98,12 @@ namespace Dimensions {
             }
 
             if (view.getRank() == 0) {
-                return contains(view.getScalar<T>());
+                return this->contains(view.getScalar<T>());
             }
 
             auto values = view.getData<T>();
             for (size_t index = 0; index < view.getType().totalElements(); ++index) {
-                if (!contains(values[index])) {
+                if (!this->contains(values[index])) {
                     return false;
                 }
             }
@@ -118,9 +118,9 @@ namespace Dimensions {
             }
 
             const bool minimumCompatible = !numeric->minimum ||
-                (minimum && *minimum >= *numeric->minimum);
+                (this->minimum && *this->minimum >= *numeric->minimum);
             const bool maximumCompatible = !numeric->maximum ||
-                (maximum && *maximum <= *numeric->maximum);
+                (this->maximum && *this->maximum <= *numeric->maximum);
             return minimumCompatible && maximumCompatible;
         }
 
@@ -130,8 +130,8 @@ namespace Dimensions {
          */
         bool equals(const Constraint& other) const override {
             const auto* numeric = dynamic_cast<const NumericRange*>(&other);
-            return numeric != nullptr && minimum == numeric->minimum &&
-                   maximum == numeric->maximum;
+            return numeric != nullptr && this->minimum == numeric->minimum &&
+                   this->maximum == numeric->maximum;
         }
 
         /// \brief Returns a shared deep copy of this range.
@@ -145,26 +145,26 @@ namespace Dimensions {
          */
         std::unique_ptr<DataValueGenerator> makeGenerator() const override {
             static std::atomic<bool> warned{false};
-            if ((!minimum || !maximum) && !warned.exchange(true)) {
-                std::cerr << "Warning: Dimensions::NumericRange::makeGenerator: " << toString()
+            if ((!this->minimum || !this->maximum) && !warned.exchange(true)) {
+                std::cerr << "Warning: Dimensions::NumericRange::makeGenerator: " << this->toString()
                           << " has a missing bound, the generator uses the other bound or 0. Give a generator to get other values." << std::endl;
             }
-            const T low = minimum.value_or(maximum.value_or(T{}));
-            return std::make_unique<NumericUniformGenerator<T>>(low, maximum.value_or(low));
+            const T low = this->minimum.value_or(this->maximum.value_or(T{}));
+            return std::make_unique<NumericUniformGenerator<T>>(low, this->maximum.value_or(low));
         }
 
         /// \brief Returns the inclusive bounds as a diagnostic string.
         std::string toString() const override {
             std::ostringstream result;
             result << "Numeric Range: [";
-            if (minimum) {
-                result << *minimum;
+            if (this->minimum) {
+                result << *this->minimum;
             } else {
                 result << "-inf";
             }
             result << ", ";
-            if (maximum) {
-                result << *maximum;
+            if (this->maximum) {
+                result << *this->maximum;
             } else {
                 result << "+inf";
             }

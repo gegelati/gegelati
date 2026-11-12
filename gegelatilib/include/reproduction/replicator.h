@@ -9,7 +9,7 @@
 
  namespace Reproduction {
     /**
-     * \brief Class representing a Reproduction.
+     * \brief Reproducer creating the offspring as copies of random parents.
      */
     class Replicator : public Reproducer
     {

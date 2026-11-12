@@ -47,10 +47,7 @@
 #include "util/counterReset.h"
 #include "file/populationDotExporter.h"
 
-namespace {
-}
-// Set all file in comment
-
+#ifndef NDEBUG
 class TPGAlgoTest : public ::testing::Test
 {
   protected:
@@ -440,6 +437,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     EXPECT_EQ(13348146703180701991U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     EXPECT_EQ(62131, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 }
+
+#endif
 
 #ifdef GEGELATI_WITH_OPENCV
 

@@ -120,6 +120,6 @@ namespace Dimensions {
             const std::vector<Requirement>& required);
     };
 
-} // namespace Evolution
+} // namespace Dimensions
 
-#endif // CONTROL_FLOW_H
+#endif // DIMENSION_FLOW_H

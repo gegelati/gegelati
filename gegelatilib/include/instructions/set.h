@@ -111,7 +111,7 @@ namespace Instructions {
          * An instruction is copied in the clone only if it handle at least one of the required types.
          * 
          * \param[in] inputRequirements vector of the necessary types.
-         * \param[in] outputRequirement vector of the necessary types.
+         * \param[in] outputRequirement the type the instructions must be able to output.
          */
         Set filterInstructionSet(const std::vector<Data::DataType>& inputRequirements, const Data::DataType& outputRequirement) const;
     };

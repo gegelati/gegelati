@@ -112,14 +112,14 @@
             virtual std::vector<size_t> getSizes() const;
 
             /**
-             * \brief Get the NodeGroups of the Individual.
-             * 
-             * \return a reference to the vector of unique pointers to NodeGroup representing the genotype of the Individual.
+             * \brief Get the NodeGroups of the genotype.
+             *
+             * \return references to the node groups, in order.
              */
             virtual std::vector<std::reference_wrapper<const NodeGroup>> getNodeGroups() const;
 
             /**
-             * \brief Get the effective genotype of the Individual: the non-intron GPNodes.
+             * \brief Get the effective genotype: the non-intron GPNodes.
              * 
              * \return a vector of vector for each non-intron node of each node group of the genotype.
              */

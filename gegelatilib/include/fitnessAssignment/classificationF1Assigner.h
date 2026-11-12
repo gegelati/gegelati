@@ -28,10 +28,10 @@
             explicit ClassificationF1Assigner(std::string name = "ClassificationF1Assigner") : Assigner(std::move(name)) {};
             
             /**
-             * \brief method ranking the individuals based on their average metric value over iterations in classification tasks
+             * \brief Compute the macro-averaged F1 score of each individual from its prediction metrics (see Metrics::PredictionMetric).
              * 
              * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
-             * \param[in] metricHash the hash of the required metric.
+             * \param[in] metricHash unused: the prediction metrics are read.
              * \return the fitness of each individual, indexed by individual ID.
              */
             virtual std::map<uint64_t, double> assignFitness(

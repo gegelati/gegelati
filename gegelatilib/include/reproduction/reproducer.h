@@ -10,7 +10,7 @@
 
  namespace Reproduction {
     /**
-     * \brief Class representing a Reproduction.
+     * \brief Base class of the methods creating offspring from parents.
      */
     class Reproducer : public Util::Named
     {
@@ -33,7 +33,7 @@
         Reproducer(std::string name = "Reproducer") : Util::Named(std::move(name)) {};
 
         /**
-         * \brief Basic reproduction method replicating individuals
+         * \brief Create offspring from parents.
          * 
          * \param[in] parents the parents reproduced
          * \param[in] nbOffspring the number of offspring created.

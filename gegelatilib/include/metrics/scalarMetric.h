@@ -24,7 +24,7 @@ namespace Metrics {
         ScalarMetric(const Dimensions::NumericRange<double>& range = Dimensions::NumericRange<double>::unbounded()) : VectorMetric(1, range) {};
 
         /**
-         * \brief Return the score of the metric.s
+         * \brief Return the score of the metric.
          */
         virtual double getValue() const;
 

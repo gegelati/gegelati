@@ -20,7 +20,7 @@ namespace Dimensions
          * \brief Abstract base class for activation functions used to transform DataValues.
          */
         struct Function {
-             /// \brief Destroys the constraint through its polymorphic interface.
+             /// \brief Destroys the function through its polymorphic interface.
             virtual ~Function() = default;
 
             /// \brief The output requirement of the activation function.
@@ -51,13 +51,13 @@ namespace Dimensions
              * \brief Returns the output dimension requirement.
              * \return A reference to the output Requirement.
              */
-            virtual const Requirement& outputDimension() const {return output;}
+            virtual const Requirement& outputDimension() const {return this->output;}
 
             /**
              * \brief Returns the input dimension requirements.
              * \return A reference to the list of input Requirements.
              */
-            virtual const std::vector<Requirement>& inputDimensions() const {return inputs;}
+            virtual const std::vector<Requirement>& inputDimensions() const {return this->inputs;}
 
             /**
              * \brief return the name of the function
@@ -65,10 +65,6 @@ namespace Dimensions
             virtual std::string name() const  = 0;
         };
 
-            /**
-             * \brief Returns the name of the activation function.
-             * \return The name of the function as a string.
-             */
          /**
           * \brief Hyperbolic tangent (Tanh) activation function scaling values to the range (-1, 1).
           * \tparam T Floating-point type used for the calculation.
@@ -257,7 +253,8 @@ namespace Dimensions
             );
 
         private:
-            std::vector<size_t> axes_;
+            /// \brief Axes reduced by the sum, empty for a global sum.
+            std::vector<size_t> axes;
 
             /**
              * \brief Computes the output DataType and validates the reduction axes.
@@ -320,7 +317,7 @@ namespace Dimensions
                     {input},
                     Requirement(makeOutputType(input.getDataType(), axes), NumericRange<double>::unbounded())
                 ),
-                axes_(std::move(axes)) { }
+                axes(std::move(axes)) { }
 
             /**
              * \brief Clones this reduction, preserving its axes and input requirement.
@@ -328,7 +325,7 @@ namespace Dimensions
             std::unique_ptr<Function> cloneUniquePtr() const override
             {
                 return std::make_unique<Sum<T>>(
-                    this->inputs.at(0), this->axes_
+                    this->inputs.at(0), this->axes
                 );
             }
 
@@ -359,13 +356,13 @@ namespace Dimensions
                 const size_t count = inputType.totalElements();
 
                 // Validate axes and derive the actual output shape.
-                Data::DataType resultType = makeOutputType(inputType, axes_);
+                Data::DataType resultType = makeOutputType(inputType, this->axes);
 
                 const auto elements = value.getData<T>(); // Keeps the elements alive while they are read.
                 const T* data = elements.get();
 
                 // Global sum.
-                if (axes_.empty()) {
+                if (this->axes.empty()) {
                     T total{};
 
                     for (size_t i = 0; i < count; ++i) {
@@ -377,7 +374,7 @@ namespace Dimensions
 
                 std::vector<bool> reduced(rank, false);
 
-                for (size_t axis : axes_) {
+                for (size_t axis : this->axes) {
                     reduced[axis] = true;
                 }
 
@@ -411,14 +408,14 @@ namespace Dimensions
                     size_t outputIndex = 0;
 
                     for (size_t axis = rank; axis > 0; --axis) {
-                        const size_t a = axis - 1;
-                        const size_t dimension = inputType.dimensions[a];
+                        const size_t inputAxis = axis - 1;
+                        const size_t dimension = inputType.dimensions[inputAxis];
 
                         const size_t coordinate = remainder % dimension;
                         remainder /= dimension;
 
-                        if (!reduced[a]) {
-                            outputIndex += coordinate * outputStrides[outputAxisForInput[a]];
+                        if (!reduced[inputAxis]) {
+                            outputIndex += coordinate * outputStrides[outputAxisForInput[inputAxis]];
                         }
                     }
 

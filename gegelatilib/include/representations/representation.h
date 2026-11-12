@@ -22,7 +22,7 @@
     /**
      * \brief Abstract class representing an Representation.
      *
-     * Available representations are TPG, MAPLE, and LGP
+     * Available representations are TPG and LGP.
      */
     class Representation : public Util::Named
     {
@@ -145,6 +145,6 @@
           const GraphBased::Genotype& genotype, const std::vector<Data::DataValue>& inputSources) const;
 
     };
-}; // namespace Representation
+}; // namespace Representations
 
-#endif // REPRESENTATION_REPRESENTATION_H
+#endif // REPRESENTATIONS_REPRESENTATION_H

@@ -34,8 +34,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef RREINFORCEMENT_ENVIRONMENT_H
-#define RREINFORCEMENT_ENVIRONMENT_H
+#ifndef REINFORCEMENT_ENVIRONMENT_H
+#define REINFORCEMENT_ENVIRONMENT_H
 
 
 #include "data/dataValue.h"
@@ -44,11 +44,10 @@
 namespace Evaluation {
 
     /**
-     * \brief Interface for creating a Learning Environment.
+     * \brief Interface of a reinforcement learning environment, in which the individuals act (see ReinforcementProblem).
      *
-     * This class defines all the method that should be implemented for a
-     * Learner to interact with an learning environment and learn to interact
-     * with it.
+     * This class defines all the methods that should be implemented for an
+     * individual to interact with the environment.
      *
      * Interaction with a learning environment are made through a discrete set
      * of actions. As a result of these actions, the learning environment may
@@ -80,7 +79,7 @@ namespace Evaluation {
 
       public:
         /**
-         * \brief Constructor for LearningEnviroment.
+         * \brief Constructor for ReinforcementEnvironment.
          *
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
@@ -90,32 +89,32 @@ namespace Evaluation {
             : inputDimensions(inputDimensions), outputDimension(outputDimension), maxSteps{maxSteps} {};
 
         /**
-         * \brief Get a copy of the Problem.
+         * \brief Get a copy of the environment.
          *
          * Default implementation returns a null pointer.
          *
-         * \return a copy of the Problem if it is copyable,
+         * \return a copy of the environment if it is copyable,
          * otherwise this method returns a NULL pointer.
          */
         virtual std::shared_ptr<Evaluation::ReinforcementEnvironment> cloneSharedPtr() const;
 
         /**
-         * \brief Can the Problem be copy constructed to evaluate
-         * several LearningAgent in parallel.
+         * \brief Can the environment be copy constructed to evaluate
+         * several individuals in parallel.
          *
-         * \return true if the Problem can be copied and run in
+         * \return true if the environment can be copied and run in
          * parallel. Default implementation returns false.
          */
         virtual bool isCopyable() const;
 
 
         /**
-         * \brief get the input dimensions of the Problem.
+         * \brief get the input dimensions of the environment.
          */
         virtual const std::vector<Dimensions::Requirement>& getInputDimensions() const;
 
         /**
-         * \brief get the output dimension of the Problem.
+         * \brief get the output dimension of the environment.
          */
         virtual const Dimensions::Requirement& getOutputDimension() const;
 
@@ -125,14 +124,14 @@ namespace Evaluation {
         virtual uint64_t getMaxSteps() const;
 
         /**
-         * \brief Get the data sources for this Problem.
+         * \brief Get the data sources of the environment.
          *
          * The dataSources should be updated during step or reset method.
          */
         virtual const std::vector<Data::DataValue>& getDataSources() const;
 
         /**
-         * \brief Execute an action on the Problem.
+         * \brief Execute an action in the environment.
          *
          * \param[in] action the view representing the action to
          * execute.
@@ -141,47 +140,45 @@ namespace Evaluation {
         virtual void doAction(const Data::DataValue& action);
 
         /**
-         * \brief Reset the Problem.
+         * \brief Reset the environment, to start a new episode.
          *
-         * Resetting a learning environment is needed to train an agent.
          * Optionally seed can be given to this function to control the
-         * randomness of a Problem (if any). When available, this
+         * randomness of the environment (if any). When available, this
          * feature will be used:
-         * - for comparing the performance of several agents with the same
+         * - for comparing the performance of several individuals with the same
          * random starting conditions.
-         * - for training each agent with diverse starting conditions.
+         * - for training each individual with diverse starting conditions.
          *
          * \param[in] seed the integer value for controlling the randomness of
-         * the Problem.
+         * the environment.
          */
         virtual void reset(size_t seed = 0) = 0;
 
         /**
-         * \brief Method for checking if the Problem has reached a
+         * \brief Method for checking if the environment has reached a
          * terminal state.
          *
          * The boolean value returned by this method, when equal to true,
-         * indicates that the Problem has reached a terminal state.
+         * indicates that the environment has reached a terminal state.
          * A terminal state is a state in which further calls to the doAction
          * method will have no effects on the dataSources of the
-         * Problem, or on its score. For example, this terminal
+         * environment, or on its rewards. For example, this terminal
          * state may be reached for a Game Over state within a game, or in case
-         * the objective of the learning agent has been successfuly reached.
+         * the objective of the individual has been successfully reached.
          *
          * \return a boolean indicating termination.
          */
         virtual bool isTerminal() const = 0;
 
         /**
-         * \brief Returns the current score of the Environment.
+         * \brief Returns the reward of the last action.
          *
-         * The returned score will be used as a reward during the learning
-         * phase of a LearningAgent.
+         * The rewards are summed during an evaluation (see Metrics::RewardsMetric).
          *
-         * \return the current score for the Problem.
+         * \return the reward of the last action.
          */
         virtual double getLastReward() const = 0;
     };
-}; // namespace Learn
+}; // namespace Evaluation
 
 #endif

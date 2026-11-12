@@ -13,7 +13,7 @@
  namespace Representations {
 
     /**
-     * \brief Abstract class representing a TPG
+     * \brief Tangled Program Graph representation: the nodes of a vertex bid with their member, the best one gives its destination.
      */
     class TPG : public Representation
     {
@@ -28,7 +28,7 @@
              * 
              * A node is of shape: {a, b}.
              *  - "a" is a context member individual.
-             *  - "b" is the destination action index.
+             *  - "b" is the destination: an action index, or another vertex.
              * 
              * \param[in] genotype genotype executed
              * \param[in] inputSources input sources on which the individual is executed.
@@ -68,7 +68,7 @@
              * \param[in] nbMembersMin the minimum number of members in the representation.
              * \param[in] nbMembersMax the maximum number of members in the representation.
              * \param[in] representationName name of the representation used.
-             * \param[in] representationColor name of the representation used.
+             * \param[in] representationColor color of the representation in the dot files.
              */
             TPG(std::vector<Dimensions::Requirement> inputDimensions, size_t nbActions, size_t nbMembersMin, size_t nbMembersMax=0, std::string representationName = "TPG", std::string representationColor = "#2db436")
                 : Representation(
@@ -88,7 +88,7 @@
 
 
         };
-}; // namespace LGP_Representation
+}; // namespace Representations
 
 
-#endif // REPRESENTATION_TPG_H
+#endif // REPRESENTATIONS_TPG_H

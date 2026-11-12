@@ -7,7 +7,7 @@
 std::map<uint64_t, std::vector<double>> FitnessAssignment::NoveltySearchAssigner::computeDescriptors(
     const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const
 {
-    // Get the average values of each descriptor for each individual
+    // Compute the descriptor values of each individual
     std::map<uint64_t, std::vector<double>> descriptorValues;
 
     for (const auto& [individualID, metricMap] : individualMetrics){
@@ -65,7 +65,7 @@ std::map<uint64_t, std::vector<uint64_t>> FitnessAssignment::NoveltySearchAssign
 
     for(const auto& [indivX, distancesX] : distances) {
 
-        // Sort vertices by distance from X.
+        // Sort the other individuals by distance from X.
         std::vector<std::pair<uint64_t, double>> sortedDistances(
             distancesX.begin(), distancesX.end());
 

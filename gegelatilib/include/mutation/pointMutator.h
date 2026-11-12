@@ -12,7 +12,7 @@
 
  namespace Mutation {
     /**
-     * \brief Class representing a Mutation.
+     * \brief Mutator changing random values of the nodes, and adding or removing random nodes.
      */
     class PointMutator : public Mutator
     {
@@ -52,9 +52,9 @@
 
 
         /**
-         * \brief return a mutated copy of a GPNode
+         * \brief Mutate a GPNode in place.
          *
-         * \param[in] node the node to mutate.
+         * \param[in,out] node the node to mutate.
          * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -75,7 +75,7 @@
         /**
          * \brief return a mutated copy of a Genotype.
          *
-         * \param[in,out] genotype the genotype mutated.
+         * \param[in] genotype the genotype to mutate, unchanged.
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */

@@ -42,7 +42,7 @@
 
 namespace Data {
     /**
-     * \brief Data type used in Program::Program to define constant values,
+     * \brief Data type used to define constant values,
      * accessible to Instructions, and mutated during the training process.
      */
     struct Constant

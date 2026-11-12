@@ -64,10 +64,10 @@
             virtual GPNode& getNode(size_t index);
 
             /**
-             * \brief Get the mutable Node at the given index.
-             * 
+             * \brief Set the Node at the given index, replacing the former one.
+             *
              * \param[in] node the Node to set.
-             * \param[in] index the index of the Node to get.
+             * \param[in] index the index of the Node to set.
              */
             virtual void setNode(std::unique_ptr<GPNode> node, size_t index);
 

@@ -19,8 +19,8 @@ Evolution::CreateGeneratorStep::CreateGeneratorStep(std::string generator,
     : Module(std::move(name)), generator{std::move(generator)}, build{std::move(build)}
 {
     this->provide(this->generator);
-    for(const std::string& name: required) {
-        this->require(name);
+    for(const std::string& requiredName: required) {
+        this->require(requiredName);
     }
     if(this->build == nullptr) {
         throw std::runtime_error("Evolution::CreateGeneratorStep: the function building the generator cannot be empty");

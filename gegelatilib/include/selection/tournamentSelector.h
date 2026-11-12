@@ -6,13 +6,13 @@
  namespace Selection {
 
     /**
-     * \brief Class representing the tournament selection mechanism used surviving selection
+     * \brief Selector keeping the best individual of random tournaments.
      */
     class TournamentSelector : public Selector {
 
         protected:            
         
-            /// Tournament sizes
+            /// Number of candidates of each tournament.
             size_t sizeTournament;
 
         public: 
@@ -38,7 +38,7 @@
 
 
             /**
-             * \brief method performing the truncation selection
+             * \brief method performing the tournament selection
              * 
              * \param[in] fitnessMap the score of each individual, indexed by individual ID.
              * \param[in] nbSelected the number of individuals to select.
@@ -52,4 +52,4 @@
     };
 };
 
-#endif // EVOLUTION_SELECTION_TRUNCATION_SELECTOR_H
+#endif // EVOLUTION_SELECTION_TOURNAMENT_SELECTOR_H

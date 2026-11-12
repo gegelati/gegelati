@@ -8,9 +8,9 @@
  namespace GraphBased {
 
     /**
-     * \brief class representation the generator of a GPNode.
-     * 
-     * The class is essentially composed on a vector of constraints and a vector of generators.
+     * \brief class representing the generator of a GPNode.
+     *
+     * The class is essentially composed of a vector of generators, one per value of the node.
      */
     class NodeGenerator {
 
@@ -27,15 +27,15 @@
 
 
             /**
-             * @brief Add a new constraint and generator to the generator.
-             * 
-             * \param generator the generator to add to the generator.
+             * @brief Add the generator of the next value of the node.
+             *
+             * \param generator the generator added.
              */
             void addGenerator(std::unique_ptr<Dimensions::DataValueGenerator> generator);
             /**
-             * @brief Add a new constraint and generator to the generator.
-             * 
-             * \param generator the generator to add to the generator.
+             * @brief Add the generator of the next value of the node.
+             *
+             * \param generator the generator added.
              */
             void addGenerator(const Dimensions::DataValueGenerator& generator);
 
@@ -52,7 +52,7 @@
             size_t size() const;
 
             /**
-             * \brief Clone method returning the same shared pointer of constraints and dupplicated unique pointer of generators
+             * \brief Clone method duplicating the generators.
              */
             std::unique_ptr<NodeGenerator> cloneUniquePtr() const;
     };

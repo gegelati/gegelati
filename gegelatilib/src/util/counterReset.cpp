@@ -3,11 +3,6 @@
 
 void CounterReset::counterReset()
 {
-    /*EvoGraph::Vertex::resetVertexIDCounter();
-    EvoGraph::Edge::resetEdgeIDCounter();
-    Representation::Individual::resetIndividualIDCounter();
-    Representation::Representation::resetRepresentationIDCounter();
-    Population::resetPopulationIDCounter();*/
     GraphBased::GPNode::resetGPNodeIDCounter();
     Individual::resetIndividualIDCounter();
 }

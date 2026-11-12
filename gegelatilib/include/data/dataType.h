@@ -366,7 +366,7 @@ namespace Data {
          *
          * Axes of the view that the window does not cover count for 1. A scalar window is 1 everywhere.
          */
-        size_t requestedExtent(const DataType& requested, size_t rank, size_t k) const noexcept;
+        size_t requestedExtent(const DataType& requested, size_t rank, size_t axis) const noexcept;
 
         // --- Comparison ---
 

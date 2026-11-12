@@ -22,14 +22,14 @@ namespace Data {
      *
      * A DataView consists of:
      * 1. A **pointer** to the first byte of the viewed data.
-     * 2. A **DataType** describing the shape, type, and source context of the data.
+     * 2. A **DataType** describing the shape, the element type and the memory layout of the data.
      *
      * This design ensures that:
      * - **Type safety**: Typed accessors (getScalar<T>, getData<T>) validate types at runtime.
      * - **Bounds safety**: Sub-array extraction (getSubView) validates that the requested
      *   shape fits in the source.
-     * - **Source context**: The DataType carries the original source's shape and offset,
-     *   enabling correct address space calculations.
+     * - **Layout**: The DataType carries the strides of the memory, so a sub-view is a window
+     *   inside bigger data without copy (see DataType).
      */
     class DataView {
 
@@ -37,7 +37,7 @@ namespace Data {
         /// \brief Pointer to the first byte of the viewed data.
         const void* ptr = nullptr;
 
-        /// \brief Complete metadata for the viewed data (shape, type, source context).
+        /// \brief Complete metadata for the viewed data (shape, element type, layout).
         DataType type;
 
     public:
@@ -86,37 +86,37 @@ namespace Data {
         /**
          * \brief Returns the DataType describing this view.
          */
-        const DataType& getType() const noexcept { return type; }
+        const DataType& getType() const noexcept { return this->type; }
 
         /**
          * \brief Returns a pointer to the first byte of the viewed data.
          */
-        const void* getPtr() const noexcept { return ptr; }
+        const void* getPtr() const noexcept { return this->ptr; }
 
         /**
          * \brief Returns the shape of THIS view (rank + dimensions).
          */
-        uint8_t getRank() const noexcept { return type.rank; }
+        uint8_t getRank() const noexcept { return this->type.rank; }
 
         /**
          * \brief Returns the dimensions of THIS view.
          */
-        const Extents& getDimensions() const noexcept { return type.dimensions; }
+        const Extents& getDimensions() const noexcept { return this->type.dimensions; }
 
         /**
          * \brief Returns the strides of THIS view: the distance in memory, in elements, between two neighbours along each axis.
          */
-        const Extents& getStrides() const noexcept { return type.strides; }
+        const Extents& getStrides() const noexcept { return this->type.strides; }
 
         /**
          * \brief Returns the element type of the viewed data.
          */
-        const std::type_info& getElementType() const noexcept { return *type.elementType; }
+        const std::type_info& getElementType() const noexcept { return *this->type.elementType; }
 
         /**
          * \brief Returns the size of each element in bytes.
          */
-        size_t getElementSize() const noexcept { return type.elementSize; }
+        size_t getElementSize() const noexcept { return this->type.elementSize; }
 
         // --- Sub-View Extraction ---
 
@@ -151,12 +151,12 @@ namespace Data {
         // --- Typed Accessors ---
 
         /**
-         * \brief Validates that this view can be accessed with a requested type and rank.
+         * \brief Validates that this view can be accessed with a requested element type.
          *
-         * \param[in] type Required element type.
-         * \throws std::runtime_error If the view is null, has insufficient rank, or has a different element type.
+         * \param[in] requestedType Required element type.
+         * \throws std::runtime_error If the view is null or has a different element type.
          */
-        void canBeAccess(const std::type_info& type) const;
+        void canBeAccess(const std::type_info& requestedType) const;
 
         
         /**
@@ -199,7 +199,7 @@ namespace Data {
             bool owned = false;
             /// \brief Frees the pointed array only if it is an owned copy.
             void operator()(const T* ptr) const noexcept {
-                if (owned) {
+                if (this->owned) {
                     delete[] ptr;
                 }
             }
@@ -275,7 +275,7 @@ namespace Data {
          * 
          * \param[in] required DataType requiring the address to be scaled.
          * \param[in] address Address in the current view.
-         * \return The corresponding address in the source view.
+         * \return The corresponding valid address in this view.
          */
         virtual size_t scaleLocation(const Data::DataType& required, const size_t address) const;
 
@@ -283,7 +283,7 @@ namespace Data {
         virtual std::string toString(std::string prefix = "") const;
 
         /**
-         * \brief Compares two DataView while ignoring source context.
+         * \brief Compares two DataView while ignoring the layout (strides).
          *
          * \param[in] other DataView to compare with.
          * \return `true` when pointer and dataType is identical.

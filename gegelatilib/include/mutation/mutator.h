@@ -59,9 +59,9 @@
         virtual std::unique_ptr<GraphBased::Genotype> initRandomGenotype(const GraphBased::GenotypeGenerator& genotypeGenerator, RNG::RNG& rng) const;
 
         /**
-         * \brief return a mutated copy of a GPNode
+         * \brief Mutate a GPNode in place.
          *
-         * \param[in] node the node to mutate.
+         * \param[in,out] node the node to mutate.
          * \param[in] nodeGenerator node Generator of the node
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -70,7 +70,7 @@
         /**
          * \brief return a mutated copy of a Genotype.
          *
-         * \param[in,out] genotype the genotype mutated.
+         * \param[in] genotype the genotype to mutate, unchanged.
          * \param[in] genotypeGenerator genotype Generator of the genotype
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -113,6 +113,6 @@
     void mutateIndividualsInParallel(
         const Mutator& mutator, const std::vector<std::shared_ptr<Individual>>& individuals,
         const GraphBased::GenotypeGenerator& generator,  RNG::RNG& rng, size_t maxNbThreads);
-}; // namespace Mutator
+}; // namespace Mutation
 
 #endif // MUTATION_MUTATOR_H

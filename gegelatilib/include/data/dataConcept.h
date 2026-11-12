@@ -20,7 +20,7 @@ namespace Data {
          * \brief Type-erased storage contract used by DataValue.
          *
          * Each concrete implementation owns the memory backing a single logical
-         * value, whether it is a scalar, a 1D array, or a 2D array. This keeps the
+         * value, whether it is a scalar or an N-dimensional array. This keeps the
          * public DataValue interface small while preserving ownership, deep-copying,
          * and debug-friendly string rendering.
          *
@@ -77,16 +77,16 @@ namespace Data {
             /**
              * \brief Constructs a scalar storage model.
              *
-             * \param[in] v Value stored by the model.
+             * \param[in] value Value stored by the model.
              */
-            explicit ScalarModel(T v) : value(std::move(v)) {}
+            explicit ScalarModel(T value) : value(std::move(value)) {}
 
             /**
              * \brief Returns the mutable address of the scalar value.
              *
              * \return Pointer to the scalar storage for modification.
              */
-            void* data() noexcept override { return &value; }
+            void* data() noexcept override { return &this->value; }
 
             /**
              * \brief Creates a copy of the scalar model.
@@ -94,7 +94,7 @@ namespace Data {
              * \return A deep clone of the scalar storage.
              */
             std::unique_ptr<ValueConcept> clone() const override {
-                return std::make_unique<ScalarModel<T>>(value);
+                return std::make_unique<ScalarModel<T>>(this->value);
             }
 
             /**
@@ -104,7 +104,7 @@ namespace Data {
              */
             std::string toString() const override {
                 std::ostringstream oss;
-                oss << value;
+                oss << this->value;
                 return oss.str();
             }
 
@@ -141,13 +141,13 @@ namespace Data {
             /**
              * \brief Constructs an N-dimensional array storage model.
              *
-             * \param[in] v Buffer owning the array elements.
-             * \param[in] s Extent of each axis; the buffer holds their product.
+             * \param[in] values Buffer owning the array elements.
+             * \param[in] shape Extent of each axis; the buffer holds their product.
              */
-            ArrayModel(std::unique_ptr<T[]> v, Extents s)
-                : values(std::move(v)), count(1), shape(std::move(s)) {
-                for (size_t extent : shape) {
-                    count *= extent;
+            ArrayModel(std::unique_ptr<T[]> values, Extents shape)
+                : values(std::move(values)), count(1), shape(std::move(shape)) {
+                for (size_t extent : this->shape) {
+                    this->count *= extent;
                 }
             }
 
@@ -156,7 +156,7 @@ namespace Data {
              *
              * \return Pointer to the first element of the array for modification.
              */
-            void* data() noexcept override { return values.get(); }
+            void* data() noexcept override { return this->values.get(); }
 
             /**
              * \brief Creates a deep copy of the array model.
@@ -164,9 +164,9 @@ namespace Data {
              * \return A deep clone containing the same array values.
              */
             std::unique_ptr<ValueConcept> clone() const override {
-                auto copy = std::make_unique<T[]>(count);
-                std::copy(values.get(), values.get() + count, copy.get());
-                return std::make_unique<ArrayModel<T>>(std::move(copy), shape);
+                auto copy = std::make_unique<T[]>(this->count);
+                std::copy(this->values.get(), this->values.get() + this->count, copy.get());
+                return std::make_unique<ArrayModel<T>>(std::move(copy), this->shape);
             }
 
             /**
@@ -177,7 +177,7 @@ namespace Data {
             std::string toString() const override {
                 std::ostringstream oss;
                 size_t index = 0;
-                write(oss, 0, index);
+                this->write(oss, 0, index);
                 return oss.str();
             }
 
@@ -191,21 +191,21 @@ namespace Data {
                     return false;
                 }
 
-                return std::equal(this->values.get(), this->values.get() + count, otherPtr->values.get());
+                return std::equal(this->values.get(), this->values.get() + this->count, otherPtr->values.get());
             }
 
         private:
             /// \brief Recursively prints the axis `axis` starting at the linear `index`.
             void write(std::ostringstream& oss, size_t axis, size_t& index) const {
                 oss << "[";
-                for (size_t i = 0; i < shape[axis]; ++i) {
+                for (size_t i = 0; i < this->shape[axis]; ++i) {
                     if (i > 0) {
                         oss << ", ";
                     }
-                    if (axis + 1 == shape.size()) {
-                        oss << values[index++];
+                    if (axis + 1 == this->shape.size()) {
+                        oss << this->values[index++];
                     } else {
-                        write(oss, axis + 1, index);
+                        this->write(oss, axis + 1, index);
                     }
                 }
                 oss << "]";

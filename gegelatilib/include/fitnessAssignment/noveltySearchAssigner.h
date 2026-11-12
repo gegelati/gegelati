@@ -100,4 +100,4 @@
     };
 };
 
-#endif // FITNESS_ASSIGNMENT_DEFAULT_H
+#endif // NOVELTY_SEARCH_ASSIGNER_H

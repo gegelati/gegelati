@@ -77,7 +77,7 @@ public:
             };
 
     /**
-     * \brief return the ID of the individual.
+     * \brief Return the current value of the individual ID counter, the ID of the next individual.
      */
     static size_t getIndividualIDCounter();
 

@@ -12,11 +12,11 @@ void Metrics::PredictionMetric::extractAfterExecution(
     const Evaluation::Problem& problem)
 {
     if(dynamic_cast<const Evaluation::PredictionProblem*>(&problem) == nullptr) {
-        throw std::runtime_error ("Metrics::PredictionMetric::extractionEndAndComputeMetric: feature can only be extracted on a classification problem");
+        throw std::runtime_error ("Metrics::PredictionMetric::extractAfterExecution: feature can only be extracted on a prediction problem");
     }
-    const Evaluation::PredictionProblem& classifProblem = dynamic_cast<const Evaluation::PredictionProblem&>(problem);
+    const Evaluation::PredictionProblem& predictionProblem = dynamic_cast<const Evaluation::PredictionProblem&>(problem);
 
-    const Data::DataValue& target = classifProblem.getDataSet().getOutputAt(hash);
+    const Data::DataValue& target = predictionProblem.getDataSet().getOutputAt(hash);
     if(output == target) {
         this->nbSuccess++;
     }

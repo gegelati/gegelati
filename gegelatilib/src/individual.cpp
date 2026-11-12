@@ -116,7 +116,7 @@ size_t Individual::getNbCachedOutputs() const
 Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSources) const
 {
     // Individual need to be valid to be executed.
-    if(!valid){
+    if(!this->valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getName() + ")");
     }
     if(!inputSources.empty()) {
@@ -130,7 +130,7 @@ Data::DataValue Individual::execute(const std::vector<Data::DataView>& inputSour
 Data::DataValue Individual::execute(const std::vector<Data::DataValue>& inputSources) const
 {
     // Individual need to be valid to be executed.
-    if(!valid){
+    if(!this->valid){
         throw std::runtime_error("Individual::execute: Individual's genotype not valid for the representation (" + this->representation->getName() + ")");
     }
     return this->representation->execute(*this->genotype, inputSources);

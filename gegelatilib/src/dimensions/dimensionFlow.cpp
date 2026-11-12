@@ -7,38 +7,38 @@ bool Dimensions::DimensionFlow::addLayer(
     std::string name,
     const std::vector<Requirement>& layerInputs,
     Requirement output) {
-    const bool compatible = hasOutput
-        ? acceptsRequirements({currentOutput}, layerInputs)
-        : acceptsRequirements(inputDimensions, layerInputs);
-    valid = valid && compatible;
+    const bool compatible = this->hasOutput
+        ? acceptsRequirements({this->currentOutput}, layerInputs)
+        : acceptsRequirements(this->inputDimensions, layerInputs);
+    this->valid = this->valid && compatible;
 
-    transitions.push_back({
+    this->transitions.push_back({
         std::move(name),
         layerInputs,
         output,
         compatible});
-    currentOutput = std::move(output);
-    hasOutput = true;
+    this->currentOutput = std::move(output);
+    this->hasOutput = true;
     return compatible;
 }
 
 bool Dimensions::DimensionFlow::isCompatibleWith(const Requirement& consumer) const noexcept {
-    return hasOutput && currentOutput.isCompatibleWith(consumer);
+    return this->hasOutput && this->currentOutput.isCompatibleWith(consumer);
 }
 
 bool Dimensions::DimensionFlow::isValid() const noexcept {
-     return valid && hasOutput; 
+     return this->valid && this->hasOutput; 
 }
 
 const Dimensions::Requirement& Dimensions::DimensionFlow::getOutputDimension() const {
-    if (!hasOutput) {
+    if (!this->hasOutput) {
         throw std::logic_error("DimensionFlow has no output layer.");
     }
-    return currentOutput;
+    return this->currentOutput;
 }        
 
 const std::vector<Dimensions::Requirement>& Dimensions::DimensionFlow::getInputDimensions() const {
-    return inputDimensions;
+    return this->inputDimensions;
 }
 
 std::string Dimensions::DimensionFlow::summary(const std::string& prefix) const {
@@ -48,39 +48,39 @@ std::string Dimensions::DimensionFlow::summary(const std::string& prefix) const 
     result << prefix << "=== Dimension Flow Summary ===\n\n";
 
     // Input Dimensions section
-    result << prefix << "Inputs (" << inputDimensions.size() << "):\n";
-    for (const auto& input : inputDimensions) {
+    result << prefix << "Inputs (" << this->inputDimensions.size() << "):\n";
+    for (const auto& input : this->inputDimensions) {
         result << prefix << "  * " << input.summary() << "\n";
     }
-    if (!inputDimensions.empty()) {
+    if (!this->inputDimensions.empty()) {
         result << "\n";
     }
 
     // Execution Pipeline section
-    result << prefix << "Pipeline (" << transitions.size() << " layers):\n";
-    for (size_t i = 0; i < transitions.size(); ++i) {
-        const auto& t = transitions[i];
-        result << prefix << "  Layer " << (i + 1) << ": " << t.name << "\n";
-        for(size_t idx = 0; idx < t.inputs.size(); idx++) {
-            result << prefix << "    Input (" << idx << "): " << t.inputs.at(idx).summary() << "\n";
+    result << prefix << "Pipeline (" << this->transitions.size() << " layers):\n";
+    for (size_t i = 0; i < this->transitions.size(); ++i) {
+        const auto& transition = this->transitions[i];
+        result << prefix << "  Layer " << (i + 1) << ": " << transition.name << "\n";
+        for(size_t idx = 0; idx < transition.inputs.size(); idx++) {
+            result << prefix << "    Input (" << idx << "): " << transition.inputs.at(idx).summary() << "\n";
         }
-        result << prefix << "    Output: " << t.output.summary() << "\n";
-        result << prefix << "    Compatible: " << (t.compatible ? "YES" : "NO");
-        if (!t.compatible) {
+        result << prefix << "    Output: " << transition.output.summary() << "\n";
+        result << prefix << "    Compatible: " << (transition.compatible ? "YES" : "NO");
+        if (!transition.compatible) {
             result << " [INCOMPATIBLE INPUT]";
         }
         result << "\n";
 
-        if (i < transitions.size() - 1) {
+        if (i < this->transitions.size() - 1) {
             result << "\n";
         }
     }
 
     // Final status
-    if (!transitions.empty()) {
+    if (!this->transitions.empty()) {
         result << "\n";
     }
-    result << prefix << "Overall: " << (valid ? "VALID" : "INVALID") << "\n";
+    result << prefix << "Overall: " << (this->valid ? "VALID" : "INVALID") << "\n";
 
     return result.str();
 }

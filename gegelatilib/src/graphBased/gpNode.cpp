@@ -1,6 +1,6 @@
 #include "graphBased/gpNode.h"
 
-// Declaration of static GPNnode ID Counter in local here because it creates
+// Declaration of static GPNode ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 #include <atomic>

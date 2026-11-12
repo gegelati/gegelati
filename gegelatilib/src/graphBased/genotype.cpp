@@ -42,7 +42,7 @@ void GraphBased::Genotype::addNodeGroup(std::unique_ptr<NodeGroup> group)
 void GraphBased::Genotype::removeNodeGroup(size_t index)
 {
     if(index >= this->nodeGroups.size()){
-        throw std::runtime_error("Individual::removeNodeGroup: index out of range.");
+        throw std::runtime_error("GraphBased::Genotype::removeNodeGroup: index out of range.");
     }
     this->nodeGroups.erase(this->nodeGroups.begin() + index);
 
@@ -51,7 +51,7 @@ void GraphBased::Genotype::removeNodeGroup(size_t index)
 const GraphBased::NodeGroup& GraphBased::Genotype::getNodeGroup(size_t index) const
 {
     if(index >= this->nodeGroups.size()){
-        throw std::runtime_error("Individual::getNodeGroup: index out of range.");
+        throw std::runtime_error("GraphBased::Genotype::getNodeGroup: index out of range.");
     }
     return *this->nodeGroups[index];
 }
@@ -59,7 +59,7 @@ const GraphBased::NodeGroup& GraphBased::Genotype::getNodeGroup(size_t index) co
 GraphBased::NodeGroup& GraphBased::Genotype::getNodeGroup(size_t index)
 {
     if(index >= this->nodeGroups.size()){
-        throw std::runtime_error("Individual::getNodeGroup: index out of range.");
+        throw std::runtime_error("GraphBased::Genotype::getNodeGroup: index out of range.");
     }
     return *this->nodeGroups[index];
 }
@@ -67,7 +67,7 @@ GraphBased::NodeGroup& GraphBased::Genotype::getNodeGroup(size_t index)
 void GraphBased::Genotype::setNodeGroup(std::unique_ptr<NodeGroup> group, size_t index)
 {
     if(index >= this->nodeGroups.size()){
-        throw std::runtime_error("Individual::getMutableNodeGroup: index out of range.");
+        throw std::runtime_error("GraphBased::Genotype::setNodeGroup: index out of range.");
     }
     this->nodeGroups.at(index) = std::move(group);
 }
@@ -113,15 +113,15 @@ std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> Graph
     std::vector<std::vector<std::reference_wrapper<const GraphBased::GPNode>>> result;
 
     for (const std::unique_ptr<NodeGroup>& nodeGroup : this->nodeGroups) {
-        std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodeGoup;
+        std::vector<std::reference_wrapper<const GraphBased::GPNode>> effectiveNodeGroup;
         for (size_t idx = 0; idx < nodeGroup->getSize(); idx++) {
             const GraphBased::GPNode& node = nodeGroup->getNode(idx);
             if(!node.getIsIntron()) {
-                effectiveNodeGoup.push_back(node);
+                effectiveNodeGroup.push_back(node);
             }
         }
 
-        result.emplace_back(effectiveNodeGoup);
+        result.emplace_back(effectiveNodeGroup);
     }
 
     return result;

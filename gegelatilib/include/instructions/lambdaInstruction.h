@@ -116,10 +116,11 @@ namespace Instructions {
                     }
                 }}
             {
-                setUpOutput();
-                setUpOperand();
+                this->setUpOutput();
+                this->setUpOperand();
             }
 
+            /// Inherited from Instruction: the result of the callable is written directly into the destination.
             void executeInto(const std::vector<Data::DataView>& args,
                              Data::DataValue& destination,
                              size_t address) const override
@@ -129,7 +130,7 @@ namespace Instructions {
                         "LambdaInstruction::executeInto: Instruction operand type mismatch.");
                 }
 
-                doExecutionInto(args, destination, address, std::index_sequence_for<Rest...>{});
+                this->doExecutionInto(args, destination, address, std::index_sequence_for<Rest...>{});
             }
 
             /**
@@ -155,7 +156,7 @@ namespace Instructions {
                         "LambdaInstruction::execute: Instruction operand type mismatch.");
                 }
 
-                return doExecution(args, std::index_sequence_for<Rest...>{});
+                return this->doExecution(args, std::index_sequence_for<Rest...>{});
             }
 
       private:
@@ -305,8 +306,7 @@ namespace Instructions {
             /**
              * \brief Defines the declared output type.
              *
-             * Registers the \c DataType of `First` and of each `Rest...` operand in
-             * the base \c Instruction's operand type list.
+             * Sets the output type of the base \c Instruction to the \c DataType of `Output`.
              */
             void setUpOutput()
             {

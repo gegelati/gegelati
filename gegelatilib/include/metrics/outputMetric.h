@@ -21,7 +21,7 @@ namespace Metrics {
     {
 
       protected:
-        /// \brief Current map of features extracted.
+        /// \brief Outputs of the individual, in the order of the evaluation.
         std::vector<Data::DataValue> outputs;
 
       public:
@@ -31,7 +31,7 @@ namespace Metrics {
         OutputMetric() : VectorMetric(0) {};
 
         /**
-         * \brief clone returning predictionMetric
+         * \brief clone returning an empty OutputMetric
          */
         virtual std::unique_ptr<Metric> cloneEmptyPtr() const override;
 
@@ -56,7 +56,7 @@ namespace Metrics {
         virtual std::string toString(std::string prefix = "") const override;
 
         /**
-         * \brief return the static hash of a prediction metric (equal for all prediction metric since there is not hyperparameters)
+         * \brief return the static hash of an output metric (equal for all output metrics since there is no hyperparameter)
          */
         static uint64_t staticHash();
 
@@ -69,4 +69,4 @@ namespace Metrics {
 
 }; // namespace Metrics
 
-#endif // PREDICTION_METRIC_H
+#endif // OUTPUT_METRIC_H

@@ -11,8 +11,8 @@ std::map<uint64_t, double> FitnessAssignment::ClassificationF1Assigner::assignFi
 
     // Determine the number of classes across all individuals.
     for (const auto& [individualID, metricMap] : individualMetrics) {
-        const auto scalarMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
-        for (const auto& [key, metric] : scalarMetrics) {
+        const auto predictionMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
+        for (const auto& [featureHash, metric] : predictionMetrics) {
             for (const auto& [predictionValue, targetValue] : metric->getPairs()) {
                 const size_t prediction = predictionValue.getScalar<size_t>();
                 const size_t target = targetValue.getScalar<size_t>();
@@ -30,10 +30,10 @@ std::map<uint64_t, double> FitnessAssignment::ClassificationF1Assigner::assignFi
 
     // Compute the macro-averaged F1 score for each individual.
     for (const auto& [individualID, metricMap] : individualMetrics) {
-        const auto scalarMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
+        const auto predictionMetrics = metricMap->getMetricValues<Metrics::PredictionMetric>(Metrics::PredictionMetric::staticHash());
         std::vector<std::vector<uint64_t>> confusionMatrix(numClasses, std::vector<uint64_t>(numClasses, 0));
 
-        for (const auto& [key, metric] : scalarMetrics) {
+        for (const auto& [featureHash, metric] : predictionMetrics) {
             for (const auto& [predictionValue, targetValue] : metric->getPairs()) {
                 const size_t prediction = predictionValue.getScalar<size_t>();
                 const size_t target = targetValue.getScalar<size_t>();

@@ -80,9 +80,9 @@ namespace Metrics {
         };
 
         /**
-         * \brief Extract metrics from the individual in the learning environment.
+         * \brief Extract metrics at the end of an evaluation (e.g. an episode of a reinforcement environment).
          *
-         * This method is called at every step of the environment evaluation.
+         * This method is called once per evaluation, after all its steps.
          *
          * \param[in] hash unique hash identifying the evaluation.
          * \param[in] individual the individual performing a step.
@@ -115,6 +115,6 @@ namespace Metrics {
     }
 
 
-}; // namespace Evaluation
+}; // namespace Metrics
 
 #endif // METRIC_H

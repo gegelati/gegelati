@@ -45,18 +45,17 @@
 namespace Evaluation {
 
     /**
-     * \brief Class used to control the learning steps of a Graph within
-     * a given Problem.
+     * \brief Problem in which the individuals act in a reinforcement environment, one episode per evaluation.
      */
     class ReinforcementProblem : public Problem
     {
       protected:
-        /// Number of class in the dataset
+        /// Environment in which the individuals act.
         std::shared_ptr<Evaluation::ReinforcementEnvironment> env;
 
       public:
         /**
-         * \brief Constructor for Problem.
+         * \brief Constructor for ReinforcementProblem.
          * 
          * \param[in] env the reinforcement environment in which the individuals are evaluated.
          * \param[in] problemSeed the seed of the problem.
@@ -72,7 +71,7 @@ namespace Evaluation {
 
 
         /**
-         * \brief return a copy of the environment if copyable, else throw
+         * \brief Return a copy of the problem with a copy of its environment, throw std::runtime_error if the environment cannot be copied.
          */
         virtual std::unique_ptr<Problem> cloneUniquePtr() const;
 
@@ -96,6 +95,6 @@ namespace Evaluation {
          */
         virtual const Evaluation::ReinforcementEnvironment& getEnvironment() const;
     };
-}; // namespace Learn
+}; // namespace Evaluation
 
 #endif

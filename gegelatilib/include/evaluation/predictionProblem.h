@@ -45,8 +45,7 @@
 namespace Evaluation {
 
     /**
-     * \brief Class used to control the learning steps of a Graph within
-     * a given Problem.
+     * \brief Problem in which the individuals predict the outputs of the samples of a dataset (e.g. a classification).
      */
     class PredictionProblem : public Problem
     {
@@ -55,7 +54,7 @@ namespace Evaluation {
         const DataSet& dataset; 
       public:
         /**
-         * \brief Constructor for Problem.
+         * \brief Constructor for PredictionProblem.
          * 
          * \param[in] dataset The dataset.
          * \param[in] problemSeed the seed of the problem.
@@ -85,7 +84,7 @@ namespace Evaluation {
         virtual bool isCopyable() const;
 
         /**
-         * \brief compute the hashes used the evaluation.
+         * \brief Compute the hashes of the evaluations: the indices of the samples drawn in the data of the mode.
          */
         virtual std::set<uint64_t> computeEvaluationHashes(
             uint64_t nbIterations, uint64_t generationNumber, Mode mode,
@@ -106,6 +105,6 @@ namespace Evaluation {
             const Individual& individual, Metrics::MetricMap& metrics,
             const std::set<uint64_t>& hashes) const override;
     };
-}; // namespace Learn
+}; // namespace Evaluation
 
 #endif // PREDICTION_PROBLEM_H
