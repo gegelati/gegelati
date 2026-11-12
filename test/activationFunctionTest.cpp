@@ -445,6 +445,129 @@ EXPECT_NEAR(
 }
 
 // ============================================================================
+// Sigmoid
+// ============================================================================
+
+TEST(ActivationFunctionsSigmoidTest, HasCorrectNameAndOneInput)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+
+    EXPECT_EQ(sigmoid.name(), "Sigmoid");
+    ASSERT_EQ(sigmoid.inputDimensions().size(), 1u);
+    EXPECT_EQ(sigmoid.inputDimensions()[0], input);
+}
+
+TEST(ActivationFunctionsSigmoidTest, OutputDimensionPreservesShapeAndIsConstrainedToZeroOne)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>());
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+    const auto& output = sigmoid.outputDimension();
+
+    EXPECT_EQ(output.getDataType(), Data::DataType::type<double>());
+    EXPECT_TRUE(output.accepts(Data::DataValue::scalar(0.0).view()));
+    EXPECT_TRUE(output.accepts(Data::DataValue::scalar(0.5).view()));
+    EXPECT_TRUE(output.accepts(Data::DataValue::scalar(1.0).view()));
+    EXPECT_FALSE(output.accepts(Data::DataValue::scalar(-0.000001).view()));
+    EXPECT_FALSE(output.accepts(Data::DataValue::scalar(1.000001).view()));
+}
+
+TEST(ActivationFunctionsSigmoidTest, ExecutesCorrectlyForScalars)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>());
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+
+    EXPECT_DOUBLE_EQ(sigmoid.execute(Data::DataValue::scalar(0.0)).getData<double>()[0], 0.5);
+    for (double x : {-3.0, -0.5, 0.5, 2.0}) {
+        const auto result = sigmoid.execute(Data::DataValue::scalar(x));
+        ASSERT_EQ(result.getRank(), 0u);
+        EXPECT_NEAR(result.getData<double>()[0], 1.0 / (1.0 + std::exp(-x)), kTolerance);
+    }
+}
+
+TEST(ActivationFunctionsSigmoidTest, ExecutesCorrectlyForArrays)
+{
+    const auto input1d = Dimensions::Requirement(Data::DataType::type<double>({4}));
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid1d(input1d);
+    const std::vector<double> source{-2.0, -0.5, 0.5, 2.0};
+    const auto result1d = sigmoid1d.execute(Data::DataValue::array1d(source));
+    ASSERT_EQ(result1d.getRank(), 1u);
+    ASSERT_EQ(result1d.getType().totalElements(), source.size());
+    const auto values1d = result1d.getData<double>();
+    for (size_t i = 0; i < source.size(); ++i) {
+        EXPECT_NEAR(values1d[i], 1.0 / (1.0 + std::exp(-source[i])), kTolerance);
+    }
+
+    const auto input2d = Dimensions::Requirement(Data::DataType::type<double>({2, 2}));
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid2d(input2d);
+    const auto result2d = sigmoid2d.execute(Data::DataValue::array2d(
+        std::vector<std::vector<double>>{{-1.0, 0.0}, {1.0, 3.0}}));
+    ASSERT_EQ(result2d.getRank(), 2u);
+    const auto values2d = result2d.getData<double>();
+    EXPECT_NEAR(values2d[0], 1.0 / (1.0 + std::exp(1.0)), kTolerance);
+    EXPECT_NEAR(values2d[1], 0.5, kTolerance);
+    EXPECT_NEAR(values2d[2], 1.0 / (1.0 + std::exp(-1.0)), kTolerance);
+    EXPECT_NEAR(values2d[3], 1.0 / (1.0 + std::exp(-3.0)), kTolerance);
+}
+
+TEST(ActivationFunctionsSigmoidTest, SaturatesWithoutOverflow)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>());
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+
+    const double high = sigmoid.execute(Data::DataValue::scalar(1000.0)).getData<double>()[0];
+    const double low = sigmoid.execute(Data::DataValue::scalar(-1000.0)).getData<double>()[0];
+    EXPECT_NEAR(high, 1.0, kTolerance);
+    EXPECT_NEAR(low, 0.0, kTolerance);
+    EXPECT_TRUE(std::isfinite(high));
+    EXPECT_TRUE(std::isfinite(low));
+    EXPECT_TRUE(sigmoid.outputDimension().accepts(Data::DataValue::scalar(high).view()));
+    EXPECT_TRUE(sigmoid.outputDimension().accepts(Data::DataValue::scalar(low).view()));
+}
+
+TEST(ActivationFunctionsSigmoidTest, IsSymmetricAroundOneHalf)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>());
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+
+    const double positive = sigmoid.execute(Data::DataValue::scalar(1.25)).getData<double>()[0];
+    const double negative = sigmoid.execute(Data::DataValue::scalar(-1.25)).getData<double>()[0];
+    EXPECT_NEAR(positive + negative, 1.0, kTolerance);
+}
+
+TEST(ActivationFunctionsSigmoidTest, PreservesFloatElementType)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<float>({3}));
+    const Dimensions::ActivationFunctions::Sigmoid<float> sigmoid(input);
+
+    const auto result = sigmoid.execute(Data::DataValue::array1d(std::vector<float>{-1.0f, 0.0f, 1.0f}));
+    EXPECT_EQ(result.getType().elementType, Data::DataType::type<float>().elementType);
+    EXPECT_NEAR(result.getData<float>()[1], 0.5f, 1e-6f);
+}
+
+TEST(ActivationFunctionsSigmoidTest, InputDimensionRejectsWrongShapeAndType)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>({3}));
+    const Dimensions::ActivationFunctions::Sigmoid<double> sigmoid(input);
+
+    EXPECT_FALSE(sigmoid.inputDimensions()[0].accepts(Data::DataValue::array1d(std::vector<double>{1.0, 2.0}).view()));
+    EXPECT_FALSE(sigmoid.inputDimensions()[0].accepts(Data::DataValue::array1d(std::vector<float>{1.0f, 2.0f, 3.0f}).view()));
+}
+
+TEST(ActivationFunctionsSigmoidTest, CloneAndPolymorphicUseBehaveTheSame)
+{
+    const auto input = Dimensions::Requirement(Data::DataType::type<double>());
+    std::unique_ptr<Dimensions::ActivationFunctions::Function> function =
+        std::make_unique<Dimensions::ActivationFunctions::Sigmoid<double>>(input);
+    const auto clone = function->cloneUniquePtr();
+
+    EXPECT_EQ(clone->name(), "Sigmoid");
+    EXPECT_NEAR(function->execute(Data::DataValue::scalar(0.5)).getData<double>()[0], 1.0 / (1.0 + std::exp(-0.5)), kTolerance);
+    EXPECT_NEAR(clone->execute(Data::DataValue::scalar(0.5)).getData<double>()[0], 1.0 / (1.0 + std::exp(-0.5)), kTolerance);
+    EXPECT_EQ(clone->outputDimension(), function->outputDimension());
+}
+
+// ============================================================================
 // ArgMax
 // ============================================================================
 

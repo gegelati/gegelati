@@ -2,9 +2,11 @@
 #ifndef NOVELTY_SEARCH_ASSIGNER_H
 #define NOVELTY_SEARCH_ASSIGNER_H
 
+#include <memory>
+#include <stdexcept>
+
 #include "fitnessAssignment/assigner.h"
-#include "metrics/vectorMetric.h"
-#include "metrics/scalarMetric.h"
+#include "fitnessAssignment/noveltyDescriptors/descriptor.h"
 
  namespace FitnessAssignment {
 
@@ -18,45 +20,38 @@
             /// @brief The number of neighbors.
             size_t nbNeighbors; 
 
-            /// @brief Indicate if the metrics over features are computed with average or a list.
-            bool averageFeature;
+            /// @brief The function mapping the metrics of an individual to its descriptor values.
+            std::shared_ptr<const Descriptors::Descriptor> descriptor;
         public:
 
             /**
              * \brief Default constructor
-             * 
+             *
              * \param[in] nbNeighbors the number of neighbors to measure.
-             * \param[in] averageFeature Indicate if the metrics over features are computed with average or a list.
+             * \param[in] descriptor the function mapping the metrics of an individual to its descriptor values.
              */
-            NoveltySearchAssigner(size_t nbNeighbors, bool averageFeature = true): nbNeighbors{nbNeighbors}, averageFeature{averageFeature} {};
+            NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor)
+                : nbNeighbors{nbNeighbors}, descriptor{std::move(descriptor)} {
+                if(this->descriptor == nullptr) {
+                    throw std::invalid_argument("FitnessAssignment::NoveltySearchAssigner: the descriptor should not be null.");
+                }
+            };
+
+            /// Return the number of neighbors of the novelty score.
+            size_t getNbNeighbors() const { return this->nbNeighbors; }
+
+            /// Return the descriptor.
+            const Descriptors::Descriptor& getDescriptor() const { return *this->descriptor; }
 
             /**
-             * \brief Method to compute the descriptor when faced to multiple features:
-             * This method compute the average of the vector metric over each feature.
-             * 
-             * \param[in] vectorMetrics the map of vector metrics averaged
-             */
-            virtual std::vector<double> computeOneDescriptorAvgVector(const std::map<uint64_t, const Metrics::VectorMetric*>& vectorMetrics) const;
-
-            /**
-             * \brief Method to compute the descriptor when faced to multiple features:
-             * This method compute the list of descriptors as the list of each scalar over feature
-             * 
-             * \param[in] scalarMetrics the map of scalar metrics listed
-             */
-            virtual std::vector<double> computeOneDescriptorListScalar(const std::map<uint64_t, const Metrics::ScalarMetric*>& scalarMetrics) const;
-
-            /**
-             * \brief Compute the descriptor values of the individuals based on the vector metric required
-             * 
+             * \brief Compute the descriptor values of the individuals with the descriptor.
+             *
              * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
-             * \param[in] metricHash the hash of the required metric.
-             * 
+             *
              * \return A map of each individual ID with the descriptor values. ID is used to reduce memory coset and increase lisibility
              */
             virtual std::map<uint64_t, std::vector<double>> computeDescriptors(
-                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-                uint64_t metricHash) const;
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const;
             
             /**
              * \brief Compute the distances between every individuals based on their descriptors values
@@ -88,7 +83,7 @@
              * \brief method ranking the individuals based on their average metric value over iterations
              * 
              * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
-             * \param[in] metricHash the hash of the required metric.
+             * \param[in] metricHash unused: the metric read is the one of the descriptor.
              * \return the fitness of each individual, indexed by individual ID.
              */
             virtual std::map<uint64_t, double> assignFitness(

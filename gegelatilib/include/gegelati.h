@@ -63,6 +63,11 @@
 #include <evaluation/reinforcementEnvironment.h>
 #include <evaluation/reinforcementProblem.h>
 
+// Descriptors
+#include <fitnessAssignment/noveltyDescriptors/averageVectorDescriptor.h>
+#include <fitnessAssignment/noveltyDescriptors/descriptor.h>
+#include <fitnessAssignment/noveltyDescriptors/scalarListDescriptor.h>
+
 // Evolution
 #include <evolution/basicEvolutionConfig.h>
 #include <evolution/entry.h>

@@ -121,8 +121,9 @@ namespace Evolution {
             /// Step caching the outputs of the vertices shared by several individuals.
             std::string cacheVertexOutputsStep = "CacheVertexOutputs";
 
-            /// Steps caching the outputs of the members and of the shared vertices for the validation.
+            /// Steps caching the outputs of the members for the validation.
             std::string validationCacheMemberOutputsStep = "ValidationCacheMemberOutputs";
+            /// Steps caching the outputs of the shared vertices for the validation.
             std::string validationCacheVertexOutputsStep = "ValidationCacheVertexOutputs";
 
             /// Step protecting the vertices referenced by others.

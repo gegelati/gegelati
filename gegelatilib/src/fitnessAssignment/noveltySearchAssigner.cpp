@@ -4,57 +4,15 @@
 #include <cmath>
 #include <limits>
 
-std::vector<double> FitnessAssignment::NoveltySearchAssigner::computeOneDescriptorAvgVector(
-    const std::map<uint64_t, const Metrics::VectorMetric*>& vectorMetrics) const
-{
-    auto it = vectorMetrics.begin();
-    std::vector<double> averageDescriptor = it->second->getValues();
-    it++;
-    while(it != vectorMetrics.end()) {
-
-        const std::vector<double>& currentValues = it->second->getValues();
-        if(currentValues.size() != averageDescriptor.size()) {
-            throw std::runtime_error("FitnessAssignment::NoveltySearchAssigner::computeDescriptors: All metrics must have the same number of values.");
-        }
-            
-        for(size_t idx = 0; idx < averageDescriptor.size(); idx++) {
-            averageDescriptor.at(idx) += currentValues.at(idx);
-        }
-
-        it++;
-    }
-
-    for(size_t idx = 0; idx < averageDescriptor.size(); idx++) {
-        averageDescriptor.at(idx) /= vectorMetrics.size();
-    }
-    return std::move(averageDescriptor);
-}
-
-std::vector<double> FitnessAssignment::NoveltySearchAssigner::computeOneDescriptorListScalar(
-    const std::map<uint64_t, const Metrics::ScalarMetric*>& scalarMetrics) const
-{
-    std::vector<double> listDescriptors;
-    for(const auto& [hash, scalarMetric]: scalarMetrics) {
-        listDescriptors.push_back(scalarMetric->getValue());
-    }
-    return std::move(listDescriptors);
-}
-
 std::map<uint64_t, std::vector<double>> FitnessAssignment::NoveltySearchAssigner::computeDescriptors(
-    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-    uint64_t metricHash) const
+    const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const
 {
     // Get the average values of each descriptor for each individual
     std::map<uint64_t, std::vector<double>> descriptorValues;
 
     for (const auto& [individualID, metricMap] : individualMetrics){
 
-        std::vector<double> currentDescriptorValues;
-        if(this->averageFeature) {
-            currentDescriptorValues = this->computeOneDescriptorAvgVector(metricMap->getMetricValues<Metrics::VectorMetric>(metricHash));
-        } else {
-            currentDescriptorValues = this->computeOneDescriptorListScalar(metricMap->getMetricValues<Metrics::ScalarMetric>(metricHash));
-        }
+        std::vector<double> currentDescriptorValues = this->descriptor->compute(*metricMap);
         
         if(currentDescriptorValues.size() == 0) {
             throw std::runtime_error("FitnessAssignment::NoveltySearchAssigner::computeDescriptors should not have zero descriptor values");
@@ -168,7 +126,7 @@ std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::assignFitne
                 const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
                 uint64_t metricHash) const
 {
-    std::map<uint64_t, std::vector<double>> descriptorValues = this->computeDescriptors(individualMetrics, metricHash);
+    std::map<uint64_t, std::vector<double>> descriptorValues = this->computeDescriptors(individualMetrics);
 
     std::map<uint64_t, std::map<uint64_t, double>> distances = this->computeDistances(descriptorValues);
 

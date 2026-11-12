@@ -123,6 +123,24 @@ TEST(MetricTest, extractAfterExecution) {
 
 }
 
+TEST(MetricTest, outputMetricValues) {
+    Evaluation::DataSet dataSet = createSmallDataSet();
+    Evaluation::PredictionProblem problem(dataSet);
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    Individual indiv(rep, GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0})));
+
+    Metrics::OutputMetric list;
+    ASSERT_TRUE(list.getValues().empty());
+    list.extractAfterExecution(0, indiv, Data::DataValue::scalar<int>(7), problem);
+    list.extractAfterExecution(0, indiv, Data::DataValue::scalar<double>(1.0), problem);
+    list.extractAfterExecution(0, indiv, Data::DataValue::array1d(std::vector<double>{4.0}), problem);
+    ASSERT_EQ(list.getValues(), (std::vector<double>{1.0, 4.0})) << "The values are the outputs made of a single double";
+    ASSERT_EQ(list.getRanges().size(), 2);
+    ASSERT_EQ(list.getOutputs().size(), 3) << "All the outputs are still stored";
+    ASSERT_EQ(list.cloneEmptyPtr()->hash(), Metrics::OutputMetric::staticHash());
+    ASSERT_TRUE(dynamic_cast<Metrics::OutputMetric&>(*list.cloneEmptyPtr()).getValues().empty()) << "The clone is empty";
+}
+
 TEST(MetricMapTest, ConstructorTemplate) 
 {
     Metrics::MetricMapTemplate* mapTemplate1;

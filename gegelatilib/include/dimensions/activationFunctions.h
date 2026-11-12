@@ -120,7 +120,65 @@ namespace Dimensions
                 return "TanH";
             }
         };
-            
+
+        /**
+         * \brief Logistic (Sigmoid) activation function scaling values to the range (0, 1).
+         * \tparam T Floating-point type used for the calculation.
+         */
+        template <typename T>
+        struct Sigmoid final : Function {
+            static_assert(
+                std::is_floating_point_v<T>,
+                "ActivationFunctions::Sigmoid requires a floating-point type."
+            );
+
+            /**
+             * \brief Constructs a Sigmoid activation function for the given input requirement.
+             * \param input The requirement of the input.
+             */
+            Sigmoid(const Requirement& input)
+             : Function({input}, Requirement(input.getDataType(), Dimensions::NumericRange<T>::between(static_cast<T>(0.0), static_cast<T>(1.0)))) {}
+
+            /**
+             * \brief Clone current function
+             */
+            std::unique_ptr<Function> cloneUniquePtr() const override
+            {
+                return std::make_unique<Sigmoid<T>>(this->inputs.at(0));
+            }
+
+            /**
+             * \brief Applies the logistic transformation 1 / (1 + exp(-x)) to each element.
+             * \param value The input DataValue.
+             * \return A DataValue with each element scaled to the range [0, 1].
+             */
+            virtual Data::DataValue execute(const Data::DataValue& value) const override {
+                size_t count = value.getType().totalElements();
+                auto data = value.getData<T>();
+                std::vector<T> values(count);
+                for (size_t idx = 0; idx < count; ++idx) {
+                    // Two branches avoid overflowing exp() for large magnitudes.
+                    const T x = data[idx];
+                    if (x >= static_cast<T>(0.0)) {
+                        values[idx] = static_cast<T>(1.0) / (static_cast<T>(1.0) + std::exp(-x));
+                    } else {
+                        const T e = std::exp(x);
+                        values[idx] = e / (static_cast<T>(1.0) + e);
+                    }
+                }
+
+                return Data::DataValue::fromRange(values, value.getType());
+            }
+
+            /**
+             * \brief Returns the name of this function.
+             * \return The string "Sigmoid".
+             */
+            virtual std::string name() const override {
+                return "Sigmoid";
+            }
+        };
+
 
          /**
           * \brief ArgMax activation function returning the index of the maximum value.

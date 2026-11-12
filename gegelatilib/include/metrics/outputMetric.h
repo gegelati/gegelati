@@ -5,16 +5,19 @@
 
 #include <map>
 
-#include "metrics/metric.h"
+#include "metrics/vectorMetric.h"
 
 
 
 namespace Metrics {
 
     /**
-     * \brief Metric extracting the inputs
+     * \brief Metric extracting the outputs of an evaluation.
+     *
+     * The values of the metric are the outputs made of a single double, in the order of the evaluation.
+     * Descriptors (see Descriptors::Descriptor) are in charge of summarizing them, e.g. with their mean.
      */
-    class OutputMetric: public Metric
+    class OutputMetric: public VectorMetric
     {
 
       protected:
@@ -25,7 +28,7 @@ namespace Metrics {
         /**
          * \brief Default constructor
          */
-        OutputMetric() {};
+        OutputMetric() : VectorMetric(0) {};
 
         /**
          * \brief clone returning predictionMetric

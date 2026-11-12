@@ -12,6 +12,10 @@ void Metrics::OutputMetric::extractAfterExecution(
     const Data::DataValue& output, const Evaluation::Problem& problem)
 {
     this->outputs.push_back(output.clone());
+    if(output.getType().totalElements() == 1 && *output.getType().elementType == typeid(double)) {
+        this->values.push_back(output.getScalar<double>());
+        this->ranges.push_back(Dimensions::NumericRange<double>::unbounded());
+    }
 }
 
 std::string Metrics::OutputMetric::toString(std::string prefix) const
