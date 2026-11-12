@@ -15,9 +15,16 @@ namespace Mutation {
 
         public:
 
-            /// @brief Default constructor
-            NodeTransferMutation(double pMutateNode, double pAddNode = 0.1, double pRemoveNode = 0.0)
-            : PointMutator(pMutateNode, pAddNode, pRemoveNode) {};
+            /**
+             * \brief Constructor, see PointMutator.
+             *
+             * \param[in] pMutateNode Probability of mutating a node.
+             * \param[in] pAddNode Probability of adding a node to the group if the generator allows it.
+             * \param[in] pRemoveNode Probability of removing a node to the group if the generator allows it.
+             * \param[in] name name of the mutator, only used to print it (e.g. in the summary of an evolution).
+             */
+            NodeTransferMutation(double pMutateNode, double pAddNode = 0.1, double pRemoveNode = 0.0, std::string name = "NodeTransferMutation")
+            : PointMutator(pMutateNode, pAddNode, pRemoveNode, std::move(name)) {};
 
             /**
              * \brief Set the individuals whose nodes are transferred by the next mutations.

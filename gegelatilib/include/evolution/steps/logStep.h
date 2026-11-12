@@ -19,7 +19,7 @@ namespace Evolution {
      * \brief Step writing the progress of the evolution: one row per generation, made of columns.
      *
      * A row starts with the generation, then has one value per column given, then the time since the previous row and since the start of the
-     * stopwatch of the evolution (a data, see startStopwatchStep, so the time of the generation 0 is the one of the initialization).
+     * stopwatch of the evolution (EvolutionData::stopwatch, started with the data, so the time of the generation 0 is the one of the initialization).
      * The initialization of the step writes the row of the initial state, the generation 0, so the log starts with the initial population.
      * The header is written before the row of generation 0, and before the first row written by the step.
      *
@@ -70,14 +70,19 @@ namespace Evolution {
             /// Width of the columns when there is no separator.
             size_t columnWidth = 14;
 
-            /// Name of the data holding the stopwatch of the evolution (see startStopwatchStep).
-            std::string stopwatchName;
-
             /// Time of the evolution at the previous row, to give the time of each generation.
             double previousTime = 0.0;
 
             /// Indicates if the header was written.
             bool headerWritten = false;
+
+            /**
+             * \brief Text of a value with a given number of digits after the decimal point, "-" if it is not a number.
+             *
+             * \param[in] value the value.
+             * \param[in] precision number of digits after the decimal point.
+             */
+            static std::string format(double value, int precision);
 
             /// Write a line made of the given texts.
             void writeLine(const std::vector<std::string>& texts);
@@ -93,10 +98,8 @@ namespace Evolution {
              * \param[in] columns columns written after the generation.
              * \param[in] separator separator of the values, empty to align the values in columns (see setColumnWidth).
              * \param[in] name name of the step.
-             * \param[in] stopwatch name of the data holding the stopwatch of the evolution, required (see startStopwatchStep).
              */
-            LogStep(std::ostream& output, std::vector<Column> columns, std::string separator = "", std::string name = "Log",
-                    std::string stopwatch = "Stopwatch");
+            LogStep(std::ostream& output, std::vector<Column> columns, std::string separator = "", std::string name = "Log");
 
             /**
              * \brief Set the width of the columns, used when there is no separator.
@@ -110,22 +113,22 @@ namespace Evolution {
     };
 
     /**
-     * \brief Step starting the stopwatch of the evolution, a data like any other, for the steps timing the evolution (see LogStep).
-     *
-     * It is meant to be the first step of an initialization, so that the time of the generation 0 is the one of the whole
-     * initialization. A stopwatch already started (e.g. by another evolution of the same module) is kept.
-     *
-     * \param[in] stopwatch name of the data holding the stopwatch.
-     */
-    std::shared_ptr<Module> startStopwatchStep(const std::string& stopwatch = "Stopwatch");
-
-    /**
      * \brief Column showing the number of individuals of a list (a population, the offspring...).
      *
      * \param[in] individuals name of the list of individuals.
      * \param[in] name heading of the column.
      */
     LogStep::Column sizeColumn(const std::string& individuals, std::string name = "Pop_Size");
+
+    /**
+     * \brief Fitness of the individuals of a list that have one.
+     *
+     * \param[in] state the data of the evolution.
+     * \param[in] individuals name of the list of individuals.
+     * \param[in] fitness name of the fitness of the individuals.
+     * \return the fitness of the individuals, empty if it was not computed during the current generation.
+     */
+    std::vector<double> fitnessOf(const EvolutionData& state, const std::string& individuals, const std::string& fitness);
 
     /**
      * \brief Columns showing the minimum, the average and the maximum of a fitness over a list of individuals.

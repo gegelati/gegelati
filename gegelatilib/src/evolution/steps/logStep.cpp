@@ -8,55 +8,42 @@
 
 #include "evolution/steps/lambdaStep.h"
 
-namespace {
-    // Fitness of the individuals that have one, empty if it was not computed during the current generation.
-    std::vector<double> fitnessOf(const Evolution::EvolutionData& state, const std::string& individuals,
-                                  const std::string& fitness)
-    {
-        std::vector<double> values;
-        if(state.isUpToDate(fitness)) {
-            for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(individuals)) {
-                const auto found = state.get<std::map<uint64_t, double>>(fitness)->find(individual->getIndividualID());
-                if(found != state.get<std::map<uint64_t, double>>(fitness)->end()) {
-                    values.push_back(found->second);
-                }
+// Fitness of the individuals that have one, empty if it was not computed during the current generation.
+std::vector<double> Evolution::fitnessOf(const EvolutionData& state, const std::string& individuals,
+                              const std::string& fitness)
+{
+    std::vector<double> values;
+    if(state.isUpToDate(fitness)) {
+        for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(individuals)) {
+            const auto found = state.get<std::map<uint64_t, double>>(fitness)->find(individual->getIndividualID());
+            if(found != state.get<std::map<uint64_t, double>>(fitness)->end()) {
+                values.push_back(found->second);
             }
         }
-        return values;
     }
-
-    // Text of a value, "-" if it is not a number.
-    std::string format(double value, int precision)
-    {
-        if(std::isnan(value)) {
-            return "-";
-        }
-        std::ostringstream text;
-        text << std::fixed << std::setprecision(precision) << value;
-        return text.str();
-    }
+    return values;
 }
 
-Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name, std::string stopwatch)
-    : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}, stopwatchName{std::move(stopwatch)}
+// Text of a value, "-" if it is not a number.
+std::string Evolution::LogStep::format(double value, int precision)
 {
-    this->requiredList.insert(this->stopwatchName);
+    if(std::isnan(value)) {
+        return "-";
+    }
+    std::ostringstream text;
+    text << std::fixed << std::setprecision(precision) << value;
+    return text.str();
+}
+
+Evolution::LogStep::LogStep(std::ostream& output, std::vector<Column> columns, std::string separator, std::string name)
+    : Module(std::move(name)), output{&output}, columns{std::move(columns)}, separator{std::move(separator)}
+{
     for(const Column& column: this->columns) {
         this->requiredList.insert(column.required.begin(), column.required.end());
     }
 
     // The initialization of the step writes the row of the initial state (the generations done so far, zero for a new evolution).
-    this->initialization = std::make_shared<LambdaStep>("WriteInitialState", [this](EvolutionData& state) { this->writeRow(state, state.nbGenerationsDone); },
-                                                        std::set<std::string>{this->stopwatchName});
-}
-
-std::shared_ptr<Evolution::Module> Evolution::startStopwatchStep(const std::string& stopwatch)
-{
-    return std::make_shared<LambdaStep>("StartStopwatch", [stopwatch](EvolutionData& state) {
-        if(!state.has(stopwatch)) {
-            state.add(stopwatch, std::make_shared<Stopwatch>());
-        }
-    }, std::set<std::string>{}, std::set<std::string>{stopwatch});
+    this->initialization = std::make_shared<LambdaStep>("WriteInitialState", [this](EvolutionData& state) { this->writeRow(state, state.nbGenerationsDone); });
 }
 
 void Evolution::LogStep::writeLine(const std::vector<std::string>& texts)
@@ -89,7 +76,7 @@ void Evolution::LogStep::writeRow(const EvolutionData& state, uint64_t generatio
         const bool available = std::all_of(column.required.begin(), column.required.end(), [&state](const std::string& name) { return state.has(name); });
         values.push_back(format(available ? column.value(state) : std::nan(""), column.precision));
     }
-    const double time = state.get<Stopwatch>(this->stopwatchName)->elapsed();
+    const double time = state.stopwatch.elapsed();
     values.push_back(format(time - ((generation == 0) ? 0.0 : this->previousTime), 2));
     values.push_back(format(time, 2));
     this->previousTime = time;

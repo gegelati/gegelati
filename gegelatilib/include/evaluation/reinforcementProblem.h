@@ -60,10 +60,12 @@ namespace Evaluation {
          * 
          * \param[in] env the reinforcement environment in which the individuals are evaluated.
          * \param[in] problemSeed the seed of the problem.
+         * \param[in] name name of the problem, only used to print it (e.g. in the summary of an evolution), e.g. the name of the game.
          */
         ReinforcementProblem(
-            const std::shared_ptr<Evaluation::ReinforcementEnvironment>& env, uint64_t problemSeed = 0) 
-            : Problem(env->getInputDimensions(), env->getOutputDimension(), problemSeed), env{env} {};
+            const std::shared_ptr<Evaluation::ReinforcementEnvironment>& env, uint64_t problemSeed = 0, std::string name = "ReinforcementProblem")
+            : Problem(env->getInputDimensions(), env->getOutputDimension(), problemSeed, std::move(name)), env{env} {};
+
 
         /// Default destructor for polymorphism
         virtual ~ReinforcementProblem() = default;

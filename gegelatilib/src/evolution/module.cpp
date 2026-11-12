@@ -4,40 +4,34 @@
 #include <atomic>
 #include <sstream>
 
-#include "util/stopwatch.h"
-
-namespace {
-    std::string listNames(const std::set<std::string>& names)
-    {
-        std::string result;
-        for(const std::string& name: names) {
-            result += (result.empty() ? "" : ", ") + name;
-        }
-        return result;
+std::string Evolution::Module::listNames(const std::set<std::string>& names)
+{
+    std::string result;
+    for(const std::string& name: names) {
+        result += (result.empty() ? "" : ", ") + name;
     }
+    return result;
+}
 
-    // Text of a module in the tree: name, parameters, period and repetitions.
-    std::string label(const Evolution::Module& module)
-    {
-        std::string details = module.details();
-        if(module.getPeriod() > 1) {
-            details += (details.empty() ? "" : ", ") + std::string("every ") + std::to_string(module.getPeriod()) + " generations";
-        }
-        return module.name() + (details.empty() ? "" : " (" + details + ")");
+std::string Evolution::Module::label() const
+{
+    std::string text = this->details();
+    if(this->period > 1) {
+        text += (text.empty() ? "" : ", ") + std::string("every ") + std::to_string(this->period) + " generations";
     }
+    return this->stepName + (text.empty() ? "" : " (" + text + ")");
+}
 
-    // Data required and provided by a leaf, written next to it in the tree.
-    std::string dataText(const Evolution::Module& module)
-    {
-        std::string text;
-        if(!module.requiredData().empty()) {
-            text += "requires: " + listNames(module.requiredData());
-        }
-        if(!module.providedData().empty()) {
-            text += std::string(text.empty() ? "" : " | ") + "provides: " + listNames(module.providedData());
-        }
-        return text;
+std::string Evolution::Module::dataText() const
+{
+    std::string text;
+    if(!this->requiredData().empty()) {
+        text += "requires: " + listNames(this->requiredData());
     }
+    if(!this->providedData().empty()) {
+        text += std::string(text.empty() ? "" : " | ") + "provides: " + listNames(this->providedData());
+    }
+    return text;
 }
 
 Evolution::Module::Module(std::string name) : stepName{std::move(name)}
@@ -209,13 +203,13 @@ void Evolution::Module::apply(EvolutionData& state)
         if(!step->runsAt(state.generation)) {
             continue;
         }
-        const Stopwatch stopwatch;
+        const double start = state.stopwatch.elapsed();
         step->apply(state);
-        step->lastDuration = stopwatch.elapsed();
+        step->lastDuration = state.stopwatch.elapsed() - start;
     }
 }
 
-void Evolution::Module::initialize(EvolutionData& state)
+void Evolution::Module::runInitializations(EvolutionData& state)
 {
     if(state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
         if(this->initialization != nullptr) {
@@ -227,7 +221,7 @@ void Evolution::Module::initialize(EvolutionData& state)
         state.initializedSteps.insert(this->stepId);
     }
     for(const std::shared_ptr<Module>& step: this->steps) {
-        step->initialize(state);
+        step->runInitializations(state);
     }
 }
 
@@ -241,25 +235,51 @@ void Evolution::Module::checkInitialization(const EvolutionData& state, std::set
     }
 }
 
-Evolution::EvolutionData Evolution::Module::evolve(size_t nbGenerations, uint64_t seed)
+bool Evolution::Module::isInitialized(const EvolutionData& state) const
+{
+    if(state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
+        return false;
+    }
+    return std::all_of(this->steps.begin(), this->steps.end(), [&state](const std::shared_ptr<Module>& step) { return step->isInitialized(state); });
+}
+
+Evolution::EvolutionData Evolution::Module::initialize(uint64_t seed)
 {
     EvolutionData data(seed);
-    this->resume(data, nbGenerations);
+    this->initialize(data);
     return data;
 }
 
-void Evolution::Module::resume(EvolutionData& state, size_t nbGenerations)
+void Evolution::Module::initialize(EvolutionData& state)
 {
+    // The data of the generations are checked too, to fail before running any initialization.
     std::set<std::string> available = state.dataNames();
     this->checkInitialization(state, available);
     this->checkData(available, "generations");
 
-    this->initialize(state);
+    this->runInitializations(state);
+}
+
+void Evolution::Module::evolve(EvolutionData& state, size_t nbGenerations)
+{
+    if(!this->isInitialized(state)) {
+        throw std::runtime_error("Evolution::Module::evolve: the data are not initialized, call initialize first (module '" + this->stepName + "')");
+    }
+    std::set<std::string> available = state.dataNames();
+    this->checkData(available, "generations");
+
     for(size_t idx = 0; idx < nbGenerations; idx++) {
         state.generation = state.nbGenerationsDone + 1;
         this->apply(state);
         state.nbGenerationsDone++;
     }
+}
+
+Evolution::EvolutionData Evolution::Module::evolve(size_t nbGenerations, uint64_t seed)
+{
+    EvolutionData data = this->initialize(seed);
+    this->evolve(data, nbGenerations);
+    return data;
 }
 
 void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data) const
@@ -275,7 +295,7 @@ void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::stri
             left += (data->initializedSteps.find(this->stepId) != data->initializedSteps.end()) ? " [done]" : " [pending]";
         }
         if(this->initialization->steps.empty()) {
-            rows.emplace_back(left + ": " + label(*this->initialization), dataText(*this->initialization));
+            rows.emplace_back(left + ": " + this->initialization->label(), this->initialization->dataText());
         } else {
             rows.emplace_back(left, "");
             this->initialization->collectRows(rows, prefix + (last ? "   " : "|  "), data);
@@ -283,7 +303,7 @@ void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::stri
     }
     for(const std::shared_ptr<Module>& step: this->steps) {
         const bool last = (++idxItem == nbItems);
-        rows.emplace_back(prefix + (last ? "`- " : "|- ") + label(*step), step->steps.empty() ? dataText(*step) : "");
+        rows.emplace_back(prefix + (last ? "`- " : "|- ") + step->label(), step->steps.empty() ? step->dataText() : "");
         step->collectRows(rows, prefix + (last ? "   " : "|  "), data);
     }
 }
@@ -291,7 +311,7 @@ void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::stri
 std::string Evolution::Module::summary(const EvolutionData* data) const
 {
     std::vector<std::pair<std::string, std::string>> rows;
-    rows.emplace_back(label(*this), "");
+    rows.emplace_back(this->label(), "");
     this->collectRows(rows, "", data);
 
     // Data of the leaves are aligned in a column.

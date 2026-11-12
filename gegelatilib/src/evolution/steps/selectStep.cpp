@@ -2,18 +2,6 @@
 
 #include <stdexcept>
 
-namespace {
-    // Names of lists, separated by commas.
-    std::string namesOf(const std::vector<std::string>& lists)
-    {
-        std::string names;
-        for(const std::string& list: lists) {
-            names += (names.empty() ? "" : ", ") + list;
-        }
-        return names;
-    }
-}
-
 
 Evolution::SelectStep::SelectStep(std::vector<std::string> candidates, std::string fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
                                   std::string selected, bool distinct, std::string name)
@@ -32,7 +20,11 @@ Evolution::SelectStep::SelectStep(std::vector<std::string> candidates, std::stri
 
 std::string Evolution::SelectStep::details() const
 {
-    return std::to_string(this->nbSelected) + (this->distinct ? " distinct" : "") + " from " + namesOf(this->candidates)
+    std::string names;
+    for(const std::string& name: this->candidates) {
+        names += (names.empty() ? "" : ", ") + name;
+    }
+    return this->selector->getSelectorName() + ", " + std::to_string(this->nbSelected) + (this->distinct ? " distinct" : "") + " from " + names
         + " to " + this->selected;
 }
 

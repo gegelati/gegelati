@@ -9,8 +9,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "learn/stickGameWithOpponent.h"
 #include "evaluation/reinforcementProblem.h"
-#include "evaluation/evaluator.h"
-#include "evaluation/parallelEvaluator.h"
+#include "evaluation/evaluate.h"
 #include "metrics/rewardsMetric.h"
 #include "metrics/inputMetric.h"
 #include "metrics/outputMetric.h"
@@ -333,7 +332,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     const std::string cacheKey("TPG.memberOutputCache");
     tpgModule->insertAfter(tpgModule->find("Mutation"), std::make_shared<Evolution::CacheMemberOutputsStep>(
         std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem,
-        std::make_shared<Evaluation::ParallelEvaluator>(tpg.nbThreads), tpg.nbTrainingIterations));
+        tpg.nbTrainingIterations, Evaluation::Mode::TRAINING, tpg.nbThreads));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
     columns.insert(columns.begin() + 1, {"NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
@@ -435,7 +434,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     evolutionModule->add(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness));
 
 
-    evolutionModule->resume(state, 40);
+    evolutionModule->initialize(state);
+    evolutionModule->evolve(state, 40);
 
     EXPECT_EQ(13348146703180701991U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     EXPECT_EQ(62131, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
@@ -491,7 +491,8 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2D) {
     evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
     str = "graphLGPBest";
     evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
-    evolutionModule->resume(state, 200);
+    evolutionModule->initialize(state);
+    evolutionModule->evolve(state, 200);
 
     ASSERT_EQ(13253408461481353746U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
@@ -552,7 +553,8 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
 
 
-    evolutionModule->resume(state, 10000);
+    evolutionModule->initialize(state);
+    evolutionModule->evolve(state, 10000);
 
     ASSERT_EQ(17819704308639420184U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     ASSERT_EQ(22492, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";

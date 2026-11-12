@@ -23,6 +23,8 @@
     class Mutator
     {
     protected:
+        /// Name of the mutator.
+        std::string mutatorName;
 
     public:
 
@@ -35,8 +37,13 @@
     
         /**
          * \brief Main Mutator constructor.
+         *
+         * \param[in] mutatorName name of the mutator.
          */
-        Mutator() {};
+        Mutator(std::string mutatorName = "Mutator") : mutatorName{std::move(mutatorName)} {};
+
+        /// Return the name of the mutator.
+        const std::string& getMutatorName() const { return this->mutatorName; }
 
         /**
          * \brief Create a random Node.

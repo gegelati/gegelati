@@ -9,7 +9,7 @@
 
 #include "dimensions/requirement.h"
 #include "evaluation/dataset.h"
-#include "evaluation/evaluator.h"
+#include "evaluation/evaluate.h"
 #include "evaluation/predictionProblem.h"
 #include "individual.h"
 #include "metrics/metricMap.h"
@@ -20,6 +20,37 @@
 #include "representations/representation.h"
 
 namespace Evolution {
+
+    /**
+     * \brief Execute individuals once on the samples of an evaluation and cache their outputs in them (Individual::cacheOutput).
+     *
+     * Individuals whose own sub-individuals are already cached run faster, so callers order them accordingly.
+     *
+     * \param[in] individuals the individuals executed.
+     * \param[in,out] problem the problem giving the samples.
+     * \param[in] nbIterations number of samples of the evaluation.
+     * \param[in] generation the current generation.
+     * \param[in] mode evaluation mode, given to the problem.
+     * \param[in] nbThreads maximum number of threads executing the individuals (see Evaluation::evaluateIndividuals).
+     */
+    void cacheOutputsOf(const std::vector<std::shared_ptr<const Individual>>& individuals, Evaluation::PredictionProblem& problem,
+                        size_t nbIterations, uint64_t generation, Evaluation::Mode mode, size_t nbThreads);
+
+    /**
+     * \brief Gather the individuals of lists of the data.
+     *
+     * \param[in] state the data of the evolution.
+     * \param[in] keys names of the lists of individuals (list of individuals or list of mutable individuals).
+     */
+    std::vector<std::shared_ptr<const Individual>> gatherIndividuals(const EvolutionData& state, const std::vector<std::string>& keys);
+
+    /**
+     * \brief Clear the outputs cached at the previous run of a caching step: they are for samples of a previous generation.
+     *
+     * \param[in] state the data of the evolution.
+     * \param[in] cache name of the cached individuals, a list of individuals, ignored if it does not exist yet.
+     */
+    void clearPreviousCache(const EvolutionData& state, const std::string& cache);
 
     /**
      * \brief Step mutating TPG vertices with the generator found in the data.
@@ -88,14 +119,14 @@ namespace Evolution {
             /// Problem in which members are evaluated.
             std::shared_ptr<Evaluation::PredictionProblem> problem;
 
-            /// Evaluator running the evaluations.
-            std::shared_ptr<const Evaluation::Evaluator> evaluator;
-
             /// Number of samples of the evaluation.
             size_t nbIterations;
 
             /// Evaluation mode, given to the problem: the outputs are cached for the samples of this mode.
             Evaluation::Mode mode;
+
+            /// Maximum number of threads evaluating the individuals.
+            size_t nbThreads;
 
         public:
             /**
@@ -104,14 +135,14 @@ namespace Evolution {
              * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
              * \param[in] cache name of the cached members, a list of individuals.
              * \param[in] problem problem in which members are evaluated.
-             * \param[in] evaluator evaluator running the evaluations.
              * \param[in] nbIterations number of samples of the evaluation.
              * \param[in] mode evaluation mode, given to the problem.
+             * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step.
              * \throw std::runtime_error if the problem is null.
              */
             CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                   std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING,
+                                   size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1,
                                    std::string name = "CacheMemberOutputs");
 
             /// Inherited from Module
@@ -146,14 +177,14 @@ namespace Evolution {
             /// Problem in which vertices are evaluated.
             std::shared_ptr<Evaluation::PredictionProblem> problem;
 
-            /// Evaluator running the evaluations.
-            std::shared_ptr<const Evaluation::Evaluator> evaluator;
-
             /// Number of samples of the evaluation.
             size_t nbIterations;
 
             /// Evaluation mode, given to the problem: the outputs are cached for the samples of this mode.
             Evaluation::Mode mode;
+
+            /// Maximum number of threads evaluating the individuals.
+            size_t nbThreads;
 
         public:
             /**
@@ -162,14 +193,14 @@ namespace Evolution {
              * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
              * \param[in] cache name of the cached vertices, a list of individuals.
              * \param[in] problem problem in which vertices are evaluated.
-             * \param[in] evaluator evaluator running the evaluations.
              * \param[in] nbIterations number of samples of the evaluation.
              * \param[in] mode evaluation mode, given to the problem.
+             * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step.
              * \throw std::runtime_error if the problem is null.
              */
             CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                   std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING,
+                                   size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1,
                                    std::string name = "CacheVertexOutputs");
 
             /**

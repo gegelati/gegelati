@@ -21,8 +21,13 @@ namespace Descriptors {
      */
     class ScalarListDescriptor : public Descriptor {
       public:
-        /// \brief Constructor, see Descriptor.
-        explicit ScalarListDescriptor(uint64_t metricHash) : Descriptor(metricHash) {};
+        /**
+         * \brief Constructor.
+         *
+         * \param[in] metricHash the hash of the metric the descriptor is computed from.
+         * \param[in] name name of the descriptor, only used to print it (e.g. in the summary of an evolution).
+         */
+        explicit ScalarListDescriptor(uint64_t metricHash, std::string name = "ScalarListDescriptor") : Descriptor(metricHash, std::move(name)) {};
 
         virtual std::vector<double> compute(Metrics::MetricMap& metrics) const override;
 

@@ -22,18 +22,16 @@
 #include "metrics/inputMetric.h"
 #include "mutation/pointMutator.h"
 
-namespace {
-    // Mutator of the vertices, the default one if none is set.
-    std::shared_ptr<Mutation::NodeTransferMutation> usedTransfer(const Evolution::OriginTPGEvolutionConfig& evolution)
-    {
-        return (evolution.nodeTransfer != nullptr) ? evolution.nodeTransfer : std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
-    }
+// Mutator of the vertices, the default one if none is set.
+std::shared_ptr<Mutation::NodeTransferMutation> Evolution::OriginTPGEvolutionConfig::usedTransfer() const
+{
+    return (this->nodeTransfer != nullptr) ? this->nodeTransfer : std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
+}
 
-    // Mutator of the members, the default one if none is set.
-    std::shared_ptr<const Mutation::Mutator> usedMemberMutator(const Evolution::OriginTPGEvolutionConfig& evolution)
-    {
-        return (evolution.memberMutation != nullptr) ? evolution.memberMutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-    }
+// Mutator of the members, the default one if none is set.
+std::shared_ptr<const Mutation::Mutator> Evolution::OriginTPGEvolutionConfig::usedMemberMutator() const
+{
+    return (this->memberMutation != nullptr) ? this->memberMutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
 }
 
 std::shared_ptr<const Representations::TPG> Evolution::OriginTPGEvolutionConfig::checkTPGSettings() const
@@ -61,9 +59,8 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     const auto tpgRepresentation = this->checkTPGSettings();
 
     // Step 1: from the settings, create what the modules need.
-    const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
-    const std::shared_ptr<Mutation::NodeTransferMutation> transfer = usedTransfer(*this);
-    const std::shared_ptr<const Mutation::Mutator> memberMutator = usedMemberMutator(*this);
+    const std::shared_ptr<Mutation::NodeTransferMutation> transfer = this->usedTransfer();
+    const std::shared_ptr<const Mutation::Mutator> memberMutator = this->usedMemberMutator();
 
     // The archive samples the inputs measured by the training evaluations. A fixed archive only samples during the initialization.
     const bool withArchive = this->archiveSize > 0;
@@ -119,11 +116,11 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
 
     // Outputs of the members, then of the vertices shared by several individuals, are computed once per sample before an evaluation.
     auto addCacheSteps = [](Module& module, const std::vector<std::string>& evaluated, const std::shared_ptr<Evaluation::PredictionProblem>& predictionProblem,
-                            const std::shared_ptr<Evaluation::Evaluator>& cacheEvaluator, size_t nbIterations, Evaluation::Mode mode,
+                            size_t nbIterations, Evaluation::Mode mode, size_t nbThreads,
                             const std::string& memberCache, const std::string& vertexCache, const std::string& memberStep, const std::string& vertexStep,
                             size_t period) {
-        auto members = std::make_shared<CacheMemberOutputsStep>(evaluated, memberCache, predictionProblem, cacheEvaluator, nbIterations, mode, memberStep);
-        auto vertices = std::make_shared<CacheVertexOutputsStep>(evaluated, vertexCache, predictionProblem, cacheEvaluator, nbIterations, mode, vertexStep);
+        auto members = std::make_shared<CacheMemberOutputsStep>(evaluated, memberCache, predictionProblem, nbIterations, mode, nbThreads, memberStep);
+        auto vertices = std::make_shared<CacheVertexOutputsStep>(evaluated, vertexCache, predictionProblem, nbIterations, mode, nbThreads, vertexStep);
         members->setPeriod(period);
         vertices->setPeriod(period);
         module.add(members);
@@ -138,22 +135,21 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
         const auto validated = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(
             (this->validationProblem != nullptr) ? this->validationProblem : this->problem);
         if(validated != nullptr) {
-            addCacheSteps(module, std::vector<std::string>{this->names.population}, validated, evaluator, this->nbValidationIterations,
-                          Evaluation::Mode::VALIDATION, this->tpgNames.validationMemberOutputCache, this->tpgNames.validationVertexOutputCache,
+            addCacheSteps(module, std::vector<std::string>{this->names.population}, validated, this->nbValidationIterations,
+                          Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationMemberOutputCache, this->tpgNames.validationVertexOutputCache,
                           this->tpgNames.validationCacheMemberOutputsStep, this->tpgNames.validationCacheVertexOutputsStep, this->validationPeriod);
         }
     };
 
     // Step 2: build the modules. The initialization creates the archive and the vertices, then evaluates them...
     auto init = std::make_shared<Module>(this->names.initialization);
-    init->add(startStopwatchStep(this->names.stopwatch));
     if(withArchive) {
         init->add(std::make_shared<CreateArchiveStep>(this->tpgNames.archive, tpgRepresentation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
     }
     init->add(makeGeneratorStep(false));
     init->add(std::make_shared<InitPopulationStep>(this->names.population, this->representation, this->sizePopulation, transfer, this->tpgNames.generator, this->names.initPopulationStep));
     init->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population}, this->names.trainingMetrics, this->problem,
-                                             evaluator, initMetrics, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
+                                             initMetrics, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->names.initialEvaluationStep));
     this->addFitnessSteps(*init, fitnessMetricHash);
     if(this->protectAggregated) {
         init->add(std::make_shared<ProtectAggregatedStep>(this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep));
@@ -162,7 +158,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
         init->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
     addValidationCacheSteps(*init);
-    this->addValidationSteps(*init, evaluator);
+    this->addValidationSteps(*init);
 
     // ... then a generation, where nodes transferred by the mutation of the offspring are the ones of the current population.
     auto generation = std::make_shared<Module>(this->names.evolution);
@@ -170,13 +166,13 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     generation->add(makeGeneratorStep(true));
     generation->add(std::make_shared<MutateVerticesStep>(this->names.offspring, this->names.population, this->tpgNames.generator, transfer, this->nbThreads, this->names.mutationStep));
     if(const auto predictionProblem = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem)) {
-        addCacheSteps(*generation, std::vector<std::string>{this->names.population, this->names.offspring}, predictionProblem, evaluator,
-                      this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->tpgNames.memberOutputCache, this->tpgNames.vertexOutputCache,
+        addCacheSteps(*generation, std::vector<std::string>{this->names.population, this->names.offspring}, predictionProblem,
+                      this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.memberOutputCache, this->tpgNames.vertexOutputCache,
                       this->tpgNames.cacheMemberOutputsStep, this->tpgNames.cacheVertexOutputsStep, 1);
     }
     generation->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population, this->names.offspring},
-                                                   this->names.trainingMetrics, this->problem, evaluator, generationMetrics, this->nbTrainingIterations,
-                                                   Evaluation::Mode::TRAINING, this->names.trainingEvaluationStep));
+                                                   this->names.trainingMetrics, this->problem, generationMetrics, this->nbTrainingIterations,
+                                                   Evaluation::Mode::TRAINING, this->nbThreads, this->names.trainingEvaluationStep));
     this->addFitnessSteps(*generation, generationMetricHash);
     this->addSurvivalStep(*generation);
     if(this->protectAggregated) {
@@ -186,7 +182,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
         generation->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
     addValidationCacheSteps(*generation);
-    this->addValidationSteps(*generation, evaluator);
+    this->addValidationSteps(*generation);
     this->addLogStep(*generation);
 
     generation->setInitialization(init);
@@ -206,29 +202,23 @@ std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolutionConfig::log
     return columns;
 }
 
-namespace {
-    // Index of the member in a node, and of the destination in a node.
-    constexpr size_t memberValueIndex = 0;
-    constexpr size_t destinationValueIndex = 1;
-
-    // Individuals referenced by the value at a given index of the nodes of the first node group.
-    std::vector<std::shared_ptr<const Individual>> getReferencedBy(const Individual& vertex, size_t idxValue)
-    {
-        std::map<uint64_t, std::shared_ptr<const Individual>> referenced;
-        const std::vector<std::reference_wrapper<const GraphBased::GPNode>> nodes = vertex.getGenotype().getNodeGroup(0).getNodes();
-        for(const GraphBased::GPNode& node: nodes) {
-            if(node.getValue(idxValue).getElementType() == typeid(std::shared_ptr<const Individual>)) {
-                const std::shared_ptr<const Individual>& individual = node.getValue(idxValue).getScalar<std::shared_ptr<const Individual>>();
-                referenced.emplace(individual->getIndividualID(), individual);
-            }
+// Individuals referenced by the value at a given index of the nodes of the first node group.
+std::vector<std::shared_ptr<const Individual>> Evolution::getReferencedBy(const Individual& vertex, size_t idxValue)
+{
+    std::map<uint64_t, std::shared_ptr<const Individual>> referenced;
+    const std::vector<std::reference_wrapper<const GraphBased::GPNode>> nodes = vertex.getGenotype().getNodeGroup(0).getNodes();
+    for(const GraphBased::GPNode& node: nodes) {
+        if(node.getValue(idxValue).getElementType() == typeid(std::shared_ptr<const Individual>)) {
+            const std::shared_ptr<const Individual>& individual = node.getValue(idxValue).getScalar<std::shared_ptr<const Individual>>();
+            referenced.emplace(individual->getIndividualID(), individual);
         }
-
-        std::vector<std::shared_ptr<const Individual>> result;
-        for(const auto& [id, individual]: referenced) {
-            result.push_back(individual);
-        }
-        return result;
     }
+
+    std::vector<std::shared_ptr<const Individual>> result;
+    for(const auto& [id, individual]: referenced) {
+        result.push_back(individual);
+    }
+    return result;
 }
 
 std::vector<std::shared_ptr<const Individual>> Evolution::getSubVertices(const Individual& vertex)

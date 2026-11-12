@@ -61,3 +61,12 @@ uint64_t Evaluation::Problem::getProblemSeed() const
 {
     return this->problemSeed;
 }
+
+std::string Evaluation::modeName(Mode mode)
+{
+    switch(mode) {
+        case Mode::TRAINING: return "training";
+        case Mode::VALIDATION: return "validation";
+        default: return "testing";
+    }
+}

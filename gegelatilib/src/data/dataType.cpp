@@ -214,19 +214,17 @@ bool Data::DataType::equalsWithLayout(const DataType& other) const noexcept
     return *this == other && this->strides == other.strides;
 }
 
-namespace {
-    // Print a list like [2, 3].
-    void printList(std::ostringstream& oss, const Data::Extents& list)
-    {
-        oss << "[";
-        for (size_t idx = 0; idx < list.size(); ++idx) {
-            if (idx > 0) {
-                oss << ", ";
-            }
-            oss << list[idx];
+// Print a list like [2, 3].
+void Data::DataType::printList(std::ostream& oss, const Data::Extents& list)
+{
+    oss << "[";
+    for (size_t idx = 0; idx < list.size(); ++idx) {
+        if (idx > 0) {
+            oss << ", ";
         }
-        oss << "]";
+        oss << list[idx];
     }
+    oss << "]";
 }
 
 std::string Data::DataType::toString() const

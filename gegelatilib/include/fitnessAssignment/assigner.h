@@ -12,6 +12,10 @@
      * evaluations into a scalar fitness value, higher being better.
      */
     class Assigner {
+        protected:
+            /// Name of the assigner.
+            std::string assignerName;
+
         public: 
 
             /// Default polymorphic destructor
@@ -19,8 +23,13 @@
 
             /**
              * \brief Default constructor
+             *
+             * \param[in] assignerName name of the assigner.
              */
-            Assigner() {};
+            Assigner(std::string assignerName = "Assigner") : assignerName{std::move(assignerName)} {};
+
+            /// Return the name of the assigner.
+            const std::string& getAssignerName() const { return this->assignerName; }
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Assigner(const Assigner&) = delete;

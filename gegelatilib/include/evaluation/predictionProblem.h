@@ -59,9 +59,10 @@ namespace Evaluation {
          * 
          * \param[in] dataset The dataset.
          * \param[in] problemSeed the seed of the problem.
+         * \param[in] name name of the problem, only used to print it (e.g. in the summary of an evolution), e.g. the name of the dataset.
          */
-        PredictionProblem(const DataSet& dataset, uint64_t problemSeed = 0) 
-            : Problem(dataset.getInputDimensions(), dataset.getOutputDimension(), problemSeed), dataset{dataset} {};
+        PredictionProblem(const DataSet& dataset, uint64_t problemSeed = 0, std::string name = "PredictionProblem")
+            : Problem(dataset.getInputDimensions(), dataset.getOutputDimension(), problemSeed, std::move(name)), dataset{dataset} {};
 
         /// Default destructor for polymorphism
         virtual ~PredictionProblem() = default;

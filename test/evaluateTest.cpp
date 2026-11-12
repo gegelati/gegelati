@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "evaluation/evaluator.h"
+#include "evaluation/evaluate.h"
 
 #include "evaluation/predictionProblem.h"
 
@@ -17,20 +17,10 @@
 #include "learn/dataSetExamples.h"
 
 
-TEST(EvaluatorTest, Constructor)
-{
-    Evaluation::Evaluator* evaluator;
-
-    ASSERT_NO_THROW(evaluator = new Evaluation::Evaluator()) << "Construction failed";
-
-    ASSERT_NO_THROW(delete evaluator) << "Destruction failed";
-}
-
-TEST(EvaluatorTest, evaluateIndividualsOnRL)
+TEST(EvaluateTest, evaluateIndividualsOnRL)
 {
     std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
     Evaluation::ReinforcementProblem problem(le);
-    Evaluation::Evaluator evaluator;
 
     auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
@@ -45,7 +35,7 @@ TEST(EvaluatorTest, evaluateIndividualsOnRL)
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
 
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
-    ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING)) << "RL evaluation failed";
+    ASSERT_NO_THROW(results = Evaluation::evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING)) << "RL evaluation failed";
     ASSERT_EQ(results.size(), 1) << "There should be one evaluation result";
     ASSERT_TRUE(results.find(indivID) != results.end()) << "The evaluated individual should be present in the results";
     ASSERT_NE(results.at(indivID), nullptr) << "The metric map should not be null";
@@ -74,11 +64,10 @@ TEST(EvaluatorTest, evaluateIndividualsOnRL)
 }
 
 
-TEST(EvaluatorTest, evaluateIndividualsOnClassif)
+TEST(EvaluateTest, evaluateIndividualsOnClassif)
 {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Evaluation::Evaluator evaluator;
 
     auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     rep->output = Data::DataValue::scalar<int>(0);
@@ -94,7 +83,7 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results;
 
-    ASSERT_NO_THROW(results = evaluator.evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TRAINING)) << "Classification evaluation failed";
+    ASSERT_NO_THROW(results = Evaluation::evaluateIndividuals(individuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TRAINING)) << "Classification evaluation failed";
     ASSERT_EQ(results.size(), 1) << "There should be one evaluation result";
     ASSERT_TRUE(results.find(indivID) != results.end()) << "The evaluated individual should be present in the results";
     ASSERT_NE(results.at(indivID), nullptr) << "The metric map should not be null";
@@ -132,11 +121,10 @@ TEST(EvaluatorTest, evaluateIndividualsOnClassif)
     ASSERT_EQ(outputMetrics.at(hash1)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Output value should be equal";
 }
 
-TEST(EvaluatorTest, evaluateIndividualsInvalidArguments)
+TEST(EvaluateTest, evaluateIndividualsInvalidArguments)
 {
     Evaluation::DataSet dataSet = createSmallDataSet();
     Evaluation::PredictionProblem problem(dataSet);
-    Evaluation::Evaluator evaluator;
 
     auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
     std::unique_ptr<GraphBased::Genotype> genotype = GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}));
@@ -146,12 +134,45 @@ TEST(EvaluatorTest, evaluateIndividualsInvalidArguments)
 
     auto emptyMetricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
 
-    ASSERT_THROW(evaluator.evaluateIndividuals(individuals, problem, emptyMetricTemplate, 2, 0, Evaluation::Mode::TESTING), std::runtime_error) << "Evaluation should fail with an empty metric template";
+    ASSERT_THROW(Evaluation::evaluateIndividuals(individuals, problem, emptyMetricTemplate, 2, 0, Evaluation::Mode::TESTING), std::runtime_error) << "Evaluation should fail with an empty metric template";
 
     auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
     metricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
 
     std::vector<std::shared_ptr<const Individual>> emptyIndividuals;
 
-    ASSERT_THROW(evaluator.evaluateIndividuals(emptyIndividuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING), std::runtime_error) << "Evaluation should fail with an empty set of individuals";
+    ASSERT_THROW(Evaluation::evaluateIndividuals(emptyIndividuals, problem, metricTemplate, 2, 0, Evaluation::Mode::TESTING), std::runtime_error) << "Evaluation should fail with an empty set of individuals";
+}
+
+TEST(EvaluateTest, severalThreadsGiveTheSameResults)
+{
+    std::shared_ptr<Evaluation::ReinforcementEnvironment> le = std::make_shared<StickGameWithOpponent>();
+    Evaluation::ReinforcementProblem problem(le, 3);
+    ASSERT_TRUE(problem.isCopyable());
+
+    auto rep = std::make_shared<Representations::FakeRepresentation>(problem.getInputDimensions(), problem.getOutputDimension());
+    std::vector<std::shared_ptr<const Individual>> individuals;
+    for(size_t idx = 0; idx < 8; idx++) {
+        individuals.push_back(std::make_shared<Individual>(rep, GraphBased::Genotype::singleNodeGenotype(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0}))));
+    }
+    auto metricTemplate = std::make_shared<Metrics::MetricMapTemplate>();
+    metricTemplate->addRequiredMetric(std::make_unique<Metrics::OutputMetric>());
+
+    auto serial = Evaluation::evaluateIndividuals(individuals, problem, metricTemplate, 3, 2, Evaluation::Mode::TRAINING);
+    auto zero = Evaluation::evaluateIndividuals(individuals, problem, metricTemplate, 3, 2, Evaluation::Mode::TRAINING, 0);
+    auto parallel = Evaluation::evaluateIndividuals(individuals, problem, metricTemplate, 3, 2, Evaluation::Mode::TRAINING, 4);
+
+    for(const auto& results : {&zero, &parallel}) {
+        ASSERT_EQ(results->size(), individuals.size());
+        for(const std::shared_ptr<const Individual>& individual : individuals) {
+            const uint64_t id = individual->getIndividualID();
+            ASSERT_TRUE(results->find(id) != results->end());
+            auto expected = serial.at(id)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+            auto actual = results->at(id)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+            ASSERT_EQ(actual.size(), expected.size());
+            for(const auto& [hash, metric] : expected) {
+                ASSERT_EQ(actual.at(hash)->getOutputs(), metric->getOutputs()) << "The threads must not change the evaluation";
+            }
+        }
+    }
 }

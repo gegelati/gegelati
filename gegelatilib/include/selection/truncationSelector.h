@@ -14,8 +14,12 @@
         
         public: 
 
-            /// @brief Default constructor setting replacement value to false
-            TruncationSelector() : Selector(false) {}
+            /**
+             * \brief Constructor, the selection is without replacement.
+             *
+             * \param[in] name name of the selector, only used to print it (e.g. in the summary of an evolution).
+             */
+            explicit TruncationSelector(std::string name = "TruncationSelector") : Selector(false, std::move(name)) {}
 
             /**
              * \brief method performing the truncation selection

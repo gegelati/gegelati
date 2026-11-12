@@ -18,6 +18,9 @@
             /// Boolean indicating wether this selection mechanism allows replacement.  
             bool replacement;
 
+            /// Name of the selector.
+            std::string selectorName;
+
         public: 
 
             /// Default polymorphic destructor
@@ -26,9 +29,13 @@
             /**
              * \brief Default constructor
              * 
-             * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.  
+             * \param[in] replacement Boolean indicating wether this selection mechanism allows replacement.
+             * \param[in] selectorName name of the selector.
              */
-            Selector(bool replacement) : replacement{replacement} {};
+            Selector(bool replacement, std::string selectorName = "Selector") : replacement{replacement}, selectorName{std::move(selectorName)} {};
+
+            /// Return the name of the selector.
+            const std::string& getSelectorName() const { return this->selectorName; }
             
             // Disable copying to avoid accidental copies (use references or pointers instead).
             Selector(const Selector&) = delete;

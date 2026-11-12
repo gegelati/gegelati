@@ -292,12 +292,12 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
 
     // The members of the roots and of the offspring are cached.
     const auto offspring = roots.offspring;
-    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem, std::make_shared<Evaluation::Evaluator>(), 2);
+    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem, 2);
     Evolution::EvolutionData state = makeState({vertex});
     state.set(offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>());
     EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring}));
     EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey}));
-    EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, cacheKey, nullptr, std::make_shared<Evaluation::Evaluator>(), 2), std::runtime_error);
+    EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, cacheKey, nullptr, 2), std::runtime_error);
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
     ASSERT_NO_THROW(step.apply(state));

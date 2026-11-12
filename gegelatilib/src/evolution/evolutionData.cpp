@@ -11,6 +11,7 @@ void Evolution::EvolutionData::reset(uint64_t seed)
     this->rng.setSeed(seed);
     this->data.clear();
     this->initializedSteps.clear();
+    this->stopwatch.reset();
 }
 
 std::set<std::string> Evolution::EvolutionData::dataNames() const

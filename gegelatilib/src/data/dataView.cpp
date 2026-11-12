@@ -115,36 +115,34 @@ size_t Data::DataView::getCombinedHash(const std::vector<DataView>& views)
     return hash;
 }
 
-namespace {
-    // Hash of a block of bytes, reading 8 bytes at a time.
-    // The 4 lanes are independent so that the multiplications can overlap, which makes it several times
-    // faster than a byte by byte hash (e.g. FNV-1a) on big arrays.
-    uint64_t hashBytes(const unsigned char* bytes, size_t size) noexcept
-    {
-        constexpr uint64_t prime = 0x9E3779B97F4A7C15ull;
-        auto mix = [](uint64_t lane, uint64_t word) {
-            lane = (lane ^ word) * prime;
-            return lane ^ (lane >> 29);
-        };
+// Hash of a block of bytes, reading 8 bytes at a time.
+// The 4 lanes are independent so that the multiplications can overlap, which makes it several times
+// faster than a byte by byte hash (e.g. FNV-1a) on big arrays.
+uint64_t Data::DataView::hashBytes(const unsigned char* bytes, size_t size) noexcept
+{
+    constexpr uint64_t prime = 0x9E3779B97F4A7C15ull;
+    auto mix = [](uint64_t lane, uint64_t word) {
+        lane = (lane ^ word) * prime;
+        return lane ^ (lane >> 29);
+    };
 
-        uint64_t lanes[4] = {0x243F6A8885A308D3ull, 0x13198A2E03707344ull, 0xA4093822299F31D0ull, 0x082EFA98EC4E6C89ull};
-        size_t idx = 0;
-        uint64_t words[4];
+    uint64_t lanes[4] = {0x243F6A8885A308D3ull, 0x13198A2E03707344ull, 0xA4093822299F31D0ull, 0x082EFA98EC4E6C89ull};
+    size_t idx = 0;
+    uint64_t words[4];
 
-        for (; idx + 32 <= size; idx += 32) {
-            std::memcpy(words, bytes + idx, 32);
-            for (size_t lane = 0; lane < 4; ++lane) {
-                lanes[lane] = mix(lanes[lane], words[lane]);
-            }
+    for (; idx + 32 <= size; idx += 32) {
+        std::memcpy(words, bytes + idx, 32);
+        for (size_t lane = 0; lane < 4; ++lane) {
+            lanes[lane] = mix(lanes[lane], words[lane]);
         }
-
-        // Last bytes, one by one.
-        uint64_t hash = mix(mix(lanes[0], lanes[1]), mix(lanes[2], lanes[3]));
-        for (; idx < size; ++idx) {
-            hash = mix(hash, bytes[idx]);
-        }
-        return mix(hash, size);
     }
+
+    // Last bytes, one by one.
+    uint64_t hash = mix(mix(lanes[0], lanes[1]), mix(lanes[2], lanes[3]));
+    for (; idx < size; ++idx) {
+        hash = mix(hash, bytes[idx]);
+    }
+    return mix(hash, size);
 }
 
 size_t Data::DataView::hash() const

@@ -388,6 +388,10 @@ namespace Data {
 
         /// Short description, e.g. `'double[2, 3]'`.
         std::string summary() const;
+
+      private:
+        /// Print a list like [2, 3], used by toString.
+        static void printList(std::ostream& oss, const Extents& list);
     };
 
     /// Print the full description of a DataType (see DataType::toString).

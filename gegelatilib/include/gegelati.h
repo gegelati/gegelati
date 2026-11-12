@@ -56,8 +56,7 @@
 
 // Evaluation
 #include <evaluation/dataset.h>
-#include <evaluation/evaluator.h>
-#include <evaluation/parallelEvaluator.h>
+#include <evaluation/evaluate.h>
 #include <evaluation/predictionProblem.h>
 #include <evaluation/problem.h>
 #include <evaluation/reinforcementEnvironment.h>

@@ -297,6 +297,18 @@ namespace Data {
          * \return `true` when the DataView differ.
          */
         bool operator!=(const DataView& other) const noexcept;
+
+    protected:
+        /**
+         * \brief Hash of a block of bytes, reading 8 bytes at a time.
+         *
+         * The 4 lanes are independent so that the multiplications can overlap, which makes it several times
+         * faster than a byte by byte hash (e.g. FNV-1a) on big arrays.
+         *
+         * \param[in] bytes the first byte of the block.
+         * \param[in] size number of bytes of the block.
+         */
+        static uint64_t hashBytes(const unsigned char* bytes, size_t size) noexcept;
     };
 
 

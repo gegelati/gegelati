@@ -14,8 +14,13 @@
         
         public: 
 
-            /// @brief Default constructor setting replacement value to false
-            RandomSelector(bool replacement) : Selector(replacement) {}
+            /**
+             * \brief Constructor.
+             *
+             * \param[in] replacement indicates if the same individual can be selected several times.
+             * \param[in] name name of the selector, only used to print it (e.g. in the summary of an evolution).
+             */
+            RandomSelector(bool replacement, std::string name = "RandomSelector") : Selector(replacement, std::move(name)) {}
 
             /**
              * \brief method performing the random selection

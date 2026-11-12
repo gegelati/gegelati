@@ -42,8 +42,11 @@
          * \param[in] pMutateNode Probability of mutating a node.
          * \param[in] pAddNode Probability of adding a node to the group if the generator allows it.
          * \param[in] pRemoveNode Probability of removing a node to the group if the generator allows it.
+         * \param[in] name name of the mutator, only used to print it (e.g. in the summary of an evolution).
          */
-        PointMutator(double pMutateNode, double pAddNode = 0.0, double pRemoveNode = 0.0): Mutator(), pMutateNode{pMutateNode}, pAddNode{pAddNode}, pRemoveNode{pRemoveNode} {};
+        PointMutator(double pMutateNode, double pAddNode = 0.0, double pRemoveNode = 0.0, std::string name = "PointMutator")
+            : Mutator(std::move(name)), pMutateNode{pMutateNode}, pAddNode{pAddNode}, pRemoveNode{pRemoveNode} {};
+
 
         /**
          * \brief return a mutated copy of a GPNode

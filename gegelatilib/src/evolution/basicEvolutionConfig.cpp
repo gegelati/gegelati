@@ -4,7 +4,6 @@
 #include <tuple>
 #include <utility>
 
-#include "evaluation/parallelEvaluator.h"
 #include "evaluation/predictionProblem.h"
 #include "evaluation/reinforcementProblem.h"
 #include "evolution/steps/assignFitnessStep.h"
@@ -22,17 +21,15 @@
 #include "selection/randomSelector.h"
 #include "selection/truncationSelector.h"
 
-namespace {
-    // Check that a problem can evaluate the individuals of a representation.
-    void checkCompatible(const Representations::Representation& representation, const Evaluation::Problem& problem)
-    {
-        if(!Dimensions::DimensionFlow::acceptsRequirements(problem.getInputDimensions(), representation.getDimensionFlow().getInputDimensions())) {
-            throw std::runtime_error("Evolution::BasicEvolutionConfig: input requirements not compatible between representation and problem");
-        }
-        if(!representation.getDimensionFlow().getOutputDimension().isCompatibleWith(problem.getOutputDimension())) {
-            throw std::runtime_error("Evolution::BasicEvolutionConfig: output requirements not compatible between representation and problem ("
-                + representation.getDimensionFlow().getOutputDimension().toString() + " =/= " + problem.getOutputDimension().toString() + ")");
-        }
+// Check that a problem can evaluate the individuals of a representation.
+void Evolution::BasicEvolutionConfig::checkCompatible(const Representations::Representation& representation, const Evaluation::Problem& problem)
+{
+    if(!Dimensions::DimensionFlow::acceptsRequirements(problem.getInputDimensions(), representation.getDimensionFlow().getInputDimensions())) {
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: input requirements not compatible between representation and problem");
+    }
+    if(!representation.getDimensionFlow().getOutputDimension().isCompatibleWith(problem.getOutputDimension())) {
+        throw std::runtime_error("Evolution::BasicEvolutionConfig: output requirements not compatible between representation and problem ("
+            + representation.getDimensionFlow().getOutputDimension().toString() + " =/= " + problem.getOutputDimension().toString() + ")");
     }
 }
 
@@ -42,33 +39,31 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolutionConfig::buildModule(
 
     // Step 1: from the settings, create what the modules need.
     const auto [metricTemplate, fitnessMetricHash] = this->makeMetrics(*this->problem);
-    const std::shared_ptr<Evaluation::Evaluator> evaluator = this->makeEvaluator();
     const std::shared_ptr<Mutation::Mutator> mutator =
         (this->mutation != nullptr) ? this->mutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
 
     // Step 2: build the modules. The initialization creates and evaluates the population...
     auto initModule = std::make_shared<Module>(this->names.initialization);
-    initModule->add(startStopwatchStep(this->names.stopwatch));
     initModule->add((this->generator != nullptr)
                         ? std::make_shared<CreateGeneratorStep>(this->names.generator, [custom = this->generator](const EvolutionData&) { return custom; }, std::set<std::string>{},
                                                                 this->names.createGeneratorStep)
                         : std::make_shared<CreateGeneratorStep>(this->names.generator, this->representation, this->names.createGeneratorStep));
     initModule->add(std::make_shared<InitPopulationStep>(this->names.population, this->representation, this->sizePopulation, mutator, this->names.generator, this->names.initPopulationStep));
     initModule->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population}, this->names.trainingMetrics, this->problem,
-                                             evaluator, metricTemplate, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->names.initialEvaluationStep));
+                                             metricTemplate, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->names.initialEvaluationStep));
     this->addFitnessSteps(*initModule, fitnessMetricHash);
-    this->addValidationSteps(*initModule, evaluator);
+    this->addValidationSteps(*initModule);
 
     // ... then a generation selects parents, creates and mutates the offspring, evaluates them and keeps the best.
     auto evolutionModule = std::make_shared<Module>(this->names.evolution);
     this->addReproductionSteps(*evolutionModule);
     evolutionModule->add(std::make_shared<MutateStep>(this->names.offspring, mutator, this->names.generator, this->nbThreads, this->names.mutationStep));
     evolutionModule->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population, this->names.offspring},
-                                                   this->names.trainingMetrics, this->problem, evaluator, metricTemplate, this->nbTrainingIterations,
-                                                   Evaluation::Mode::TRAINING, this->names.trainingEvaluationStep));
+                                                   this->names.trainingMetrics, this->problem, metricTemplate, this->nbTrainingIterations,
+                                                   Evaluation::Mode::TRAINING, this->nbThreads, this->names.trainingEvaluationStep));
     this->addFitnessSteps(*evolutionModule, fitnessMetricHash);
     this->addSurvivalStep(*evolutionModule);
-    this->addValidationSteps(*evolutionModule, evaluator);
+    this->addValidationSteps(*evolutionModule);
     this->addLogStep(*evolutionModule);
 
     evolutionModule->setInitialization(initModule);
@@ -89,7 +84,7 @@ std::vector<Evolution::LogStep::Column> Evolution::BasicEvolutionConfig::logColu
 void Evolution::BasicEvolutionConfig::addLogStep(Module& step) const
 {
     if(this->logOutput != nullptr) {
-        step.add(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep, this->names.stopwatch));
+        step.add(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep));
     }
 }
 
@@ -131,14 +126,6 @@ std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> Evolution::Basi
     return result;
 }
 
-std::shared_ptr<Evaluation::Evaluator> Evolution::BasicEvolutionConfig::makeEvaluator() const
-{
-    if(this->nbThreads > 1) {
-        return std::make_shared<Evaluation::ParallelEvaluator>(this->nbThreads);
-    }
-    return std::make_shared<Evaluation::Evaluator>();
-}
-
 std::shared_ptr<FitnessAssignment::Assigner> Evolution::BasicEvolutionConfig::usedAssigner() const
 {
     return (this->assigner != nullptr) ? this->assigner : std::make_shared<FitnessAssignment::DefaultAssigner>();
@@ -176,7 +163,7 @@ void Evolution::BasicEvolutionConfig::addSurvivalStep(Module& step) const
                                               this->names.trainingFitness, selector, this->sizePopulation, this->names.population, true, this->names.survivorSelectionStep));
 }
 
-void Evolution::BasicEvolutionConfig::addValidationSteps(Module& step, std::shared_ptr<Evaluation::Evaluator> evaluator) const
+void Evolution::BasicEvolutionConfig::addValidationSteps(Module& step) const
 {
     if(this->nbValidationIterations == 0) {
         return;
@@ -185,8 +172,8 @@ void Evolution::BasicEvolutionConfig::addValidationSteps(Module& step, std::shar
     const auto [metricTemplate, metricHash] = this->makeMetrics(*evaluatedProblem);
 
     auto evaluate = std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population},
-                                                   this->names.validationMetrics, evaluatedProblem, std::move(evaluator), metricTemplate,
-                                                   this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->names.validationEvaluationStep);
+                                                   this->names.validationMetrics, evaluatedProblem, metricTemplate,
+                                                   this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->names.validationEvaluationStep);
     auto assign = std::make_shared<AssignFitnessStep>(this->names.validationMetrics, this->names.validationFitness,
                                                       (this->validationAssigner != nullptr) ? this->validationAssigner : this->usedAssigner(), metricHash,
                                                       this->names.validationFitnessStep);

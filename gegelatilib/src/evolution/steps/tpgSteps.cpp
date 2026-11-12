@@ -27,7 +27,7 @@ Evolution::MutateVerticesStep::MutateVerticesStep(std::string individuals, std::
 
 std::string Evolution::MutateVerticesStep::details() const
 {
-    return this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return this->mutator->getMutatorName() + ", " + this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
@@ -40,9 +40,9 @@ void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 }
 
 Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                                          std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode, std::string name)
-    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
-      nbIterations{nbIterations}, mode{mode}
+                                                          size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
+    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)},
+      nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
 {
     for(const std::string& key: this->evaluated) {
         this->require(key);
@@ -55,64 +55,62 @@ Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::strin
 
 std::string Evolution::CacheMemberOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
-namespace {
-    // Execute the individuals once on the samples of the evaluation and cache their outputs in them (Individual::cacheOutput).
-    // Individuals whose own sub-individuals are already cached run faster, so callers order them accordingly.
-    void cacheOutputsOf(const std::vector<std::shared_ptr<const Individual>>& individuals, Evaluation::PredictionProblem& problem,
-                        const Evaluation::Evaluator& evaluator, size_t nbIterations, uint64_t generation, Evaluation::Mode mode)
-    {
-        if(individuals.empty()) {
-            return;
-        }
-
-        auto outputTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
-        std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results =
-            evaluator.evaluateIndividuals(individuals, problem, outputTemplate, nbIterations, generation, mode);
-
-        // Hashes are the indices of the samples, and are iterated in the same order as the outputs were measured.
-        const std::set<uint64_t> hashes = problem.computeEvaluationHashes(nbIterations, generation, mode, problem.getProblemSeed());
-        const Evaluation::DataSet& dataset = problem.getDataSet();
-
-        for(const std::shared_ptr<const Individual>& individual: individuals) {
-            std::map<uint64_t, const Metrics::OutputMetric*> metrics =
-                results.at(individual->getIndividualID())->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
-            if(metrics.empty()) {
-                continue;
-            }
-
-            const std::vector<Data::DataValue>& outputs = metrics.begin()->second->getOutputs();
-            size_t idxOutput = 0;
-            for(uint64_t hash: hashes) {
-                if(idxOutput >= outputs.size()) {
-                    break;
-                }
-                individual->cacheOutput(dataset.getInputsAt(hash).at(0).getPtr(), outputs.at(idxOutput).clone());
-                idxOutput++;
-            }
-        }
+// Execute the individuals once on the samples of the evaluation and cache their outputs in them (Individual::cacheOutput).
+// Individuals whose own sub-individuals are already cached run faster, so callers order them accordingly.
+void Evolution::cacheOutputsOf(const std::vector<std::shared_ptr<const Individual>>& individuals, Evaluation::PredictionProblem& problem,
+                    size_t nbIterations, uint64_t generation, Evaluation::Mode mode, size_t nbThreads)
+{
+    if(individuals.empty()) {
+        return;
     }
 
-    // Gather the individuals of the lists of the state.
-    std::vector<std::shared_ptr<const Individual>> gatherIndividuals(const Evolution::EvolutionData& state, const std::vector<std::string>& keys)
-    {
-        std::vector<std::shared_ptr<const Individual>> gathered;
-        for(const std::string& key: keys) {
-            const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
-            gathered.insert(gathered.end(), list.begin(), list.end());
-        }
-        return gathered;
-    }
+    auto outputTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results =
+        Evaluation::evaluateIndividuals(individuals, problem, outputTemplate, nbIterations, generation, mode, nbThreads);
 
-    // Clear the outputs cached at the previous run: they are for samples of a previous generation.
-    void clearPreviousCache(const Evolution::EvolutionData& state, const std::string& cache)
-    {
-        if(state.has(cache)) {
-            for(const std::shared_ptr<const Individual>& cached: *state.get<std::vector<std::shared_ptr<const Individual>>>(cache)) {
-                cached->clearCachedOutputs();
+    // Hashes are the indices of the samples, and are iterated in the same order as the outputs were measured.
+    const std::set<uint64_t> hashes = problem.computeEvaluationHashes(nbIterations, generation, mode, problem.getProblemSeed());
+    const Evaluation::DataSet& dataset = problem.getDataSet();
+
+    for(const std::shared_ptr<const Individual>& individual: individuals) {
+        std::map<uint64_t, const Metrics::OutputMetric*> metrics =
+            results.at(individual->getIndividualID())->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
+        if(metrics.empty()) {
+            continue;
+        }
+
+        const std::vector<Data::DataValue>& outputs = metrics.begin()->second->getOutputs();
+        size_t idxOutput = 0;
+        for(uint64_t hash: hashes) {
+            if(idxOutput >= outputs.size()) {
+                break;
             }
+            individual->cacheOutput(dataset.getInputsAt(hash).at(0).getPtr(), outputs.at(idxOutput).clone());
+            idxOutput++;
+        }
+    }
+}
+
+// Gather the individuals of the lists of the state.
+std::vector<std::shared_ptr<const Individual>> Evolution::gatherIndividuals(const EvolutionData& state, const std::vector<std::string>& keys)
+{
+    std::vector<std::shared_ptr<const Individual>> gathered;
+    for(const std::string& key: keys) {
+        const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
+        gathered.insert(gathered.end(), list.begin(), list.end());
+    }
+    return gathered;
+}
+
+// Clear the outputs cached at the previous run: they are for samples of a previous generation.
+void Evolution::clearPreviousCache(const EvolutionData& state, const std::string& cache)
+{
+    if(state.has(cache)) {
+        for(const std::shared_ptr<const Individual>& cached: *state.get<std::vector<std::shared_ptr<const Individual>>>(cache)) {
+            cached->clearCachedOutputs();
         }
     }
 }
@@ -123,13 +121,13 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 
     const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(gatherIndividuals(state, this->evaluated));
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
-    cacheOutputsOf(members, *this->problem, *this->evaluator, this->nbIterations, state.generation, this->mode);
+    cacheOutputsOf(members, *this->problem, this->nbIterations, state.generation, this->mode, this->nbThreads);
 }
 
 Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
-                                                          std::shared_ptr<const Evaluation::Evaluator> evaluator, size_t nbIterations, Evaluation::Mode mode, std::string name)
-    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
-      nbIterations{nbIterations}, mode{mode}
+                                                          size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
+    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)},
+      nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
 {
     for(const std::string& key: this->evaluated) {
         this->require(key);
@@ -142,7 +140,7 @@ Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::strin
 
 std::string Evolution::CacheVertexOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 std::vector<std::vector<std::shared_ptr<const Individual>>> Evolution::CacheVertexOutputsStep::getSharedVerticesByHeight(
@@ -224,7 +222,7 @@ void Evolution::CacheVertexOutputsStep::apply(EvolutionData& state)
     // so each vertex only costs the bids of its own nodes.
     std::vector<std::shared_ptr<const Individual>> cached;
     for(const std::vector<std::shared_ptr<const Individual>>& layer: getSharedVerticesByHeight(gatherIndividuals(state, this->evaluated))) {
-        cacheOutputsOf(layer, *this->problem, *this->evaluator, this->nbIterations, state.generation, this->mode);
+        cacheOutputsOf(layer, *this->problem, this->nbIterations, state.generation, this->mode, this->nbThreads);
         cached.insert(cached.end(), layer.begin(), layer.end());
     }
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(std::move(cached)));

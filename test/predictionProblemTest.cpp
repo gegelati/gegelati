@@ -35,6 +35,16 @@ TEST(PredictionProblemTest, dimensions)
     ASSERT_NO_THROW(problem.summary());
 }
 
+TEST(PredictionProblemTest, name)
+{
+    Evaluation::DataSet dataSet = createSmallDataSet();
+    ASSERT_EQ(Evaluation::PredictionProblem(dataSet).getProblemName(), "PredictionProblem");
+
+    Evaluation::PredictionProblem problem(dataSet, 3, "SmallDataSet");
+    ASSERT_EQ(problem.getProblemName(), "SmallDataSet");
+    ASSERT_EQ(problem.cloneUniquePtr()->getProblemName(), "SmallDataSet") << "A clone keeps the name";
+}
+
 TEST(PredictionProblemTest, seed) 
 {
     Evaluation::DataSet dataSet = createSmallDataSet();

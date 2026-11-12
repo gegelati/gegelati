@@ -15,6 +15,7 @@
 #include "data/demangle.h"
 #include "evolution/entry.h"
 #include "rng/rng.h"
+#include "util/stopwatch.h"
 
 namespace Evolution {
 
@@ -43,6 +44,9 @@ namespace Evolution {
 
         /// Random number generator of the evolution.
         RNG::RNG rng;
+
+        /// Stopwatch of the evolution, started when the data are created (or reset). The modules and the log read their times from it.
+        Stopwatch stopwatch;
 
         /// Identifiers of the steps whose initialization was run on this state (see Module::initialize).
         std::set<uint64_t> initializedSteps;

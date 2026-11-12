@@ -43,6 +43,21 @@ namespace Evolution {
      */
     std::vector<std::shared_ptr<const Individual>> getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices);
 
+    /// Index of the member in a node of a TPG vertex.
+    constexpr size_t memberValueIndex = 0;
+
+    /// Index of the destination in a node of a TPG vertex.
+    constexpr size_t destinationValueIndex = 1;
+
+    /**
+     * \brief Return the individuals referenced by the value at a given index of the nodes of a TPG vertex (first node group).
+     *
+     * \param[in] vertex the TPG vertex.
+     * \param[in] idxValue index of the value in the nodes, e.g. memberValueIndex or destinationValueIndex.
+     * \return the referenced individuals, ordered by ID and without duplicates.
+     */
+    std::vector<std::shared_ptr<const Individual>> getReferencedBy(const Individual& vertex, size_t idxValue);
+
     /**
      * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding steps.
      *
@@ -160,6 +175,12 @@ namespace Evolution {
          * \return the representation of the vertices.
          */
         std::shared_ptr<const Representations::TPG> checkTPGSettings() const;
+
+        /// Return the mutator of the vertices, the default one if none is set.
+        std::shared_ptr<Mutation::NodeTransferMutation> usedTransfer() const;
+
+        /// Return the mutator of the members, the default one if none is set.
+        std::shared_ptr<const Mutation::Mutator> usedMemberMutator() const;
     };
 
 }; // namespace Evolution

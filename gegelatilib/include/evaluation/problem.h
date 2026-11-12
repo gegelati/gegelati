@@ -57,6 +57,13 @@ namespace Evaluation {
         VALIDATION,
         TESTING
     };
+
+    /**
+     * \brief Name of a mode, to print it: "training", "validation" or "testing".
+     *
+     * \param[in] mode the mode.
+     */
+    std::string modeName(Mode mode);
     /**
      * \brief Class used to control the learning steps of a Graph within
      * a given Problem.
@@ -74,6 +81,9 @@ namespace Evaluation {
         /// Unique seed of the problem
         uint64_t problemSeed;
 
+        /// Name of the problem.
+        std::string problemName;
+
       public:
         /**
          * \brief Constructor for Problem.
@@ -81,8 +91,13 @@ namespace Evaluation {
          * \param[in] inputDimensions the dimensions of the input sources.
          * \param[in] outputDimension the dimensions of the output source.
          * \param[in] problemSeed unique seed of the problem.
+         * \param[in] problemName name of the problem.
          */
-        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension, uint64_t problemSeed = 0) : inputDimensions(inputDimensions), outputDimension(outputDimension), problemSeed(problemSeed)  {};
+        Problem(const std::vector<Dimensions::Requirement>& inputDimensions, const Dimensions::Requirement& outputDimension, uint64_t problemSeed = 0,
+                std::string problemName = "Problem") : inputDimensions(inputDimensions), outputDimension(outputDimension), problemSeed(problemSeed), problemName(std::move(problemName))  {};
+
+        /// Return the name of the problem.
+        const std::string& getProblemName() const { return this->problemName; }
 
         /// Default destructor for polymorphism
         virtual ~Problem() = default;

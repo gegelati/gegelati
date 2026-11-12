@@ -14,6 +14,8 @@
     class Reproducer
     {
     protected:
+        /// Name of the reproducer.
+        std::string reproducerName;
 
     public:
 
@@ -26,8 +28,13 @@
     
         /**
          * \brief Main Reproducer constructor.
+         *
+         * \param[in] reproducerName name of the reproducer.
          */
-        Reproducer() {};
+        Reproducer(std::string reproducerName = "Reproducer") : reproducerName{std::move(reproducerName)} {};
+
+        /// Return the name of the reproducer.
+        const std::string& getReproducerName() const { return this->reproducerName; }
 
         /**
          * \brief Basic reproduction method replicating individuals

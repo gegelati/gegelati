@@ -3,7 +3,7 @@
 
 std::string Evolution::AssignFitnessStep::details() const
 {
-    return this->metrics + " to " + this->fitness;
+    return this->assigner->getAssignerName() + ", " + this->metrics + " to " + this->fitness;
 }
 
 void Evolution::AssignFitnessStep::apply(EvolutionData& state)

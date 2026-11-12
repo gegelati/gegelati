@@ -4,6 +4,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "individual.h"
@@ -50,6 +51,25 @@ namespace File {
          * \param[in] individuals roots of the population to export.
          */
         static void exportToFile(const std::string& filePath, const std::vector<std::shared_ptr<const Individual>>& individuals);
+
+    private:
+        /// Indicates if a value of a node is a reference to an individual (a destination or a member).
+        static bool isIndividual(const Data::DataValue& value);
+
+        /// Name of the node of an individual in the graph: the name of its representation followed by its ID.
+        static std::string nodeName(const Individual* individual);
+
+        /// Text with the quotes and the backslashes escaped, to write it in a string of the dot file.
+        static std::string escape(const std::string& text);
+
+        /**
+         * \brief Write an individual, then the individuals it references, each one once.
+         *
+         * \param[in,out] out the stream receiving the graph.
+         * \param[in] individual the individual written.
+         * \param[in,out] visited the individuals already written.
+         */
+        static void printIndividual(std::ostream& out, const Individual& individual, std::unordered_set<const Individual*>& visited);
     };
 }
 

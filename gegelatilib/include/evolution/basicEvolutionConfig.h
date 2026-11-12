@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "evaluation/evaluator.h"
+#include "evaluation/problem.h"
 #include "individual.h"
 #include "metrics/metricMap.h"
 #include "evolution/module.h"
@@ -85,9 +85,6 @@ namespace Evolution {
 
             /// Data: the generator of the genotypes, created by CreateGeneratorStep and read by the steps creating and mutating the population.
             std::string generator = "generator";
-
-            /// Data: the stopwatch of the evolution, started first by the initialization and read by the log (shared by the evolutions using the same name).
-            std::string stopwatch = "Stopwatch";
 
             /// Module of the evolution, holding the steps of a generation and the initialization.
             std::string evolution = "Evolution";
@@ -202,7 +199,7 @@ namespace Evolution {
          * \brief Build the module of the evolution: the steps of a generation, with the initialization.
          *
          * It goes in two steps. First the settings are read to create what the modules need: the data
-         * (from the names), the metrics, the evaluator and the default components. Then the modules are
+         * (from the names), the metrics and the default components. Then the modules are
          * built: the initialization steps, and the steps of a generation which has them as its initialization.
          * The result can be edited, evolved, or added to the modules of other evolutions (see Module::evolve).
          *
@@ -232,11 +229,17 @@ namespace Evolution {
         /// Return the metrics measured in a problem, and the hash of the metric of the fitness, which depends on the kind of problem.
         std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> makeMetrics(const Evaluation::Problem& evaluatedProblem) const;
 
-        /// Return the evaluator running the evaluations, parallel if several threads are authorized.
-        std::shared_ptr<Evaluation::Evaluator> makeEvaluator() const;
-
         /// Return the assigner of the fitness, the default one if none is set.
         std::shared_ptr<FitnessAssignment::Assigner> usedAssigner() const;
+
+        /**
+         * \brief Check that a problem can evaluate the individuals of a representation.
+         *
+         * \param[in] representation the representation of the individuals.
+         * \param[in] problem the problem in which they are evaluated.
+         * \throw std::runtime_error if the input or output requirements of the representation and of the problem are not compatible.
+         */
+        static void checkCompatible(const Representations::Representation& representation, const Evaluation::Problem& problem);
 
         /**
          * \brief Add the steps computing the training fitness (and the parent fitness) from the training metrics.
@@ -264,9 +267,8 @@ namespace Evolution {
          * \brief Add the steps of the validation, if requested.
          *
          * \param[in,out] step the step receiving the steps.
-         * \param[in] evaluator evaluator running the evaluations.
          */
-        void addValidationSteps(Module& step, std::shared_ptr<Evaluation::Evaluator> evaluator) const;
+        void addValidationSteps(Module& step) const;
     };
 
 }; // namespace Evolution

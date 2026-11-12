@@ -26,8 +26,10 @@
     
         /**
          * \brief Main Reproducer constructor.
+         *
+         * \param[in] name name of the reproducer, only used to print it (e.g. in the summary of an evolution).
          */
-        Replicator() {};
+        explicit Replicator(std::string name = "Replicator") : Reproducer(std::move(name)) {};
 
         /**
          * \brief Basic reproduction method replicating individuals

@@ -2,23 +2,12 @@
 
 #include <stdexcept>
 
-namespace {
-    std::string modeName(Evaluation::Mode mode)
-    {
-        switch(mode) {
-            case Evaluation::Mode::TRAINING: return "training";
-            case Evaluation::Mode::VALIDATION: return "validation";
-            default: return "testing";
-        }
-    }
-}
-
 
 Evolution::EvaluateStep::EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::shared_ptr<Evaluation::Problem> problem,
-                                      std::shared_ptr<const Evaluation::Evaluator> evaluator, std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate,
-                                      size_t nbIterations, Evaluation::Mode mode, std::string name)
-    : Module(std::move(name)), evaluated{std::move(evaluated)}, metrics{std::move(metrics)}, problem{std::move(problem)}, evaluator{std::move(evaluator)},
-      metricTemplate{std::move(metricTemplate)}, nbIterations{nbIterations}, mode{mode}
+                                      std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate, size_t nbIterations, Evaluation::Mode mode,
+                                      size_t nbThreads, std::string name)
+    : Module(std::move(name)), evaluated{std::move(evaluated)}, metrics{std::move(metrics)}, problem{std::move(problem)},
+      metricTemplate{std::move(metricTemplate)}, nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
 {
     for(const std::string& key: this->evaluated) {
         this->require(key);
@@ -31,7 +20,7 @@ Evolution::EvaluateStep::EvaluateStep(std::vector<std::string> evaluated, std::s
 
 std::string Evolution::EvaluateStep::details() const
 {
-    return modeName(this->mode) + ", " + std::to_string(this->nbIterations) + " iterations";
+    return Evaluation::modeName(this->mode) + ", " + std::to_string(this->nbIterations) + " iterations, " + this->problem->getProblemName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::EvaluateStep::apply(EvolutionData& state)
@@ -42,6 +31,6 @@ void Evolution::EvaluateStep::apply(EvolutionData& state)
         const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(key);
         individuals.insert(individuals.end(), list.begin(), list.end());
     }
-    state.set(this->metrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->evaluator->evaluateIndividuals(
-        individuals, *this->problem, this->metricTemplate, this->nbIterations, state.generation, this->mode)));
+    state.set(this->metrics, std::make_shared<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(Evaluation::evaluateIndividuals(
+        individuals, *this->problem, this->metricTemplate, this->nbIterations, state.generation, this->mode, this->nbThreads)));
 }

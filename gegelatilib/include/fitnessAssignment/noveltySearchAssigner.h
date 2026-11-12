@@ -29,9 +29,10 @@
              *
              * \param[in] nbNeighbors the number of neighbors to measure.
              * \param[in] descriptor the function mapping the metrics of an individual to its descriptor values.
+             * \param[in] name name of the assigner, only used to print it (e.g. in the summary of an evolution).
              */
-            NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor)
-                : nbNeighbors{nbNeighbors}, descriptor{std::move(descriptor)} {
+            NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor, std::string name = "NoveltySearchAssigner")
+                : Assigner(std::move(name)), nbNeighbors{nbNeighbors}, descriptor{std::move(descriptor)} {
                 if(this->descriptor == nullptr) {
                     throw std::invalid_argument("FitnessAssignment::NoveltySearchAssigner: the descriptor should not be null.");
                 }
@@ -42,6 +43,7 @@
 
             /// Return the descriptor.
             const Descriptors::Descriptor& getDescriptor() const { return *this->descriptor; }
+
 
             /**
              * \brief Compute the descriptor values of the individuals with the descriptor.

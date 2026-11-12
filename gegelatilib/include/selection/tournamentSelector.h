@@ -17,8 +17,19 @@
 
         public: 
 
-            /// @brief Default constructor setting replacement value to false
-            TournamentSelector(size_t sizeTournament, bool replacement=true) : Selector(replacement), sizeTournament{sizeTournament} {}
+            /**
+             * \brief Constructor.
+             *
+             * \param[in] sizeTournament number of candidates of each tournament.
+             * \param[in] replacement indicates if the same individual can be selected several times.
+             * \param[in] name name of the selector, only used to print it (e.g. in the summary of an evolution).
+             */
+            TournamentSelector(size_t sizeTournament, bool replacement = true, std::string name = "TournamentSelector")
+                : Selector(replacement, std::move(name)), sizeTournament{sizeTournament} {}
+
+            /// A name given in place of the replacement flag would silently convert to a bool: write TournamentSelector(size, true, "name").
+            TournamentSelector(size_t sizeTournament, const char* name) = delete;
+
 
             /**
              * \brief method performing the truncation selection

@@ -18,12 +18,13 @@ namespace Evolution {
      * A module reads and updates the EvolutionData, identified by keys. A module is either a leaf, which
      * overrides apply (the steps such as MutateStep), or a container, which runs the modules it holds one after the other
      * (the default apply). Containers nest, so a population, a whole evolutionary algorithm or a set of algorithms
-     * is a module. Evolving is running the root module generation after generation: evolve creates the data of
-     * a new evolution and returns them, resume goes on with the data of an evolution.
+     * is a module. An evolution has two stages on the root module: initialize creates the data of the evolution
+     * and runs the initializations (generation 0), evolve runs generations on initialized data.
      *
      * Each module can have an initialization, itself a module, run once on some data before the module first runs (see initialize).
-     * The initialization of a container is therefore the concatenation of the initializations of its modules. Modules added
-     * to a root that already evolved are initialized the next time it evolves, without touching the others.
+     * The initialization of a container is therefore the concatenation of the initializations of its modules. A module added
+     * to a root that already evolved is initialized alone by calling initialize on the data again, evolve refusing data that
+     * are not initialized.
      *
      * Modules are shared pointers so the same module can be used in several containers. Modules are edited through the
      * objects themselves: insertAfter(mutate, secondMutate). Editing and searching also look into the nested containers.
@@ -37,8 +38,9 @@ namespace Evolution {
      * module->add(lgp.buildModule());
      * module->add(std::make_shared<LambdaStep>("Link", link, required, provided));
      * module->add(tpg.buildModule());
-     * EvolutionData data = module->evolve(100);
-     * module->resume(data, 50);
+     * EvolutionData data = module->initialize(seed);
+     * module->evolve(data, 100);
+     * module->evolve(data, 50);
      * std::cout << module->summary(data);
      * \endcode
      */
@@ -151,8 +153,7 @@ namespace Evolution {
             /**
              * \brief Return the duration in seconds of the last run of the step.
              *
-             * It is measured by the container running the step (with a Stopwatch), so the step is the authority on its time,
-             * not the state. The duration of a container includes the ones of its steps. It is zero until the step ran.
+             * It is measured by the container running the step with the stopwatch of the data (EvolutionData::stopwatch). The duration of a container includes the ones of its steps. It is zero until the step ran.
              */
             double getLastDuration() const { return this->lastDuration; }
 
@@ -295,19 +296,50 @@ namespace Evolution {
             virtual void apply(EvolutionData& state);
 
             /**
-             * \brief Run the initializations that were not run on a state yet.
+             * \brief Start a new evolution: create its data and run the initializations (generation 0).
              *
-             * The initialization of this step runs first if the state did not run it already, then the steps
-             * are initialized in their order. Nothing happens for what is already initialized.
+             * The data required by the modules are checked first: they must be in the data or provided by a previous
+             * initialization or module.
              *
-             * \param[in,out] state the state of the evolution.
+             * \param[in] seed seed of the random number generator of the evolution.
+             * \return the initialized data of the evolution.
+             * \throw std::runtime_error if a module requires data that nothing provides.
              */
-            void initialize(EvolutionData& state);
+            EvolutionData initialize(uint64_t seed = 0);
 
             /**
-             * \brief Start a new evolution: create its data, run generations, and return the data.
+             * \brief Run the initializations that were not run yet on the data of an evolution.
              *
-             * The initializations run first, then the generations. See resume.
+             * The initialization of this module runs first if the data did not run it already, then the modules held
+             * are initialized in their order. Nothing happens for what is already initialized, so calling it again only
+             * initializes the modules added meanwhile.
+             *
+             * \param[in,out] data the data of the evolution, e.g. returned by initialize.
+             * \throw std::runtime_error if a module requires data that nothing provides.
+             */
+            void initialize(EvolutionData& data);
+
+            /**
+             * \brief Return true if every initialization of the module and the modules it holds was run on the data.
+             *
+             * \param[in] data the data of an evolution.
+             */
+            bool isInitialized(const EvolutionData& data) const;
+
+            /**
+             * \brief Run generations on the data of an evolution, going on with the generations already done.
+             *
+             * The data required by the modules are checked first. Calling it again continues the same evolution.
+             * Use EvolutionData::reset then initialize to start again.
+             *
+             * \param[in,out] data the initialized data of the evolution.
+             * \param[in] nbGenerations number of generations to run.
+             * \throw std::runtime_error if the data are not initialized (see initialize), or if a module requires data that nothing provides.
+             */
+            void evolve(EvolutionData& data, size_t nbGenerations);
+
+            /**
+             * \brief Start a new evolution and run it: initialize then evolve.
              *
              * \param[in] nbGenerations number of generations to run.
              * \param[in] seed seed of the random number generator of the evolution.
@@ -315,19 +347,6 @@ namespace Evolution {
              * \throw std::runtime_error if a module requires data that nothing provides.
              */
             EvolutionData evolve(size_t nbGenerations, uint64_t seed = 0);
-
-            /**
-             * \brief Go on with the evolution of some data, after initializing what is not initialized yet.
-             *
-             * The data the modules require are checked first: they must be in the data or provided by a previous
-             * initialization or module. Calling resume again continues the same evolution, modules added meanwhile being
-             * initialized. Use EvolutionData::reset to start again.
-             *
-             * \param[in,out] data the data of the evolution, e.g. returned by evolve.
-             * \param[in] nbGenerations number of generations to run.
-             * \throw std::runtime_error if a module requires data that nothing provides.
-             */
-            void resume(EvolutionData& data, size_t nbGenerations);
 
             /**
              * \brief Return a printable tree of the modules with their required and provided data.
@@ -345,6 +364,18 @@ namespace Evolution {
             std::string summary(const EvolutionData& data) const;
 
         private:
+            /// Run the initializations that were not run on a state yet, without checking the data.
+            void runInitializations(EvolutionData& state);
+
+            /// Return the names of some data, separated by commas.
+            static std::string listNames(const std::set<std::string>& names);
+
+            /// Return the text of the module in the tree of a summary: its name, its parameters and its period.
+            std::string label() const;
+
+            /// Return the data required and provided by the module, written next to it in the tree of a summary.
+            std::string dataText() const;
+
             /// Check the initializations that were not run on a state yet.
             void checkInitialization(const EvolutionData& state, std::set<std::string>& available) const;
 

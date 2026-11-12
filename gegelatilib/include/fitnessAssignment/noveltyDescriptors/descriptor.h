@@ -23,6 +23,9 @@ namespace Descriptors {
         /// \brief Hash of the metric the descriptor is computed from.
         uint64_t metricHash;
 
+        /// \brief Name of the descriptor.
+        std::string descriptorName;
+
         /**
          * \brief Smallest range containing two ranges: a bound is missing if it is missing in one of them.
          */
@@ -40,8 +43,12 @@ namespace Descriptors {
       public:
         /**
          * \param[in] metricHash the hash of the metric the descriptor is computed from.
+         * \param[in] descriptorName name of the descriptor.
          */
-        explicit Descriptor(uint64_t metricHash) : metricHash{metricHash} {};
+        explicit Descriptor(uint64_t metricHash, std::string descriptorName = "Descriptor") : metricHash{metricHash}, descriptorName{std::move(descriptorName)} {};
+
+        /// \brief Return the name of the descriptor.
+        const std::string& getDescriptorName() const { return this->descriptorName; }
 
         /// Default polymorphic destructor
         virtual ~Descriptor() = default;

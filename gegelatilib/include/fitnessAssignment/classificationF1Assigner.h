@@ -22,8 +22,10 @@
 
             /**
              * \brief Default constructor
+             *
+             * \param[in] name name of the assigner, only used to print it (e.g. in the summary of an evolution).
              */
-            ClassificationF1Assigner() {};
+            explicit ClassificationF1Assigner(std::string name = "ClassificationF1Assigner") : Assigner(std::move(name)) {};
             
             /**
              * \brief method ranking the individuals based on their average metric value over iterations in classification tasks
