@@ -29,10 +29,11 @@
              *
              * \param[in] nbNeighbors the number of neighbors to measure.
              * \param[in] descriptor the function mapping the metrics of an individual to its descriptor values.
+             * \param[in] metricHash hash of the metric the assigner reads (e.g. the one of its descriptor).
              * \param[in] name name of the assigner, only used to print it (e.g. in the summary of an evolution).
              */
-            NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor, std::string name = "NoveltySearchAssigner")
-                : Assigner(std::move(name)), nbNeighbors{nbNeighbors}, descriptor{std::move(descriptor)} {
+            NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor, uint64_t metricHash, std::string name = "NoveltySearchAssigner")
+                : Assigner(metricHash, std::move(name)), nbNeighbors{nbNeighbors}, descriptor{std::move(descriptor)} {
                 if(this->descriptor == nullptr) {
                     throw std::invalid_argument("FitnessAssignment::NoveltySearchAssigner: the descriptor should not be null.");
                 }
@@ -91,12 +92,10 @@
              * \brief method ranking the individuals based on their average metric value over iterations
              * 
              * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
-             * \param[in] metricHash unused: the metric read is the one of the descriptor.
              * \return the fitness of each individual, indexed by individual ID.
              */
             virtual std::map<uint64_t, double> assignFitness(
-                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-                uint64_t metricHash) const override;
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const override;
     };
 };
 

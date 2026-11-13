@@ -292,12 +292,13 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
 
     // The members of the roots and of the offspring are cached.
     const auto offspring = roots.offspring;
-    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem, 2);
+    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem->getName(), 2);
     Evolution::EvolutionData state = makeState({vertex});
     state.set(offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>());
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring, problem->getName()}));
     EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey}));
-    EXPECT_THROW(Evolution::CacheMemberOutputsStep({offspring}, cacheKey, nullptr, 2), std::runtime_error);
+    EXPECT_THROW(step.apply(state), std::runtime_error) << "The problem is a component of the data";
+    state.add(problem->getName(), std::shared_ptr<Evaluation::Problem>(problem));
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
     ASSERT_NO_THROW(step.apply(state));
@@ -345,10 +346,14 @@ TEST_F(TPGStepsTest, mutateVerticesStep)
     const auto offspring = vertices.offspring;
     const std::string generatorKey("VertexGenerator");
 
-    // Mutated vertices transfer the nodes of the roots, with the generator found in the data.
-    Evolution::MutateVerticesStep mutate(offspring, vertices.population, generatorKey, transfer, 2);
+    // Mutated vertices transfer the nodes of the roots, with the generator and the mutation found in the data.
+    Evolution::MutateVerticesStep mutate(offspring, vertices.population, generatorKey, transfer->getName(), 2);
     EXPECT_EQ(mutate.name(), "MutateVertices");
-    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring, vertices.population, generatorKey}));
+    EXPECT_EQ(mutate.requiredData(), (std::set<std::string>{offspring, vertices.population, generatorKey, transfer->getName()}));
     EXPECT_TRUE(mutate.providedData().empty()) << "Vertices are mutated in place";
-    EXPECT_THROW(Evolution::MutateVerticesStep(offspring, vertices.population, generatorKey, nullptr), std::runtime_error);
+
+    // The mutation must be a NodeTransferMutation.
+    Evolution::EvolutionData state;
+    state.add(transfer->getName(), std::shared_ptr<Mutation::Mutator>(std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5)));
+    EXPECT_THROW(mutate.apply(state), std::runtime_error);
 }

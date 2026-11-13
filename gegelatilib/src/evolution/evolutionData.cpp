@@ -14,6 +14,22 @@ void Evolution::EvolutionData::reset(uint64_t seed)
     this->stopwatch.reset();
 }
 
+void Evolution::EvolutionData::mergeWith(const EvolutionData& other)
+{
+    if(&other == this) {
+        return;
+    }
+    for(const auto& [name, entry]: other.data) {
+        std::map<std::string, std::shared_ptr<const EntryBase>>::iterator it = this->data.find(name);
+        if(it == this->data.end()) {
+            this->data.emplace(name, entry);
+        } else if(it->second->type() != entry->type()) {
+            throw std::runtime_error("Evolution::EvolutionData::mergeWith: two data of different types are named " + name);
+        }
+    }
+    this->initializedSteps.insert(other.initializedSteps.begin(), other.initializedSteps.end());
+}
+
 std::set<std::string> Evolution::EvolutionData::dataNames() const
 {
     std::set<std::string> names;

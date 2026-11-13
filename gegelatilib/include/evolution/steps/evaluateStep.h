@@ -25,11 +25,11 @@ namespace Evolution {
             /// Name of the measured metrics.
             std::string metrics;
 
-            /// Problem in which the individuals are evaluated.
-            std::shared_ptr<Evaluation::Problem> problem;
+            /// Name of the problem in which the individuals are evaluated, a component of the data (Evaluation::Problem).
+            std::string problem;
 
-            /// Metrics measured during the evaluations.
-            std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate;
+            /// Name of the metrics measured during the evaluations, a component of the data (Metrics::MetricMapTemplate).
+            std::string metricTemplate;
 
             /// Number of evaluations of each individual.
             size_t nbIterations;
@@ -46,16 +46,15 @@ namespace Evolution {
              *
              * \param[in] evaluated names of the lists of evaluated individuals (list of individuals or list of mutable individuals).
              * \param[in] metrics name of the measured metrics, a metrics map.
-             * \param[in] problem problem in which the individuals are evaluated.
-             * \param[in] metricTemplate metrics measured during the evaluations.
+             * \param[in] problem name of the problem in which the individuals are evaluated, stored in the data as an Evaluation::Problem.
+             * \param[in] metricTemplate name of the metrics measured during the evaluations, stored in the data as a Metrics::MetricMapTemplate.
              * \param[in] nbIterations number of evaluations of each individual.
              * \param[in] mode evaluation mode, given to the problem.
              * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step (e.g. "ValidationEvaluation").
-             * \throw std::runtime_error if the problem is null.
              */
-            EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::shared_ptr<Evaluation::Problem> problem,
-                         std::shared_ptr<const Metrics::MetricMapTemplate> metricTemplate, size_t nbIterations,
+            EvaluateStep(std::vector<std::string> evaluated, std::string metrics, std::string problem,
+                         std::string metricTemplate, size_t nbIterations,
                          Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1, std::string name = "Evaluate");
 
             /// Return the names of the lists of evaluated individuals.
@@ -64,14 +63,14 @@ namespace Evolution {
             /// Return the name of the measured metrics.
             const std::string& getMetrics() const { return this->metrics; }
 
-            /// Return the problem in which the individuals are evaluated.
-            std::shared_ptr<Evaluation::Problem> getProblem() const { return this->problem; }
+            /// Return the name of the problem in which the individuals are evaluated.
+            const std::string& getProblem() const { return this->problem; }
 
             /// Return the maximum number of threads evaluating the individuals.
             size_t getNbThreads() const { return this->nbThreads; }
 
-            /// Return the metrics measured during the evaluations.
-            std::shared_ptr<const Metrics::MetricMapTemplate> getMetricTemplate() const { return this->metricTemplate; }
+            /// Return the name of the metrics measured during the evaluations.
+            const std::string& getMetricTemplate() const { return this->metricTemplate; }
 
             /// Return the number of evaluations of each individual.
             size_t getNbIterations() const { return this->nbIterations; }

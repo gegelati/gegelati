@@ -42,6 +42,7 @@
 #include "evaluation/problem.h"
 #include "evaluation/reinforcementEnvironment.h"
 
+
 namespace Evaluation {
 
     /**
@@ -79,6 +80,12 @@ namespace Evaluation {
          * \brief Reinforcement problem is copyable if the environment is
          */
         virtual bool isCopyable() const;
+
+
+        /**
+         * \brief Return a RewardMetric: the default metric representing the fitness of an evaluation performed an Reinforcement Problem.
+         */
+        virtual std::unique_ptr<Metrics::Metric> getDefaultFitnessMetric() const override;
 
         /**
          * \brief Evaluate the individual with one episode per hash.

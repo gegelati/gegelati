@@ -18,6 +18,8 @@ inline Evolution::BasicEvolutionConfig::Names namesOf(const std::string& populat
     names.parentFitness = population + ".parentFitness";
     names.validationFitness = population + ".validationFitness";
     names.generator = population + ".generator";
+    names.trainingMetricTemplate = population + ".trainingMetricTemplate";
+    names.validationMetricTemplate = population + ".validationMetricTemplate";
     names.evolution = population;
     return names;
 }

@@ -22,11 +22,8 @@ namespace Evolution {
             /// Name of the computed fitness.
             std::string fitness;
 
-            /// Assigner computing the fitness.
-            std::shared_ptr<const FitnessAssignment::Assigner> assigner;
-
-            /// Hash of the metric from which the fitness is computed.
-            uint64_t metricHash;
+            /// Name of the assigner computing the fitness, a component of the data (FitnessAssignment::Assigner).
+            std::string assigner;
 
         public:
             /**
@@ -34,15 +31,14 @@ namespace Evolution {
              *
              * \param[in] metrics name of the metrics read.
              * \param[in] fitness name of the computed fitness.
-             * \param[in] assigner assigner computing the fitness.
-             * \param[in] metricHash hash of the metric from which the fitness is computed.
+             * \param[in] assigner name of the assigner computing the fitness, stored in the data as a FitnessAssignment::Assigner.
              * \param[in] name name of the step.
              */
-            AssignFitnessStep(std::string metrics, std::string fitness, std::shared_ptr<const FitnessAssignment::Assigner> assigner, uint64_t metricHash,
-                              std::string name = "AssignFitness")
-                : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}, metricHash{metricHash}
+            AssignFitnessStep(std::string metrics, std::string fitness, std::string assigner, std::string name = "AssignFitness")
+                : Module(std::move(name)), metrics{std::move(metrics)}, fitness{std::move(fitness)}, assigner{std::move(assigner)}
             {
                 this->require(this->metrics);
+                this->require(this->assigner);
                 this->provide(this->fitness);
             }
 

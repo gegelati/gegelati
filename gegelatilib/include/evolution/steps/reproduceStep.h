@@ -22,8 +22,8 @@ namespace Evolution {
             /// Name of the created offspring.
             std::string offspring;
 
-            /// Reproducer creating the offspring.
-            std::shared_ptr<const Reproduction::Reproducer> reproducer;
+            /// Name of the reproducer creating the offspring, a component of the data (Reproduction::Reproducer).
+            std::string reproducer;
 
             /// Number of offspring created.
             size_t nbOffspring;
@@ -33,16 +33,17 @@ namespace Evolution {
              * \brief Constructor.
              *
              * \param[in] parents name of the parents, a list of individuals.
-             * \param[in] reproducer reproducer creating the offspring.
+             * \param[in] reproducer name of the reproducer creating the offspring, stored in the data as a Reproduction::Reproducer.
              * \param[in] nbOffspring number of offspring created.
              * \param[in] offspring name of the created offspring, a list of mutable individuals.
              * \param[in] name name of the step.
              */
-            ReproduceStep(std::string parents, std::shared_ptr<const Reproduction::Reproducer> reproducer, size_t nbOffspring, std::string offspring,
+            ReproduceStep(std::string parents, std::string reproducer, size_t nbOffspring, std::string offspring,
                           std::string name = "Reproduce")
                 : Module(std::move(name)), parents{std::move(parents)}, reproducer{std::move(reproducer)}, nbOffspring{nbOffspring}, offspring{std::move(offspring)}
             {
                 this->require(this->parents);
+                this->require(this->reproducer);
                 this->provide(this->offspring);
             }
 

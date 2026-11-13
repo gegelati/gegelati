@@ -70,8 +70,8 @@ namespace Evolution {
             /// Name of the generator of the genotypes.
             std::string generator;
 
-            /// Mutation of the vertices, transferring the nodes of the roots.
-            std::shared_ptr<Mutation::NodeTransferMutation> mutator;
+            /// Name of the mutation of the vertices, a component of the data (Mutation::Mutator, a Mutation::NodeTransferMutation).
+            std::string mutator;
 
             /// Maximum number of threads used to mutate.
             size_t nbThreads;
@@ -83,13 +83,60 @@ namespace Evolution {
              * \param[in] individuals name of the mutated vertices, a list of mutable individuals (e.g. offspring).
              * \param[in] roots name of the current roots, a list of individuals (e.g. the individuals of a population).
              * \param[in] generator name of the generator of the genotypes.
-             * \param[in] mutator mutation of the vertices, its potential nodes are set by the step.
+             * \param[in] mutator name of the mutation of the vertices, stored in the data as a Mutation::Mutator that is a Mutation::NodeTransferMutation. Its potential nodes are set by the step.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the mutator is null.
              */
             MutateVerticesStep(std::string individuals, std::string roots, std::string generator,
-                               std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads = 1, std::string name = "MutateVertices");
+                               std::string mutator, size_t nbThreads = 1, std::string name = "MutateVertices");
+
+            /// Inherited from Module
+            virtual std::string details() const override;
+            /// Inherited from Module
+            virtual void apply(EvolutionData& state) override;
+    };
+
+    /**
+     * \brief Step building the generator of the genotypes of TPG vertices, stored in the data.
+     *
+     * The member of a node is created with the member mutator and, if there is an archive, must answer differently from the
+     * existing members on it. Its destination is an action or, if the current vertices are given, sometimes one of them.
+     * New vertices start with the minimum number of nodes of the TPG representation.
+     */
+    class UpdateGeneratorStep : public Module {
+        protected:
+            /// Name of the built generator, a GraphBased::GenotypeGenerator.
+            std::string generator;
+
+            /// Name of the representation of the vertices, a component of the data (const Representations::Representation, a Representations::TPG).
+            std::string representation;
+
+            /// Name of the representation of the members, a component of the data (const Representations::Representation).
+            std::string memberRepresentation;
+
+            /// Name of the mutator of the members, a component of the data (Mutation::Mutator).
+            std::string memberMutator;
+
+            /// Name of the archive (an Evaluation::DataSet), empty for none.
+            std::string archive;
+
+            /// Name of the roots whose vertices can be destinations (a list of mutable individuals), empty for actions only.
+            std::string vertices;
+
+        public:
+            /**
+             * \brief Constructor.
+             *
+             * \param[in] generator name of the built generator.
+             * \param[in] representation name of the representation of the vertices, a Representations::TPG.
+             * \param[in] memberRepresentation name of the representation of the members.
+             * \param[in] memberMutator name of the mutator of the members.
+             * \param[in] archive name of the archive on which new members must answer differently, empty for none.
+             * \param[in] vertices name of the roots whose vertices can be destinations, empty for actions only.
+             * \param[in] name name of the step.
+             */
+            UpdateGeneratorStep(std::string generator, std::string representation, std::string memberRepresentation, std::string memberMutator,
+                                std::string archive = "", std::string vertices = "", std::string name = "UpdateGenerator");
 
             /// Inherited from Module
             virtual std::string details() const override;
@@ -116,8 +163,8 @@ namespace Evolution {
             /// Name of the cached members, a list of individuals.
             std::string cache;
 
-            /// Problem in which members are evaluated.
-            std::shared_ptr<Evaluation::PredictionProblem> problem;
+            /// Name of the problem, a component of the data (Evaluation::Problem, a Evaluation::PredictionProblem).
+            std::string problem;
 
             /// Number of samples of the evaluation.
             size_t nbIterations;
@@ -134,14 +181,13 @@ namespace Evolution {
              *
              * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
              * \param[in] cache name of the cached members, a list of individuals.
-             * \param[in] problem problem in which members are evaluated.
+             * \param[in] problem name of the problem in which members are evaluated, stored in the data as an Evaluation::Problem that is a Evaluation::PredictionProblem.
              * \param[in] nbIterations number of samples of the evaluation.
              * \param[in] mode evaluation mode, given to the problem.
              * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the problem is null.
              */
-            CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+            CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
                                    size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1,
                                    std::string name = "CacheMemberOutputs");
 
@@ -174,8 +220,8 @@ namespace Evolution {
             /// Name of the cached vertices, a list of individuals.
             std::string cache;
 
-            /// Problem in which vertices are evaluated.
-            std::shared_ptr<Evaluation::PredictionProblem> problem;
+            /// Name of the problem, a component of the data (Evaluation::Problem, a Evaluation::PredictionProblem).
+            std::string problem;
 
             /// Number of samples of the evaluation.
             size_t nbIterations;
@@ -192,14 +238,13 @@ namespace Evolution {
              *
              * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
              * \param[in] cache name of the cached vertices, a list of individuals.
-             * \param[in] problem problem in which vertices are evaluated.
+             * \param[in] problem name of the problem in which vertices are evaluated, stored in the data as an Evaluation::Problem that is a Evaluation::PredictionProblem.
              * \param[in] nbIterations number of samples of the evaluation.
              * \param[in] mode evaluation mode, given to the problem.
              * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the problem is null.
              */
-            CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+            CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
                                    size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1,
                                    std::string name = "CacheVertexOutputs");
 
@@ -259,8 +304,7 @@ namespace Evolution {
      * from the existing ones on the archive. The step must be run during the initialization and at each generation.
      *
      * Inputs are sampled from the InputMetric of the metrics of the roots. If the archive is fixed, it is only sampled
-     * during the initialization, and only the answers are updated afterwards: the evaluations of the generations
-     * do not need to measure the InputMetric.
+     * during the initialization, and only the answers are updated afterwards.
      */
     class UpdateArchiveStep : public Module {
         protected:

@@ -3,198 +3,147 @@
 #include <stdexcept>
 #include <map>
 #include <queue>
-#include "dimensions/dataValueGenerator.h"
-#include "dimensions/individualArchiveValueGenerator.h"
-#include "dimensions/individualValueGenerator.h"
-#include "graphBased/nodeGenerator.h"
 
 #include "evaluation/predictionProblem.h"
-
-
+#include "evolution/steps/assignFitnessStep.h"
 #include "evolution/steps/evaluateStep.h"
 #include "evolution/steps/initPopulationStep.h"
-#include "evolution/steps/lambdaStep.h"
+#include "evolution/steps/reproduceStep.h"
+#include "evolution/steps/selectStep.h"
 #include "evolution/steps/tpgSteps.h"
-
-
-
-
 #include "metrics/inputMetric.h"
 #include "mutation/pointMutator.h"
 
-// Mutator of the vertices, the default one if none is set.
-std::shared_ptr<Mutation::NodeTransferMutation> Evolution::OriginTPGEvolutionConfig::usedTransfer() const
+void Evolution::OriginTPGEvolutionConfig::updateEmptyComponents()
 {
-    return (this->nodeTransfer != nullptr) ? this->nodeTransfer : std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
-}
+    if(this->nodeTransfer == nullptr) {
+        this->nodeTransfer = std::make_shared<Mutation::NodeTransferMutation>(0.1, 0.7, 0.7);
+    }
+    if(this->memberMutation == nullptr) {
+        this->memberMutation = std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
+    }
+    // The vertices are created and mutated by the node transfer.
+    this->mutation = this->nodeTransfer;
+    BasicEvolutionConfig::updateEmptyComponents();
 
-// Mutator of the members, the default one if none is set.
-std::shared_ptr<const Mutation::Mutator> Evolution::OriginTPGEvolutionConfig::usedMemberMutator() const
-{
-    return (this->memberMutation != nullptr) ? this->memberMutation : std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5);
-}
-
-std::shared_ptr<const Representations::TPG> Evolution::OriginTPGEvolutionConfig::checkTPGSettings() const
-{
-    this->checkSettings();
-    const auto tpgRepresentation = std::dynamic_pointer_cast<const Representations::TPG>(this->representation);
-    if(tpgRepresentation == nullptr) {
+    if(std::dynamic_pointer_cast<const Representations::TPG>(this->representation) == nullptr) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation must be a TPG");
     }
     if(this->memberRepresentation == nullptr) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation of the members must be set");
     }
-    if(!Dimensions::DimensionFlow::acceptsRequirements(tpgRepresentation->getDimensionFlow().getInputDimensions(),
+    if(!Dimensions::DimensionFlow::acceptsRequirements(this->representation->getDimensionFlow().getInputDimensions(),
                                                        this->memberRepresentation->getDimensionFlow().getInputDimensions())) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: input requirements not compatible between the TPG and the members");
     }
     if(!this->memberRepresentation->getDimensionFlow().getOutputDimension().isCompatibleWith(Dimensions::Requirement(Data::DataType::type<double>()))) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the members must output a double");
     }
-    return tpgRepresentation;
+
+    // The archive samples the inputs measured by the training evaluations (ignored if already in the template).
+    if(this->archiveSize > 0) {
+        this->trainingMetricTemplate->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
+    }
 }
 
-std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildModule() const
+std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::makeValidationModule(const std::string& name, size_t period) const
 {
-    const auto tpgRepresentation = this->checkTPGSettings();
+    std::shared_ptr<Module> validation = BasicEvolutionConfig::makeValidationModule(name, period);
 
-    // Step 1: from the settings, create what the modules need.
-    const std::shared_ptr<Mutation::NodeTransferMutation> transfer = this->usedTransfer();
-    const std::shared_ptr<const Mutation::Mutator> memberMutator = this->usedMemberMutator();
+    // Outputs of the members, then of the shared vertices, are cached before the validation evaluation (prediction problems only).
+    const std::shared_ptr<Evaluation::Problem> validated = (this->validationProblem != nullptr) ? this->validationProblem : this->problem;
+    if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(validated) != nullptr) {
+        const std::shared_ptr<Module> evaluation = validation->find(this->names.validationEvaluationStep);
+        validation->insertBefore(evaluation, std::make_shared<CacheMemberOutputsStep>(
+            std::vector<std::string>{this->names.population}, this->tpgNames.validationMemberOutputCache, validated->getName(),
+            this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationCacheMemberOutputsStep));
+        validation->insertBefore(evaluation, std::make_shared<CacheVertexOutputsStep>(
+            std::vector<std::string>{this->names.population}, this->tpgNames.validationVertexOutputCache, validated->getName(),
+            this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationCacheVertexOutputsStep));
+    }
+    return validation;
+}
 
-    // The archive samples the inputs measured by the training evaluations. A fixed archive only samples during the initialization.
+std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildModule()
+{
+    // Step 1: build the basic evolution (it updates the empty components), its steps are then changed for the TPG.
+    std::shared_ptr<Module> evolutionModule = BasicEvolutionConfig::buildModule();
+    Module& initModule = *evolutionModule->getInitialization();
     const bool withArchive = this->archiveSize > 0;
-    const auto [initMetrics, fitnessMetricHash] = this->makeMetrics(*this->problem);
-    const auto [generationMetrics, generationMetricHash] = this->makeMetrics(*this->problem);
+    const std::string archiveName = withArchive ? this->tpgNames.archive : "";
+
+    // Step 2: store the components of the members, read by the generator of the vertices.
+    evolutionModule->getData().add(this->memberRepresentation->getName(), this->memberRepresentation);
+    evolutionModule->getData().add(this->memberMutation->getName(), this->memberMutation);
+
+    // Step 3: change the initialization.
+
+    // The archive is created first, then the generator of the vertices, pointing to actions only, before the vertices.
+    const std::shared_ptr<Module> initPopulation = initModule.find(this->names.initPopulationStep);
     if(withArchive) {
-        initMetrics->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
-        if(!this->isArchiveFixed) {
-            generationMetrics->addRequiredMetric(std::make_unique<Metrics::InputMetric>());
-        }
+        initModule.insertBefore(initPopulation, std::make_shared<CreateArchiveStep>(
+            this->tpgNames.archive, this->representation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
     }
+    initModule.insertBefore(initPopulation, std::make_shared<UpdateGeneratorStep>(
+        this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
+        this->memberMutation->getName(), archiveName, "", this->tpgNames.updateGeneratorStep));
 
-    // The generator of the vertices is a data of the evolution, built again by a step: the members are created with the member mutator and
-    // must answer differently from existing ones on the archive if there is one, and nodes may point to the current vertices.
-    const std::set<std::string> archiveName = withArchive ? std::set<std::string>{this->tpgNames.archive} : std::set<std::string>{};
-    auto makeGeneratorStep = [&](bool fromVertices) {
-        std::set<std::string> required = archiveName;
-        if(fromVertices) {
-            required.insert(this->names.population);
-        }
-        return std::make_shared<LambdaStep>(this->tpgNames.updateGeneratorStep,
-            [archiveName = this->tpgNames.archive, populationName = this->names.population, generatorName = this->tpgNames.generator, tpgRepresentation,
-             memberRepresentation = this->memberRepresentation, memberMutator, fromVertices](EvolutionData& data) {
-                // The member of a node is created with the member mutator, and must answer differently from existing ones on the archive if there is one.
-                GraphBased::NodeGenerator bidNodes;
-                if(data.has(archiveName)) {
-                    bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*data.get<Evaluation::DataSet>(archiveName), memberRepresentation, *memberMutator));
-                } else {
-                    bidNodes.addGenerator(Dimensions::IndividualValueGenerator(memberRepresentation, *memberMutator));
-                }
-
-                // The destination is an action or, sometimes, one of the current vertices.
-                const std::shared_ptr<std::vector<std::shared_ptr<Individual>>> population =
-                    fromVertices ? data.get<std::vector<std::shared_ptr<Individual>>>(populationName) : nullptr;
-                const std::vector<std::shared_ptr<const Individual>> vertices =
-                    fromVertices ? getAllVertices(std::vector<std::shared_ptr<const Individual>>(population->begin(), population->end())) : std::vector<std::shared_ptr<const Individual>>{};
-                Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpgRepresentation->getNbActions() - 1);
-                if(vertices.empty()) {
-                    bidNodes.addGenerator(actionGenerator);
-                } else {
-                    Dimensions::MultiGenerator destination;
-                    destination.addGenerator(actionGenerator, 0.995);
-                    destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(vertices), 0.005);
-                    bidNodes.addGenerator(destination);
-                }
-
-                // New vertices start with the minimum number of nodes.
-                const std::pair<size_t, size_t> range = tpgRepresentation->getGenotypeConstraint().getRangeAt(0);
-                data.set(generatorName, std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, range, std::make_pair(range.first, range.first)));
-            },
-            required, std::set<std::string>{this->tpgNames.generator});
-    };
-
-    // Outputs of the members, then of the vertices shared by several individuals, are computed once per sample before an evaluation.
-    auto addCacheSteps = [](Module& module, const std::vector<std::string>& evaluated, const std::shared_ptr<Evaluation::PredictionProblem>& predictionProblem,
-                            size_t nbIterations, Evaluation::Mode mode, size_t nbThreads,
-                            const std::string& memberCache, const std::string& vertexCache, const std::string& memberStep, const std::string& vertexStep,
-                            size_t period) {
-        auto members = std::make_shared<CacheMemberOutputsStep>(evaluated, memberCache, predictionProblem, nbIterations, mode, nbThreads, memberStep);
-        auto vertices = std::make_shared<CacheVertexOutputsStep>(evaluated, vertexCache, predictionProblem, nbIterations, mode, nbThreads, vertexStep);
-        members->setPeriod(period);
-        vertices->setPeriod(period);
-        module.add(members);
-        module.add(vertices);
-    };
-
-    // The validation evaluates the population as often as the validation period says, and has its own caches.
-    auto addValidationCacheSteps = [&](Module& module) {
-        if(this->nbValidationIterations == 0) {
-            return;
-        }
-        const auto validated = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(
-            (this->validationProblem != nullptr) ? this->validationProblem : this->problem);
-        if(validated != nullptr) {
-            addCacheSteps(module, std::vector<std::string>{this->names.population}, validated, this->nbValidationIterations,
-                          Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationMemberOutputCache, this->tpgNames.validationVertexOutputCache,
-                          this->tpgNames.validationCacheMemberOutputsStep, this->tpgNames.validationCacheVertexOutputsStep, this->validationPeriod);
-        }
-    };
-
-    // Step 2: build the modules. The initialization creates the archive and the vertices, then evaluates them...
-    auto init = std::make_shared<Module>(this->names.initialization);
-    if(withArchive) {
-        init->add(std::make_shared<CreateArchiveStep>(this->tpgNames.archive, tpgRepresentation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
-    }
-    init->add(makeGeneratorStep(false));
-    init->add(std::make_shared<InitPopulationStep>(this->names.population, this->representation, this->sizePopulation, transfer, this->tpgNames.generator, this->names.initPopulationStep));
-    init->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population}, this->names.trainingMetrics, this->problem,
-                                             initMetrics, this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->names.initialEvaluationStep));
-    this->addFitnessSteps(*init, fitnessMetricHash);
+    // After the fitness: protection of the aggregated vertices, then update of the archive.
+    std::shared_ptr<Module> position = initModule.find(this->names.trainingFitnessStep);
     if(this->protectAggregated) {
-        init->add(std::make_shared<ProtectAggregatedStep>(this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep));
+        const std::shared_ptr<Module> protect = std::make_shared<ProtectAggregatedStep>(
+            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep);
+        initModule.insertAfter(position, protect);
+        position = protect;
     }
     if(withArchive) {
-        init->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
+        initModule.insertAfter(position, std::make_shared<UpdateArchiveStep>(
+            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
-    addValidationCacheSteps(*init);
-    this->addValidationSteps(*init);
 
-    // ... then a generation, where nodes transferred by the mutation of the offspring are the ones of the current population.
-    auto generation = std::make_shared<Module>(this->names.evolution);
-    this->addReproductionSteps(*generation);
-    generation->add(makeGeneratorStep(true));
-    generation->add(std::make_shared<MutateVerticesStep>(this->names.offspring, this->names.population, this->tpgNames.generator, transfer, this->nbThreads, this->names.mutationStep));
-    if(const auto predictionProblem = std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem)) {
-        addCacheSteps(*generation, std::vector<std::string>{this->names.population, this->names.offspring}, predictionProblem,
-                      this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.memberOutputCache, this->tpgNames.vertexOutputCache,
-                      this->tpgNames.cacheMemberOutputsStep, this->tpgNames.cacheVertexOutputsStep, 1);
+    // Step 4: change the generation.
+
+    // Mutation of the offspring, with a generator whose destinations can be the current vertices, and nodes transferred from the population.
+    const std::shared_ptr<Module> mutation = evolutionModule->find(this->names.mutationStep);
+    evolutionModule->insertBefore(mutation, std::make_shared<UpdateGeneratorStep>(
+        this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
+        this->memberMutation->getName(), archiveName, this->names.population, this->tpgNames.updateGeneratorStep));
+    evolutionModule->replace(mutation, std::make_shared<MutateVerticesStep>(
+        this->names.offspring, this->names.population, this->names.generator,
+        this->nodeTransfer->getName(), this->nbThreads, this->names.mutationStep));
+
+    // Outputs of the members, then of the shared vertices, are cached before the evaluation (prediction problems only).
+    if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem) != nullptr) {
+        const std::shared_ptr<Module> evaluation = evolutionModule->find(this->names.trainingEvaluationStep);
+        evolutionModule->insertBefore(evaluation, std::make_shared<CacheMemberOutputsStep>(
+            std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.memberOutputCache, this->problem->getName(),
+            this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.cacheMemberOutputsStep));
+        evolutionModule->insertBefore(evaluation, std::make_shared<CacheVertexOutputsStep>(
+            std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.vertexOutputCache, this->problem->getName(),
+            this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.cacheVertexOutputsStep));
     }
-    generation->add(std::make_shared<EvaluateStep>(std::vector<std::string>{this->names.population, this->names.offspring},
-                                                   this->names.trainingMetrics, this->problem, generationMetrics, this->nbTrainingIterations,
-                                                   Evaluation::Mode::TRAINING, this->nbThreads, this->names.trainingEvaluationStep));
-    this->addFitnessSteps(*generation, generationMetricHash);
-    this->addSurvivalStep(*generation);
+
+    // After the surviving selection: protection of the aggregated vertices, then update of the archive.
+    position = evolutionModule->find(this->names.survivorSelectionStep);
     if(this->protectAggregated) {
-        generation->add(std::make_shared<ProtectAggregatedStep>(this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep));
+        const std::shared_ptr<Module> protect = std::make_shared<ProtectAggregatedStep>(
+            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep);
+        evolutionModule->insertAfter(position, protect);
+        position = protect;
     }
     if(withArchive) {
-        generation->add(std::make_shared<UpdateArchiveStep>(this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
+        evolutionModule->insertAfter(position, std::make_shared<UpdateArchiveStep>(
+            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
-    addValidationCacheSteps(*generation);
-    this->addValidationSteps(*generation);
-    this->addLogStep(*generation);
-
-    generation->setInitialization(init);
-    return generation;
+    return evolutionModule;
 }
 
 std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolutionConfig::logColumns() const
 {
     std::vector<LogStep::Column> columns = BasicEvolutionConfig::logColumns();
     const std::string roots(this->names.population);
-    const auto rootsOf = [roots](const EvolutionData& state) {
-        const auto list = state.get<std::vector<std::shared_ptr<Individual>>>(roots);
+    const std::function<std::vector<std::shared_ptr<const Individual>>(const EvolutionData&)> rootsOf = [roots](const EvolutionData& state) {
+        const std::shared_ptr<const std::vector<std::shared_ptr<Individual>>> list = state.get<std::vector<std::shared_ptr<Individual>>>(roots);
         return std::vector<std::shared_ptr<const Individual>>(list->begin(), list->end());
     };
     columns.insert(columns.begin() + 1, {"NbVertex", [rootsOf](const EvolutionData& state) { return static_cast<double>(getAllVertices(rootsOf(state)).size()); }, 0, {roots}});

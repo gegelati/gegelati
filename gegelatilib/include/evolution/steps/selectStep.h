@@ -27,8 +27,8 @@ namespace Evolution {
             /// Name of the fitness used by the selector.
             std::string fitness;
 
-            /// Selector choosing the individuals.
-            std::shared_ptr<const Selection::Selector> selector;
+            /// Name of the selector choosing the individuals, a component of the data (Selection::Selector).
+            std::string selector;
 
             /// Number of selections.
             size_t nbSelected;
@@ -36,24 +36,19 @@ namespace Evolution {
             /// Name of the selected individuals, a list of individuals.
             std::string selected;
 
-            /// Indicates if each individual is kept at most once, the selected ones being ordered by ID.
-            bool distinct;
-
         public:
             /**
              * \brief Constructor.
              *
              * \param[in] candidates names of the lists of candidates (list of individuals or list of mutable individuals).
              * \param[in] fitness name of the fitness used by the selector, a fitness map.
-             * \param[in] selector selector choosing the individuals.
+             * \param[in] selector name of the selector choosing the individuals, stored in the data as a Selection::Selector.
              * \param[in] nbSelected number of selections.
              * \param[in] selected name of the selected individuals, a list of individuals (e.g. one of the candidates).
-             * \param[in] distinct indicates if each individual is kept at most once, the selected ones being ordered by ID.
              * \param[in] name name of the step (e.g. "ParentSelection").
-             * \throw std::runtime_error if there is no candidates or the selector is null.
+             * \throw std::runtime_error if there is no candidates.
              */
-            SelectStep(std::vector<std::string> candidates, std::string fitness, std::shared_ptr<const Selection::Selector> selector, size_t nbSelected,
-                       std::string selected, bool distinct = false, std::string name = "Select");
+            SelectStep(std::vector<std::string> candidates, std::string fitness, std::string selector, size_t nbSelected, std::string selected, std::string name = "Select");
 
             /// Inherited from Module
             virtual std::string details() const override;

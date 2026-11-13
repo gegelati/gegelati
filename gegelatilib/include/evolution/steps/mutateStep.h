@@ -13,15 +13,15 @@
 namespace Evolution {
 
     /**
-     * \brief Step mutating individuals, with the generator found in the data (see CreateGeneratorStep).
+     * \brief Step mutating individuals, with the generator found in the data.
      */
     class MutateStep : public Module {
         protected:
             /// Name of the mutated individuals.
             std::string individuals;
 
-            /// Mutator applied to the individuals.
-            std::shared_ptr<const Mutation::Mutator> mutator;
+            /// Name of the mutator applied to the individuals, a component of the data (Mutation::Mutator).
+            std::string mutator;
 
             /// Name of the generator of the genotypes values.
             std::string generator;
@@ -34,13 +34,12 @@ namespace Evolution {
              * \brief Constructor.
              *
              * \param[in] individuals name of the mutated individuals, a list of mutable individuals (e.g. offspring).
-             * \param[in] mutator mutator applied to the individuals.
+             * \param[in] mutator name of the mutator applied to the individuals, stored in the data as a Mutation::Mutator.
              * \param[in] generator name of the generator of the genotypes values.
              * \param[in] nbThreads maximum number of threads used to mutate.
              * \param[in] name name of the step.
-             * \throw std::runtime_error if the mutator is null.
              */
-            MutateStep(std::string individuals, std::shared_ptr<const Mutation::Mutator> mutator, std::string generator,
+            MutateStep(std::string individuals, std::string mutator, std::string generator,
                        size_t nbThreads = 1, std::string name = "Mutate");
 
             /// Return the name of the mutated individuals.

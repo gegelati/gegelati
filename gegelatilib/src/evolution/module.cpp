@@ -34,10 +34,20 @@ std::string Evolution::Module::dataText() const
     return text;
 }
 
-Evolution::Module::Module(std::string name) : stepName{std::move(name)}
+uint64_t Evolution::Module::newStepId()
 {
     static std::atomic<uint64_t> nbSteps{0};
-    this->stepId = nbSteps++;
+    return nbSteps++;
+}
+
+Evolution::Module& Evolution::Module::setInitialization(std::shared_ptr<Module> initialization)
+{
+    if(initialization == nullptr) {
+        initialization = std::make_shared<Module>(this->data, "Initialization");
+    }
+    this->data->mergeWith(*initialization->data);
+    this->initialization = std::move(initialization);
+    return *this->initialization;
 }
 
 void Evolution::Module::setPeriod(size_t period)
@@ -94,11 +104,23 @@ bool Evolution::Module::has(const std::string& name) const
     return this->findStep(name) != nullptr;
 }
 
-Evolution::Module& Evolution::Module::add(std::shared_ptr<Module> step)
+Evolution::EvolutionData& Evolution::Module::getData()
+{
+    return *this->data;
+}
+
+const Evolution::EvolutionData& Evolution::Module::getData() const
+{
+    return *this->data;
+}
+
+
+Evolution::Module& Evolution::Module::addSubModule(std::shared_ptr<Module> step)
 {
     if(step == nullptr) {
-        throw std::runtime_error("Evolution::Module::add: cannot add a null step");
+        throw std::runtime_error("Evolution::Module::addSubModule: cannot add a null step");
     }
+    this->data->mergeWith(*step->data);
     this->steps.push_back(std::move(step));
     return *this;
 }
@@ -108,6 +130,7 @@ Evolution::Module& Evolution::Module::insertBefore(const std::shared_ptr<Module>
     if(step == nullptr) {
         throw std::runtime_error("Evolution::Module::insertBefore: cannot insert a null step");
     }
+    this->data->mergeWith(*step->data);
     size_t index = 0;
     Module& owner = this->checkedOwnerOf(position, index);
     owner.steps.insert(owner.steps.begin() + index, std::move(step));
@@ -119,6 +142,7 @@ Evolution::Module& Evolution::Module::insertAfter(const std::shared_ptr<Module>&
     if(step == nullptr) {
         throw std::runtime_error("Evolution::Module::insertAfter: cannot insert a null step");
     }
+    this->data->mergeWith(*step->data);
     size_t index = 0;
     Module& owner = this->checkedOwnerOf(position, index);
     owner.steps.insert(owner.steps.begin() + index + 1, std::move(step));
@@ -130,6 +154,7 @@ Evolution::Module& Evolution::Module::replace(const std::shared_ptr<Module>& rep
     if(step == nullptr) {
         throw std::runtime_error("Evolution::Module::replace: cannot replace by a null step");
     }
+    this->data->mergeWith(*step->data);
     size_t index = 0;
     Module& owner = this->checkedOwnerOf(replaced, index);
     owner.steps.at(index) = std::move(step);
@@ -235,23 +260,30 @@ void Evolution::Module::checkInitialization(const EvolutionData& state, std::set
     }
 }
 
-bool Evolution::Module::isInitialized(const EvolutionData& state) const
+bool Evolution::Module::isInitializedOn(const EvolutionData& state) const
 {
     if(state.initializedSteps.find(this->stepId) == state.initializedSteps.end()) {
         return false;
     }
-    return std::all_of(this->steps.begin(), this->steps.end(), [&state](const std::shared_ptr<Module>& step) { return step->isInitialized(state); });
+    return std::all_of(this->steps.begin(), this->steps.end(), [&state](const std::shared_ptr<Module>& step) { return step->isInitializedOn(state); });
 }
 
-Evolution::EvolutionData Evolution::Module::initialize(uint64_t seed)
+bool Evolution::Module::isInitialized() const
 {
-    EvolutionData data(seed);
-    this->initialize(data);
-    return data;
+    return this->isInitializedOn(*this->data);
 }
 
-void Evolution::Module::initialize(EvolutionData& state)
+Evolution::EvolutionData& Evolution::Module::initialize(uint64_t seed)
 {
+    this->data->rng.setSeed(seed);
+    this->initializePending();
+    return *this->data;
+}
+
+void Evolution::Module::initializePending()
+{
+    EvolutionData& state = *this->data;
+
     // The data of the generations are checked too, to fail before running any initialization.
     std::set<std::string> available = state.dataNames();
     this->checkInitialization(state, available);
@@ -260,9 +292,10 @@ void Evolution::Module::initialize(EvolutionData& state)
     this->runInitializations(state);
 }
 
-void Evolution::Module::evolve(EvolutionData& state, size_t nbGenerations)
+void Evolution::Module::evolve(size_t nbGenerations)
 {
-    if(!this->isInitialized(state)) {
+    EvolutionData& state = *this->data;
+    if(!this->isInitializedOn(state)) {
         throw std::runtime_error("Evolution::Module::evolve: the data are not initialized, call initialize first (module '" + this->stepName + "')");
     }
     std::set<std::string> available = state.dataNames();
@@ -275,11 +308,11 @@ void Evolution::Module::evolve(EvolutionData& state, size_t nbGenerations)
     }
 }
 
-Evolution::EvolutionData Evolution::Module::evolve(size_t nbGenerations, uint64_t seed)
+Evolution::EvolutionData& Evolution::Module::evolve(size_t nbGenerations, uint64_t seed)
 {
-    EvolutionData data = this->initialize(seed);
-    this->evolve(data, nbGenerations);
-    return data;
+    this->initialize(seed);
+    this->evolve(nbGenerations);
+    return *this->data;
 }
 
 void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data) const

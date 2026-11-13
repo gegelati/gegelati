@@ -3,8 +3,7 @@
 
 
 std::map<uint64_t, double> FitnessAssignment::DefaultAssigner::assignFitness(
-                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-                uint64_t metricHash) const
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const
 {
     // Get the average score of each individual.
     std::map<uint64_t, double> fitnesses;
@@ -12,7 +11,7 @@ std::map<uint64_t, double> FitnessAssignment::DefaultAssigner::assignFitness(
 
         double avgFitness = 0.0;
 
-        std::map<uint64_t, const Metrics::ScalarMetric*> scalarMetrics = metricMap->getMetricValues<Metrics::ScalarMetric>(metricHash);
+        std::map<uint64_t, const Metrics::ScalarMetric*> scalarMetrics = metricMap->getMetricValues<Metrics::ScalarMetric>(this->metricHash);
         for(const auto& [key, metric]: scalarMetrics) {
             avgFitness += metric->getValue();
         }

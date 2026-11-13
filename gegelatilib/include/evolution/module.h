@@ -15,18 +15,22 @@ namespace Evolution {
     /**
      * \brief Unit of an evolution: a stage (selection, mutation, evaluation, logging...), or a list of units.
      *
-     * A module reads and updates the EvolutionData, identified by keys. A module is either a leaf, which
+     * A module reads and updates the EvolutionData, identified by names. A module is either a leaf, which
      * overrides apply (the steps such as MutateStep), or a container, which runs the modules it holds one after the other
      * (the default apply). Containers nest, so a population, a whole evolutionary algorithm or a set of algorithms
-     * is a module. An evolution has two stages on the root module: initialize creates the data of the evolution
+     * is a module. An evolution has two stages on the root module: initialize seeds the data of the evolution
      * and runs the initializations (generation 0), evolve runs generations on initialized data.
      *
-     * Each module can have an initialization, itself a module, run once on some data before the module first runs (see initialize).
-     * The initialization of a container is therefore the concatenation of the initializations of its modules. A module added
-     * to a root that already evolved is initialized alone by calling initialize on the data again, evolve refusing data that
-     * are not initialized.
+     * A module added to another one (addSubModule, insertBefore, setInitialization...) has its data merged into the data
+     * of its new container (see EvolutionData::mergeWith), so that the root holds the data of the whole tree and runs the
+     * evolution on them. The data hold the components of the evolution (problem, selectors, assigners...), which the steps
+     * read by name, and the data produced by the steps (populations, metrics, fitness...).
      *
-     * Modules are shared pointers so the same module can be used in several containers. Modules are edited through the
+     * Each module can have an initialization, itself a module, run once on the data before the module first runs (see initialize).
+     * The initialization of a container is therefore the concatenation of the initializations of its modules. A module added
+     * to a root that already evolved is initialized alone by initializePending, evolve refusing data that are not initialized.
+     *
+     * Modules are shared pointers. Modules are edited through the
      * objects themselves: insertAfter(mutate, secondMutate). Editing and searching also look into the nested containers.
      * If the same module appears several times, its first occurrence is used.
      *
@@ -34,14 +38,14 @@ namespace Evolution {
      * and several modules may share it. A leaf holds no module.
      *
      * \code
-     * auto module = std::make_shared<Module>("Evolution");
-     * module->add(lgp.buildModule());
-     * module->add(std::make_shared<LambdaStep>("Link", link, required, provided));
-     * module->add(tpg.buildModule());
-     * EvolutionData data = module->initialize(seed);
-     * module->evolve(data, 100);
-     * module->evolve(data, 50);
-     * std::cout << module->summary(data);
+     * std::shared_ptr<Module> module = std::make_shared<Module>("Evolution");
+     * module->addSubModule(lgp.buildModule());
+     * module->addSubModule(std::make_shared<LambdaStep>("Link", link, required, provided));
+     * module->addSubModule(tpg.buildModule());
+     * module->initialize(seed);
+     * module->evolve(100);
+     * module->evolve(50);
+     * std::cout << module->summary(module->getData());
      * \endcode
      */
     class Module {
@@ -54,6 +58,9 @@ namespace Evolution {
 
             /// Steps held by the step, in execution order.
             std::vector<std::shared_ptr<Module>> steps;
+
+            /// Data accessible by the module.
+            std::shared_ptr<Evolution::EvolutionData> data;
 
             /// Module run once on a state before the step first runs, null if none.
             std::shared_ptr<Module> initialization = nullptr;
@@ -94,13 +101,25 @@ namespace Evolution {
              */
             Module& checkedOwnerOf(const std::shared_ptr<Module>& step, size_t& index);
 
+            /// Return a new identifier for a step (defined in the library, so that every step of a program gets a different one).
+            static uint64_t newStepId();
+
         public:
             /**
-             * \brief Constructor.
+             * \brief Constructor, with its own empty data.
              *
              * \param[in] name name of the step.
              */
-            explicit Module(std::string name = "Steps");
+            Module(std::string name = "Steps") : Module(std::make_shared<EvolutionData>(), std::move(name)) {}
+
+            /**
+             * \brief Constructor.
+             *
+             * \param[in] data Data accessible by the module.
+             * \param[in] name name of the step.
+             */
+            Module(std::shared_ptr<Evolution::EvolutionData> data, std::string name = "Steps")
+                : stepName{std::move(name)}, data{std::move(data)}, stepId{newStepId()} {}
 
             /// Default polymorphic destructor
             virtual ~Module() = default;
@@ -124,6 +143,16 @@ namespace Evolution {
              * \param[in] name the new name.
              */
             void setName(std::string name) { this->stepName = std::move(name); }
+
+            /**
+             * \brief Return the current data of the module
+             */
+            virtual EvolutionData& getData();
+
+            /**
+             * \brief Return the current data of the module
+             */
+            virtual const EvolutionData& getData() const;
 
             /**
              * \brief Run the step only once every few generations (e.g. a costly evaluation).
@@ -161,11 +190,12 @@ namespace Evolution {
              * \brief Set the step run once on a state before this step first runs.
              *
              * It typically creates the data the step needs, e.g. the first population. It runs
-             * during the generation EvolutionData::initGeneration.
+             * during the generation EvolutionData::initGeneration. It shares the data of this module.
              *
-             * \param[in] initialization the initialization, null for none.
+             * \param[in] initialization the initialization, null to create an empty one (named "Initialization") to fill.
+             * \return the initialization, to add its steps.
              */
-            void setInitialization(std::shared_ptr<Module> initialization) { this->initialization = std::move(initialization); }
+            Evolution::Module& setInitialization(std::shared_ptr<Module> initialization = nullptr);
 
             /// Return the initialization of the step, null if none.
             const std::shared_ptr<Module>& getInitialization() const { return this->initialization; }
@@ -177,7 +207,7 @@ namespace Evolution {
              * \return the step, to chain calls.
              * \throw std::runtime_error if the step is null.
              */
-            Module& add(std::shared_ptr<Module> step);
+            Module& addSubModule(std::shared_ptr<Module> step);
 
             /**
              * \brief Insert a step just before another one.
@@ -296,57 +326,52 @@ namespace Evolution {
             virtual void apply(EvolutionData& state);
 
             /**
-             * \brief Start a new evolution: create its data and run the initializations (generation 0).
+             * \brief Seed the random number generator of the data and run the initializations not run yet (generation 0).
              *
-             * The data required by the modules are checked first: they must be in the data or provided by a previous
+             * The data are not reset, since they hold the components: to start a new evolution, build a new module.
+             * The data required by the modules are checked first: they must be in the data (e.g. a component) or provided by a previous
              * initialization or module.
              *
              * \param[in] seed seed of the random number generator of the evolution.
-             * \return the initialized data of the evolution.
+             * \return the initialized data of the evolution (see getData).
              * \throw std::runtime_error if a module requires data that nothing provides.
              */
-            EvolutionData initialize(uint64_t seed = 0);
+            EvolutionData& initialize(uint64_t seed = 0);
 
             /**
-             * \brief Run the initializations that were not run yet on the data of an evolution.
+             * \brief Run the initializations that were not run yet on the data, without resetting them.
              *
              * The initialization of this module runs first if the data did not run it already, then the modules held
              * are initialized in their order. Nothing happens for what is already initialized, so calling it again only
              * initializes the modules added meanwhile.
              *
-             * \param[in,out] data the data of the evolution, e.g. returned by initialize.
              * \throw std::runtime_error if a module requires data that nothing provides.
              */
-            void initialize(EvolutionData& data);
+            void initializePending();
+
+            /// Return true if every initialization of the module and the modules it holds was run on its data.
+            bool isInitialized() const;
 
             /**
-             * \brief Return true if every initialization of the module and the modules it holds was run on the data.
-             *
-             * \param[in] data the data of an evolution.
-             */
-            bool isInitialized(const EvolutionData& data) const;
-
-            /**
-             * \brief Run generations on the data of an evolution, going on with the generations already done.
+             * \brief Run generations on the data, going on with the generations already done.
              *
              * The data required by the modules are checked first. Calling it again continues the same evolution.
-             * Use EvolutionData::reset then initialize to start again.
+             * Build a new module to start again.
              *
-             * \param[in,out] data the initialized data of the evolution.
              * \param[in] nbGenerations number of generations to run.
              * \throw std::runtime_error if the data are not initialized (see initialize), or if a module requires data that nothing provides.
              */
-            void evolve(EvolutionData& data, size_t nbGenerations);
+            void evolve(size_t nbGenerations);
 
             /**
-             * \brief Start a new evolution and run it: initialize then evolve.
+             * \brief Initialize the data then run generations: initialize then evolve.
              *
              * \param[in] nbGenerations number of generations to run.
              * \param[in] seed seed of the random number generator of the evolution.
-             * \return the data of the evolution.
+             * \return the data of the evolution (see getData).
              * \throw std::runtime_error if a module requires data that nothing provides.
              */
-            EvolutionData evolve(size_t nbGenerations, uint64_t seed = 0);
+            EvolutionData& evolve(size_t nbGenerations, uint64_t seed);
 
             /**
              * \brief Return a printable tree of the modules with their required and provided data.
@@ -378,6 +403,9 @@ namespace Evolution {
 
             /// Check the initializations that were not run on a state yet.
             void checkInitialization(const EvolutionData& state, std::set<std::string>& available) const;
+
+            /// Return true if every initialization of the module and the modules it holds was run on a state.
+            bool isInitializedOn(const EvolutionData& state) const;
 
             /// Return the tree of the modules, then the data if given.
             std::string summary(const EvolutionData* data) const;

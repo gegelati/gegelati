@@ -17,20 +17,19 @@
             /**
              * \brief Default constructor
              *
+             * \param[in] metricHash Hash used by the assigner to map from the metric to the fitness: should be a ScalarMetric.
              * \param[in] name name of the assigner, only used to print it (e.g. in the summary of an evolution).
              */
-            explicit DefaultAssigner(std::string name = "DefaultAssigner") : Assigner(std::move(name)) {};
+            explicit DefaultAssigner(uint64_t metricHash, std::string name = "DefaultAssigner") : Assigner(metricHash, std::move(name)) {};
             
             /**
              * \brief method ranking the individuals based on their average metric value over iterations
              * 
              * \param[in] individualMetrics the metrics of each individual, indexed by individual ID.
-             * \param[in] metricHash the hash of the required metric.
              * \return the fitness of each individual, indexed by individual ID.
              */
             virtual std::map<uint64_t, double> assignFitness(
-                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-                uint64_t metricHash) const override;
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const override;
     };
 };
 

@@ -1,6 +1,7 @@
 
 #include "evaluation/reinforcementProblem.h"
 
+#include "metrics/rewardsMetric.h"
 
 
 std::unique_ptr<Evaluation::Problem> Evaluation::ReinforcementProblem::cloneUniquePtr() const
@@ -17,6 +18,11 @@ bool Evaluation::ReinforcementProblem::isCopyable() const
   return this->env->isCopyable();
 }
 
+
+std::unique_ptr<Metrics::Metric> Evaluation::ReinforcementProblem::getDefaultFitnessMetric() const
+{
+  return std::make_unique<Metrics::RewardsMetric>();
+}
 
 void Evaluation::ReinforcementProblem::extractMetrics(
   const Individual& individual, Metrics::MetricMap& metrics,

@@ -1,5 +1,6 @@
 
 #include "evaluation/predictionProblem.h"
+#include "metrics/predictionMetric.h"
 
 
 std::unique_ptr<Evaluation::Problem> Evaluation::PredictionProblem::cloneUniquePtr() const
@@ -47,6 +48,11 @@ std::set<uint64_t> Evaluation::PredictionProblem::computeEvaluationHashes(
 const Evaluation::DataSet& Evaluation::PredictionProblem::getDataSet() const
 {
   return this->dataset;
+}
+
+std::unique_ptr<Metrics::Metric> Evaluation::PredictionProblem::getDefaultFitnessMetric() const
+{
+  return std::make_unique<Metrics::PredictionMetric>();
 }
 
 void Evaluation::PredictionProblem::extractMetrics(

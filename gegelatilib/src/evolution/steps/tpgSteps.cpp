@@ -7,39 +7,107 @@
 #include "util/individualUtils.h"
 #include <unordered_map>
 
+#include "dimensions/dataValueGenerator.h"
+#include "dimensions/individualArchiveValueGenerator.h"
+#include "dimensions/individualValueGenerator.h"
+#include "graphBased/genotypeGenerator.h"
+#include "graphBased/nodeGenerator.h"
 #include "metrics/inputMetric.h"
 #include "metrics/outputMetric.h"
 #include "representations/TPG.h"
 #include "evolution/originTPGEvolutionConfig.h"
 
 Evolution::MutateVerticesStep::MutateVerticesStep(std::string individuals, std::string roots, std::string generator,
-                                                  std::shared_ptr<Mutation::NodeTransferMutation> mutator, size_t nbThreads, std::string name)
+                                                  std::string mutator, size_t nbThreads, std::string name)
     : Module(std::move(name)), individuals{std::move(individuals)}, roots{std::move(roots)}, generator{std::move(generator)}, mutator{std::move(mutator)},
       nbThreads{nbThreads}
 {
     this->require(this->individuals);
     this->require(this->roots);
     this->require(this->generator);
-    if(this->mutator == nullptr) {
-        throw std::runtime_error("Evolution::MutateVerticesStep: the mutator cannot be null");
-    }
+    this->require(this->mutator);
 }
 
 std::string Evolution::MutateVerticesStep::details() const
 {
-    return this->mutator->getName() + ", " + this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return this->mutator + ", " + this->individuals + ", nodes of " + this->roots + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 {
     // The roots are only shared with the mutation while mutating, so the step does not keep them alive.
+    Mutation::NodeTransferMutation* transfer = dynamic_cast<Mutation::NodeTransferMutation*>(state.get<Mutation::Mutator>(this->mutator).get());
+    if(transfer == nullptr) {
+        throw std::runtime_error("Evolution::MutateVerticesStep: the mutator " + this->mutator + " must be a NodeTransferMutation");
+    }
     const std::vector<std::shared_ptr<Individual>>& roots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->roots);
-    this->mutator->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(roots.begin(), roots.end()));
-    Mutation::mutateIndividualsInParallel(*this->mutator, *state.get<std::vector<std::shared_ptr<Individual>>>(this->individuals), *state.get<GraphBased::GenotypeGenerator>(this->generator), state.rng, this->nbThreads);
-    this->mutator->setPotentialNodes(nullptr);
+    transfer->setPotentialNodes(std::make_shared<const std::vector<std::shared_ptr<const Individual>>>(roots.begin(), roots.end()));
+    Mutation::mutateIndividualsInParallel(*transfer, *state.get<std::vector<std::shared_ptr<Individual>>>(this->individuals), *state.get<GraphBased::GenotypeGenerator>(this->generator), state.rng, this->nbThreads);
+    transfer->setPotentialNodes(nullptr);
 }
 
-Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+Evolution::UpdateGeneratorStep::UpdateGeneratorStep(std::string generator, std::string representation, std::string memberRepresentation,
+                                                    std::string memberMutator, std::string archive, std::string vertices, std::string name)
+    : Module(std::move(name)), generator{std::move(generator)}, representation{std::move(representation)},
+      memberRepresentation{std::move(memberRepresentation)}, memberMutator{std::move(memberMutator)}, archive{std::move(archive)}, vertices{std::move(vertices)}
+{
+    this->require(this->representation);
+    this->require(this->memberRepresentation);
+    this->require(this->memberMutator);
+    if(!this->archive.empty()) {
+        this->require(this->archive);
+    }
+    if(!this->vertices.empty()) {
+        this->require(this->vertices);
+    }
+    this->provide(this->generator);
+}
+
+std::string Evolution::UpdateGeneratorStep::details() const
+{
+    return this->memberRepresentation + " members mutated by " + this->memberMutator + (this->archive.empty() ? "" : ", new on " + this->archive)
+           + (this->vertices.empty() ? "" : ", tangled to " + this->vertices);
+}
+
+void Evolution::UpdateGeneratorStep::apply(EvolutionData& state)
+{
+    const Representations::TPG* tpg = dynamic_cast<const Representations::TPG*>(state.get<const Representations::Representation>(this->representation).get());
+    if(tpg == nullptr) {
+        throw std::runtime_error("Evolution::UpdateGeneratorStep: the representation " + this->representation + " must be a TPG");
+    }
+    const std::shared_ptr<const Representations::Representation> members = state.get<const Representations::Representation>(this->memberRepresentation);
+    const Mutation::Mutator& mutator = *state.get<Mutation::Mutator>(this->memberMutator);
+
+    // The member of a node is created with the member mutator, and must answer differently from existing ones on the archive if there is one.
+    GraphBased::NodeGenerator bidNodes;
+    if(!this->archive.empty()) {
+        bidNodes.addGenerator(Dimensions::IndividualValueArchiveGenerator(*state.get<Evaluation::DataSet>(this->archive), members, mutator));
+    } else {
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(members, mutator));
+    }
+
+    // The destination is an action or, sometimes, one of the current vertices.
+    std::vector<std::shared_ptr<const Individual>> currentVertices;
+    if(!this->vertices.empty()) {
+        const std::vector<std::shared_ptr<Individual>>& roots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->vertices);
+        currentVertices = getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()));
+    }
+    Dimensions::NumericUniformGenerator<size_t> actionGenerator(0, tpg->getNbActions() - 1);
+    if(currentVertices.empty()) {
+        bidNodes.addGenerator(actionGenerator);
+    } else {
+        Dimensions::MultiGenerator destination;
+        destination.addGenerator(actionGenerator, 0.995);
+        destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(currentVertices), 0.005);
+        bidNodes.addGenerator(destination);
+    }
+
+    // New vertices start with the minimum number of nodes.
+    const std::pair<size_t, size_t> range = tpg->getGenotypeConstraint().getRangeAt(0);
+    state.set(this->generator, std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, range, std::make_pair(range.first, range.first)));
+}
+
+Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
                                                           size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
     : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)},
       nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
@@ -47,15 +115,13 @@ Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::strin
     for(const std::string& key: this->evaluated) {
         this->require(key);
     }
+    this->require(this->problem);
     this->provide(this->cache);
-    if(this->problem == nullptr) {
-        throw std::runtime_error("Evolution::CacheMemberOutputsStep: the problem cannot be null");
-    }
 }
 
 std::string Evolution::CacheMemberOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples, " + this->problem->getName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 // Execute the individuals once on the samples of the evaluation and cache their outputs in them (Individual::cacheOutput).
@@ -67,7 +133,7 @@ void Evolution::cacheOutputsOf(const std::vector<std::shared_ptr<const Individua
         return;
     }
 
-    auto outputTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
+    std::shared_ptr<Metrics::MetricMapTemplate> outputTemplate = std::make_shared<Metrics::MetricMapTemplate>(std::make_unique<Metrics::OutputMetric>());
     std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>> results =
         Evaluation::evaluateIndividuals(individuals, problem, outputTemplate, nbIterations, generation, mode, nbThreads);
 
@@ -119,12 +185,17 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
 {
     clearPreviousCache(state, this->cache);
 
+    Evaluation::PredictionProblem* predictionProblem = dynamic_cast<Evaluation::PredictionProblem*>(state.get<Evaluation::Problem>(this->problem).get());
+    if(predictionProblem == nullptr) {
+        throw std::runtime_error("Evolution::CacheMemberOutputsStep: the problem " + this->problem + " must be a PredictionProblem");
+    }
+
     const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(gatherIndividuals(state, this->evaluated));
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
-    cacheOutputsOf(members, *this->problem, this->nbIterations, state.generation, this->mode, this->nbThreads);
+    cacheOutputsOf(members, *predictionProblem, this->nbIterations, state.generation, this->mode, this->nbThreads);
 }
 
-Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::shared_ptr<Evaluation::PredictionProblem> problem,
+Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
                                                           size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
     : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)},
       nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
@@ -132,15 +203,13 @@ Evolution::CacheVertexOutputsStep::CacheVertexOutputsStep(std::vector<std::strin
     for(const std::string& key: this->evaluated) {
         this->require(key);
     }
+    this->require(this->problem);
     this->provide(this->cache);
-    if(this->problem == nullptr) {
-        throw std::runtime_error("Evolution::CacheVertexOutputsStep: the problem cannot be null");
-    }
 }
 
 std::string Evolution::CacheVertexOutputsStep::details() const
 {
-    return std::to_string(this->nbIterations) + " samples, " + this->problem->getName() + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return std::to_string(this->nbIterations) + " samples, " + this->problem + ", " + std::to_string(this->nbThreads) + " thread(s)";
 }
 
 std::vector<std::vector<std::shared_ptr<const Individual>>> Evolution::CacheVertexOutputsStep::getSharedVerticesByHeight(
@@ -218,11 +287,16 @@ void Evolution::CacheVertexOutputsStep::apply(EvolutionData& state)
 {
     clearPreviousCache(state, this->cache);
 
+    Evaluation::PredictionProblem* predictionProblem = dynamic_cast<Evaluation::PredictionProblem*>(state.get<Evaluation::Problem>(this->problem).get());
+    if(predictionProblem == nullptr) {
+        throw std::runtime_error("Evolution::CacheVertexOutputsStep: the problem " + this->problem + " must be a PredictionProblem");
+    }
+
     // Layers are executed from the lowest one: the shared vertices they point to have their outputs cached already,
     // so each vertex only costs the bids of its own nodes.
     std::vector<std::shared_ptr<const Individual>> cached;
     for(const std::vector<std::shared_ptr<const Individual>>& layer: getSharedVerticesByHeight(gatherIndividuals(state, this->evaluated))) {
-        cacheOutputsOf(layer, *this->problem, this->nbIterations, state.generation, this->mode, this->nbThreads);
+        cacheOutputsOf(layer, *predictionProblem, this->nbIterations, state.generation, this->mode, this->nbThreads);
         cached.insert(cached.end(), layer.begin(), layer.end());
     }
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(std::move(cached)));
@@ -288,7 +362,7 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
     // Keep random inputs if there are more than the archive can store.
     const bool sampleRandomly = allInputs.size() > this->archiveSize;
     while(!allInputs.empty() && archive.size() < this->archiveSize) {
-        auto it = allInputs.begin();
+        std::map<uint64_t, std::vector<Data::DataValue>>::iterator it = allInputs.begin();
         if(sampleRandomly) {
             std::advance(it, state.rng.uniformSample<uint64_t>(0, allInputs.size() - 1));
         }
@@ -335,21 +409,20 @@ void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)
     std::map<uint64_t, std::set<uint64_t>>& aggregators = *state.get<std::map<uint64_t, std::set<uint64_t>>>(this->aggregators);
 
     std::vector<std::shared_ptr<Individual>> roots(*state.get<std::vector<std::shared_ptr<Individual>>>(this->roots));
-    const auto constRoots = [&roots]() { return std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()); };
 
     // Aggregators still alive are the ones reachable from the roots.
     std::set<uint64_t> alive;
-    for(const std::shared_ptr<const Individual>& vertex: getAllVertices(constRoots())) {
+    for(const std::shared_ptr<const Individual>& vertex: getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()))) {
         alive.insert(vertex->getIndividualID());
     }
     for(auto& [id, aggregatorIDs]: aggregators) {
-        for(auto it = aggregatorIDs.begin(); it != aggregatorIDs.end();) {
+        for(std::set<uint64_t>::iterator it = aggregatorIDs.begin(); it != aggregatorIDs.end();) {
             it = (alive.count(*it) == 0) ? aggregatorIDs.erase(it) : std::next(it);
         }
     }
 
     // Vertices without aggregator come back as roots.
-    for(auto it = aggregators.begin(); it != aggregators.end();) {
+    for(std::map<uint64_t, std::set<uint64_t>>::iterator it = aggregators.begin(); it != aggregators.end();) {
         if(it->second.empty()) {
             roots.push_back(protectedVertices.at(it->first));
             protectedVertices.erase(it->first);

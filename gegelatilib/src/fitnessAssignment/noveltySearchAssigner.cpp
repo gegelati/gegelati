@@ -123,8 +123,7 @@ std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::computeNove
 
 
 std::map<uint64_t, double> FitnessAssignment::NoveltySearchAssigner::assignFitness(
-                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics,
-                uint64_t metricHash) const
+                const std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& individualMetrics) const
 {
     std::map<uint64_t, std::vector<double>> descriptorValues = this->computeDescriptors(individualMetrics);
 

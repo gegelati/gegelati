@@ -66,7 +66,7 @@ namespace Evolution {
      *  - Vertices are mutated by a NodeTransferMutation transferring nodes of the current population, and the generator of the
      *    genotypes depends on the evolution: tangled connections towards any current vertex are proposed, and members are mutated
      *    with the member mutation. The range of the number of nodes is the one of the TPG representation, and new vertices start
-     *    with the minimum. BasicEvolutionConfig::mutation is not used.
+     *    with the minimum. BasicEvolutionConfig::mutation is replaced by the nodeTransfer.
      *  - CacheMemberOutputs (after Mutation), only for prediction problems, executes each member once per sample.
      *  - CacheVertexOutputs (after CacheMemberOutputs), only for prediction problems, executes once per sample each vertex shared
      *    by several individuals, layer by layer from the lowest vertices.
@@ -76,7 +76,7 @@ namespace Evolution {
      *    the population the vertices referenced by others.
      *  - If the archive size is positive, CreateArchive (first step of the initialization) creates an archive on which mutated
      *    members must answer differently from existing ones, and UpdateArchive (after the protection) maintains it from the inputs
-     *    measured by the training evaluations. A fixed archive only measures the inputs during the evaluation of the initialization.
+     *    measured by the training evaluations. A fixed archive only samples them during the initialization.
      */
     struct OriginTPGEvolutionConfig : public BasicEvolutionConfig {
         /// Representation of the members, its output must be a double, required.
@@ -124,9 +124,6 @@ namespace Evolution {
             /// Data: the aggregators of the protected vertices.
             std::string aggregators = "aggregators";
 
-            /// Data: the generator of the genotypes of the vertices, built again at each generation.
-            std::string generator = "generator";
-
             /// Step creating the archive.
             std::string createArchiveStep = "CreateArchive";
 
@@ -157,30 +154,30 @@ namespace Evolution {
         /**
          * \brief Inherited from BasicEvolutionConfig, builds the module of the TPG evolution.
          *
-         * Like for BasicEvolutionConfig, the settings are read first to create what the modules need, then the modules are built: the
-         * initialization creates the archive and the vertices, a generation protects the aggregated vertices and updates the archive.
+         * Like for BasicEvolutionConfig, the null components are replaced by the defaults and stored in the data of the module, then the
+         * modules are built: the initialization creates the archive and the vertices, a generation protects the aggregated vertices and
+         * updates the archive. The vertex mutation is stored under its name as a Mutation::Mutator, the member representation and mutation under their names.
          *
          * \throw std::runtime_error if a required setting is missing, if the representation is not a TPG,
          * or if the representations and the problem are not compatible.
          */
-        virtual std::shared_ptr<Module> buildModule() const override;
+        virtual std::shared_ptr<Module> buildModule() override;
 
         /// Inherited from BasicEvolutionConfig, adds the number of vertices and of members of the graphs of the population.
         virtual std::vector<LogStep::Column> logColumns() const override;
 
       protected:
         /**
-         * \brief Throw if the settings of the TPG evolution are missing or not compatible.
+         * \brief Inherited from BasicEvolutionConfig, also checks the settings of the TPG evolution and replaces its null components by the defaults.
          *
-         * \return the representation of the vertices.
+         * The mutation of the evolution is the nodeTransfer, which creates and mutates the vertices.
+         *
+         * \throw std::runtime_error if the settings are missing or not compatible.
          */
-        std::shared_ptr<const Representations::TPG> checkTPGSettings() const;
+        virtual void updateEmptyComponents() override;
 
-        /// Return the mutator of the vertices, the default one if none is set.
-        std::shared_ptr<Mutation::NodeTransferMutation> usedTransfer() const;
-
-        /// Return the mutator of the members, the default one if none is set.
-        std::shared_ptr<const Mutation::Mutator> usedMemberMutator() const;
+        /// Inherited from BasicEvolutionConfig, caches the outputs of the members and of the shared vertices before the validation evaluation (prediction problems only).
+        virtual std::shared_ptr<Module> makeValidationModule(const std::string& name, size_t period) const override;
     };
 
 }; // namespace Evolution

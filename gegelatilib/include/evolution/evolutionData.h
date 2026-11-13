@@ -53,17 +53,26 @@ namespace Evolution {
 
         /**
          * \brief Constructor.
-         *
-         * \param[in] seed the seed of the random number generator.
          */
-        explicit EvolutionData(uint64_t seed = 0) { this->rng.setSeed(seed); }
+        explicit EvolutionData() {}
 
         /**
-         * \brief Empty the state to start a new evolution, data included.
+         * \brief Empty the state to start a new evolution, everything included.
          *
          * \param[in] seed the seed of the random number generator.
          */
         void reset(uint64_t seed);
+
+        /**
+         * \brief Add the data of another EvolutionData, e.g. the components of a module added to another one.
+         *
+         * A data already present under the same name is kept: the data of the other one is ignored. Different data must therefore
+         * have different names. The initializations done on the other data are added too.
+         *
+         * \param[in] other the merged data.
+         * \throw std::runtime_error if both have a data of different types under the same name.
+         */
+        void mergeWith(const EvolutionData& other);
 
         /// Return the names of the data of the state.
         std::set<std::string> dataNames() const;
@@ -144,7 +153,7 @@ namespace Evolution {
          */
         bool isUpToDate(const std::string& name) const
         {
-            auto it = this->data.find(name);
+            std::map<std::string, std::shared_ptr<const EntryBase>>::const_iterator it = this->data.find(name);
             return it != this->data.end() && it->second->generation() == this->generation;
         }
 
@@ -162,7 +171,7 @@ namespace Evolution {
         /// Return the data with a name, checking its existence and type.
         template <typename T> const std::shared_ptr<T>& find(const std::string& name) const
         {
-            auto it = this->data.find(name);
+            std::map<std::string, std::shared_ptr<const EntryBase>>::const_iterator it = this->data.find(name);
             if(it == this->data.end()) {
                 throw std::runtime_error("Evolution::EvolutionData::get: no data named " + name);
             }

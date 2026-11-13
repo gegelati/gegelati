@@ -31,7 +31,6 @@
 #include "evolution/steps/exportStep.h"
 #include "evolution/originTPGEvolutionConfig.h"
 #include "evolution/steps/logStep.h"
-#include "evolution/steps/createGeneratorStep.h"
 #include "evolution/steps/lambdaStep.h"
 #include "evolution/steps/tpgSteps.h"
 
@@ -47,7 +46,6 @@
 #include "util/counterReset.h"
 #include "file/populationDotExporter.h"
 
-#ifndef NDEBUG
 class TPGAlgoTest : public ::testing::Test
 {
   protected:
@@ -147,14 +145,15 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
     config.problem = problem;
     std::shared_ptr<Evolution::Module> evolutionModule = config.buildModule();
 
-    auto mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5);
-    auto newMutateStep = std::make_shared<Evolution::MutateStep>(config.names.offspring, mutator, config.names.generator, 10, "Mutation2");
+    std::shared_ptr<Mutation::Mutator> mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5, "SecondPointMutator");
+    evolutionModule->getData().add(mutator->getName(), mutator);
+    auto newMutateStep = std::make_shared<Evolution::MutateStep>(config.names.offspring, mutator->getName(), config.names.generator, 10, "Mutation2");
     evolutionModule->insertAfter(evolutionModule->find("Mutation"), newMutateStep);
     //evolutionModule->replace(evolutionModule->find("Mutation"), newMutateStep);*/
 
 
     std::cout<<evolutionModule->summary()<<std::endl;
-    Evolution::EvolutionData data = evolutionModule->evolve(20, 4);
+    Evolution::EvolutionData& data = evolutionModule->evolve(20, 4);
     std::cout<<data.summary()<<std::endl;
 
 
@@ -219,12 +218,12 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
 
 
     std::string str = "graph";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, populationFitness));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, populationFitness));
 
 
-    Evolution::EvolutionData data = evolutionModule->evolve(40, 4);
+    Evolution::EvolutionData& data = evolutionModule->evolve(40, 4);
 
     EXPECT_EQ(16454860796132402384U, data.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     EXPECT_EQ(65221, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
@@ -260,7 +259,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
 
     Evolution::BasicEvolutionConfig lgp;
     lgp.representation = lgpRep;
-    lgp.problem = std::make_shared<Evaluation::PredictionProblem>(lgpDataSet, 500);
+    lgp.problem = std::make_shared<Evaluation::PredictionProblem>(lgpDataSet, 500, "LGPProblem");
     lgp.sizePopulation = 100;
     lgp.nbOffspring = 1000;
     lgp.nbTrainingIterations = 50;
@@ -271,12 +270,13 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     lgp.names.trainingMetrics = "LGP.trainingMetrics";
     lgp.names.trainingFitness = "LGP.trainingFitness";
     lgp.names.generator = "LGP.generator";
+    lgp.names.trainingMetricTemplate = "LGP.trainingMetricTemplate";
     lgp.names.evolution = "LGP";
     lgp.logOutput = nullptr;
 
     Evolution::BasicEvolutionConfig tpg;
     tpg.representation = tpgRep;
-    auto tpgProblem = std::make_shared<Evaluation::PredictionProblem>(dataSet, 500);
+    auto tpgProblem = std::make_shared<Evaluation::PredictionProblem>(dataSet, 500, "TPGProblem");
     tpg.problem = tpgProblem;
     tpg.sizePopulation = 100;
     tpg.nbOffspring = 1000;
@@ -290,6 +290,8 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     tpg.names.trainingFitness = "TPG.trainingFitness";
     tpg.names.evolution = "TPG";
     tpg.names.generator = "TPG.generator";
+    tpg.names.trainingMetricTemplate = "TPG.trainingMetricTemplate";
+    tpg.names.validationMetricTemplate = "TPG.validationMetricTemplate";
     tpg.logOutput = nullptr;
 
     // Before the TPG is created or mutated, a step builds its generator: the members are the current individuals of the LGP,
@@ -318,17 +320,17 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
         }, std::set<std::string>{lgp.names.population}, std::set<std::string>{tpg.names.generator});
     };
 
-    // The LGP does a generation, then the TPG does one. Its generator replaces the naive one of its initialization, and is created again before its mutation.
+    // The LGP does a generation, then the TPG does one. Its generator replaces the naive one before the creation of its population, and is created again before its mutation.
     auto evolutionModule = std::make_shared<Evolution::Module>("Evolution");
-    evolutionModule->add(lgp.buildModule());
+    evolutionModule->addSubModule(lgp.buildModule());
     auto tpgModule = tpg.buildModule();
-    tpgModule->getInitialization()->replace(tpgModule->getInitialization()->find("CreateGenerator"), makeGeneratorStep());
+    tpgModule->getInitialization()->insertBefore(tpgModule->getInitialization()->find("InitPopulation"), makeGeneratorStep());
     tpgModule->insertBefore(tpgModule->find("Mutation"), makeGeneratorStep());
 
     // The outputs of the members (the LGP individuals) on the samples of the evaluation are computed once, whatever the number of vertices using them.
     const std::string cacheKey("TPG.memberOutputCache");
     tpgModule->insertAfter(tpgModule->find("Mutation"), std::make_shared<Evolution::CacheMemberOutputsStep>(
-        std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem,
+        std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem->getName(),
         tpg.nbTrainingIterations, Evaluation::Mode::TRAINING, tpg.nbThreads));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
@@ -337,15 +339,15 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     }, 0, {tpgKeys.population}});
     std::ostringstream csv;
     const std::vector<Evolution::LogStep::Column> times = Evolution::stepTimeColumns(*tpgModule);
-    tpgModule->add(std::make_shared<Evolution::LogStep>(std::cout, columns));
+    tpgModule->addSubModule(std::make_shared<Evolution::LogStep>(std::cout, columns));
     columns.insert(columns.end(), times.begin(), times.end());
-    tpgModule->add(std::make_shared<Evolution::LogStep>(csv, columns, ";", "CsvLog"));
-    evolutionModule->add(tpgModule);
+    tpgModule->addSubModule(std::make_shared<Evolution::LogStep>(csv, columns, ";", "CsvLog"));
+    evolutionModule->addSubModule(tpgModule);
 
     
     std::cout << evolutionModule->summary() << std::endl;
 
-    Evolution::EvolutionData data = evolutionModule->evolve(40, 4);
+    Evolution::EvolutionData& data = evolutionModule->evolve(40, 4);
     std::cout << data.summary() << std::endl;
     std::cout << csv.str() << std::endl;
 
@@ -421,141 +423,18 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     config.memberRepresentation = lgpRep;
     config.problem = problem;
     auto evolutionModule = config.buildModule();
-    Evolution::EvolutionData state(4);
     //evolutionModule->remove(evolutionModule->findStep("CacheMemberOutputs"));
     std::cout<<evolutionModule->summary()<<std::endl;
 
     std::string str = "graph";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false));
     str = "graphBest";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness));
 
 
-    evolutionModule->initialize(state);
-    evolutionModule->evolve(state, 40);
+    Evolution::EvolutionData& state = evolutionModule->evolve(40, 4);
 
     EXPECT_EQ(13348146703180701991U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
     EXPECT_EQ(62131, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 }
 
-#endif
-
-#ifdef GEGELATI_WITH_OPENCV
-
-
-#include "instructions/imageInstructionSet.h"
-TEST_F(TPGAlgoTest, customEvolutionLGP2D) {
-    mnist::MNIST_dataset<std::vector, std::vector<double>, uint8_t> mnist(mnist::read_dataset<std::vector, std::vector, double, uint8_t>(MNIST_DATA_LOCATION));
-
-    std::vector<std::vector<double>> trainingImages = mnist.training_images;
-    std::vector<uint8_t> trainingLabels = mnist.training_labels;
-
-    Dimensions::Requirement inputReq = Dimensions::Requirement::array2d<double>(28, 28);
-    Dimensions::Requirement outputReq = Dimensions::Requirement::scalar<size_t>();
-    Evaluation::DataSet dataSet({inputReq}, outputReq);
-    for(size_t idx = 0; idx < trainingImages.size(); idx++) {
-        std::vector<Data::DataValue> inputs;
-        inputs.push_back(Data::DataValue::array2d<std::vector<double>>(trainingImages.at(idx), 28, 28));
-        
-        dataSet.addData(std::move(inputs), Data::DataValue::scalar<uint64_t>(static_cast<uint64_t>(trainingLabels.at(idx))));
-    }
-    // Create evaluationAgent
-    auto problem = std::make_shared<Evaluation::PredictionProblem>(dataSet, 3);
-
-    auto instructions = Instructions::ImageInstructions::createAll<double>(28, 28);
-    Instructions::Set imageSet;
-    for(auto& intr: instructions) {
-        imageSet.add(*intr);
-    }
-
-    std::vector<size_t> axes = {1, 2};
-
-    // Create representation
-    auto lgpRep = std::make_shared<Representations::LGP>(dataSet.getInputDimensions(), Data::DataType::type<double>({10, 28, 28}), imageSet, Data::DataType::type<double>({10, 28, 28}), 1, 20);
-    lgpRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Sum<double>>(lgpRep->getDimensionFlow().getOutputDimension(), axes));
-    lgpRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::ArgMax<double>>(lgpRep->getDimensionFlow().getOutputDimension()));
-    std::cout<<lgpRep->summary()<<std::endl;
-    
-    Evolution::BasicEvolutionConfig config;
-    config.sizePopulation = 50;
-    config.nbOffspring = 450;
-    config.nbTrainingIterations = 500;
-    config.nbThreads = 20;
-    config.representation = lgpRep;
-    config.problem = problem;
-    auto evolutionModule = config.buildModule();
-    Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolutionConfig::Names population;
-    std::string str = "graphLGP";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
-    str = "graphLGPBest";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
-    evolutionModule->initialize(state);
-    evolutionModule->evolve(state, 200);
-
-    ASSERT_EQ(13253408461481353746U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-}
-
-
-
-TEST_F(TPGAlgoTest, customEvolutionTPG3) {
-    mnist::MNIST_dataset<std::vector, std::vector<double>, uint8_t> mnist(mnist::read_dataset<std::vector, std::vector, double, uint8_t>(MNIST_DATA_LOCATION));
-
-    std::vector<std::vector<double>> trainingImages = mnist.training_images;
-    std::vector<uint8_t> trainingLabels = mnist.training_labels;
-
-    Dimensions::Requirement inputReq = Dimensions::Requirement::array2d<double>(28, 28);
-    Dimensions::Requirement outputReq = Dimensions::Requirement::scalar<size_t>();
-    Evaluation::DataSet dataSet({inputReq}, outputReq);
-    for(size_t idx = 0; idx < trainingImages.size(); idx++) {
-        std::vector<Data::DataValue> inputs;
-        inputs.push_back(Data::DataValue::array2d<std::vector<double>>(trainingImages.at(idx), 28, 28));
-        
-        dataSet.addData(std::move(inputs), Data::DataValue::scalar<uint64_t>(static_cast<uint64_t>(trainingLabels.at(idx))));
-    }
-
-    auto instructions = Instructions::ImageInstructions::createAll<double>(28, 28);
-    Instructions::Set imageSet;
-    for(auto& intr: instructions) {
-        imageSet.add(*intr);
-    }
-
-    // Create evaluationAgent
-    auto problem = std::make_shared<Evaluation::PredictionProblem>(dataSet, 3);
-
-    auto lgpRep = std::make_shared<Representations::LGP>(dataSet.getInputDimensions(), Data::DataType::type<double>({8, 28, 28}), imageSet, Data::DataType::type<double>({1, 28, 28}), 1, 20);
-    lgpRep->addOutputFunction(std::make_unique<Dimensions::ActivationFunctions::Sum<double>>(lgpRep->getDimensionFlow().getOutputDimension()));
-    std::cout<<lgpRep->summary()<<std::endl;
-    auto tpgRep = std::make_shared<Representations::TPG>(problem->getInputDimensions(), 10, 2, 200);
-
-    auto assigner = std::make_shared<FitnessAssignment::ClassificationF1Assigner>();
-
-    Evolution::OriginTPGEvolutionConfig config;
-    config.sizePopulation = 100;
-    config.nbOffspring = 400;
-    config.nbTrainingIterations = 500;
-    config.nbThreads = 20;
-    config.archiveSize = 0;
-    config.isArchiveFixed = true;
-    config.protectAggregated = false;
-    config.assigner = assigner;
-    config.representation = tpgRep;
-    config.memberRepresentation = lgpRep;
-    config.problem = problem;
-    auto evolutionModule = config.buildModule();
-    Evolution::EvolutionData state(4);
-    const Evolution::BasicEvolutionConfig::Names population;
-
-    std::string str = "graph";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false));
-    str = "graphBest";
-    evolutionModule->add(std::make_shared<Evolution::ExportStep>(population.population, MNIST_DATA_LOCATION + str, false, population.trainingFitness));
-
-
-    evolutionModule->initialize(state);
-    evolutionModule->evolve(state, 10000);
-
-    ASSERT_EQ(17819704308639420184U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    ASSERT_EQ(22492, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
-}
-#endif

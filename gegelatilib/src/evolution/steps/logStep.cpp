@@ -15,8 +15,9 @@ std::vector<double> Evolution::fitnessOf(const EvolutionData& state, const std::
     std::vector<double> values;
     if(state.isUpToDate(fitness)) {
         for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(individuals)) {
-            const auto found = state.get<std::map<uint64_t, double>>(fitness)->find(individual->getIndividualID());
-            if(found != state.get<std::map<uint64_t, double>>(fitness)->end()) {
+            const std::shared_ptr<const std::map<uint64_t, double>> fitnessValues = state.get<std::map<uint64_t, double>>(fitness);
+            const std::map<uint64_t, double>::const_iterator found = fitnessValues->find(individual->getIndividualID());
+            if(found != fitnessValues->end()) {
                 values.push_back(found->second);
             }
         }

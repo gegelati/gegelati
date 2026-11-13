@@ -83,6 +83,12 @@ namespace Evaluation {
          */
         virtual bool isCopyable() const;
 
+
+        /**
+         * \brief Return a PredictionMetric: the default metric representing the fitness of an evaluation performed an Prediction Problem.
+         */
+        virtual std::unique_ptr<Metrics::Metric> getDefaultFitnessMetric() const override;
+
         /**
          * \brief Compute the hashes of the evaluations: the indices of the samples drawn in the data of the mode.
          */

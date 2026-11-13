@@ -136,6 +136,11 @@ namespace Evaluation {
         uint64_t getProblemSeed() const;    
 
         /**
+         * \brief Return the default metric representing the fitness of an evaluation performed on the problem.
+         */
+        virtual std::unique_ptr<Metrics::Metric> getDefaultFitnessMetric() const = 0;
+
+        /**
          * \brief Compute the hashes identifying the evaluations of an individual, one per iteration.
          */
         virtual std::set<uint64_t> computeEvaluationHashes(

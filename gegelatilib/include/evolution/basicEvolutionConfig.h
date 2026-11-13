@@ -31,18 +31,23 @@ namespace Evolution {
      * basic.sizePopulation = 100;
      * basic.nbOffspring = 100;
      * std::shared_ptr<Evolution::Module> population = basic.buildModule();
-     * auto mutation = population->find<MutateStep>("Mutation");
-     * Evolution::EvolutionData data = population->evolve(100, seed);
+     * std::shared_ptr<Evolution::MutateStep> mutation = population->find<Evolution::MutateStep>("Mutation");
+     * Evolution::EvolutionData& data = population->evolve(100, seed);
      * \endcode
      *
-     * Initialization steps: InitPopulation, InitialEvaluation, TrainingFitness (and ParentFitness).
-     * Generation steps: ParentSelection, Reproduction, Mutation, TrainingEvaluation, TrainingFitness (and ParentFitness),
-     * SurvivorSelection, then ValidationEvaluation and ValidationFitness if validation iterations are requested.
+     * Initialization steps: InitPopulation, InitialEvaluation, TrainingFitness (then InitValidation).
+     * Generation steps: (ParentFitness), ParentSelection, Reproduction, Mutation, TrainingEvaluation, TrainingFitness,
+     * SurvivorSelection, then Validation (ValidationEvaluation and ValidationFitness) if validation iterations are requested, and Log.
      * The steps of the generation are a module named by names.evolution, whose initialization is the initialization steps
      * (see buildModule). It can be edited, repeated or run every few generations, and added to the steps of other evolutions.
      *
-     * Null components are replaced by the defaults: random parent selection, truncation survival,
-     * replication, point mutation, and the average of the rewards (or the accuracy) as fitness.
+     * The components (problem, representation, assigners, selectors, breeder, mutation) are stored in the data of the module under their
+     * name (Util::Named::getName), the generator and the metric templates under names.generator and names.*MetricTemplate. Two different
+     * components of the same evolution must therefore have different names (e.g. a validation problem of the same class as the training problem).
+     *
+     * Null components are replaced by the defaults when the module is built: random parent selection, truncation survival,
+     * replication, point mutation, and the default metric of the problem (rewards or predictions, see Evaluation::Problem::getDefaultFitnessMetric)
+     * averaged by a DefaultAssigner as fitness.
      */
     struct BasicEvolutionConfig {
         /**
@@ -83,14 +88,17 @@ namespace Evolution {
             /// Data: the fitness of the validation.
             std::string validationFitness = "validationFitness";
 
-            /// Data: the generator of the genotypes, created by CreateGeneratorStep and read by the steps creating and mutating the population.
+            /// Component: the generator of the genotypes, read by the steps creating and mutating the population.
             std::string generator = "generator";
+
+            /// Component: the metrics measured by the training evaluations (trainingMetricTemplate).
+            std::string trainingMetricTemplate = "trainingMetricTemplate";
+
+            /// Component: the metrics measured by the validation evaluations (validationMetricTemplate).
+            std::string validationMetricTemplate = "validationMetricTemplate";
 
             /// Module of the evolution, holding the steps of a generation and the initialization.
             std::string evolution = "Evolution";
-
-            /// Module holding the steps of the initialization.
-            std::string initialization = "Initialization";
 
             /// Step creating the individuals.
             std::string initPopulationStep = "InitPopulation";
@@ -124,9 +132,6 @@ namespace Evolution {
 
             /// Step computing the validation fitness.
             std::string validationFitnessStep = "ValidationFitness";
-
-            /// Step creating the generator of the genotypes.
-            std::string createGeneratorStep = "CreateGenerator";
 
             /// Step writing the log of the evolution.
             std::string logStep = "Log";
@@ -162,7 +167,10 @@ namespace Evolution {
         /// Number of threads authorized.
         size_t nbThreads = 1;
 
-        /// Fitness assignment method, DefaultAssigner if null. Used for the survival, and for the parents without parentAssigner.
+        /// Metrics measured during the training evaluations, empty if null. The default metric of the problem is added if an assigner reads it, the metrics read by the other assigners must be in it.
+        std::shared_ptr<Metrics::MetricMapTemplate> trainingMetricTemplate = nullptr;
+
+        /// Fitness assignment method, DefaultAssigner of the default metric of the problem if null. Used for the survival, and for the parents without parentAssigner.
         std::shared_ptr<FitnessAssignment::Assigner> assigner = nullptr;
 
         /// Fitness assignment method of the parent selection (e.g. novelty), the assigner if null.
@@ -180,17 +188,17 @@ namespace Evolution {
         /// Mutator of the offspring, PointMutator(0.2, 0.5, 0.5) if null.
         std::shared_ptr<Mutation::Mutator> mutation = nullptr;
 
-        /// Generator of the genotypes, the naive generator of the constraint of the representation if null. It is created once by the first step of the initialization.
+        /// Generator of the genotypes, the naive generator of the constraint of the representation if null.
         std::shared_ptr<GraphBased::GenotypeGenerator> generator = nullptr;
 
-        /// Metrics measured during the evaluations in addition to the one of the fitness. Each evaluation step uses an empty clone.
-        std::vector<std::shared_ptr<const Metrics::Metric>> metrics;
-
-        /// Problem of the validation, the training problem if null.
+        /// Problem of the validation, optional: the validation is evaluated on the training problem if null (it then stays null).
         std::shared_ptr<Evaluation::Problem> validationProblem = nullptr;
 
-        /// Fitness assignment method of the validation, the assigner if null.
+        /// Fitness assignment method of the validation, optional: the training assigner is used if null (it then stays null).
         std::shared_ptr<FitnessAssignment::Assigner> validationAssigner = nullptr;
+
+        /// Metrics measured during the validation evaluations, empty if null. The default metric is added like for the training.
+        std::shared_ptr<Metrics::MetricMapTemplate> validationMetricTemplate = nullptr;
 
         /// Default polymorphic destructor.
         virtual ~BasicEvolutionConfig() = default;
@@ -198,16 +206,17 @@ namespace Evolution {
         /**
          * \brief Build the module of the evolution: the steps of a generation, with the initialization.
          *
-         * It goes in two steps. First the settings are read to create what the modules need: the data
-         * (from the names), the metrics and the default components. Then the modules are
-         * built: the initialization steps, and the steps of a generation which has them as its initialization.
+         * It goes in steps. First the null components of the settings are replaced by the defaults (the settings are updated,
+         * see updateEmptyComponents), then they are stored in the data of the module, then the modules are built:
+         * the initialization steps, and the steps of a generation which has them as its initialization.
          * The result can be edited, evolved, or added to the modules of other evolutions (see Module::evolve).
          *
          * \return the module, named by names.evolution.
          * \throw std::runtime_error if the representation or the problem is null, if a size is zero, if they are not compatible,
-         * if a problem is neither a prediction nor a reinforcement problem, or if the validation period is zero.
+         * if the validation period is zero while validating, if a metric template lacks the metric of its assigner,
+         * or if two components have the same name.
          */
-        virtual std::shared_ptr<Module> buildModule() const;
+        virtual std::shared_ptr<Module> buildModule();
 
         /**
          * \brief Columns of the log of the evolution, made from its names and settings.
@@ -220,17 +229,29 @@ namespace Evolution {
         virtual std::vector<LogStep::Column> logColumns() const;
 
       protected:
-        /// Throw if a required setting is missing or the settings are not compatible.
-        void checkSettings() const;
+        /**
+         * \brief Check the settings and replace the null components by the defaults, the generator and the mutation excepted.
+         *
+         * The default metrics of the problems are added to the metric templates when an assigner reads them.
+         *
+         * \throw std::runtime_error if the settings are missing or not compatible (see buildModule).
+         */
+        virtual void updateEmptyComponents();
 
-        /// Add the step writing the log of the evolution, the last step of a generation, if logOutput is set.
-        void addLogStep(Module& step) const;
+        /**
+         * \brief Store the components shared by the evolutions in the data of the module, the generator and the mutation excepted.
+         *
+         * \param[in,out] module the module receiving the components in its data.
+         */
+        void addComponents(Module& module) const;
 
-        /// Return the metrics measured in a problem, and the hash of the metric of the fitness, which depends on the kind of problem.
-        std::pair<std::shared_ptr<Metrics::MetricMapTemplate>, uint64_t> makeMetrics(const Evaluation::Problem& evaluatedProblem) const;
-
-        /// Return the assigner of the fitness, the default one if none is set.
-        std::shared_ptr<FitnessAssignment::Assigner> usedAssigner() const;
+        /**
+         * \brief Return a module evaluating the population in validation mode and computing its validation fitness.
+         *
+         * \param[in] name name of the module.
+         * \param[in] period number of generations between two runs of the module.
+         */
+        virtual std::shared_ptr<Module> makeValidationModule(const std::string& name, size_t period) const;
 
         /**
          * \brief Check that a problem can evaluate the individuals of a representation.
@@ -240,35 +261,6 @@ namespace Evolution {
          * \throw std::runtime_error if the input or output requirements of the representation and of the problem are not compatible.
          */
         static void checkCompatible(const Representations::Representation& representation, const Evaluation::Problem& problem);
-
-        /**
-         * \brief Add the steps computing the training fitness (and the parent fitness) from the training metrics.
-         *
-         * \param[in,out] step the step receiving the steps.
-         * \param[in] metricHash hash of the metric from which the fitness is computed.
-         */
-        void addFitnessSteps(Module& step, uint64_t metricHash) const;
-
-        /**
-         * \brief Add the steps selecting the parents and reproducing them.
-         *
-         * \param[in,out] step the step receiving the steps.
-         */
-        void addReproductionSteps(Module& step) const;
-
-        /**
-         * \brief Add the step selecting the survivors among the population and its offspring.
-         *
-         * \param[in,out] step the step receiving the step.
-         */
-        void addSurvivalStep(Module& step) const;
-
-        /**
-         * \brief Add the steps of the validation, if requested.
-         *
-         * \param[in,out] step the step receiving the steps.
-         */
-        void addValidationSteps(Module& step) const;
     };
 
 }; // namespace Evolution
