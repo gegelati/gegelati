@@ -123,6 +123,9 @@ namespace Evolution {
             /// Name of the roots whose vertices can be destinations (a list of mutable individuals), empty for actions only.
             std::string vertices;
 
+            /// Probability that the destination of a node is a team rather than an action, when there are teams.
+            double teamDestinationProbability;
+
         public:
             /**
              * \brief Constructor.
@@ -133,10 +136,11 @@ namespace Evolution {
              * \param[in] memberMutator name of the mutator of the members.
              * \param[in] archive name of the archive on which new members must answer differently, empty for none.
              * \param[in] vertices name of the roots whose vertices can be destinations, empty for actions only.
+             * \param[in] teamDestinationProbability probability that the destination of a node is a team rather than an action (1 - teamDestinationProbability).
              * \param[in] name name of the step.
              */
             UpdateGeneratorStep(std::string generator, std::string representation, std::string memberRepresentation, std::string memberMutator,
-                                std::string archive = "", std::string vertices = "", std::string name = "UpdateGenerator");
+                                std::string archive = "", std::string vertices = "", double teamDestinationProbability = 0.005, std::string name = "UpdateGenerator");
 
             /// Inherited from Module
             virtual void apply(EvolutionData& state) override;

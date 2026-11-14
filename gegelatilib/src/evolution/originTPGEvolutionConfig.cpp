@@ -5,6 +5,7 @@
 #include <map>
 #include <queue>
 
+#include "dimensions/individualValueGenerator.h"
 #include "evaluation/predictionProblem.h"
 #include "evolution/steps/assignFitnessStep.h"
 #include "evolution/steps/evaluateStep.h"
@@ -25,14 +26,25 @@ void Evolution::OriginTPGEvolutionConfig::updateEmptyComponents()
     }
     // The vertices are created and mutated by the node transfer.
     this->mutation = this->nodeTransfer;
-    BasicEvolutionConfig::updateEmptyComponents();
 
-    if(std::dynamic_pointer_cast<const Representations::TPG>(this->representation) == nullptr) {
+    const std::shared_ptr<const Representations::TPG> tpg = std::dynamic_pointer_cast<const Representations::TPG>(this->representation);
+    if(tpg == nullptr) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation must be a TPG");
     }
     if(this->memberRepresentation == nullptr) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: the representation of the members must be set");
     }
+
+    // The generator of the teams, set before the basic components so that no generator is made from the constraint of the TPG: each node
+    // has a new member, created with the member mutator, and an action (as UpdateGeneratorStep, which replaces it before the population is created).
+    if(this->generator == nullptr) {
+        GraphBased::NodeGenerator bidNodes;
+        bidNodes.addGenerator(Dimensions::IndividualValueGenerator(this->memberRepresentation, *this->memberMutation));
+        bidNodes.addGenerator(Dimensions::NumericUniformGenerator<size_t>(0, tpg->getNbActions() - 1));
+        const std::pair<size_t, size_t> range = tpg->getGenotypeConstraint().getRangeAt(0);
+        this->generator = std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, range, std::make_pair(range.first, range.first));
+    }
+    BasicEvolutionConfig::updateEmptyComponents();
     if(!Dimensions::DimensionFlow::acceptsRequirements(this->representation->getDimensionFlow().getInputDimensions(),
                                                        this->memberRepresentation->getDimensionFlow().getInputDimensions())) {
         throw std::runtime_error("Evolution::OriginTPGEvolutionConfig: input requirements not compatible between the TPG and the members");
@@ -85,7 +97,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     }
     initModule.insertBefore(this->names.initPopulationStep, std::make_shared<UpdateGeneratorStep>(
         this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
-        this->memberMutation->getName(), archiveName, "", this->tpgNames.updateGeneratorStep));
+        this->memberMutation->getName(), archiveName, "", this->teamDestinationProbability, this->tpgNames.updateGeneratorStep));
 
     // After the fitness: protection of the aggregated vertices, then update of the archive.
     std::string position = this->names.trainingFitnessStep;
@@ -104,7 +116,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     // Mutation of the offspring, with a generator whose destinations can be the current vertices, and nodes transferred from the population.
     evolutionModule->insertBefore(this->names.mutationStep, std::make_shared<UpdateGeneratorStep>(
         this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
-        this->memberMutation->getName(), archiveName, this->names.population, this->tpgNames.updateGeneratorStep));
+        this->memberMutation->getName(), archiveName, this->names.population, this->teamDestinationProbability, this->tpgNames.updateGeneratorStep));
     evolutionModule->replace(this->names.mutationStep, std::make_shared<MutateVerticesStep>(
         this->names.offspring, this->names.population, this->names.generator,
         this->nodeTransfer->getName(), this->nbThreads, this->names.mutationStep));

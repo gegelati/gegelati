@@ -77,6 +77,9 @@ namespace Evolution {
         /// Indicates if the vertices referenced by others are removed from the population.
         bool protectAggregated = true;
 
+        /// Probability that the destination of a new or mutated node is a team rather than an action (see UpdateGeneratorStep).
+        double teamDestinationProbability = 0.005;
+
         /// Mutator of the vertices, NodeTransferMutation(0.1, 0.7, 0.7) if null.
         std::shared_ptr<Mutation::NodeTransferMutation> nodeTransfer = nullptr;
 

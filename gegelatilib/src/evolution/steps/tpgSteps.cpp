@@ -47,9 +47,10 @@ void Evolution::MutateVerticesStep::apply(EvolutionData& state)
 }
 
 Evolution::UpdateGeneratorStep::UpdateGeneratorStep(std::string generator, std::string representation, std::string memberRepresentation,
-                                                    std::string memberMutator, std::string archive, std::string vertices, std::string name)
+                                                    std::string memberMutator, std::string archive, std::string vertices, double teamDestinationProbability, std::string name)
     : Module(std::move(name)), generator{std::move(generator)}, representation{std::move(representation)},
-      memberRepresentation{std::move(memberRepresentation)}, memberMutator{std::move(memberMutator)}, archive{std::move(archive)}, vertices{std::move(vertices)}
+      memberRepresentation{std::move(memberRepresentation)}, memberMutator{std::move(memberMutator)}, archive{std::move(archive)}, vertices{std::move(vertices)},
+      teamDestinationProbability{teamDestinationProbability}
 {
     this->require(this->representation);
     this->require(this->memberRepresentation);
@@ -92,8 +93,8 @@ void Evolution::UpdateGeneratorStep::apply(EvolutionData& state)
         bidNodes.addGenerator(actionGenerator);
     } else {
         Dimensions::MultiGenerator destination;
-        destination.addGenerator(actionGenerator, 0.995);
-        destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(currentVertices), 0.005);
+        destination.addGenerator(actionGenerator, 1 - this->teamDestinationProbability);
+        destination.addGenerator(Dimensions::ListUniformGenerator<std::shared_ptr<const Individual>>(currentVertices), this->teamDestinationProbability);
         bidNodes.addGenerator(destination);
     }
 
