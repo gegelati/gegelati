@@ -15,7 +15,7 @@ Evolution::InitPopulationStep::InitPopulationStep(std::string individuals, std::
 
 std::string Evolution::InitPopulationStep::details() const
 {
-    return std::to_string(this->size) + " individuals, " + this->representation + ", " + this->mutator;
+    return std::to_string(this->size) + " individuals";
 }
 
 void Evolution::InitPopulationStep::apply(EvolutionData& state)

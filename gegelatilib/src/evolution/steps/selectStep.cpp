@@ -20,12 +20,7 @@ Evolution::SelectStep::SelectStep(std::vector<std::string> candidates, std::stri
 
 std::string Evolution::SelectStep::details() const
 {
-    std::string names;
-    for(const std::string& name: this->candidates) {
-        names += (names.empty() ? "" : ", ") + name;
-    }
-    return this->selector + ", " + std::to_string(this->nbSelected) + " from " + names
-        + " to " + this->selected;
+    return std::to_string(this->nbSelected) + " selected";
 }
 
 void Evolution::SelectStep::apply(EvolutionData& state)

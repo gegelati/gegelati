@@ -13,7 +13,7 @@ Evolution::MutateStep::MutateStep(std::string individuals, std::string mutator, 
 
 std::string Evolution::MutateStep::details() const
 {
-    return this->mutator + ", " + this->individuals + ", " + std::to_string(this->nbThreads) + " thread(s)";
+    return std::to_string(this->nbThreads) + " thread(s)";
 }
 
 void Evolution::MutateStep::apply(EvolutionData& state)

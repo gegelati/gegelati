@@ -46,8 +46,6 @@ namespace Evolution {
             const std::string& getFitness() const { return this->fitness; }
 
             /// Inherited from Module
-            virtual std::string details() const override;
-            /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
     };
 

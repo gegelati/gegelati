@@ -172,12 +172,13 @@ TEST_F(ModuleTest, summary)
 {
     auto evolutionModule = makeSteps(10, 10, 3, 2);
     const std::string summary = evolutionModule->summary();
-    for(const std::string& text: {"InitPopulation", "InitialEvaluation", "ParentSelection (RandomSelector, 10 from Population to Parents)",
-                                  "Reproduction", "Mutation", "TrainingEvaluation (training, 3 iterations, ",
-                                  "SurvivorSelection (TruncationSelector, 10 from Population, Offspring to Population)",
-                                  "ValidationEvaluation (validation, 2 iterations, ", "ValidationFitness (DefaultAssigner, validationMetrics to validationFitness)"}) {
+    // Each step with its numeric parameters only.
+    for(const std::string& text: {"InitPopulation (10 individuals)", "InitialEvaluation (3 iterations, 1 thread(s))", "ParentSelection (10 selected)",
+                                  "Reproduction (10 offspring)", "Mutation (1 thread(s))", "TrainingEvaluation (3 iterations, 1 thread(s))",
+                                  "SurvivorSelection (10 selected)", "ValidationEvaluation (2 iterations, 1 thread(s))", "ValidationFitness"}) {
         EXPECT_NE(summary.find(text), std::string::npos) << text << "\n" << summary;
     }
+    EXPECT_NE(summary.find("requires: Parents, Replicator | provides: Offspring"), std::string::npos) << summary;
 }
 
 TEST_F(ModuleTest, settingsAreChecked)
@@ -352,7 +353,7 @@ TEST_F(ModuleTest, parentsWithTheirOwnFitness)
     // The parent fitness is the first step of a generation, computed from the metrics of the previous one.
     EXPECT_EQ(evolutionModule->find("ParentSelection")->requiredData().count(population.parentFitness), 1U);
     EXPECT_EQ(evolutionModule->getSteps().front()->name(), "ParentFitness");
-    EXPECT_NE(evolutionModule->summary().find("ParentFitness (ParentAssigner, trainingMetrics to parentFitness)"), std::string::npos);
+    EXPECT_EQ(evolutionModule->find("ParentFitness")->requiredData(), (std::set<std::string>{"ParentAssigner", population.trainingMetrics}));
 
     Evolution::EvolutionData& state = evolutionModule->evolve(3, 0);
     EXPECT_TRUE(state.isUpToDate(population.parentFitness));
@@ -656,9 +657,9 @@ TEST_F(ModuleTest, twoPopulations)
     };
 
     std::shared_ptr<Evolution::Module> evolutionModule = makeModule(true);
-    const std::string summary = evolutionModule->summary();
-    for(const std::string& text: {"A.trainingFitness", "B.trainingFitness", "B.parents"}) {
-        EXPECT_NE(summary.find(text), std::string::npos) << text;
+    const std::set<std::string> provided = evolutionModule->providedData();
+    for(const std::string& name: {"A.trainingFitness", "B.trainingFitness", "B.parents"}) {
+        EXPECT_EQ(provided.count(name), 1U) << name;
     }
     Evolution::EvolutionData& state = evolutionModule->evolve(3, 4);
 
@@ -889,7 +890,7 @@ TEST_F(ModuleTest, evaluateStep)
     EXPECT_EQ(step.name(), "Evaluate");
     EXPECT_EQ(step.requiredData(), (std::set<std::string>{population.population, offspring, problem->getName(), metricTemplateKey}));
     EXPECT_EQ(step.providedData(), (std::set<std::string>{metrics}));
-    EXPECT_EQ(step.details(), "validation, 2 iterations, ReinforcementProblem, 3 thread(s)");
+    EXPECT_EQ(step.details(), "2 iterations, 3 thread(s)");
     ASSERT_NO_THROW(step.apply(state));
 
     // Metrics of the individuals of both lists, constant and mutable, indexed by ID.
@@ -942,7 +943,6 @@ TEST_F(ModuleTest, exportStep)
     Evolution::ExportStep all(population.population, path + "_all", true);
     Evolution::ExportStep best(population.population, path + "_best", false, fitness);
     EXPECT_EQ(all.name(), "Export");
-    EXPECT_EQ(all.details(), path + "_all<generation>.dot");
     EXPECT_EQ(all.requiredData(), (std::set<std::string>{population.population}));
     EXPECT_EQ(best.requiredData(), (std::set<std::string>{population.population, fitness}));
     EXPECT_TRUE(all.providedData().empty());
@@ -1080,11 +1080,9 @@ TEST_F(ModuleTest, componentsDescribeThemselves)
     EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, std::make_shared<Descriptors::AverageVectorDescriptor>(0), 0).getName(), "NoveltySearchAssigner");
     EXPECT_EQ(Descriptors::AverageVectorDescriptor(0).getName(), "AverageVectorDescriptor");
 
-    // And so do the steps using them.
-    auto mutate = makeSteps(10, 10, 2)->find("Mutation");
-    EXPECT_NE(mutate->details().find("PointMutator"), std::string::npos) << mutate->details();
-    auto select = makeSteps(10, 10, 2)->find("SurvivorSelection");
-    EXPECT_NE(select->details().find("TruncationSelector"), std::string::npos) << select->details();
+    // The steps only show their numeric parameters.
+    EXPECT_EQ(makeSteps(10, 10, 2)->find("Mutation")->details(), "1 thread(s)");
+    EXPECT_EQ(makeSteps(10, 10, 2)->find("SurvivorSelection")->details(), "10 selected");
 }
 
 TEST_F(ModuleTest, componentsCanBeNamed)
@@ -1127,11 +1125,9 @@ TEST_F(ModuleTest, componentsCanBeNamed)
     streamed << Selection::TournamentSelector(3, true, "Small") << " / " << *descriptor;
     EXPECT_EQ(streamed.str(), "Small / OutputsOnTheArchive") << "Streaming an object writes its name, not its details";
 
-    // The steps print the names of the components they read.
+    // The steps read the components by their names.
     Evolution::SelectStep small({"A"}, "fitness", "Small", 2, "B");
-    Evolution::SelectStep big({"A"}, "fitness", "Big", 2, "B");
-    EXPECT_NE(small.details().find("Small"), std::string::npos) << small.details();
-    EXPECT_NE(big.details().find("Big"), std::string::npos) << big.details();
+    EXPECT_EQ(small.requiredData().count("Small"), 1U);
 }
 
 TEST_F(ModuleTest, evolveRunsTheInitializations)

@@ -3,7 +3,7 @@
 
 std::string Evolution::ReproduceStep::details() const
 {
-    return this->reproducer + ", " + std::to_string(this->nbOffspring) + " from " + this->parents + " to " + this->offspring;
+    return std::to_string(this->nbOffspring) + " offspring";
 }
 
 void Evolution::ReproduceStep::apply(EvolutionData& state)

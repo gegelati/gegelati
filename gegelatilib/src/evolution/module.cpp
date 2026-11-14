@@ -300,18 +300,18 @@ std::string Evolution::Module::summary(const EvolutionData* data) const
 
     // Data of the leaves are aligned in a column.
     size_t width = 0;
-    for(const auto& [left, right]: rows) {
-        if(!right.empty()) {
-            width = std::max(width, left.size());
+    for(const std::pair<std::string, std::string>& row: rows) {
+        if(!row.second.empty()) {
+            width = std::max(width, row.first.size());
         }
     }
     width = std::min<size_t>(width, 70);
 
     std::ostringstream result;
-    for(const auto& [left, right]: rows) {
-        result << left;
-        if(!right.empty()) {
-            result << std::string((left.size() < width) ? width - left.size() : 0, ' ') << "  " << right;
+    for(const std::pair<std::string, std::string>& row: rows) {
+        result << row.first;
+        if(!row.second.empty()) {
+            result << std::string((row.first.size() < width) ? width - row.first.size() : 0, ' ') << "  " << row.second;
         }
         result << std::string(1, 10);
     }

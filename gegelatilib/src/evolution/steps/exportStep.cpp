@@ -6,12 +6,6 @@
 #include "file/populationDotExporter.h"
 #include "util/individualUtils.h"
 
-
-std::string Evolution::ExportStep::details() const
-{
-    return this->filePath + (this->oneFilePerGeneration ? "<generation>" : "") + ".dot";
-}
-
 void Evolution::ExportStep::apply(EvolutionData& state)
 {
     if(state.generation == EvolutionData::initGeneration) {

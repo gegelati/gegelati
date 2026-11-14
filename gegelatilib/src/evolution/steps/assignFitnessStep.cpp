@@ -1,11 +1,5 @@
 #include "evolution/steps/assignFitnessStep.h"
 
-
-std::string Evolution::AssignFitnessStep::details() const
-{
-    return this->assigner + ", " + this->metrics + " to " + this->fitness;
-}
-
 void Evolution::AssignFitnessStep::apply(EvolutionData& state)
 {
     const FitnessAssignment::Assigner& usedAssigner = *state.get<FitnessAssignment::Assigner>(this->assigner);

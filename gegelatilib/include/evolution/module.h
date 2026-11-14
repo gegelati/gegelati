@@ -339,8 +339,8 @@ namespace Evolution {
             /**
              * \brief Return a printable tree of the modules with their required and provided data.
              *
-             * Each line shows a module with its parameters and period, and the leaves show the data they require
-             * and provide in aligned columns. Initializations are shown under the module they belong to.
+             * Each line shows a module with its numeric parameters (see details) and its period, and the leaves show the data they
+             * require and provide in aligned columns. Initializations are shown under the module they belong to.
              */
             std::string summary() const;
 

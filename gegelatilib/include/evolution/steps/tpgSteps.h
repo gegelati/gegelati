@@ -139,8 +139,6 @@ namespace Evolution {
                                 std::string archive = "", std::string vertices = "", std::string name = "UpdateGenerator");
 
             /// Inherited from Module
-            virtual std::string details() const override;
-            /// Inherited from Module
             virtual void apply(EvolutionData& state) override;
     };
 
