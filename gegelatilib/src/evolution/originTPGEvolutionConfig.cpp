@@ -132,17 +132,29 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     return evolutionModule;
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::OriginTPGEvolutionConfig::logColumns() const
+double Evolution::OriginTPGEvolutionConfig::getNbVertices(const EvolutionData& state, const std::string& roots)
 {
-    std::vector<LogStep::Column> columns = BasicEvolutionConfig::logColumns();
-    const std::string roots(this->names.population);
-    const std::function<std::vector<std::shared_ptr<const Individual>>(const EvolutionData&)> rootsOf = [roots](const EvolutionData& state) {
-        const std::shared_ptr<const std::vector<std::shared_ptr<Individual>>> list = state.get<std::vector<std::shared_ptr<Individual>>>(roots);
-        return std::vector<std::shared_ptr<const Individual>>(list->begin(), list->end());
-    };
-    columns.insert(columns.begin() + 1, {"NbVertex", [rootsOf](const EvolutionData& state) { return static_cast<double>(getAllVertices(rootsOf(state)).size()); }, 0, {roots}});
-    columns.insert(columns.begin() + 2, {"NbMember", [rootsOf](const EvolutionData& state) { return static_cast<double>(getMembersOf(getAllVertices(rootsOf(state))).size()); }, 0, {roots}});
-    return columns;
+    const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(roots);
+    return static_cast<double>(getAllVertices(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end())).size());
+}
+
+double Evolution::OriginTPGEvolutionConfig::getNbMembers(const EvolutionData& state, const std::string& roots)
+{
+    const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(roots);
+    return static_cast<double>(getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end()))).size());
+}
+
+std::shared_ptr<Evolution::LogModule> Evolution::OriginTPGEvolutionConfig::buildLogModule() const
+{
+    std::shared_ptr<LogModule> log = BasicEvolutionConfig::buildLogModule();
+
+    // The number of vertices and of members of the graphs of the population, after its size.
+    const std::string roots = this->names.population;
+    log->insertAfter("Pop_Size", std::make_shared<LogColumnStep>("NbVertex",
+        [roots](const EvolutionData& state) { return getNbVertices(state, roots); }, 0, std::set<std::string>{roots}));
+    log->insertAfter("NbVertex", std::make_shared<LogColumnStep>("NbMember",
+        [roots](const EvolutionData& state) { return getNbMembers(state, roots); }, 0, std::set<std::string>{roots}));
+    return log;
 }
 
 // Individuals referenced by the value at a given index of the nodes of the first node group.

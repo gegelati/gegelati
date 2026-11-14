@@ -214,13 +214,13 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     const std::string populationFitness(config.names.trainingFitness);
 
 
-    std::cout<<evolutionModule->summary()<<std::endl;
+    std::cout<<evolutionModule->summary(1)<<std::endl;
 
 
     std::string str = "graph";
-    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, std::nullopt, "ExportPopulation"));
     str = "graphBest";
-    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, populationFitness));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(population, MNIST_DATA_LOCATION + str, false, populationFitness, "ExportBest"));
 
 
     Evolution::EvolutionData& data = evolutionModule->evolve(40, 4);
@@ -264,7 +264,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     lgp.nbOffspring = 1000;
     lgp.nbTrainingIterations = 50;
     lgp.nbThreads = 20;
-    lgp.names.population = "LGP";
+    lgp.names.population = "LGPPopulation";
     lgp.names.parents = "LGP.parents";
     lgp.names.offspring = "LGP.offspring";
     lgp.names.trainingMetrics = "LGP.trainingMetrics";
@@ -283,7 +283,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     tpg.nbTrainingIterations = 500;
     tpg.nbValidationIterations = 500;
     tpg.nbThreads = 20;
-    tpg.names.population = "TPG";
+    tpg.names.population = "TPGPopulation";
     tpg.names.parents = "TPG.parents";
     tpg.names.offspring = "TPG.offspring";
     tpg.names.trainingMetrics = "TPG.trainingMetrics";
@@ -333,19 +333,28 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
         std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem->getName(),
         tpg.nbTrainingIterations, Evaluation::Mode::TRAINING, tpg.nbThreads));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
-    std::vector<Evolution::LogStep::Column> columns = tpg.logColumns();
-    columns.insert(columns.begin() + 1, {"NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
+    const std::shared_ptr<Evolution::LogColumnStep> nbVertex = std::make_shared<Evolution::LogColumnStep>("NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {
         return static_cast<double>(Evolution::getAllVertices(constIndividuals(*data.get<std::vector<std::shared_ptr<Individual>>>(tpgKeys.population))).size());
-    }, 0, {tpgKeys.population}});
+    }, 0, std::set<std::string>{tpgKeys.population});
     std::ostringstream csv;
-    const std::vector<Evolution::LogStep::Column> times = Evolution::stepTimeColumns(*tpgModule);
-    tpgModule->addSubModule(std::make_shared<Evolution::LogStep>(std::cout, columns));
-    columns.insert(columns.end(), times.begin(), times.end());
-    tpgModule->addSubModule(std::make_shared<Evolution::LogStep>(csv, columns, ";", "CsvLog"));
+    Evolution::BasicLogConfig csvConfig;
+    csvConfig.output = &csv;
+    csvConfig.separator = ";";
+    csvConfig.name = "CsvLog";
+    csvConfig.population = tpgKeys.population;
+    csvConfig.trainingFitness = tpgKeys.trainingFitness;
+    std::shared_ptr<Evolution::LogModule> csvLog = csvConfig.buildModule();
+    csvLog->insertAfter("Pop_Size", nbVertex);
+    Evolution::BasicLogConfig::addStepTimeColumns(*csvLog, *tpgModule);
+    tpg.logOutput = &std::cout;
+    std::shared_ptr<Evolution::LogModule> log = tpg.buildLogModule();
+    log->insertAfter("Pop_Size", nbVertex);
+    tpgModule->addSubModule(log);
+    tpgModule->addSubModule(csvLog);
     evolutionModule->addSubModule(tpgModule);
 
     
-    std::cout << evolutionModule->summary() << std::endl;
+    std::cout << evolutionModule->summary(2) << std::endl;
 
     Evolution::EvolutionData& data = evolutionModule->evolve(40, 4);
     std::cout << data.summary() << std::endl;
@@ -424,12 +433,12 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     config.problem = problem;
     auto evolutionModule = config.buildModule();
     //evolutionModule->remove(evolutionModule->findStep("CacheMemberOutputs"));
-    std::cout<<evolutionModule->summary()<<std::endl;
+    std::cout<<evolutionModule->summary(1)<<std::endl;
 
     std::string str = "graph";
-    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, std::nullopt, "ExportPopulation"));
     str = "graphBest";
-    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness));
+    evolutionModule->addSubModule(std::make_shared<Evolution::ExportStep>(config.names.population, MNIST_DATA_LOCATION + str, false, config.names.trainingFitness, "ExportBest"));
 
 
     Evolution::EvolutionData& state = evolutionModule->evolve(40, 4);

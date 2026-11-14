@@ -266,8 +266,12 @@ Evolution::EvolutionData& Evolution::Module::evolve(size_t nbGenerations, uint64
     return state;
 }
 
-void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data) const
+void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data,
+                                    size_t depth) const
 {
+    if(depth == 0) {
+        return;
+    }
     const size_t nbItems = this->steps.size() + ((this->initialization != nullptr) ? 1 : 0);
     size_t idxItem = 0;
 
@@ -281,22 +285,44 @@ void Evolution::Module::collectRows(std::vector<std::pair<std::string, std::stri
         if(this->initialization->steps.empty()) {
             rows.emplace_back(left + ": " + this->initialization->label(), this->initialization->dataText());
         } else {
+            // The steps of the initialization are at the same level as the steps of the module.
             rows.emplace_back(left, "");
-            this->initialization->collectRows(rows, prefix + (last ? "   " : "|  "), data);
+            this->initialization->collectRows(rows, prefix + (last ? "   " : "|  "), data, depth);
         }
     }
     for(const std::shared_ptr<Module>& step: this->steps) {
         const bool last = (++idxItem == nbItems);
-        rows.emplace_back(prefix + (last ? "`- " : "|- ") + step->label(), step->steps.empty() ? step->dataText() : "");
-        step->collectRows(rows, prefix + (last ? "   " : "|  "), data);
+        // A module of the last level shown is one row, with the data required and provided by its steps.
+        const bool expanded = depth > 1;
+        rows.emplace_back(prefix + (last ? "`- " : "|- ") + step->label(), (step->steps.empty() || !expanded) ? step->dataText() : "");
+        if(expanded) {
+            step->collectRows(rows, prefix + (last ? "   " : "|  "), data, depth - 1);
+        } else if(!step->steps.empty() || step->initialization != nullptr) {
+            // The first hidden modules are listed by name on a single line, "..." standing for the others.
+            std::vector<std::string> hiddenNames;
+            if(step->initialization != nullptr) {
+                hiddenNames.push_back("initialization");
+            }
+            for(const std::shared_ptr<Module>& subStep: step->steps) {
+                hiddenNames.push_back(subStep->name());
+            }
+            std::string hidden;
+            for(size_t idx = 0; idx < std::min(hiddenNames.size(), nbHiddenNamesShown); idx++) {
+                hidden += (idx > 0 ? ", " : "") + hiddenNames.at(idx);
+            }
+            if(hiddenNames.size() > nbHiddenNamesShown) {
+                hidden += ", ...";
+            }
+            rows.emplace_back(prefix + (last ? "   " : "|  ") + "`- (" + hidden + ")", "");
+        }
     }
 }
 
-std::string Evolution::Module::summary(const EvolutionData* data) const
+std::string Evolution::Module::summary(const EvolutionData* data, size_t depth) const
 {
     std::vector<std::pair<std::string, std::string>> rows;
     rows.emplace_back(this->label(), "");
-    this->collectRows(rows, "", data);
+    this->collectRows(rows, "", data, depth);
 
     // Data of the leaves are aligned in a column.
     size_t width = 0;
@@ -321,12 +347,12 @@ std::string Evolution::Module::summary(const EvolutionData* data) const
     return result.str();
 }
 
-std::string Evolution::Module::summary() const
+std::string Evolution::Module::summary(size_t depth) const
 {
-    return this->summary(nullptr);
+    return this->summary(nullptr, depth);
 }
 
-std::string Evolution::Module::summary(const EvolutionData& data) const
+std::string Evolution::Module::summary(const EvolutionData& data, size_t depth) const
 {
-    return this->summary(&data);
+    return this->summary(&data, depth);
 }

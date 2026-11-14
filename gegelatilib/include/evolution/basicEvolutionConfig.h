@@ -11,6 +11,7 @@
 #include "individual.h"
 #include "metrics/metricMap.h"
 #include "evolution/module.h"
+#include "evolution/basicLogConfig.h"
 #include "evolution/steps/logStep.h"
 #include "fitnessAssignment/assigner.h"
 #include "graphBased/genotypeGenerator.h"
@@ -161,7 +162,7 @@ namespace Evolution {
         /// Number of generations between two validations (see EvolutionData::isUpToDate).
         size_t validationPeriod = 1;
 
-        /// Stream receiving the log of the evolution at each generation (see logColumns), the console by default, null for no log. It must outlive the evolution.
+        /// Stream receiving the log of the evolution at each generation (see buildLogModule), the console by default, null for no log. It must outlive the evolution.
         std::ostream* logOutput = &std::cout;
 
         /// Number of threads authorized.
@@ -219,14 +220,14 @@ namespace Evolution {
         virtual std::shared_ptr<Module> buildModule();
 
         /**
-         * \brief Columns of the log of the evolution, made from its names and settings.
+         * \brief Build the log of the evolution, written to logOutput: the BasicLogConfig of its names (validation fitness if validated).
          *
-         * They show the size of the population, its training fitness and, if validation is requested, its validation fitness.
-         * Add, remove or replace columns to customize the log, then give them to a LogStep.
+         * buildModule adds it as the last step of a generation. The columns are steps of the log: add, remove or replace them by name to customize it.
          *
-         * \return the columns.
+         * \return the log, named by names.logStep.
+         * \throw std::runtime_error if logOutput is null.
          */
-        virtual std::vector<LogStep::Column> logColumns() const;
+        virtual std::shared_ptr<LogModule> buildLogModule() const;
 
       protected:
         /**

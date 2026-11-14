@@ -164,7 +164,7 @@ namespace Evolution {
         virtual std::shared_ptr<Module> buildModule() override;
 
         /// Inherited from BasicEvolutionConfig, adds the number of vertices and of members of the graphs of the population.
-        virtual std::vector<LogStep::Column> logColumns() const override;
+        virtual std::shared_ptr<LogModule> buildLogModule() const override;
 
       protected:
         /**
@@ -175,6 +175,22 @@ namespace Evolution {
          * \throw std::runtime_error if the settings are missing or not compatible.
          */
         virtual void updateEmptyComponents() override;
+
+        /**
+         * \brief Return the number of vertices of the graphs of a population (see getAllVertices).
+         *
+         * \param[in] state the data of the evolution.
+         * \param[in] roots name of the roots of the graphs, the individuals of the population.
+         */
+        static double getNbVertices(const EvolutionData& state, const std::string& roots);
+
+        /**
+         * \brief Return the number of members used by the graphs of a population (see getMembersOf).
+         *
+         * \param[in] state the data of the evolution.
+         * \param[in] roots name of the roots of the graphs, the individuals of the population.
+         */
+        static double getNbMembers(const EvolutionData& state, const std::string& roots);
 
         /// Inherited from BasicEvolutionConfig, caches the outputs of the members and of the shared vertices before the validation evaluation (prediction problems only).
         virtual std::shared_ptr<Module> makeValidationModule(const std::string& name, size_t period) const override;

@@ -1,6 +1,7 @@
 #ifndef EVOLUTION_MODULE_H
 #define EVOLUTION_MODULE_H
 
+#include <limits>
 #include <memory>
 #include <set>
 #include <stdexcept>
@@ -341,17 +342,27 @@ namespace Evolution {
              *
              * Each line shows a module with its numeric parameters (see details) and its period, and the leaves show the data they
              * require and provide in aligned columns. Initializations are shown under the module they belong to.
+             *
+             * \param[in] depth number of levels of modules shown under this one, all of them by default. The steps of an initialization are
+             * at the level of the steps of its module. A module of the last level shown is one line, with the data required and provided by its steps,
+             * followed by a line "(ValidationEvaluation, ValidationFitness)" listing the names of its first hidden modules (see nbHiddenNamesShown),
+             * "..." standing for the others.
+             * summary(1) shows the steps of a generation and of the initialization, a validation or a log being one line.
              */
-            std::string summary() const;
+            std::string summary(size_t depth = std::numeric_limits<size_t>::max()) const;
 
             /**
-             * \brief Return the tree of the modules (see summary()) then the given data, with the initializations done on them.
+             * \brief Return the tree of the modules (see summary(size_t)) then the given data, with the initializations done on them.
              *
              * \param[in] data the data of an evolution of this module.
+             * \param[in] depth number of levels of modules shown under this one, all of them by default.
              */
-            std::string summary(const EvolutionData& data) const;
+            std::string summary(const EvolutionData& data, size_t depth = std::numeric_limits<size_t>::max()) const;
 
         private:
+            /// Number of names of hidden modules listed under a module collapsed by the depth of a summary, "..." standing for the others.
+            static constexpr size_t nbHiddenNamesShown = 5;
+
             /// Return the position of the step of this module with a name, or throw.
             size_t indexOf(const std::string& name) const;
 
@@ -371,10 +382,10 @@ namespace Evolution {
             std::string dataText() const;
 
             /// Return the tree of the modules, then the data if given.
-            std::string summary(const EvolutionData* data) const;
+            std::string summary(const EvolutionData* data, size_t depth) const;
 
             /// Add one row (text of the tree, data of the module) per module held by this one, initialization included.
-            void collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data) const;
+            void collectRows(std::vector<std::pair<std::string, std::string>>& rows, const std::string& prefix, const EvolutionData* data, size_t depth) const;
     };
 
 }; // namespace Evolution

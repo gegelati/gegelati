@@ -226,19 +226,20 @@ std::shared_ptr<Evolution::Module> Evolution::BasicEvolutionConfig::buildModule(
 
     // Step 5: add the logger step (not mandatory).
     if(this->logOutput != nullptr) {
-        evolutionModule->addSubModule(std::make_shared<LogStep>(*this->logOutput, this->logColumns(), "", this->names.logStep));
+        evolutionModule->addSubModule(this->buildLogModule());
     }
     return evolutionModule;
 }
 
-std::vector<Evolution::LogStep::Column> Evolution::BasicEvolutionConfig::logColumns() const
+std::shared_ptr<Evolution::LogModule> Evolution::BasicEvolutionConfig::buildLogModule() const
 {
-    std::vector<LogStep::Column> columns{sizeColumn(this->names.population)};
-    const std::vector<LogStep::Column> trainingColumns = fitnessColumns("Fit", this->names.population, this->names.trainingFitness);
-    columns.insert(columns.end(), trainingColumns.begin(), trainingColumns.end());
+    BasicLogConfig logConfig;
+    logConfig.output = this->logOutput;
+    logConfig.name = this->names.logStep;
+    logConfig.population = this->names.population;
+    logConfig.trainingFitness = this->names.trainingFitness;
     if(this->nbValidationIterations > 0) {
-        const std::vector<LogStep::Column> validationColumns = fitnessColumns("Val", this->names.population, this->names.validationFitness);
-        columns.insert(columns.end(), validationColumns.begin(), validationColumns.end());
+        logConfig.validationFitness = this->names.validationFitness;
     }
-    return columns;
+    return logConfig.buildModule();
 }

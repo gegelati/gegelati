@@ -69,6 +69,7 @@
 
 // Evolution
 #include <evolution/basicEvolutionConfig.h>
+#include <evolution/basicLogConfig.h>
 #include <evolution/entry.h>
 #include <evolution/evolutionData.h>
 #include <evolution/originTPGEvolutionConfig.h>
@@ -78,6 +79,7 @@
 #include <evolution/steps/exportStep.h>
 #include <evolution/steps/initPopulationStep.h>
 #include <evolution/steps/lambdaStep.h>
+#include <evolution/steps/logColumnStep.h>
 #include <evolution/steps/logStep.h>
 #include <evolution/steps/mutateStep.h>
 #include <evolution/steps/reproduceStep.h>

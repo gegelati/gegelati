@@ -37,8 +37,7 @@ namespace Evolution {
              * \param[in] bestFitness name of a fitness to only export the best individual, none to export them all.
              * \param[in] name name of the step.
              */
-            ExportStep(std::string individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<std::string> bestFitness = std::nullopt,
-                       std::string name = "Export")
+            ExportStep(std::string individuals, std::string filePath, bool oneFilePerGeneration = false, std::optional<std::string> bestFitness = std::nullopt, std::string name = "Export")
                 : Module(std::move(name)), individuals{std::move(individuals)}, filePath{std::move(filePath)},
                   oneFilePerGeneration{oneFilePerGeneration}, bestFitness{std::move(bestFitness)}
             {
