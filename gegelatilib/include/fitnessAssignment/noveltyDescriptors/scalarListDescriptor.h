@@ -9,7 +9,7 @@ namespace Descriptors {
     /**
      * \brief Descriptor listing a scalar metric over the features: the dimension is the number of features.
      *
-     * Example: the metric is a single value, and there are 3 features (e.g. 3 images):
+     * Example: the metric is a single value, and there are 3 features (e.g. 3 samples of a dataset):
      * \code
      *   feature 0: 0.2
      *   feature 1: 0.7
@@ -24,15 +24,15 @@ namespace Descriptors {
         /**
          * \brief Constructor.
          *
-         * \param[in] metricHash the hash of the metric the descriptor is computed from.
          * \param[in] name name of the descriptor, only used to print it (e.g. in the summary of an evolution).
          */
-        explicit ScalarListDescriptor(uint64_t metricHash, std::string name = "ScalarListDescriptor") : Descriptor(metricHash, std::move(name)) {};
+        explicit ScalarListDescriptor(std::string name = "ScalarListDescriptor") : Descriptor(std::move(name)) {};
 
-        virtual std::vector<double> compute(Metrics::MetricMap& metrics) const override;
+        /// Inherited from Descriptor, the value of the scalar metric of each feature.
+        virtual std::vector<double> compute(Metrics::MetricMap& metrics, uint64_t metricHash) const override;
 
         /// The ranges are the ranges of the metric of each feature.
-        virtual std::vector<Dimensions::NumericRange<double>> ranges(Metrics::MetricMap& metrics) const override;
+        virtual std::vector<Dimensions::NumericRange<double>> ranges(Metrics::MetricMap& metrics, uint64_t metricHash) const override;
     };
 
 }; // namespace Descriptors

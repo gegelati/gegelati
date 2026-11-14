@@ -50,10 +50,9 @@ class BoundedVectorMetric: public Metrics::VectorMetric {
     std::string toString(std::string prefix = "") const override {return "";};
 };
 
-/// Descriptor averaging the vector metric M over the features.
-template<class M>
+/// Descriptor averaging a vector metric over the features (the metric is the one of the assigner using it).
 std::shared_ptr<const Descriptors::Descriptor> averageOf() {
-    return std::make_shared<Descriptors::AverageVectorDescriptor>(std::make_unique<M>()->hash());
+    return std::make_shared<Descriptors::AverageVectorDescriptor>();
 }
 
 /// Metric map of an individual with one feature (or more, one per extractionEnd) for a metric.
@@ -77,11 +76,12 @@ TEST(DescriptorTest, averageVectorDescriptor)
 {
     const std::vector<Dimensions::NumericRange<double>> ranges{Dimensions::NumericRange<double>::between(0.0, 1.0), Dimensions::NumericRange<double>::atLeast(2.0)};
     auto map = makeMetricMap(std::make_unique<BoundedVectorMetric>(std::vector<double>{1.0, 4.0}, ranges), 3);
-    Descriptors::AverageVectorDescriptor descriptor(BoundedVectorMetric({}, {}).hash());
+    Descriptors::AverageVectorDescriptor descriptor;
+    const uint64_t metricHash = BoundedVectorMetric({}, {}).hash();
 
-    ASSERT_EQ(descriptor.compute(*map), (std::vector<double>{1.0, 4.0}));
-    ASSERT_EQ(descriptor.dimension(*map), 2);
-    const auto descriptorRanges = descriptor.ranges(*map);
+    ASSERT_EQ(descriptor.compute(*map, metricHash), (std::vector<double>{1.0, 4.0}));
+    ASSERT_EQ(descriptor.dimension(*map, metricHash), 2);
+    const auto descriptorRanges = descriptor.ranges(*map, metricHash);
     ASSERT_EQ(descriptorRanges.size(), 2);
     ASSERT_EQ(descriptorRanges.at(0).minimum, 0.0);
     ASSERT_EQ(descriptorRanges.at(0).maximum, 1.0);
@@ -92,11 +92,12 @@ TEST(DescriptorTest, averageVectorDescriptor)
 TEST(DescriptorTest, scalarListDescriptor)
 {
     auto map = makeMetricMap(std::make_unique<FakeScalarMetric>(0.3), 3);
-    Descriptors::ScalarListDescriptor descriptor(FakeScalarMetric().hash());
+    Descriptors::ScalarListDescriptor descriptor;
+    const uint64_t metricHash = FakeScalarMetric().hash();
 
-    ASSERT_EQ(descriptor.compute(*map), (std::vector<double>{0.3, 0.3, 0.3}));
-    ASSERT_EQ(descriptor.dimension(*map), 3) << "One dimension per feature";
-    for(const auto& range : descriptor.ranges(*map)) {
+    ASSERT_EQ(descriptor.compute(*map, metricHash), (std::vector<double>{0.3, 0.3, 0.3}));
+    ASSERT_EQ(descriptor.dimension(*map, metricHash), 3) << "One dimension per feature";
+    for(const auto& range : descriptor.ranges(*map, metricHash)) {
         ASSERT_FALSE(range.minimum.has_value());
         ASSERT_FALSE(range.maximum.has_value());
     }
@@ -111,7 +112,7 @@ TEST(NoveltySearchTest, Constructor)
 {
     FitnessAssignment::Assigner* assigner;
 
-    ASSERT_NO_THROW(assigner = new FitnessAssignment::NoveltySearchAssigner(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash())) << "Constructor of NoveltySearchAssigner failed.";
+    ASSERT_NO_THROW(assigner = new FitnessAssignment::NoveltySearchAssigner(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash())) << "Constructor of NoveltySearchAssigner failed.";
 
     ASSERT_NO_THROW(delete assigner) << "Destructor of NoveltySearchAssigner failed.";
 }
@@ -120,7 +121,7 @@ TEST(NoveltySearchTest, Constructor)
 TEST(NoveltySearchTest, computeDescriptors)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 
@@ -167,7 +168,7 @@ TEST(NoveltySearchTest, computeDescriptors)
 TEST(NoveltySearchTest, computeDescriptorsList)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, std::make_shared<Descriptors::ScalarListDescriptor>(std::make_unique<FakeScalarMetric>()->hash()), std::make_unique<FakeScalarMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, std::make_shared<Descriptors::ScalarListDescriptor>(), std::make_unique<FakeScalarMetric>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 
@@ -217,7 +218,7 @@ TEST(NoveltySearchTest, computeDescriptorsList)
 TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 
@@ -245,7 +246,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics1)
 TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 
@@ -272,7 +273,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics2)
 TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric2>(), std::make_unique<FakeVectorMetric2>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric2>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 
@@ -303,7 +304,7 @@ TEST(NoveltySearchTest, computeDescriptorsInvalidMetrics3)
 
 TEST(NoveltySearchTest, computeDistances) 
 {
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
     std::map<uint64_t, std::vector<double>> descriptorValues;
     descriptorValues.insert(std::make_pair(0, std::vector<double>({0.0})));
     descriptorValues.insert(std::make_pair(1, std::vector<double>({0.1})));
@@ -347,7 +348,7 @@ TEST(NoveltySearchTest, computeDistances)
 
 TEST(NoveltySearchTest, computeNeighborsTest)
 {
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     uint64_t id0 = 0; uint64_t id1 = 1;
     uint64_t id2 = 2; uint64_t id3 = 3;
@@ -381,14 +382,14 @@ TEST(NoveltySearchTest, computeNeighborsTest)
     ASSERT_EQ(neighbors.at(id3).at(1), id1);
 
     
-    FitnessAssignment::NoveltySearchAssigner noveltySearchWrong(4, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearchWrong(4, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
     ASSERT_THROW(noveltySearchWrong.computeNeighbors(distances), std::runtime_error) << "computing neighbors should with 4 individuals and 4 neighbors";
 
 }
 
 TEST(NoveltySearchTest, computeNoveltyScore)
 {
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     uint64_t id0 = 0; uint64_t id1 = 1;
     uint64_t id2 = 2; uint64_t id3 = 3;
@@ -430,7 +431,7 @@ TEST(NoveltySearchTest, computeNoveltyScore)
 TEST(NoveltySearchTest, doSelection)
 {
     CounterReset::counterReset();
-    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf<FakeVectorMetric>(), std::make_unique<FakeVectorMetric>()->hash());
+    FitnessAssignment::NoveltySearchAssigner noveltySearch(2, averageOf(), std::make_unique<FakeVectorMetric>()->hash());
 
     auto rep = std::make_shared<Representations::FakeRepresentation>();
 

@@ -1097,8 +1097,8 @@ TEST_F(ModuleTest, componentsDescribeThemselves)
     EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7).getName(), "NodeTransferMutation");
     EXPECT_EQ(Reproduction::Replicator().getName(), "Replicator");
     EXPECT_EQ(FitnessAssignment::DefaultAssigner(0).getName(), "DefaultAssigner");
-    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, std::make_shared<Descriptors::AverageVectorDescriptor>(0), 0).getName(), "NoveltySearchAssigner");
-    EXPECT_EQ(Descriptors::AverageVectorDescriptor(0).getName(), "AverageVectorDescriptor");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, std::make_shared<Descriptors::AverageVectorDescriptor>(), 0).getName(), "NoveltySearchAssigner");
+    EXPECT_EQ(Descriptors::AverageVectorDescriptor().getName(), "AverageVectorDescriptor");
 
     // The steps only show their numeric parameters.
     EXPECT_EQ(makeSteps(10, 10, 2)->find("Mutation")->details(), "1 thread(s)");
@@ -1108,9 +1108,9 @@ TEST_F(ModuleTest, componentsDescribeThemselves)
 TEST_F(ModuleTest, componentsCanBeNamed)
 {
     // The name identifies a component in the data, and tells apart two components of the same class in a summary.
-    auto descriptor = std::make_shared<Descriptors::AverageVectorDescriptor>(0, "OutputsOnTheArchive");
-    EXPECT_EQ(descriptor->getName(), "OutputsOnTheArchive");
-    EXPECT_EQ(Descriptors::ScalarListDescriptor(0, "PerImage").getName(), "PerImage");
+    auto descriptor = std::make_shared<Descriptors::AverageVectorDescriptor>("AverageOutputs");
+    EXPECT_EQ(descriptor->getName(), "AverageOutputs");
+    EXPECT_EQ(Descriptors::ScalarListDescriptor("PerSample").getName(), "PerSample");
 
     EXPECT_EQ(Selection::RandomSelector(true, "RandomParents").getName(), "RandomParents");
     EXPECT_EQ(Selection::TournamentSelector(3, true, "Small").getName(), "Small");
@@ -1140,10 +1140,10 @@ TEST_F(ModuleTest, componentsCanBeNamed)
     EXPECT_EQ(Mutation::PointMutator(0.2, 0.5, 0.5, "Gentle").getDetails(), "Gentle(mutate 0.2, add 0.5, remove 0.5)");
     EXPECT_EQ(Mutation::NodeTransferMutation(0.1, 0.7, 0.7).getDetails(), "NodeTransferMutation(mutate 0.1, add 0.7, remove 0.7)");
     EXPECT_EQ(Reproduction::Replicator("Copy").getDetails(), "Copy");
-    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor, 0, "Novelty").getDetails(), "Novelty(15 neighbors, OutputsOnTheArchive)");
+    EXPECT_EQ(FitnessAssignment::NoveltySearchAssigner(15, descriptor, 0, "Novelty").getDetails(), "Novelty(15 neighbors, AverageOutputs)");
     std::ostringstream streamed;
     streamed << Selection::TournamentSelector(3, true, "Small") << " / " << *descriptor;
-    EXPECT_EQ(streamed.str(), "Small / OutputsOnTheArchive") << "Streaming an object writes its name, not its details";
+    EXPECT_EQ(streamed.str(), "Small / AverageOutputs") << "Streaming an object writes its name, not its details";
 
     // The steps read the components by their names.
     Evolution::SelectStep small({"A"}, "fitness", "Small", 2, "B");

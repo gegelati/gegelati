@@ -12,7 +12,7 @@ std::map<uint64_t, std::vector<double>> FitnessAssignment::NoveltySearchAssigner
 
     for (const auto& [individualID, metricMap] : individualMetrics){
 
-        std::vector<double> currentDescriptorValues = this->descriptor->compute(*metricMap);
+        std::vector<double> currentDescriptorValues = this->descriptor->compute(*metricMap, this->metricHash);
         
         if(currentDescriptorValues.size() == 0) {
             throw std::runtime_error("FitnessAssignment::NoveltySearchAssigner::computeDescriptors should not have zero descriptor values");

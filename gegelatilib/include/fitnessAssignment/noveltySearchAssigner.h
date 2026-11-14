@@ -29,7 +29,7 @@
              *
              * \param[in] nbNeighbors the number of neighbors to measure.
              * \param[in] descriptor the function mapping the metrics of an individual to its descriptor values.
-             * \param[in] metricHash hash of the metric the assigner reads (e.g. the one of its descriptor).
+             * \param[in] metricHash hash of the metric the assigner reads, given to the descriptor.
              * \param[in] name name of the assigner, only used to print it (e.g. in the summary of an evolution).
              */
             NoveltySearchAssigner(size_t nbNeighbors, std::shared_ptr<const Descriptors::Descriptor> descriptor, uint64_t metricHash, std::string name = "NoveltySearchAssigner")

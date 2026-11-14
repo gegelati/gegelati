@@ -15,15 +15,12 @@ namespace Descriptors {
      * \brief Base class of the functions mapping the metrics of an individual to descriptor values,
      * the point of the behavior space used by novelty search and, later, by quality diversity methods.
      *
-     * A descriptor knows the hash of the metric it reads. Its ranges are derived from the ranges of this metric,
-     * so they can be unbounded. The dimension of the descriptor is the number of ranges. It depends on the metrics
+     * The metric a descriptor reads is given by its user (e.g. the metric hash of FitnessAssignment::NoveltySearchAssigner), so the same
+     * descriptor can describe any metric of the right kind. Its ranges are derived from the ranges of this metric, so they can be unbounded. The dimension of the descriptor is the number of ranges. It depends on the metrics
      * (e.g. the number of features), so it is given for a metric map.
      */
     class Descriptor : public Util::Named {
       protected:
-        /// \brief Hash of the metric the descriptor is computed from.
-        uint64_t metricHash;
-
         /**
          * \brief Smallest range containing two ranges: a bound is missing if it is missing in one of them.
          */
@@ -40,38 +37,37 @@ namespace Descriptors {
 
       public:
         /**
-         * \param[in] metricHash the hash of the metric the descriptor is computed from.
          * \param[in] name name of the descriptor, only used to print it (see Util::Named).
          */
-        explicit Descriptor(uint64_t metricHash, std::string name = "Descriptor") : Util::Named(std::move(name)), metricHash{metricHash} {};
+        explicit Descriptor(std::string name = "Descriptor") : Util::Named(std::move(name)) {};
 
         /// Default polymorphic destructor
         virtual ~Descriptor() = default;
-
-        /// \brief Return the hash of the metric the descriptor is computed from.
-        uint64_t getMetricHash() const { return this->metricHash; }
 
         /**
          * \brief Compute the descriptor values of one individual.
          *
          * \param[in] metrics the metrics of the individual.
+         * \param[in] metricHash the hash of the metric the descriptor is computed from.
          * \return the descriptor values.
          */
-        virtual std::vector<double> compute(Metrics::MetricMap& metrics) const = 0;
+        virtual std::vector<double> compute(Metrics::MetricMap& metrics, uint64_t metricHash) const = 0;
 
         /**
          * \brief Return the range of each descriptor value, possibly unbounded.
          *
          * \param[in] metrics the metrics of an individual.
+         * \param[in] metricHash the hash of the metric the descriptor is computed from.
          */
-        virtual std::vector<Dimensions::NumericRange<double>> ranges(Metrics::MetricMap& metrics) const = 0;
+        virtual std::vector<Dimensions::NumericRange<double>> ranges(Metrics::MetricMap& metrics, uint64_t metricHash) const = 0;
 
         /**
          * \brief Return the number of descriptor values.
          *
          * \param[in] metrics the metrics of an individual.
+         * \param[in] metricHash the hash of the metric the descriptor is computed from.
          */
-        size_t dimension(Metrics::MetricMap& metrics) const { return this->ranges(metrics).size(); }
+        size_t dimension(Metrics::MetricMap& metrics, uint64_t metricHash) const { return this->ranges(metrics, metricHash).size(); }
     };
 
 }; // namespace Descriptors

@@ -2,9 +2,9 @@
 
 #include <stdexcept>
 
-std::vector<double> Descriptors::AverageVectorDescriptor::compute(Metrics::MetricMap& metrics) const
+std::vector<double> Descriptors::AverageVectorDescriptor::compute(Metrics::MetricMap& metrics, uint64_t metricHash) const
 {
-    const auto vectorMetrics = metrics.getMetricValues<Metrics::VectorMetric>(this->metricHash);
+    const auto vectorMetrics = metrics.getMetricValues<Metrics::VectorMetric>(metricHash);
     if(vectorMetrics.empty()) {
         throw std::runtime_error("Descriptors::AverageVectorDescriptor::compute: no metric with the required hash.");
     }
@@ -28,9 +28,9 @@ std::vector<double> Descriptors::AverageVectorDescriptor::compute(Metrics::Metri
     return average;
 }
 
-std::vector<Dimensions::NumericRange<double>> Descriptors::AverageVectorDescriptor::ranges(Metrics::MetricMap& metrics) const
+std::vector<Dimensions::NumericRange<double>> Descriptors::AverageVectorDescriptor::ranges(Metrics::MetricMap& metrics, uint64_t metricHash) const
 {
-    const auto vectorMetrics = metrics.getMetricValues<Metrics::VectorMetric>(this->metricHash);
+    const auto vectorMetrics = metrics.getMetricValues<Metrics::VectorMetric>(metricHash);
     if(vectorMetrics.empty()) {
         throw std::runtime_error("Descriptors::AverageVectorDescriptor::ranges: no metric with the required hash.");
     }
