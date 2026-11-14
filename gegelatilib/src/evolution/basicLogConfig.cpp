@@ -15,7 +15,8 @@ std::vector<double> Evolution::BasicLogConfig::fitnessOfPopulation(const Evoluti
     std::vector<double> values;
     if(state.isUpToDate(fitness)) {
         const std::shared_ptr<const std::map<uint64_t, double>> fitnessValues = state.get<std::map<uint64_t, double>>(fitness);
-        for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(population)) {
+        const std::vector<std::shared_ptr<Individual>>& individuals = *state.get<std::vector<std::shared_ptr<Individual>>>(population);
+        for(const std::shared_ptr<Individual>& individual: individuals) {
             const std::map<uint64_t, double>::const_iterator found = fitnessValues->find(individual->getIndividualID());
             if(found != fitnessValues->end()) {
                 values.push_back(found->second);

@@ -158,14 +158,14 @@ std::set<std::string> Evolution::Module::requiredData() const
     std::set<std::string> required;
     std::set<std::string> provided;
     for(const std::shared_ptr<Module>& step: this->steps) {
-        for(const std::string& name: step->requiredData()) {
+        const std::set<std::string> stepRequired = step->requiredData();
+        for(const std::string& name: stepRequired) {
             if(provided.find(name) == provided.end()) {
                 required.insert(name);
             }
         }
-        for(const std::string& name: step->providedData()) {
-            provided.insert(name);
-        }
+        const std::set<std::string> stepProvided = step->providedData();
+        provided.insert(stepProvided.begin(), stepProvided.end());
     }
     return required;
 }
@@ -177,9 +177,8 @@ std::set<std::string> Evolution::Module::providedData() const
     }
     std::set<std::string> provided;
     for(const std::shared_ptr<Module>& step: this->steps) {
-        for(const std::string& name: step->providedData()) {
-            provided.insert(name);
-        }
+        const std::set<std::string> stepProvided = step->providedData();
+        provided.insert(stepProvided.begin(), stepProvided.end());
     }
     return provided;
 }
@@ -196,14 +195,14 @@ void Evolution::Module::checkData(std::set<std::string>& available) const
         }
         return;
     }
-    for(const std::string& name: this->requiredData()) {
+    const std::set<std::string> required = this->requiredData();
+    for(const std::string& name: required) {
         if(available.find(name) == available.end()) {
             throw std::runtime_error("Evolution::Module: step '" + this->stepName + "' requires " + name + ", which no previous step provides");
         }
     }
-    for(const std::string& name: this->providedData()) {
-        available.insert(name);
-    }
+    const std::set<std::string> provided = this->providedData();
+    available.insert(provided.begin(), provided.end());
 }
 
 void Evolution::Module::apply(EvolutionData& state)

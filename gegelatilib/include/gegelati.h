@@ -88,6 +88,7 @@
 
 // File
 #include <file/populationDotExporter.h>
+#include <file/populationDotImporter.h>
 
 // Fitness assignment
 #include <fitnessAssignment/assigner.h>

@@ -330,7 +330,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     // The outputs of the members (the LGP individuals) on the samples of the evaluation are computed once, whatever the number of vertices using them.
     const std::string cacheKey("TPG.memberOutputCache");
     tpgModule->insertAfter("Mutation", std::make_shared<Evolution::CacheMemberOutputsStep>(
-        std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem->getName(),
+        std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem->getName(), lgpRep->getName(),
         tpg.nbTrainingIterations, Evaluation::Mode::TRAINING, tpg.nbThreads));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.
     const std::shared_ptr<Evolution::LogColumnStep> nbVertex = std::make_shared<Evolution::LogColumnStep>("NbVertex", [tpgKeys](const Evolution::EvolutionData& data) {

@@ -4,7 +4,6 @@
 #include <memory>
 #include <ostream>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include "individual.h"
@@ -13,63 +12,69 @@
 namespace File {
 
     /**
-     * \brief Exports a population of Individual to a .dot file.
+     * \brief Exports a population of Individual to a .dot file, read back by PopulationDotImporter.
      *
-     * Each Individual is a single dot node. Its genotype is printed inside the
-     * node label: one line per GPNode, each value being printed with
-     * Data::DataValue::toValueString.
+     * Each Individual is a single dot node, named by its representation and its ID separated by "_" (e.g. "LGP_12"). Its genotype is written
+     * in the genotype attribute of the node: "{[(value,value),(value)],[...]}", one bracket per node group and one parenthesis per GPNode.
+     * Each value is a scalar written with its type, "type:value": "st:" for a size_t, "i:" for an int, "d:" for a double, "f:" for a float
+     * (doubles and floats with all their digits). A value referencing an individual is written with the representation of the individual as
+     * type and its ID as value (e.g. "LGP:12"), and adds an edge towards the referenced individual.
      *
-     * A value holding a std::shared_ptr<const Individual> is printed as
-     * "{ID, RepresentationName}" and adds an edge towards the referenced
-     * Individual. Only these individual aggregations appear as edges; the
-     * genotype of each Individual stays "hidden" inside its node.
+     * The individuals referenced by the population, directly or not (e.g. the members of the teams of a TPG), are written too. All the individuals
+     * are written in the order of their IDs. The population is the list of the "{ rank= same ... }" line, in its order: an individual of the
+     * population can also be referenced by another one (e.g. a team aggregated by another team).
+     * The introns are not written by default: they do not change the behavior of an individual.
      */
     class PopulationDotExporter {
-
     public:
-
         /**
-         * \brief Writes the dot description of the individuals and of every
-         * individual reachable from them.
+         * \brief Writes the dot description of the individuals and of every individual they reference.
          *
          * \param[in] out stream receiving the dot content.
-         * \param[in] individuals roots of the population to export.
+         * \param[in] individuals the population to export.
+         * \param[in] withIntrons indicates if the intron nodes are written.
+         * \throw std::runtime_error if a value of a node is not a scalar, or if its type is not supported.
          */
-        static void print(std::ostream& out, const std::vector<std::shared_ptr<const Individual>>& individuals);
+        static void print(std::ostream& out, const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons = false);
 
         /**
          * \brief Returns the dot description as a string.
          *
-         * \param[in] individuals roots of the population to export.
+         * \param[in] individuals the population to export.
+         * \param[in] withIntrons indicates if the intron nodes are written.
          */
-        static std::string toString(const std::vector<std::shared_ptr<const Individual>>& individuals);
+        static std::string toString(const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons = false);
 
         /**
          * \brief Writes the dot description into a file.
          *
          * \param[in] filePath path of the file to write.
-         * \param[in] individuals roots of the population to export.
+         * \param[in] individuals the population to export.
+         * \param[in] withIntrons indicates if the intron nodes are written.
          */
-        static void exportToFile(const std::string& filePath, const std::vector<std::shared_ptr<const Individual>>& individuals);
+        static void exportToFile(const std::string& filePath, const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons = false);
 
     private:
-        /// Indicates if a value of a node is a reference to an individual (a destination or a member).
-        static bool isIndividual(const Data::DataValue& value);
+        /// Text of a value of a node, "type:value". Throws if the value is not a scalar of a supported type.
+        static std::string valueText(const Data::DataValue& value);
 
-        /// Name of the node of an individual in the graph: the name of its representation followed by its ID.
-        static std::string nodeName(const Individual* individual);
+        /// Text of a node, "(value,value)".
+        static std::string nodeText(const GraphBased::GPNode& node);
 
-        /// Text with the quotes and the backslashes escaped, to write it in a string of the dot file.
-        static std::string escape(const std::string& text);
+        /// Text of a node group, "[(...),(...)]", without the introns unless withIntrons.
+        static std::string nodeGroupText(const GraphBased::NodeGroup& group, bool withIntrons);
+
+        /// Text of a genotype, "{[...],[...]}", without the introns unless withIntrons.
+        static std::string genotypeText(const GraphBased::Genotype& genotype, bool withIntrons);
 
         /**
-         * \brief Write an individual, then the individuals it references, each one once.
+         * \brief Write an individual: its node, with its genotype, and the edges towards the individuals it references.
          *
          * \param[in,out] out the stream receiving the graph.
          * \param[in] individual the individual written.
-         * \param[in,out] visited the individuals already written.
+         * \param[in] withIntrons indicates if the intron nodes are written.
          */
-        static void printIndividual(std::ostream& out, const Individual& individual, std::unordered_set<const Individual*>& visited);
+        static void printIndividual(std::ostream& out, const Individual& individual, bool withIntrons);
     };
 }
 

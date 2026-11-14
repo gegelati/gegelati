@@ -78,7 +78,8 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
     // The output registers are read at the end of the execution.
     GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
     std::vector<bool> usefulRegisters(this->registersType.totalElements(), false);
-    for(size_t element: this->registerElementsOf(this->outputRegistersType, 0)) {
+    const std::vector<size_t> outputElements = this->registerElementsOf(this->outputRegistersType, 0);
+    for(size_t element: outputElements) {
         usefulRegisters[element] = true;
     }
 
@@ -91,7 +92,8 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
         // An instruction is useful if it writes a register read afterwards, and the registers it writes are not read before it.
         bool isUseful = false;
-        for(size_t element: this->registerElementsOf(instruction.getOutputType(), outputIndex)) {
+        const std::vector<size_t> writtenElements = this->registerElementsOf(instruction.getOutputType(), outputIndex);
+        for(size_t element: writtenElements) {
             isUseful = isUseful || usefulRegisters[element];
             usefulRegisters[element] = false;
         }
@@ -118,7 +120,8 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
                 }
 
                 if(sourceIndex == 0) {
-                    for(size_t element: this->registerElementsOf(operandType, inputIndex)) {
+                    const std::vector<size_t> readElements = this->registerElementsOf(operandType, inputIndex);
+                    for(size_t element: readElements) {
                         usefulRegisters[element] = true;
                     }
                 }

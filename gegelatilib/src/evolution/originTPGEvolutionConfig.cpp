@@ -1,4 +1,5 @@
 #include "evolution/originTPGEvolutionConfig.h"
+#include "util/individualUtils.h"
 
 #include <stdexcept>
 #include <map>
@@ -54,7 +55,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::makeVali
     const std::shared_ptr<Evaluation::Problem> validated = (this->validationProblem != nullptr) ? this->validationProblem : this->problem;
     if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(validated) != nullptr) {
         validation->insertBefore(this->names.validationEvaluationStep, std::make_shared<CacheMemberOutputsStep>(
-            std::vector<std::string>{this->names.population}, this->tpgNames.validationMemberOutputCache, validated->getName(),
+            std::vector<std::string>{this->names.population}, this->tpgNames.validationMemberOutputCache, validated->getName(), this->memberRepresentation->getName(),
             this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationCacheMemberOutputsStep));
         validation->insertBefore(this->names.validationEvaluationStep, std::make_shared<CacheVertexOutputsStep>(
             std::vector<std::string>{this->names.population}, this->tpgNames.validationVertexOutputCache, validated->getName(),
@@ -95,7 +96,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     }
     if(withArchive) {
         initModule.insertAfter(position, std::make_shared<UpdateArchiveStep>(
-            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
+            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->memberRepresentation->getName(), this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
 
     // Step 4: change the generation.
@@ -111,7 +112,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     // Outputs of the members, then of the shared vertices, are cached before the evaluation (prediction problems only).
     if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem) != nullptr) {
         evolutionModule->insertBefore(this->names.trainingEvaluationStep, std::make_shared<CacheMemberOutputsStep>(
-            std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.memberOutputCache, this->problem->getName(),
+            std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.memberOutputCache, this->problem->getName(), this->memberRepresentation->getName(),
             this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.cacheMemberOutputsStep));
         evolutionModule->insertBefore(this->names.trainingEvaluationStep, std::make_shared<CacheVertexOutputsStep>(
             std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.vertexOutputCache, this->problem->getName(),
@@ -127,7 +128,7 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     }
     if(withArchive) {
         evolutionModule->insertAfter(position, std::make_shared<UpdateArchiveStep>(
-            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
+            this->names.population, this->names.trainingMetrics, this->tpgNames.archive, this->memberRepresentation->getName(), this->archiveSize, this->isArchiveFixed, this->tpgNames.updateArchiveStep));
     }
     return evolutionModule;
 }
@@ -138,10 +139,11 @@ double Evolution::OriginTPGEvolutionConfig::getNbVertices(const EvolutionData& s
     return static_cast<double>(getAllVertices(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end())).size());
 }
 
-double Evolution::OriginTPGEvolutionConfig::getNbMembers(const EvolutionData& state, const std::string& roots)
+double Evolution::OriginTPGEvolutionConfig::getNbMembers(const EvolutionData& state, const std::string& roots, const std::string& memberRepresentation)
 {
     const std::vector<std::shared_ptr<Individual>>& list = *state.get<std::vector<std::shared_ptr<Individual>>>(roots);
-    return static_cast<double>(getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end()))).size());
+    const Representations::Representation& members = *state.get<const Representations::Representation>(memberRepresentation);
+    return static_cast<double>(getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(list.begin(), list.end())), members).size());
 }
 
 std::shared_ptr<Evolution::LogModule> Evolution::OriginTPGEvolutionConfig::buildLogModule() const
@@ -150,35 +152,18 @@ std::shared_ptr<Evolution::LogModule> Evolution::OriginTPGEvolutionConfig::build
 
     // The number of vertices and of members of the graphs of the population, after its size.
     const std::string roots = this->names.population;
+    const std::string memberRepresentation = this->memberRepresentation->getName();
     log->insertAfter("Pop_Size", std::make_shared<LogColumnStep>("NbVertex",
         [roots](const EvolutionData& state) { return getNbVertices(state, roots); }, 0, std::set<std::string>{roots}));
     log->insertAfter("NbVertex", std::make_shared<LogColumnStep>("NbMember",
-        [roots](const EvolutionData& state) { return getNbMembers(state, roots); }, 0, std::set<std::string>{roots}));
+        [roots, memberRepresentation](const EvolutionData& state) { return getNbMembers(state, roots, memberRepresentation); }, 0, std::set<std::string>{roots, memberRepresentation}));
     return log;
-}
-
-// Individuals referenced by the value at a given index of the nodes of the first node group.
-std::vector<std::shared_ptr<const Individual>> Evolution::getReferencedBy(const Individual& vertex, size_t idxValue)
-{
-    std::map<uint64_t, std::shared_ptr<const Individual>> referenced;
-    const std::vector<std::reference_wrapper<const GraphBased::GPNode>> nodes = vertex.getGenotype().getNodeGroup(0).getNodes();
-    for(const GraphBased::GPNode& node: nodes) {
-        if(node.getValue(idxValue).getElementType() == typeid(std::shared_ptr<const Individual>)) {
-            const std::shared_ptr<const Individual>& individual = node.getValue(idxValue).getScalar<std::shared_ptr<const Individual>>();
-            referenced.emplace(individual->getIndividualID(), individual);
-        }
-    }
-
-    std::vector<std::shared_ptr<const Individual>> result;
-    for(const auto& [id, individual]: referenced) {
-        result.push_back(individual);
-    }
-    return result;
 }
 
 std::vector<std::shared_ptr<const Individual>> Evolution::getSubVertices(const Individual& vertex)
 {
-    return getReferencedBy(vertex, destinationValueIndex);
+    // The sub-vertices are the referenced individuals of the representation of the vertex.
+    return Util::getMemberIndividuals(vertex, vertex.getRepresentation());
 }
 
 std::vector<std::shared_ptr<const Individual>> Evolution::getAllVertices(const std::vector<std::shared_ptr<const Individual>>& roots)
@@ -194,7 +179,8 @@ std::vector<std::shared_ptr<const Individual>> Evolution::getAllVertices(const s
     while(!toControl.empty()) {
         const std::shared_ptr<const Individual> current = toControl.front();
         toControl.pop();
-        for(const std::shared_ptr<const Individual>& subVertex: getSubVertices(*current)) {
+        const std::vector<std::shared_ptr<const Individual>> subVertices = getSubVertices(*current);
+        for(const std::shared_ptr<const Individual>& subVertex: subVertices) {
             if(vertices.emplace(subVertex->getIndividualID(), subVertex).second) {
                 toControl.push(subVertex);
             }
@@ -208,18 +194,19 @@ std::vector<std::shared_ptr<const Individual>> Evolution::getAllVertices(const s
     return result;
 }
 
-std::vector<std::shared_ptr<const Individual>> Evolution::getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices)
+std::vector<std::shared_ptr<const Individual>> Evolution::getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices, const Representations::Representation& memberRepresentation)
 {
     std::map<uint64_t, std::shared_ptr<const Individual>> members;
     for(const std::shared_ptr<const Individual>& vertex: vertices) {
-        for(const std::shared_ptr<const Individual>& member: getReferencedBy(*vertex, memberValueIndex)) {
+        const std::vector<std::shared_ptr<const Individual>> vertexMembers = Util::getMemberIndividuals(*vertex, memberRepresentation);
+        for(const std::shared_ptr<const Individual>& member: vertexMembers) {
             members.emplace(member->getIndividualID(), member);
         }
     }
 
     std::vector<std::shared_ptr<const Individual>> result;
-    for(const auto& [id, member]: members) {
-        result.push_back(member);
+    for(const std::pair<const uint64_t, std::shared_ptr<const Individual>>& member: members) {
+        result.push_back(member.second);
     }
     return result;
 }

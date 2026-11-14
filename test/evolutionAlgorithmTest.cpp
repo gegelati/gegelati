@@ -423,7 +423,7 @@ TEST_F(EvolutionAlgorithmTest, originTPGPipeline) {
         EXPECT_TRUE(vertex->isValid());
         EXPECT_LE(vertex->getGenotype().getNodeGroup(0).getSize(), 10U);
     }
-    EXPECT_FALSE(Evolution::getMembersOf(vertices).empty());
+    EXPECT_FALSE(Evolution::getMembersOf(vertices, *lgpRep).empty());
     EXPECT_NE(Util::bestIndividual(constIndividuals(*state.get<std::vector<std::shared_ptr<Individual>>>(population.population)), *state.get<std::map<uint64_t, double>>(population.trainingFitness)), nullptr);
 }
 

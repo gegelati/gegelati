@@ -164,6 +164,9 @@ namespace Evolution {
             /// Name of the problem, a component of the data (Evaluation::Problem, a Evaluation::PredictionProblem).
             std::string problem;
 
+            /// Name of the representation of the members, a component of the data (const Representations::Representation).
+            std::string memberRepresentation;
+
             /// Number of samples of the evaluation.
             size_t nbIterations;
 
@@ -180,14 +183,13 @@ namespace Evolution {
              * \param[in] evaluated names of the lists of individuals about to be evaluated (list of individuals or list of mutable individuals).
              * \param[in] cache name of the cached members, a list of individuals.
              * \param[in] problem name of the problem in which members are evaluated, stored in the data as an Evaluation::Problem that is a Evaluation::PredictionProblem.
+             * \param[in] memberRepresentation name of the representation of the members, stored in the data.
              * \param[in] nbIterations number of samples of the evaluation.
              * \param[in] mode evaluation mode, given to the problem.
              * \param[in] nbThreads maximum number of threads evaluating the individuals (see Evaluation::evaluateIndividuals).
              * \param[in] name name of the step.
              */
-            CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
-                                   size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1,
-                                   std::string name = "CacheMemberOutputs");
+            CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem, std::string memberRepresentation, size_t nbIterations, Evaluation::Mode mode = Evaluation::Mode::TRAINING, size_t nbThreads = 1, std::string name = "CacheMemberOutputs");
 
             /// Inherited from Module
             virtual std::string details() const override;
@@ -315,6 +317,9 @@ namespace Evolution {
             /// Name of the updated archive, an Evaluation::DataSet.
             std::string archive;
 
+            /// Name of the representation of the members, a component of the data (const Representations::Representation).
+            std::string memberRepresentation;
+
             /// Maximum number of samples stored in the archive.
             size_t archiveSize;
 
@@ -343,17 +348,19 @@ namespace Evolution {
              * \param[in] roots name of the roots whose members answer, a list of individuals.
              * \param[in] metrics name of the metrics from which inputs are sampled, a metrics map. Only the metrics of the roots are used.
              * \param[in] archive name of the updated archive, created by a CreateArchiveStep.
+             * \param[in] memberRepresentation name of the representation of the members, stored in the data.
              * \param[in] archiveSize maximum number of samples stored in the archive.
              * \param[in] isArchiveFixed indicates if the inputs of the archive are fixed after the initialization.
              * \param[in] name name of the step.
              */
-            UpdateArchiveStep(std::string roots, std::string metrics, std::string archive, size_t archiveSize, bool isArchiveFixed, std::string name = "UpdateArchive")
+            UpdateArchiveStep(std::string roots, std::string metrics, std::string archive, std::string memberRepresentation, size_t archiveSize, bool isArchiveFixed, std::string name = "UpdateArchive")
                 : Module(std::move(name)), roots{std::move(roots)}, metrics{std::move(metrics)}, archive{std::move(archive)},
-                  archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
+                  memberRepresentation{std::move(memberRepresentation)}, archiveSize{archiveSize}, isArchiveFixed{isArchiveFixed}
             {
                 this->require(this->roots);
                 this->require(this->metrics);
                 this->require(this->archive);
+                this->require(this->memberRepresentation);
             }
 
             /// Inherited from Module

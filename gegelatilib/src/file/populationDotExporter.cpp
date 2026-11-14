@@ -1,105 +1,80 @@
 #include "file/populationDotExporter.h"
 
 #include <fstream>
+#include <iomanip>
+#include <limits>
+#include <map>
 #include <sstream>
 #include <stdexcept>
-#include <unordered_set>
 
-bool File::PopulationDotExporter::isIndividual(const Data::DataValue& value) {
-    return value.getRank() == 0 && value.getElementType() == typeid(std::shared_ptr<const Individual>);
+#include "util/individualUtils.h"
+
+std::string File::PopulationDotExporter::valueText(const Data::DataValue& value) {
+    if (value.getRank() != 0) {
+        throw std::runtime_error("PopulationDotExporter: the values of the nodes must be scalars.");
+    }
+    std::ostringstream text;
+    if (value.getElementType() == typeid(std::shared_ptr<const Individual>)) {
+        const Individual& referenced = *value.getScalar<std::shared_ptr<const Individual>>();
+        text << referenced.getRepresentation().getName() << ":" << referenced.getIndividualID();
+    } else if (value.getElementType() == typeid(size_t)) {
+        text << "st:" << value.getScalar<size_t>();
+    } else if (value.getElementType() == typeid(int)) {
+        text << "i:" << value.getScalar<int>();
+    } else if (value.getElementType() == typeid(double)) {
+        text << "d:" << std::setprecision(std::numeric_limits<double>::max_digits10) << value.getScalar<double>();
+    } else if (value.getElementType() == typeid(float)) {
+        text << "f:" << std::setprecision(std::numeric_limits<float>::max_digits10) << value.getScalar<float>();
+    } else {
+        throw std::runtime_error("PopulationDotExporter: the type of a value of a node is not supported (size_t, int, double, float or an individual).");
+    }
+    return text.str();
 }
 
-std::string File::PopulationDotExporter::nodeName(const Individual* individual) {
-    return individual->getRepresentation().getName() + std::to_string(individual->getIndividualID());
+std::string File::PopulationDotExporter::nodeText(const GraphBased::GPNode& node) {
+    std::string text = "(";
+    for (size_t idxValue = 0; idxValue < node.getSize(); idxValue++) {
+        text += (idxValue > 0 ? "," : "") + valueText(node.getValue(idxValue));
+    }
+    return text + ")";
 }
 
-std::string File::PopulationDotExporter::escape(const std::string& text) {
-    std::string result;
-    for (char c : text) {
-        if (c == '"' || c == '\\') {
-            result += '\\';
+std::string File::PopulationDotExporter::nodeGroupText(const GraphBased::NodeGroup& group, bool withIntrons) {
+    std::string text = "[";
+    bool firstNode = true;
+    for (size_t idxNode = 0; idxNode < group.getSize(); idxNode++) {
+        const GraphBased::GPNode& node = group.getNode(idxNode);
+        if (node.getIsIntron() && !withIntrons) {
+            continue;
         }
-        result += c;
+        text += (firstNode ? "" : ",") + nodeText(node);
+        firstNode = false;
     }
-    return result;
+    return text + "]";
 }
 
-void File::PopulationDotExporter::printIndividual(std::ostream& out, const Individual& individual, std::unordered_set<const Individual*>& visited) {
-    if (!visited.insert(&individual).second) {
-        return;
+std::string File::PopulationDotExporter::genotypeText(const GraphBased::Genotype& genotype, bool withIntrons) {
+    std::string text = "{";
+    for (size_t idxGroup = 0; idxGroup < genotype.getSize(); idxGroup++) {
+        text += (idxGroup > 0 ? "," : "") + nodeGroupText(genotype.getNodeGroup(idxGroup), withIntrons);
     }
-
-    std::vector<const Individual*> referenced;
-    std::ostringstream genotypeStr;
-    std::ostringstream edges;
-    // Name-only label used when the graph is rendered in reduced mode.
-    const std::string label = escape(nodeName(&individual));
-
-    const GraphBased::Genotype& genotype = individual.getGenotype();
-    genotypeStr << "{";
-    for (size_t g = 0; g < genotype.getSize(); ++g) {
-        const GraphBased::NodeGroup& group = genotype.getNodeGroup(g);
-        genotypeStr <<"[";
-
-        for (size_t n = 0; n < group.getSize(); ++n) {
-            const GraphBased::GPNode& node = group.getNode(n);
-            if(node.getIsIntron()) {
-                continue;   
-            }
-
-            genotypeStr << "(";
-            for (size_t v = 0; v < node.getSize(); ++v) {
-                const Data::DataValue& value = node.getValue(v);
-                if (v > 0) {
-                    genotypeStr << ",";
-                }
-                if (isIndividual(value)) {
-                    const Individual* target = value.getScalar<std::shared_ptr<const Individual>>().get();
-                    genotypeStr << escape(nodeName(target));
-                    edges << "\t\t" << nodeName(&individual) << " -> " << nodeName(target) << "\n";
-                    referenced.push_back(target);
-                } else {
-                    genotypeStr << escape(value.toValueString());
-                }
-            }
-            genotypeStr <<")";
-            if(node.getIsIntron()) {
-                genotypeStr << "-intr";
-            }
-            if(n < group.getSize() - 1) {
-                genotypeStr << ",";
-            }
-        }
-        genotypeStr <<"]";
-        if(g < genotype.getSize() - 1) {
-            genotypeStr << ",";
-        }
-    }
-    genotypeStr << "}";
-
-    out << "\t\t" << nodeName(&individual) << " [fillcolor=\""
-        << individual.getRepresentation().getRepresentationColor()
-        << "\", shape=box margin=0.03 width=0 height=0"
-        << ", label=\"" << label
-        << "\", genotype=\"" << genotypeStr.str() << "\"];\n";
-        
-    for (const Individual* target : referenced) {
-        printIndividual(out, *target, visited);
-    }
-        out << edges.str();
+    return text + "}";
 }
 
-void File::PopulationDotExporter::print(std::ostream& out, const std::vector<std::shared_ptr<const Individual>>& individuals) {
-    /*
-    // File exported with GEGELATI vX.Y.Z
-    // On the YYYY-MM-DD HH:MM:SS
-    // With the <Printer>
-    graph{
-    graph[pad = "0.212,0.055" bgcolor = lightgray]
-    node[style = filled label = ""]
-    */
-    std::string offset = "";
+void File::PopulationDotExporter::printIndividual(std::ostream& out, const Individual& individual, bool withIntrons) {
+    // The node of an individual is named by its representation and its ID, e.g. "LGP_12".
+    const std::string name = individual.getRepresentation().getName() + "_" + std::to_string(individual.getIndividualID());
+    out << "\t\t" << name << " [fillcolor=\"" << individual.getRepresentation().getRepresentationColor() << "\", shape=box margin=0.03 width=0 height=0"
+        << ", label=\"" << name << "\", genotype=\"" << genotypeText(individual.getGenotype(), withIntrons) << "\"];\n";
 
+    const std::vector<std::shared_ptr<const Individual>> members = Util::getMemberIndividuals(individual);
+    for (const std::shared_ptr<const Individual>& member : members) {
+        out << "\t\t" << name << " -> " << member->getRepresentation().getName() << "_" << member->getIndividualID() << "\n";
+    }
+}
+
+void File::PopulationDotExporter::print(std::ostream& out, const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons) {
+    
     out << "// File exported with GEGELATI v" GEGELATI_VERSION "\n";
     out << "// On the " << Util::getCurrentDate().c_str() << "\n";
     out << "// With the " << DEMANGLE_TYPEID_NAME(typeid(PopulationDotExporter).name()) << "\n";
@@ -107,31 +82,32 @@ void File::PopulationDotExporter::print(std::ostream& out, const std::vector<std
     out << "\tgraph[pad = \"0.212, 0.055\" bgcolor = lightgray]\n";
     out << "\tnode[shape=circle style = filled label = \"\"]\n";
 
-    std::unordered_set<const Individual*> visited;
-    for (const std::shared_ptr<const Individual>& individual : individuals) {
-        printIndividual(out, *individual, visited);
+    // All the individuals, the population and their members, are written in the order of their IDs.
+    std::vector<std::shared_ptr<const Individual>> allIndividuals = Util::getAllMemberIndividuals(individuals);
+    allIndividuals.insert(allIndividuals.end(), individuals.begin(), individuals.end());
+    const std::map<uint64_t, std::shared_ptr<const Individual>> orderedIndividuals = Util::makeOrderedIndex(allIndividuals);
+    for (const std::pair<const uint64_t, std::shared_ptr<const Individual>>& individual : orderedIndividuals) {
+        printIndividual(out, *individual.second, withIntrons);
     }
 
-    
-    // Rank all the individuals
+    // The population, in its order.
     out << "\t\t{ rank= same ";
-    // Team root ids
     for (const std::shared_ptr<const Individual>& individual : individuals) {
-        out << nodeName(individual.get()) << " ";
+        out << individual->getRepresentation().getName() << "_" << individual->getIndividualID() << " ";
     }
     out << "}\n}\n";
 }
 
-std::string File::PopulationDotExporter::toString(const std::vector<std::shared_ptr<const Individual>>& individuals) {
+std::string File::PopulationDotExporter::toString(const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons) {
     std::ostringstream oss;
-    print(oss, individuals);
+    print(oss, individuals, withIntrons);
     return oss.str();
 }
 
-void File::PopulationDotExporter::exportToFile(const std::string& filePath, const std::vector<std::shared_ptr<const Individual>>& individuals) {
+void File::PopulationDotExporter::exportToFile(const std::string& filePath, const std::vector<std::shared_ptr<const Individual>>& individuals, bool withIntrons) {
     std::ofstream file(filePath);
     if (!file.is_open()) {
         throw std::runtime_error("PopulationDotExporter: cannot open file " + filePath);
     }
-    print(file, individuals);
+    print(file, individuals, withIntrons);
 }

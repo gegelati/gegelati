@@ -57,6 +57,8 @@ class TPGStepsTest : public ::testing::Test
 {
   protected:
     std::shared_ptr<Representations::FakeRepresentation> rep = std::make_shared<Representations::FakeRepresentation>();
+    // Representation of the members, another one than the one of the vertices (see Evolution::getMembersOf).
+    std::shared_ptr<Representations::FakeRepresentation> memberRep = std::make_shared<Representations::FakeRepresentation>();
     std::shared_ptr<const Individual> member;
     // Keys of the population of roots.
     const Evolution::BasicEvolutionConfig::Names roots{namesOf("Roots")};
@@ -70,7 +72,7 @@ class TPGStepsTest : public ::testing::Test
     virtual void SetUp()
     {
         CounterReset::counterReset();
-        member = std::make_shared<Individual>(rep);
+        member = std::make_shared<Individual>(memberRep);
     }
 
     // Replace the individuals of the population of roots.
@@ -135,7 +137,7 @@ TEST_F(TPGStepsTest, graphHelpers)
     EXPECT_EQ(Evolution::getAllVertices({vertexB, vertexA, leaf1}).size(), 4U);
 
     // Members are the ones used by the nodes.
-    std::vector<std::shared_ptr<const Individual>> members = Evolution::getMembersOf(all);
+    std::vector<std::shared_ptr<const Individual>> members = Evolution::getMembersOf(all, *memberRep);
     ASSERT_EQ(members.size(), 1U);
     EXPECT_EQ(members.at(0), member);
 }
@@ -247,11 +249,12 @@ TEST_F(TPGStepsTest, protectAggregatedChains)
 TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
 {
     Evolution::CreateArchiveStep create(archiveKey, {Dimensions::Requirement(Data::DataType::type<int>({2}))});
-    Evolution::UpdateArchiveStep update(roots.population, roots.trainingMetrics, archiveKey, 10, false);
+    Evolution::UpdateArchiveStep update(roots.population, roots.trainingMetrics, archiveKey, memberRep->getName(), 10, false);
     EXPECT_EQ(create.providedData(), (std::set<std::string>{archiveKey}));
     EXPECT_EQ(update.requiredData().count(archiveKey), 1U);
 
     Evolution::EvolutionData state;
+    state.set(memberRep->getName(), std::shared_ptr<const Representations::Representation>(memberRep));
     state.generation = Evolution::EvolutionData::initGeneration;
     EXPECT_THROW(update.apply(state), std::runtime_error) << "The archive must be created first";
 
@@ -267,7 +270,7 @@ TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
     EXPECT_EQ(archive->size(), 0U);
 
     // Later generations of a fixed archive only update answers, which is nothing for an empty archive.
-    Evolution::UpdateArchiveStep fixed(roots.population, roots.trainingMetrics, archiveKey, 10, true);
+    Evolution::UpdateArchiveStep fixed(roots.population, roots.trainingMetrics, archiveKey, memberRep->getName(), 10, true);
     state.generation = 3;
     ASSERT_NO_THROW(fixed.apply(state));
     EXPECT_EQ(state.get<Evaluation::DataSet>(archiveKey), archive);
@@ -292,13 +295,14 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
 
     // The members of the roots and of the offspring are cached.
     const auto offspring = roots.offspring;
-    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem->getName(), 2);
+    Evolution::CacheMemberOutputsStep step({roots.population, offspring}, cacheKey, problem->getName(), memberRep->getName(), 2);
     Evolution::EvolutionData state = makeState({vertex});
     state.set(offspring, std::make_shared<std::vector<std::shared_ptr<Individual>>>());
-    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring, problem->getName()}));
+    EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring, problem->getName(), memberRep->getName()}));
     EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey}));
     EXPECT_THROW(step.apply(state), std::runtime_error) << "The problem is a component of the data";
     state.set(problem->getName(), std::shared_ptr<Evaluation::Problem>(problem));
+    state.set(memberRep->getName(), std::shared_ptr<const Representations::Representation>(memberRep));
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
     ASSERT_NO_THROW(step.apply(state));

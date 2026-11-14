@@ -27,14 +27,16 @@ void Evolution::SelectStep::apply(EvolutionData& state)
 {
     std::unordered_map<uint64_t, std::shared_ptr<Individual>> index;
     for(const std::string& candidate: this->candidates) {
-        for(const std::shared_ptr<Individual>& individual: *state.get<std::vector<std::shared_ptr<Individual>>>(candidate)) {
+        const std::vector<std::shared_ptr<Individual>>& individuals = *state.get<std::vector<std::shared_ptr<Individual>>>(candidate);
+        for(const std::shared_ptr<Individual>& individual: individuals) {
             index.emplace(individual->getIndividualID(), individual);
         }
     }
 
     // Only the fitness of the candidates is used.
     std::map<uint64_t, double> candidatesFitness;
-    for(const auto& [id, value]: *state.get<std::map<uint64_t, double>>(this->fitness)) {
+    const std::map<uint64_t, double>& fitnessValues = *state.get<std::map<uint64_t, double>>(this->fitness);
+    for(const auto& [id, value]: fitnessValues) {
         if(index.count(id) > 0) {
             candidatesFitness.insert(std::make_pair(id, value));
         }

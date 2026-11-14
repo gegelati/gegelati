@@ -102,15 +102,15 @@ void Evolution::UpdateGeneratorStep::apply(EvolutionData& state)
     state.set(this->generator, std::make_shared<GraphBased::GenotypeGenerator>(bidNodes, range, std::make_pair(range.first, range.first)));
 }
 
-Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem,
-                                                          size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
-    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)},
+Evolution::CacheMemberOutputsStep::CacheMemberOutputsStep(std::vector<std::string> evaluated, std::string cache, std::string problem, std::string memberRepresentation, size_t nbIterations, Evaluation::Mode mode, size_t nbThreads, std::string name)
+    : Module(std::move(name)), evaluated{std::move(evaluated)}, cache{std::move(cache)}, problem{std::move(problem)}, memberRepresentation{std::move(memberRepresentation)},
       nbIterations{nbIterations}, mode{mode}, nbThreads{nbThreads}
 {
     for(const std::string& key: this->evaluated) {
         this->require(key);
     }
     this->require(this->problem);
+    this->require(this->memberRepresentation);
     this->provide(this->cache);
 }
 
@@ -170,7 +170,8 @@ std::vector<std::shared_ptr<const Individual>> Evolution::gatherIndividuals(cons
 void Evolution::clearPreviousCache(const EvolutionData& state, const std::string& cache)
 {
     if(state.has(cache)) {
-        for(const std::shared_ptr<const Individual>& cached: *state.get<std::vector<std::shared_ptr<const Individual>>>(cache)) {
+        const std::vector<std::shared_ptr<const Individual>>& cachedIndividuals = *state.get<std::vector<std::shared_ptr<const Individual>>>(cache);
+        for(const std::shared_ptr<const Individual>& cached: cachedIndividuals) {
             cached->clearCachedOutputs();
         }
     }
@@ -185,7 +186,8 @@ void Evolution::CacheMemberOutputsStep::apply(EvolutionData& state)
         throw std::runtime_error("Evolution::CacheMemberOutputsStep: the problem " + this->problem + " must be a PredictionProblem");
     }
 
-    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(gatherIndividuals(state, this->evaluated));
+    const Representations::Representation& representation = *state.get<const Representations::Representation>(this->memberRepresentation);
+    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(gatherIndividuals(state, this->evaluated), representation);
     state.set(this->cache, std::make_shared<std::vector<std::shared_ptr<const Individual>>>(members));
     cacheOutputsOf(members, *predictionProblem, this->nbIterations, state.generation, this->mode, this->nbThreads);
 }
@@ -290,7 +292,8 @@ void Evolution::CacheVertexOutputsStep::apply(EvolutionData& state)
     // Layers are executed from the lowest one: the shared vertices they point to have their outputs cached already,
     // so each vertex only costs the bids of its own nodes.
     std::vector<std::shared_ptr<const Individual>> cached;
-    for(const std::vector<std::shared_ptr<const Individual>>& layer: getSharedVerticesByHeight(gatherIndividuals(state, this->evaluated))) {
+    const std::vector<std::vector<std::shared_ptr<const Individual>>> layers = getSharedVerticesByHeight(gatherIndividuals(state, this->evaluated));
+    for(const std::vector<std::shared_ptr<const Individual>>& layer: layers) {
         cacheOutputsOf(layer, *predictionProblem, this->nbIterations, state.generation, this->mode, this->nbThreads);
         cached.insert(cached.end(), layer.begin(), layer.end());
     }
@@ -328,7 +331,8 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
     const std::vector<std::shared_ptr<const Individual>> roots(mutableRoots.begin(), mutableRoots.end());
     const std::unordered_map<uint64_t, std::shared_ptr<const Individual>> rootIndex = Util::makeIndex(roots);
     std::map<uint64_t, std::vector<Data::DataValue>> allInputs;
-    for(auto& [id, metricMap]: *state.get<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->metrics)) {
+    std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>& metricMaps = *state.get<std::map<uint64_t, std::unique_ptr<Metrics::MetricMap>>>(this->metrics);
+    for(auto& [id, metricMap]: metricMaps) {
         if(rootIndex.count(id) == 0) {
             continue;
         }
@@ -349,7 +353,8 @@ void Evolution::UpdateArchiveStep::updateArchive(EvolutionData& state, Evaluatio
         }
     }
 
-    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(roots));
+    const Representations::Representation& representation = *state.get<const Representations::Representation>(this->memberRepresentation);
+    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(roots), representation);
     if(members.empty()) {
         return;
     }
@@ -375,7 +380,8 @@ void Evolution::UpdateArchiveStep::updateArchiveOutputs(EvolutionData& state, Ev
     }
 
     const std::vector<std::shared_ptr<Individual>>& roots = *state.get<std::vector<std::shared_ptr<Individual>>>(this->roots);
-    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end())));
+    const Representations::Representation& representation = *state.get<const Representations::Representation>(this->memberRepresentation);
+    const std::vector<std::shared_ptr<const Individual>> members = getMembersOf(getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end())), representation);
     for(size_t idx = 0; idx < archive.size(); idx++) {
         archive.setOutputAt(idx, computeMemberAnswer(archive.getInputsAt(idx), members));
     }
@@ -407,7 +413,8 @@ void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)
 
     // Aggregators still alive are the ones reachable from the roots.
     std::set<uint64_t> alive;
-    for(const std::shared_ptr<const Individual>& vertex: getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()))) {
+    const std::vector<std::shared_ptr<const Individual>> vertices = getAllVertices(std::vector<std::shared_ptr<const Individual>>(roots.begin(), roots.end()));
+    for(const std::shared_ptr<const Individual>& vertex: vertices) {
         alive.insert(vertex->getIndividualID());
     }
     for(auto& [id, aggregatorIDs]: aggregators) {
@@ -433,7 +440,8 @@ void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)
         rootIndex.emplace(root->getIndividualID(), root);
     }
     for(const std::shared_ptr<Individual>& root: roots) {
-        for(const std::shared_ptr<const Individual>& subVertex: getSubVertices(*root)) {
+        const std::vector<std::shared_ptr<const Individual>> subVertices = getSubVertices(*root);
+        for(const std::shared_ptr<const Individual>& subVertex: subVertices) {
             const uint64_t subID = subVertex->getIndividualID();
             if(subID == root->getIndividualID()) {
                 continue;

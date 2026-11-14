@@ -20,7 +20,7 @@
 namespace Evolution {
 
     /**
-     * \brief Return the vertices directly referenced as destination by the nodes of a TPG vertex.
+     * \brief Return the vertices directly referenced by a TPG vertex: the referenced individuals of its representation (see Util::getMemberIndividuals).
      *
      * \param[in] vertex the TPG vertex.
      * \return the referenced vertices, ordered by ID and without duplicates.
@@ -36,27 +36,13 @@ namespace Evolution {
     std::vector<std::shared_ptr<const Individual>> getAllVertices(const std::vector<std::shared_ptr<const Individual>>& roots);
 
     /**
-     * \brief Return the members used by the nodes of TPG vertices.
+     * \brief Return the members used by TPG vertices: the individuals of the member representation they reference.
      *
      * \param[in] vertices the TPG vertices.
+     * \param[in] memberRepresentation the representation of the members.
      * \return the members, ordered by ID and without duplicates.
      */
-    std::vector<std::shared_ptr<const Individual>> getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices);
-
-    /// Index of the member in a node of a TPG vertex.
-    constexpr size_t memberValueIndex = 0;
-
-    /// Index of the destination in a node of a TPG vertex.
-    constexpr size_t destinationValueIndex = 1;
-
-    /**
-     * \brief Return the individuals referenced by the value at a given index of the nodes of a TPG vertex (first node group).
-     *
-     * \param[in] vertex the TPG vertex.
-     * \param[in] idxValue index of the value in the nodes, e.g. memberValueIndex or destinationValueIndex.
-     * \return the referenced individuals, ordered by ID and without duplicates.
-     */
-    std::vector<std::shared_ptr<const Individual>> getReferencedBy(const Individual& vertex, size_t idxValue);
+    std::vector<std::shared_ptr<const Individual>> getMembersOf(const std::vector<std::shared_ptr<const Individual>>& vertices, const Representations::Representation& memberRepresentation);
 
     /**
      * \brief Settings of the evolution of Tangled Program Graphs the way the original TPG algorithm does, building the corresponding steps.
@@ -189,8 +175,9 @@ namespace Evolution {
          *
          * \param[in] state the data of the evolution.
          * \param[in] roots name of the roots of the graphs, the individuals of the population.
+         * \param[in] memberRepresentation name of the representation of the members, a component of the data.
          */
-        static double getNbMembers(const EvolutionData& state, const std::string& roots);
+        static double getNbMembers(const EvolutionData& state, const std::string& roots, const std::string& memberRepresentation);
 
         /// Inherited from BasicEvolutionConfig, caches the outputs of the members and of the shared vertices before the validation evaluation (prediction problems only).
         virtual std::shared_ptr<Module> makeValidationModule(const std::string& name, size_t period) const override;
