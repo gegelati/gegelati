@@ -53,11 +53,10 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::makeVali
     // Outputs of the members, then of the shared vertices, are cached before the validation evaluation (prediction problems only).
     const std::shared_ptr<Evaluation::Problem> validated = (this->validationProblem != nullptr) ? this->validationProblem : this->problem;
     if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(validated) != nullptr) {
-        const std::shared_ptr<Module> evaluation = validation->find(this->names.validationEvaluationStep);
-        validation->insertBefore(evaluation, std::make_shared<CacheMemberOutputsStep>(
+        validation->insertBefore(this->names.validationEvaluationStep, std::make_shared<CacheMemberOutputsStep>(
             std::vector<std::string>{this->names.population}, this->tpgNames.validationMemberOutputCache, validated->getName(),
             this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationCacheMemberOutputsStep));
-        validation->insertBefore(evaluation, std::make_shared<CacheVertexOutputsStep>(
+        validation->insertBefore(this->names.validationEvaluationStep, std::make_shared<CacheVertexOutputsStep>(
             std::vector<std::string>{this->names.population}, this->tpgNames.validationVertexOutputCache, validated->getName(),
             this->nbValidationIterations, Evaluation::Mode::VALIDATION, this->nbThreads, this->tpgNames.validationCacheVertexOutputsStep));
     }
@@ -73,28 +72,26 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     const std::string archiveName = withArchive ? this->tpgNames.archive : "";
 
     // Step 2: store the components of the members, read by the generator of the vertices.
-    evolutionModule->getData().add(this->memberRepresentation->getName(), this->memberRepresentation);
-    evolutionModule->getData().add(this->memberMutation->getName(), this->memberMutation);
+    evolutionModule->getData().set(this->memberRepresentation->getName(), this->memberRepresentation);
+    evolutionModule->getData().set(this->memberMutation->getName(), this->memberMutation);
 
     // Step 3: change the initialization.
 
     // The archive is created first, then the generator of the vertices, pointing to actions only, before the vertices.
-    const std::shared_ptr<Module> initPopulation = initModule.find(this->names.initPopulationStep);
     if(withArchive) {
-        initModule.insertBefore(initPopulation, std::make_shared<CreateArchiveStep>(
+        initModule.insertBefore(this->names.initPopulationStep, std::make_shared<CreateArchiveStep>(
             this->tpgNames.archive, this->representation->getDimensionFlow().getInputDimensions(), this->tpgNames.createArchiveStep));
     }
-    initModule.insertBefore(initPopulation, std::make_shared<UpdateGeneratorStep>(
+    initModule.insertBefore(this->names.initPopulationStep, std::make_shared<UpdateGeneratorStep>(
         this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
         this->memberMutation->getName(), archiveName, "", this->tpgNames.updateGeneratorStep));
 
     // After the fitness: protection of the aggregated vertices, then update of the archive.
-    std::shared_ptr<Module> position = initModule.find(this->names.trainingFitnessStep);
+    std::string position = this->names.trainingFitnessStep;
     if(this->protectAggregated) {
-        const std::shared_ptr<Module> protect = std::make_shared<ProtectAggregatedStep>(
-            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep);
-        initModule.insertAfter(position, protect);
-        position = protect;
+        initModule.insertAfter(position, std::make_shared<ProtectAggregatedStep>(
+            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep));
+        position = this->tpgNames.protectAggregatedStep;
     }
     if(withArchive) {
         initModule.insertAfter(position, std::make_shared<UpdateArchiveStep>(
@@ -104,32 +101,29 @@ std::shared_ptr<Evolution::Module> Evolution::OriginTPGEvolutionConfig::buildMod
     // Step 4: change the generation.
 
     // Mutation of the offspring, with a generator whose destinations can be the current vertices, and nodes transferred from the population.
-    const std::shared_ptr<Module> mutation = evolutionModule->find(this->names.mutationStep);
-    evolutionModule->insertBefore(mutation, std::make_shared<UpdateGeneratorStep>(
+    evolutionModule->insertBefore(this->names.mutationStep, std::make_shared<UpdateGeneratorStep>(
         this->names.generator, this->representation->getName(), this->memberRepresentation->getName(),
         this->memberMutation->getName(), archiveName, this->names.population, this->tpgNames.updateGeneratorStep));
-    evolutionModule->replace(mutation, std::make_shared<MutateVerticesStep>(
+    evolutionModule->replace(this->names.mutationStep, std::make_shared<MutateVerticesStep>(
         this->names.offspring, this->names.population, this->names.generator,
         this->nodeTransfer->getName(), this->nbThreads, this->names.mutationStep));
 
     // Outputs of the members, then of the shared vertices, are cached before the evaluation (prediction problems only).
     if(std::dynamic_pointer_cast<Evaluation::PredictionProblem>(this->problem) != nullptr) {
-        const std::shared_ptr<Module> evaluation = evolutionModule->find(this->names.trainingEvaluationStep);
-        evolutionModule->insertBefore(evaluation, std::make_shared<CacheMemberOutputsStep>(
+        evolutionModule->insertBefore(this->names.trainingEvaluationStep, std::make_shared<CacheMemberOutputsStep>(
             std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.memberOutputCache, this->problem->getName(),
             this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.cacheMemberOutputsStep));
-        evolutionModule->insertBefore(evaluation, std::make_shared<CacheVertexOutputsStep>(
+        evolutionModule->insertBefore(this->names.trainingEvaluationStep, std::make_shared<CacheVertexOutputsStep>(
             std::vector<std::string>{this->names.population, this->names.offspring}, this->tpgNames.vertexOutputCache, this->problem->getName(),
             this->nbTrainingIterations, Evaluation::Mode::TRAINING, this->nbThreads, this->tpgNames.cacheVertexOutputsStep));
     }
 
     // After the surviving selection: protection of the aggregated vertices, then update of the archive.
-    position = evolutionModule->find(this->names.survivorSelectionStep);
+    position = this->names.survivorSelectionStep;
     if(this->protectAggregated) {
-        const std::shared_ptr<Module> protect = std::make_shared<ProtectAggregatedStep>(
-            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep);
-        evolutionModule->insertAfter(position, protect);
-        position = protect;
+        evolutionModule->insertAfter(position, std::make_shared<ProtectAggregatedStep>(
+            this->names.population, this->tpgNames.protectedVertices, this->tpgNames.aggregators, this->tpgNames.protectAggregatedStep));
+        position = this->tpgNames.protectAggregatedStep;
     }
     if(withArchive) {
         evolutionModule->insertAfter(position, std::make_shared<UpdateArchiveStep>(

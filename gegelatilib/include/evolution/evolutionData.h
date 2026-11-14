@@ -45,11 +45,8 @@ namespace Evolution {
         /// Random number generator of the evolution.
         RNG::RNG rng;
 
-        /// Stopwatch of the evolution, started when the data are created (or reset). The modules and the log read their times from it.
+        /// Stopwatch of the evolution, started when the data are created (or when a new evolution starts, see Module::evolve). The modules and the log read their times from it.
         Stopwatch stopwatch;
-
-        /// Identifiers of the steps whose initialization was run on this state (see Module::initialize).
-        std::set<uint64_t> initializedSteps;
 
         /**
          * \brief Constructor.
@@ -57,17 +54,10 @@ namespace Evolution {
         explicit EvolutionData() {}
 
         /**
-         * \brief Empty the state to start a new evolution, everything included.
-         *
-         * \param[in] seed the seed of the random number generator.
-         */
-        void reset(uint64_t seed);
-
-        /**
          * \brief Add the data of another EvolutionData, e.g. the components of a module added to another one.
          *
          * A data already present under the same name is kept: the data of the other one is ignored. Different data must therefore
-         * have different names. The initializations done on the other data are added too.
+         * have different names.
          *
          * \param[in] other the merged data.
          * \throw std::runtime_error if both have a data of different types under the same name.
@@ -78,25 +68,7 @@ namespace Evolution {
         std::set<std::string> dataNames() const;
 
         /**
-         * \brief Create a data, with the current generation.
-         *
-         * It is for the steps creating a data, so that two steps (e.g. of two evolutions given the same names) cannot create the same one.
-         *
-         * \tparam T type of the data, deduced from the value.
-         * \param[in] name the name of the data.
-         * \param[in] value the stored value, shared with the caller.
-         * \throw std::runtime_error if there is already a data with this name.
-         */
-        template <typename T> void add(const std::string& name, std::shared_ptr<T> value)
-        {
-            if(this->has(name)) {
-                throw std::runtime_error("Evolution::EvolutionData::add: a data named " + name + " already exists");
-            }
-            this->set(name, std::move(value));
-        }
-
-        /**
-         * \brief Store a data, replacing the previous one if there is one, with the current generation.
+         * \brief Store a data, creating it or replacing the previous one, with the current generation.
          *
          * \tparam T type of the data, deduced from the value.
          * \param[in] name the name of the data.

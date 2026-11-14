@@ -146,9 +146,9 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
     std::shared_ptr<Evolution::Module> evolutionModule = config.buildModule();
 
     std::shared_ptr<Mutation::Mutator> mutator = std::make_shared<Mutation::PointMutator>(0.5, 0.5, 0.5, "SecondPointMutator");
-    evolutionModule->getData().add(mutator->getName(), mutator);
+    evolutionModule->getData().set(mutator->getName(), mutator);
     auto newMutateStep = std::make_shared<Evolution::MutateStep>(config.names.offspring, mutator->getName(), config.names.generator, 10, "Mutation2");
-    evolutionModule->insertAfter(evolutionModule->find("Mutation"), newMutateStep);
+    evolutionModule->insertAfter("Mutation", newMutateStep);
     //evolutionModule->replace(evolutionModule->find("Mutation"), newMutateStep);*/
 
 
@@ -324,12 +324,12 @@ TEST_F(TPGAlgoTest, customEvolutionLGPAndTPGApart) {
     auto evolutionModule = std::make_shared<Evolution::Module>("Evolution");
     evolutionModule->addSubModule(lgp.buildModule());
     auto tpgModule = tpg.buildModule();
-    tpgModule->getInitialization()->insertBefore(tpgModule->getInitialization()->find("InitPopulation"), makeGeneratorStep());
-    tpgModule->insertBefore(tpgModule->find("Mutation"), makeGeneratorStep());
+    tpgModule->getInitialization()->insertBefore("InitPopulation", makeGeneratorStep());
+    tpgModule->insertBefore("Mutation", makeGeneratorStep());
 
     // The outputs of the members (the LGP individuals) on the samples of the evaluation are computed once, whatever the number of vertices using them.
     const std::string cacheKey("TPG.memberOutputCache");
-    tpgModule->insertAfter(tpgModule->find("Mutation"), std::make_shared<Evolution::CacheMemberOutputsStep>(
+    tpgModule->insertAfter("Mutation", std::make_shared<Evolution::CacheMemberOutputsStep>(
         std::vector<std::string>{tpgKeys.population, tpgKeys.offspring}, cacheKey, tpgProblem->getName(),
         tpg.nbTrainingIterations, Evaluation::Mode::TRAINING, tpg.nbThreads));
     // The log of the TPG: the columns of the preset and the number of vertices, and a second log written for another tool with the time of each step.

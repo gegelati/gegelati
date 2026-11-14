@@ -273,9 +273,9 @@ TEST_F(TPGStepsTest, archiveIsADataOfThePopulation)
     EXPECT_EQ(state.get<Evaluation::DataSet>(archiveKey), archive);
     EXPECT_EQ(archive->size(), 0U);
 
-    // A new evolution starts without archive.
-    state.reset(0);
-    EXPECT_FALSE(state.has(archiveKey));
+    // A new evolution creates the archive again, replacing the previous one.
+    ASSERT_NO_THROW(create.apply(state));
+    EXPECT_NE(state.get<Evaluation::DataSet>(archiveKey), archive);
 }
 
 TEST_F(TPGStepsTest, cacheMemberOutputs)
@@ -298,7 +298,7 @@ TEST_F(TPGStepsTest, cacheMemberOutputs)
     EXPECT_EQ(step.requiredData(), (std::set<std::string>{roots.population, offspring, problem->getName()}));
     EXPECT_EQ(step.providedData(), (std::set<std::string>{cacheKey}));
     EXPECT_THROW(step.apply(state), std::runtime_error) << "The problem is a component of the data";
-    state.add(problem->getName(), std::shared_ptr<Evaluation::Problem>(problem));
+    state.set(problem->getName(), std::shared_ptr<Evaluation::Problem>(problem));
 
     EXPECT_EQ(cachedMember->getNbCachedOutputs(), 0U);
     ASSERT_NO_THROW(step.apply(state));
@@ -354,6 +354,6 @@ TEST_F(TPGStepsTest, mutateVerticesStep)
 
     // The mutation must be a NodeTransferMutation.
     Evolution::EvolutionData state;
-    state.add(transfer->getName(), std::shared_ptr<Mutation::Mutator>(std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5)));
+    state.set(transfer->getName(), std::shared_ptr<Mutation::Mutator>(std::make_shared<Mutation::PointMutator>(0.2, 0.5, 0.5)));
     EXPECT_THROW(mutate.apply(state), std::runtime_error);
 }

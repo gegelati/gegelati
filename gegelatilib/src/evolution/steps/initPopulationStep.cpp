@@ -23,5 +23,5 @@ void Evolution::InitPopulationStep::apply(EvolutionData& state)
     std::vector<std::shared_ptr<Individual>> individuals = Mutation::initIndividuals(
         *state.get<Mutation::Mutator>(this->mutator), state.get<const Representations::Representation>(this->representation),
         *state.get<GraphBased::GenotypeGenerator>(this->generator), this->size, state.rng);
-    state.add(this->individuals, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::move(individuals)));
+    state.set(this->individuals, std::make_shared<std::vector<std::shared_ptr<Individual>>>(std::move(individuals)));
 }

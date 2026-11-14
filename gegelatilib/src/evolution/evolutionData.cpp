@@ -4,16 +4,6 @@
 #include <sstream>
 #include <vector>
 
-void Evolution::EvolutionData::reset(uint64_t seed)
-{
-    this->generation = initGeneration;
-    this->nbGenerationsDone = 0;
-    this->rng.setSeed(seed);
-    this->data.clear();
-    this->initializedSteps.clear();
-    this->stopwatch.reset();
-}
-
 void Evolution::EvolutionData::mergeWith(const EvolutionData& other)
 {
     if(&other == this) {
@@ -27,7 +17,6 @@ void Evolution::EvolutionData::mergeWith(const EvolutionData& other)
             throw std::runtime_error("Evolution::EvolutionData::mergeWith: two data of different types are named " + name);
         }
     }
-    this->initializedSteps.insert(other.initializedSteps.begin(), other.initializedSteps.end());
 }
 
 std::set<std::string> Evolution::EvolutionData::dataNames() const

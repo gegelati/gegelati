@@ -107,28 +107,28 @@ void Evolution::BasicEvolutionConfig::updateEmptyComponents()
 void Evolution::BasicEvolutionConfig::addComponents(Module& module) const
 {
     EvolutionData& data = module.getData();
-    data.add(this->problem->getName(), this->problem);
-    data.add(this->representation->getName(), this->representation);
-    data.add(this->assigner->getName(), this->assigner);
-    data.add(this->parentSelection->getName(), this->parentSelection);
-    data.add(this->survivingSelection->getName(), this->survivingSelection);
-    data.add(this->breeder->getName(), this->breeder);
-    data.add(this->names.trainingMetricTemplate, this->trainingMetricTemplate);
-    data.add(this->mutation->getName(), this->mutation);
-    data.add(this->names.generator, this->generator);
+    data.set(this->problem->getName(), this->problem);
+    data.set(this->representation->getName(), this->representation);
+    data.set(this->assigner->getName(), this->assigner);
+    data.set(this->parentSelection->getName(), this->parentSelection);
+    data.set(this->survivingSelection->getName(), this->survivingSelection);
+    data.set(this->breeder->getName(), this->breeder);
+    data.set(this->names.trainingMetricTemplate, this->trainingMetricTemplate);
+    data.set(this->mutation->getName(), this->mutation);
+    data.set(this->names.generator, this->generator);
 
     // Specific assigner for parent selection if required.
     if(this->parentAssigner != nullptr) {
-        data.add(this->parentAssigner->getName(), this->parentAssigner);
+        data.set(this->parentAssigner->getName(), this->parentAssigner);
     }
     // Validation problem and assigner (if any, the training ones are used otherwise) and metrics.
     if(this->nbValidationIterations > 0) {
         if(this->validationProblem != nullptr) {
-            data.add(this->validationProblem->getName(), this->validationProblem);
+            data.set(this->validationProblem->getName(), this->validationProblem);
         }
-        data.add(this->names.validationMetricTemplate, this->validationMetricTemplate);
+        data.set(this->names.validationMetricTemplate, this->validationMetricTemplate);
         if(this->validationAssigner != nullptr) {
-            data.add(this->validationAssigner->getName(), this->validationAssigner);
+            data.set(this->validationAssigner->getName(), this->validationAssigner);
         }
     }
 }

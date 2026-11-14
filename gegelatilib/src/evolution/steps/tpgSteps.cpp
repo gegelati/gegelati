@@ -305,7 +305,7 @@ void Evolution::CacheVertexOutputsStep::apply(EvolutionData& state)
 void Evolution::CreateArchiveStep::apply(EvolutionData& state)
 {
     // Each answer of the archive is an array with the answer of each member.
-    state.add(this->archive, std::make_shared<Evaluation::DataSet>(this->inputRequirements, Dimensions::Requirement(Data::DataType::type<double>({1}))));
+    state.set(this->archive, std::make_shared<Evaluation::DataSet>(this->inputRequirements, Dimensions::Requirement(Data::DataType::type<double>({1}))));
 }
 
 std::string Evolution::UpdateArchiveStep::details() const
@@ -401,8 +401,8 @@ void Evolution::ProtectAggregatedStep::apply(EvolutionData& state)
 {
     // A new evolution starts without protected vertices.
     if(state.generation == EvolutionData::initGeneration) {
-        state.add(this->protectedVertices, std::make_shared<std::map<uint64_t, std::shared_ptr<Individual>>>());
-        state.add(this->aggregators, std::make_shared<std::map<uint64_t, std::set<uint64_t>>>());
+        state.set(this->protectedVertices, std::make_shared<std::map<uint64_t, std::shared_ptr<Individual>>>());
+        state.set(this->aggregators, std::make_shared<std::map<uint64_t, std::set<uint64_t>>>());
         return;
     }
     std::map<uint64_t, std::shared_ptr<Individual>>& protectedVertices = *state.get<std::map<uint64_t, std::shared_ptr<Individual>>>(this->protectedVertices);

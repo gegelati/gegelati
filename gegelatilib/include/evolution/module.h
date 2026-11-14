@@ -18,33 +18,30 @@ namespace Evolution {
      * A module reads and updates the EvolutionData, identified by names. A module is either a leaf, which
      * overrides apply (the steps such as MutateStep), or a container, which runs the modules it holds one after the other
      * (the default apply). Containers nest, so a population, a whole evolutionary algorithm or a set of algorithms
-     * is a module. An evolution has two stages on the root module: initialize seeds the data of the evolution
-     * and runs the initializations (generation 0), evolve runs generations on initialized data.
+     * is a module. The root module runs the evolution: evolve(nbGenerations, seed) starts a new one (the initializations, at the
+     * generation 0, then the generations), runGenerations(nbGenerations) goes on with the current one.
      *
      * A module added to another one (addSubModule, insertBefore, setInitialization...) has its data merged into the data
      * of its new container (see EvolutionData::mergeWith), so that the root holds the data of the whole tree and runs the
      * evolution on them. The data hold the components of the evolution (problem, selectors, assigners...), which the steps
      * read by name, and the data produced by the steps (populations, metrics, fitness...).
      *
-     * Each module can have an initialization, itself a module, run once on the data before the module first runs (see initialize).
+     * Each module can have an initialization, itself a module, run once per evolution before the module first runs (see evolve).
      * The initialization of a container is therefore the concatenation of the initializations of its modules. A module added
-     * to a root that already evolved is initialized alone by initializePending, evolve refusing data that are not initialized.
+     * to a root that already evolved is initialized by the next evolve, which starts a new evolution: its initializations run again
+     * and replace the data of the previous evolution.
      *
-     * Modules are shared pointers. Modules are edited through the
-     * objects themselves: insertAfter(mutate, secondMutate). Editing and searching also look into the nested containers.
-     * If the same module appears several times, its first occurrence is used.
-     *
-     * A module is identified by its address: its name is only a label for summaries and error messages,
-     * and several modules may share it. A leaf holds no module.
+     * Modules are shared pointers. The modules held by a module are identified by their names, unique in it: they are edited and
+     * searched by name (insertAfter("Mutation", secondMutate), find("Mutation")), in this module only, not in the nested ones.
+     * findRecursiveSubModule searches the nested modules too. A leaf holds no module.
      *
      * \code
      * std::shared_ptr<Module> module = std::make_shared<Module>("Evolution");
      * module->addSubModule(lgp.buildModule());
      * module->addSubModule(std::make_shared<LambdaStep>("Link", link, required, provided));
      * module->addSubModule(tpg.buildModule());
-     * module->initialize(seed);
-     * module->evolve(100);
-     * module->evolve(50);
+     * module->evolve(100, seed);
+     * module->runGenerations(50);
      * std::cout << module->summary(module->getData());
      * \endcode
      */
@@ -65,8 +62,8 @@ namespace Evolution {
             /// Module run once on a state before the step first runs, null if none.
             std::shared_ptr<Module> initialization = nullptr;
 
-            /// Identifier of the step, used by the state to remember the steps it initialized.
-            uint64_t stepId;
+            /// Indicates if the initialization of the module (and of its modules) was run, see evolve.
+            bool initialized = false;
 
             /// Names of the data required by the step itself (see require), not by the steps it holds.
             std::set<std::string> requiredList;
@@ -83,27 +80,6 @@ namespace Evolution {
             /// Duration in seconds of the last run of the step by its container.
             double lastDuration = 0.0;
 
-            /**
-             * \brief Return the container holding a step, this one or a nested one.
-             *
-             * \param[in] step the step searched.
-             * \param[out] index position of the step in the container returned.
-             * \return the container, or null if the step is not in this step or the nested ones.
-             */
-            Module* ownerOf(const std::shared_ptr<Module>& step, size_t& index);
-
-            /**
-             * \brief Return the container holding a step, or throw.
-             *
-             * \param[in] step the step searched.
-             * \param[out] index position of the step in the container returned.
-             * \throw std::runtime_error if the step is not in the step.
-             */
-            Module& checkedOwnerOf(const std::shared_ptr<Module>& step, size_t& index);
-
-            /// Return a new identifier for a step (defined in the library, so that every step of a program gets a different one).
-            static uint64_t newStepId();
-
         public:
             /**
              * \brief Constructor, with its own empty data.
@@ -119,7 +95,7 @@ namespace Evolution {
              * \param[in] name name of the step.
              */
             Module(std::shared_ptr<Evolution::EvolutionData> data, std::string name = "Steps")
-                : stepName{std::move(name)}, data{std::move(data)}, stepId{newStepId()} {}
+                : stepName{std::move(name)}, data{std::move(data)} {}
 
             /// Default polymorphic destructor
             virtual ~Module() = default;
@@ -205,51 +181,51 @@ namespace Evolution {
              *
              * \param[in] step the added step.
              * \return the step, to chain calls.
-             * \throw std::runtime_error if the step is null.
+             * \throw std::runtime_error if the step is null, or if the module already has a step with its name.
              */
             Module& addSubModule(std::shared_ptr<Module> step);
 
             /**
-             * \brief Insert a step just before another one.
+             * \brief Insert a step just before another one of this module.
              *
-             * \param[in] position step before which the new one is inserted, in this step or a nested one.
+             * \param[in] position name of the step before which the new one is inserted.
              * \param[in] step the inserted step.
              * \return the step, to chain calls.
-             * \throw std::runtime_error if the step is null or the position is not in the step.
+             * \throw std::runtime_error if the step is null, if the module already has a step with its name, or if no step has the position name.
              */
-            Module& insertBefore(const std::shared_ptr<Module>& position, std::shared_ptr<Module> step);
+            Module& insertBefore(const std::string& position, std::shared_ptr<Module> step);
 
             /**
-             * \brief Insert a step just after another one.
+             * \brief Insert a step just after another one of this module.
              *
-             * \param[in] position step after which the new one is inserted, in this step or a nested one.
+             * \param[in] position name of the step after which the new one is inserted.
              * \param[in] step the inserted step.
              * \return the step, to chain calls.
-             * \throw std::runtime_error if the step is null or the position is not in the step.
+             * \throw std::runtime_error if the step is null, if the module already has a step with its name, or if no step has the position name.
              */
-            Module& insertAfter(const std::shared_ptr<Module>& position, std::shared_ptr<Module> step);
+            Module& insertAfter(const std::string& position, std::shared_ptr<Module> step);
 
             /**
-             * \brief Replace a step by another one.
+             * \brief Replace a step of this module by another one.
              *
-             * \param[in] replaced the replaced step, in this step or a nested one.
+             * \param[in] replaced name of the replaced step.
              * \param[in] step the new step.
              * \return the step, to chain calls.
-             * \throw std::runtime_error if the step is null or the replaced step is not in the step.
+             * \throw std::runtime_error if the step is null, if another step has its name, or if no step has the replaced name.
              */
-            Module& replace(const std::shared_ptr<Module>& replaced, std::shared_ptr<Module> step);
+            Module& replace(const std::string& replaced, std::shared_ptr<Module> step);
 
             /**
-             * \brief Remove a step.
+             * \brief Remove a step of this module.
              *
-             * \param[in] removed the removed step, in this step or a nested one.
+             * \param[in] removed name of the removed step.
              * \return the step, to chain calls.
-             * \throw std::runtime_error if the step is not in the step.
+             * \throw std::runtime_error if no step has this name.
              */
-            Module& remove(const std::shared_ptr<Module>& removed);
+            Module& remove(const std::string& removed);
 
             /**
-             * \brief Return the first step with a name, looking into the nested steps.
+             * \brief Return the step of this module with a name, the nested modules not searched.
              *
              * \param[in] name name of the step.
              * \return the step, or null if no step has this name.
@@ -257,9 +233,20 @@ namespace Evolution {
             std::shared_ptr<Module> findStep(const std::string& name) const;
 
             /**
-             * \brief Return the first step with a name, e.g. to edit the steps built by a preset.
+             * \brief Return the first module with a name, in this module or in the nested ones.
              *
-             * The nested steps are searched too.
+             * The steps of this module are searched first, then the nested modules in their order. Several nested modules may have
+             * a step with the same name: prefer find on the module holding the step.
+             *
+             * \param[in] name name of the module.
+             * \return the module, or null if no module has this name.
+             */
+            std::shared_ptr<Module> findRecursiveSubModule(const std::string& name) const;
+
+            /**
+             * \brief Return the step of this module with a name, e.g. to edit the steps built by a preset.
+             *
+             * The nested modules are not searched (see findRecursiveSubModule).
              *
              * \tparam T type of the step.
              * \param[in] name name of the step.
@@ -279,7 +266,7 @@ namespace Evolution {
             }
 
             /**
-             * \brief Return true if a step has the name, in this step or a nested one.
+             * \brief Return true if a step of this module has the name, the nested modules not searched.
              *
              * \param[in] name name of the step.
              */
@@ -310,10 +297,9 @@ namespace Evolution {
              * A container checks its steps one by one.
              *
              * \param[in,out] available names of the data already filled, updated with the data provided by the step.
-             * \param[in] where location of the step used in the error message (e.g. "generation").
              * \throw std::runtime_error if the step requires data that no previous step provides.
              */
-            virtual void checkData(std::set<std::string>& available, const std::string& where) const;
+            virtual void checkData(std::set<std::string>& available) const;
 
             /**
              * \brief Run the step.
@@ -326,52 +312,29 @@ namespace Evolution {
             virtual void apply(EvolutionData& state);
 
             /**
-             * \brief Seed the random number generator of the data and run the initializations not run yet (generation 0).
+             * \brief Start a new evolution and run it.
              *
-             * The data are not reset, since they hold the components: to start a new evolution, build a new module.
-             * The data required by the modules are checked first: they must be in the data (e.g. a component) or provided by a previous
-             * initialization or module.
-             *
-             * \param[in] seed seed of the random number generator of the evolution.
-             * \return the initialized data of the evolution (see getData).
-             * \throw std::runtime_error if a module requires data that nothing provides.
-             */
-            EvolutionData& initialize(uint64_t seed = 0);
-
-            /**
-             * \brief Run the initializations that were not run yet on the data, without resetting them.
-             *
-             * The initialization of this module runs first if the data did not run it already, then the modules held
-             * are initialized in their order. Nothing happens for what is already initialized, so calling it again only
-             * initializes the modules added meanwhile.
-             *
-             * \throw std::runtime_error if a module requires data that nothing provides.
-             */
-            void initializePending();
-
-            /// Return true if every initialization of the module and the modules it holds was run on its data.
-            bool isInitialized() const;
-
-            /**
-             * \brief Run generations on the data, going on with the generations already done.
-             *
-             * The data required by the modules are checked first. Calling it again continues the same evolution.
-             * Build a new module to start again.
-             *
-             * \param[in] nbGenerations number of generations to run.
-             * \throw std::runtime_error if the data are not initialized (see initialize), or if a module requires data that nothing provides.
-             */
-            void evolve(size_t nbGenerations);
-
-            /**
-             * \brief Initialize the data then run generations: initialize then evolve.
+             * The generation counters and the stopwatch of the data are reset, the seed is given to their random number generator,
+             * then every initialization runs again (replacing the data of the previous evolution) before the generations.
+             * The components, and the data of the previous evolution that no initialization replaces, stay in the data.
              *
              * \param[in] nbGenerations number of generations to run.
              * \param[in] seed seed of the random number generator of the evolution.
              * \return the data of the evolution (see getData).
              * \throw std::runtime_error if a module requires data that nothing provides.
              */
-            EvolutionData& evolve(size_t nbGenerations, uint64_t seed);
+            EvolutionData& evolve(size_t nbGenerations, uint64_t seed = 0);
+
+            /**
+             * \brief Run more generations of the current evolution, started by evolve.
+             *
+             * No initialization runs: the evolution must have been started by evolve. A module added since then is only initialized by
+             * the next evolve. The data required by the modules are checked before anything runs.
+             *
+             * \param[in] nbGenerations number of generations to run.
+             * \throw std::runtime_error if the evolution was not started by evolve, or if a module requires data that nothing provides.
+             */
+            void runGenerations(size_t nbGenerations);
 
             /**
              * \brief Return a printable tree of the modules with their required and provided data.
@@ -389,8 +352,14 @@ namespace Evolution {
             std::string summary(const EvolutionData& data) const;
 
         private:
-            /// Run the initializations that were not run on a state yet, without checking the data.
-            void runInitializations(EvolutionData& state);
+            /// Return the position of the step of this module with a name, or throw.
+            size_t indexOf(const std::string& name) const;
+
+            /// Check that a step can be added to this module (not null, name not taken), replacing the step with the given name if any.
+            void checkAdded(const std::shared_ptr<Module>& step, const std::string& replaced = "") const;
+
+            /// Run the initialization of the module, then the ones of its modules, without checking the data.
+            void runInitialization(EvolutionData& state);
 
             /// Return the names of some data, separated by commas.
             static std::string listNames(const std::set<std::string>& names);
@@ -400,12 +369,6 @@ namespace Evolution {
 
             /// Return the data required and provided by the module, written next to it in the tree of a summary.
             std::string dataText() const;
-
-            /// Check the initializations that were not run on a state yet.
-            void checkInitialization(const EvolutionData& state, std::set<std::string>& available) const;
-
-            /// Return true if every initialization of the module and the modules it holds was run on a state.
-            bool isInitializedOn(const EvolutionData& state) const;
 
             /// Return the tree of the modules, then the data if given.
             std::string summary(const EvolutionData* data) const;
