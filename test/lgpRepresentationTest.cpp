@@ -190,8 +190,57 @@ TEST_F(LGPRepresentationTest, detectIntronNodes)
     EXPECT_FALSE(instructions.getNode(1).getIsIntron());
     EXPECT_TRUE(instructions.getNode(2).getIsIntron());
     EXPECT_FALSE(instructions.getNode(3).getIsIntron());
+}
 
-    ASSERT_FALSE(true) << "Need test with array instructions";
+TEST_F(LGPRepresentationTest, detectIntronNodesWithArrayInstructions)
+{
+    // R[x] = R[y] + R[z] (index 0), and R[x] = sum of the array of 2 registers starting at R[y] (index 1).
+    Instructions::LambdaInstruction<double, double, double> add([](double a, double b) -> double { return a + b; });
+    Instructions::LambdaInstruction<double, const double[2]> sum([](const double a[2]) -> double { return a[0] + a[1]; });
+    Instructions::Set arraySet;
+    arraySet.add(add);
+    arraySet.add(sum);
+
+    // Registers of one dimension: the array at index 1 is R[1] and R[2].
+    {
+        Representations::LGP representation({inputType}, Data::DataType::type<double>({8}), arraySet, Data::DataType::type<double>({1}), 4);
+        GraphBased::Genotype genotype;
+        std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 0, 0, 5, 0, 6})); // R[4] = R[5] + R[6] -> intron
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{1, 0, 0, 5, 0, 6})); // R[1] = R[5] + R[6] -> read by the sum
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{2, 0, 0, 5, 0, 6})); // R[2] = R[5] + R[6] -> read by the sum
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 1, 0, 1, 0, 0})); // R[0] = R[1] + R[2] -> output
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{3, 1, 0, 0, 0, 0})); // R[3] = R[0] + R[1] -> intron
+        genotype.addNodeGroup(std::move(group));
+        representation.detectIntronNodes(genotype);
+
+        const GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
+        EXPECT_TRUE(instructions.getNode(0).getIsIntron());
+        EXPECT_FALSE(instructions.getNode(1).getIsIntron());
+        EXPECT_FALSE(instructions.getNode(2).getIsIntron());
+        EXPECT_FALSE(instructions.getNode(3).getIsIntron());
+        EXPECT_TRUE(instructions.getNode(4).getIsIntron());
+    }
+
+    // Registers of 2 x 4: an array of 2 fits at 3 positions per row, so the index 3 is the start of the second row, R[1][0] and R[1][1]
+    // (the registers 4 and 5), and not the registers 3 and 4.
+    {
+        Representations::LGP representation({inputType}, Data::DataType::type<double>({2, 4}), arraySet, Data::DataType::type<double>({1}), 4);
+        GraphBased::Genotype genotype;
+        std::unique_ptr<GraphBased::NodeGroup> group = std::make_unique<GraphBased::NodeGroup>();
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{4, 0, 0, 6, 0, 7})); // register 4 -> read by the sum
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{5, 0, 0, 6, 0, 7})); // register 5 -> read by the sum
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{3, 0, 0, 6, 0, 7})); // register 3 -> intron
+        group->addNode(std::make_unique<GraphBased::GPNode>(std::vector<size_t>{0, 1, 0, 3, 0, 0})); // register 0 = registers 4 + 5 -> output
+        genotype.addNodeGroup(std::move(group));
+        representation.detectIntronNodes(genotype);
+
+        const GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
+        EXPECT_FALSE(instructions.getNode(0).getIsIntron());
+        EXPECT_FALSE(instructions.getNode(1).getIsIntron());
+        EXPECT_TRUE(instructions.getNode(2).getIsIntron());
+        EXPECT_FALSE(instructions.getNode(3).getIsIntron());
+    }
 }
 
 TEST_F(LGPRepresentationTest, compatibilityCheck) 

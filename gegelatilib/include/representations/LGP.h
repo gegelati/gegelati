@@ -27,6 +27,17 @@
             Data::DataType registersType;
 
             /**
+             * \brief Return the indices of the registers covered by a value placed at an index, as the execution places it.
+             *
+             * The index is scaled to the positions where the value fits in the registers (Data::DataView::scaleLocation), and the
+             * covered registers follow the layout of the registers: for registers of rank 2 or more, a sub-array is not contiguous.
+             *
+             * \param[in] type the type of the value (an operand or an output of an instruction).
+             * \param[in] index the index encoded in the node.
+             */
+            std::vector<size_t> registerElementsOf(const Data::DataType& type, size_t index) const;
+
+            /**
              * \brief execute each node as an instruction line. 
              * 
              * A node is of shape: {a, b, c, d, e, f}.

@@ -95,29 +95,22 @@ TEST(EvaluateTest, evaluateIndividualsOnClassif)
     uint64_t hash0 = *it;
     it++;
     uint64_t hash1 = *it;
+    // A prediction problem measures a single metric for the whole evaluation, with one input and one output per sample, in the order of the samples.
     std::map<uint64_t, const Metrics::InputMetric*> inputMetrics = results.at(indivID)->getMetricValues<Metrics::InputMetric>(Metrics::InputMetric::staticHash());
-    ASSERT_EQ(inputMetrics.size(), 2) << "There should be two input metrics";
-    ASSERT_TRUE(inputMetrics.find(hash0) != inputMetrics.end()) << "Input metric should contain the first evaluation hash";
-    ASSERT_TRUE(inputMetrics.find(hash1) != inputMetrics.end()) << "Input metric should contain the second evaluation hash";
+    ASSERT_EQ(inputMetrics.size(), 1) << "There should be one input metric for the evaluation";
+    const Metrics::InputMetric& inputMetric = *inputMetrics.begin()->second;
+    ASSERT_EQ(inputMetric.getInputs().size(), 2) << "The input metric should contain the inputs of the two samples";
+    ASSERT_EQ(inputMetric.getInputs().at(0).size(), 1) << "Classification input metric should contain one data source value";
+    ASSERT_EQ(inputMetric.getInputs().at(0).at(0), dataSet.getInputsAt(hash0).at(0)) << "Input values should be the ones of the first sample";
+    ASSERT_EQ(inputMetric.getInputs().at(1).size(), 1) << "Classification input metric should contain one data source value";
+    ASSERT_EQ(inputMetric.getInputs().at(1).at(0), dataSet.getInputsAt(hash1).at(0)) << "Input values should be the ones of the second sample";
 
     std::map<uint64_t, const Metrics::OutputMetric*> outputMetrics = results.at(indivID)->getMetricValues<Metrics::OutputMetric>(Metrics::OutputMetric::staticHash());
-    ASSERT_EQ(outputMetrics.size(), 2) << "There should be two output metrics";
-    ASSERT_TRUE(outputMetrics.find(hash0) != outputMetrics.end()) << "Output metric should contain the first evaluation hash";
-    ASSERT_TRUE(outputMetrics.find(hash1) != outputMetrics.end()) << "Output metric should contain the second evaluation hash";
-
-    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().size(), 1) << "Classification input metric should contain one input";
-    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0).size(), 1) << "Classification input metric should contain one data source value";
-    ASSERT_EQ(inputMetrics.at(hash0)->getInputs().at(0).at(0), dataSet.getInputsAt(hash0).at(0)) << "Input values should be equal";
-
-    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().size(), 1) << "Classification input metric should contain one input";
-    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0).size(), 1) << "Classification input metric should contain one data source value";
-    ASSERT_EQ(inputMetrics.at(hash1)->getInputs().at(0).at(0), dataSet.getInputsAt(hash1).at(0)) << "Input values should be equal";
-
-    ASSERT_EQ(outputMetrics.at(hash0)->getOutputs().size(), 1) << "Classification output metric should contain one output";
-    ASSERT_EQ(outputMetrics.at(hash0)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Output value should be equal";
-
-    ASSERT_EQ(outputMetrics.at(hash1)->getOutputs().size(), 1) << "Classification output metric should contain one output";
-    ASSERT_EQ(outputMetrics.at(hash1)->getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Output value should be equal";
+    ASSERT_EQ(outputMetrics.size(), 1) << "There should be one output metric for the evaluation";
+    const Metrics::OutputMetric& outputMetric = *outputMetrics.begin()->second;
+    ASSERT_EQ(outputMetric.getOutputs().size(), 2) << "The output metric should contain the outputs of the two samples";
+    ASSERT_EQ(outputMetric.getOutputs().at(0), Data::DataValue::scalar<int>(0)) << "Output value should be equal";
+    ASSERT_EQ(outputMetric.getOutputs().at(1), Data::DataValue::scalar<int>(0)) << "Output value should be equal";
 }
 
 TEST(EvaluateTest, evaluateIndividualsInvalidArguments)

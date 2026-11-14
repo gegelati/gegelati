@@ -157,7 +157,7 @@ TEST_F(TPGAlgoTest, customEvolutionLGP2) {
     std::cout<<data.summary()<<std::endl;
 
 
-    ASSERT_EQ(18013509966814137868U, data.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
+    ASSERT_EQ(336106317719029226U, data.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
 }
 
 
@@ -226,7 +226,7 @@ TEST_F(TPGAlgoTest, customEvolutionTPG2) {
     Evolution::EvolutionData& data = evolutionModule->evolve(40, 4);
 
     EXPECT_EQ(16454860796132402384U, data.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    EXPECT_EQ(65221, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(59077, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 
     std::cout<<data.summary()<<std::endl;
 }
@@ -444,6 +444,6 @@ TEST_F(TPGAlgoTest, customEvolutionTPG3) {
     Evolution::EvolutionData& state = evolutionModule->evolve(40, 4);
 
     EXPECT_EQ(13348146703180701991U, state.rng.uniformSample<uint64_t>(0, UINT64_MAX)) << "bouh bouh bouh th determinism";
-    EXPECT_EQ(62131, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
+    EXPECT_EQ(61536, Individual::getIndividualIDCounter()) << "bouh bouh bouh th determinism";
 }
 

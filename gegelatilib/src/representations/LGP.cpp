@@ -53,16 +53,33 @@ void Representations::LGP::setGenotypeConstraint()
 
 
 
+std::vector<size_t> Representations::LGP::registerElementsOf(const Data::DataType& type, size_t index) const
+{
+    // Same location as the execution (Data::DataView::scaleLocation), then the elements of the window at this location.
+    size_t location = index % this->registersType.getAddressSpace(type);
+    if(this->registersType.rank >= 2) {
+        location = this->registersType.getValidAddress(type, location);
+    }
+    std::vector<size_t> elements;
+    this->registersType.forEachRun(type, this->registersType.offsetOf(location), [&elements](size_t memoryOffset, size_t, size_t length) {
+        for(size_t idx = 0; idx < length; idx++) {
+            elements.push_back(memoryOffset + idx);
+        }
+    });
+    return elements;
+}
+
 void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) const
 {
     if(genotype.getSize() == 0) {
         return;
     }
 
+    // The output registers are read at the end of the execution.
     GraphBased::NodeGroup& instructions = genotype.getNodeGroup(0);
     std::vector<bool> usefulRegisters(this->registersType.totalElements(), false);
-    for(size_t idx = 0; idx < this->outputRegistersType.totalElements(); idx++) {
-        usefulRegisters[idx] = true;
+    for(size_t element: this->registerElementsOf(this->outputRegistersType, 0)) {
+        usefulRegisters[element] = true;
     }
 
     const std::vector<Dimensions::Requirement>& inputDimensions = this->dimensionFlow.getInputDimensions();
@@ -72,15 +89,11 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
         const size_t outputIndex = node.getValue(0).getScalar<size_t>();
         const size_t functionIndex = node.getValue(1).getScalar<size_t>();
         const Instructions::Instruction& instruction = this->iSet.getInstruction(functionIndex);
-        const Data::DataType outputType = instruction.getOutputType();
-        const size_t outputAddressSpace = this->registersType.getAddressSpace(outputType);
-        const size_t outputLocation = outputIndex % outputAddressSpace;
-        const size_t outputSize = outputType.totalElements();
-
+        // An instruction is useful if it writes a register read afterwards, and the registers it writes are not read before it.
         bool isUseful = false;
-        for(size_t idx = 0; idx < outputSize; idx++) {
-            isUseful = isUseful || usefulRegisters[outputLocation + idx];
-            usefulRegisters[outputLocation + idx] = false;
+        for(size_t element: this->registerElementsOf(instruction.getOutputType(), outputIndex)) {
+            isUseful = isUseful || usefulRegisters[element];
+            usefulRegisters[element] = false;
         }
         node.setIsIntron(!isUseful);
 
@@ -105,9 +118,8 @@ void Representations::LGP::detectIntronNodes(GraphBased::Genotype& genotype) con
                 }
 
                 if(sourceIndex == 0) {
-                    const size_t inputLocation = inputIndex % addressSpace;
-                    for(size_t idx = 0; idx < operandType.totalElements(); idx++) {
-                        usefulRegisters[inputLocation + idx] = true;
+                    for(size_t element: this->registerElementsOf(operandType, inputIndex)) {
+                        usefulRegisters[element] = true;
                     }
                 }
                 break;
